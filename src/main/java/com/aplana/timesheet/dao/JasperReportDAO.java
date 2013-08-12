@@ -463,7 +463,12 @@ public class JasperReportDAO {
                     "empl.name as col_0, " +
                     "division.name as col_1, " +
                     "project.name as col_2, " +
-                    "project_task.name as col_3, " +
+                    "CASE" +
+                    "   WHEN (project_task.name is not null) " +
+                    "       THEN project_task.name " +
+                    "   ELSE " +
+                    "       'Задача не указана' " +
+                    "END as col_3, " +
                     "calendar.caldate as col_4, " +
                     "sum(timesheet_details.duration) as col_5, " +
                     "CASE" +
@@ -547,7 +552,7 @@ public class JasperReportDAO {
                     "empl.billable, " +
                     "project_role.name, " +
                     "project_state.value " +
-            "ORDER BY empl.name, project.name, project_task.name, calendar.caldate ";
+            "ORDER BY empl.name, project.name, col_3, calendar.caldate ";
 
     private List getResultList( Report03 report ) {
         boolean hasProject = report.getProjectId() != null && report.getProjectId() != 0;
