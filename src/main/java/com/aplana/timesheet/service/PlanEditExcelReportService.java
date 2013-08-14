@@ -1,24 +1,10 @@
 package com.aplana.timesheet.service;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.mail.internet.MimeUtility;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import com.aplana.timesheet.dao.entity.Project;
 import org.apache.poi.hssf.usermodel.HSSFPalette;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.IndexedColors;
-import org.apache.poi.ss.usermodel.Row;
-
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -27,6 +13,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.mail.internet.MimeUtility;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by abayanov
@@ -75,7 +70,7 @@ public class PlanEditExcelReportService {
     private HSSFWorkbook createAndFillReport(String fileName, String jsonData, List<Project> projectList) {
         HSSFWorkbook workBook = new HSSFWorkbook();
         HSSFSheet sheet = workBook.createSheet(fileName);
-        sheet.autoSizeColumn((short)2);
+        sheet.autoSizeColumn((short) 2);
 
         createReportHeader(sheet, workBook, projectList);
 
@@ -86,7 +81,7 @@ public class PlanEditExcelReportService {
         return workBook;
     }
 
-    private void createReportHeader(HSSFSheet sheet, HSSFWorkbook workBook ,List<Project> projectList) {
+    private void createReportHeader(HSSFSheet sheet, HSSFWorkbook workBook, List<Project> projectList) {
 
         CellStyle style = getHeaderCellStyle(workBook);
         List<Row> rows = new ArrayList<Row>();
@@ -117,24 +112,24 @@ public class PlanEditExcelReportService {
         sheet.addMergedRegion(region);
         Integer numberCell = 3;
 
-        createHeaderGroupCells("Итог", numberCell, rows,  sheet,style);
-        numberCell+=2;
-        createHeaderGroupCells("Процент загрузки", numberCell, rows,  sheet,style);
-        numberCell+=2;
-        createHeaderGroupCells("Проекты центра", numberCell, rows,  sheet,style);
-        numberCell+=2;
-        createHeaderGroupCells("Пресейлы центра", numberCell, rows,  sheet,style);
-        numberCell+=2;
-        createHeaderGroupCells("Проекты/Пресейлы других центров", numberCell, rows,  sheet,style);
-        numberCell+=2;
-        createHeaderGroupCells("Непроектная", numberCell, rows,  sheet,style);
-        numberCell+=2;
-        createHeaderGroupCells("Болезнь", numberCell, rows, sheet,style);
-        numberCell+=2;
-        createHeaderGroupCells("Отпуск", numberCell, rows,  sheet, style);
+        createHeaderGroupCells("Итог", numberCell, rows, sheet, style);
+        numberCell += 2;
+        createHeaderGroupCells("Процент загрузки", numberCell, rows, sheet, style);
+        numberCell += 2;
+        createHeaderGroupCells("Проекты центра", numberCell, rows, sheet, style);
+        numberCell += 2;
+        createHeaderGroupCells("Пресейлы центра", numberCell, rows, sheet, style);
+        numberCell += 2;
+        createHeaderGroupCells("Проекты/Пресейлы других центров", numberCell, rows, sheet, style);
+        numberCell += 2;
+        createHeaderGroupCells("Непроектная", numberCell, rows, sheet, style);
+        numberCell += 2;
+        createHeaderGroupCells("Болезнь", numberCell, rows, sheet, style);
+        numberCell += 2;
+        createHeaderGroupCells("Отпуск", numberCell, rows, sheet, style);
         for (Project project : projectList) {
-            numberCell+=2;
-            createHeaderGroupCells(project.getName(), numberCell, rows, sheet,style);
+            numberCell += 2;
+            createHeaderGroupCells(project.getName(), numberCell, rows, sheet, style);
         }
     }
 
@@ -147,13 +142,13 @@ public class PlanEditExcelReportService {
             JSONArray rows = rootObject.getJSONArray("rows");
 
             HSSFPalette palette = workBook.getCustomPalette();
-            palette.setColorAtIndex(new Byte((byte) 41), new Byte((byte) 216), new Byte((byte) 216), new Byte((byte) 216));
+            palette.setColorAtIndex((byte) 41, (byte) 216, (byte) 216, (byte) 216);
 
             CellStyle oddStyle = getTypicalCellStyle(workBook, palette.getColor(41).getIndex());
             CellStyle evenStyle = getTypicalCellStyle(workBook, IndexedColors.WHITE.getIndex());
             CellStyle style = null;
             for (int i = 0; i < rows.length(); i++) {
-                if ((numberRow%2)==0) {
+                if ((numberRow % 2) == 0) {
                     style = oddStyle;
                 } else {
                     style = evenStyle;
@@ -222,13 +217,45 @@ public class PlanEditExcelReportService {
         Cell cell = row.createCell(numberCell);
         cell.setCellStyle(style);
         String cellValue;
+        cellValue = getFieldValue(fieldName, jsonRow);
+
+        try {
+            if (cellValue.contains("%")) {
+                setCellValueAsPercent(cell, cellValue, style);
+            } else {
+                setCellValueAsDouble(cell, cellValue);
+            }
+        } catch (Exception ignored) {
+            // Если произошла ошибка - записываем как строку
+            cell.setCellValue(cellValue);
+        }
+    }
+
+    private void setCellValueAsPercent(Cell cell, String cellValue, CellStyle outerStyle) {
+        Workbook workbook = cell.getSheet().getWorkbook();
+        String doubleValue = cellValue.replace("%", "");
+        CellStyle style = workbook.createCellStyle();
+        style.cloneStyleFrom(outerStyle);
+        style.setDataFormat((short) 10); // 0.00%
+        cell.setCellStyle(style);
+        Double v = Double.parseDouble(doubleValue) / 100;
+        cell.setCellValue(v);
+    }
+
+    private void setCellValueAsDouble(Cell cell, String cellValue) throws Exception {
+        double doubleCellValue = Double.parseDouble(cellValue);
+        cell.setCellValue(doubleCellValue);
+    }
+
+    private String getFieldValue(String fieldName, JSONObject jsonRow) {
+        String cellValue;
         try {
             cellValue = jsonRow.getString(fieldName);
-            cellValue = cellValue.replace(',','.');
+            cellValue = cellValue.replace(',', '.');
         } catch (JSONException e) {
-            cellValue = "0.0";
+            cellValue = "0.00";
         }
-        cell.setCellValue(cellValue);
+        return cellValue;
     }
 
     private void createHeaderGroupCells(String name, Integer numberCell, List<Row> rows, HSSFSheet sheet, CellStyle style) {
@@ -257,7 +284,7 @@ public class PlanEditExcelReportService {
         cellFact.setCellValue(FACT);
         cellFact.setCellStyle(style);
 
-        CellRangeAddress region = new CellRangeAddress(0, 2, numberCell, numberCell+1);
+        CellRangeAddress region = new CellRangeAddress(0, 2, numberCell, numberCell + 1);
         sheet.addMergedRegion(region);
     }
 
@@ -296,10 +323,10 @@ public class PlanEditExcelReportService {
             } else {
                 byte[] b;
                 b = Character.toString(c).getBytes("utf-8");
-                for ( byte aB : b ) {
+                for (byte aB : b) {
                     int k = aB;
-                    if ( k < 0 ) k += 256;
-                    sb.append( "%" ).append( Integer.toHexString( k ).toUpperCase() );
+                    if (k < 0) k += 256;
+                    sb.append("%").append(Integer.toHexString(k).toUpperCase());
                 }
             }
         }
@@ -307,7 +334,7 @@ public class PlanEditExcelReportService {
     }
 
     private String updateJson(String jsonRaw) {
-        return "{rows:"+jsonRaw+"}";
+        return "{rows:" + jsonRaw + "}";
     }
 
     private void error(Exception e) {
