@@ -145,8 +145,4 @@ public class PlannedVacationService {
     public void service() {
         sendMailService.plannedVacationInfoMailing(getManagerEmployeesVacation());
     }
-
-
-
-
 }

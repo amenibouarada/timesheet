@@ -157,9 +157,8 @@ public class PlannedVacationServiceTest extends AbstractJsonTest{
         boolean isConsist = false;
         for(Map.Entry<Employee, Set<Vacation>> entry : employeeVacations.entrySet()) {
             if (entry.getValue().contains(vacation)) isConsist = true;
-        }
+        }       
         
         Assert.assertTrue(isConsist);
     }
-
 }
