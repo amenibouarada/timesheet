@@ -351,6 +351,7 @@ public class PlanEditController {
 
         String reportName = "Планирование занятости за "+calDate.getMonthTxt()+" "+year.toString()+" года";
 
+        // TODO Спорный способ передавать сюда JSON, чтобы потом его снова разбирать. Переделать
         planEditExcelReportService.createAndExportReport(reportName,dataAsJson, projectList, response, request);
 
         return null;
