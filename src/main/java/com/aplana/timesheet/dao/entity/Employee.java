@@ -11,7 +11,7 @@ import java.util.Set;
 
 @Entity
 @Table(name = "employee", uniqueConstraints = @UniqueConstraint(columnNames = {"name", "job", "division"}))
-public class Employee implements Identifiable {
+public class Employee implements Identifiable, Comparable{
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "emp_seq")
@@ -299,5 +299,11 @@ public class Employee implements Identifiable {
 
     public void setEmployeeProjectBillables(Set<EmployeeProjectBillable> employeeProjectBillables) {
         this.employeeProjectBillables = employeeProjectBillables;
+    }
+
+    @Override
+    public int compareTo(Object o) {
+        if(equals(o)) return 0;
+        else return 1;
     }
 }

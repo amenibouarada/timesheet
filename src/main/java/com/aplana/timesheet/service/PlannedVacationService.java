@@ -22,7 +22,8 @@ import java.util.Calendar;
  * To change this template use File | Settings | File Templates.
  */
 @Service
-@Transactional(propagation = Propagation.REQUIRES_NEW, noRollbackFor = DataAccessException.class)
+@Transactional(propagation = Propagation.SUPPORTS, noRollbackFor = DataAccessException.class)
+//из-за режима распространения SUPPORTS новая транзакция не начинается, в тестах данные становятся доступны
 public class PlannedVacationService {
     private static final Logger logger = LoggerFactory.getLogger(PlannedVacationService.class);
 
@@ -53,13 +54,11 @@ public class PlannedVacationService {
     public PlannedVacationService() {};
 
 
-
-
     /**
      * Получаем руководителей сотрудников
      */
 
-    private  Map<Employee, List<Employee>> getEmployeeManagers(List<Employee> employees) {
+    public  Map<Employee, Set<Employee>> getEmployeeManagers(List<Employee> employees) {
         Map<Employee, List<Project>> employeeProjects = new HashMap<Employee, List<Project>>();
         for(Employee employee:employees) {
             List<Project> projects = new ArrayList<Project>();
@@ -69,37 +68,45 @@ public class PlannedVacationService {
             employeeProjects.put(employee, projects);
         }
 
-        Map<Employee, List<Employee>> employeeManagers = new HashMap<Employee, List<Employee>>();
+        Map<Employee, Set<Employee>> employeeManagers = new HashMap<Employee, Set<Employee>>();
 
         for(Map.Entry<Employee, List<Project>> entry : employeeProjects.entrySet()) {
-            List<Employee> manager = new ArrayList<Employee>();
+            Set<Employee> managers = new HashSet<Employee>();
             for (Project project:entry.getValue()) {
-                manager.addAll(employeeDAO.getProjectManagers(project));
+                managers.addAll(employeeDAO.getProjectManagers(project));
+                
+                Employee manager = entry.getKey();
+                while ((manager = getManager(manager)) != null) {
+                    managers.add(manager);
+                }
+
             }
-            employeeManagers.put(entry.getKey(), manager);
+            employeeManagers.put(entry.getKey(), managers);
         }
+             
         return employeeManagers;
     }
 
     /**
      * Переворачиваем мапу
      */
-    private  Map<Employee, List<Employee>> reverseEmployeeManagersToManagerEmployees(Map<Employee, List<Employee>> employeeManagers) {
-        Map<Employee, List<Employee>> managerEmployees = new HashMap<Employee, List<Employee>>();
+    public  Map<Employee, Set<Employee>> reverseEmployeeManagersToManagerEmployees(Map<Employee, Set<Employee>> employeeManagers) {
+        Map<Employee, Set<Employee>> managerEmployees = new HashMap<Employee, Set<Employee>>();
 
-        for(Map.Entry<Employee, List<Employee>> entry : employeeManagers.entrySet()) {  // проходим по сотрудник - его менеджеры
+        for(Map.Entry<Employee, Set<Employee>> entry : employeeManagers.entrySet()) {  // проходим по сотрудник - его менеджеры
             for (Employee manager:entry.getValue()) {                                   // просматриваем его менеджеров
                 if(manager.equals(entry.getKey()))continue;
                 if(managerEmployees.containsKey(manager)) {                             // если в мапе менеджер - сотрудники есть такой менеджер
                     if(!managerEmployees.get(manager).contains(entry.getKey()))         // если у этого менеджера нет этого сотрудника
                         managerEmployees.get(manager).add(entry.getKey());              // то добавляем
                 } else {
-                    List<Employee> employee = new ArrayList<Employee>();                // если в мапе менеджер - сотрудники нет такого менеджера
+                    Set<Employee> employee = new HashSet<Employee>();                // если в мапе менеджер - сотрудники нет такого менеджера
                     employee.add(entry.getKey());                                       // добавляем нового с единственным сотрудником
                     managerEmployees.put(manager, employee);
                 }
             }
         }
+
         return managerEmployees;
     }
 
@@ -112,17 +119,16 @@ public class PlannedVacationService {
     * Получаем руководителей чьи "близкие" подчиненые планируют отпуска в ближайшие 2 недели
     */
 
-    private Map<Employee, Set<Vacation>> getManagerEmployeesVacation() {
+    public Map<Employee, Set<Vacation>> getManagerEmployeesVacation() {
         final List<Employee> employees = employeeDAO.getEmployeeWithPlannedVacation(dateCurrent, dateAfter);
 
-        Map<Employee, List<Employee>> employeeManagers = getEmployeeManagers(employees);
+        Map<Employee, Set<Employee>> employeeManagers = getEmployeeManagers(employees);
 
-        Map<Employee, List<Employee>> managerEmployees = reverseEmployeeManagersToManagerEmployees(employeeManagers);
-
-
-
+        Map<Employee, Set<Employee>> managerEmployees = reverseEmployeeManagersToManagerEmployees(employeeManagers);
+        
+        
         Map<Employee, Set<Vacation>> managerEmployeesVacation = new HashMap<Employee, Set<Vacation>>();
-        for(Map.Entry<Employee, List<Employee>> entry : managerEmployees.entrySet()) {
+        for(Map.Entry<Employee, Set<Employee>> entry : managerEmployees.entrySet()) {
             Set<Vacation> vacations = new TreeSet<Vacation>();
 
             for (Employee employee:entry.getValue()) {
@@ -130,44 +136,17 @@ public class PlannedVacationService {
             }
 
             managerEmployeesVacation.put(entry.getKey(), new TreeSet<Vacation>(vacations));
-            Employee manager = entry.getKey();
-            while((manager = getManager(manager))!=null) {
-                if(managerEmployeesVacation.containsKey(manager)) {
-                    managerEmployeesVacation.get(manager).addAll(vacations);
-                } else {
-                    managerEmployeesVacation.put(manager, new TreeSet<Vacation>(vacations));
-                }
-            }
         }
-
-
-
+        
         return managerEmployeesVacation;
     }
 
     @Transactional
     public void service() {
-        Map<Employee, Set<Vacation>>   gf = getManagerEmployeesVacation();
-
-        sendMailService.plannedVacationInfoMailing(gf);
+        sendMailService.plannedVacationInfoMailing(getManagerEmployeesVacation());
     }
 
 
-    public VacationDAO getVacationDAO() {
-        return vacationDAO;
-    }
-
-    public void setVacationDAO(VacationDAO vacationDAO) {
-        this.vacationDAO = vacationDAO;
-    }
-
-    public EmployeeDAO getEmployeeDAO() {
-        return employeeDAO;
-    }
-
-    public void setEmployeeDAO(EmployeeDAO employeeDAO) {
-        this.employeeDAO = employeeDAO;
-    }
 
 
 }
