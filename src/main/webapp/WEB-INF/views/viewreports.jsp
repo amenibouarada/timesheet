@@ -243,14 +243,12 @@
                         <td>
                             <c:if test="${report.illnessDay}">Болезнь</c:if>
                             <c:if test="${report.vacationDay}">Отпуск</c:if>
+                            <c:if test="${report.businessTripDay}">Командировка</c:if>
                         </td>
 
                         <td>
                             <c:if test="${report.trouble}">Проблема</c:if>
-                            <c:if test="${report.effort != defEffort}">
-                                <c:if test="${report.trouble}">; </c:if>
-                                ${report.effort}
-                            </c:if>
+                            <c:if test="${report.effort != defEffort}">${report.effort}</c:if>
                         </td>
 
                     </tr>

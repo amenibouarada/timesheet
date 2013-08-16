@@ -30,6 +30,8 @@ public class TimeSheetDAO {
     IllnessDAO illnessDAO;
     @Autowired
     VacationDAO vacationDAO;
+    @Autowired
+    BusinessTripDAO businessTripDAO;
     private static final Logger logger = LoggerFactory.getLogger(TimeSheetDAO.class);
     @PersistenceContext
     private EntityManager entityManager;
@@ -113,8 +115,7 @@ public class TimeSheetDAO {
             Integer actType = item[4] != null ? ((Integer) item[4]) : null;
 
             // Если нерабочая активность - сразу проставим в duration 0
-            if (duration != null && !TypesOfActivityEnum.isEfficientActivity(actType))
-            {
+            if (duration != null && !TypesOfActivityEnum.isEfficientActivity(actType)) {
                 duration = BigDecimal.ZERO;
             }
 
@@ -123,6 +124,7 @@ public class TimeSheetDAO {
                 ds.setTimeSheetDAO(this);
                 ds.setIllnessDAO(illnessDAO);
                 ds.setVacationDAO(vacationDAO);
+                ds.setBusinessTripDAO(businessTripDAO);
                 map.put(calDate.getTime(), ds);
             } else {
                 DayTimeSheet dts = map.get(calDate.getTime());

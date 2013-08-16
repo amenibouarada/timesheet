@@ -59,4 +59,12 @@ public class BusinessTripDAO {
                 .setParameter("endDate", endDate)
                 .getResultList();
     }
+
+    public Boolean isDayBusinessTrip(Employee employee, Date date){
+        Query query = entityManager.createQuery(
+                "from BusinessTrip as bt where bt.employee = :employee and :date between bt.beginDate and bt.endDate"
+        ).setParameter("employee", employee).setParameter("date", date);
+        return !query.getResultList().isEmpty();
+    }
+
 }

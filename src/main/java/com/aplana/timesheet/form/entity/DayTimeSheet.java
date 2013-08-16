@@ -1,5 +1,6 @@
 package com.aplana.timesheet.form.entity;
 
+import com.aplana.timesheet.dao.BusinessTripDAO;
 import com.aplana.timesheet.dao.IllnessDAO;
 import com.aplana.timesheet.dao.TimeSheetDAO;
 import com.aplana.timesheet.dao.VacationDAO;
@@ -16,6 +17,7 @@ public class DayTimeSheet implements Comparable<DayTimeSheet> {
     private TimeSheetDAO timeSheetDAO;
     private IllnessDAO illnessDAO;
     private VacationDAO vacationDAO;
+    private BusinessTripDAO businessTripDAO;
     private Employee emp;
     private Timestamp calDate;
     private Boolean workDay;
@@ -48,6 +50,10 @@ public class DayTimeSheet implements Comparable<DayTimeSheet> {
 
     public void setVacationDAO(VacationDAO vacationDAO) {
         this.vacationDAO = vacationDAO;
+    }
+
+    public void setBusinessTripDAO(BusinessTripDAO businessTripDAO) {
+        this.businessTripDAO = businessTripDAO;
     }
 
     public Integer getAct_type() {
@@ -249,4 +255,11 @@ public class DayTimeSheet implements Comparable<DayTimeSheet> {
         else
             return null;
     }
+
+    // является данный день командировкой
+    @Transactional(readOnly = true)
+    public Boolean getBusinessTripDay(){
+        return businessTripDAO.isDayBusinessTrip(emp, new Date(calDate.getTime()));
+    }
+
 }
