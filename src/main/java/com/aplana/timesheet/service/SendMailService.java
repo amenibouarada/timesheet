@@ -205,7 +205,7 @@ public class SendMailService{
     }
 
     public void performMailing(TimeSheetForm form) {
-        new TimeSheetSender(this, propertyProvider).sendMessage(form);
+        new TimeSheetSender(this, propertyProvider, overtimeCauseService).sendMessage(form);
     }
 
     public void performFeedbackMailing(FeedbackForm form) {

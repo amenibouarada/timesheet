@@ -2,6 +2,7 @@ package com.aplana.timesheet.service.MailSenders;
 
 import com.aplana.timesheet.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.ManagerRoleNameService;
+import com.aplana.timesheet.service.OvertimeCauseService;
 import com.aplana.timesheet.service.SendMailService;
 import com.aplana.timesheet.service.VacationApprovalService;
 import com.google.common.annotations.VisibleForTesting;
@@ -32,10 +33,17 @@ public class MailSender<T> {
     protected TSPropertyProvider propertyProvider;
     protected VacationApprovalService vacationApprovalService;
     protected ManagerRoleNameService managerRoleNameService;
+    protected OvertimeCauseService overtimeCauseService;
 
     public MailSender(SendMailService sendMailService, TSPropertyProvider propertyProvider) { //TODO костыль
         this.sendMailService = sendMailService;
         this.propertyProvider = propertyProvider;
+    }
+
+    public MailSender(SendMailService sendMailService, TSPropertyProvider propertyProvider, OvertimeCauseService overtimeCauseService) { //TODO костыль
+        this.sendMailService = sendMailService;
+        this.propertyProvider = propertyProvider;
+        this.overtimeCauseService = overtimeCauseService;
     }
 
     public MailSender(SendMailService sendMailService, TSPropertyProvider propertyProvider,

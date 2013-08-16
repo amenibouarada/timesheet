@@ -5,6 +5,7 @@ import com.aplana.timesheet.enums.*;
 import com.aplana.timesheet.form.TimeSheetForm;
 import com.aplana.timesheet.form.TimeSheetTableRowForm;
 import com.aplana.timesheet.properties.TSPropertyProvider;
+import com.aplana.timesheet.service.OvertimeCauseService;
 import com.aplana.timesheet.service.SendMailService;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.HashBasedTable;
@@ -41,8 +42,8 @@ public class TimeSheetSender extends MailSender<TimeSheetForm> {
     public static final String EFFORT_IN_NEXTDAY = "effortInNextDay";
     private String employeeEmail;
 
-    public TimeSheetSender(SendMailService sendMailService, TSPropertyProvider propertyProvider) {
-        super(sendMailService, propertyProvider);
+    public TimeSheetSender(SendMailService sendMailService, TSPropertyProvider propertyProvider, OvertimeCauseService overtimeCauseService) {
+        super(sendMailService, propertyProvider, overtimeCauseService);
     }
 
     @Override
@@ -97,9 +98,10 @@ public class TimeSheetSender extends MailSender<TimeSheetForm> {
         if ( params.getEffortInNextDay() == EffortInNextDayEnum.OVERLOADED.getId() || params.getEffortInNextDay() == EffortInNextDayEnum.UNDERLOADED.getId() ) {
             return MailPriorityEnum.HIGH;
         }
-        /* указана хоть одна переработка */
-        if (params.getOvertimeCause() != null)
+        /* указана переработка по часам */
+        if (overtimeCauseService.isOvertimeDuration(params)) {
             return MailPriorityEnum.HIGH;
+        }
 
         return MailPriorityEnum.NORMAL;
     }

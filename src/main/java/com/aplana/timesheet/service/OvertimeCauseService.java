@@ -83,6 +83,16 @@ public class OvertimeCauseService {
         return totalDuration - WORK_DAY_DURATION > propertyProvider.getOvertimeThreshold() && WORK_DAY_DURATION - totalDuration > propertyProvider.getUndertimeThreshold();
     }
 
+    public boolean isOvertimeDuration(TimeSheetForm ts) {
+        Double totalDuration = calculateTotalDuration(ts);
+        return totalDuration - WORK_DAY_DURATION > propertyProvider.getOvertimeThreshold();
+    }
+
+    public boolean isUndertimeDuration(TimeSheetForm ts) {
+        Double totalDuration = calculateTotalDuration(ts);
+        return WORK_DAY_DURATION - totalDuration > propertyProvider.getUndertimeThreshold();
+    }
+
     public Integer getDictId(Integer overtimeCauseId) {
         DictionaryItem overtimeCause = dictionaryItemService.find(overtimeCauseId);
         return overtimeCause != null ? overtimeCause.getDictionary().getId() : null;
