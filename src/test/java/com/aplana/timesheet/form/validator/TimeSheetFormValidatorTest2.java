@@ -22,6 +22,7 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
 /* попытка сделать функциональный тест */
+// todo здесь можно наприсоединять сервисов и сделать сборку тестовой формы более элегантно
 
 public class TimeSheetFormValidatorTest2 extends AbstractTest {
     private static final Logger logger = LoggerFactory.getLogger(TimeSheetFormValidatorTest2.class);
