@@ -1,6 +1,7 @@
 package com.aplana.timesheet.form.validator;
 
 import com.aplana.timesheet.controller.AbstractController;
+import com.aplana.timesheet.dao.entity.DictionaryItem;
 import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.dao.entity.Project;
 import com.aplana.timesheet.enums.*;
@@ -10,6 +11,7 @@ import com.aplana.timesheet.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.*;
 import com.aplana.timesheet.util.DateTimeUtil;
 import com.aplana.timesheet.util.EnumsUtils;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -55,6 +57,8 @@ public class TimeSheetFormValidator extends AbstractValidator {
     private TSPropertyProvider propertyProvider;
     @Autowired
     private VacationService vacationService;
+    @Autowired
+    private OvertimeCauseService overtimeCauseService;
 
     public boolean supports(Class<?> clazz) {
         return clazz.isAssignableFrom(TimeSheetForm.class);
@@ -62,53 +66,56 @@ public class TimeSheetFormValidator extends AbstractValidator {
 
     public void validate(Object target, Errors errors) {
         TimeSheetForm tsForm = (TimeSheetForm) target;
-        Integer selectedEmployeeId = tsForm.getEmployeeId();
-        Employee employee = employeeService.find(selectedEmployeeId);
-        ProjectRolesEnum emplJob = (employee != null)
-                ? getByCode(employee.getJob().getCode())
-                : NOT_DEFINED;
+        if (tsForm != null) {
+            Integer selectedEmployeeId = tsForm.getEmployeeId();
+            Employee employee = employeeService.find(selectedEmployeeId);
+            ProjectRolesEnum emplJob = (employee != null)
+                    ? getByCode(employee.getJob().getCode())
+                    : NOT_DEFINED;
 
-        if (emplJob == null) {
-            logger.warn("emplJob is null");
-        }
-
-        validateDivision(tsForm, errors);
-        validateEmployee(selectedEmployeeId, errors);
-        validateSelectedDate(tsForm, selectedEmployeeId, errors);
-        validateEffort(tsForm, errors);
-
-        // Для табличной части (по строчно).
-        List<TimeSheetTableRowForm> tsTablePart = filterTable(tsForm);// удалим пустые строки
-        tsForm.setTimeSheetTablePart(tsTablePart);
-
-        // Здесь также проверятся причины недоработок/переработок
-        validateDuration(tsForm, employee, errors, tsTablePart);
-
-        // План на след. день нужен только если есть строки списания
-        final boolean planNecessary = tsTablePart != null && !tsTablePart.isEmpty() && BooleanUtils.isTrue(employee.getDivision().getPlansRequired());
-        validatePlan(tsForm, emplJob, planNecessary, errors);
-
-        if (tsTablePart != null) {
-
-            checkForEffectiveActTypes(tsTablePart, tsForm.getEmployeeId(), errors);
-
-            List<TimeSheetTableRowForm> listToRemove = new ArrayList<TimeSheetTableRowForm>();
-            logger.debug("TimeSheetForm table has {} lines.", tsTablePart.size());
-
-            int notNullRowNumber = 0;
-
-            for (TimeSheetTableRowForm formRow : tsTablePart) {
-                TypesOfActivityEnum actType = TypesOfActivityEnum.getById(formRow.getActivityTypeId());
-
-                validateProject(formRow, actType, notNullRowNumber, errors);
-                validateWorkPlace(formRow, notNullRowNumber, errors);
-                validateProjectRole(formRow, notNullRowNumber, errors);
-                valdateCategoryOfActivity(formRow, emplJob, notNullRowNumber, errors);
-                validateProjectTask(formRow, notNullRowNumber, errors);
-                validateDescription(formRow, emplJob, notNullRowNumber, errors);
-
-                notNullRowNumber++;
+            if (emplJob == null) {
+                logger.warn("emplJob is null");
             }
+
+            validateDivision(tsForm, errors);
+            validateEmployee(selectedEmployeeId, errors);
+            validateSelectedDate(tsForm, selectedEmployeeId, errors);
+            validateEffort(tsForm, errors);
+
+            // Для табличной части (по строчно).
+            List<TimeSheetTableRowForm> tsTablePart = filterTable(tsForm);// удалим пустые строки
+            tsForm.setTimeSheetTablePart(tsTablePart);
+
+            // Проверка рабочих часов на правильность формата
+            validateDuration(tsForm, employee, errors, tsTablePart);
+            // Проверка недоработок/переработок и  их причины
+            validateCause(tsForm, employee, errors);
+
+            // План на след. день нужен только если есть строки списания
+            final boolean planNecessary = tsTablePart != null && !tsTablePart.isEmpty() && employee != null && employee.getDivision() != null && BooleanUtils.isTrue(employee.getDivision().getPlansRequired());
+            validatePlan(tsForm, emplJob, planNecessary, errors);
+
+            if (tsTablePart != null) {
+
+                checkForEffectiveActTypes(tsTablePart, tsForm.getEmployeeId(), errors);
+
+                List<TimeSheetTableRowForm> listToRemove = new ArrayList<TimeSheetTableRowForm>();
+                logger.debug("TimeSheetForm table has {} lines.", tsTablePart.size());
+
+                int notNullRowNumber = 0;
+
+                for (TimeSheetTableRowForm formRow : tsTablePart) {
+                    TypesOfActivityEnum actType = TypesOfActivityEnum.getById(formRow.getActivityTypeId());
+
+                    validateProject(formRow, actType, notNullRowNumber, errors);
+                    validateWorkPlace(formRow, notNullRowNumber, errors);
+                    validateProjectRole(formRow, notNullRowNumber, errors);
+                    valdateCategoryOfActivity(formRow, emplJob, notNullRowNumber, errors);
+                    validateProjectTask(formRow, notNullRowNumber, errors);
+                    validateDescription(formRow, emplJob, notNullRowNumber, errors);
+
+                    notNullRowNumber++;
+                }
 
             /*
             Отчет может быть без записей
@@ -116,12 +123,18 @@ public class TimeSheetFormValidator extends AbstractValidator {
                 errors.reject("error.tsform.tablepart.required",
                         "В отчёте должны быть записи.");
             }*/
-        } /*
+            } /*
         Отчет может быть без записей
         else {
             errors.reject("error.tsform.tablepart.required", "В отчёте должны быть записи.");
         }*/
 
+        } else {
+            errors.rejectValue("timeSheetForm",
+                    "error.tsform.isnull",
+                    "Не удалось получить параметры формы");
+            logger.error("Can not validate tsform, object is null");
+        }
     }
 
     private void validateWorkPlace(TimeSheetTableRowForm formRow, int notNullRowNumber, Errors errors) {
@@ -193,21 +206,19 @@ public class TimeSheetFormValidator extends AbstractValidator {
     private void validateDescription(TimeSheetTableRowForm formRow, ProjectRolesEnum emplJob, int notNullRowNumber, Errors errors) {
         String description = formRow.getDescription();
         // Необходимо указать комментарии
-        if (description != null) {
-            logger.debug("Employee Job: {}", emplJob.getName());
+        logger.debug("Employee Job: {}", emplJob.getName());
 
-            if (StringUtils.isBlank(description) && emplJob != HEAD) {
-                errors.rejectValue("timeSheetTablePart[" + notNullRowNumber + "].description",
-                        "error.tsform.description.required", getErrorMessageArgs(notNullRowNumber),
-                        "Необходимо указать комментарии в строке " + (notNullRowNumber + 1) + ".");
-            }
+        if (StringUtils.isBlank(description) && emplJob != HEAD) {
+            errors.rejectValue("timeSheetTablePart[" + notNullRowNumber + "].description",
+                    "error.tsform.description.required", getErrorMessageArgs(notNullRowNumber),
+                    "Необходимо указать комментарии в строке " + (notNullRowNumber + 1) + ".");
         }
     }
 
     private Object[] getErrorMessageArgs(int notNullRowNumber) {
         return new Object[]{"в строке №" + (notNullRowNumber + 1)};
     }
-
+    @VisibleForTesting
     private void valdateCategoryOfActivity(TimeSheetTableRowForm formRow, ProjectRolesEnum emplJob, int notNullRowNumber, Errors errors) {
         Integer actCatId = formRow.getActivityCategoryId();
         Integer projectId = formRow.getProjectId();
@@ -332,71 +343,65 @@ public class TimeSheetFormValidator extends AbstractValidator {
     }
 
     private void validateSelectedDate(TimeSheetForm tsForm, Integer selectedEmployeeId, Errors errors) {
-        String selectedDate = tsForm.getCalDate();
+        final String selectedDate = tsForm.getCalDate();
         // Дата не выбрана.
-        if (selectedDate != null) {
-            ValidationUtils.rejectIfEmptyOrWhitespace(errors,
-                    "calDate",
-                    "error.tsform.caldate.required",
-                    "Необходимо выбрать дату.");
-            // Эти проверки не проводится, если дата не выбрана.
-            if (StringUtils.isNotBlank(selectedDate)) {
-                // Выбрана недопустимая дата (если сотрудник выбрал дату из
-                // диапазона дат, которые еще не внесены в таблицу calendar.
-                if (!isCaldateValid(tsForm.getCalDate())) {
-                    errors.rejectValue("calDate",
-                            "error.tsform.caldate.invalid",
-                            "Выбрана недопустимая дата.");
-                    // Сотрудник уже отправлял отчёт за выбранную дату.
-                } else if (!isCaldateUniqueForCurrentEmployee(selectedDate, selectedEmployeeId)) {
-                    Object[] errorMessageArgs = {DateTimeUtil.formatDateString(selectedDate)};
-                    errors.rejectValue("calDate",
-                            "error.tsform.caldate.notuniq",
-                            errorMessageArgs,
-                            "Вы уже списывали занятость за " + DateTimeUtil.formatDateString(selectedDate));
-                }
+        ValidationUtils.rejectIfEmptyOrWhitespace(errors,
+                "calDate",
+                "error.tsform.caldate.required",
+                "Необходимо выбрать дату.");
+        // Эти проверки не проводится, если дата не выбрана.
+        if (StringUtils.isNotBlank(selectedDate)) {
+            // Выбрана недопустимая дата (если сотрудник выбрал дату из
+            // диапазона дат, которые еще не внесены в таблицу calendar.
+            if (!isCaldateValid(selectedDate) || !DateTimeUtil.isDateValid(selectedDate)) {
+                errors.rejectValue("calDate",
+                        "error.tsform.caldate.invalid",
+                        "Выбрана недопустимая дата.");
+                // Сотрудник уже отправлял отчёт за выбранную дату.
+            } else if (!isCaldateUniqueForCurrentEmployee(selectedDate, selectedEmployeeId)) {
+                Object[] errorMessageArgs = {DateTimeUtil.formatDateString(selectedDate)};
+                errors.rejectValue("calDate",
+                        "error.tsform.caldate.notuniq",
+                        errorMessageArgs,
+                        "Вы уже списывали занятость за " + DateTimeUtil.formatDateString(selectedDate));
             }
         }
     }
 
     private void validateDuration(TimeSheetForm tsForm, Employee employee, Errors errors, List<TimeSheetTableRowForm> timeSheetTablePart) {
         double totalDuration = 0;
-
         int notNullRowNumber = 0;
-        if (timeSheetTablePart != null) { // Проверяем заполненность строк отчета только если они есть :)
+        // Проверяем заполненность строк отчета только если они есть :)
+        if (timeSheetTablePart != null) {
             for (TimeSheetTableRowForm rowForm : timeSheetTablePart) {
                 String durationStr = rowForm.getDuration();
-                final TypesOfActivityEnum activityType = EnumsUtils.tryFindById(rowForm.getActivityTypeId(), TypesOfActivityEnum.class);
-
                 // Необходимо указать часы
-                if (durationStr != null) {
-                    ValidationUtils.rejectIfEmptyOrWhitespace(errors,
-                            "timeSheetTablePart[" + notNullRowNumber + "].duration",
-                            "error.tsform.duration.required", getErrorMessageArgs(notNullRowNumber),
-                            "Необходимо указать часы в строке " + (notNullRowNumber + 1) + ".");
-                    // Часы должны быть указаны в правильном формате (1, 1.2, 5.5 и т.п.)
-                    // and may be 1,2; 2,3
-                    if (StringUtils.isNotBlank(durationStr)) {
-                        Pattern p1 = Pattern.compile("([0-9]*)(\\.|,)[0-9]");
-                        Pattern p2 = Pattern.compile("([0-9]*)");
-                        Matcher m1 = p1.matcher(durationStr);
-                        Matcher m2 = p2.matcher(durationStr);
-                        if (!m1.matches() && !m2.matches()) {
+                ValidationUtils.rejectIfEmptyOrWhitespace(errors,
+                        "timeSheetTablePart[" + notNullRowNumber + "].duration",
+                        "error.tsform.duration.required", getErrorMessageArgs(notNullRowNumber),
+                        "Необходимо указать часы в строке " + (notNullRowNumber + 1) + ".");
+                // Часы должны быть указаны в правильном формате (1, 1.2, 5.5 и т.п.)
+                // and may be 1,2; 2,3
+                if (StringUtils.isNotBlank(durationStr)) {
+                    Pattern p1 = Pattern.compile("([0-9]*)(\\.|,)[0-9]");
+                    Pattern p2 = Pattern.compile("([0-9]*)");
+                    Matcher m1 = p1.matcher(durationStr);
+                    Matcher m2 = p2.matcher(durationStr);
+                    if (!m1.matches() && !m2.matches()) {
+                        errors.rejectValue("timeSheetTablePart[" + notNullRowNumber + "].duration",
+                                "error.tsform.duration.format", getErrorMessageArgs(notNullRowNumber),
+                                "Количество часов указано не верно в строке " + (notNullRowNumber + 1)
+                                        + ". Примеры правильных значений (5, 3.5, 2.0 и т.п.).");
+                    } else {
+                        double duration = Double.parseDouble(durationStr.replace(",", "."));
+                        // Количество часов должно быть больше нуля
+                        if (duration <= 0) {
                             errors.rejectValue("timeSheetTablePart[" + notNullRowNumber + "].duration",
-                                    "error.tsform.duration.format", getErrorMessageArgs(notNullRowNumber),
-                                    "Количество часов указано не верно в строке " + (notNullRowNumber + 1)
-                                            + ". Примеры правильных значений (5, 3.5, 2.0 и т.п.).");
-                        } else {
-                            double duration = Double.parseDouble(durationStr.replace(",", "."));
-                            // Количество часов должно быть больше нуля
-                            if (duration <= 0) {
-                                errors.rejectValue("timeSheetTablePart[" + notNullRowNumber + "].duration",
-                                        "error.tsform.duration.length", getErrorMessageArgs(notNullRowNumber),
-                                        "Количество часов должно быть больше нуля в строке " + (notNullRowNumber + 1) + ".");
-                            }
-                            // Считаем общее количество часов
-                            totalDuration += duration;
+                                    "error.tsform.duration.length", getErrorMessageArgs(notNullRowNumber),
+                                    "Количество часов должно быть больше нуля в строке " + (notNullRowNumber + 1) + ".");
                         }
+                        // Считаем общее количество часов
+                        totalDuration += duration;
                     }
                 }
 
@@ -409,50 +414,19 @@ public class TimeSheetFormValidator extends AbstractValidator {
         // Проверять причины недоработки будем даже если нет записей в отчете
         //if (tsTablePart != null && !tsTablePart.isEmpty()) {
         boolean isHoliday = calendarService.isHoliday(
-                DateTimeUtil.stringToDate(tsForm.getCalDate(), AbstractController.DATE_FORMAT),
+                DateTimeUtil.stringToDateForDB(tsForm.getCalDate()),
                 employee
         );
 
         boolean isVacation = vacationService.isDayVacationWithoutPlanned(
                 employee,
-                DateTimeUtil.stringToDate(tsForm.getCalDate(), AbstractController.DATE_FORMAT)
+                DateTimeUtil.stringToDateForDB(tsForm.getCalDate())
         );
 
         // Отчет за выходные без отработанных часов невозможен
         if ((isHoliday || isVacation) && totalDuration == 0) {
             errors.rejectValue("overtimeCause", "error.tsform.workonholiday.zeroduration");
         }
-
-        Boolean isDivisionLeader = employeeService.isEmployeeDivisionLeader(employee.getId());
-
-        Boolean hasCause = tsForm.getOvertimeCause() != null && tsForm.getOvertimeCause() >0;
-
-        if (((totalDuration - WORK_DAY_DURATION > propertyProvider.getOvertimeThreshold()) ||
-                ((WORK_DAY_DURATION - totalDuration > propertyProvider.getUndertimeThreshold()) && !isDivisionLeader) ||
-                (isHoliday || isVacation)) && !hasCause
-                ) {
-            boolean isOvertime = totalDuration - WORK_DAY_DURATION > 0;
-            String concreteName = isHoliday || isVacation ? "работы в выходной день" : (isOvertime ? "переработок" : "недоработок");
-            final Integer overtimeCause = tsForm.getOvertimeCause();
-
-            if (isNotChoosed(overtimeCause)) {
-                errors.rejectValue("overtimeCause", "error.tsform.overtimecause.notchoosed", "Не указана причина " + concreteName);
-            } else {
-                final TSEnum cause = isHoliday || isVacation
-                        ? EnumsUtils.tryFindById(overtimeCause, WorkOnHolidayCausesEnum.class)
-                        : (
-                        isOvertime
-                                ? EnumsUtils.tryFindById(overtimeCause, OvertimeCausesEnum.class)
-                                : EnumsUtils.tryFindById(overtimeCause, UndertimeCausesEnum.class)
-                );
-                checkCauseComment(cause, tsForm.getOvertimeCauseComment(), concreteName, errors);
-            }
-
-            if (isHoliday || isVacation) {
-                checkTypeOfCompensation(tsForm, errors);
-            }
-        }
-        //}
 
         // Сумма часов превышает 24.
         if (totalDuration > 24) {
@@ -471,32 +445,27 @@ public class TimeSheetFormValidator extends AbstractValidator {
                     "error.tsform.typeOfCompensation.notChoosed",
                     "Не указан тип компенсации"
             );
-        }
-    }
-
-    private void checkCauseComment(TSEnum cause, String overtimeCauseComment, String concreteName, Errors errors) {
-        if (cause == null) {
-            errors.rejectValue("overtimeCause", "error.tsform.overtimecause.wrongvalue", "Указана неверная причина для " + concreteName);
-        } else if (cause.getName().equals("Другое")
-                && (StringUtils.isBlank(overtimeCauseComment)
-                || !overtimeCauseComment.matches(inStringMoreThanTwoWordsRegex))
-                ) {
-            errors.rejectValue("overtimeCauseComment", "error.tsform.overtimecause.wrongcommentformat",
-                    "Комментарий должен содержать не менее двух слов");
+        } else {
+            if (dictionaryItemService.find(typeOfCompensation).getDictionary().getId() != DictionaryEnum.TYPES_OF_COMPENSATION.getId()) {
+                errors.rejectValue(
+                        "typeOfCompensation",
+                        "error.tsform.typeOfCompensation.wrongvalue",
+                        "Указан не правильный тип компенсации"
+                );
+            }
         }
     }
 
     /*
     * Возвращает false, если сотрудник уже отправлял отчет за выбранную дату.
     */
-
     private boolean isCaldateUniqueForCurrentEmployee(String calDate, Integer employeeId) {
         return timeSheetService.findForDateAndEmployee(calDate, employeeId) == null;
     }
 
     /*
-      * Возвращает true, если введённая дата присутствует в таблице calendar и false, если нет.
-      */
+    * Возвращает true, если введённая дата присутствует в таблице calendar и false, если нет.
+    */
     private boolean isCaldateValid(String date) {
         return calendarService.find(date) != null;
     }
@@ -514,13 +483,8 @@ public class TimeSheetFormValidator extends AbstractValidator {
     }
 
     private boolean isActCatValid(Integer actCat, ProjectRolesEnum emplJob) {
-        if (actCat == null ||
-                //У проектной роли "Руководитель центра" нет доступных категорий активности.
-                (emplJob == HEAD && actCat == 0)
-                ) {
-            return true;
-        }
-        return dictionaryItemService.find(actCat) != null;
+        return actCat == null || //У проектной роли "Руководитель центра" нет доступных категорий активности.
+                (emplJob == HEAD && actCat == 0) || dictionaryItemService.find(actCat) != null;
     }
 
     private boolean isProjectValid(Integer project) {
@@ -532,9 +496,63 @@ public class TimeSheetFormValidator extends AbstractValidator {
     }
 
     private boolean isProjectTaskValid(Integer project, Integer task) {
-        if (project == null && task == null) {
-            return true;
+        return project == null && task == null || projectTaskService.find(project, task) != null;
+    }
+
+    /* вспомогательная функция для проверки одной из причин переработки */
+    private void checkCause(TimeSheetForm tsForm, String causeTypeStr, TSEnum tsEnum, Errors errors) {
+        final Integer overtimeCauseId = tsForm.getOvertimeCause();
+        /* установлена ли причина недо/переработки или вых день*/
+        if (isNotChoosed(overtimeCauseId)) {
+            errors.rejectValue(
+                    "overtimeCause",
+                    "error.tsform.overtimecause.notchoosed",
+                    "Необходимо выбрать причину " + causeTypeStr
+            );
+        } else {
+            final DictionaryItem overtimeCause = dictionaryItemService.find(overtimeCauseId);
+            /* проверим попадает ли причина в правильный словарь */
+            if (overtimeCause.getDictionary().getId() != tsEnum.getId()) {
+                errors.rejectValue(
+                        "overtimeCause",
+                        "error.tsform.overtimecause.wrongvalue",
+                        "Указана неверная причина " + causeTypeStr
+                );
+            }
+            /* проверим коментарии к причине */
+            if (overtimeCause.getValue().equals("Другое")) {
+                String overtimeCauseComment = tsForm.getOvertimeCauseComment();
+                if (StringUtils.isBlank(overtimeCauseComment)
+                        || !overtimeCauseComment.matches(inStringMoreThanTwoWordsRegex)) {
+                    errors.rejectValue(
+                            "overtimeCauseComment",
+                            "error.tsform.overtimecause.wrongcommentformat",
+                            "Комментарий должен содержать не менее двух слов"
+                    );
+                }
+            }
         }
-        return projectTaskService.find(project, task) != null;
+    }
+
+    /* Проверка на правильность переработки недоработки или работы в выходной */
+    private void validateCause(TimeSheetForm tsForm, Employee employee, Errors errors) {
+        /* проверим работу в выходные/праздничные дни */
+        if ( calendarService.isHoliday(DateTimeUtil.stringToDateForDB(tsForm.getCalDate()),employee)
+                || vacationService.isDayVacationWithoutPlanned(employee,DateTimeUtil.stringToDateForDB(tsForm.getCalDate())) )
+        {
+            checkCause(tsForm, "работы в праздничный/выходной день", DictionaryEnum.WORK_ON_HOLIDAY_CAUSE, errors);
+            checkTypeOfCompensation(tsForm, errors);
+        } else {
+            /* проверяем есть ли переработка */
+            if ( overtimeCauseService.isOvertimeDuration(tsForm) ) {
+                checkCause(tsForm, "переработки", DictionaryEnum.OVERTIME_CAUSE, errors);
+            }else{
+                /* проверим есть ли недоработка (для начальника подразделения недоработка не учитывается) */
+                if ( overtimeCauseService.isUndertimeDuration(tsForm)
+                        && !employeeService.isEmployeeDivisionLeader(employee.getId()) ) {
+                    checkCause(tsForm, "недоработки", DictionaryEnum.UNDERTIME_CAUSE, errors);
+                }
+            }
+        }
     }
 }

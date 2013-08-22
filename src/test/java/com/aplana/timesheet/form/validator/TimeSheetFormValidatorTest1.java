@@ -117,7 +117,6 @@ public class TimeSheetFormValidatorTest1 extends AbstractTest {
         testedForm1.setTimeSheetTablePart(tsRowList);
         testedForm1.setCalDate(calDate);
         testedForm1.setPlan("План работ формы 1");
-        testedForm1.setTotalDuration(25);
         testedForm1.setOvertimeCause(107);
         testedForm1.setOvertimeCauseComment("Я трудоголик и работаю без выходных");
         testedForm1.setTypeOfCompensation(117);

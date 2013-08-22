@@ -17,6 +17,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.ParseException;
+import java.util.List;
+
 import static com.aplana.timesheet.constants.TimeSheetConstants.WORK_DAY_DURATION;
 
 /**
@@ -53,8 +56,15 @@ public class OvertimeCauseService {
 
     private double calculateTotalDuration(TimeSheetForm tsForm) {
         double totalDuration = 0D;
+        double currentDuration;
         for (TimeSheetTableRowForm tableRowForm : tsForm.getTimeSheetTablePart()) {
-            totalDuration += Double.parseDouble(tableRowForm.getDuration());
+            try{
+                currentDuration = Double.parseDouble(tableRowForm.getDuration());
+            }catch (NumberFormatException e){
+                logger.error("Error parsing duration empl_id="+tsForm.getEmployeeId()+" on date='"+tsForm.getCalDate()+"'", e);
+                currentDuration = 0D;
+            }
+            totalDuration += currentDuration;
         }
 
         return totalDuration;
@@ -83,14 +93,36 @@ public class OvertimeCauseService {
         return totalDuration - WORK_DAY_DURATION > propertyProvider.getOvertimeThreshold() && WORK_DAY_DURATION - totalDuration > propertyProvider.getUndertimeThreshold();
     }
 
-    public boolean isOvertimeDuration(TimeSheetForm ts) {
-        Double totalDuration = calculateTotalDuration(ts);
-        return totalDuration - WORK_DAY_DURATION > propertyProvider.getOvertimeThreshold();
+    public boolean isOvertimeDuration(TimeSheetForm tsForm) {
+        final List<TimeSheetTableRowForm> tsTableRowList = tsForm.getTimeSheetTablePart();
+        if (tsTableRowList != null && tsTableRowList.size() != 0) {
+            for (TimeSheetTableRowForm rowForm : tsTableRowList) {
+                if (TypesOfActivityEnum.isNotCheckableForOvertime(
+                        EnumsUtils.tryFindById(rowForm.getActivityTypeId(),TypesOfActivityEnum.class))) {
+                    return false;
+                }
+            }
+            Double totalDuration = calculateTotalDuration(tsForm);
+            return totalDuration - WORK_DAY_DURATION > propertyProvider.getOvertimeThreshold();
+        } else {
+            return false;
+        }
     }
 
-    public boolean isUndertimeDuration(TimeSheetForm ts) {
-        Double totalDuration = calculateTotalDuration(ts);
-        return WORK_DAY_DURATION - totalDuration > propertyProvider.getUndertimeThreshold();
+    public boolean isUndertimeDuration(TimeSheetForm tsForm) {
+        final List<TimeSheetTableRowForm> tsTableRowList = tsForm.getTimeSheetTablePart();
+        if (tsTableRowList != null && tsTableRowList.size() != 0) {
+            for (TimeSheetTableRowForm rowForm : tsForm.getTimeSheetTablePart()) {
+                if (TypesOfActivityEnum.isNotCheckableForOvertime(
+                        EnumsUtils.tryFindById(rowForm.getActivityTypeId(),TypesOfActivityEnum.class))) {
+                    return false;
+                }
+            }
+            Double totalDuration = calculateTotalDuration(tsForm);
+            return WORK_DAY_DURATION - totalDuration > propertyProvider.getUndertimeThreshold();
+        } else {
+            return false;
+        }
     }
 
     public Integer getDictId(Integer overtimeCauseId) {
