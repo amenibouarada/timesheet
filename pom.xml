@@ -36,9 +36,22 @@
     </properties>
 
     <repositories>
+        <!--
+            <repository>
+                <id>atlassian-public</id>
+                <url>https://m2proxy.atlassian.com/repository/public</url>
+                <snapshots>
+                    <enabled>true</enabled>
+                    <checksumPolicy>warn</checksumPolicy>
+                </snapshots>
+                <releases>
+                    <enabled>true</enabled>
+                    <checksumPolicy>warn</checksumPolicy>
+                </releases>
+            </repository> -->
         <repository>
-            <id>atlassian-public</id>
-            <url>https://m2proxy.atlassian.com/repository/public</url>
+            <id>aplana-nexus-ts</id>
+            <url>http://192.168.101.242:8081/nexus/content/groups/public/</url>
             <snapshots>
                 <enabled>true</enabled>
                 <checksumPolicy>warn</checksumPolicy>
@@ -47,10 +60,6 @@
                 <enabled>true</enabled>
                 <checksumPolicy>warn</checksumPolicy>
             </releases>
-        </repository>
-        <repository>
-            <id>aplana-nexus-ts</id>
-            <url>http://192.168.101.242:8081/nexus/content/groups/public/</url>
         </repository>
     </repositories>
 
@@ -101,71 +110,71 @@
                     <showWarnings>true</showWarnings>
                 </configuration>
             </plugin>
-           <!-- <plugin>
-                <groupId>org.codehaus.cargo</groupId>
-                <artifactId>cargo-maven2-plugin</artifactId>
-                <version>${cargo.plugin.version}</version>
-                <configuration>
-                    <wait>false</wait>
-                    <container>
-                        <containerId>tomcat6x</containerId>
-                        <type>installed</type>
-                        <home>${catalina.home}</home>
-                    </container>
-                    <configuration>
-                        <type>existing</type>
-                        <home>${catalina.home}</home>
-                        <properties>
-                            <cargo.tomcat.manager.url>http://localhost:8080/manager/html</cargo.tomcat.manager.url>
-                            <cargo.remote.username>tomcat</cargo.remote.username>
-                            <cargo.remote.password>tomcat</cargo.remote.password>
-                        </properties>
-                    </configuration>
-                    <deployer>
-                        <type>installed</type>
-                        <deployables>
-                            <deployable>
-                                <groupId>${project.groupId}</groupId>
-                                <artifactId>${project.artifactId}</artifactId>
-                                <type>${project.packaging}</type>
-                                <properties>
-                                    <context>${project.artifactId}</context>
-                                </properties>
-                            </deployable>
-                        </deployables>
-                    </deployer>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>start-container</id>
-                        <phase>pre-integration-test</phase>
-                        <goals>
-                            <goal>deployer-deploy</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>stop-container</id>
-                        <phase>post-integration-test</phase>
-                        <goals>
-                            <goal>deployer-undeploy</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>verify-deploy</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>deployer-deploy</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>clean-undeploy</id>
-                        <phase>pre-clean</phase>
-                        <goals>
-                            <goal>deployer-undeploy</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>-->
+            <!-- <plugin>
+                 <groupId>org.codehaus.cargo</groupId>
+                 <artifactId>cargo-maven2-plugin</artifactId>
+                 <version>${cargo.plugin.version}</version>
+                 <configuration>
+                     <wait>false</wait>
+                     <container>
+                         <containerId>tomcat6x</containerId>
+                         <type>installed</type>
+                         <home>${catalina.home}</home>
+                     </container>
+                     <configuration>
+                         <type>existing</type>
+                         <home>${catalina.home}</home>
+                         <properties>
+                             <cargo.tomcat.manager.url>http://localhost:8080/manager/html</cargo.tomcat.manager.url>
+                             <cargo.remote.username>tomcat</cargo.remote.username>
+                             <cargo.remote.password>tomcat</cargo.remote.password>
+                         </properties>
+                     </configuration>
+                     <deployer>
+                         <type>installed</type>
+                         <deployables>
+                             <deployable>
+                                 <groupId>${project.groupId}</groupId>
+                                 <artifactId>${project.artifactId}</artifactId>
+                                 <type>${project.packaging}</type>
+                                 <properties>
+                                     <context>${project.artifactId}</context>
+                                 </properties>
+                             </deployable>
+                         </deployables>
+                     </deployer>
+                 </configuration>
+                 <executions>
+                     <execution>
+                         <id>start-container</id>
+                         <phase>pre-integration-test</phase>
+                         <goals>
+                             <goal>deployer-deploy</goal>
+                         </goals>
+                     </execution>
+                     <execution>
+                         <id>stop-container</id>
+                         <phase>post-integration-test</phase>
+                         <goals>
+                             <goal>deployer-undeploy</goal>
+                         </goals>
+                     </execution>
+                     <execution>
+                         <id>verify-deploy</id>
+                         <phase>package</phase>
+                         <goals>
+                             <goal>deployer-deploy</goal>
+                         </goals>
+                     </execution>
+                     <execution>
+                         <id>clean-undeploy</id>
+                         <phase>pre-clean</phase>
+                         <goals>
+                             <goal>deployer-undeploy</goal>
+                         </goals>
+                     </execution>
+                 </executions>
+             </plugin>-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
