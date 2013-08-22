@@ -48,6 +48,10 @@
                 <checksumPolicy>warn</checksumPolicy>
             </releases>
         </repository>
+        <repository>
+            <id>aplana-nexus-ts</id>
+            <url>http://192.168.101.242:8081/nexus/content/groups/public/</url>
+        </repository>
     </repositories>
 
     <pluginRepositories>
