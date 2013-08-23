@@ -258,7 +258,7 @@
                 projectOption.innerHTML = obj[projectindex].value;
                 projectIdElement.appendChild(projectOption);
             }
-
+            sortSelectOptions(projectIdElement);
         }
 
     </script>
