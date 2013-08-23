@@ -29,6 +29,8 @@ import org.springframework.ui.velocity.VelocityEngineUtils;
 import javax.annotation.Nullable;
 import java.util.*;
 
+import static com.aplana.timesheet.enums.TypesOfActivityEnum.*;
+
 @Service
 public class SendMailService{
     private static final Logger logger = LoggerFactory.getLogger(SendMailService.class);
@@ -38,7 +40,7 @@ public class SendMailService{
                 @Override
                 public boolean apply(@Nullable ProjectActivityInfo projectActivityInfo) {
                     TypesOfActivityEnum actType = projectActivityInfo.getTypeOfActivity();
-                    return actType == TypesOfActivityEnum.PROJECT || actType == TypesOfActivityEnum.PRESALE;
+                    return actType == PROJECT || actType == PRESALE || actType == PROJECT_PRESALE;
                 }
             });
     private final Function<ProjectManager, String> GET_EMAIL_FROM_MANAGER
