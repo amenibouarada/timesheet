@@ -108,7 +108,7 @@
 				<textElement/>
 				<textFieldExpression><![CDATA[$F{act_cat}]]></textFieldExpression>
 			</textField>
-			<textField pattern="###0.0" isStretchWithOverflow="true">
+			<textField pattern="###0.00" isStretchWithOverflow="true">
 				<reportElement uuid="90c0d099-174c-4810-b44f-34741c784a17" style="Detail" stretchType="RelativeToTallestObject" x="668" y="0" width="60" height="13"/>
 				<textElement/>
 				<textFieldExpression><![CDATA[$F{duration}]]></textFieldExpression>

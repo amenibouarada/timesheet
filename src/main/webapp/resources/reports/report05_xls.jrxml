@@ -187,7 +187,7 @@
 				<textElement/>
 				<textFieldExpression><![CDATA[$F{taskName}]]></textFieldExpression>
 			</textField>
-			<textField pattern="###0.0">
+			<textField pattern="###0.00">
 				<reportElement uuid="aca90fc4-092b-4cfe-861d-76cd0e46eb67" style="Detail" stretchType="RelativeToTallestObject" x="901" y="0" width="50" height="13"/>
 				<textElement/>
 				<textFieldExpression><![CDATA[$F{duration}]]></textFieldExpression>

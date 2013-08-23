@@ -83,7 +83,7 @@
 					<textElement>
 						<font size="16"/>
 					</textElement>
-					<textFieldExpression><![CDATA[new DecimalFormat("###0.0").format($V{DurationSumGroupByName}) + "/" + new DecimalFormat("###0.0").format($V{DurationHolidaySumGroupByName})]]></textFieldExpression>
+					<textFieldExpression><![CDATA[new DecimalFormat("###0.00").format($V{DurationSumGroupByName}) + "/" + new DecimalFormat("###0.00").format($V{DurationHolidaySumGroupByName})]]></textFieldExpression>
 				</textField>
 			</band>
 		</groupHeader>
@@ -107,7 +107,7 @@
 				<textField evaluationTime="Group" evaluationGroup="GroupByProject">
 					<reportElement uuid="46e1b250-52bb-4f2a-ae6c-78b0ebde2fbe" style="Billable" x="453" y="0" width="100" height="20"/>
 					<textElement/>
-					<textFieldExpression><![CDATA[new DecimalFormat("###0.0").format($V{DurationSumGroupByProject}) + "/" + new DecimalFormat("###0.0").format($V{DurationHolidaySumGroupByProject})]]></textFieldExpression>
+					<textFieldExpression><![CDATA[new DecimalFormat("###0.00").format($V{DurationSumGroupByProject}) + "/" + new DecimalFormat("###0.00").format($V{DurationHolidaySumGroupByProject})]]></textFieldExpression>
 				</textField>
 			</band>
 		</groupHeader>
@@ -128,7 +128,7 @@
 						<printWhenExpression><![CDATA[$F{taskname} != null ? Boolean.TRUE:Boolean.FALSE]]></printWhenExpression>
 					</reportElement>
 					<textElement/>
-					<textFieldExpression><![CDATA[new DecimalFormat("###0.0").format($V{DurationSumGroupByTask}) + "/" + new DecimalFormat("###0.0").format($V{DurationHolidaySumGroupByTask})]]></textFieldExpression>
+					<textFieldExpression><![CDATA[new DecimalFormat("###0.00").format($V{DurationSumGroupByTask}) + "/" + new DecimalFormat("###0.00").format($V{DurationHolidaySumGroupByTask})]]></textFieldExpression>
 				</textField>
 			</band>
 		</groupHeader>

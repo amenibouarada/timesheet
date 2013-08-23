@@ -381,7 +381,7 @@ public class TimeSheetFormValidator extends AbstractValidator {
                     // Часы должны быть указаны в правильном формате (1, 1.2, 5.5 и т.п.)
                     // and may be 1,2; 2,3
                     if (StringUtils.isNotBlank(durationStr)) {
-                        Pattern p1 = Pattern.compile("([0-9]*)(\\.|,)[0-9]");
+                        Pattern p1 = Pattern.compile("([0-9]*)(\\.|,)[0-9]*");
                         Pattern p2 = Pattern.compile("([0-9]*)");
                         Matcher m1 = p1.matcher(durationStr);
                         Matcher m2 = p2.matcher(durationStr);

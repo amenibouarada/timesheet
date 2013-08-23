@@ -68,7 +68,7 @@
 				<textField isStretchWithOverflow="true" evaluationTime="Group" evaluationGroup="GroupByName">
 					<reportElement uuid="90d40522-fd6d-41dc-9e5b-9a344615768d" style="SubTitle" stretchType="RelativeToTallestObject" x="625" y="0" width="47" height="13"/>
 					<textElement/>
-					<textFieldExpression><![CDATA[new DecimalFormat("###0.0").format($V{DurationSumGroupByName}) + "/" + new DecimalFormat("###0.0").format($V{DurationHolidaySumGroupByName})]]></textFieldExpression>
+					<textFieldExpression><![CDATA[new DecimalFormat("###0.00").format($V{DurationSumGroupByName}) + "/" + new DecimalFormat("###0.00").format($V{DurationHolidaySumGroupByName})]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true">
 					<reportElement uuid="c6f5f653-5077-46bb-9791-98dff9a46181" style="SubTitle" stretchType="RelativeToTallestObject" x="99" y="0" width="99" height="13"/>

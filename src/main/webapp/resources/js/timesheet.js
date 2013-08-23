@@ -1051,7 +1051,7 @@ function checkDuration(processed) {
         input = processed.target;
     }
     var duration = dojo.attr(input, "value");
-    var reg = /^\d{1,2}((\.|\,)\d)?$/;
+    var reg = /^\d{1,2}((\.|\,)\d{1,2})?$/;
     if (!reg.test(duration)) {
         duration = "";
     }
@@ -1061,7 +1061,7 @@ function checkDuration(processed) {
 
 /* Производит пересчет общего количества часов, потраченных на все задачи. */
 function recalculateDuration() {
-    var totalDurationValue = 0.0;
+    var totalDurationValue = 0.00;
     var hoursNodes = dojo.query(".duration");
     for (var i = 0; i < hoursNodes.length; i++) {
         var hours = parseFloat(dojo.attr(hoursNodes[i], "value").replace(",", "."));
@@ -1069,8 +1069,7 @@ function recalculateDuration() {
             totalDurationValue += hours;
         }
     }
-    /* Округление 1 цифры после запятой APLANATS-336 */
-    dojo.byId("total_duration").innerHTML = totalDurationValue.toFixed(1);
+    dojo.byId("total_duration").innerHTML = totalDurationValue.toFixed(2);
     return totalDurationValue;
 }
 
