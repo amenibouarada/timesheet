@@ -21,6 +21,8 @@ import java.util.List;
 @Service
 public class BusinessTripsAndIllnessAddFormValidator extends AbstractValidator {
 
+    private static final int MAX_COMMENT_LENGTH = 600;
+
     @Autowired
     private BusinessTripService businessTripService;
 
@@ -78,8 +80,8 @@ public class BusinessTripsAndIllnessAddFormValidator extends AbstractValidator {
 
         form.setComment(form.getComment().trim());
 
-        if (form.getComment() != null && form.getComment().length() > 200) {
-            errors.rejectValue("beginDate", "error.businesstripsandilnessaddform.comment.wrong", "Комментарий слишком длинный! (максимально допускается 200 символов)");
+        if (form.getComment() != null && form.getComment().length() > MAX_COMMENT_LENGTH) {
+            errors.rejectValue("beginDate", "error.businesstripsandilnessaddform.comment.wrong", "Комментарий слишком длинный! (максимально допускается" + MAX_COMMENT_LENGTH + "символов)");
         }
 
     }

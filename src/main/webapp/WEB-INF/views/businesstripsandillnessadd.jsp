@@ -183,18 +183,7 @@
 
         function checkCommon(){
             return (document.getElementById("reportType").value != null && document.getElementById("beginDate").value != null &&
-                    document.getElementById("endDate").value != null &&
-                    checkComment());
-        }
-
-        function checkComment(){
-            var comment = document.getElementById("comment").value;
-            if (comment == null || comment.trim().length <= 200){
-                return true;
-            } else {
-                errors.push("Комментарий должен быть короче 200 символов!");
-                return false;
-            }
+                    document.getElementById("endDate").value != null);
         }
 
         function checkDates(){
@@ -348,7 +337,7 @@
 
         <div class="checkboxeslabel lowspace">Комментарий:</div>
         <div class="comment lowspace">
-            <form:textarea path="comment" id="comment" rows="7" cssClass="fullwidth"/>
+            <form:textarea path="comment" id="comment" maxlength="600" rows="7" cssClass="fullwidth"/>
         </div>
 
 

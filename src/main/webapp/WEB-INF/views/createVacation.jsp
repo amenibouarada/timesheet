@@ -352,7 +352,7 @@
                 <span class="label">Комментарий</span>
             </td>
             <td>
-                <form:textarea path="comment" id="comment" maxlength="400" rows="5" cssStyle="width: 100%" />
+                <form:textarea path="comment" id="comment" maxlength="600" rows="5" cssStyle="width: 100%" />
             </td>
         </tr>
     </table>
