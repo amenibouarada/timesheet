@@ -98,11 +98,10 @@ public class TimeSheetFormValidatorTest1 extends AbstractTest {
         projectTask.setProject(project);
 
         TimeSheetTableRowForm tsRow1 = new TimeSheetTableRowForm();
-        tsRow1.setTaskName(projectTask.getId()); // project_task - Развитие и поддержка TimeSheet
+        tsRow1.setProjectTaskId(projectTask.getId()); // project_task - Развитие и поддержка TimeSheet
         tsRow1.setDescription("Описание строки 1");
         tsRow1.setDuration("2.0");
         tsRow1.setProblem("Проблема строки 1");
-        tsRow1.setOther("Прочее строки 1");
         tsRow1.setProjectId(project.getId());
         tsRow1.setActivityTypeId(actType.getId());
         tsRow1.setActivityCategoryId(actCat.getId());

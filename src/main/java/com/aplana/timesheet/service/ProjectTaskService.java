@@ -33,8 +33,8 @@ public class ProjectTaskService {
 	 * либо null, если проект или код задачи null, или такой задачи нет.
 	 */
     @Transactional(readOnly = true)
-    public ProjectTask find(Integer projectId, Integer taskName) {
-		return projectTaskDAO.find(projectId, taskName);
+    public ProjectTask find(Integer projectId, Integer projectTaskId) {
+		return projectTaskDAO.find(projectId, projectTaskId);
 	}
 
     @Transactional(readOnly = true)
@@ -65,7 +65,7 @@ public class ProjectTaskService {
         return JsonUtil.format(builder);
     }
 
-    public ProjectTask find(Integer taskName) {
-        return taskName != null ? projectTaskDAO.find(taskName) : null;
+    public ProjectTask find(Integer projectTaskId) {
+        return projectTaskId != null ? projectTaskDAO.find(projectTaskId) : null;
     }
 }

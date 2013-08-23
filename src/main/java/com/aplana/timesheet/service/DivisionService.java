@@ -3,6 +3,7 @@ package com.aplana.timesheet.service;
 import com.aplana.timesheet.dao.DivisionDAO;
 import com.aplana.timesheet.dao.ProjectDAO;
 import com.aplana.timesheet.dao.entity.Division;
+import com.aplana.timesheet.dao.entity.Project;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,7 +16,7 @@ public class DivisionService {
 	@Autowired
 	DivisionDAO divisionDAO;
 	@Autowired
-	ProjectDAO projectDAO;
+    ProjectDAO projectDAO;
 
     @Transactional(readOnly = true)
     public List<Division> getDivisions() {
@@ -46,7 +47,10 @@ public class DivisionService {
 	 */
     @Transactional(readOnly = true)
     public Division find(Integer division) {
-		return divisionDAO.find(division);
+		if (division != null)
+            return divisionDAO.find(division);
+        else
+            return null;
 	}
 
     @Transactional
@@ -63,4 +67,17 @@ public class DivisionService {
     public Iterable<Division> getAllDivisions() {
         return divisionDAO.getAllDivisions();
     }
+
+    @Transactional(readOnly = true)
+    public Boolean isValidDivisionProject(Integer divisionId, Integer projectId) {
+        Division division = divisionDAO.find(divisionId);
+        if (division != null) {
+            Project project = projectDAO.find(projectId);
+            if (project != null) {
+                return division.getProjects().contains(project);
+            }
+        }
+        return Boolean.FALSE;
+    }
+
 }

@@ -62,10 +62,6 @@ public class TimeSheetDetail {
 	@Column(columnDefinition = "text null")
 	private String problem;
 
-	// В это поле попадает название пресейла, вводимое пользователем, если он не
-	// нашел нужное ему название в списке пресейлов.
-	private String other;
-
 	public TimeSheet getTimeSheet() {
 		return timeSheet;
 	}
@@ -117,10 +113,6 @@ public class TimeSheetDetail {
 		return problem;
 	}
 
-	public String getOther() {
-		return other;
-	}
-
 	public Integer getId() {
 		return id;
 	}
@@ -146,10 +138,6 @@ public class TimeSheetDetail {
 
 	public void setProblem(String problem) {
 		this.problem = problem;
-	}
-
-	public void setOther(String other) {
-		this.other = other;
 	}
 
     public ProjectRole getProjectRole() {
@@ -188,7 +176,6 @@ public class TimeSheetDetail {
 			.append(" description=").append(description)
 			.append(" duration=").append(duration)
 			.append(" problem=").append(problem)
-			.append(" other=").append(other)
 		.toString();
 	}
 }

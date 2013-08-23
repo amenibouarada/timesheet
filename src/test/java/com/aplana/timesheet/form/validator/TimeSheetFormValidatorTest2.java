@@ -90,7 +90,7 @@ public class TimeSheetFormValidatorTest2 extends AbstractTest {
         DictionaryItem workplace = dictionaryItemService.find(49);
 
         TimeSheetTableRowForm tsRow1 = new TimeSheetTableRowForm();
-        tsRow1.setTaskName(projectTask.getId()); // project_task - Развитие и поддержка TimeSheet
+        tsRow1.setProjectTaskId(projectTask.getId()); // project_task - Развитие и поддержка TimeSheet
         tsRow1.setDescription("Описание строки 1");
         tsRow1.setDuration("8.0");
 //        tsRow1.setProblem("Проблема строки 1");
@@ -631,8 +631,382 @@ public class TimeSheetFormValidatorTest2 extends AbstractTest {
 
 /*----------------------------------------------------------------------------------------------------------------------
 *   Блок №3
-*   тестирование строки
+*   тестирование строки отчёта TimeSheetFrom -> TimeSheetTableRowForm на null и заведомо "плохие" значения
 *---------------------------------------------------------------------------------------------------------------------*/
+    /* Зануляем название задачи */
+    @Test
+    public void testValidate3_01() throws Exception {
+        /* дополнения "правильного" объекта новыми данными */
+        timeSheetForm.getTimeSheetTablePart().get(0).setProjectTaskId(null);
+        /* тест */
+        timeSheetFormValidator.validate(timeSheetForm, errors);
+        /* анализ результата */
+        fillErrorsText();
+        logger.info("Expected error = "+errorsText);
+        /* по кол-ву ошибок */
+        assertEquals(1, errors.getAllErrors().size());
+        /* по наличию ошибок */
+        assertTrue(errorsText.toString(), errors.hasErrors());
+        /* по наличию ключевой фразы в ошибке */
+        assertTrue(errorsText.indexOf("Необходимо выбрать проектную задачу") != -1);
+    }
+
+    /* Ложная задача */
+    @Test
+    public void testValidate3_02() throws Exception {
+        /* дополнения "правильного" объекта новыми данными */
+        timeSheetForm.getTimeSheetTablePart().get(0).setProjectTaskId(-1);
+        /* тест */
+        timeSheetFormValidator.validate(timeSheetForm, errors);
+        /* анализ результата */
+        fillErrorsText();
+        logger.info("Expected error = "+errorsText);
+        /* по кол-ву ошибок */
+        assertEquals(1, errors.getAllErrors().size());
+        /* по наличию ошибок */
+        assertTrue(errorsText.toString(), errors.hasErrors());
+        /* по наличию ключевой фразы в ошибке */
+        assertTrue(errorsText.indexOf("Неверная проектная задача") != -1);
+    }
+
+    /* Зануление описания */
+    @Test
+    public void testValidate3_03() throws Exception {
+        /* дополнения "правильного" объекта новыми данными */
+        timeSheetForm.getTimeSheetTablePart().get(0).setDescription(null);
+        /* тест */
+        timeSheetFormValidator.validate(timeSheetForm, errors);
+        /* анализ результата */
+        fillErrorsText();
+        logger.info("Expected error = "+errorsText);
+        /* по кол-ву ошибок */
+        assertEquals(1, errors.getAllErrors().size());
+        /* по наличию ошибок */
+        assertTrue(errorsText.toString(), errors.hasErrors());
+        /* по наличию ключевой фразы в ошибке */
+        assertTrue(errorsText.indexOf("Необходимо указать комментарии") != -1);
+    }
+
+    /* Пустое описание */
+    @Test
+    public void testValidate3_04() throws Exception {
+        /* дополнения "правильного" объекта новыми данными */
+        timeSheetForm.getTimeSheetTablePart().get(0).setDescription("");
+        /* тест */
+        timeSheetFormValidator.validate(timeSheetForm, errors);
+        /* анализ результата */
+        fillErrorsText();
+        logger.info("Expected error = "+errorsText);
+        /* по кол-ву ошибок */
+        assertEquals(1, errors.getAllErrors().size());
+        /* по наличию ошибок */
+        assertTrue(errorsText.toString(), errors.hasErrors());
+        /* по наличию ключевой фразы в ошибке */
+        assertTrue(errorsText.indexOf("Необходимо указать комментарии") != -1);
+    }
+
+    /* Зануление время работы */
+    @Test
+    public void testValidate3_05() throws Exception {
+        /* дополнения "правильного" объекта новыми данными */
+        timeSheetForm.getTimeSheetTablePart().get(0).setDuration(null);
+        /* тест */
+        timeSheetFormValidator.validate(timeSheetForm, errors);
+        /* анализ результата */
+        fillErrorsText();
+        logger.info("Expected error = "+errorsText);
+        /* по кол-ву ошибок */
+        assertEquals(2, errors.getAllErrors().size());
+        /* по наличию ошибок */
+        assertTrue(errorsText.toString(), errors.hasErrors());
+        /* по наличию ключевой фразы в ошибке */
+        assertTrue(errorsText.indexOf("Необходимо указать часы") != -1);
+        assertTrue(errorsText.indexOf("недоработки") != -1);
+    }
+
+    /* Пустая строка времени работы */
+    @Test
+    public void testValidate3_06() throws Exception {
+        /* дополнения "правильного" объекта новыми данными */
+        timeSheetForm.getTimeSheetTablePart().get(0).setDuration("");
+        /* тест */
+        timeSheetFormValidator.validate(timeSheetForm, errors);
+        /* анализ результата */
+        fillErrorsText();
+        logger.info("Expected error = "+errorsText);
+        /* по кол-ву ошибок */
+        assertEquals(2, errors.getAllErrors().size());
+        /* по наличию ошибок */
+        assertTrue(errorsText.toString(), errors.hasErrors());
+        /* по наличию ключевой фразы в ошибке */
+        assertTrue(errorsText.indexOf("Необходимо указать часы") != -1);
+        assertTrue(errorsText.indexOf("недоработки") != -1);
+    }
+
+    /* Неконвертируемая строка время работы */
+    @Test
+    public void testValidate3_07() throws Exception {
+        /* дополнения "правильного" объекта новыми данными */
+        timeSheetForm.getTimeSheetTablePart().get(0).setDuration("хрен проссыш");
+        /* тест */
+        timeSheetFormValidator.validate(timeSheetForm, errors);
+        /* анализ результата */
+        fillErrorsText();
+        logger.info("Expected error = "+errorsText);
+        /* по кол-ву ошибок */
+        assertEquals(2, errors.getAllErrors().size());
+        /* по наличию ошибок */
+        assertTrue(errorsText.toString(), errors.hasErrors());
+        /* по наличию ключевой фразы в ошибке */
+        assertTrue(errorsText.indexOf("указано не верно") != -1);
+        assertTrue(errorsText.indexOf("недоработки") != -1);
+    }
+
+    /* Зануление строки Проблемы */
+    @Test
+    public void testValidate3_08() throws Exception {
+        /* дополнения "правильного" объекта новыми данными */
+        timeSheetForm.getTimeSheetTablePart().get(0).setProblem(null);
+        /* тест */
+        timeSheetFormValidator.validate(timeSheetForm, errors);
+        /* анализ результата */
+        fillErrorsText();
+        logger.info("Expected error = "+errorsText);
+        /* по кол-ву ошибок */
+        assertEquals(0, errors.getAllErrors().size());
+    }
+
+    /* Пустая строка Проблема */
+    @Test
+    public void testValidate3_09() throws Exception {
+        /* дополнения "правильного" объекта новыми данными */
+        timeSheetForm.getTimeSheetTablePart().get(0).setProblem("");
+        /* тест */
+        timeSheetFormValidator.validate(timeSheetForm, errors);
+        /* анализ результата */
+        fillErrorsText();
+        logger.info("Expected error = "+errorsText);
+        /* по кол-ву ошибок */
+        assertEquals(0, errors.getAllErrors().size());
+    }
+
+    /* Зануляем проект */
+    @Test
+    public void testValidate3_10() throws Exception {
+        /* дополнения "правильного" объекта новыми данными */
+        timeSheetForm.getTimeSheetTablePart().get(0).setProjectId(null);
+        /* тест */
+        timeSheetFormValidator.validate(timeSheetForm, errors);
+        /* анализ результата */
+        fillErrorsText();
+        logger.info("Expected error = "+errorsText);
+        /* по кол-ву ошибок */
+        assertEquals(2, errors.getAllErrors().size());
+        /* по наличию ошибок */
+        assertTrue(errorsText.toString(), errors.hasErrors());
+        /* по наличию ключевой фразы в ошибке */
+        assertTrue(errorsText.indexOf("Необходимо указать название проекта") != -1);
+        assertTrue(errorsText.indexOf("Необходимо указать категорию активности") != -1);
+    }
+
+    /* Ложный проект */
+    @Test
+    public void testValidate3_11() throws Exception {
+        /* дополнения "правильного" объекта новыми данными */
+        timeSheetForm.getTimeSheetTablePart().get(0).setProjectId(-1);
+        /* тест */
+        timeSheetFormValidator.validate(timeSheetForm, errors);
+        /* анализ результата */
+        fillErrorsText();
+        logger.info("Expected error = "+errorsText);
+        /* по кол-ву ошибок */
+        assertEquals(1, errors.getAllErrors().size());
+        /* по наличию ошибок */
+        assertTrue(errorsText.toString(), errors.hasErrors());
+        /* по наличию ключевой фразы в ошибке */
+        assertTrue(errorsText.indexOf("Неверный проект\\пресейл") != -1);
+    }
+
+    /* Зануляем тип активности (считается что вся строка пуста) */
+    @Test
+    public void testValidate3_12() throws Exception {
+        /* дополнения "правильного" объекта новыми данными */
+        timeSheetForm.getTimeSheetTablePart().get(0).setActivityTypeId(null);
+        /* тест */
+        timeSheetFormValidator.validate(timeSheetForm, errors);
+        /* анализ результата */
+        fillErrorsText();
+        logger.info("Expected error = "+errorsText);
+        /* по кол-ву ошибок */
+        assertEquals(0, errors.getAllErrors().size());
+    }
+
+    /* Ложный тип активности (считается что вся строка пуста если тип не в словаре) */
+    @Test
+    public void testValidate3_13() throws Exception {
+        /* дополнения "правильного" объекта новыми данными */
+        timeSheetForm.getTimeSheetTablePart().get(0).setActivityTypeId(-1);
+        /* тест */
+        timeSheetFormValidator.validate(timeSheetForm, errors);
+        /* анализ результата */
+        fillErrorsText();
+        logger.info("Expected error = "+errorsText);
+        /* по кол-ву ошибок */
+        assertEquals(0, errors.getAllErrors().size());
+    }
+
+    /* Зануляем категорию активности */
+    @Test
+    public void testValidate3_14() throws Exception {
+        /* дополнения "правильного" объекта новыми данными */
+        timeSheetForm.getTimeSheetTablePart().get(0).setActivityCategoryId(null);
+        /* тест */
+        timeSheetFormValidator.validate(timeSheetForm, errors);
+        /* анализ результата */
+        fillErrorsText();
+        logger.info("Expected error = "+errorsText);
+        /* по кол-ву ошибок */
+        assertEquals(1, errors.getAllErrors().size());
+        /* по наличию ошибок */
+        assertTrue(errorsText.toString(), errors.hasErrors());
+        /* по наличию ключевой фразы в ошибке */
+        assertTrue(errorsText.indexOf("Необходимо указать категорию активности") != -1);
+    }
+
+    /* Ложная категория активности */
+    @Test
+    public void testValidate3_15() throws Exception {
+        /* дополнения "правильного" объекта новыми данными */
+        timeSheetForm.getTimeSheetTablePart().get(0).setActivityCategoryId(-1);
+        /* тест */
+        timeSheetFormValidator.validate(timeSheetForm, errors);
+        /* анализ результата */
+        fillErrorsText();
+        logger.info("Expected error = "+errorsText);
+        /* по кол-ву ошибок */
+        assertEquals(1, errors.getAllErrors().size());
+        /* по наличию ошибок */
+        assertTrue(errorsText.toString(), errors.hasErrors());
+        /* по наличию ключевой фразы в ошибке */
+        assertTrue(errorsText.indexOf("Неверная категория активности") != -1);
+    }
+
+    /* Зануляем проектную роль */
+    @Test
+    public void testValidate3_16() throws Exception {
+        /* дополнения "правильного" объекта новыми данными */
+        timeSheetForm.getTimeSheetTablePart().get(0).setProjectRoleId(null);
+        /* тест */
+        timeSheetFormValidator.validate(timeSheetForm, errors);
+        /* анализ результата */
+        fillErrorsText();
+        logger.info("Expected error = "+errorsText);
+        /* по кол-ву ошибок */
+        assertEquals(1, errors.getAllErrors().size());
+        /* по наличию ошибок */
+        assertTrue(errorsText.toString(), errors.hasErrors());
+        /* по наличию ключевой фразы в ошибке */
+        assertTrue(errorsText.indexOf("Необходимо указать проектную роль") != -1);
+    }
+
+    /* Ложная проектная роль */
+    @Test
+    public void testValidate3_17() throws Exception {
+        /* дополнения "правильного" объекта новыми данными */
+        timeSheetForm.getTimeSheetTablePart().get(0).setProjectRoleId(-1);
+        /* тест */
+        timeSheetFormValidator.validate(timeSheetForm, errors);
+        /* анализ результата */
+        fillErrorsText();
+        logger.info("Expected error = "+errorsText);
+        /* по кол-ву ошибок */
+        assertEquals(1, errors.getAllErrors().size());
+        /* по наличию ошибок */
+        assertTrue(errorsText.toString(), errors.hasErrors());
+        /* по наличию ключевой фразы в ошибке */
+        assertTrue(errorsText.indexOf("Неверная проектная роль") != -1);
+    }
+
+    /* Зануляем проектную роль */
+    @Test
+    public void testValidate3_18() throws Exception {
+        /* дополнения "правильного" объекта новыми данными */
+        timeSheetForm.getTimeSheetTablePart().get(0).setWorkplaceId(null);
+        /* тест */
+        timeSheetFormValidator.validate(timeSheetForm, errors);
+        /* анализ результата */
+        fillErrorsText();
+        logger.info("Expected error = "+errorsText);
+        /* по кол-ву ошибок */
+        assertEquals(1, errors.getAllErrors().size());
+        /* по наличию ошибок */
+        assertTrue(errorsText.toString(), errors.hasErrors());
+        /* по наличию ключевой фразы в ошибке */
+        assertTrue(errorsText.indexOf("Необходимо указать место работы") != -1);
+    }
+
+    /* Ложная проектная роль */
+    @Test
+    public void testValidate3_19() throws Exception {
+        /* дополнения "правильного" объекта новыми данными */
+        timeSheetForm.getTimeSheetTablePart().get(0).setWorkplaceId(-1);
+        /* тест */
+        timeSheetFormValidator.validate(timeSheetForm, errors);
+        /* анализ результата */
+        fillErrorsText();
+        logger.info("Expected error = "+errorsText);
+        /* по кол-ву ошибок */
+        assertEquals(1, errors.getAllErrors().size());
+        /* по наличию ошибок */
+        assertTrue(errorsText.toString(), errors.hasErrors());
+        /* по наличию ключевой фразы в ошибке */
+        assertTrue(errorsText.indexOf("Выбрано недопустимое место работы") != -1);
+    }
+
+/*----------------------------------------------------------------------------------------------------------------------
+*   Блок №4
+*   Логические проверки условий из постановки http://conf.aplana.com/pages/viewpage.action?pageId=1874744
+*---------------------------------------------------------------------------------------------------------------------*/
+
+    /* Проверяем связку проекта и подразделения */
+    @Test
+    public void testValidate4_01() throws Exception {
+        /* дополнения "правильного" объекта новыми данными */
+        timeSheetForm.setDivisionId(1); // Центр заказной разработки
+        timeSheetForm.getTimeSheetTablePart().get(0).setProjectId(38); // МТС-ТП
+        timeSheetForm.getTimeSheetTablePart().get(0).setProjectTaskId(10); // ДКР
+        /* тест */
+        timeSheetFormValidator.validate(timeSheetForm, errors);
+        /* анализ результата */
+        fillErrorsText();
+        logger.info("Expected error = "+errorsText);
+        /* по кол-ву ошибок */
+        assertEquals(1, errors.getAllErrors().size());
+        /* по наличию ошибок */
+        assertTrue(errorsText.toString(), errors.hasErrors());
+        /* по наличию ключевой фразы в ошибке */
+        assertTrue(errorsText.indexOf("выбран неверный проект") != -1);
+    }
+
+    /* Проверяем связку проектной роли и типа активности */
+    @Test
+    public void testValidate4_02() throws Exception {
+        /* дополнения "правильного" объекта новыми данными */
+        timeSheetForm.getTimeSheetTablePart().get(0).setProjectRoleId(19); // руководитель
+//        timeSheetForm.getTimeSheetTablePart().get(0).setActivityTypeId(); // ДКР
+        /* тест */
+        timeSheetFormValidator.validate(timeSheetForm, errors);
+        /* анализ результата */
+        fillErrorsText();
+        logger.info("Expected error = "+errorsText);
+        /* по кол-ву ошибок */
+        assertEquals(1, errors.getAllErrors().size());
+        /* по наличию ошибок */
+        assertTrue(errorsText.toString(), errors.hasErrors());
+        /* по наличию ключевой фразы в ошибке */
+        assertTrue(errorsText.indexOf("--") != -1);
+    }
+
 //    /* Для типов активностей Проект, Проектный присейл, Присейл заполнение полей «Название проекта/пресейла»,
 //    «Проектная роль», «Категория активности», «Часы» и «Комментарии»  является обязательным. */
 //    /* прогоним все типы с правильным отчётом */
@@ -667,7 +1041,7 @@ public class TimeSheetFormValidatorTest2 extends AbstractTest {
 //
 //        Errors errors = new BeanPropertyBindingResult(timeSheetForm, "timeSheetForm");
 //
-//        timeSheetForm.getTimeSheetTablePart().get(0).setTaskName(null);
+//        timeSheetForm.getTimeSheetTablePart().get(0).setProjectTaskId(null);
 //        timeSheetForm.getTimeSheetTablePart().get(0).setProjectRoleId(null);
 //        timeSheetForm.getTimeSheetTablePart().get(0).setActivityCategoryId(null);
 //        timeSheetForm.getTimeSheetTablePart().get(0).setDuration("");
@@ -706,7 +1080,7 @@ public class TimeSheetFormValidatorTest2 extends AbstractTest {
 //
 //        Errors errors = new BeanPropertyBindingResult(timeSheetForm, "timeSheetForm");
 //
-//        timeSheetForm.getTimeSheetTablePart().get(0).setTaskName(null);
+//        timeSheetForm.getTimeSheetTablePart().get(0).setProjectTaskId(null);
 //        timeSheetForm.getTimeSheetTablePart().get(0).setProjectRoleId(null);
 //        timeSheetForm.getTimeSheetTablePart().get(0).setActivityCategoryId(null);
 //        timeSheetForm.getTimeSheetTablePart().get(0).setDuration("");
@@ -745,7 +1119,7 @@ public class TimeSheetFormValidatorTest2 extends AbstractTest {
 //
 //        Errors errors = new BeanPropertyBindingResult(timeSheetForm, "timeSheetForm");
 //
-//        timeSheetForm.getTimeSheetTablePart().get(0).setTaskName(null);
+//        timeSheetForm.getTimeSheetTablePart().get(0).setProjectTaskId(null);
 //        timeSheetForm.getTimeSheetTablePart().get(0).setProjectRoleId(null);
 //        timeSheetForm.getTimeSheetTablePart().get(0).setActivityCategoryId(null);
 //        timeSheetForm.getTimeSheetTablePart().get(0).setDuration("");

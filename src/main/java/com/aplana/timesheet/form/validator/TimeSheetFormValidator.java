@@ -1,6 +1,5 @@
 package com.aplana.timesheet.form.validator;
 
-import com.aplana.timesheet.controller.AbstractController;
 import com.aplana.timesheet.dao.entity.DictionaryItem;
 import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.dao.entity.Project;
@@ -10,7 +9,6 @@ import com.aplana.timesheet.form.TimeSheetTableRowForm;
 import com.aplana.timesheet.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.*;
 import com.aplana.timesheet.util.DateTimeUtil;
-import com.aplana.timesheet.util.EnumsUtils;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
@@ -30,7 +28,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.aplana.timesheet.constants.TimeSheetConstants.WORK_DAY_DURATION;
 import static com.aplana.timesheet.enums.ProjectRolesEnum.*;
 
 @Service
@@ -59,6 +56,7 @@ public class TimeSheetFormValidator extends AbstractValidator {
     private VacationService vacationService;
     @Autowired
     private OvertimeCauseService overtimeCauseService;
+
 
     public boolean supports(Class<?> clazz) {
         return clazz.isAssignableFrom(TimeSheetForm.class);
@@ -99,7 +97,6 @@ public class TimeSheetFormValidator extends AbstractValidator {
 
                 checkForEffectiveActTypes(tsTablePart, tsForm.getEmployeeId(), errors);
 
-                List<TimeSheetTableRowForm> listToRemove = new ArrayList<TimeSheetTableRowForm>();
                 logger.debug("TimeSheetForm table has {} lines.", tsTablePart.size());
 
                 int notNullRowNumber = 0;
@@ -108,6 +105,7 @@ public class TimeSheetFormValidator extends AbstractValidator {
                     TypesOfActivityEnum actType = TypesOfActivityEnum.getById(formRow.getActivityTypeId());
 
                     validateProject(formRow, actType, notNullRowNumber, errors);
+                    validateProjectAndDivision(tsForm.getDivisionId(), formRow, notNullRowNumber, errors);
                     validateWorkPlace(formRow, notNullRowNumber, errors);
                     validateProjectRole(formRow, notNullRowNumber, errors);
                     valdateCategoryOfActivity(formRow, emplJob, notNullRowNumber, errors);
@@ -138,13 +136,17 @@ public class TimeSheetFormValidator extends AbstractValidator {
     }
 
     private void validateWorkPlace(TimeSheetTableRowForm formRow, int notNullRowNumber, Errors errors) {
-
+        // Рабочее место не выбрано
         if (isNotChoosed(formRow.getWorkplaceId())) {
             errors.rejectValue("timeSheetTablePart[" + notNullRowNumber + "].workplaceId",
                     "error.tsform.workplace.required", getErrorMessageArgs(notNullRowNumber),
                     "Необходимо указать место работы в строке " + (notNullRowNumber + 1) + ".");
+        // Неверное мето работы
+        } else if (!isWorkPlaceValid(formRow.getWorkplaceId())) {
+            errors.rejectValue("timeSheetTablePart[" + notNullRowNumber + "].workplaceId",
+                    "error.tsform.workplace.wrongvalue", getErrorMessageArgs(notNullRowNumber),
+                    "Выбрано недопустимое место работы в строке " + (notNullRowNumber + 1) + ".");
         }
-
     }
 
     private void checkForEffectiveActTypes(List<TimeSheetTableRowForm> timeSheetTablePart, Integer employeeId, Errors errors) {
@@ -157,6 +159,7 @@ public class TimeSheetFormValidator extends AbstractValidator {
         }
     }
 
+    /* удаляются все строки с типом активности не попадающем в список возможных */
     private List<TimeSheetTableRowForm> filterTable(TimeSheetForm tsForm) {
         List<TimeSheetTableRowForm> timeSheetTablePart = tsForm.getTimeSheetTablePart();
         if (timeSheetTablePart == null) {
@@ -278,21 +281,43 @@ public class TimeSheetFormValidator extends AbstractValidator {
         }
     }
 
+    /* проверка на правильную комбинацию подразделения и проекта */
+    private void validateProjectAndDivision(Integer divisionId, TimeSheetTableRowForm tsFromRows, int notNullRowNumber, Errors errors) {
+        if (isDivisionValid(divisionId) && tsFromRows != null) {
+            Integer projectId = tsFromRows.getProjectId();
+            if (projectService.find(projectId) != null) {
+                if (!divisionService.isValidDivisionProject(divisionId, projectId)) {
+                    errors.rejectValue("timeSheetTablePart[" + notNullRowNumber + "].projectId",
+                            "error.tsform.division.project.presale.invalid", getErrorMessageArgs(notNullRowNumber),
+                            "Для данного подразделения выбран неверный проект\\пресейл в строке " + (notNullRowNumber + 1) + ".");
+                }
+            }
+        }
+    }
+
+    /* проверка на правильную комбинацию роли и активности */
+    private void validateProjectRoleAndActivityType(TimeSheetTableRowForm tsFromRow, int notNullRowNumber, Errors errors) {
+        if ( tsFromRow != null && dictionaryItemService.find(tsFromRow.getActivityTypeId()) != null
+                && projectRoleService.find(tsFromRow.getProjectRoleId()) != null ) {
+
+        }
+    }
+
     private void validateProjectTask(TimeSheetTableRowForm formRow, int notNullRowNumber, Errors errors) {
         Integer projectId = formRow.getProjectId();
-        Integer taskName = formRow.getTaskName();
+        Integer projectTaskId = formRow.getProjectTaskId();
         if (projectId != null) {
             Project project = projectService.find(projectId);
             // Необходимо указать проектную задачу
             if (project != null && project.isCqRequired()) {
-                if (taskName == null || taskName.equals(0)) {
-                    errors.rejectValue("timeSheetTablePart[" + notNullRowNumber + "].taskName",
-                            "error.tsform.taskName.required", getErrorMessageArgs(notNullRowNumber),
+                if (projectTaskId == null || projectTaskId.equals(0)) {
+                    errors.rejectValue("timeSheetTablePart[" + notNullRowNumber + "].projectTaskId",
+                            "error.tsform.projectTask.required", getErrorMessageArgs(notNullRowNumber),
                             "Необходимо выбрать проектную задачу в строке " + (notNullRowNumber + 1) + ".");
                     // Неверная проектная задача
-                } else if (!isProjectTaskValid(projectId, taskName)) {
-                    errors.rejectValue("timeSheetTablePart[" + notNullRowNumber + "].taskName",
-                            "error.tsform.taskName.invalid", getErrorMessageArgs(notNullRowNumber),
+                } else if (!isProjectTaskValid(projectId, projectTaskId)) {
+                    errors.rejectValue("timeSheetTablePart[" + notNullRowNumber + "].projectTaskId",
+                            "error.tsform.projectTask.invalid", getErrorMessageArgs(notNullRowNumber),
                             "Неверная проектная задача в строке " + (notNullRowNumber + 1) + ".");
                 }
             }
@@ -489,6 +514,10 @@ public class TimeSheetFormValidator extends AbstractValidator {
 
     private boolean isProjectValid(Integer project) {
         return project == null || projectService.findActive(project) != null;
+    }
+
+    private boolean isWorkPlaceValid(Integer workplaceId) {
+        return workplaceId == null || dictionaryItemService.find(workplaceId, DictionaryEnum.WORKPLACE.getId()) != null;
     }
 
     private boolean isProjectRoleValid(Integer projectRole) {

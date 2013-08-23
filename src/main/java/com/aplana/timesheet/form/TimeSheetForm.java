@@ -97,7 +97,6 @@ public class TimeSheetForm {
             if (part!=null) {
                 part.setDescription(StringEscapeUtils.unescapeHtml4(part.getDescription()));
                 part.setProblem(StringEscapeUtils.unescapeHtml4(part.getProblem()));
-                part.setOther(StringEscapeUtils.unescapeHtml4(part.getOther()));
             }
         }
     }

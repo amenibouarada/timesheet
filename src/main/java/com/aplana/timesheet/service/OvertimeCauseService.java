@@ -61,9 +61,13 @@ public class OvertimeCauseService {
             try{
                 currentDuration = Double.parseDouble(tableRowForm.getDuration());
             }catch (NumberFormatException e){
-                logger.error("Error parsing duration empl_id="+tsForm.getEmployeeId()+" on date='"+tsForm.getCalDate()+"'", e);
+                logger.error("Error parsing duration on empl_id="+tsForm.getEmployeeId()+" on date='"+tsForm.getCalDate()+"'", e);
+                currentDuration = 0D;
+            }catch (NullPointerException e){
+                logger.error("Error parsing duration (isNull) on empl_id="+tsForm.getEmployeeId()+" on date='"+tsForm.getCalDate()+"'", e);
                 currentDuration = 0D;
             }
+
             totalDuration += currentDuration;
         }
 
