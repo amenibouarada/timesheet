@@ -29,7 +29,7 @@ public class ProjectTaskDAO {
 	@SuppressWarnings("unchecked")
 	public List<ProjectTask> getProjectTasks(Integer projectId) {
 		Query query = entityManager.createQuery(
-                "from ProjectTask as pt where pt.project=:project and pt.active=:active"
+                "FROM ProjectTask AS pt WHERE pt.project=:project AND pt.active=:active ORDER BY pt.sortOrder"
         ).setParameter("project", projectDAO.find(projectId)).setParameter("active", true);
 
         return query.getResultList();

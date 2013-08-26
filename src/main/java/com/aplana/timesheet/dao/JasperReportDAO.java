@@ -387,6 +387,7 @@ public class JasperReportDAO {
                                 "project_role.name, " +
                                 "project.name, " +
                                 "project_task.name, " +
+                                "project_task.sort_order, " +
                                 "project_state.value, " +
                                 "epbillable.billable, " +
                                 "vacation_type.value, " +
@@ -398,7 +399,7 @@ public class JasperReportDAO {
                                 "empl.name, " +
                                 "project_state.value, " +
                                 "project.name, " +
-                                "project_task.name, " +
+                                "project_task.sort_order, " +
                                 "day_type ";
 
     private List getResultList( Report02 report ) {

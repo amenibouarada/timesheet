@@ -748,7 +748,6 @@ function projectChange(obj) {
                 }
             }
         }
-        sortSelectOptions(taskSelect);
         dojo.byId("task_description_" + rowIndex).innerHTML = "";
     }
 }

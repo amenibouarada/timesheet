@@ -27,6 +27,9 @@ public class ProjectTask {
     @ForeignKey(name = "FK_PROJECT")
     Project project;
 
+    @Column(name = "sort_order", nullable = true)
+    String sortOrder;
+
     public Integer getId() {
 	return id;
     }
@@ -65,5 +68,13 @@ public class ProjectTask {
 
     public void setProject(Project project) {
 	this.project = project;
+    }
+
+    public String getSortOrder() {
+        return sortOrder;
+    }
+
+    public void setSortOrder(String sortOrder) {
+        this.sortOrder = sortOrder;
     }
 }
