@@ -193,32 +193,55 @@ public class BusinessTripsAndIllnessController extends AbstractController{
         return getBusinessTripsOrIllnessReport(employee.getDivision().getId(), regions, employee.getId(), employee.getManager().getId(), dateFrom, dateTo, printType);
     }
 
-    private ModelAndView getBusinessTripsOrIllnessReport(Integer divisionId, List<Integer> regions, Integer employeeId,Integer manager,
+    private ModelAndView getBusinessTripsOrIllnessReport(Integer divisionId, List<Integer> regions, Integer employeeId, Integer manager,
                                                          Date dateFrom,
                                                          Date dateTo,
                                                          Integer printtype)
             throws BusinessTripsAndIllnessControllerException {
-        List<Employee> sickEmployee = new ArrayList<Employee>();
+        boolean hasAnyEmployee = false;
+        boolean hasAnyReports = false;
+        List<Employee> employeeList = new ArrayList<Employee>();
         HashMap<Employee, QuickReport> reports = new HashMap<Employee, QuickReport>();
         List<Division> divisionList = divisionService.getDivisions();
         final boolean allFlag = (employeeId == ALL_EMPLOYEES);
         if (allFlag) {
-            sickEmployee = employeeService.getEmployeeByRegionAndManagerAndDivision(regions, divisionId, manager);
+            employeeList = employeeService.getEmployeeByRegionAndManagerAndDivision(regions, divisionId, manager);
         } else {
-            sickEmployee.add(employeeService.find(employeeId));
+            employeeList.add(employeeService.find(employeeId));
         }
-        Employee oneEmployee = null;
-        if (sickEmployee != null && sickEmployee.size() !=0) {
-
-            for (Employee employee : sickEmployee) {
-                reports.put(employee, getReport(printtype, employee, dateFrom, dateTo));
+        if (employeeList != null && employeeList.size() != 0 ) {
+            hasAnyEmployee = true;
+            for (Employee employee : employeeList) {
+                QuickReport report = getReport(printtype, employee, dateFrom, dateTo);
+                if (report.getPeriodicalsList().size() > 0){
+                    hasAnyReports = true;
+                }
+                reports.put(employee, report);
             }
-            oneEmployee = sickEmployee.get(0);
         }
-        if (manager == null) {
-            manager = -1;
+        for (QuickReport report : reports.values()) {
+            report.setPeriodicalsList(clearDuplicatePeriodicals(report.getPeriodicalsList()));
         }
-        return fillResponseModel(divisionId,regions , dateFrom, dateTo, printtype, oneEmployee, divisionList,reports, manager, allFlag);
+
+        ModelAndView modelAndView = new ModelAndView("businesstripsandillness");
+        modelAndView.addObject("dateFrom", format.format(dateFrom));
+        modelAndView.addObject("dateTo", format.format(dateTo));
+        modelAndView.addObject("divisionId", divisionId);
+        modelAndView.addObject("employeeId", employeeId);
+        modelAndView.addObject("managerId", manager == null ? -1 : manager);
+        modelAndView.addObject("divisionList", divisionList);
+        modelAndView.addObject("employeeListJson", employeeHelper.getEmployeeListJson(divisionList, employeeService.isShowAll(request)));
+        modelAndView.addObject("regionIds", getDefaultSelectRegion(regions));
+        modelAndView.addObject("regionList", getRegionList());
+        modelAndView.addObject("managerList", getManagerList());
+        modelAndView.addObject("managerMapJson", getManagerListJson());
+        modelAndView.addObject("reportsMap", reports);
+        modelAndView.addObject("reportFormed", printtype);
+        modelAndView.addObject("forAll", allFlag);
+        modelAndView.addObject("hasAnyEmployee", hasAnyEmployee); // найден ли хотя бы один сотрудник
+        modelAndView.addObject("hasAnyReports", hasAnyReports);   // найден ли хотя бы один отчет
+
+        return modelAndView;
     }
 
     @RequestMapping(value = "/businesstripsandillness/{divisionId}/{employeeId}/{reportTypeId}")
@@ -323,44 +346,6 @@ public class BusinessTripsAndIllnessController extends AbstractController{
         } catch (NoSuchElementException ex) {
             return false;
         }
-    }
-
-    /**
-     * заполняем данные об отчетах сотрудников и возвращаем формочку с табличкой по нужному типу отчетов
-     */
-    private ModelAndView fillResponseModel(Integer divisionId, List<Integer> regionIds, Date dateFrom, Date dateTo, Integer printtype,
-                                           Employee employee, List<Division> divisionList,
-                                           HashMap<Employee ,QuickReport> reports, Integer managerId, boolean forAll) {
-        ModelAndView modelAndView = new ModelAndView("businesstripsandillness");
-
-        int idEmployee=0;
-        String nameEmployee = "";
-        if (employee != null) {
-            idEmployee = (forAll) ? ALL_EMPLOYEES : employee.getId();
-            nameEmployee = (forAll) ? "" : employee.getName();
-        }
-
-        modelAndView.addObject("dateFrom", format.format(dateFrom));
-        modelAndView.addObject("dateTo", format.format(dateTo));
-        modelAndView.addObject("divisionId", divisionId);
-        modelAndView.addObject("employeeId", idEmployee);
-        modelAndView.addObject("managerId", managerId);
-        modelAndView.addObject("employeeName", nameEmployee);
-        modelAndView.addObject("divisionList", divisionList);
-        modelAndView.addObject("employeeListJson", employeeHelper.getEmployeeListJson(divisionList, employeeService.isShowAll(request)));
-        modelAndView.addObject("regionIds", getDefaultSelectRegion(regionIds));
-        modelAndView.addObject("regionList", getRegionList());
-        modelAndView.addObject("managerList", getManagerList());
-        modelAndView.addObject("managerMapJson", getManagerListJson());
-
-        for (QuickReport report : reports.values()) {
-           report.setPeriodicalsList(clearDuplicatePeriodicals(report.getPeriodicalsList()));
-        }
-        modelAndView.addObject("reportsMap", reports);
-        modelAndView.addObject("reportFormed", printtype);
-        modelAndView.addObject("forAll",forAll);
-
-        return modelAndView;
     }
 
     private List<Integer> getDefaultSelectRegion(List<Integer> regionIds) {
