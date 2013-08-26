@@ -163,8 +163,8 @@ function addNewRow() {
     dojo.addClass(projectTasksCell, "top_align");
     var projectTasksSelect = dojo.doc.createElement("select");
     dojo.attr(projectTasksSelect, {
-        id:"projectTask_id_" + newRowIndex,
-        name:"timeSheetTablePart[" + newRowIndex + "].projectTaskId",
+        id:"taskName_id_" + newRowIndex,
+        name:"timeSheetTablePart[" + newRowIndex + "].taskName",
         onchange:"setTaskDescription(" + newRowIndex + ")"
     });
     insertEmptyOption(projectTasksSelect);
@@ -267,7 +267,6 @@ function addNewRow() {
 
 function setActDescription(rowIndex){
     var label = dojo.byId("act_description_" + rowIndex);
-    var act_label = dojo.byId("activity_category_id_" + rowIndex);
     if (label == null) { return; }
     var actCat = (dojo.byId("activity_category_id_" + rowIndex)).value;
     var actType = (dojo.byId("activity_type_id_" + rowIndex)).value;
@@ -291,7 +290,7 @@ function setActDescription(rowIndex){
 function setTaskDescription(rowIndex){
     var label = dojo.byId("task_description_" + rowIndex);
     if (label == null) { return; }
-    var task = (dojo.byId("projectTask_id_"+rowIndex)).value;
+    var task = (dojo.byId("taskName_id_"+rowIndex)).value;
     var finded = false;
     for (var i = 0; i < projectTaskList.length; i++) {
         for (var j = 0; j < projectTaskList[i].projTasks.length; j++) {
@@ -556,6 +555,14 @@ function divisionChange(obj) {
     }
 }
 
+function isEnableTaskSelect(rowIndex){
+    var typeActivitySelect = dojo.byId("activity_type_id_" + rowIndex);
+    if (typeActivitySelect.value == "42" || typeActivitySelect.value == "14"){
+        return false;
+    }
+    return true;
+}
+
 /*
  * Срабатывает при смене значения в списке "Тип активности".
  * Управляет доступностью компонентов соответсвующей строки
@@ -587,10 +594,6 @@ function typeActivityChange(obj) {
     else if (select.value == "14") {
         dojo.removeAttr("workplace_id_" + rowIndex, "disabled");
         dojo.attr("project_id_" + rowIndex, {
-            disabled:"disabled",
-            value:"0"
-        });
-        dojo.attr("projectTask_id_" + rowIndex, {
             disabled:"disabled",
             value:"0"
         });
@@ -631,14 +634,13 @@ function typeActivityChange(obj) {
         }
     }
 
-    /*
-    kss 19.07.2013 - для пресейлов автоматически блокировалось поле выбора "Задача".
-    if (select.value == "13") {
-        dojo.attr("projectTask_id_" + rowIndex, {
+    if ( ! isEnableTaskSelect(rowIndex)){
+        dojo.attr("taskName_id_" + rowIndex, {
             disabled:"disabled",
             value:"0"
         });
-    }*/
+    }
+
     if ((select.value == "12") || (select.value == "13") || (select.value == "14") || (select.value == "42")) {
         dojo.removeAttr("workplace_id_" + rowIndex, "disabled");
         dojo.removeAttr("activity_category_id_" + rowIndex, "disabled");
@@ -723,30 +725,32 @@ function projectChange(obj) {
     var selectId = dojo.attr(select, "id");
     var projectId = select.value;
     var rowIndex = selectId.substring(selectId.lastIndexOf("_") + 1, selectId.length);
-    var taskSelect = dojo.byId("projectTask_id_" + rowIndex);
+    var taskSelect = dojo.byId("taskName_id_" + rowIndex);
     var taskOption = null;
     taskSelect.options.length = 0;
-    dojo.attr(taskSelect, {
-        disabled:"disabled",
-        value:"0"
-    });
-    for (var i = 0; i < projectTaskList.length; i++) {
-        if (projectId == projectTaskList[i].projId) {
-            dojo.removeAttr(taskSelect, "disabled");
-            insertEmptyOption(taskSelect);
-            for (var j = 0; j < projectTaskList[i].projTasks.length; j++) {
-                taskOption = dojo.doc.createElement("option");
-                dojo.attr(taskOption, {
-                    value:projectTaskList[i].projTasks[j].id
-                });
-                taskOption.title = projectTaskList[i].projTasks[j].value;
-                taskOption.innerHTML = projectTaskList[i].projTasks[j].value;
-                taskSelect.appendChild(taskOption);
+    if ( isEnableTaskSelect(rowIndex) ){
+        dojo.attr(taskSelect, {
+            disabled:"disabled",
+            value:"0"
+        });
+        for (var i = 0; i < projectTaskList.length; i++) {
+            if (projectId == projectTaskList[i].projId) {
+                dojo.removeAttr(taskSelect, "disabled");
+                insertEmptyOption(taskSelect);
+                for (var j = 0; j < projectTaskList[i].projTasks.length; j++) {
+                    taskOption = dojo.doc.createElement("option");
+                    dojo.attr(taskOption, {
+                        value:projectTaskList[i].projTasks[j].id
+                    });
+                    taskOption.title = projectTaskList[i].projTasks[j].value;
+                    taskOption.innerHTML = projectTaskList[i].projTasks[j].value;
+                    taskSelect.appendChild(taskOption);
+                }
             }
         }
+        sortSelectOptions(taskSelect);
+        dojo.byId("task_description_" + rowIndex).innerHTML = "";
     }
-    sortSelectOptions(taskSelect);
-    dojo.byId("task_description_" + rowIndex).innerHTML = "";
 }
 
 /* Выставляет должность сотрудника (проектная роль по умолчанию) */
@@ -875,7 +879,7 @@ function reloadRowsState() {
         }
         setActDescription(i);
 
-        var taskSelect = dojo.byId("projectTask_id_" + i);
+        var taskSelect = dojo.byId("taskName_id_" + i);
         if (dojo.attr(taskSelect, "disabled") != "disabled") {
             for (var j = 0; j < selectedProjectTasks.length; j++) {
                 if (selectedProjectTasks[j].row == i) {
@@ -982,7 +986,7 @@ function resetRowState(rowIndex, resetActType) {
     var labelDescription = dojo.byId("act_description_" + rowIndex);
     labelDescription.innerHtml = "";
     setActDescription(rowIndex);
-    dojo.attr("projectTask_id_" + rowIndex, {
+    dojo.attr("taskName_id_" + rowIndex, {
         disabled:"disabled",
         value:"0"
     });
@@ -1047,7 +1051,7 @@ function checkDuration(processed) {
         input = processed.target;
     }
     var duration = dojo.attr(input, "value");
-    var reg = /^\d{1,2}((\.|\,)\d)?$/;
+    var reg = /^\d{1,2}((\.|\,)\d{1,2})?$/;
     if (!reg.test(duration)) {
         duration = "";
     }
@@ -1057,7 +1061,7 @@ function checkDuration(processed) {
 
 /* Производит пересчет общего количества часов, потраченных на все задачи. */
 function recalculateDuration() {
-    var totalDurationValue = 0.0;
+    var totalDurationValue = 0.00;
     var hoursNodes = dojo.query(".duration");
     for (var i = 0; i < hoursNodes.length; i++) {
         var hours = parseFloat(dojo.attr(hoursNodes[i], "value").replace(",", "."));
@@ -1065,8 +1069,7 @@ function recalculateDuration() {
             totalDurationValue += hours;
         }
     }
-    /* Округление 1 цифры после запятой APLANATS-336 */
-    dojo.byId("total_duration").innerHTML = totalDurationValue.toFixed(1);
+    dojo.byId("total_duration").innerHTML = totalDurationValue.toFixed(2);
     return totalDurationValue;
 }
 

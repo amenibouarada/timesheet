@@ -65,6 +65,8 @@ public class BusinessTripsAndIllnessController extends AbstractController{
 
     private static final SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy");
     public static final int ALL_EMPLOYEES = -1;
+    public static final String ERROR_BUSINESS_TRIP_DELETE = "Ошибка при удалении командировки из БД!";
+    public static final String ERROR_ILLNESS_DELETE = "Ошибка при удалении больничного из БД!";
 
     @Autowired
     SecurityService securityService;
@@ -236,8 +238,9 @@ public class BusinessTripsAndIllnessController extends AbstractController{
         try {
             illnessService.deleteIllnessById(reportId);
             return StringUtils.EMPTY;
-        } catch (Throwable th) {
-            throw new BusinessTripsAndIllnessControllerException("Ошибка при удалении больничного из БД!");
+        } catch (Exception e) {
+            logger.error(ERROR_ILLNESS_DELETE, e);
+            throw new BusinessTripsAndIllnessControllerException(ERROR_ILLNESS_DELETE, e);
         }
     }
 
@@ -248,8 +251,9 @@ public class BusinessTripsAndIllnessController extends AbstractController{
         try {
             businessTripService.deleteBusinessTripById(reportId);
             return StringUtils.EMPTY;
-        } catch (Throwable th) {
-            throw new BusinessTripsAndIllnessControllerException("Ошибка при удалении командировки из БД!");
+        } catch (Exception e) {
+            logger.error(ERROR_BUSINESS_TRIP_DELETE, e);
+            throw new BusinessTripsAndIllnessControllerException(ERROR_BUSINESS_TRIP_DELETE, e);
         }
     }
 

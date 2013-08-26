@@ -192,10 +192,10 @@
 				<textElement/>
 				<textFieldExpression><![CDATA[$F{taskName}]]></textFieldExpression>
 			</textField>
-			<textField isStretchWithOverflow="true" pattern="###0.0">
+			<textField isStretchWithOverflow="true" pattern="###0.00">
 				<reportElement uuid="681ec018-6d3e-45b1-a885-74eaabd50173" style="Detail" stretchType="RelativeToTallestObject" x="1234" y="0" width="76" height="20"/>
 				<textElement/>
-				<textFieldExpression><![CDATA[new DecimalFormat("###0.0").format($F{duration})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[new DecimalFormat("###0.00").format($F{duration})]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement uuid="14097a06-ba57-49f7-9dc4-45e23f293c42" style="Detail" stretchType="RelativeToTallestObject" x="1310" y="0" width="156" height="20"/>

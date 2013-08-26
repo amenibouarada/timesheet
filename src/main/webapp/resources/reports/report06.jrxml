@@ -106,10 +106,10 @@
 				<textElement/>
 				<textFieldExpression><![CDATA[$F{project_role}]]></textFieldExpression>
 			</textField>
-			<textField pattern="###0.0">
+			<textField pattern="###0.00">
 				<reportElement uuid="82971a62-a6bd-4be0-82cb-6b599c3f3068" style="Detail" x="493" y="0" width="60" height="20"/>
 				<textElement/>
-				<textFieldExpression><![CDATA[new DecimalFormat("###0.0").format($F{duration})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[new DecimalFormat("###0.00").format($F{duration})]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>

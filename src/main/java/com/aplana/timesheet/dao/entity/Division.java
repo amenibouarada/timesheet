@@ -7,7 +7,7 @@ import javax.persistence.*;
 import java.util.Set;
 
 @Entity
-@Table(name = "division", uniqueConstraints = @UniqueConstraint(columnNames = { "ldap_name", "name" }))
+@Table(name = "division", uniqueConstraints = @UniqueConstraint(columnNames = {"ldap_name", "name"}))
 public class Division implements Identifiable, Comparable<Division> {
     @Id
     @Column(nullable = false)
@@ -25,19 +25,19 @@ public class Division implements Identifiable, Comparable<Division> {
     @Column(columnDefinition = "bool not null default true")
     private boolean isCheck;
 
-	@Column(length = 100, nullable = false)
-	private String leader;
+    @Column(length = 100, nullable = false)
+    private String leader;
 
-	@OneToMany(mappedBy = "division", cascade = CascadeType.ALL)
-	private Set<Employee> employees;
+    @OneToMany(mappedBy = "division", cascade = CascadeType.ALL)
+    private Set<Employee> employees;
 
-	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-	@JoinTable(name = "division_project",
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinTable(name = "division_project",
             joinColumns = {
-                    @JoinColumn(name = "division_id", nullable = false) },
+                    @JoinColumn(name = "division_id", nullable = false)},
             inverseJoinColumns = {
-                    @JoinColumn(name = "project_id", nullable = false) })
-	private Set<Project> projects;
+                    @JoinColumn(name = "project_id", nullable = false)})
+    private Set<Project> projects;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "leader_id", nullable = true)
@@ -65,7 +65,8 @@ public class Division implements Identifiable, Comparable<Division> {
     @Column(name = "plans_required")
     private Boolean plansRequired;
 
-    public Division() {	}
+    public Division() {
+    }
 
     public Employee getLeaderId() {
         return leaderId;
@@ -79,7 +80,7 @@ public class Division implements Identifiable, Comparable<Division> {
         return ldapName;
     }
 
-    public void setLdapName( String ldapName ) {
+    public void setLdapName(String ldapName) {
         this.ldapName = ldapName;
     }
 
@@ -87,11 +88,11 @@ public class Division implements Identifiable, Comparable<Division> {
         return leader;
     }
 
-    public void setLeader( String leader ) {
+    public void setLeader(String leader) {
         this.leader = leader;
     }
 
-    public Division( Integer id ) {
+    public Division(Integer id) {
         this.id = id;
     }
 
@@ -99,7 +100,7 @@ public class Division implements Identifiable, Comparable<Division> {
         return active;
     }
 
-    public void setActive( boolean active ) {
+    public void setActive(boolean active) {
         this.active = active;
     }
 
@@ -107,7 +108,7 @@ public class Division implements Identifiable, Comparable<Division> {
         return projects;
     }
 
-    public void setProjects( Set<Project> projects ) {
+    public void setProjects(Set<Project> projects) {
         this.projects = projects;
     }
 
@@ -115,7 +116,7 @@ public class Division implements Identifiable, Comparable<Division> {
         return employees;
     }
 
-    public void setEmployees( Set<Employee> employees ) {
+    public void setEmployees(Set<Employee> employees) {
         this.employees = employees;
     }
 
@@ -123,7 +124,7 @@ public class Division implements Identifiable, Comparable<Division> {
         return id;
     }
 
-    public void setId( Integer id ) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -131,7 +132,7 @@ public class Division implements Identifiable, Comparable<Division> {
         return name;
     }
 
-    public void setName( String name ) {
+    public void setName(String name) {
         this.name = name;
     }
 
@@ -201,43 +202,33 @@ public class Division implements Identifiable, Comparable<Division> {
 
 
     public String toString() {
-		StringBuilder sb = new StringBuilder()
-			.append(" id=").append(id)
-			.append(" name=").append(name)
-			.append(" ldapName=").append(ldapName)
-			.append(" active=").append(active);
-		return sb.toString();
-	}
+        StringBuilder sb = new StringBuilder()
+                .append(" id=").append(id)
+                .append(" name=").append(name)
+                .append(" ldapName=").append(ldapName)
+                .append(" active=").append(active);
+        return sb.toString();
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) { return true; }
-		if (obj == null) { return false; }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Division)) return false;
 
-        Division other = (Division) obj;
+        Division division = (Division) o;
 
-        final Integer thisId = getId();
-
-        if (thisId == null) {
-            if (other.getId() != null) {
-                return false;
-            }
-        } else if (!thisId.equals(other.getId())) {
-            return false;
-        }
-
-        final String thisLdapName = getLdapName();
-
-        if (thisLdapName == null) {
-			if (other.getLdapName() != null) {
-                return false;
-            }
-		} else if (!thisLdapName.equals(other.getLdapName())) {
-            return false;
-        }
+        if (id != null ? !id.equals(division.id) : division.id != null) return false;
+        if (ldapName != null ? !ldapName.equals(division.ldapName) : division.ldapName != null) return false;
 
         return true;
-	}
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + (ldapName != null ? ldapName.hashCode() : 0);
+        return result;
+    }
 
     @Override
     public int compareTo(Division o) {
@@ -246,7 +237,6 @@ public class Division implements Identifiable, Comparable<Division> {
                 return 0;
             else
                 return o.getId() > this.getId() ? -1 : 1;
-        }
-        else return 1;
+        } else return 1;
     }
 }

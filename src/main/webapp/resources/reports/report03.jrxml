@@ -88,7 +88,7 @@
 					<textElement>
 						<font size="16"/>
 					</textElement>
-					<textFieldExpression><![CDATA[new DecimalFormat("###0.0").format($V{DurationSumGroupByName}) + "/" + new DecimalFormat("###0.0").format($V{DurationHolidaySumGroupByName})]]></textFieldExpression>
+					<textFieldExpression><![CDATA[new DecimalFormat("###0.00").format($V{DurationSumGroupByName}) + "/" + new DecimalFormat("###0.00").format($V{DurationHolidaySumGroupByName})]]></textFieldExpression>
 				</textField>
 			</band>
 		</groupHeader>
@@ -116,7 +116,7 @@
 					<textElement>
 						<font isBold="false"/>
 					</textElement>
-					<textFieldExpression><![CDATA[new DecimalFormat("###0.0").format($V{DurationSumGroupByProject}) + "/" + new DecimalFormat("###0.0").format($V{DurationHolidaySumGroupByProject})]]></textFieldExpression>
+					<textFieldExpression><![CDATA[new DecimalFormat("###0.00").format($V{DurationSumGroupByProject}) + "/" + new DecimalFormat("###0.00").format($V{DurationHolidaySumGroupByProject})]]></textFieldExpression>
 				</textField>
 			</band>
 		</groupHeader>
@@ -141,7 +141,7 @@
 					<textElement>
 						<font isBold="false"/>
 					</textElement>
-					<textFieldExpression><![CDATA[new DecimalFormat("###0.0").format($V{DurationSumGroupByTask}) + "/" + new DecimalFormat("###0.0").format($V{DurationHolidaySumGroupByTask})]]></textFieldExpression>
+					<textFieldExpression><![CDATA[new DecimalFormat("###0.00").format($V{DurationSumGroupByTask}) + "/" + new DecimalFormat("###0.00").format($V{DurationHolidaySumGroupByTask})]]></textFieldExpression>
 				</textField>
 			</band>
 		</groupHeader>
@@ -215,10 +215,10 @@
 				<textElement/>
 				<textFieldExpression><![CDATA[new SimpleDateFormat("dd-MM-yyyy").format($F{caldate})]]></textFieldExpression>
 			</textField>
-			<textField isStretchWithOverflow="true" pattern="###0.0">
+			<textField isStretchWithOverflow="true" pattern="###0.00">
 				<reportElement uuid="31ad8074-8339-4f64-b87b-01c52cbac93d" style="ColoredDetail" stretchType="RelativeToTallestObject" x="493" y="0" width="60" height="20"/>
 				<textElement/>
-				<textFieldExpression><![CDATA[new DecimalFormat("###0.0").format($F{duration})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[new DecimalFormat("###0.00").format($F{duration})]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement uuid="2549c262-31dc-41dd-8300-4d0b2a4fa8e5" style="ColoredDetail" stretchType="RelativeToTallestObject" x="187" y="0" width="199" height="20"/>
