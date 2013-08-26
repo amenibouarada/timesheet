@@ -1,9 +1,10 @@
 package com.aplana.timesheet.form.validator;
 
-import com.aplana.timesheet.dao.entity.DictionaryItem;
-import com.aplana.timesheet.dao.entity.Employee;
-import com.aplana.timesheet.dao.entity.Project;
-import com.aplana.timesheet.enums.*;
+import com.aplana.timesheet.dao.entity.*;
+import com.aplana.timesheet.enums.DictionaryEnum;
+import com.aplana.timesheet.enums.ProjectRolesEnum;
+import com.aplana.timesheet.enums.TSEnum;
+import com.aplana.timesheet.enums.TypesOfActivityEnum;
 import com.aplana.timesheet.form.TimeSheetForm;
 import com.aplana.timesheet.form.TimeSheetTableRowForm;
 import com.aplana.timesheet.properties.TSPropertyProvider;
@@ -13,8 +14,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.BooleanUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +24,6 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.ValidationUtils;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -56,7 +56,8 @@ public class TimeSheetFormValidator extends AbstractValidator {
     private VacationService vacationService;
     @Autowired
     private OvertimeCauseService overtimeCauseService;
-
+    @Autowired
+    private AvailableActivityCategoryService availableActivityCategoryService;
 
     public boolean supports(Class<?> clazz) {
         return clazz.isAssignableFrom(TimeSheetForm.class);
@@ -108,6 +109,7 @@ public class TimeSheetFormValidator extends AbstractValidator {
                     validateProjectAndDivision(tsForm.getDivisionId(), formRow, notNullRowNumber, errors);
                     validateWorkPlace(formRow, notNullRowNumber, errors);
                     validateProjectRole(formRow, notNullRowNumber, errors);
+                    validateProjectRoleAndActivityType(formRow, notNullRowNumber, errors);
                     valdateCategoryOfActivity(formRow, emplJob, notNullRowNumber, errors);
                     validateProjectTask(formRow, notNullRowNumber, errors);
                     validateDescription(formRow, emplJob, notNullRowNumber, errors);
@@ -297,9 +299,34 @@ public class TimeSheetFormValidator extends AbstractValidator {
 
     /* проверка на правильную комбинацию роли и активности */
     private void validateProjectRoleAndActivityType(TimeSheetTableRowForm tsFromRow, int notNullRowNumber, Errors errors) {
-        if ( tsFromRow != null && dictionaryItemService.find(tsFromRow.getActivityTypeId()) != null
-                && projectRoleService.find(tsFromRow.getProjectRoleId()) != null ) {
-
+        DictionaryItem actType = dictionaryItemService.find(tsFromRow.getActivityTypeId());
+        ProjectRole projectRole = projectRoleService.find(tsFromRow.getProjectRoleId());
+        if (actType != null && projectRole != null) {
+            List<AvailableActivityCategory> availableActivityCategoryList = availableActivityCategoryService.getAvailableActivityCategories(actType, projectRole);
+            if (availableActivityCategoryList.isEmpty()) {
+                errors.rejectValue("timeSheetTablePart[" + notNullRowNumber + "].activityTypeId",
+                        "error.tsform.projectrole.activitytype.invalid", getErrorMessageArgs(notNullRowNumber),
+                        "Для данного типа активности выбрана неправильная проектная роль в строке " + (notNullRowNumber + 1) + ".");
+            } else {
+            /* заодно проверим категорию активности */
+                if (tsFromRow.getActivityCategoryId() != null) {
+                    DictionaryItem actCategory = dictionaryItemService.find(tsFromRow.getActivityCategoryId());
+                    if (actCategory != null) {
+                        Boolean finded = false;
+                        for (AvailableActivityCategory item : availableActivityCategoryList) {
+                            if (item.getActCat().equals(actCategory)) {
+                                finded = true;
+                                break;
+                            }
+                        }
+                        if (!finded) {
+                            errors.rejectValue("timeSheetTablePart[" + notNullRowNumber + "].activityCategoryId",
+                                    "error.tsform.projectrole.activitytype.activitycategory.invalid", getErrorMessageArgs(notNullRowNumber),
+                                    "Для данного типа активности и проектной роли указана неправильная активность в строке " + (notNullRowNumber + 1) + ".");
+                        }
+                    }
+                }
+            }
         }
     }
 
