@@ -89,7 +89,7 @@ public class ViewReportsController extends AbstractControllerForEmployeeWithYear
             durationFact = durationFact.add(next.getDuration());
             next.setDuration(next.getDuration().add(vacationDuration).setScale(1));
         }
-        durationFact.setScale(1);
+        durationFact = durationFact.setScale(1);
         mav.addObject("durationFact", durationFact.doubleValue());
         mav.addObject(
                 "durationPlan",

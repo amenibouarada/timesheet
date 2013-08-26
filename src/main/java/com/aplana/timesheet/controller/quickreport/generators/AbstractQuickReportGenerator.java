@@ -11,6 +11,8 @@ import com.aplana.timesheet.service.EmployeeService;
 import com.aplana.timesheet.service.IllnessService;
 import com.aplana.timesheet.util.DateTimeUtil;
 import org.apache.commons.lang.time.DateUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
@@ -22,7 +24,9 @@ import java.util.List;
  */
 public abstract class AbstractQuickReportGenerator <T extends QuickReport, K extends Periodical>  implements QuickReportGenerator<T> {
 
-    public static final String QOICK_REPORT_GENARATE_ERROR_MESSAGE = "Ошибка при генерации отчета!";
+    private static final Logger logger = LoggerFactory.getLogger(AbstractQuickReportGenerator.class);
+
+    public static final String QUICK_REPORT_GENARATE_ERROR_MESSAGE = "Ошибка при генерации отчета!";
     @Autowired
     BusinessTripService businessTripService;
 
@@ -72,8 +76,9 @@ public abstract class AbstractQuickReportGenerator <T extends QuickReport, K ext
 
             return report;
 
-        } catch (Throwable th){
-            throw new BusinessTripsAndIllnessControllerException(QOICK_REPORT_GENARATE_ERROR_MESSAGE);
+        } catch (Exception e){
+            logger.error(QUICK_REPORT_GENARATE_ERROR_MESSAGE, e);
+            throw new BusinessTripsAndIllnessControllerException(QUICK_REPORT_GENARATE_ERROR_MESSAGE, e);
         }
     }
 
