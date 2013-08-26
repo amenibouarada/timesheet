@@ -14,7 +14,7 @@ public class HibernateQueryResultDataSource implements JRDataSource {
     private Object currentValue;
 
     public HibernateQueryResultDataSource(List list, String[] fields) {
-        this.fields = fields;
+        this.fields = fields.clone();
         this.iterator = list.iterator();
     }
 

@@ -10,4 +10,7 @@ public class BusinessTripsAndIllnessControllerException extends Exception {
         super(message);
     }
 
+    public BusinessTripsAndIllnessControllerException(String message, Throwable th) {
+        super(message, th);
+    }
 }

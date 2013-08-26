@@ -21,7 +21,7 @@ public class ResponceBodyExceptionAspect {
     public Object profile(ProceedingJoinPoint pjp) throws Throwable {
         try{
             return pjp.proceed();
-        }catch(Throwable e){
+        }catch(Exception e){
             logger.error("Error in @ResponceBody method", e);
             return null;
         }

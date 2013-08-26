@@ -153,15 +153,20 @@ public class Vacation implements Comparable{
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null) return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Vacation)) return false;
 
-        Vacation vacation = (Vacation) obj;
+        Vacation vacation = (Vacation) o;
 
-        final Integer vacationId = vacation.getId();
+        if (id != null ? !id.equals(vacation.id) : vacation.id != null) return false;
 
-        return (getId() != null ? getId().equals(vacationId) : vacationId == null);
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return id != null ? id.hashCode() : 0;
     }
 
     @Override

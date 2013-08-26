@@ -38,6 +38,11 @@ import static com.aplana.timesheet.enums.QuickReportTypesEnum.ILLNESS;
 @Controller
 public class BusinessTripsAndIllnessAddController extends AbstractController{
 
+    public static final String ERROR_BUSINESS_TRIP_FIND = "Ошибка при получении отчета из БД!";
+    public static final String ERROR_BUSINESS_TRIP_SAVE = "Ошибка при сохранении командировки!";
+    public static final String ERROR_ILLNESS_SAVE = "Ошибка при сохранении больничного!";
+    public static final String ERROR_BUSINESS_TRIP_EDIT = "Ошибка при редактировании командировки!";
+    public static final String ERROR_ILLNESS_EDIT = "Ошибка при редактировании больничного!";
     @Autowired
     DictionaryItemService dictionaryItemService;
     @Autowired
@@ -208,9 +213,9 @@ public class BusinessTripsAndIllnessAddController extends AbstractController{
             tsForm.setComment(businessTrip.getComment());
 
             return getModelAndViewEditing(businessTrip.getEmployee(), businessTrip.getId());
-        } catch (Throwable th) {
-            logger.error(th.getMessage(), th);
-            throw new BusinessTripsAndIllnessAddException("Ошибка при получении отчета из БД!");
+        } catch (Exception e) {
+            logger.error(ERROR_BUSINESS_TRIP_FIND, e);
+            throw new BusinessTripsAndIllnessAddException(ERROR_BUSINESS_TRIP_FIND);
         }
     }
 
@@ -242,8 +247,9 @@ public class BusinessTripsAndIllnessAddController extends AbstractController{
             illnessService.setIllness(illness);
 
             return getModelAndViewSuccess(illness.getEmployee(), illness.getEndDate(), ILLNESS);
-        } catch (Throwable th) {
-            throw new BusinessTripsAndIllnessAddException("Ошибка при редактировании больничного!", th);
+        } catch (Exception e) {
+            logger.error(ERROR_ILLNESS_EDIT, e);
+            throw new BusinessTripsAndIllnessAddException(ERROR_ILLNESS_EDIT, e);
         }
     }
 
@@ -266,8 +272,9 @@ public class BusinessTripsAndIllnessAddController extends AbstractController{
             businessTripService.setBusinessTrip(businessTrip);
 
             return getModelAndViewSuccess(businessTrip.getEmployee(), businessTrip.getBeginDate(), BUSINESS_TRIP);
-        } catch (Throwable th) {
-            throw new BusinessTripsAndIllnessAddException("Ошибка при редактировании командировки!", th);
+        } catch (Exception e) {
+            logger.error(ERROR_BUSINESS_TRIP_EDIT, e);
+            throw new BusinessTripsAndIllnessAddException(ERROR_BUSINESS_TRIP_EDIT, e);
         }
     }
 
@@ -307,8 +314,9 @@ public class BusinessTripsAndIllnessAddController extends AbstractController{
             illnessService.setIllness(illness);
 
             return getModelAndViewSuccess(illness.getEmployee(), illness.getBeginDate(), ILLNESS);
-        } catch (Throwable th) {
-            throw new BusinessTripsAndIllnessAddException("Ошибка при сохранении больничного!", th);
+        } catch (Exception e) {
+            logger.error(ERROR_ILLNESS_SAVE, e);
+            throw new BusinessTripsAndIllnessAddException(ERROR_ILLNESS_SAVE, e);
         }
     }
 
@@ -327,8 +335,9 @@ public class BusinessTripsAndIllnessAddController extends AbstractController{
             businessTripService.setBusinessTrip(businessTrip);
 
             return getModelAndViewSuccess(businessTrip.getEmployee(), businessTrip.getBeginDate(), BUSINESS_TRIP);
-        } catch (Throwable th){
-            throw new BusinessTripsAndIllnessAddException("Ошибка при сохранении командировки!", th);
+        } catch (Exception e){
+            logger.error(ERROR_BUSINESS_TRIP_SAVE, e);
+            throw new BusinessTripsAndIllnessAddException(ERROR_BUSINESS_TRIP_SAVE, e);
         }
     }
 
