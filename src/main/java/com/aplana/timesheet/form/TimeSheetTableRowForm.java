@@ -1,11 +1,10 @@
 package com.aplana.timesheet.form;
 
 public class TimeSheetTableRowForm {
-	private Integer taskName;
+	private Integer projectTaskId;
 	private String description;
 	private String duration;
 	private String problem;
-	private String other;
 	private Integer projectId;
 	private Integer activityTypeId;
 	private Integer activityCategoryId;
@@ -20,8 +19,8 @@ public class TimeSheetTableRowForm {
 		this.projectRoleId = projectRoleId;
 	}
 
-	public Integer getTaskName() {
-		return taskName;
+	public Integer getProjectTaskId() {
+		return projectTaskId;
 	}
 
 	public String getDescription() {
@@ -36,12 +35,8 @@ public class TimeSheetTableRowForm {
 		return problem;
 	}
 
-	public String getOther() {
-		return other;
-	}
-
-	public void setTaskName(Integer taskName) {
-		this.taskName = taskName;
+	public void setProjectTaskId(Integer projectTaskId) {
+		this.projectTaskId = projectTaskId;
 	}
 
 	public void setDescription(String description) {
@@ -54,10 +49,6 @@ public class TimeSheetTableRowForm {
 
 	public void setProblem(String problem) {
 		this.problem = problem;
-	}
-
-	public void setOther(String other) {
-		this.other = other;
 	}
 
 	public Integer getProjectId() {

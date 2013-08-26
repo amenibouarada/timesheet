@@ -459,7 +459,8 @@
                         </td>
 
                         <td class="top_align"> <!-- Название проекта/пресейла -->
-                            <form:select path="timeSheetTablePart[${row.index}].projectId" id="project_id_${row.index}"
+                            <form:select path="timeSheetTablePart[${row.index}].projectId"
+                                         id="project_id_${row.index}"
                                          onchange="projectChange(this)" cssClass="project"
                                          onmouseover="tooltip.show(getTitle(this));" onmouseout="tooltip.hide();"
                                          onkeyup="somethingChanged();" onmouseup="somethingChanged();">
@@ -486,8 +487,8 @@
                             <label id="act_description_${row.index}" style="font-style: italic"/>
                         </td>
                         <td class="top_align"> <!-- Проектная задача -->
-                            <form:select path="timeSheetTablePart[${row.index}].taskName"
-                                         id="taskName_id_${row.index}"
+                            <form:select path="timeSheetTablePart[${row.index}].projectTaskId"
+                                         id="projectTask_id_${row.index}"
                                          onchange="setTaskDescription(${row.index})"
                                          onmouseover="tooltip.show(getTitle(this));" onmouseout="tooltip.hide();"
                                          onkeyup="somethingChanged();" onmouseup="somethingChanged();">

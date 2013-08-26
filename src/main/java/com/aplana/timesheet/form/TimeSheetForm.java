@@ -10,7 +10,6 @@ public class TimeSheetForm {
     private List<TimeSheetTableRowForm> timeSheetTablePart;
     private String calDate;
     private String plan;
-    private double totalDuration;
     /** Причина недоработок, переработок */
     private Integer overtimeCause;
     /** Комментария к причине надоработок/переработко */
@@ -25,14 +24,6 @@ public class TimeSheetForm {
 
     public void setDivisionId(Integer divisionId) {
         this.divisionId = divisionId;
-    }
-
-    public double getTotalDuration() {
-        return totalDuration;
-    }
-
-    public void setTotalDuration(double totalDuration) {
-        this.totalDuration = totalDuration;
     }
 
     public List<TimeSheetTableRowForm> getTimeSheetTablePart() {
@@ -106,7 +97,6 @@ public class TimeSheetForm {
             if (part!=null) {
                 part.setDescription(StringEscapeUtils.unescapeHtml4(part.getDescription()));
                 part.setProblem(StringEscapeUtils.unescapeHtml4(part.getProblem()));
-                part.setOther(StringEscapeUtils.unescapeHtml4(part.getOther()));
             }
         }
     }

@@ -54,6 +54,50 @@ public class DateTimeUtil {
     }
 
     /**
+     * Преобразует строку дату формата БД
+     *
+     * @param date       - строка даты.
+     * @return объект класса {@link Date}.
+     */
+    public static Date stringToDateForDB(String date) {
+        SimpleDateFormat sdf = new SimpleDateFormat(DATE_PATTERN);
+        Date result = new Date();
+
+        if(date==null || date.isEmpty()){
+            logger.error("Error while parsing empty string into date");
+            return result;
+        }
+        try {
+            result = sdf.parse(date);
+        } catch (ParseException e) {
+            logger.error("Error while parsing date in string format.", e);
+        }
+        return result;
+    }
+
+    /**
+     * Преобразует строку дату формата просмотра
+     *
+     * @param date       - строка даты.
+     * @return объект класса {@link Date}.
+     */
+    public static Date stringToDateForView(String date) {
+        SimpleDateFormat sdf = new SimpleDateFormat(VIEW_DATE_PATTERN);
+        Date result = new Date();
+
+        if(date==null || date.isEmpty()){
+            logger.error("Error while parsing empty string into date");
+            return result;
+        }
+        try {
+            result = sdf.parse(date);
+        } catch (ParseException e) {
+            logger.error("Error while parsing date in string format.", e);
+        }
+        return result;
+    }
+
+    /**
      * Преобразует строку даты в указанном формате в объект класса {@link Timestamp}.
      *
      * @param date       - строка даты.

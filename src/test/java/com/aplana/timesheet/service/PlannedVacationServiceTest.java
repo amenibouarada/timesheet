@@ -127,7 +127,6 @@ public class PlannedVacationServiceTest extends AbstractJsonTest{
         timeSheetDetail.setActType(dictionaryItemService.getTypesOfActivity().get(0));
         timeSheetDetail.setDuration(8d);
         timeSheetDetail.setDescription("unit test description | lololo ");
-        timeSheetDetail.setOther("unit test other");
         timeSheetDetail.setProblem("unit test problem");
         timeSheetDetail.setProjectRole(projectRoleService.getProjectRoles().get(0));
         timeSheetDetail.setProjectTask(projectTaskService.getProjectTasks(project.getId()).get(0));     //projectTaskService.getProjectTasks(project.getId()).get(0)
