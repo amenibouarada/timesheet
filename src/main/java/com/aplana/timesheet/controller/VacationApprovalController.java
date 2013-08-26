@@ -1,14 +1,12 @@
 package com.aplana.timesheet.controller;
 
 import com.aplana.timesheet.dao.entity.ApprovalResultModel;
-import com.aplana.timesheet.dao.entity.ProjectRole;
 import com.aplana.timesheet.dao.entity.Vacation;
 import com.aplana.timesheet.dao.entity.VacationApproval;
 import com.aplana.timesheet.exception.service.VacationApprovalServiceException;
 import com.aplana.timesheet.form.VacationApprovalForm;
 import com.aplana.timesheet.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.ManagerRoleNameService;
-import com.aplana.timesheet.service.ProjectRoleService;
 import com.aplana.timesheet.service.SendMailService;
 import com.aplana.timesheet.service.VacationApprovalService;
 import com.aplana.timesheet.service.vacationapproveprocess.VacationApprovalProcessService;
@@ -46,15 +44,15 @@ public class VacationApprovalController {
 
     private static final Logger logger = LoggerFactory.getLogger(VacationApprovalController.class);
 
-    final String NOT_ACCEPTED_YET = "%s, просьба принять решение по \"%s\" сотрудника %s из г. %s на период с %s - %s. %s";
-    final String ACCEPTANCE = "Запрос \"%s\" сотрудника %s из г. %s на период с %s - %s %s.";
+    final String NOT_ACCEPTED_YET = "%s, просьба принять решение по \"%s\" сотрудника %s из г. %s на период с %s по %s. %s";
+    final String ACCEPTANCE = "Запрос \"%s\" сотрудника %s из г. %s на период с %s по %s %s.";
     final String ACCEPTED = "согласован";
     final String REFUSE = "не согласован";
     final String DATE_FORMAT = "dd.MM.yyyy";
     final String BAD_REQUEST = "Неверный запрос!";
     final String LOGGER_MESSAGE = "\n    UserIP: %s\n";
-    final String REFUSE_ANSWER = "%s, Вы не согласовали \"%s\" сотрудника %s из г. %s на период с %s - %s.";
-    final String ACCEPT_ANSWER = "%s, Вы согласовали \"%s\" сотрудника %s из г. %s на период с %s - %s.";
+    final String REFUSE_ANSWER = "%s, Вы не согласовали \"%s\" сотрудника %s из г. %s на период с %s по %s.";
+    final String ACCEPT_ANSWER = "%s, Вы согласовали \"%s\" сотрудника %s из г. %s на период с %s по %s.";
 
     final String BUTTONS_INVISIBLE = "style=\"display: none\"";
 

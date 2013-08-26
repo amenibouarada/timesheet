@@ -81,7 +81,7 @@ public class VacationApprovedSender extends AbstractVacationSenderWithCopyToAuth
         String beginDateStr = DateFormatUtils.format(vacation.getBeginDate(), DATE_FORMAT);
         String endDateStr = DateFormatUtils.format(vacation.getEndDate(), DATE_FORMAT);
 
-        String messageBody = String.format("Отклонен %s сотрудника %s из г. %s на период с %s - %s",
+        String messageBody = String.format("Отклонен %s сотрудника %s из г. %s на период с %s по %s",
                 vacation.getType().getValue(), vacation.getEmployee().getName(), vacation.getEmployee().getRegion().getName(), beginDateStr, endDateStr);
 
         return getMessageBody(messageBody);
@@ -102,7 +102,7 @@ public class VacationApprovedSender extends AbstractVacationSenderWithCopyToAuth
         String beginDateStr = DateFormatUtils.format(vacation.getBeginDate(), DATE_FORMAT);
         String endDateStr = DateFormatUtils.format(vacation.getEndDate(), DATE_FORMAT);
 
-        String messageBody = String.format("Успешно согласован %s сотрудника %s из г. %s на период с %s - %s",
+        String messageBody = String.format("Успешно согласован %s сотрудника %s из г. %s на период с %s по %s",
                 vacation.getType().getValue(), vacation.getEmployee().getName(), vacation.getEmployee().getRegion().getName(), beginDateStr, endDateStr);
 
         return getMessageBody(messageBody);
