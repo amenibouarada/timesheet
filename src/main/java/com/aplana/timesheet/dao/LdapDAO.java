@@ -42,14 +42,18 @@ public class LdapDAO {
         logger.info("Getting Employee {} from LDAP",email);
         EqualsFilter filter = new EqualsFilter("mail", email);
         logger.debug("LDAP Query {}", filter.encode());
-        return ( EmployeeLdap ) Iterables.getFirst(ldapTemplate.search("", filter.encode(), new EmployeeAttributeMapper()), null);
+        EmployeeLdap first = (EmployeeLdap) Iterables.getFirst(ldapTemplate.search("", filter.encode(), new EmployeeAttributeMapper()), null);
+        logger.debug("LDAP Query finished. result = {}", first);
+        return first;
     }
 
     public EmployeeLdap getEmployeeByLdapName(String name) {
         try {
             EqualsFilter filter = new EqualsFilter("distinguishedName", name.replaceAll("/", ","));
             logger.debug("LDAP Query {}", filter.encode());
-            return (EmployeeLdap) Iterables.getFirst(ldapTemplate.search("", filter.encode(), new EmployeeAttributeMapper()), null);
+            EmployeeLdap first = (EmployeeLdap) Iterables.getFirst(ldapTemplate.search("", filter.encode(), new EmployeeAttributeMapper()), null);
+            logger.debug("LDAP Query finished. result = {}", first);
+            return first;
         } catch (NameNotFoundException e) {
             logger.debug("Not found: " + name);
             return null;
@@ -60,7 +64,9 @@ public class LdapDAO {
         try {
             EqualsFilter filter = new EqualsFilter("displayName", name);
             logger.debug("LDAP Query {}", filter.encode());
-            return (EmployeeLdap) Iterables.getFirst(ldapTemplate.search("", filter.encode(), new EmployeeAttributeMapper()), null);
+            EmployeeLdap first = (EmployeeLdap) Iterables.getFirst(ldapTemplate.search("", filter.encode(), new EmployeeAttributeMapper()), null);
+            logger.debug("LDAP Query finished. result = {}", first);
+            return first;
         } catch (NameNotFoundException e) {
             logger.debug("Not found: " + name);
             return null;
@@ -71,7 +77,9 @@ public class LdapDAO {
         try {
             EqualsFilter filter = new EqualsFilter(SID, sid);
             logger.debug("LDAP Query {}", filter.encode());
-            return (EmployeeLdap) Iterables.getFirst(ldapTemplate.search("", filter.encode(), new EmployeeAttributeMapper()), null);
+            EmployeeLdap first = (EmployeeLdap) Iterables.getFirst(ldapTemplate.search("", filter.encode(), new EmployeeAttributeMapper()), null);
+            logger.debug("LDAP Query finished. result = {}", first);
+            return first;
         } catch (NameNotFoundException e) {
             logger.debug("Not found: " + sid);
             return null;
@@ -97,7 +105,7 @@ public class LdapDAO {
                 .and(new EqualsFilter("objectClass", "user"));
         logger.debug("LDAP Query {}", andFilter.encode());
 		List<EmployeeLdap> employees = ldapTemplate.search("", andFilter.encode(), new EmployeeAttributeMapper());
-		logger.debug("Employees size is {}", employees.size());
+		logger.debug("LDAP Query finished. Employees size is {}", employees.size());
 		if(!employees.isEmpty())
             logger.debug("Employee {} City is {}", employees.get(0).getDisplayName(), employees.get(0).getCity());
 		return employees;
@@ -111,7 +119,9 @@ public class LdapDAO {
 
         AndFilter andFilter = new AndFilter().and(new EqualsFilter("objectClass", "person"));
 		logger.debug("LDAP Query {}", andFilter.encode());
-		return ldapTemplate.search(dn, andFilter.encode(), new EmployeeAttributeMapper());
+        List search = ldapTemplate.search(dn, andFilter.encode(), new EmployeeAttributeMapper());
+        logger.debug("LDAP Query finished. result.size = {}", search.size());
+        return search;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -121,7 +131,9 @@ public class LdapDAO {
                 .and( new EqualsFilter( "displayName", divisionLeaderName ) )
                 .and( new EqualsFilter( "department", division ) );
         logger.debug("LDAP Query {}", andFilter.encode());
-		return ldapTemplate.search("", andFilter.encode(), new EmployeeAttributeMapper());
+        List search = ldapTemplate.search("", andFilter.encode(), new EmployeeAttributeMapper());
+        logger.debug("LDAP Query finished. result.size = {}", search.size());
+        return search;
 	}
 
     @SuppressWarnings("unchecked")
@@ -132,7 +144,8 @@ public class LdapDAO {
         SearchControls ctls = new SearchControls();
         ctls.setSearchScope(SearchControls.SUBTREE_SCOPE);
 
-        return ldapTemplate.search("", andFilter.encode(), ctls, new AttributesMapper() {
+        logger.debug("LDAP Query {}", andFilter.encode());
+        List search = ldapTemplate.search("", andFilter.encode(), ctls, new AttributesMapper() {
             @Override
             public Map mapFromAttributes(Attributes attributes) throws NamingException {
                 Map map = new HashMap();
@@ -144,6 +157,8 @@ public class LdapDAO {
                 return map;
             }
         });
+        logger.debug("LDAP Query finished. result.size = {}", search.size());
+        return search;
     }
 
     private class EmployeeAttributeMapper implements AttributesMapper {
