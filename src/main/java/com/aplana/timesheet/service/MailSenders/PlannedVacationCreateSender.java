@@ -78,7 +78,7 @@ public class PlannedVacationCreateSender extends AbstractVacationSenderWithCopyT
         stringBuilder.append(String.format("Информируем Вас о планируемом отпуске "));
         stringBuilder.append(String.format("сотрудника %s ", employeeNameStr));
         stringBuilder.append(String.format("из г. %s ", regionNameStr));
-        stringBuilder.append(String.format("на период с %s - %s. ", beginDateStr, endDateStr));
+        stringBuilder.append(String.format("на период с %s по %s. ", beginDateStr, endDateStr));
         stringBuilder.append(String.format("%s", commentStr));
         stringBuilder.append(String.format("Запись о планируемом отпуске создана %s. Дата создания %s.",authorVacation,creationDate));
 

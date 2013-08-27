@@ -29,7 +29,7 @@ public class ProjectTaskDAO {
 	@SuppressWarnings("unchecked")
 	public List<ProjectTask> getProjectTasks(Integer projectId) {
 		Query query = entityManager.createQuery(
-                "from ProjectTask as pt where pt.project=:project and pt.active=:active"
+                "FROM ProjectTask AS pt WHERE pt.project=:project AND pt.active=:active ORDER BY pt.sortOrder"
         ).setParameter("project", projectDAO.find(projectId)).setParameter("active", true);
 
         return query.getResultList();
@@ -39,13 +39,13 @@ public class ProjectTaskDAO {
 	 * Возвращает активную проектную задачу, относящуюся к указанному проекту,
 	 * либо null, если проект или код задачи null, или такой задачи нет.
 	 */
-    public ProjectTask find(Integer project, Integer taskId) {
-		Project proj = projectDAO.findActive(project);
-		if (proj == null || taskId == null) { return null; }
+    public ProjectTask find(Integer projectId, Integer projectTaskId) {
+		Project project = projectDAO.findActive(projectId);
+		if (project == null || projectTaskId == null) { return null; }
 
         Query query = entityManager.createQuery(
                 "from ProjectTask as pt where pt.project=:project and id=:taskId and pt.active=:active"
-        ).setParameter("project", proj).setParameter("taskId", taskId).setParameter("active", true);
+        ).setParameter("project", project).setParameter("taskId", projectTaskId).setParameter("active", true);
         // параметры project и active введены для контроля, что такс именно этого проекта
 		try {
 			return (ProjectTask) query.getSingleResult();
@@ -54,7 +54,7 @@ public class ProjectTaskDAO {
 		}
 	}
 
-    public ProjectTask find(Integer taskName) {
-        return entityManager.find(ProjectTask.class, taskName);
+    public ProjectTask find(Integer projectTaskId) {
+        return entityManager.find(ProjectTask.class, projectTaskId);
     }
 }

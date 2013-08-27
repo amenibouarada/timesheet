@@ -12,11 +12,10 @@
     <link rel="stylesheet" type="text/css" href="<%= request.getContextPath()%>/resources/css/businesstripsandillness.css">
     <script type="text/javascript">
 
-
-
-//        типы отчетов
-        var illnessReportType = 6;
-        var businessTripReportType = 7;
+        var employeeList = ${employeeListJson};
+        var forAll = ${forAll};
+        var selectedAllRegion = null;
+        var empId = ${employeeId};
 
         dojo.ready(function () {
             window.focus();
@@ -28,6 +27,7 @@
             dojo.byId("manager").value = ${managerId};
 
             initRegionsList();
+
             if (dojo.byId("regions").value != -1) {
                 sortEmployee();
                 selectedAllRegion = false;
@@ -44,11 +44,6 @@
 
         dojo.require("dijit.form.DateTextBox");
         dojo.require("dojo.NodeList-traverse");
-
-        var employeeList = ${employeeListJson};
-        var forAll = ${forAll};
-        var selectedAllRegion = null;
-        var empId = ${employeeId};
 
         //устанавливается значение по умолчанию "Все регионы"
         function initRegionsList(){
@@ -76,11 +71,9 @@
             var dateFrom = dojo.byId("dateFrom").value;
             var dateTo = dojo.byId("dateTo").value
 
-            var datesValid = false;
-
             var regionsValid = getSelectedIndexes(dojo.byId("regions")).length > 0;
 
-            datesValid = (dateFrom != null && dateFrom != undefined && dateFrom != "")&& (dateTo != null && dateTo != undefined && dateTo != "") && (dateFrom <= dateFrom);
+            var datesValid = (dateFrom != null && dateFrom != undefined && dateFrom != "")&& (dateTo != null && dateTo != undefined && dateTo != "") && (dateFrom <= dateFrom);
 
             if (datesValid && divisionId != null && divisionId != 0 && empId != null && empId != 0 && regionsValid) {
                 businesstripsandillness.action = "<%=request.getContextPath()%>/businesstripsandillness/"
@@ -536,7 +529,26 @@
 
     <%------------------------------TABLE-----------------------------------%>
 
-    <c:if test="${not empty reportsMap}">
+    <c:if test="${not hasAnyEmployee}">
+        <div style="margin-left: 10px">
+            <b>По заданным критериям не найдено ни одного сотрудника.</b>
+        </div>
+    </c:if>
+
+    <c:if test="${not hasAnyReports and hasAnyEmployee}">
+        <div style="margin-left: 10px">
+            <b>Нет данных о
+                    <c:if test="${reportFormed == 6}">
+                        болезнях
+                    </c:if>
+                    <c:if test="${reportFormed == 7}">
+                        командировках
+                    </c:if>
+                сотрудников за выбранный период</b>
+        </div>
+    </c:if>
+
+    <c:if test="${hasAnyReports}">
         <table id="reporttable">
             <thead>
                 <tr>
@@ -631,36 +643,10 @@
                         </tbody>
                     </c:when>
 
-                    <c:when test="${fn:length(reports.periodicalsList) == 0}">
-                        <c:choose>
-                            <c:when test="${reportFormed == 6}">
-                                <tbody>
-                                <sec:authorize access="hasRole('CHANGE_ILLNESS_BUSINESS_TRIP')">
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                </sec:authorize>
-                                <td class="textcenter">${employeeReport.key.name}</td>
-                                <td colspan="8"><b>Нет данных о больничных сотрудника за выбранный период.</b></td>
-                                </tbody>
-                            </c:when>
-                            <c:when test="${reportFormed == 7}">
-                                <tbody>
-                                <sec:authorize access="hasRole('CHANGE_ILLNESS_BUSINESS_TRIP')">
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                </sec:authorize>
-                                <td class="textcenter">${employeeReport.key.name}</td>
-                                <td colspan="8"><b>Нет данных о командировках сотрудника за выбранный период.</b></td>
-                                </tbody>
-                            </c:when>
-                        </c:choose>
-                    </c:when>
                 </c:choose>
             </c:forEach>
             <c:choose>
-                <c:when test="${forAll!=true}">
+                <c:when test="${forAll != true}">
                     <c:choose>
                         <c:when test="${reportFormed == 6}">
                                 <tr><td colspan="5" class="bold">Итоги за период:</td></tr>
@@ -716,26 +702,6 @@
                 </c:when>
             </c:choose>
         </table>
-    </c:if>
-    <c:if test="${empty reportsMap}">
-        <div style="margin-left: 10px">
-            <sec:authorize access="hasRole('CHANGE_ILLNESS_BUSINESS_TRIP')">
-                <b>Не найдено данных по заданным параметрам, вы можете создать
-                    <c:choose>
-                        <c:when test="${reportFormed == 6}">
-                            больничный
-                        </c:when>
-                        <c:when test="${reportFormed == 7}">
-                            командировку
-                        </c:when>
-                    </c:choose>
-                    пройдя по <a href="#" onclick="createBusinessTripOrIllness();"> ссылке.</a>
-                </b>
-            </sec:authorize>
-            <sec:authorize access="not hasRole('CHANGE_ILLNESS_BUSINESS_TRIP')">
-                <b>Не найдено данных по заданным параметрам.</b>
-            </sec:authorize>
-        </div>
     </c:if>
     </form:form>
 </body>

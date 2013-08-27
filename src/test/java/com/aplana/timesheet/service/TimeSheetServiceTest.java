@@ -70,7 +70,7 @@ public class TimeSheetServiceTest extends AbstractJsonTest {
             Iterator<ProjectTask> iterator = projectTasks.iterator();
             if (iterator.hasNext()) {
                 ProjectTask next = iterator.next();
-                timeSheetTableRowForm.setTaskName(next.getId());
+                timeSheetTableRowForm.setProjectTaskId(next.getId());
             }
         }
         timeSheetTableRowForm.setProjectRoleId(RANDOM.nextInt());
@@ -166,7 +166,7 @@ public class TimeSheetServiceTest extends AbstractJsonTest {
         if (tablePart != null) {
             sb.append("[");
             for (int i = 0; i < tablePart.size(); i++) {
-                if (!"".equals(tablePart.get(i).getTaskName())) {
+                if (!"".equals(tablePart.get(i).getProjectTaskId())) {
                     sb.append("{\"row\":\"").append(i).append("\",");
                     sb.append("\"role\":\"").append(tablePart.get(i).getProjectRoleId()).append("\"}");
                     if (i < (tablePart.size() - 1)) {
@@ -187,9 +187,9 @@ public class TimeSheetServiceTest extends AbstractJsonTest {
         if (tablePart != null) {
             sb.append("[");
             for (int i = 0; i < tablePart.size(); i++) {
-                if (!"".equals(tablePart.get(i).getTaskName())) {
+                if (!"".equals(tablePart.get(i).getProjectTaskId())) {
                     sb.append("{\"row\":\"").append(i).append("\",");
-                    sb.append("\"task\":\"").append(tablePart.get(i).getTaskName()).append("\"}");
+                    sb.append("\"task\":\"").append(tablePart.get(i).getProjectTaskId()).append("\"}");
                     if (i < (tablePart.size() - 1)) {
                         sb.append(",");
                     }

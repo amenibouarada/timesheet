@@ -24,7 +24,7 @@ import java.util.Date;
 public class CreateVacationFormValidator extends AbstractValidator {
 
     public static final int TYPE_WITH_REQUIRED_COMMENT = VacationTypesEnum.WITH_NEXT_WORKING.getId();
-    private static final int MAX_COMMENT_LENGTH = 400;
+    private static final int MAX_COMMENT_LENGTH = 600;
     private static final String MAX_LENGTH_ERROR_MESSAGE =
             String.format("Длина комментария превышает допустимые %d символов", MAX_COMMENT_LENGTH);
     private static final String WRONG_YEAR_ERROR_MESSAGE = "Календарь на %i год еще не заполнен, " +

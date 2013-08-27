@@ -87,9 +87,9 @@ public class ViewReportsController extends AbstractControllerForEmployeeWithYear
             BigDecimal vacationDuration = next.getVacationDay() && next.getWorkDay() ? new BigDecimal(8) : BigDecimal.ZERO;
             durationFact = durationFact.add(vacationDuration);
             durationFact = durationFact.add(next.getDuration());
-            next.setDuration(next.getDuration().add(vacationDuration).setScale(1));
+            next.setDuration(next.getDuration().add(vacationDuration).setScale(2));
         }
-        durationFact = durationFact.setScale(1);
+        durationFact = durationFact.setScale(2);
         mav.addObject("durationFact", durationFact.doubleValue());
         mav.addObject(
                 "durationPlan",

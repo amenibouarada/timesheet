@@ -65,7 +65,7 @@ public class VacationCreateSender extends AbstractVacationSender<Vacation> {
         stringBuilder.append(String.format("Создан \"%s\" ", vacationTypeStr));
         stringBuilder.append(String.format("сотрудника %s ", employeeNameStr));
         stringBuilder.append(String.format("из г. %s ", regionNameStr));
-        stringBuilder.append(String.format("на период с %s - %s. ", beginDateStr, endDateStr));
+        stringBuilder.append(String.format("на период с %s по %s. ", beginDateStr, endDateStr));
         stringBuilder.append(String.format("%s", commentStr));
         stringBuilder.append(String.format("Дата создания отпуска %s.",creationDate));
 

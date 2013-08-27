@@ -1,7 +1,6 @@
 package com.aplana.timesheet.service.MailSenders;
 
 import com.aplana.timesheet.dao.entity.ApprovalResultModel;
-import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.dao.entity.Vacation;
 import com.aplana.timesheet.dao.entity.VacationApproval;
 import com.aplana.timesheet.properties.TSPropertyProvider;
@@ -70,7 +69,7 @@ public class VacationApproveRequestSender extends AbstractVacationSender<Vacatio
         stringBuilder.append(String.format("Просьба принять решение по \"%s\" ", vacationTypeStr));
         stringBuilder.append(String.format("сотрудника %s ", employeeNameStr));
         stringBuilder.append(String.format("из г. %s ", regionNameStr));
-        stringBuilder.append(String.format("на период с %s - %s. ", beginDateStr, endDateStr));
+        stringBuilder.append(String.format("на период с %s по %s. ", beginDateStr, endDateStr));
         stringBuilder.append(String.format("%s", commentStr));
         stringBuilder.append(String.format("Для регистрации Вашего решения нажмите на ссылку: %s . ", approveURL));
         stringBuilder.append(String.format("Дата создания отпуска %s.",creationDate));

@@ -169,7 +169,7 @@ public class TimeSheetSender extends MailSender<TimeSheetForm> {
                     result.put(i, CATEGORY_OF_ACTIVITY, CategoriesOfActivityEnum.getById(actCatId).getName());
                 }
 
-                ProjectTask projectTask = sendMailService.getProjectTaskService().find(tsRow.getTaskName());
+                ProjectTask projectTask = sendMailService.getProjectTaskService().find(tsRow.getProjectTaskId());
                 putIfIsNotBlank(i, result, TASK_NAME, projectTask != null ? projectTask.getTaskName() : null);
                 putIfIsNotBlank(i, result, DURATION, tsRow.getDuration());
                 putIfIsNotBlank(i, result, DESCRIPTION_STRINGS, tsRow.getDescription());

@@ -46,7 +46,7 @@ public class DivisionDAO {
 
 	public Division find(Integer id) {
         Division division = entityManager.find(Division.class, id);
-        Hibernate.initialize(division.getLeaderId());
+        if (division != null) Hibernate.initialize(division.getLeaderId());
         return division;
 	}
 	
