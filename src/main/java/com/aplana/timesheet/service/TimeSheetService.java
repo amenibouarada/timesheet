@@ -303,7 +303,7 @@ public class TimeSheetService {
     }
 
     @Transactional(readOnly = true)
-    public String getListOfActDescriptoin() {
+    public String getListOfActDescription() {
         List<AvailableActivityCategory> availableActivityCategories = availableActivityCategoryDAO.getAllAvailableActivityCategories();
         final JsonArrayNodeBuilder result = anArrayBuilder();
         for (AvailableActivityCategory activityCategory : availableActivityCategories) {

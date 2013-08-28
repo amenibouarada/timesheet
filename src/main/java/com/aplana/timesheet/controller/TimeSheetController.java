@@ -246,7 +246,7 @@ public class TimeSheetController {
         result.put("projectRoleList", projectRoleList);
         result.put("projectRoleListJson", projectRoleService.getProjectRoleListJson(projectRoleList));
 
-        result.put("listOfActDescriptionJson", getListOfActDescriptoin());
+        result.put("listOfActDescriptionJson", timeSheetService.getListOfActDescription());
         result.put(
                 "typesOfCompensation",
                 dictionaryItemService.getItemsByDictionaryId(DictionaryEnum.TYPES_OF_COMPENSATION.getId())
@@ -267,25 +267,22 @@ public class TimeSheetController {
      */
     @RequestMapping(value = "/timesheet/plans", headers = "Accept=application/json;Charset=UTF-8")
     @ResponseBody
-    public String getPlans(@RequestParam("date") String date, @RequestParam("employeeId") Integer employeeId) {
+    public String getPlans(@RequestParam("date") String date,
+                           @RequestParam("employeeId") Integer employeeId) {
         return timeSheetService.getPlansJson(date, employeeId);
-    }
-
-    public String getListOfActDescriptoin(){
-        return timeSheetService.getListOfActDescriptoin();
     }
 
     @RequestMapping(value = "/timesheet/jiraIssues", headers = "Accept=application/octet-stream;Charset=UTF-8")
     @ResponseBody
-    public String getJiraIssuesStr(@RequestParam("employeeId") Integer employeeId, @RequestParam("date") String date, @RequestParam("projectId") Integer projectId) {
+    public String getJiraIssuesStr(@RequestParam("employeeId") Integer employeeId,
+                                   @RequestParam("date") String date,
+                                   @RequestParam("projectId") Integer projectId) {
         return jiraService.getDayIssues(employeeId, date, projectId);
     }
 
     @RequestMapping(value = "/employee/isDivisionLeader", headers = "Accept=application/json")
     @ResponseBody
-    public String isDivisionLeader(
-            @RequestParam("employeeId") Integer employeeId
-    ) {
+    public String isDivisionLeader(@RequestParam("employeeId") Integer employeeId) {
         return JsonUtil.format(
                 object(
                         field(
