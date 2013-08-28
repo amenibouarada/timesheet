@@ -163,8 +163,8 @@ function addNewRow() {
     dojo.addClass(projectTasksCell, "top_align");
     var projectTasksSelect = dojo.doc.createElement("select");
     dojo.attr(projectTasksSelect, {
-        id:"taskName_id_" + newRowIndex,
-        name:"timeSheetTablePart[" + newRowIndex + "].taskName",
+        id:"projectTask_id_" + newRowIndex,
+        name:"timeSheetTablePart[" + newRowIndex + "].projectTaskId",
         onchange:"setTaskDescription(" + newRowIndex + ")"
     });
     insertEmptyOption(projectTasksSelect);
@@ -290,7 +290,7 @@ function setActDescription(rowIndex){
 function setTaskDescription(rowIndex){
     var label = dojo.byId("task_description_" + rowIndex);
     if (label == null) { return; }
-    var task = (dojo.byId("taskName_id_"+rowIndex)).value;
+    var task = (dojo.byId("projectTask_id_"+rowIndex)).value;
     var finded = false;
     for (var i = 0; i < projectTaskList.length; i++) {
         for (var j = 0; j < projectTaskList[i].projTasks.length; j++) {
@@ -635,7 +635,7 @@ function typeActivityChange(obj) {
     }
 
     if ( ! isEnableTaskSelect(rowIndex)){
-        dojo.attr("taskName_id_" + rowIndex, {
+        dojo.attr("projectTask_id_" + rowIndex, {
             disabled:"disabled",
             value:"0"
         });
@@ -725,7 +725,7 @@ function projectChange(obj) {
     var selectId = dojo.attr(select, "id");
     var projectId = select.value;
     var rowIndex = selectId.substring(selectId.lastIndexOf("_") + 1, selectId.length);
-    var taskSelect = dojo.byId("taskName_id_" + rowIndex);
+    var taskSelect = dojo.byId("projectTask_id_" + rowIndex);
     var taskOption = null;
     taskSelect.options.length = 0;
     if ( isEnableTaskSelect(rowIndex) ){
@@ -878,7 +878,7 @@ function reloadRowsState() {
         }
         setActDescription(i);
 
-        var taskSelect = dojo.byId("taskName_id_" + i);
+        var taskSelect = dojo.byId("projectTask_id_" + i);
         if (dojo.attr(taskSelect, "disabled") != "disabled") {
             for (var j = 0; j < selectedProjectTasks.length; j++) {
                 if (selectedProjectTasks[j].row == i) {
@@ -985,7 +985,7 @@ function resetRowState(rowIndex, resetActType) {
     var labelDescription = dojo.byId("act_description_" + rowIndex);
     labelDescription.innerHtml = "";
     setActDescription(rowIndex);
-    dojo.attr("taskName_id_" + rowIndex, {
+    dojo.attr("projectTask_id_" + rowIndex, {
         disabled:"disabled",
         value:"0"
     });
