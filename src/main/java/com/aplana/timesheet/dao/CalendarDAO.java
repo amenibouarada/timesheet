@@ -150,8 +150,9 @@ public class CalendarDAO {
                         "left outer join c.holidays as h with h.region.id is null or h.region.id=:region " +
                         "where c.calDate>:calDatePar and h.id is null " +
                         "order by c.calDate asc " +
-                        "limit 1"
-        ).setParameter("calDatePar", new Date(day.getCalDate().getTime())).setParameter("region", region.getId());
+                        "limit 1")
+                .setParameter("calDatePar", new Date(day.getCalDate().getTime()))
+                .setParameter("region", region.getId());
 
         return ( Calendar ) query.getResultList().get( 0 );
     }
@@ -195,18 +196,39 @@ public class CalendarDAO {
         final Query query = entityManager.createQuery(
                 "select count(c) - count(h)" +
                     " from Calendar c" +
-                    " left outer join c.holidays h" +
+                    " left outer join c.holidays h with (h.region.id is null or h.region.id = :regionId)" +
                     " where YEAR(c.calDate) = :year and MONTH(c.calDate) = :month" +
-                    " and (h.region is null or h.region = :region) and c.calDate >= :from_date"
-        ).setParameter("region", region).setParameter("year", year).
-                setParameter("month", month).setParameter("from_date", fromDate);
+                    " and c.calDate >= :from_date")
+                .setParameter("regionId", region.getId())
+                .setParameter("year", year)
+                .setParameter("month", month)
+                .setParameter("from_date", fromDate);
 
         return ((Long) query.getSingleResult()).intValue();
     }
 
     public int getWorkDaysCountForRegion(Region region, Integer year, Integer month, @Nullable Date fromDate,
                                          @Nullable Date toDate) {
-        final CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        final Date qFromDate = (fromDate != null) ? fromDate : DateTimeUtil.stringToDateForDB(DateTimeUtil.MIN_DATE);
+        final Date qToDate = (toDate != null) ? toDate : DateTimeUtil.stringToDateForDB(DateTimeUtil.MAX_DATE);
+
+        final Query query = entityManager.createQuery(
+                        " select count(c)-count(h)" +
+                        " from Calendar c" +
+                        " left join c.holidays h with (h.region.id is null or h.region.id = :regionId)" +
+                        " where YEAR(c.calDate) = :year and MONTH(c.calDate) = :month" +
+                        " and c.calDate >= :dateBeg" +
+                        " and c.calDate < :dateEnd")
+                .setParameter("year", year)
+                .setParameter("month", month)
+                .setParameter("regionId", region.getId())
+                .setParameter("dateBeg", qFromDate)
+                .setParameter("dateEnd", qToDate);
+
+        return ((Long) query.getSingleResult()).intValue();
+
+/*  проблемы вставки условий в секцию left join on (xxx = 1 and yyy = 2) */
+/*        final CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         final CriteriaQuery<Object> criteriaQuery = criteriaBuilder.createQuery();
         final Root<Calendar> from = criteriaQuery.from(Calendar.class);
         final Join<Object, Object> join = from.join("holidays", JoinType.LEFT);
@@ -255,7 +277,7 @@ public class CalendarDAO {
 
         select.where(predicates.toArray(new Predicate[predicates.size()]));
 
-        return ((Long) entityManager.createQuery(select).getSingleResult()).intValue();
+        return ((Long) entityManager.createQuery(select).getSingleResult()).intValue();*/
     }
 
     public Date tryGetMaxDateMonth(Integer year, Integer month) {
@@ -292,11 +314,13 @@ public class CalendarDAO {
         final Query query = entityManager.createQuery(
                 "select count(c) - count(h)" +
                         " from Calendar c" +
-                        " left outer join c.holidays h" +
+                        " left outer join c.holidays h with (h.region.id is null or h.region.id = :regionId)" +
                         " where YEAR(c.calDate) = :year and MONTH(c.calDate) = :month" +
-                        " and (h.region is null or h.region = :region) and c.calDate <= :toDate"
-        ).setParameter("region", region).setParameter("year", year).
-                setParameter("month", month).setParameter("toDate", toDate);
+                        " and c.calDate <= :toDate")
+                .setParameter("regionId", region.getId())
+                .setParameter("year", year)
+                .setParameter("month", month)
+                .setParameter("toDate", toDate);
 
         return ((Long) query.getSingleResult()).intValue();
     }
