@@ -368,6 +368,9 @@ function planBoxNotEmpty() {
 }
 
 function findEmployeeById(employeeId){
+    if (!employeeId){
+        return;
+    }
     for (var i = 0; i < employeeList.length; i++){
         for (var j = 0; j < employeeList[i].divEmps.length ; j++){
             if (employeeList[i].divEmps[j].id == employeeId){
@@ -380,8 +383,13 @@ function findEmployeeById(employeeId){
 /* Устанавливает компоненту calDate дату по умолчанию. */
 function setDefaultDate(employeeId) {
     var employee = findEmployeeById(employeeId);
-    if (!employee) return;
     var date_picker = dijit.byId("calDate");
+    if (!employee) {
+        date_picker.set('disabled', true);
+        return;
+    } else {
+        date_picker.set('disabled', false);
+    }
     date_picker.set("displayedValue", employee.dateByDefault);
 }
 
@@ -511,47 +519,49 @@ function textareaAutoGrow(obj) {
  * значения в списке подразделений.
  */
 function divisionChange(obj) {
-    var divisionId = null;
     var employeeSelect = dojo.byId("employeeId");
-    var employeeOption = null;
+    var divisionId =  obj.target == null ? obj.value : obj.target.value;
 
-    if (obj.target == null) {
-        divisionId = obj.value;
-    }
-    else {
-        divisionId = obj.target.value;
-    }
     //Очищаем список сотрудников.
     employeeSelect.options.length = 0;
-    for (var i = 0; i < employeeList.length; i++) {
-        if (divisionId == employeeList[i].divId) {
-            insertEmptyOption(employeeSelect);
-            for (var j = 0; j < employeeList[i].divEmps.length; j++) {
-                if (employeeList[i].divEmps[j].id != 0) {
-                    employeeOption = dojo.doc.createElement("option");
-                    dojo.attr(employeeOption, {
-                        value:employeeList[i].divEmps[j].id
-                    });
-                    employeeOption.title = employeeList[i].divEmps[j].value;
-                    employeeOption.innerHTML = employeeList[i].divEmps[j].value;
-                    employeeSelect.appendChild(employeeOption);
+
+    //заполняем списк сотрудников относительно выбранного подразделения
+    if (divisionId == 0) {
+        insertEmptyOption(employeeSelect);
+        onEmployeeChange(employeeSelect)
+        employeeSelect.disabled = true;
+    } else {
+        var employeeOption = null;
+        employeeSelect.disabled = false;
+        for (var i = 0; i < employeeList.length; i++) {
+            if (divisionId == employeeList[i].divId) {
+                insertEmptyOption(employeeSelect);
+                for (var j = 0; j < employeeList[i].divEmps.length; j++) {
+                    if (employeeList[i].divEmps[j].id != 0) {
+                        employeeOption = dojo.doc.createElement("option");
+                        dojo.attr(employeeOption, {
+                            value:employeeList[i].divEmps[j].id
+                        });
+                        employeeOption.title = employeeList[i].divEmps[j].value;
+                        employeeOption.innerHTML = employeeList[i].divEmps[j].value;
+                        employeeSelect.appendChild(employeeOption);
+                    }
                 }
             }
         }
+        sortSelectOptions(employeeSelect);
     }
-    sortSelectOptions(employeeSelect);
-    if (divisionId == 0) {
-        insertEmptyOption(employeeSelect);
-    }
+
     var rows = dojo.query(".row_number");
+    var activityType;
     for (var i = 0; i < rows.length; i++) {
-        if ((dojo.byId("activity_type_id_" + i).value == "12")
-            || (dojo.byId("activity_type_id_" + i).value == "42")){
+        activityType = dojo.byId("activity_type_id_" + i).value;
+        //TODO "42", "12" и т.д. надо заменить на енум
+        if ((activityType == "12") || (activityType == "42")){
             fillProjectList(i, "12");
         }else{
-            fillProjectList(i, dojo.byId("activity_type_id_" + i).value);
+            fillProjectList(i, activityType);
         }
-
     }
 }
 
@@ -1229,123 +1239,142 @@ function checkDurationThenSendForm(){
     var isVacation = false;
     var isDivisionLeader = false;
 
-    dojo.xhrGet({
-        url: getContextPath() + "/calendar/isholiday",
-        headers: {
-            "If-Modified-Since":"Sat, 1 Jan 2000 00:00:00 GMT"
-        },
-        handleAs: "text",
-        timeout: 1000,
-        failOk: true,
-        content: { date: dijit.byId('calDate').get('value').format("yyyy-mm-dd"), employeeId: dojo.byId('employeeId').value },
-        sync: true,
+    var formattedDate;
+    var divisionId = dojo.byId('divisionId').value;
+    var employeeId = dojo.byId('employeeId').value;
+    var pickedDate = dijit.byId('calDate').get('value');
 
-        load: function(dataAsText, ioArgs) {
-            var data;
-
-            try {
-                data = dojo.fromJson(dataAsText);
-            } catch (e) {}
-
-            if (data) {
-                isHoliday = data.isHoliday;
-            }
+    if (typeof divisionId == typeof undefined || divisionId == null || divisionId == 0) {
+        alert("Укажите подразделение, сотрудника и дату");
+    } else if (typeof employeeId == typeof undefined || employeeId == null || employeeId == 0) {
+        alert("Укажите сотрудника и дату");
+    } else {
+        if (pickedDate) {
+            formattedDate = pickedDate.format("yyyy-mm-dd");
         }
-    });
 
-    dojo.xhrGet({
-        url: getContextPath() + "/calendar/isvacationwithoutplanned",
-        headers: {
-            "If-Modified-Since":"Sat, 1 Jan 2000 00:00:00 GMT"
-        },
-        handleAs: "text",
-        timeout: 1000,
-        failOk: true,
-        content: { date: dijit.byId('calDate').get('value').format("yyyy-mm-dd"), employeeId: dojo.byId('employeeId').value },
-        sync: true,
+        dojo.xhrGet({
+            url:getContextPath() + "/calendar/isholiday",
+            headers:{
+                "If-Modified-Since":"Sat, 1 Jan 2000 00:00:00 GMT"
+            },
+            handleAs:"text",
+            timeout:1000,
+            failOk:true,
+            content:{ date:formattedDate, employeeId:employeeId },
+            sync:true,
 
-        load: function(dataAsText, ioArgs) {
-            var data;
+            load:function (dataAsText, ioArgs) {
+                var data;
 
-            try {
-                data = dojo.fromJson(dataAsText);
-            } catch (e) {}
+                try {
+                    data = dojo.fromJson(dataAsText);
+                } catch (e) {
+                }
 
-            if (data) {
-                isVacation = data.isVacation
+                if (data) {
+                    isHoliday = data.isHoliday;
+                }
             }
-        }
-    });
-
-    dojo.xhrGet({
-        url: getContextPath() + "/employee/isDivisionLeader",
-        headers: {
-            "If-Modified-Since":"Sat, 1 Jan 2000 00:00:00 GMT"
-        },
-        handleAs: "text",
-        timeout: 1000,
-        failOk: true,
-        content: { employeeId: dojo.byId('employeeId').value },
-        sync: true,
-
-        load: function(dataAsText, ioArgs) {
-            var data;
-            try {
-                data = dojo.fromJson(dataAsText);
-            } catch (e) {}
-
-            if (data) {
-                isDivisionLeader = data.isDivisionLeader
-            }
-        }
-    });
-
-    var check = (((totalDuration < (8 - undertimeThreshold)) && !isDivisionLeader)|| totalDuration > (8 + overtimeThreshold) ) || isHoliday || isVacation;
-    if ( check ) {
-        var comment = dijit.byId("overtimeCauseComment");
-
-        /*comment.on("mouseover", function() {
-            tooltip.show(this.tooltip);
         });
 
-        comment.on("mouseout", function() {
-            tooltip.hide();
-        });*/
+        dojo.xhrGet({
+            url:getContextPath() + "/calendar/isvacationwithoutplanned",
+            headers:{
+                "If-Modified-Since":"Sat, 1 Jan 2000 00:00:00 GMT"
+            },
+            handleAs:"text",
+            timeout:1000,
+            failOk:true,
+            content:{ date:formattedDate, employeeId:employeeId },
+            sync:true,
 
-        var select_box = dijit.byId("overtimeCause");
+            load:function (dataAsText, ioArgs) {
+                var data;
 
-        select_box.removeOption(select_box.getOptions());
-        select_box.addOption({ value: 0, label: "<div style='visibility: hidden;'>some invisible text, don't remove me!</div>" });
+                try {
+                    data = dojo.fromJson(dataAsText);
+                } catch (e) {
+                }
 
-        var evald_json = isHoliday || isVacation ? workOnHolidayCauseList : (totalDuration < 8 ? unfinishedDayCauseList : overtimeCauseList);
+                if (data) {
+                    isVacation = data.isVacation
+                }
+            }
+        });
 
-        for (var key in evald_json) {
-            var row = evald_json[key];
-            select_box.addOption({ value: row.id, label: row.value });
+        dojo.xhrGet({
+            url:getContextPath() + "/employee/isDivisionLeader",
+            headers:{
+                "If-Modified-Since":"Sat, 1 Jan 2000 00:00:00 GMT"
+            },
+            handleAs:"text",
+            timeout:1000,
+            failOk:true,
+            content:{ employeeId:employeeId },
+            sync:true,
+
+            load:function (dataAsText, ioArgs) {
+                var data;
+                try {
+                    data = dojo.fromJson(dataAsText);
+                } catch (e) {
+                }
+
+                if (data) {
+                    isDivisionLeader = data.isDivisionLeader
+                }
+            }
+        });
+
+        var check = (((totalDuration < (8 - undertimeThreshold)) && !isDivisionLeader) || totalDuration > (8 + overtimeThreshold) ) || isHoliday || isVacation;
+        if (check) {
+            var comment = dijit.byId("overtimeCauseComment");
+
+            /*comment.on("mouseover", function() {
+             tooltip.show(this.tooltip);
+             });
+
+             comment.on("mouseout", function() {
+             tooltip.hide();
+             });*/
+
+            var select_box = dijit.byId("overtimeCause");
+
+            select_box.removeOption(select_box.getOptions());
+            select_box.addOption({ value:0, label:"<div style='visibility: hidden;'>some invisible text, don't remove me!</div>" });
+
+            var evald_json = isHoliday || isVacation ? workOnHolidayCauseList : (totalDuration < 8 ? unfinishedDayCauseList : overtimeCauseList);
+
+            for (var key in evald_json) {
+                var row = evald_json[key];
+                select_box.addOption({ value:row.id, label:row.value });
+            }
+
+            if (defaultOvertimeCause) {
+                select_box.set('value', defaultOvertimeCause);
+            }
+
+            var holidayDisplays = isHoliday || isVacation ? "" : "none";
+
+            dojo.byId("holidayWarning").style.display = dojo.byId("typeOfCompensationContainer").style.display = holidayDisplays;
+
+            var dialog = dijit.byId("dialogOne");
+
+            dialog.set("title", "Укажите причину " + (isHoliday || isVacation ? "работы в выходной день" : (totalDuration < 8 ? "недоработок" : "переработок")));
+            dialog.show();
+        } else {
+
+            // При отправке без диалога о недоработках очищаем служебные поля
+            dojo.byId("overtimeCauseComment_hidden").value = "";
+            dojo.byId("overtimeCause_hidden").value = "";
+            dojo.byId("typeOfCompensation_hidden").value = "";
+
+            submitform('send');
         }
-
-        if (defaultOvertimeCause) {
-            select_box.set('value', defaultOvertimeCause);
-        }
-
-        var holidayDisplays = isHoliday || isVacation ? "" : "none";
-
-        dojo.byId("holidayWarning").style.display = dojo.byId("typeOfCompensationContainer").style.display = holidayDisplays;
-
-        var dialog = dijit.byId("dialogOne");
-
-        dialog.set("title", "Укажите причину " + (isHoliday || isVacation ? "работы в выходной день" : (totalDuration < 8 ? "недоработок" : "переработок")));
-        dialog.show();
-    } else {
-
-        // При отправке без диалога о недоработках очищаем служебные поля
-        dojo.byId("overtimeCauseComment_hidden").value = "";
-        dojo.byId("overtimeCause_hidden").value = "";
-        dojo.byId("typeOfCompensation_hidden").value = "";
-
-        submitform('send');
     }
 }
+
 
 
 function submitWithOvertimeCauseSet(){
