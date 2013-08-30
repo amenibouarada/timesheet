@@ -23,7 +23,7 @@
             dojo.byId("divisionId").value = ${divisionId};
             vacationCreate_divisionChange(dojo.byId("divisionId"));
             dojo.byId("employeeId").value = ${employeeId};
-            initCurrentDateInfo(${employee.id},dijit.byId('calFromDate').value,getUrl());
+            initCurrentDateInfo(${employeeId},dijit.byId('calFromDate').value,getUrl());
         });
 
         dojo.require("dijit.form.DateTextBox");

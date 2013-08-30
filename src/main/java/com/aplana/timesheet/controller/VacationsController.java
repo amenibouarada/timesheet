@@ -42,7 +42,7 @@ import static com.aplana.timesheet.util.DateTimeUtil.dateToString;
  * @version 1.1
  */
 @Controller
-public class VacationsController extends AbstractControllerForEmployeeWithYears {
+public class VacationsController extends AbstractControllerForEmployee {
 
     private static final String VACATION_FORM = "vacationsForm";
     private static final String DATE_FORMAT = "yyyy-MM-dd";
@@ -77,15 +77,8 @@ public class VacationsController extends AbstractControllerForEmployeeWithYears 
         vacationsForm.setDivisionId(employee.getDivision().getId());
         vacationsForm.setEmployeeId(employee.getId());
         vacationsForm.setRegionsIdList(getRegionIdList());
-        final ModelAndView modelAndView = createModelAndViewForEmployee("vacations", employee.getId(), employee.getDivision().getId());
-
         vacationsForm.setCalToDate(DateTimeUtil.currentYearLastDay());
         vacationsForm.setCalFromDate(DateTimeUtil.currentMonthFirstDay());
-
-        modelAndView.addObject("vacationTypes",
-                dictionaryItemService.getItemsByDictionaryId(DictionaryEnum.VACATION_TYPE.getId()));
-        modelAndView.addObject("curEmployee", securityService.getSecurityPrincipal().getEmployee());
-
         vacationsForm.setVacationType(0);
         vacationsForm.setRegions(new ArrayList<Integer>());
         // APLANATS-867
@@ -99,6 +92,7 @@ public class VacationsController extends AbstractControllerForEmployeeWithYears 
             @ModelAttribute(VACATION_FORM) VacationsForm vacationsForm,
             BindingResult result
     ) {
+        long startTime = System.currentTimeMillis();
         Integer divisionId = vacationsForm.getDivisionId();
         Integer employeeId = vacationsForm.getEmployeeId();
         Date dateFrom = DateTimeUtil.stringToDate(vacationsForm.getCalFromDate(), DATE_FORMAT);
@@ -152,7 +146,7 @@ public class VacationsController extends AbstractControllerForEmployeeWithYears 
                 )
                 ;
 
-        final ModelAndView modelAndView = createModelAndViewForEmployee("vacations", employeeId, divisionId);
+        final ModelAndView modelAndView = createMAVForEmployeeWithDivisionAndManagerAndRegion("vacations", employeeId, divisionId);
 
         final int vacationsSize = vacations.size();
 
@@ -224,7 +218,8 @@ public class VacationsController extends AbstractControllerForEmployeeWithYears 
 
         modelAndView.addObject("calDaysCount", calAndWorkDaysList);
         modelAndView.addObject(VacationsForm.MANAGER_ID, vacationsForm.getManagerId());
-
+        long stopTime = System.currentTimeMillis();
+        modelAndView.addObject("generateTime", (stopTime - startTime));
         return modelAndView;
     }
 
@@ -451,8 +446,9 @@ public class VacationsController extends AbstractControllerForEmployeeWithYears 
             }
         }
         Employee employee = securityService.getSecurityPrincipal().getEmployee();
-        final ModelAndView modelAndView = createModelAndViewForEmployee("vacationsNeedsApproval", employee.getId(), employee.getDivision().getId());
-
+        /* непонятно зачем это вызывается если эти объекты не используются */
+//        final ModelAndView modelAndView = createModelAndViewForEmployee("vacationsNeedsApproval", employee.getId(), employee.getDivision().getId());
+        final ModelAndView modelAndView = new ModelAndView("vacationsNeedsApproval");
         modelAndView.addObject("curEmployee", securityService.getSecurityPrincipal().getEmployee());
 
         final List<Vacation> vacations = vacationService.findVacationsNeedsApproval(employee.getId());

@@ -12,7 +12,10 @@ import com.aplana.timesheet.exception.controller.BusinessTripsAndIllnessControll
 import com.aplana.timesheet.form.BusinessTripsAndIllnessForm;
 import com.aplana.timesheet.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.*;
-import com.aplana.timesheet.util.*;
+import com.aplana.timesheet.util.DateNumbers;
+import com.aplana.timesheet.util.EmployeeHelper;
+import com.aplana.timesheet.util.EnumsUtils;
+import com.aplana.timesheet.util.TimeSheetUser;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import org.apache.commons.lang.StringUtils;
@@ -230,7 +233,7 @@ public class BusinessTripsAndIllnessController extends AbstractController{
         modelAndView.addObject("employeeId", employeeId);
         modelAndView.addObject("managerId", manager == null ? -1 : manager);
         modelAndView.addObject("divisionList", divisionList);
-        modelAndView.addObject("employeeListJson", employeeHelper.getEmployeeListJson(divisionList, employeeService.isShowAll(request)));
+        modelAndView.addObject("employeeListJson", employeeHelper.getEmployeeListWithLastWorkdayJson(divisionList, employeeService.isShowAll(request)));
         modelAndView.addObject("regionIds", getDefaultSelectRegion(regions));
         modelAndView.addObject("regionList", getRegionList());
         modelAndView.addObject("managerList", getManagerList());

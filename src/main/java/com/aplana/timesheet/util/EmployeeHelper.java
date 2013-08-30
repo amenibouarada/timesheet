@@ -54,17 +54,21 @@ public class EmployeeHelper {
     private RegionService regionService;
 
     @Transactional(readOnly = true)
-    public String getEmployeeListJson(List<Division> divisions, Boolean filterFired) {
-        return getEmployeeListJson(divisions, filterFired, false);
+    public String getEmployeeListWithLastWorkdayJson(List<Division> divisions, Boolean filterFired) {
+        return getEmployeeListWithLastWorkdayJson(divisions, filterFired, false);
     }
 
+    /* !!! медленная функция, ниже написаны ужатые функции */
     @Transactional(readOnly = true)
-    public String getEmployeeListJson(List<Division> divisions, Boolean filterFired, Boolean addDetails) {
+    public String getEmployeeListWithLastWorkdayJson(List<Division> divisions, Boolean filterFired, Boolean addDetails) {
         final JsonArrayNodeBuilder builder = anArrayBuilder();
 
         for (Division division : divisions) {
             final List<Employee> employees = employeeService.getEmployees(division, filterFired);
-            final Map<Integer, Date> lastWorkdays = timeSheetService.getLastWorkdayWithoutTimesheetMap(division);
+            Map<Integer, Date> lastWorkdays = new HashMap<Integer, Date>();
+            if (addDetails) {
+                lastWorkdays = timeSheetService.getLastWorkdayWithoutTimesheetMap(division);
+            }
             final JsonObjectNodeBuilder nodeBuilder = anObjectBuilder();
             final JsonArrayNodeBuilder employeesBuilder = anArrayBuilder();
 
@@ -108,6 +112,68 @@ public class EmployeeHelper {
                                         employee.getEndDate() != null ? dateToString(employee.getEndDate(), DATE_FORMAT) : ""
                                 ));
                     }
+                    employeesBuilder.withElement(objectNodeBuilder);
+                }
+            }
+            builder.withElement(nodeBuilder.withField(DIVISION_EMPLOYEES, employeesBuilder));
+        }
+        return JsonUtil.format(builder.build());
+    }
+
+    @Transactional(readOnly = true)
+    public String getEmployeeListWithDivisionAndManagerAndRegionJson(List<Division> divisions, Boolean filterFired) {
+        final JsonArrayNodeBuilder builder = anArrayBuilder();
+
+        for (Division division : divisions) {
+            final List<Employee> employees = employeeService.getEmployees(division, filterFired);
+            final JsonObjectNodeBuilder nodeBuilder = anObjectBuilder();
+            final JsonArrayNodeBuilder employeesBuilder = anArrayBuilder();
+
+            nodeBuilder.withField(DIVISION_ID, aStringBuilder(division.getId()));
+
+            if (employees.isEmpty()) {
+                employeesBuilder.withElement(
+                        anObjectBuilder().
+                                withField(ID, aStringBuilder(0)).
+                                withField(VALUE, JsonNodeBuilders.aStringBuilder(StringUtils.EMPTY))
+                );
+            } else {
+                for (Employee employee : employees) {
+                    JsonObjectNodeBuilder objectNodeBuilder = anObjectBuilder().
+                            withField(ID, aStringBuilder(employee.getId())).
+                            withField(VALUE, JsonNodeBuilders.aStringBuilder(getValue(employee))).
+                            withField(MANAGER_ID, aStringBuilder(employee.getManager() == null ? null : employee.getManager().getId())).
+                            withField(REGION_ID, aStringBuilder(employee.getRegion().getId()));
+                    employeesBuilder.withElement(objectNodeBuilder);
+                }
+            }
+            builder.withElement(nodeBuilder.withField(DIVISION_EMPLOYEES, employeesBuilder));
+        }
+        return JsonUtil.format(builder.build());
+    }
+
+    @Transactional(readOnly = true)
+    public String getEmployeeListWithDivisionJson(List<Division> divisions, Boolean filterFired) {
+        final JsonArrayNodeBuilder builder = anArrayBuilder();
+
+        for (Division division : divisions) {
+            final List<Employee> employees = employeeService.getEmployees(division, filterFired);
+            final JsonObjectNodeBuilder nodeBuilder = anObjectBuilder();
+            final JsonArrayNodeBuilder employeesBuilder = anArrayBuilder();
+
+            nodeBuilder.withField(DIVISION_ID, aStringBuilder(division.getId()));
+
+            if (employees.isEmpty()) {
+                employeesBuilder.withElement(
+                        anObjectBuilder().
+                                withField(ID, aStringBuilder(0)).
+                                withField(VALUE, JsonNodeBuilders.aStringBuilder(StringUtils.EMPTY))
+                );
+            } else {
+                for (Employee employee : employees) {
+                    JsonObjectNodeBuilder objectNodeBuilder = anObjectBuilder().
+                            withField(ID, aStringBuilder(employee.getId())).
+                            withField(VALUE, JsonNodeBuilders.aStringBuilder(getValue(employee)));
                     employeesBuilder.withElement(objectNodeBuilder);
                 }
             }

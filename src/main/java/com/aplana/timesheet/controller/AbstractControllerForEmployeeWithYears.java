@@ -34,4 +34,14 @@ public abstract class AbstractControllerForEmployeeWithYears extends AbstractCon
         return modelAndView;
     }
 
+    @Override
+    protected final ModelAndView createMAVForEmployeeWithDivision(String viewName, Integer employeeId, Integer divisionId) {
+        final ModelAndView modelAndView = super.createMAVForEmployeeWithDivision(viewName, employeeId, divisionId);
+
+        List<Calendar> years = DateTimeUtil.getYearsList(calendarService);
+
+        modelAndView.addObject(YEARS_LIST, years);
+
+        return modelAndView;
+    }
 }

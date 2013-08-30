@@ -217,7 +217,7 @@ public class TimeSheetController {
         List<Division> divisions = divisionService.getDivisions();
         result.put("divisionList", divisions);
 
-        String employeeListJson = employeeHelper.getEmployeeListJson(divisions, employeeService.isShowAll(request), true);
+        String employeeListJson = employeeHelper.getEmployeeListWithLastWorkdayJson(divisions, employeeService.isShowAll(request), true);
         result.put("employeeListJson", employeeListJson);
 
         List<DictionaryItem> categoryOfActivity = dictionaryItemService.getCategoryOfActivity();
