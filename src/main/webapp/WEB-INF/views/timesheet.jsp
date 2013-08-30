@@ -358,7 +358,6 @@
 
         <span class="label">Отчет сотрудника</span>
         <form:select path="employeeId" id="employeeId" class="without_dojo" onmouseover="tooltip.show(getTitle(this));"
-                     cssStyle="width: auto"
                      onmouseout="tooltip.hide();" onchange="onEmployeeChange(this)">
             <form:option label="" value="0"/>
         </form:select>

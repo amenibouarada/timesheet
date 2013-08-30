@@ -107,7 +107,10 @@ function colorDayWithReportFromThreeMonth(/* int */ year, /* int */ month, emplo
             error:function (err, ioArgs) {
                 if (err && ioArgs && ioArgs.args && ioArgs.args.content) {
                     // Если ошибка - не будем ничего рисовать. При следующем запросе на отрисовку - снова будет сделана попытка получения данных за этот месяц
-                    dateInfoHolder[ioArgs.args.content.queryYear + "-" + ioArgs.args.content.queryMonth  + ":" + ioArgs.args.content.employeeIdemployeeId] = null;
+                    var key = ioArgs.args.content.queryYear + "-" + ioArgs.args.content.queryMonth + ":" + ioArgs.args.content.employeeIdemployeeId;
+                    if (key && dateInfoHolder[key]) {
+                        dateInfoHolder[key] = null;
+                    }
                 }
             }
         });

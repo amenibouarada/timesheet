@@ -78,7 +78,7 @@ public class TimeSheetServiceTest extends AbstractJsonTest {
         timeSheetTableRowForm.setActivityCategoryId(RANDOM.nextInt());
     }
 
-    private String getListOfActDescriptoinForTest() {
+    private String getListOfActDescriptionForTest() {
         List<AvailableActivityCategory> availableActivityCategories = availableActivityCategoryDAO.getAllAvailableActivityCategories();
         StringBuilder result = new StringBuilder();
         result.append("[");
@@ -241,9 +241,9 @@ public class TimeSheetServiceTest extends AbstractJsonTest {
     }
 
     @Test
-    public void testGetListOfActDescriptoin() {
-        String currentResult = timeSheetService.getListOfActDescriptoin();
-        String testResult = getListOfActDescriptoinForTest();
+    public void testGetListOfActDescription() {
+        String currentResult = timeSheetService.getListOfActDescription();
+        String testResult = getListOfActDescriptionForTest();
         assertJsonEquals(testResult, currentResult);
     }
 

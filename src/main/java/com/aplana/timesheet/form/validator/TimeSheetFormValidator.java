@@ -130,8 +130,7 @@ public class TimeSheetFormValidator extends AbstractValidator {
         }*/
 
         } else {
-            errors.rejectValue("timeSheetForm",
-                    "error.tsform.isnull",
+            errors.reject("error.tsform.isnull",
                     "Не удалось получить параметры формы");
             logger.error("Can not validate tsform, object is null");
         }

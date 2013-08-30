@@ -49,6 +49,8 @@ public class TimeSheetFormValidatorTest1 extends AbstractTest {
     TSPropertyProvider propertyProviderMock;
     @Mock
     VacationService vacationServiceMock;
+    @Mock
+    OvertimeCauseService overtimeCauseServiceMock;
     @InjectMocks
     private TimeSheetFormValidator timeSheetFormValidator;
 
@@ -97,6 +99,20 @@ public class TimeSheetFormValidatorTest1 extends AbstractTest {
         projectTask.setId(276);
         projectTask.setProject(project);
 
+        // причина переработки
+        Dictionary overtimeDictionary = new Dictionary();
+        overtimeDictionary.setId(11);
+        DictionaryItem overtimeCause = new DictionaryItem();
+        overtimeCause.setId(107);
+        overtimeCause.setValue("Забылся");
+        overtimeCause.setDictionary(overtimeDictionary);
+
+        // рабочее место
+        DictionaryItem workplace = new DictionaryItem();
+        workplace.setId(49);
+        workplace.setValue("В офисе");
+
+
         TimeSheetTableRowForm tsRow1 = new TimeSheetTableRowForm();
         tsRow1.setProjectTaskId(projectTask.getId()); // project_task - Развитие и поддержка TimeSheet
         tsRow1.setDescription("Описание строки 1");
@@ -106,7 +122,7 @@ public class TimeSheetFormValidatorTest1 extends AbstractTest {
         tsRow1.setActivityTypeId(actType.getId());
         tsRow1.setActivityCategoryId(actCat.getId());
         tsRow1.setProjectRoleId(projectRole.getId());
-        tsRow1.setWorkplaceId(49);
+        tsRow1.setWorkplaceId(workplace.getId());
 
         TimeSheetForm testedForm1 = new TimeSheetForm();
         testedForm1.setDivisionId(division.getId());
@@ -116,7 +132,7 @@ public class TimeSheetFormValidatorTest1 extends AbstractTest {
         testedForm1.setTimeSheetTablePart(tsRowList);
         testedForm1.setCalDate(calDate);
         testedForm1.setPlan("План работ формы 1");
-        testedForm1.setOvertimeCause(107);
+        testedForm1.setOvertimeCause(overtimeCause.getId());
         testedForm1.setOvertimeCauseComment("Я трудоголик и работаю без выходных");
         testedForm1.setTypeOfCompensation(117);
         testedForm1.setEffortInNextDay(effort.getId());
@@ -147,6 +163,15 @@ public class TimeSheetFormValidatorTest1 extends AbstractTest {
 
         when(projectTaskServiceMock.find(project.getId(), projectTask.getId())).thenReturn(projectTask);
 
+        when(overtimeCauseServiceMock.isOvertimeDuration(testedForm1)).thenReturn(Boolean.TRUE);
+        when(overtimeCauseServiceMock.isUndertimeDuration(testedForm1)).thenReturn(Boolean.FALSE);
+        when(dictionaryItemServiceMock.find(testedForm1.getOvertimeCause())).thenReturn(overtimeCause);
+
+        when(dictionaryItemServiceMock.find(workplace.getId(), DictionaryEnum.WORKPLACE.getId())).thenReturn(workplace);
+
+        when(projectServiceMock.findActive(project.getId())).thenReturn(project);
+
+        when(divisionServiceMock.isValidDivisionProject(testedForm1.getDivisionId(), project.getId())).thenReturn(Boolean.TRUE);
         /* тест */
         timeSheetFormValidator.validate(testedForm1, errors);
 
