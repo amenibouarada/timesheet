@@ -195,6 +195,16 @@ public class EmployeeHelper {
         return JsonUtil.format(builder.build());
     }
 
+    /* возвращает список всех активных сотрудников с минимальными данными */
+    public String getEmployeesJson() {
+        List<Employee> employees = employeeService.getEmployees();
+        if (employees!= null && !employees.isEmpty()) {
+            return makeEmployeeListInJSON(employees);
+        } else {
+            return StringUtils.EMPTY;
+        }
+    }
+
     @Transactional(readOnly = true)
     public String getManagerListJson(){
         final JsonArrayNodeBuilder builder = anArrayBuilder();

@@ -11,6 +11,7 @@ import com.aplana.timesheet.form.BusinessTripsAndIllnessAddForm;
 import com.aplana.timesheet.form.validator.BusinessTripsAndIllnessAddFormValidator;
 import com.aplana.timesheet.service.*;
 import com.aplana.timesheet.util.DateTimeUtil;
+import com.aplana.timesheet.util.EmployeeHelper;
 import com.aplana.timesheet.util.EnumsUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +56,8 @@ public class BusinessTripsAndIllnessAddController extends AbstractController{
     ProjectService projectService;
     @Autowired
     BusinessTripsAndIllnessAddFormValidator businessTripsAndIllnessAddFormValidator;
+    @Autowired
+    EmployeeHelper employeeHelper;
 
     public static final String DATE_FORMAT = "dd.MM.yyyy";
 
@@ -88,6 +91,11 @@ public class BusinessTripsAndIllnessAddController extends AbstractController{
         tsForm.setBeginDate(new Date());
         tsForm.setEndDate(new Date());
         return getModelAndViewCreation(employee);
+    }
+
+    @RequestMapping(value = "/businesstripsandillnessadd/")
+    public ModelAndView showCreateBusinessTripOrIllnessForm (){
+        return new ModelAndView(String.format("redirect:/businesstripsandillnessadd/-1"));
     }
 
     /**
@@ -207,7 +215,7 @@ public class BusinessTripsAndIllnessAddController extends AbstractController{
             tsForm.setEndDate(businessTrip.getEndDate());
             tsForm.setEmployee(businessTrip.getEmployee());
             tsForm.setBusinessTripType(businessTrip.getType().getId());
-            if (businessTrip.getType().getId().equals(BusinessTripTypesEnum.PROJECT)) {
+            if (businessTrip.getType().getId().equals(BusinessTripTypesEnum.PROJECT.getId())) {
                 tsForm.setProjectId(businessTrip.getProject().getId());
             }
             tsForm.setComment(businessTrip.getComment());
@@ -294,9 +302,8 @@ public class BusinessTripsAndIllnessAddController extends AbstractController{
     private ModelAndView getModelAndViewCreation(Employee employee) {
 
         ModelAndView modelAndView = new ModelAndView("businesstripsandillnessadd");
-        modelAndView.addObject("employeeId", employee.getId());
-        modelAndView.addObject("employeeName", employee.getName());
-
+        if (employee != null) modelAndView.addObject("employeeId", employee.getId());
+        modelAndView.addObject("employeeList", employeeService.getEmployees());
         return modelAndView;
     }
 

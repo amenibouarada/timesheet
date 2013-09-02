@@ -36,8 +36,13 @@
 
         var errors;
 
+
         function getEmployeeId() {
-            return "${employeeId}";
+            if (dojo.byId("employeeId")) {
+                return parseInt(dojo.byId("employeeId").value);
+            } else {
+                return ${employeeId}
+            }
         }
 
         initCurrentDateInfo(getEmployeeId());
@@ -97,7 +102,8 @@
         function submitform(){
             if (validate()){
                 if (${reportId == null}){
-                    mainForm.action = "<%=request.getContextPath()%>/businesstripsandillnessadd/tryAdd/" + "${employeeId}";
+                    var employeeId = getEmployeeId();
+                    mainForm.action = "<%=request.getContextPath()%>/businesstripsandillnessadd/tryAdd/" + employeeId;
                 } else {
                     mainForm.action = "<%=request.getContextPath()%>/businesstripsandillnessadd/trySave/" + "${reportId}";
                 }
@@ -106,17 +112,22 @@
         }
 
         function cancelform(){
-            var reportType = parseInt(dojo.byId("reportType").value);
-
-            switch (reportType) {
-                case illnessReportType:
-                    mainForm.action = "<%=request.getContextPath()%>/businesstripsandillness/illness/" + "${employeeId}";
-                    break;
-                case businessTripReportType :
-                    mainForm.action = "<%=request.getContextPath()%>/businesstripsandillness/businesstrip/" + "${employeeId}";
-                    break;
-                default: mainForm.action = "<%=request.getContextPath()%>/businesstripsandillness/";;
-            }
+//            закоментированно до лучших времён
+            <%--var reportType = parseInt(dojo.byId("reportType").value);--%>
+            <%--var employeeId = parseInt(dojo.byId("employeeId").value);--%>
+            <%--if (employeeId > 0) {--%>
+                <%--switch (reportType) {--%>
+                    <%--case illnessReportType:--%>
+                        <%--mainForm.action = "<%=request.getContextPath()%>/businesstripsandillness/illness/" + employeeId;--%>
+                        <%--break;--%>
+                    <%--case businessTripReportType :--%>
+                        <%--mainForm.action = "<%=request.getContextPath()%>/businesstripsandillness/businesstrip/" + employeeId;--%>
+                        <%--break;--%>
+                    <%--default: mainForm.action = "<%=request.getContextPath()%>/businesstripsandillness/";--%>
+                <%--}--%>
+            <%--} else {--%>
+                mainForm.action = "<%=request.getContextPath()%>/businesstripsandillness/";
+//            }
 
             mainForm.submit();
         }
@@ -225,12 +236,12 @@
                 var beginDate = dojo.byId("beginDate").value;
                 var endDate = dojo.byId("endDate").value;
                 var projectIdElement = dojo.byId("projectId");
-
+                var employeeId = getEmployeeId();
                 projectIdElement.innerHTML =
                         "<img src=\"<c:url value="/resources/img/loading_small.gif"/>\"/>";
 
                 dojo.xhrGet({
-                    url: "<%= request.getContextPath()%>/businesstripsandillnessadd/getprojects/${employeeId}/" + beginDate + "/" + endDate + "/",
+                    url: "<%= request.getContextPath()%>/businesstripsandillnessadd/getprojects/" + employeeId +"/"+ beginDate + "/" + endDate + "/",
                     handleAs: "json",
 
                     load: function(data) {
@@ -259,6 +270,9 @@
                 projectIdElement.appendChild(projectOption);
             }
             sortSelectOptions(projectIdElement);
+            if (${businesstripsandillnessadd.projectId != null}) {
+                projectIdElement.value = ${(businesstripsandillnessadd.projectId != null) ? businesstripsandillnessadd.projectId : 0};
+            }
         }
 
     </script>
@@ -273,7 +287,18 @@
         </div>
 
         <div class="lowspace checkboxesselect">
-            ${employeeName}
+            <c:choose>
+                <c:when test="${reportId == null}">
+                    <form:select path="employeeId" id="employeeId" onmouseover="tooltip.show(getTitle(this));"
+                                 onmouseout="tooltip.hide();" required="true">
+                        <form:options items="${employeeList}" itemLabel="name" itemValue="id"/>
+                        <form:option value="-1" label="Выберите сотрудника"/>
+                    </form:select>
+                </c:when>
+                <c:otherwise>
+                    ${businesstripsandillnessadd.employee.name}
+                </c:otherwise>
+            </c:choose>
         </div>
 
         <c:choose>

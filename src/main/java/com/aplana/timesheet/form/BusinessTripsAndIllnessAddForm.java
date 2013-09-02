@@ -14,9 +14,9 @@ import java.util.List;
  * Date: 23.01.13
  */
 public class BusinessTripsAndIllnessAddForm {
-
     private Integer reportId = null;
     private Employee employee;
+    private Integer employeeId;
     private Date beginDate = new Date();
     private Date endDate;
     private String comment;
@@ -122,5 +122,13 @@ public class BusinessTripsAndIllnessAddForm {
 
     public void setReportType(Integer reportType) {
         this.reportType = reportType;
+    }
+
+    public Integer getEmployeeId() {
+        return employeeId;
+    }
+
+    public void setEmployeeId(Integer employeeId) {
+        this.employeeId = employeeId;
     }
 }
