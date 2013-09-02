@@ -11,10 +11,7 @@ import com.aplana.timesheet.form.validator.CreateVacationFormValidator;
 import com.aplana.timesheet.service.*;
 import com.aplana.timesheet.util.DateTimeUtil;
 import com.aplana.timesheet.util.EmployeeHelper;
-import com.aplana.timesheet.util.ViewReportHelper;
 import org.apache.commons.lang.BooleanUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.time.DateFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +23,6 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.sql.Timestamp;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -105,7 +101,7 @@ public class CreateVacationController {
         modelAndView.addObject("divisionId", employee.getDivision().getId());
         modelAndView.addObject("employeeId", employee.getId());
         modelAndView.addObject("divisionList", divisionList);
-        modelAndView.addObject("employeeListJson", employeeHelper.getEmployeeListJson(divisionList, employeeService.isShowAll(request)));
+        modelAndView.addObject("employeeListJson", employeeHelper.getEmployeeListWithDivisionJson(divisionList, employeeService.isShowAll(request)));
         modelAndView.addObject("typeWithRequiredComment", CreateVacationFormValidator.TYPE_WITH_REQUIRED_COMMENT);
         modelAndView.addObject("typeVacationPlanned", VacationTypesEnum.PLANNED.getId());
 

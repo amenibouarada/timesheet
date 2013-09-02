@@ -53,10 +53,47 @@ public abstract class AbstractControllerForEmployee extends AbstractController{
         modelAndView.addObject(EMPLOYEE, employee);
         modelAndView.addObject("divisionList", divisionList);
         modelAndView.addObject("fullProjectListJsonWithDivisionId", projectService.getProjectListJson(divisionList, true));
-        modelAndView.addObject("employeeListJson", employeeHelper.getEmployeeListJson(divisionList, employeeService.isShowAll(request)));
+        modelAndView.addObject("employeeListJson", employeeHelper.getEmployeeListWithLastWorkdayJson(divisionList, employeeService.isShowAll(request)));
         modelAndView.addObject("managerListJson", employeeHelper.getManagerListJson());
 
         return modelAndView;
     }
 
+    protected ModelAndView createMAVForEmployeeWithDivisionAndManagerAndRegion(String viewName, Integer employeeId, Integer divisionId) {
+        final ModelAndView modelAndView = new ModelAndView(viewName);
+
+        divisionList = divisionService.getDivisions();
+
+        modelAndView.addObject("divisionId", divisionId);
+        modelAndView.addObject("employeeId", employeeId);
+        modelAndView.addObject("divisionList", divisionList);
+        modelAndView.addObject("fullProjectListJsonWithDivisionId", projectService.getProjectListJson(divisionList, true));
+        modelAndView.addObject("employeeListJson",
+                employeeHelper.getEmployeeListWithDivisionAndManagerAndRegionJson(
+                        divisionList, employeeService.isShowAll(request)
+                )
+        );
+        modelAndView.addObject("managerListJson", employeeHelper.getManagerListJson());
+
+        return modelAndView;
+    }
+
+    protected ModelAndView createMAVForEmployeeWithDivision(String viewName, Integer employeeId, Integer divisionId) {
+        final ModelAndView modelAndView = new ModelAndView(viewName);
+
+        Employee employee = employeeService.find(employeeId);
+
+        divisionList = divisionService.getDivisions();
+
+        modelAndView.addObject("employeeId", employeeId);
+        modelAndView.addObject(EMPLOYEE, employee);
+        modelAndView.addObject("divisionList", divisionList);
+        modelAndView.addObject("employeeListJson",
+                employeeHelper.getEmployeeListWithDivisionJson(
+                        divisionList, employeeService.isShowAll(request)
+                )
+        );
+
+        return modelAndView;
+    }
 }

@@ -529,180 +529,180 @@
 
     <%------------------------------TABLE-----------------------------------%>
 
-    <c:if test="${not hasAnyEmployee}">
-        <div style="margin-left: 10px">
-            <b>По заданным критериям не найдено ни одного сотрудника.</b>
-        </div>
-    </c:if>
-
-    <c:if test="${not hasAnyReports and hasAnyEmployee}">
-        <div style="margin-left: 10px">
-            <b>Нет данных о
-                    <c:if test="${reportFormed == 6}">
-                        болезнях
-                    </c:if>
-                    <c:if test="${reportFormed == 7}">
-                        командировках
-                    </c:if>
-                сотрудников за выбранный период</b>
-        </div>
-    </c:if>
-
-    <c:if test="${hasAnyReports}">
-        <table id="reporttable">
-            <thead>
-                <tr>
-                    <sec:authorize access="hasRole('CHANGE_ILLNESS_BUSINESS_TRIP')">
-                    <c:choose>
-                         <c:when test="${forAll!=true}">
-                          <th width="15" class="iconbutton">
-                            <img src="<c:url value="/resources/img/add.gif"/>" title="Создать" onclick="createBusinessTripOrIllness();"/>
-                          </th>
-                         </c:when>
-                         <c:otherwise>
-                             <th class="tight"></th>
-                         </c:otherwise>
-                    </c:choose>
-                    <th class="tight"></th>
-                    <th class="tight"></th>
-                    </sec:authorize>
-                    <th width="200">Сотрудник</th>
-                    <th width="200">Центр</th>
-                    <th width="200">Регион</th>
-                    <th width="100">Дата с</th>
-                    <th width="100">Дата по</th>
-                    <th width="100">Кол-во календарных дней</th>
-                    <th width="100">Кол-во <br>рабочих дней</th>
-                    <c:choose>
-                        <c:when test="${reportFormed == 7}">
-                            <th width="160">Проектная/внепроектная</th>
-                        </c:when>
-                        <c:when test="${reportFormed == 6}">
-                            <th width="160">Основание</th>
-                        </c:when>
-                    </c:choose>
-                    <th width="200">Комментарий</th>
-                </tr>
-            </thead>
-
-            <c:forEach var="employeeReport" items="${reportsMap}">
-                <c:set var="reports" value="${employeeReport.value}"/>
+    <table id="reporttable">
+        <thead>
+            <tr>
+                <sec:authorize access="hasRole('CHANGE_ILLNESS_BUSINESS_TRIP')">
                 <c:choose>
-                    <c:when test="${fn:length(reports.periodicalsList) > 0}">
-                        <tbody>
-
-                            <c:forEach var="report" items="${reports.periodicalsList}">
-                                <tr>
-                                    <sec:authorize access="hasRole('CHANGE_ILLNESS_BUSINESS_TRIP')">
-                                    <td></td>
-                                    <td>
-                                            <div class="iconbutton">
-                                                <img src="<c:url value="/resources/img/edit.png"/>" title="Редактировать"
-                                                     onclick="editReport(${report.id});" />
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="iconbutton">
-                                                <c:choose>
-                                                    <c:when test="${reportFormed == 6}">
-                                                        <img src="<c:url value="/resources/img/delete.png"/>" title="Удалить"
-                                                             onclick="deleteReport(this.parentElement, ${report.id}, ${report.calendarDays}, ${report.workingDays}, ${report.workDaysOnIllnessWorked});" />
-                                                    </c:when>
-                                                    <c:when test="${reportFormed == 7}">
-                                                        <img src="<c:url value="/resources/img/delete.png"/>" title="Удалить"
-                                                             onclick="deleteReport(this.parentElement, ${report.id}, ${report.calendarDays}, ${report.workingDays});" />
-                                                    </c:when>
-                                                </c:choose>
-                                            </div>
-                                        </td>
-                                    </sec:authorize>
-                                    <td class="textcenter">${employeeReport.key.name}</td>
-                                    <td class="textcenter">${employeeReport.key.division.name}</td>
-                                    <td class="textcenter">${employeeReport.key.region.name}</td>
-                                    <td class="textcenter"><fmt:formatDate value="${report.beginDate}" pattern="dd.MM.yyyy"/></td>
-                                    <td class="textcenter"><fmt:formatDate value="${report.endDate}" pattern="dd.MM.yyyy"/></td>
-                                    <td class="textcenter">${report.calendarDays}</td>
-                                    <td class="textcenter">${report.workingDays}</td>
-                                    <c:choose>
-                                        <c:when test="${reportFormed == 6}">
-                                            <td class="textcenter">${report.reason.value}</td>
-                                        </c:when>
-                                        <c:when test="${reportFormed == 7}">
-                                            <td class="textcenter">
-                                                ${report.type.value}
-                                                    <c:if test="${report.project != null}">
-                                                        (${report.project.name})
-                                                    </c:if>
-                                            </td>
-                                        </c:when>
-                                    </c:choose>
-                                    <td>${report.comment}</td>
-                                </tr>
-                            </c:forEach>
-
-                        </tbody>
-                    </c:when>
-
+                     <c:when test="${forAll!=true}">
+                      <th width="15" class="iconbutton">
+                        <img src="<c:url value="/resources/img/add.gif"/>" title="Создать" onclick="createBusinessTripOrIllness();"/>
+                      </th>
+                     </c:when>
+                     <c:otherwise>
+                         <th class="tight"></th>
+                     </c:otherwise>
                 </c:choose>
-            </c:forEach>
-            <c:choose>
-                <c:when test="${forAll != true}">
+                <th class="tight"></th>
+                <th class="tight"></th>
+                </sec:authorize>
+                <th width="200">Сотрудник</th>
+                <th width="200">Центр</th>
+                <th width="200">Регион</th>
+                <th width="100">Дата с</th>
+                <th width="100">Дата по</th>
+                <th width="100">Кол-во календарных дней</th>
+                <th width="100">Кол-во <br>рабочих дней</th>
+                <c:choose>
+                    <c:when test="${reportFormed == 7}">
+                        <th width="160">Проектная/внепроектная</th>
+                    </c:when>
+                    <c:when test="${reportFormed == 6}">
+                        <th width="160">Основание</th>
+                    </c:when>
+                </c:choose>
+                <th width="200">Комментарий</th>
+            </tr>
+        </thead>
+
+        <c:choose>
+            <c:when test="${not hasAnyEmployee}">
+                <div style="margin-left: 10px">
+                    <b>По заданным критериям не найдено ни одного сотрудника.</b>
+                </div>
+            </c:when>
+            <c:when test="${not hasAnyReports and hasAnyEmployee}">
+                <div style="margin-left: 10px">
+                    <b>Нет данных о
+                        <c:if test="${reportFormed == 6}">
+                            болезнях
+                        </c:if>
+                        <c:if test="${reportFormed == 7}">
+                            командировках
+                        </c:if>
+                        сотрудников за выбранный период</b>
+                </div>
+            </c:when>
+            <c:otherwise>
+                <c:forEach var="employeeReport" items="${reportsMap}">
+                    <c:set var="reports" value="${employeeReport.value}"/>
                     <c:choose>
-                        <c:when test="${reportFormed == 6}">
-                                <tr><td colspan="5" class="bold">Итоги за период:</td></tr>
+                        <c:when test="${fn:length(reports.periodicalsList) > 0}">
+                            <tbody>
+
+                                <c:forEach var="report" items="${reports.periodicalsList}">
+                                    <tr>
+                                        <sec:authorize access="hasRole('CHANGE_ILLNESS_BUSINESS_TRIP')">
+                                        <td></td>
+                                        <td>
+                                                <div class="iconbutton">
+                                                    <img src="<c:url value="/resources/img/edit.png"/>" title="Редактировать"
+                                                         onclick="editReport(${report.id});" />
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="iconbutton">
+                                                    <c:choose>
+                                                        <c:when test="${reportFormed == 6}">
+                                                            <img src="<c:url value="/resources/img/delete.png"/>" title="Удалить"
+                                                                 onclick="deleteReport(this.parentElement, ${report.id}, ${report.calendarDays}, ${report.workingDays}, ${report.workDaysOnIllnessWorked});" />
+                                                        </c:when>
+                                                        <c:when test="${reportFormed == 7}">
+                                                            <img src="<c:url value="/resources/img/delete.png"/>" title="Удалить"
+                                                                 onclick="deleteReport(this.parentElement, ${report.id}, ${report.calendarDays}, ${report.workingDays});" />
+                                                        </c:when>
+                                                    </c:choose>
+                                                </div>
+                                            </td>
+                                        </sec:authorize>
+                                        <td class="textcenter">${employeeReport.key.name}</td>
+                                        <td class="textcenter">${employeeReport.key.division.name}</td>
+                                        <td class="textcenter">${employeeReport.key.region.name}</td>
+                                        <td class="textcenter"><fmt:formatDate value="${report.beginDate}" pattern="dd.MM.yyyy"/></td>
+                                        <td class="textcenter"><fmt:formatDate value="${report.endDate}" pattern="dd.MM.yyyy"/></td>
+                                        <td class="textcenter">${report.calendarDays}</td>
+                                        <td class="textcenter">${report.workingDays}</td>
+                                        <c:choose>
+                                            <c:when test="${reportFormed == 6}">
+                                                <td class="textcenter">${report.reason.value}</td>
+                                            </c:when>
+                                            <c:when test="${reportFormed == 7}">
+                                                <td class="textcenter">
+                                                    ${report.type.value}
+                                                        <c:if test="${report.project != null}">
+                                                            (${report.project.name})
+                                                        </c:if>
+                                                </td>
+                                            </c:when>
+                                        </c:choose>
+                                        <td>${report.comment}</td>
+                                    </tr>
+                                </c:forEach>
+
+                            </tbody>
+                        </c:when>
+
+                    </c:choose>
+                </c:forEach>
+                <c:choose>
+                    <c:when test="${forAll != true}">
+                        <c:choose>
+                            <c:when test="${reportFormed == 6}">
+                                    <tr><td colspan="5" class="bold">Итоги за период:</td></tr>
+                                    <c:choose>
+                                        <c:when test="${fn:length(reports.periodicalsList) > 0}">
+                                            <tr>
+                                                <td colspan="4" class="resultrow">Общее кол-во календарных дней болезни:</td>
+                                                <td colspan="1" class="resultrow" id="mounthCalendarDaysOnIllness">${reports.mounthCalendarDays}</td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="4" class="resultrow">Общее кол-во рабочих дней болезни:</td>
+                                                <td colspan="1" class="resultrow" id="mounthWorkDaysOnIllness">${reports.mounthWorkDays}</td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="4" class="resultrow">Общее кол-во рабочих дней болезни, когда сотрудник работал:</td>
+                                                <td colspan="1" class="resultrow" id="mounthWorkDaysOnIllnessWorked"><fmt:formatNumber value="${reports.mounthWorkDaysOnIllnessWorked}" pattern="#.#"/></td>
+                                            </tr>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <tr><td colspan="5" class="bold">Нет данных о больничных сотрудника за выбранный период.</td></tr>
+                                        </c:otherwise>
+                                    </c:choose>
+                                    <tr><td colspan="5" class="bold">Итоги за год:</td></tr>
+                                    <tr>
+                                        <td colspan="4" class="resultrow">Общее кол-во рабочих дней болезни:</td>
+                                        <td colspan="1" class="resultrow" id="yearWorkDaysOnIllness">${reports.yearWorkDaysOnIllness}</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="4" class="resultrow">Общее кол-во рабочих дней болезни, когда сотрудник работал:</td>
+                                        <td colspan="1" class="resultrow" id="yearWorkDaysOnIllnessWorked"><fmt:formatNumber value="${reports.yearWorkDaysOnIllnessWorked}" pattern="#.#"/></td>
+                                    </tr>
+                            </c:when>
+
+                            <c:when test="${reportFormed == 7}">
                                 <c:choose>
                                     <c:when test="${fn:length(reports.periodicalsList) > 0}">
-                                        <tr>
-                                            <td colspan="4" class="resultrow">Общее кол-во календарных дней болезни:</td>
-                                            <td colspan="1" class="resultrow" id="mounthCalendarDaysOnIllness">${reports.mounthCalendarDays}</td>
-                                        </tr>
-                                        <tr>
-                                            <td colspan="4" class="resultrow">Общее кол-во рабочих дней болезни:</td>
-                                            <td colspan="1" class="resultrow" id="mounthWorkDaysOnIllness">${reports.mounthWorkDays}</td>
-                                        </tr>
-                                        <tr>
-                                            <td colspan="4" class="resultrow">Общее кол-во рабочих дней болезни, когда сотрудник работал:</td>
-                                            <td colspan="1" class="resultrow" id="mounthWorkDaysOnIllnessWorked"><fmt:formatNumber value="${reports.mounthWorkDaysOnIllnessWorked}" pattern="#.#"/></td>
-                                        </tr>
+                                                <tr><td colspan="5" class="bold">Итоги за период:</td></tr>
+                                                <tr>
+                                                    <td colspan="4" class="resultrow">Общее кол-во календарных дней в командировке:</td>
+                                                    <td colspan="1" class="resultrow" id="mounthCalendarDaysInBusinessTrip">${reports.mounthCalendarDays}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="4" class="resultrow">Общее кол-во рабочих дней в командировке:</td>
+                                                    <td colspan="1" class="resultrow" id="mounthWorkDaysOnBusinessTrip">${reports.mounthWorkDays}</td>
+                                                </tr>
                                     </c:when>
                                     <c:otherwise>
-                                        <tr><td colspan="5" class="bold">Нет данных о больничных сотрудника за выбранный период.</td></tr>
+                                        <span class="bold"><tr><td colspan="5" class="bold">Нет данных о командировках сотрудника за выбранный период.</td></tr></span>
                                     </c:otherwise>
                                 </c:choose>
-                                <tr><td colspan="5" class="bold">Итоги за год:</td></tr>
-                                <tr>
-                                    <td colspan="4" class="resultrow">Общее кол-во рабочих дней болезни:</td>
-                                    <td colspan="1" class="resultrow" id="yearWorkDaysOnIllness">${reports.yearWorkDaysOnIllness}</td>
-                                </tr>
-                                <tr>
-                                    <td colspan="4" class="resultrow">Общее кол-во рабочих дней болезни, когда сотрудник работал:</td>
-                                    <td colspan="1" class="resultrow" id="yearWorkDaysOnIllnessWorked"><fmt:formatNumber value="${reports.yearWorkDaysOnIllnessWorked}" pattern="#.#"/></td>
-                                </tr>
-                        </c:when>
-
-                        <c:when test="${reportFormed == 7}">
-                            <c:choose>
-                                <c:when test="${fn:length(reports.periodicalsList) > 0}">
-                                            <tr><td colspan="5" class="bold">Итоги за период:</td></tr>
-                                            <tr>
-                                                <td colspan="4" class="resultrow">Общее кол-во календарных дней в командировке:</td>
-                                                <td colspan="1" class="resultrow" id="mounthCalendarDaysInBusinessTrip">${reports.mounthCalendarDays}</td>
-                                            </tr>
-                                            <tr>
-                                                <td colspan="4" class="resultrow">Общее кол-во рабочих дней в командировке:</td>
-                                                <td colspan="1" class="resultrow" id="mounthWorkDaysOnBusinessTrip">${reports.mounthWorkDays}</td>
-                                            </tr>
-                                </c:when>
-                                <c:otherwise>
-                                    <span class="bold"><tr><td colspan="5" class="bold">Нет данных о командировках сотрудника за выбранный период.</td></tr></span>
-                                </c:otherwise>
-                            </c:choose>
-                        </c:when>
-                    </c:choose>
-                </c:when>
-            </c:choose>
-        </table>
-    </c:if>
+                            </c:when>
+                        </c:choose>
+                    </c:when>
+                </c:choose>
+            </c:otherwise>
+        </c:choose>
+    </table>
     </form:form>
 </body>
 </html>

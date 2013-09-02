@@ -16,11 +16,9 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
@@ -196,7 +194,7 @@ public class TimeSheetControllerTest extends AbstractTimeSheetTest {
         when(propertyProvider.getUndertimeThreshold()).thenReturn(1D);
         when(divisionService.getDivisions()).thenReturn(divisions);
         when(employeeService.isShowAll((HttpServletRequest) any())).thenReturn(Boolean.TRUE);
-        when(employeeHelper.getEmployeeListJson(divisions, Boolean.TRUE, Boolean.TRUE)).thenReturn(employeeListJSON);
+        when(employeeHelper.getEmployeeListWithLastWorkdayJson(divisions, Boolean.TRUE, Boolean.TRUE)).thenReturn(employeeListJSON);
         when(dictionaryItemService.getCategoryOfActivity()).thenReturn(categorysOfActivity);
         when(dictionaryItemService.getDictionaryItemsInJson(categorysOfActivity)).thenReturn(categorysOfActivityJSON);
         when(availableActivityCategoryService.getAvailableActCategoriesJson()).thenReturn(availableActCategoriesJSON);

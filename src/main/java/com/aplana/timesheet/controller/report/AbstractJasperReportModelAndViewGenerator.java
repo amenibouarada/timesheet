@@ -79,7 +79,7 @@ public abstract class AbstractJasperReportModelAndViewGenerator implements Jaspe
         if ( fillProjectListWithOwnerDivisionJson )
             mav.addObject("projectListWithOwnerDivisionJson", projectService.getProjectListWithOwnerDivisionJson());
         if( fillEmployeeListJson )
-            mav.addObject("employeeListJson", employeeHelper.getEmployeeListJson(divisions, employeeService.isShowAll(request)));
+            mav.addObject("employeeListJson", employeeHelper.getEmployeeListWithLastWorkdayJson(divisions, employeeService.isShowAll(request)));
     }
 
     protected void fillWithAllProjects( final ModelAndView mav ) {
