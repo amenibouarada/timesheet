@@ -4,7 +4,7 @@ public class Report05 extends BaseReport {
 
     public static final String jrName = "report05";
 
-    public static final String jrNameFile="Отчет №5. Детализация трудозатрат для СК";
+    public static final String jrNameFile="Отчет №5. Строки отчетов за день со всеми полями";
 
     @Override
     public String getJRName() {
