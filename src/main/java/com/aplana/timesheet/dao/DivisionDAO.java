@@ -1,6 +1,7 @@
 package com.aplana.timesheet.dao;
 
 import com.aplana.timesheet.dao.entity.Division;
+import com.aplana.timesheet.dao.entity.Employee;
 import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,6 +76,30 @@ public class DivisionDAO {
                 "SELECT id FROM division as d WHERE lower(department_name) SIMILAR TO  :departmentName"
         ).setParameter("departmentName", ("(%_,|)" + departmentName + "(,_%|)").toLowerCase()).getSingleResult();
         return (Division) find(id);
+    }
+
+    public Division findByLeader(Integer employeeId) {
+        Query query = entityManager.createQuery(
+                "from Division as d where d.leaderId.id=:employeeId"
+        ).setParameter("employeeId", employeeId);
+
+        try {
+            return  (Division) query.getSingleResult();
+        } catch (NoResultException e) {
+            return null;
+        }
+    }
+
+    public Division findByLeader(Employee employee) {
+        Query query = entityManager.createQuery(
+                "from Division as d where d.leaderId=:employee"
+        ).setParameter("employee", employee);
+
+        try {
+            return  (Division) query.getSingleResult();
+        } catch (NoResultException e) {
+            return null;
+        }
     }
 
     public void save(Division division) {

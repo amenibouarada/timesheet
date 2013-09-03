@@ -63,7 +63,13 @@ public class Project {
     @Column(name = "jira_project_key")
     private String jiraProjectKey;
 
-	public Set<Division> getDivisions() {
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "division", nullable = true) //todo Определиться обязательно ли поле к заполнению. Пока таблица заполняется отключил.
+    @ForeignKey(name = "FK_PROJECT_DIVISION")
+    private Division division;
+
+
+    public Set<Division> getDivisions() {
 		return divisions;
 	}
 
@@ -185,4 +191,11 @@ public class Project {
         this.employeeProjectBillables = employeeProjectBillables;
     }
 
+    public Division getDivision() {
+        return division;
+    }
+
+    public void setDivision(Division division) {
+        this.division = division;
+    }
 }

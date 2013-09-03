@@ -1,5 +1,6 @@
 package com.aplana.timesheet.service;
 
+import com.aplana.timesheet.dao.DivisionDAO;
 import com.aplana.timesheet.dao.EmployeeDAO;
 import com.aplana.timesheet.dao.ProjectDAO;
 import com.aplana.timesheet.dao.entity.DictionaryItem;
@@ -61,6 +62,9 @@ public class OQProjectSyncService extends AbstractServiceWithTransactionManageme
 
     @Autowired
     private EmployeeDAO employeeDAO;
+
+    @Autowired
+    private DivisionDAO divisionDAO;
 
     @Autowired
     EmployeeLdapService employeeLdapService;
@@ -170,7 +174,8 @@ public class OQProjectSyncService extends AbstractServiceWithTransactionManageme
                 if (!setPM(project, pmLdap)) {
                     return; //если не указан РП или его нет в БД, то проект не сохраняем, переходим к следующему
                 }
-                setDivision(project, hcLdap, foundProject);  // установим подразделения, связанные с проектом
+                setDivisions(project, hcLdap, foundProject);  // установим подразделения, связанные с проектом
+                setDivision(project, hcLdap, pmLdap);  // установим ответственное подразделение к проекту
             }
             dao.store(project); // запишем в БД
 
@@ -208,7 +213,7 @@ public class OQProjectSyncService extends AbstractServiceWithTransactionManageme
         return true;
     }
 
-    private void setDivision(Project project, String hcLdap, Project foundProject) {
+    private void setDivisions(Project project, String hcLdap, Project foundProject) {
         Set<Division> divisions = new TreeSet<Division>();
         Employee employee = this.employeeDAO.findByLdapName(hcLdap.split("/")[0]);
         if (employee != null) {
@@ -227,6 +232,37 @@ public class OQProjectSyncService extends AbstractServiceWithTransactionManageme
         }
 
         project.setDivisions(divisions);
+    }
+
+    private void setDivision(Project project, String hcLdap, String pmLdap) {
+        if (hcLdap != null && !hcLdap.isEmpty()) {
+        /* ищем человека в БД */
+            Employee employee = this.employeeDAO.findByLdapName(hcLdap.split("/")[0]);
+            if (employee != null) {
+            /* нашли, ищем лидер ли он подразделения */
+                Division division = this.divisionDAO.findByLeader(employee);
+                if (division != null)
+                /* он лидер, записываем в проект это подразделение */
+                    project.setDivision(division);
+            } else {
+                if (pmLdap != null && !pmLdap.isEmpty()) {
+                    /* ищем руководителя проекта по OQ данным */
+                    Employee pm = this.employeeDAO.findByLdapName(pmLdap.split("/")[0]);
+                    if (pm != null) {
+                        project.setDivision(pm.getDivision());
+                    } else {
+                        trace.append("В проекте ")
+                                .append(project.getName())
+                                .append(" не установлено поле division (ответственное подразделение), т.к. не найдено руководителя подразделения ")
+                                .append(hcLdap)
+                                .append(" или руководитель проекта ")
+                                .append(pmLdap)
+                                .append("\n");
+                    }
+                }
+            }
+        }
+
     }
 
     public NodeList getOQasNodeList() throws SAXException,
