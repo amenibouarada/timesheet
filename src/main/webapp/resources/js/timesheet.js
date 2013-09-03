@@ -1617,6 +1617,7 @@ function getJiraInfo(rowIndex) {
             handleAs:"text",
             timeout:10000,
             content:{employeeId:employeeId, date:reportDate, projectId:projectId},
+            preventCache: true,
             load:function (data) {
                 if (data.length != 0)
                     dojo.byId("description_id_" + rowIndex).value = data;
