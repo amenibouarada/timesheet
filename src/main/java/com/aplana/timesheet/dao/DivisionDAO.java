@@ -91,15 +91,7 @@ public class DivisionDAO {
     }
 
     public Division findByLeader(Employee employee) {
-        Query query = entityManager.createQuery(
-                "from Division as d where d.leaderId=:employee"
-        ).setParameter("employee", employee);
-
-        try {
-            return  (Division) query.getSingleResult();
-        } catch (NoResultException e) {
-            return null;
-        }
+        return findByLeader(employee.getId());
     }
 
     public void save(Division division) {
