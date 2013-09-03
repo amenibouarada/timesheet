@@ -419,7 +419,7 @@
                 <th style="min-width: 130px">Задача</th>
                 <th style="min-width: 30px">ч.</th>
                 <th style="min-width: 240px">Комментарии</th>
-                <th style="min-width: 30px">JIRA</th>
+                <th style="min-width: 35px">JIRA</th>
                 <th style="min-width: 200px">Проблемы</th>
             </tr>
 
