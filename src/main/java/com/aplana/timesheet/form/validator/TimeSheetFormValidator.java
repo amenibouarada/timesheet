@@ -330,6 +330,9 @@ public class TimeSheetFormValidator extends AbstractValidator {
     }
 
     private void validateProjectTask(TimeSheetTableRowForm formRow, int notNullRowNumber, Errors errors) {
+        if (formRow.getActivityTypeId().equals(TypesOfActivityEnum.PROJECT_PRESALE.getId())){
+            return;
+        }
         Integer projectId = formRow.getProjectId();
         Integer projectTaskId = formRow.getProjectTaskId();
         if (projectId != null) {
