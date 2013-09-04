@@ -92,7 +92,6 @@ public class VacationsController extends AbstractControllerForEmployee {
             @ModelAttribute(VACATION_FORM) VacationsForm vacationsForm,
             BindingResult result
     ) {
-        long startTime = System.currentTimeMillis();
         Integer divisionId = vacationsForm.getDivisionId();
         Integer employeeId = vacationsForm.getEmployeeId();
         Date dateFrom = DateTimeUtil.stringToDate(vacationsForm.getCalFromDate(), DATE_FORMAT);
@@ -218,8 +217,7 @@ public class VacationsController extends AbstractControllerForEmployee {
 
         modelAndView.addObject("calDaysCount", calAndWorkDaysList);
         modelAndView.addObject(VacationsForm.MANAGER_ID, vacationsForm.getManagerId());
-        long stopTime = System.currentTimeMillis();
-        modelAndView.addObject("generateTime", (stopTime - startTime));
+        modelAndView.addObject("vacationService", vacationService);
         return modelAndView;
     }
 

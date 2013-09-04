@@ -246,6 +246,10 @@ public class SendMailService{
         new PlannedVacationCreateSender(this, propertyProvider, emails).sendMessage(vacation);
     }
 
+    public void performPlannedVacationDeletedMailing(Vacation vacation) {
+        new PlannedVacationDeletedSender(this, propertyProvider, employeeService, projectService).sendMessage(vacation);
+    }
+
     public void performVacationApprovedSender (Vacation vacation, List<String> emails) {
         new VacationApprovedSender(this, propertyProvider, emails).sendMessage(vacation);
     }

@@ -394,14 +394,14 @@ public class EmployeeService {
     }
 
     /**
-     * Получаем список линейных руководителей с дублями
+     * Получаем список линейных руководителей
      * @param employee
      * @return
      */
     public List<Employee> getLinearEmployees(Employee employee) {
         List<Employee> employees = new ArrayList<Employee>();
         Employee manager = employee.getManager();
-        if(manager !=null){
+        if (manager !=null && !employees.contains(manager)) {
             employees.add(manager);
             employees.addAll(getLinearEmployees(manager));
         }

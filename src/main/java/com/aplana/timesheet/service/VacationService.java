@@ -163,11 +163,13 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
                 EnumsUtils.getEnumById(statusDictionaryItem.getId(), VacationStatusEnum.class);
 
         if (
-                employee.equals(vacation.getEmployee()) ||
-                employee.equals(vacation.getAuthor()) ||
+                isVacationDeletePermission(vacation, employee) ||
                 isAdmin
         ) {
-            if (!isAdmin && (vacationStatus == VacationStatusEnum.REJECTED || vacationStatus == VacationStatusEnum.APPROVED)) {
+            if (!isAdmin &&
+                    (vacationStatus == VacationStatusEnum.REJECTED || vacationStatus == VacationStatusEnum.APPROVED) &&
+                    vacation.getType().getId() != VacationTypesEnum.PLANNED.getId()
+               ) {
                 throw new DeleteVacationException(String.format(
                         "Нельзя удалить заявление на отпуск в статусе \"%s\". Для удаления данного заявления " +
                                 "необходимо написать на timesheet@aplana.com",
@@ -175,7 +177,12 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
                 ));
             }
 
-            sendMailService.performVacationDeletedMailing(vacation);    //todo переделать, чтобы рассылка все-таки была после удаления?
+            /* для планируемых отпусков другая удалялка */
+            if (vacation.getType().getId() == VacationTypesEnum.PLANNED.getId()) {
+                sendMailService.performPlannedVacationDeletedMailing(vacation);
+            } else {
+                sendMailService.performVacationDeletedMailing(vacation);    //todo переделать, чтобы рассылка все-таки была после удаления?
+            }
 
             delete(vacation);
 
@@ -344,5 +351,18 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
     public Boolean isDayVacationWithoutPlanned(Employee employee, Date date){
         Boolean dayVacationWithoutPlanned = vacationDAO.isDayVacationWithoutPlanned(employee, date);
         return dayVacationWithoutPlanned;
+    }
+
+    /* функция возвращает можно ли удалить планируемый отпуск в таблице заявлений на отпуск */
+    public Boolean isVacationDeletePermission(Vacation vacation, Employee employee) {
+        if (employee != null && vacation != null) {
+            /* проверяем что это либо создатель отпуска либо сам отпускник */
+            if (vacation.getEmployee().equals(employee) || vacation.getAuthor().equals(employee))
+                return Boolean.TRUE;
+            /* проверяем что отпуск планируемый и текущий пользователь является лин. рук. отпускника */
+            if ( vacation.getType().getId() == VacationTypesEnum.PLANNED.getId() && employeeService.getLinearEmployees(vacation.getEmployee()).contains(employee) )
+                return Boolean.TRUE;
+        }
+        return Boolean.FALSE;
     }
 }
