@@ -81,7 +81,7 @@ public class BusinessTripsAndIllnessAddFormValidator extends AbstractValidator {
         form.setComment(form.getComment().trim());
 
         if (form.getComment() != null && form.getComment().length() > MAX_COMMENT_LENGTH) {
-            errors.rejectValue("beginDate", "error.businesstripsandilnessaddform.comment.wrong", "Комментарий слишком длинный! (максимально допускается" + MAX_COMMENT_LENGTH + "символов)");
+            errors.rejectValue("beginDate", "error.businesstripsandilnessaddform.comment.wrong", "Комментарий выходит за рамки допустимого количества символов - " + MAX_COMMENT_LENGTH + "!");
         }
 
     }
