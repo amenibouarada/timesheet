@@ -19,9 +19,7 @@ import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static com.aplana.timesheet.enums.VacationStatusEnum.APPROVED;
 
@@ -259,7 +257,9 @@ public class VacationDAO {
                         "left outer join va.vacation as v " +
                         "left outer join va.manager as m " +
                         "left outer join v.status as s " +
-                        "where (m.id = :emp_id ) and (s.id not in (:statuses)) " +
+                        "where (m.id = :emp_id ) " +
+                        "and (s.id not in (:statuses)) " +
+                        "and va.result is null " +
                         "order by v.beginDate")
                         .setParameter("emp_id", employeeId)
                         .setParameter("statuses", statuses);

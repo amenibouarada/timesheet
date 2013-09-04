@@ -77,7 +77,7 @@
 			<staticText>
 				<reportElement uuid="e07f3913-ded0-4c30-aa1f-b734293e6511" style="Title" x="0" y="0" width="1840" height="77"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle"/>
-				<text><![CDATA[Отчет №5. Детализация трудозатрат для СК]]></text>
+				<text><![CDATA[Отчет №5. Строки отчетов за день со всеми полями]]></text>
 			</staticText>
 			<textField>
 				<reportElement uuid="5d9cb9aa-4638-403e-81b7-28cd94591461" style="SubTitle" x="0" y="77" width="1840" height="24"/>

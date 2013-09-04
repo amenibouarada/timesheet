@@ -10,6 +10,7 @@ import com.aplana.timesheet.util.DateTimeUtil;
 import com.atlassian.jira.rest.client.JiraRestClient;
 import com.atlassian.jira.rest.client.domain.Issue;
 import com.atlassian.jira.rest.client.internal.jersey.JerseyJiraRestClientFactory;
+import org.apache.commons.lang.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,36 +75,36 @@ public class JiraService {
         StringBuilder stringBuilder = new StringBuilder();
 
         if ( user != null && !user.equals("") ) {
-            String sdate = "";
-            if ( date != null )
-                sdate = " on " + new SimpleDateFormat(DateTimeUtil.DATE_PATTERN).format(date) + " ";
+            String onDate = "";
+            String createdDate = "";
+            if ( date != null ) {
+                onDate = " on " + new SimpleDateFormat(DateTimeUtil.DATE_PATTERN).format(date) + " ";
+                createdDate = " or (reporter = " + user +
+                        " and created > " + DateTimeUtil.dateToString(date) +
+                        " and created < " + DateTimeUtil.dateToString(DateUtils.addDays(date, 1)) + ")";
+            }
 
             if ( project != null && !project.equals("") )
                 stringBuilder.append("project in (").append(project).append(") and ");
 
             stringBuilder
-                    .append("(status changed by ")
-                    .append(user)
-                    .append(sdate)
-                    .append(" or assignee changed from ")
-                    .append(user)
-                    .append(sdate)
-                    .append(" or assignee changed to ")
-                    .append(user)
-                    .append(sdate)
-                    .append(" or reporter changed from ")
-                    .append(user)
-                    .append(sdate)
-                    .append(" or reporter changed to ")
-                    .append(user)
-                    .append(sdate)
+                    .append("(status changed by ").append(user).append(onDate)
+                    .append(" or assignee changed from ").append(user).append(onDate)
+                    .append(" or assignee changed to ").append(user).append(onDate)
+                    .append(" or reporter changed from ").append(user).append(onDate)
+                    .append(" or reporter changed to ").append(user).append(onDate)
+                    .append((createdDate.isEmpty()) ? "" : createdDate)
                     .append(")");
 /*  пример строки запроса*/
-//  project in (APLANATS) and (status changed by Nlebedev on 2013-07-31
-//                            or assignee changed from Nlebedev on 2013-07-31
-//                            or assignee changed to Nlebedev on 2013-07-31
-//                            or reporter changed from Nlebedev on 2013-07-31
-//                            or reporter changed to Nlebedev on 2013-07-31)
+//  project in (APLANATS) and
+// (status changed by Nlebedev on 2013-07-31
+//  or assignee changed from Nlebedev on 2013-07-31
+//  or assignee changed to Nlebedev on 2013-07-31
+//  or reporter changed from Nlebedev on 2013-07-31
+//  or reporter changed to Nlebedev on 2013-07-31
+//  or (reporter = Nlebedev and created > 2013-07-31 and created < 2013-08-01)
+//  )
+
         }
 
         return stringBuilder.toString();
