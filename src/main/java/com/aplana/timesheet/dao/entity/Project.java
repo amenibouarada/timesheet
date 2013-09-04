@@ -68,6 +68,10 @@ public class Project {
     @ForeignKey(name = "FK_PROJECT_DIVISION")
     private Division division;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "funding_type", nullable = true) //todo Определиться обязательно ли поле к заполнению. Пока таблица заполняется отключил.
+    @ForeignKey(name = "FK_PROJECT_FUNDING_TYPE")
+    private DictionaryItem fundingType;
 
     public Set<Division> getDivisions() {
 		return divisions;
@@ -197,5 +201,13 @@ public class Project {
 
     public void setDivision(Division division) {
         this.division = division;
+    }
+
+    public DictionaryItem getFundingType() {
+        return fundingType;
+    }
+
+    public void setFundingType(DictionaryItem fundingType) {
+        this.fundingType = fundingType;
     }
 }

@@ -7,6 +7,7 @@ import com.aplana.timesheet.dao.entity.DictionaryItem;
 import com.aplana.timesheet.dao.entity.Division;
 import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.dao.entity.Project;
+import com.aplana.timesheet.enums.ProjectFundingTypeEnum;
 import com.aplana.timesheet.enums.TypesOfActivityEnum;
 import com.aplana.timesheet.properties.TSPropertyProvider;
 import com.aplana.timesheet.util.DateTimeUtil;
@@ -149,6 +150,8 @@ public class OQProjectSyncService extends AbstractServiceWithTransactionManageme
             if (foundProject == null) {  // если проекта еще нет в БД
                 project.setActive(newStatus.contains(status)); // установим ему новый статус
                 project.setEndDate(DateTimeUtil.stringToDate("01.01.2050", DATE_FORMAT)); // APLANATS-826 при добавлении проекта прописываем в качестве даты окончания фиксированную большую дату
+                /* тип финансирования (по умолчанию) */
+                project.setFundingType(dictionaryItemService.find(ProjectFundingTypeEnum.COMMERCIAL_PROJECT.getId()));
             } else {
                 // если проект уже существовал - статус менять не будем
                 // см. //APLANATS-408
@@ -177,6 +180,7 @@ public class OQProjectSyncService extends AbstractServiceWithTransactionManageme
                 setLinkProjectAndDivision(project, hcLdap, foundProject);  // установим подразделения, связанные с проектом
                 setProjectDivision(project, hcLdap, pmLdap);  // установим ответственное подразделение к проекту
             }
+
             dao.store(project); // запишем в БД
 
             if (transactionStatus != null) {

@@ -14,7 +14,8 @@ public enum DictionaryEnum implements TSEnum {
     TYPES_OF_COMPENSATION(13, "Типы компенсации"),
     WORK_ON_HOLIDAY_CAUSE(14, "Причины работы в выходной день"),
     VACATION_STATUS(8,"Статусы отпусков"),
-    EFFORT_IN_NEXTDAY(15, "Оценка моего объема работ на следующий рабочий день");
+    EFFORT_IN_NEXTDAY(15, "Оценка моего объема работ на следующий рабочий день"),
+    PROJECT_FUNDING_TYPE(16, "Тип финансирования проекта");
 
     private int id;
     private String name;
