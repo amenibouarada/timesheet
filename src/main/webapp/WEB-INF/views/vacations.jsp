@@ -18,111 +18,111 @@
 
 <html>
 <head>
-<title><fmt:message key="title.vacations"/></title>
+    <title><fmt:message key="title.vacations"/></title>
 
-<link rel="stylesheet" type="text/css" href="<%= getResRealPath("/resources/css/vacations.css", application) %>"/>
-<link rel="stylesheet" type="text/css" href="<%= getResRealPath("/resources/css/vacationsGraphic.css", application) %>"/>
+    <link rel="stylesheet" type="text/css" href="<%= getResRealPath("/resources/css/vacations.css", application) %>"/>
+    <link rel="stylesheet" type="text/css" href="<%= getResRealPath("/resources/css/vacationsGraphic.css", application) %>"/>
 
-<script src="<%= getResRealPath("/resources/js/vacations.js", application) %>" type="text/javascript"></script>
-<script src="<%= getResRealPath("/resources/js/vacationsGraphic.js", application) %>" type="text/javascript"></script>
+    <script src="<%= getResRealPath("/resources/js/vacations.js", application) %>" type="text/javascript"></script>
+    <script src="<%= getResRealPath("/resources/js/vacationsGraphic.js", application) %>" type="text/javascript"></script>
 
-<script type="text/javascript">
-    dojo.require("dojo.NodeList-traverse");
-    dojo.require("dojox.html.entities");
-    dojo.require("dijit.form.DateTextBox");
-    dojo.require(CALENDAR_EXT_PATH);
-    require(["dojo/parser", "dijit/TitlePane"]);
+    <script type="text/javascript">
+        dojo.require("dojo.NodeList-traverse");
+        dojo.require("dojox.html.entities");
+        dojo.require("dijit.form.DateTextBox");
+        dojo.require(CALENDAR_EXT_PATH);
+        require(["dojo/parser", "dijit/TitlePane"]);
 
-    var regionsIdList = ${regionsIdList};
-    var managerList = ${managerListJson};
-    var selectedEmployee = ${employeeId};
-    var vacationListJSON =  ${vacationListByProjectJSON};
-    var fullProjectList = ${fullProjectListJsonWithDivisionId};
-    var holidayList = ${holidayList};
 
-    var PROJECT_ID = "<%= PROJECT_ID %>";
-    var CAL_FROM_DATE = "<%= CAL_FROM_DATE %>";
-    var CAL_TO_DATE = "<%= CAL_TO_DATE %>";
-    var DIVISION_ID = "<%= DIVISION_ID %>";
-    var EMPLOYEE_ID = "<%= EMPLOYEE_ID %>";
-    var VACATION_ID = "<%= VACATION_ID %>";
-    var ALL_VALUE = <%= ALL_VALUE %>;
-    var MANAGER_ID = "<%= MANAGER_ID %>";
-    var REGIONS = "<%= REGIONS %>";
-    var APPROVAL_ID = "<%= APPROVAL_ID %>";
-    var VIEW_MODE = "<%= VIEW_MODE %>";
+        var managerList = ${managerListJson};
+        var selectedEmployee = ${employeeId};
+        var vacationListJSON =  ${vacationListByProjectJSON};
+        var fullProjectList = ${fullProjectListJsonWithDivisionId};
+        var holidayList = ${holidayList};
 
-    var VACATION_WITH_PAY = "62";    // отпуск с сохранением содержания
-    var VACATION_WITHOUT_PAY = "63"; // отпуск без сохранения содержания
-    var VACATION_WITH_WORK = "64";   // отпуск с последующей отработкой
-    var VACATION_PLANNED = "65";     // планируемый отпуск
+        var PROJECT_ID = "<%= PROJECT_ID %>";
+        var CAL_FROM_DATE = "<%= CAL_FROM_DATE %>";
+        var CAL_TO_DATE = "<%= CAL_TO_DATE %>";
+        var DIVISION_ID = "<%= DIVISION_ID %>";
+        var EMPLOYEE_ID = "<%= EMPLOYEE_ID %>";
+        var VACATION_ID = "<%= VACATION_ID %>";
+        var ALL_VALUE = <%= ALL_VALUE %>;
+        var MANAGER_ID = "<%= MANAGER_ID %>";
+        var REGIONS = "<%= REGIONS %>";
+        var APPROVAL_ID = "<%= APPROVAL_ID %>";
+        var VIEW_MODE = "<%= VIEW_MODE %>";
 
-    var VIEW_TABLE = <%= VIEW_TABLE %>;
-    var VIEW_GRAPHIC_BY_DAY = <%= VIEW_GRAPHIC_BY_DAY %>;
-    var VIEW_GRAPHIC_BY_WEEK = <%= VIEW_GRAPHIC_BY_WEEK %>;
+        var VACATION_WITH_PAY = "62";    // отпуск с сохранением содержания
+        var VACATION_WITHOUT_PAY = "63"; // отпуск без сохранения содержания
+        var VACATION_WITH_WORK = "64";   // отпуск с последующей отработкой
+        var VACATION_PLANNED = "65";     // планируемый отпуск
 
-    var contextPath = "<%=request.getContextPath()%>";
+        var VIEW_TABLE = <%= VIEW_TABLE %>;
+        var VIEW_GRAPHIC_BY_DAY = <%= VIEW_GRAPHIC_BY_DAY %>;
+        var VIEW_GRAPHIC_BY_WEEK = <%= VIEW_GRAPHIC_BY_WEEK %>;
 
-    dojo.declare("DateTextBox", dijit.form.DateTextBox, {
-        popupClass:"dijit.Calendar"
-    });
+        var contextPath = "<%=request.getContextPath()%>";
 
-    dojo.addOnLoad(function () {
-        updateMultipleForSelect(dojo.byId(REGIONS));
-    });
-
-    dojo.ready(function () {
-        window.focus();
-        divisionChangeVac(dojo.byId(DIVISION_ID).value);
-
-        var managerSelect = dojo.byId(MANAGER_ID);
-        <c:if test="${managerId != null}">
-          managerSelect.value = '${managerId}';
-        </c:if>
-
-        // регистрируем событие на переключение между вкладками
-        var tabContainer = dojo.dijit.registry.byId("tabContainer");
-        tabContainer.watch("selectedChildWidget", function(name, oval, nval){
-            var selectedTabInput = dojo.byId(VIEW_MODE);
-            if (nval.id == "firstTab") { // вкладка на которую переключились
-                selectedTabInput.value = VIEW_TABLE;
-            }else{ // иначе если это график, то смотрим состояние переключателей
-                if (dojo.byId("byDay").checked){
-                    selectedTabInput.value = VIEW_GRAPHIC_BY_DAY;
-                }else{
-                    selectedTabInput.value = VIEW_GRAPHIC_BY_WEEK;
-                }
-            }
+        dojo.declare("DateTextBox", dijit.form.DateTextBox, {
+            popupClass:"dijit.Calendar"
         });
-        // отобразим необходимую вкладку
-        var viewMode = dojo.byId(VIEW_MODE).value;
-        var tabContainer = dojo.dijit.registry.byId("tabContainer");
-        var tab = dojo.dijit.registry.byId("secondTab");
-        if (viewMode == VIEW_TABLE){
-            tab = dojo.dijit.registry.byId("firstTab");
-            dojo.byId("byDay").checked = true;
-        }else{
-            if (viewMode == VIEW_GRAPHIC_BY_DAY){
+
+        dojo.addOnLoad(function () {
+            updateMultipleForSelect(dojo.byId(REGIONS));
+        });
+
+        dojo.ready(function () {
+            window.focus();
+            divisionChangeVac(dojo.byId(DIVISION_ID).value);
+
+            var managerSelect = dojo.byId(MANAGER_ID);
+            <c:if test="${managerId != null}">
+            managerSelect.value = '${managerId}';
+            </c:if>
+
+            // регистрируем событие на переключение между вкладками
+            var tabContainer = dojo.dijit.registry.byId("tabContainer");
+            tabContainer.watch("selectedChildWidget", function(name, oval, nval){
+                var selectedTabInput = dojo.byId(VIEW_MODE);
+                if (nval.id == "firstTab") { // вкладка на которую переключились
+                    selectedTabInput.value = VIEW_TABLE;
+                }else{ // иначе если это график, то смотрим состояние переключателей
+                    if (dojo.byId("byDay").checked){
+                        selectedTabInput.value = VIEW_GRAPHIC_BY_DAY;
+                    }else{
+                        selectedTabInput.value = VIEW_GRAPHIC_BY_WEEK;
+                    }
+                }
+            });
+            // отобразим необходимую вкладку
+            var viewMode = dojo.byId(VIEW_MODE).value;
+            var tabContainer = dojo.dijit.registry.byId("tabContainer");
+            var tab = dojo.dijit.registry.byId("secondTab");
+            if (viewMode == VIEW_TABLE){
+                tab = dojo.dijit.registry.byId("firstTab");
                 dojo.byId("byDay").checked = true;
             }else{
-                dojo.byId("byWeek").checked = true;
+                if (viewMode == VIEW_GRAPHIC_BY_DAY){
+                    dojo.byId("byDay").checked = true;
+                }else{
+                    dojo.byId("byWeek").checked = true;
+                }
             }
-        }
-        tabContainer.selectChild(tab);
+            tabContainer.selectChild(tab);
 
-        fillEmployeeSelect();
-        dojo.byId(EMPLOYEE_ID).value = ${employeeId};
-        dojo.byId(VACATION_ID).setAttribute("disabled", "disabled");
+            fillEmployeeSelect();
+            dojo.byId(EMPLOYEE_ID).value = ${employeeId};
+            dojo.byId(VACATION_ID).setAttribute("disabled", "disabled");
 
-        var projectId = ${projectId};
-        if (projectId != null){
-            dojo.byId(PROJECT_ID).value = projectId;
-        }
+            var projectId = ${projectId};
+            if (projectId != null){
+                dojo.byId(PROJECT_ID).value = projectId;
+            }
 
-        showGraphic(viewMode);
-    });
+            showGraphic(viewMode);
+        });
 
-</script>
+    </script>
 </head>
 <body>
 
@@ -254,88 +254,102 @@
 
 
 <div data-dojo-type="dijit/layout/TabContainer" doLayout="false" id="tabContainer">
-    <div data-dojo-type="dijit/layout/ContentPane" id="firstTab" title="Таблица">
-        <table id="vacations">
-            <thead>
-            <tr>
-                <th width="15" class="create-button">
-                    <img src="<c:url value="/resources/img/add.gif"/>" title="Создать" onclick="createVacation();"/>
-                </th>
-                <th width="160">Статус</th>
-                <th width="220">Тип отпуска</th>
-                <th width="110">Дата создания</th>
-                <th width="110">Дата с</th>
-                <th width="110">Дата по</th>
-                <th width="120">Кол-во календарных дней</th>
-                <th width="130">Кол-во рабочих дней</th>
-                <th width="270">Комментарий</th>
-                <th width="270">Сотрудник</th>
-                <th width="200">Центр</th>
-                <th width="120">Регион</th>
-            </tr>
-            </thead>
-            <tbody>
-            <c:choose>
-            <c:when test="${fn:length(vacationsList) == 0}">
-            <tr>
-                <td colspan="12">Нет ни одного заявления на отпуск, удовлетворяющего выбранным параметрам</td>
-            </tr>
-            </tbody>
-            </c:when>
-            <c:otherwise>
-                <c:forEach var="vacation" items="${vacationsList}" varStatus="lp">
-                    <tr>
-                        <td>
-                            <sec:authorize access="
-                            hasRole('ROLE_ADMIN') or
-                            ${
-                                (vacation.employee.id eq curEmployee.id) or
-                                (vacation.author.id eq curEmployee.id)
-                            }
-                        ">
-                                <div class="delete-button">
-                                    <img src="<c:url value="/resources/img/delete.png"/>" title="Удалить"
-                                         onclick="deleteVacation(this.parentElement, ${vacation.id});"/>
-                                </div>
-                            </sec:authorize>
-                        </td>
-                        <td class="centered">
-                                ${vacation.status.value}
-                            <c:if test="${fn:length(vacation.vacationApprovals) > 0}">
-                                <div data-dojo-type="dijit/TitlePane" data-dojo-props="title: 'Согласующие', open: false"
-                                     style="margin: 3px; padding: 0;">
-                                    <table class="centered">
-                                        <c:forEach var="va" items="${vacation.vacationApprovals}">
-                                            <tr>
-                                                <td>${va.manager.name}</td>
-                                                <td>
-                                                    <c:choose>
-                                                        <c:when test="${va.result}">
-                                                            Согласовано
-                                                            <br>
-                                                            <fmt:formatDate value="${va.responseDate}" pattern="dd.MM.yyyy"/>
-                                                        </c:when>
-                                                        <c:when test="${!va.result && va.result != null}">
-                                                            Отклонено
-                                                            <br>
-                                                            <fmt:formatDate value="${va.responseDate}" pattern="dd.MM.yyyy"/>
-                                                        </c:when>
-                                                        <c:when test="${vacation.status.id == vacationApproved && va.result == null}">
-                                                            Согласовано автоматически по истечении установленного времени
-                                                        </c:when>
-                                                        <c:when test="${va.manager.id == curEmployee.id}">
-                                                            <a href="<%= request.getContextPath() %>/vacation_approval?uid=${va.uid}"
-                                                               target="blank">
-                                                                Ожидается Ваше согласование</a>
-                                                        </c:when>
-                                                        <c:otherwise>
-                                                            Запрос отправлен<br>
-                                                            <fmt:formatDate value="${va.requestDate}" pattern="dd.MM.yyyy"/>
-                                                        </c:otherwise>
-                                                    </c:choose>
-                                                </td>
-                                                <td>
-                                                    <sec:authorize access="
+<div data-dojo-type="dijit/layout/ContentPane" id="firstTab" title="Таблица">
+    <table id="vacations">
+        <thead>
+        <tr>
+            <th width="15" class="create-button">
+                <img src="<c:url value="/resources/img/add.gif"/>" title="Создать" onclick="createVacation();"/>
+            </th>
+            <th width="160">Статус</th>
+            <th width="210">Тип отпуска</th>
+            <th width= "250">Сотрудник</th>
+            <th width="150">Дата создания</th>
+            <th width="80">Дата с</th>
+            <th width="80">Дата по</th>
+            <th width="110">Кол-во календарных дней</th>
+            <th width="120">Кол-во рабочих дней</th>
+            <th width="270">Комментарий</th>
+            <th width="200">Центр</th>
+            <th width="120">Регион</th>
+        </tr>
+        </thead>
+        <tbody>
+        <c:choose>
+        <c:when test="${fn:length(vacationsList) == 0}">
+        <tr>
+            <td colspan="12">Нет ни одного заявления на отпуск, удовлетворяющего выбранным параметрам</td>
+        </tr>
+        </tbody>
+        </c:when>
+        <c:otherwise>
+            <c:forEach var="vacation" items="${vacationsList}" varStatus="lp">
+                <tr>
+                    <td>
+                        <sec:authorize access="
+                    hasRole('ROLE_ADMIN') or
+                    ${
+                        (vacation.employee.id eq curEmployee.id) or
+                        (vacation.author.id eq curEmployee.id)
+                    }
+                ">
+                            <div class="delete-button">
+                                <img src="<c:url value="/resources/img/delete.png"/>" title="Удалить"
+                                     onclick="deleteVacation(this.parentElement, ${vacation.id});"/>
+                            </div>
+                        </sec:authorize>
+                    </td>
+                    <td id="statusTd" class="centered">
+                        <c:choose>
+                        <c:when test="${vacation.status.id == vacationApproved}">
+                <span  style="color: #00b114">
+                    </c:when>
+                    <c:when test="${vacation.status.id == vacationRejected}">
+                <span style="color: #d90002">
+                    </c:when>
+                    <c:when test="${vacation.status.id == vacationAprovementWiyhLm || vacation.status.id == vacationAprovementWiyhPm || vacation.status.id == vacationAprovedByPm}">
+                <span style="color: blue">
+                    </c:when>
+                    <c:otherwise>
+                <span class="centered">
+                    </c:otherwise>
+                </c:choose>
+                        ${vacation.status.value}   </span>
+                    <c:if test="${fn:length(vacation.vacationApprovals) > 0}">
+                        <div data-dojo-type="dijit/TitlePane" data-dojo-props="title: 'Согласующие', open: false"
+                             style="margin: 3px; padding: 0;">
+                            <table class="centered">
+                                <c:forEach var="va" items="${vacation.vacationApprovals}">
+                                    <tr>
+                                        <td>${va.manager.name}</td>
+                                        <td>
+                                            <c:choose>
+                                                <c:when test="${va.result}">
+                                                    Согласовано
+                                                    <br>
+                                                    <fmt:formatDate value="${va.responseDate}" pattern="dd.MM.yyyy"/>
+                                                </c:when>
+                                                <c:when test="${!va.result && va.result != null}">
+                                                    Отклонено
+                                                    <br>
+                                                    <fmt:formatDate value="${va.responseDate}" pattern="dd.MM.yyyy"/>
+                                                </c:when>
+                                                <c:when test="${vacation.status.id == vacationApproved && va.result == null}">
+                                                    Согласовано автоматически по истечении установленного времени
+                                                </c:when>
+                                                <c:when test="${va.manager.id == curEmployee.id}">
+                                                    <a href="<%= request.getContextPath() %>/vacation_approval?uid=${va.uid}"
+                                                       target="blank">
+                                                        Ожидается Ваше согласование</a>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    Запрос отправлен<br>
+                                                    <fmt:formatDate value="${va.requestDate}" pattern="dd.MM.yyyy"/>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </td>
+                                        <td>
+                                            <sec:authorize access="
                                                hasRole('ROLE_ADMIN') and
                                                 ${
                                                     ((vacation.status.id eq vacationAprovementWiyhLm)
@@ -343,97 +357,108 @@
                                                     and (!va.result)
                                                 }
                                         ">
-                                                        <div class="delete-button">
-                                                            <img src="<c:url value="/resources/img/delete.png"/>"
-                                                                 title="Удалить утверждающего"
-                                                                 onclick="deleteApprover(${va.id})"/>
-                                                        </div>
-                                                    </sec:authorize>
-                                                </td>
-                                            </tr>
-                                        </c:forEach>
-                                    </table>
-                                </div>
-                            </c:if>
-                        </td>
-                        <td class="centered">${vacation.type.value}</td>
-                        <td class="date"><fmt:formatDate value="${vacation.creationDate}" pattern="dd.MM.yyyy"/></td>
-                        <td class="date"><fmt:formatDate value="${vacation.beginDate}" pattern="dd.MM.yyyy"/></td>
-                        <td class="date"><fmt:formatDate value="${vacation.endDate}" pattern="dd.MM.yyyy"/></td>
-                        <td class="centered">${calDays[lp.index]}</td>
-                        <td class="centered">${workDays[lp.index]}</td>
-                        <td class="centered">
-                                ${vacation.comment}
-                            <c:if test="${vacation.author.id ne vacation.employee.id}">
-                                <c:if test="${fn:length(vacation.comment) != 0}"><br/><br/></c:if>
-                                Заявка создана сотрудником ${vacation.author.name}
-                            </c:if>
-                        </td>
-                        <td class="centered">${vacation.employee.name}</td>
-                        <td class="centered">${vacation.employee.division.name}</td>
-                        <td class="centered">${vacation.employee.region.name}</td>
-                    </tr>
-                </c:forEach>
-                </tbody>
-                <tfoot>
-                <tr class="summary">
-                    <td colspan="3">Кол-во утвержденных заявлений на отпуск</td>
-                    <td colspan="1">${summaryApproved}</td>
-                </tr>
-                <tr class="summary">
-                    <td colspan="3">Кол-во отклоненных заявлений на отпуск</td>
-                    <td colspan="1">${summaryRejected}</td>
-                </tr>
-                <tr>
-                    <td colspan="4" class="centered">
-                        <c:choose>
-                            <c:when test="${employeeId != -1}">
-                                <div data-dojo-type="dijit/TitlePane"
-                                     data-dojo-props="title: 'Кол-во дней отпуска за период', open: false"
-                                     style="margin: 3px; padding: 0;">
-                                    <table class="centered">
-                                        <thead>
-                                        <tr>
-                                            <th width="170">Год</th>
-                                            <th width="170">Тип отпуска</th>
-                                            <th width="170">Календарные дни</th>
-                                            <th width="170">Рабочие дни</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        <c:forEach var="cal" items="${calDaysCount}">
-                                            <tr>
-                                                <td>${cal.year}</td>
-                                                <td>${cal.vacationType}</td>
-                                                <td>${cal.summaryCalDays}</td>
-                                                <td>${cal.summaryWorkDays}</td>
-                                            </tr>
-                                        </c:forEach>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </c:when>
-                        </c:choose>
+                                                <div class="delete-button">
+                                                    <img src="<c:url value="/resources/img/delete.png"/>"
+                                                         title="Удалить утверждающего"
+                                                         onclick="deleteApprover(${va.id})"/>
+                                                </div>
+                                            </sec:authorize>
+                                        </td>
+                                    </tr>
+                                </c:forEach>
+                            </table>
+                        </div>
+                    </c:if>
+
                     </td>
+                    <td class="centered">${vacation.type.value}</td>
+                    <td class="centered">${vacation.employee.name}</td>
+                    <td class="date"><fmt:formatDate value="${vacation.creationDate}" pattern="dd.MM.yyyy HH:mm"/></td>
+                    <td class="date"><fmt:formatDate value="${vacation.beginDate}" pattern="dd.MM.yyyy"/></td>
+                    <td class="date"><fmt:formatDate value="${vacation.endDate}" pattern="dd.MM.yyyy"/></td>
+                    <td class="centered">${calDays[vacation]}</td>
+                    <td class="centered">${workDays[vacation]}</td>
+                    <td class="centered">
+                            ${vacation.comment}
+                        <c:if test="${vacation.author.id ne vacation.employee.id}">
+                            <c:if test="${fn:length(vacation.comment) != 0}"><br/><br/></c:if>
+                            Заявка создана сотрудником ${vacation.author.name}
+                        </c:if>
+                    </td>
+                    <td class="centered">${vacation.employee.division.name}</td>
+                    <td class="centered">${vacation.employee.region.name}</td>
                 </tr>
-                </tfoot>
-            </c:otherwise>
-            </c:choose>
-        </table>
-    </div>
-    <div data-dojo-type="dijit/layout/ContentPane" id="secondTab" title="График">
-        <div style="padding-left: 10px">
+            </c:forEach>
+            </tbody>
+            <tfoot>
+            <tr class="summary">
+                <td colspan="3">Кол-во утвержденных заявлений на отпуск</td>
+                <td colspan="1">${summaryApproved}</td>
+            </tr>
+            <tr class="summary">
+                <td colspan="3">Кол-во отклоненных заявлений на отпуск</td>
+                <td colspan="1">${summaryRejected}</td>
+            </tr>
+            <tr>
+                <td colspan="4" class="centered">
+                    <c:choose>
+                        <c:when test="${employeeId != -1}">
+                            <div data-dojo-type="dijit/TitlePane"
+                                 data-dojo-props="title: 'Кол-во дней отпуска за период', open: false"
+                                 style="margin: 3px; padding: 0;">
+                                <table class="centered">
+                                    <thead>
+                                    <tr>
+                                        <th width="170">Тип отпуска</th>
+                                        <th width="170">Год</th>
+                                        <th width="170">Календарные дни</th>
+                                        <th width="170">Рабочие дни</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <c:forEach var="cal" items="${calDaysCount}" varStatus="status">
 
-            <br>
-            Отображение:<br>
-            <input type="radio" onclick="showGraphic(VIEW_GRAPHIC_BY_DAY)" name="radiobuttons" id="byDay"> &nbsp; По дням <br>
-            <input type="radio" onclick="showGraphic(VIEW_GRAPHIC_BY_WEEK)" name="radiobuttons" id="byWeek"> &nbsp; По неделям
-            <br><br>
+                                        <c:if test="${(status.count-1)%years == 0 && years!=1}">
+                                            <c:if test="${(status.count==1)}"><tr></c:if>
+                                            <c:if test="${(status.count!=1)}"><tr class="trDelimeter"></c:if>
+                                            <td rowspan="${years}">${cal.vacationType}</td>
+                                        </c:if>
+                                        <c:if test="${years==1}">
+                                            <c:if test="${(status.count==1)}"><tr></c:if>
+                                            <c:if test="${(status.count!=1)}"><tr class="trDelimeter"></c:if>
+                                            <td>${cal.vacationType}</td>
+                                        </c:if>
+                                        <td>${cal.year}</td>
+                                        <td>${cal.summaryCalDays}</td>
+                                        <td>${cal.summaryWorkDays}</td>
+                                        </tr>
 
-        </div>
-        <div id="emptyMessage"></div>
-        <div style="position:relative;" class="Gantt" id="graphic_div"> </div>
+                                    </c:forEach>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </c:when>
+                    </c:choose>
+                </td>
+            </tr>
+            </tfoot>
+        </c:otherwise>
+        </c:choose>
+    </table>
+</div>
+<div data-dojo-type="dijit/layout/ContentPane" id="secondTab" title="График">
+    <div style="padding-left: 10px">
+
+        <br>
+        Отображение:<br>
+        <input type="radio" onclick="showGraphic(VIEW_GRAPHIC_BY_DAY)" name="radiobuttons" id="byDay"> &nbsp; По дням <br>
+        <input type="radio" onclick="showGraphic(VIEW_GRAPHIC_BY_WEEK)" name="radiobuttons" id="byWeek"> &nbsp; По неделям
+        <br><br>
+
     </div>
+    <div id="emptyMessage"></div>
+    <div style="position:relative;" class="Gantt" id="graphic_div"> </div>
+</div>
 </div>
 
 </body>
