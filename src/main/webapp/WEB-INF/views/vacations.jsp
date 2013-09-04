@@ -2,7 +2,10 @@
 <%@page contentType="text/html" pageEncoding="UTF-8" %>
 
 <%@ page import="static com.aplana.timesheet.form.VacationsForm.*" %>
+<%@ page import="com.aplana.timesheet.dao.entity.Employee" %>
+<%@ page import="com.aplana.timesheet.dao.entity.Vacation" %>
 <%@ page import="com.aplana.timesheet.enums.VacationStatusEnum" %>
+<%@ page import="com.aplana.timesheet.service.VacationService" %>
 
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
@@ -15,6 +18,10 @@
 <c:set var="vacationAprovementWiyhPm" value="<%=VacationStatusEnum.APPROVEMENT_WITH_PM.getId()%>"/>
 <c:set var="vacationAprovedByPm" value="<%=VacationStatusEnum.APPROVED_BY_PM.getId()%>"/>
 <c:set var="vacationRejected" value="<%=VacationStatusEnum.REJECTED.getId()%>"/>
+
+<%
+    VacationService vacationService = (VacationService) request.getAttribute("vacationService");
+%>
 
 <html>
 <head>
@@ -286,13 +293,12 @@
                 <c:forEach var="vacation" items="${vacationsList}" varStatus="lp">
                     <tr>
                         <td>
-                            <sec:authorize access="
-                            hasRole('ROLE_ADMIN') or
-                            ${
-                                (vacation.employee.id eq curEmployee.id) or
-                                (vacation.author.id eq curEmployee.id)
-                            }
-                        ">
+                            <c:set var="vacationDeletePermission"
+                                   value="<%= vacationService.isVacationDeletePermission(
+                                        (Vacation) pageContext.getAttribute("vacation"),
+                                        (Employee) pageContext.findAttribute("curEmployee")) %>"
+                                    />
+                            <sec:authorize access="hasRole('ROLE_ADMIN') or ${vacationDeletePermission}">
                                 <div class="delete-button">
                                     <img src="<c:url value="/resources/img/delete.png"/>" title="Удалить"
                                          onclick="deleteVacation(this.parentElement, ${vacation.id});"/>
