@@ -4,6 +4,7 @@ import com.aplana.timesheet.constants.TimeSheetConstants;
 import com.aplana.timesheet.dao.EmployeeReportDAO;
 import com.aplana.timesheet.dao.entity.*;
 import com.aplana.timesheet.enums.EmployeePlanType;
+import com.aplana.timesheet.enums.TypesOfActivityEnum;
 import com.aplana.timesheet.form.entity.EmployeeMonthReportDetail;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -51,6 +52,10 @@ public class EmployeeReportService {
         Double sumFactH = Double.valueOf(0);
         for (Object[] item : detailList) {
             DictionaryItem dictionaryItem = (DictionaryItem) item[0];
+            /* подменим активность "проектный пресейл" -> "проектом" */
+            if (dictionaryItem.getId().equals(TypesOfActivityEnum.PROJECT_PRESALE.getId())) {
+                dictionaryItem = dictionaryItemService.find(TypesOfActivityEnum.PROJECT.getId());
+            }
             Project project = (Project) item[1];
             Double workPlanH = Double.valueOf(0);
 
