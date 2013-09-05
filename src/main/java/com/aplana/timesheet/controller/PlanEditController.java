@@ -454,9 +454,9 @@ public class PlanEditController {
 
     private String getDataAsJson(PlanEditForm form, Date date) {
         final List<Employee> employees;
-        final Integer manager = form.getManager();
-        LOGGER.debug("manager = {}",manager);
-        if (manager == null || manager == -1) {
+        final Integer managerId = form.getManager();
+        LOGGER.debug("manager = {}",managerId);
+        if (managerId == null || managerId == -1) {
             employees = employeeService.getDivisionEmployees(
                     form.getDivisionId(),
                     date,
@@ -469,8 +469,13 @@ public class PlanEditController {
                     date,
                     getRegionIds(form),
                     getProjectRoleIds(form),
-                    manager
+                    managerId
             );
+            Employee manager = employeeService.find(managerId);
+            if (!employees.contains(manager)) {
+                employees.add(manager);
+                Collections.sort(employees);
+            }
         }
         final ArrayList<JsonNode> nodes = new ArrayList<JsonNode>();
 
