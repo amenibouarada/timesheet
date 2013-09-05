@@ -295,8 +295,8 @@
                         <td>
                             <c:set var="vacationDeletePermission"
                                    value="<%= vacationService.isVacationDeletePermission(
-                                        (Vacation) pageContext.getAttribute("vacation"),
-                                        (Employee) pageContext.findAttribute("curEmployee")) %>"
+                                        (Vacation) pageContext.getAttribute(\"vacation\"),
+                                        (Employee) pageContext.findAttribute(\"curEmployee\")) %>"
                                     />
                             <sec:authorize access="hasRole('ROLE_ADMIN') or ${vacationDeletePermission}">
                                 <div class="delete-button">
