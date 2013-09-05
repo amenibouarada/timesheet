@@ -16,6 +16,6 @@ public class TimeSheetConstants {
      */
     public static final String COOKIE_REMEMBER = "REMEMBER";
     public static final String POST_REMEMBER = "remember";
-    public static final double WORK_DAY_DURATION = 8.0;
+    public static final double WORK_DAY_DURATION = 8.0; //todo переделать в BigDecimal
     public static final String DOJO_PATH = "/resources/js/dojo-release-1.8.3";
 }

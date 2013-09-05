@@ -9,6 +9,8 @@ import com.aplana.timesheet.form.entity.EmployeeMonthReportDetail;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,10 +48,10 @@ public class EmployeeReportService {
         List<Object[]> detailList = employeeMonthReportDAO.getEmployeeMonthData(employee_id, year, month);
         List<EmployeeMonthReportDetail> result = new ArrayList<EmployeeMonthReportDetail>();
         /* кол-во часов по плану в месяц */
-        Double workDurationPlan = calendarService.getEmployeeRegionWorkDaysCount(employee, year, month) * TimeSheetConstants.WORK_DAY_DURATION * employee.getJobRate();
+        BigDecimal workDurationPlan = new BigDecimal(calendarService.getEmployeeRegionWorkDaysCount(employee, year, month) * TimeSheetConstants.WORK_DAY_DURATION * employee.getJobRate(), MathContext.DECIMAL64);
         /* Итогошные значения */
-        Double sumPlanH = Double.valueOf(0);
-        Double sumFactH = Double.valueOf(0);
+        BigDecimal sumPlanH = BigDecimal.ZERO;
+        BigDecimal sumFactH = BigDecimal.ZERO;
         for (Object[] item : detailList) {
             DictionaryItem dictionaryItem = (DictionaryItem) item[0];
             /* подменим активность "проектный пресейл" -> "проектом" */
@@ -57,54 +59,54 @@ public class EmployeeReportService {
                 dictionaryItem = dictionaryItemService.find(TypesOfActivityEnum.PROJECT.getId());
             }
             Project project = (Project) item[1];
-            Double workPlanH = Double.valueOf(0);
+            BigDecimal workPlanH = BigDecimal.ZERO;
 
             /* считаем плановое кол-во часов (для непроектной свой расчёт) */
             if (dictionaryItem.getId() == EmployeePlanType.NON_PROJECT.getId()) {
                 EmployeePlan employeePlan = employeePlanService.tryFind(employee, year, month, dictionaryItem);
                 if (employeePlan != null) {
-                    workPlanH = employeePlan.getValue() * employee.getJobRate();
+                    workPlanH = BigDecimal.valueOf(employeePlan.getValue() * employee.getJobRate());
                 }
             } else {
                 EmployeeProjectPlan projectPlan = employeeProjectPlanService.tryFind(employee, year, month, project);
                 if (projectPlan != null) {
-                    workPlanH = projectPlan.getValue() * employee.getJobRate();
+                    workPlanH = BigDecimal.valueOf(projectPlan.getValue() * employee.getJobRate());
                 }
             }
-            Double workFactH = (Double) item[2];
+            BigDecimal workFactH = new BigDecimal((Double) item[2], MathContext.DECIMAL64);
             /* складываем в Итого */
-            sumPlanH += workPlanH;
-            sumFactH += workFactH;
+            sumPlanH = sumPlanH.add(workPlanH);
+            sumFactH = sumFactH.add(workFactH);
             result.add(new EmployeeMonthReportDetail(dictionaryItem, project, workPlanH, workFactH, workDurationPlan));
         }
 
         /* проверяем отпуска */
-        Double vacationPlanH = Double.valueOf(0);
-        Double vacationFactH = vacationService.getVacationsWorkdaysCount(employee, year, month, null) * TimeSheetConstants.WORK_DAY_DURATION * employee.getJobRate();
+        BigDecimal vacationPlanH = BigDecimal.ZERO;
+        BigDecimal vacationFactH = new BigDecimal(vacationService.getVacationsWorkdaysCount(employee, year, month, null) * TimeSheetConstants.WORK_DAY_DURATION * employee.getJobRate(), MathContext.DECIMAL64);
         DictionaryItem vacationDic = dictionaryItemService.find(EmployeePlanType.VACATION.getId());
         EmployeePlan vacationPlan = employeePlanService.tryFind(employee, year, month, vacationDic);
         if (vacationPlan != null) {
-            vacationPlanH = vacationPlan.getValue() * employee.getJobRate();
+            vacationPlanH = BigDecimal.valueOf(vacationPlan.getValue() * employee.getJobRate());
         }
         /* фильтруем пустую строку */
-        if (vacationPlanH != 0 || vacationFactH != 0) {
-            sumPlanH += vacationPlanH;
-            sumFactH += vacationFactH;
+        if (!vacationPlanH.equals(BigDecimal.ZERO) || !vacationFactH.equals(BigDecimal.ZERO)) {
+            sumPlanH = sumPlanH.add(vacationPlanH);
+            sumFactH = sumFactH.add(vacationFactH);
             result.add(new EmployeeMonthReportDetail(vacationDic, new Project(), vacationPlanH, vacationFactH, workDurationPlan));
         }
 
         /* проверим болезни */
-        Double illnessPlanH = Double.valueOf(0);
-        Double illnessFactH = illnessService.getIllnessWorkdaysCount(employee, year, month)* TimeSheetConstants.WORK_DAY_DURATION * employee.getJobRate();
+        BigDecimal illnessPlanH = BigDecimal.ZERO;
+        BigDecimal illnessFactH = new BigDecimal(illnessService.getIllnessWorkdaysCount(employee, year, month)* TimeSheetConstants.WORK_DAY_DURATION * employee.getJobRate(), MathContext.DECIMAL64);
         DictionaryItem illnessDic = dictionaryItemService.find(EmployeePlanType.ILLNESS.getId());
         EmployeePlan illnessPlan = employeePlanService.tryFind(employee, year, month, illnessDic);
         if (illnessPlan != null) {
-            illnessPlanH = illnessPlan.getValue() * employee.getJobRate();
+            illnessPlanH = BigDecimal.valueOf(illnessPlan.getValue() * employee.getJobRate());
         }
         /* фильтруем пустую строку */
-        if (illnessPlanH != 0 || illnessFactH != 0) {
-            sumPlanH += illnessPlanH;
-            sumFactH += illnessFactH;
+        if (!illnessPlanH.equals(BigDecimal.ZERO) || !illnessFactH.equals(BigDecimal.ZERO)) {
+            sumPlanH = sumPlanH.add(illnessPlanH);
+            sumFactH = sumFactH.add(illnessFactH);
             result.add(new EmployeeMonthReportDetail(illnessDic, new Project(), illnessPlanH, illnessFactH, workDurationPlan));
         }
 

@@ -423,7 +423,7 @@ public class TimeSheetFormValidator extends AbstractValidator {
     }
 
     private void validateDuration(TimeSheetForm tsForm, Employee employee, Errors errors, List<TimeSheetTableRowForm> timeSheetTablePart) {
-        double totalDuration = 0;
+        double totalDuration = 0;  //todo переделать в BigDecimal
         int notNullRowNumber = 0;
         // Проверяем заполненность строк отчета только если они есть :)
         if (timeSheetTablePart != null) {
@@ -434,18 +434,17 @@ public class TimeSheetFormValidator extends AbstractValidator {
                         "timeSheetTablePart[" + notNullRowNumber + "].duration",
                         "error.tsform.duration.required", getErrorMessageArgs(notNullRowNumber),
                         "Необходимо указать часы в строке " + (notNullRowNumber + 1) + ".");
-                // Часы должны быть указаны в правильном формате (1, 1.2, 5.5 и т.п.)
+                // Часы должны быть указаны в правильном формате (1, 1.2, 5.52 и т.п.)
                 // and may be 1,2; 2,3
                 if (StringUtils.isNotBlank(durationStr)) {
-                    Pattern p1 = Pattern.compile("([0-9]*)(\\.|,)[0-9]");
-                    Pattern p2 = Pattern.compile("([0-9]*)");
+                    /* все числа numeric (4, 2) */
+                    Pattern p1 = Pattern.compile("^0*[1-9]?[0-9](?:[.,]\\d{1,2})?$");
                     Matcher m1 = p1.matcher(durationStr);
-                    Matcher m2 = p2.matcher(durationStr);
-                    if (!m1.matches() && !m2.matches()) {
+                    if (!m1.matches()) {
                         errors.rejectValue("timeSheetTablePart[" + notNullRowNumber + "].duration",
                                 "error.tsform.duration.format", getErrorMessageArgs(notNullRowNumber),
                                 "Количество часов указано не верно в строке " + (notNullRowNumber + 1)
-                                        + ". Примеры правильных значений (5, 3.5, 2.0 и т.п.).");
+                                        + ". Примеры правильных значений (5, 3.5, 2.33 и т.п.).");
                     } else {
                         double duration = Double.parseDouble(durationStr.replace(",", "."));
                         // Количество часов должно быть больше нуля

@@ -771,6 +771,20 @@ public class TimeSheetFormValidatorTest2 extends AbstractTest {
         assertTrue(errorsText.indexOf("недоработки") != -1);
     }
 
+    /* Использование запятой вместо точки */
+    @Test
+    public void testValidate3_07_1() throws Exception {
+        /* дополнения "правильного" объекта новыми данными */
+        timeSheetForm.getTimeSheetTablePart().get(0).setDuration("8,55");
+        /* тест */
+        timeSheetFormValidator.validate(timeSheetForm, errors);
+        /* анализ результата */
+        fillErrorsText();
+        logger.info("Expected error = "+errorsText);
+        /* по кол-ву ошибок */
+        assertEquals(0, errors.getAllErrors().size());
+    }
+
     /* Зануление строки Проблемы */
     @Test
     public void testValidate3_08() throws Exception {

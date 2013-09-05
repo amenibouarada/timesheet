@@ -56,8 +56,8 @@ public class TimeSheetDetail {
 	@Column(columnDefinition = "text null")
 	private String description;
 
-	@Column(columnDefinition = "decimal(2,1) null")
-	private Double duration;
+	@Column(columnDefinition = "decimal(4,2) null")
+	private Double duration; //todo переделать в BigDecimal
 
 	@Column(columnDefinition = "text null")
 	private String problem;

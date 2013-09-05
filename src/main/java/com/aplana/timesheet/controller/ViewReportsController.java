@@ -90,14 +90,16 @@ public class ViewReportsController extends AbstractControllerForEmployeeWithYear
             next.setDuration(next.getDuration().add(vacationDuration).setScale(2));
         }
         durationFact = durationFact.setScale(2);
-        mav.addObject("durationFact", durationFact.doubleValue());
+        mav.addObject("durationFact", durationFact/*.doubleValue()*/);
         mav.addObject(
                 "durationPlan",
-                (calendarService.getEmployeeRegionWorkDaysCount(
-                        employee,
-                        year,
-                        month
-                ) * TimeSheetConstants.WORK_DAY_DURATION * employee.getJobRate())
+                BigDecimal.valueOf( //todo переделать когда все числа будут BigDecimal
+                        (calendarService.getEmployeeRegionWorkDaysCount(
+                                employee,
+                                year,
+                                month
+                        ) * TimeSheetConstants.WORK_DAY_DURATION * employee.getJobRate())
+                ).setScale(2)
         );
         Date toDate = new Date();
         Integer curYear = calendarService.getYearFromDate(toDate);
@@ -109,12 +111,14 @@ public class ViewReportsController extends AbstractControllerForEmployeeWithYear
 
         mav.addObject(
                 "durationPlanToCurrDate",(toDate.after(new Date())) ? 0 :
-                (calendarService.getCountWorkDayPriorDate(
-                        employee.getRegion(),
-                        year,
-                        month,
-                        toDate
-                ) * TimeSheetConstants.WORK_DAY_DURATION * employee.getJobRate())
+                BigDecimal.valueOf(//todo переделать когда все числа будут BigDecimal
+                        (calendarService.getCountWorkDayPriorDate(
+                            employee.getRegion(),
+                            year,
+                            month,
+                            toDate
+                    ) * TimeSheetConstants.WORK_DAY_DURATION * employee.getJobRate())
+                ).setScale(2)
         );
 
         mav.addObject("reportsDetail", employeeReportService.getMonthReport(employeeId, year, month));

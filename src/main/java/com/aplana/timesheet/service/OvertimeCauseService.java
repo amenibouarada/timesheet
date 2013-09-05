@@ -1,23 +1,21 @@
 package com.aplana.timesheet.service;
 
-import com.aplana.timesheet.constants.TimeSheetConstants;
 import com.aplana.timesheet.dao.OvertimeCauseDAO;
 import com.aplana.timesheet.dao.entity.DictionaryItem;
 import com.aplana.timesheet.dao.entity.OvertimeCause;
 import com.aplana.timesheet.dao.entity.TimeSheet;
-import com.aplana.timesheet.enums.*;
+import com.aplana.timesheet.enums.TypesOfActivityEnum;
 import com.aplana.timesheet.form.TimeSheetForm;
 import com.aplana.timesheet.form.TimeSheetTableRowForm;
 import com.aplana.timesheet.properties.TSPropertyProvider;
 import com.aplana.timesheet.util.EnumsUtils;
-import com.google.common.base.Preconditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.text.ParseException;
+import java.math.BigDecimal;
 import java.util.List;
 
 import static com.aplana.timesheet.constants.TimeSheetConstants.WORK_DAY_DURATION;
@@ -54,21 +52,21 @@ public class OvertimeCauseService {
         dao.store(overtimeCause);
     }
 
-    private double calculateTotalDuration(TimeSheetForm tsForm) {
-        double totalDuration = 0D;
-        double currentDuration;
+    private BigDecimal calculateTotalDuration(TimeSheetForm tsForm) {
+        BigDecimal totalDuration = BigDecimal.ZERO;
+        BigDecimal currentDuration;
         for (TimeSheetTableRowForm tableRowForm : tsForm.getTimeSheetTablePart()) {
             try{
-                currentDuration = Double.parseDouble(tableRowForm.getDuration());
+                currentDuration = new BigDecimal(tableRowForm.getDuration().replace(",", "."));
             }catch (NumberFormatException e){
                 logger.error("Error parsing duration on empl_id="+tsForm.getEmployeeId()+" on date='"+tsForm.getCalDate()+"'", e);
-                currentDuration = 0D;
+                currentDuration = BigDecimal.ZERO;
             }catch (NullPointerException e){
                 logger.error("Error parsing duration (isNull) on empl_id="+tsForm.getEmployeeId()+" on date='"+tsForm.getCalDate()+"'", e);
-                currentDuration = 0D;
+                currentDuration = BigDecimal.ZERO;
             }
 
-            totalDuration += currentDuration;
+            totalDuration = totalDuration.add(currentDuration);
         }
 
         return totalDuration;
@@ -80,7 +78,7 @@ public class OvertimeCauseService {
         return dictionaryItemService.find(overtimeCauseId).getValue();
     }
 
-    public boolean isOvertimeCauseNeeded(TimeSheetForm tsForm, double totalDuration) {
+    public boolean isOvertimeCauseNeeded(TimeSheetForm tsForm, BigDecimal totalDuration) {
         for (TimeSheetTableRowForm rowForm : tsForm.getTimeSheetTablePart()) {
             if (
                     TypesOfActivityEnum.isNotCheckableForOvertime(
@@ -94,7 +92,10 @@ public class OvertimeCauseService {
             }
         }
 
-        return totalDuration - WORK_DAY_DURATION > propertyProvider.getOvertimeThreshold() && WORK_DAY_DURATION - totalDuration > propertyProvider.getUndertimeThreshold();
+        return totalDuration.subtract(BigDecimal.valueOf(WORK_DAY_DURATION)).compareTo(
+                    BigDecimal.valueOf(propertyProvider.getOvertimeThreshold())) > 0
+                && BigDecimal.valueOf(WORK_DAY_DURATION).subtract(totalDuration).compareTo(
+                    BigDecimal.valueOf(propertyProvider.getUndertimeThreshold())) > 0;
     }
 
     public boolean isOvertimeDuration(TimeSheetForm tsForm) {
@@ -106,8 +107,9 @@ public class OvertimeCauseService {
                     return false;
                 }
             }
-            Double totalDuration = calculateTotalDuration(tsForm);
-            return totalDuration - WORK_DAY_DURATION > propertyProvider.getOvertimeThreshold();
+            BigDecimal totalDuration = calculateTotalDuration(tsForm);
+            return totalDuration.subtract(BigDecimal.valueOf(WORK_DAY_DURATION)).compareTo(
+                    BigDecimal.valueOf(propertyProvider.getOvertimeThreshold())) > 0;
         } else {
             return false;
         }
@@ -122,8 +124,9 @@ public class OvertimeCauseService {
                     return false;
                 }
             }
-            Double totalDuration = calculateTotalDuration(tsForm);
-            return WORK_DAY_DURATION - totalDuration > propertyProvider.getUndertimeThreshold();
+            BigDecimal totalDuration = calculateTotalDuration(tsForm);
+            return BigDecimal.valueOf(WORK_DAY_DURATION).subtract(totalDuration).compareTo(
+                    BigDecimal.valueOf(propertyProvider.getUndertimeThreshold())) > 0;
         } else {
             return false;
         }

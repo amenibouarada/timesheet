@@ -220,7 +220,7 @@ public class Employee implements Identifiable, Comparable{
         this.objectSid = objectSid;
     }
 
-    public Float getJobRate() {
+    public Float getJobRate() { //todo переделать в BigDecimal
         return jobRate;
     }
 
