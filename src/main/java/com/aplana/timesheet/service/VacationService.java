@@ -278,7 +278,7 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
         return !vacation.getStatus().getId().equals(VacationStatusEnum.APPROVED.getId());
     }
 
-    public String getExitToWorkAndCountVacationDayJson(String beginDate,String endDate, Integer employeeId){
+    public String getExitToWorkAndCountVacationDayJson(String beginDate,String endDate, Integer employeeId, Integer vacationTypeId){
         final JsonObjectNodeBuilder builder = anObjectBuilder();
         try {
             final Timestamp endDateT = DateTimeUtil.stringToTimestamp(endDate, CreateVacationForm.DATE_FORMAT);
@@ -310,8 +310,11 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
             }
             builder.withField("vacationWorkDayCount", aStringBuilder(vacationWorkCount.toString()));
             builder.withField("vacationDayCount", aStringBuilder((vacationDayCount<=0)?"0":vacationDayCount.toString()));
-            /* проверка на необходимость вывода информ сообщения о попадании на пятницу */
-            if (vacationDayCount > TSPropertyProvider.VACANTION_FRIDAY_INFORM_DAYS) {
+            /* проверка на необходимость вывода информ сообщения о попадании
+            *  на пятницу для отпуска с сохранением содержания */
+            if (vacationTypeId != null &&
+                    vacationTypeId == VacationTypesEnum.WITH_PAY.getId() &&
+                    vacationDayCount > TSPropertyProvider.VACANTION_FRIDAY_INFORM_DAYS) {
                 Calendar calendar = new GregorianCalendar();
                 calendar.setTime(endDateT);
 

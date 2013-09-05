@@ -169,11 +169,12 @@
         function updateExitToWorkAndCountVacationDay() {
             var fromDate = dojo.byId("calFromDate").value;
             var endDate = dojo.byId("calToDate").value;
-
+            var vacationType = dojo.byId("types").value;
             var exitToWorkElement = dojo.byId("exitToWork");
 
             if ((typeof fromDate == typeof undefined || fromDate == null || fromDate.length == 0)
-                    ||(typeof endDate == typeof undefined || endDate == null || endDate.length == 0)) {
+                    || (typeof endDate == typeof undefined || endDate == null || endDate.length == 0)
+                    || (typeof vacationType == typeof undefined || vacationType == null)) {
                 exitToWorkElement.innerHTML = '';
             } else {
                 exitToWorkElement.innerHTML =
@@ -182,7 +183,7 @@
                 dojo.xhrGet({
                     url: "<%= request.getContextPath()%>/getExitToWorkAndCountVacationDay",
                     handleAs: "json",
-                    content:{beginDate:fromDate, endDate:endDate, employeeId:getEmployeeId()},
+                    content:{beginDate:fromDate, endDate:endDate, employeeId:getEmployeeId(), vacationTypeId:vacationType},
                     load: function(data) {
                         if (data.size != 0) {
                             exitToWorkElement.setAttribute("class", "");
@@ -274,7 +275,8 @@
                 <span class="label">Подразделение</span>
             </td>
             <td>
-                <form:select path="divisionId" id="divisionId" onchange="vacationCreate_divisionChange(this)" class="without_dojo"
+                <form:select path="divisionId" id="divisionId" class="without_dojo"
+                             onchange="vacationCreate_divisionChange(this);updateExitToWorkAndCountVacationDay();"
                              onmouseover="tooltip.show(getTitle(this));" onmouseout="tooltip.hide();">
                     <form:options items="${divisionList}" itemLabel="name" itemValue="id"/>
                 </form:select>
@@ -283,10 +285,9 @@
                 <span class="label">Сотрудник:</span>
             </td>
             <td>
-                <form:select path="employeeId" id="employeeId" class="without_dojo" onmouseover="tooltip.show(getTitle(this));"
-                             onmouseout="tooltip.hide();"
-                             onchange="dateInfoHolder = []"
-                        >
+                <form:select path="employeeId" id="employeeId" class="without_dojo"
+                             onmouseover="tooltip.show(getTitle(this));" onmouseout="tooltip.hide();"
+                             onchange="dateInfoHolder = [];updateExitToWorkAndCountVacationDay();">
                 </form:select>
             </td>
         </tr>
@@ -299,7 +300,8 @@
                     <td>
                         <form:input path="calFromDate" id="calFromDate" class="date_picker" required="true"
                                     data-dojo-type="DateTextBox"
-                                    onMouseOver="tooltip.show(getTitle(this));" onMouseOut="tooltip.hide();"/>
+                                    onMouseOver="tooltip.show(getTitle(this));" onMouseOut="tooltip.hide();"
+                                    onChange="updateExitToWorkAndCountVacationDay();"/>
                     </td>
                     <td>
                         <div class="question-hint">
@@ -339,7 +341,7 @@
             </td>
             <td>
                 <form:select path="vacationType" id="types" onMouseOver="tooltip.show(getTitle(this));"
-                             onchange="initCurrentDateInfo(dojo.byId('employeeId').value,dijit.byId('calFromDate').value, getUrl());"
+                             onChange="updateExitToWorkAndCountVacationDay();"
                              onMouseOut="tooltip.hide();" multiple="false" size="1">
                     <form:option value="0" label="" />
                     <form:options items="${vacationTypes}" itemLabel="value" itemValue="id" />

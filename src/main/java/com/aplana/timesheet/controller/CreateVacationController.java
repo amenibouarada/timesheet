@@ -121,9 +121,10 @@ public class CreateVacationController {
     public String getExitToWorkAndCountVacationDay(
                                            @RequestParam("beginDate") String beginDate,
                                            @RequestParam("endDate") String endDate,
-                                           @RequestParam("employeeId") Integer employeeId
+                                           @RequestParam("employeeId") Integer employeeId,
+                                           @RequestParam("vacationTypeId") Integer vacationTypeId
     ) {
-        return vacationService.getExitToWorkAndCountVacationDayJson(beginDate,endDate,employeeId);
+        return vacationService.getExitToWorkAndCountVacationDayJson(beginDate, endDate, employeeId, vacationTypeId);
     }
 
     @RequestMapping(value = "/validateAndCreateVacation/{employeeId}/{approved}", method = RequestMethod.POST)
