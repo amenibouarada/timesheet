@@ -73,9 +73,10 @@ public class CreateVacationController {
             @ModelAttribute(CREATE_VACATION_FORM) CreateVacationForm createVacationForm,
             BindingResult result
     ) {
-        final Employee employee = employeeId.equals(-1)
-                ? securityService.getSecurityPrincipal().getEmployee()
-                : employeeService.find(employeeId);
+        final Employee employee = (employeeId != null && employeeService.find(employeeId) != null)
+                ? employeeService.find(employeeId)
+                : securityService.getSecurityPrincipal().getEmployee();
+
         final Calendar calendar = getCalendar(new Timestamp(java.util.Calendar.getInstance().getTimeInMillis()));
         final Timestamp nextWorkDay = calendarService.getNextWorkDay(calendar,
                 employeeService.find(employee.getId()).getRegion()).getCalDate(); //При выборе текущего сотрудника, поле Регион незаполнено
