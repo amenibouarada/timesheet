@@ -116,11 +116,12 @@ public class PlannedVacationService {
     }
 
     /**
-    * Получаем руководителей чьи "близкие" подчиненые планируют отпуска в ближайшие 2 недели
+    *   Получаем руководителей чьи "близкие" подчиненые планируют отпуска в ближайшие 2 недели
+    *   (с датой начала отпуска cur + 2 недели)
     */
 
     public Map<Employee, Set<Vacation>> getManagerEmployeesVacation() {
-        final List<Employee> employees = employeeDAO.getEmployeeWithPlannedVacation(dateCurrent, dateAfter);
+        final List<Employee> employees = employeeDAO.getEmployeeWithPlannedVacation(dateAfter);
 
         Map<Employee, Set<Employee>> employeeManagers = getEmployeeManagers(employees);
 
@@ -132,7 +133,7 @@ public class PlannedVacationService {
             Set<Vacation> vacations = new TreeSet<Vacation>();
 
             for (Employee employee:entry.getValue()) {
-                vacations.addAll(vacationDAO.findVacations(employee.getId(), dateCurrent, dateAfter, null));
+                vacations.add(vacationDAO.findVacation(employee.getId(), dateAfter, null));
             }
 
             managerEmployeesVacation.put(entry.getKey(), new TreeSet<Vacation>(vacations));
