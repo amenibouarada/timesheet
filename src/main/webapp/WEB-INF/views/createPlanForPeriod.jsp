@@ -92,12 +92,13 @@
                         select.options.length = 1;
 
                         dojo.forEach(data, function(project) {
-                            select.add(
-                                    dojo.create("option", {
-                                        value: project.<%= CreatePlanForPeriodContoller.PROJECT_ID %>,
-                                        innerHTML: project.<%= CreatePlanForPeriodContoller.PROJECT_NAME %>
-                                    })
-                            );
+                            var option = document.createElement("option");
+                            dojo.attr(option, {
+                                value:project.<%= CreatePlanForPeriodContoller.PROJECT_ID %>
+                            });
+                            option.text = project.<%= CreatePlanForPeriodContoller.PROJECT_NAME %>;
+                            option.innerHTML = project.<%= CreatePlanForPeriodContoller.PROJECT_NAME %>;
+                            select.appendChild(option);
                         });
 
                         select.value = value;

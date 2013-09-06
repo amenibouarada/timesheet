@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.ui.velocity.VelocityEngineUtils;
 
 import javax.annotation.Nullable;
+import java.math.BigDecimal;
 import java.util.*;
 
 import static com.aplana.timesheet.enums.TypesOfActivityEnum.*;
@@ -281,11 +282,11 @@ public class SendMailService{
     public String initMessageBodyForReport(TimeSheet timeSheet) {
         Map<String, Object> model1 = new HashMap<String, Object>();
         Iterator<TimeSheetDetail> iteratorTSD = timeSheet.getTimeSheetDetails().iterator();
-        Double summDuration = 0D;
+        BigDecimal summDuration = BigDecimal.ZERO;
         while (iteratorTSD.hasNext()){
-            summDuration = summDuration + iteratorTSD.next().getDuration();
+            summDuration = summDuration.add(BigDecimal.valueOf(iteratorTSD.next().getDuration())); //todo переделать на bigdecimal
         }
-        model1.put("summDuration", summDuration);
+        model1.put("summDuration", summDuration.setScale(2, BigDecimal.ROUND_HALF_UP));
         model1.put("dictionaryItemService", dictionaryItemService);
         model1.put("projectService", projectService);
         model1.put("DateTimeUtil", DateTimeUtil.class);

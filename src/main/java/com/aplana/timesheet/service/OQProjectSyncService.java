@@ -164,6 +164,8 @@ public class OQProjectSyncService extends AbstractServiceWithTransactionManageme
                 }
                 project.setCqRequired(foundProject.isCqRequired());
                 project.setEndDate(foundProject.getEndDate()); // APLANATS-826
+                project.setFundingType(foundProject.getFundingType());
+                project.setJiraProjectKey(foundProject.getJiraProjectKey());
             }
 
             project.setName(name);

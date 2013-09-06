@@ -74,14 +74,6 @@ function isNilOrNull(obj) {
     return !(obj != null && obj != 0);
 }
 
-function checkEmployeeData(empId) {
-    if (isNilOrNull(empId)){
-        alert("Необходимо выбрать сотрудника!\n");
-        return false;
-    }
-    return true;
-}
-
 function updateMultipleForSelect(select) {
     var allOptionIndex;
 
@@ -164,11 +156,8 @@ function changeSelectedEmployee() {
 function createVacation() {
     var empId = dojo.byId(EMPLOYEE_ID).value;
 
-    if (checkEmployeeData(empId)) {
-        vacationsForm.action =
-            contextPath + "/createVacation/" + empId;
-        vacationsForm.submit();
-    }
+    vacationsForm.action = contextPath + "/createVacation/" + empId;
+    vacationsForm.submit();
 }
 
 function deleteVacation(parentElement, vac_id) {

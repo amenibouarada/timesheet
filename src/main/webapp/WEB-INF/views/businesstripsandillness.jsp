@@ -533,16 +533,9 @@
         <thead>
             <tr>
                 <sec:authorize access="hasRole('CHANGE_ILLNESS_BUSINESS_TRIP')">
-                <c:choose>
-                     <c:when test="${forAll!=true}">
-                      <th width="15" class="iconbutton">
-                        <img src="<c:url value="/resources/img/add.gif"/>" title="Создать" onclick="createBusinessTripOrIllness();"/>
-                      </th>
-                     </c:when>
-                     <c:otherwise>
-                         <th class="tight"></th>
-                     </c:otherwise>
-                </c:choose>
+                <th width="15" class="iconbutton">
+                    <img src="<c:url value="/resources/img/add.gif"/>" title="Создать" onclick="createBusinessTripOrIllness();"/>
+                </th>
                 <th class="tight"></th>
                 <th class="tight"></th>
                 </sec:authorize>
