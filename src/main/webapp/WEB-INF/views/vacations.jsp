@@ -270,13 +270,13 @@
                 </th>
                 <th width="160">Статус</th>
                 <th width="220">Тип отпуска</th>
-                <th width="110">Дата создания</th>
+                <th width="250">Сотрудник</th>
+                <th width="150">Дата создания</th>
                 <th width="110">Дата с</th>
                 <th width="110">Дата по</th>
                 <th width="120">Кол-во календарных дней</th>
                 <th width="130">Кол-во рабочих дней</th>
                 <th width="270">Комментарий</th>
-                <th width="270">Сотрудник</th>
                 <th width="200">Центр</th>
                 <th width="120">Регион</th>
             </tr>
@@ -305,8 +305,22 @@
                                 </div>
                             </sec:authorize>
                         </td>
-                        <td class="centered">
-                                ${vacation.status.value}
+                    <td id="statusTd" class="centered">
+                        <c:choose>
+                        <c:when test="${vacation.status.id == vacationApproved}">
+                            <span  style="color: #00b114">
+                        </c:when>
+                        <c:when test="${vacation.status.id == vacationRejected}">
+                            <span style="color: #d90002">
+                        </c:when>
+                        <c:when test="${vacation.status.id == vacationAprovementWiyhLm || vacation.status.id == vacationAprovementWiyhPm || vacation.status.id == vacationAprovedByPm}">
+                            <span style="color: blue">
+                        </c:when>
+                        <c:otherwise>
+                            <span class="centered">
+                        </c:otherwise>
+                        </c:choose>
+                            ${vacation.status.value}</span>
                             <c:if test="${fn:length(vacation.vacationApprovals) > 0}">
                                 <div data-dojo-type="dijit/TitlePane" data-dojo-props="title: 'Согласующие', open: false"
                                      style="margin: 3px; padding: 0;">
@@ -342,13 +356,12 @@
                                                 </td>
                                                 <td>
                                                     <sec:authorize access="
-                                               hasRole('ROLE_ADMIN') and
-                                                ${
-                                                    ((vacation.status.id eq vacationAprovementWiyhLm)
-                                                    or (vacation.status.id eq vacationAprovementWiyhPm))
-                                                    and (!va.result)
-                                                }
-                                        ">
+                                                        hasRole('ROLE_ADMIN') and
+                                                        ${
+                                                            ((vacation.status.id eq vacationAprovementWiyhLm)
+                                                            or (vacation.status.id eq vacationAprovementWiyhPm))
+                                                            and (!va.result)
+                                                        }">
                                                         <div class="delete-button">
                                                             <img src="<c:url value="/resources/img/delete.png"/>"
                                                                  title="Удалить утверждающего"
@@ -363,19 +376,19 @@
                             </c:if>
                         </td>
                         <td class="centered">${vacation.type.value}</td>
-                        <td class="date"><fmt:formatDate value="${vacation.creationDate}" pattern="dd.MM.yyyy"/></td>
+                        <td class="centered">${vacation.employee.name}</td>
+                        <td class="date"><fmt:formatDate value="${vacation.creationDate}" pattern="dd.MM.yyyy HH:mm"/></td>
                         <td class="date"><fmt:formatDate value="${vacation.beginDate}" pattern="dd.MM.yyyy"/></td>
                         <td class="date"><fmt:formatDate value="${vacation.endDate}" pattern="dd.MM.yyyy"/></td>
-                        <td class="centered">${calDays[lp.index]}</td>
-                        <td class="centered">${workDays[lp.index]}</td>
+                        <td class="centered">${calDays[vacation]}</td>
+                        <td class="centered">${workDays[vacation]}</td>
                         <td class="centered">
-                                ${vacation.comment}
+                            ${vacation.comment}
                             <c:if test="${vacation.author.id ne vacation.employee.id}">
                                 <c:if test="${fn:length(vacation.comment) != 0}"><br/><br/></c:if>
                                 Заявка создана сотрудником ${vacation.author.name}
                             </c:if>
                         </td>
-                        <td class="centered">${vacation.employee.name}</td>
                         <td class="centered">${vacation.employee.division.name}</td>
                         <td class="centered">${vacation.employee.region.name}</td>
                     </tr>
@@ -407,7 +420,7 @@
                                         </tr>
                                         </thead>
                                         <tbody>
-                                    <c:forEach var="cal" items="${calDaysCount}" varStatus="status">
+                                        <c:forEach var="cal" items="${calDaysCount}" varStatus="status">
 
                                         <c:if test="${(status.count-1)%years == 0 && years!=1}">
                                             <c:if test="${(status.count==1)}"><tr></c:if>
