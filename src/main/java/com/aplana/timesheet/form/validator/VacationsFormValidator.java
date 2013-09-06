@@ -2,9 +2,6 @@ package com.aplana.timesheet.form.validator;
 
 import com.aplana.timesheet.form.VacationsForm;
 import com.aplana.timesheet.service.CalendarService;
-import com.aplana.timesheet.service.EmployeeService;
-import com.aplana.timesheet.service.SecurityService;
-import com.aplana.timesheet.service.VacationService;
 import com.aplana.timesheet.util.DateTimeUtil;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,14 +9,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.Errors;
 
 import java.sql.Timestamp;
-import java.util.Date;
 
 /**
  * @author rshamsutdinov
  * @version 1.0
  */
 @Service
-public class VacationsFormValidator extends AbstractDateValidator {
+public class VacationsFormValidator extends AbstractValidator {
 
     @Autowired
     private CalendarService calendarService;
@@ -46,41 +42,18 @@ public class VacationsFormValidator extends AbstractDateValidator {
         final boolean calFromDateIsNotEmpty = StringUtils.length(calFromDate) > 0;
         final boolean calToDateIsNotEmpty = StringUtils.length(calToDate) > 0;
 
+        validateDivisionId(vacationsForm.getDivisionId(), errors);
+        validateEmployeeId(vacationsForm.getEmployeeId(), errors);
+
         if (calFromDateIsNotEmpty && calToDateIsNotEmpty) {
             final Timestamp fromDate = DateTimeUtil.stringToTimestamp(calFromDate);
             final Timestamp toDate = DateTimeUtil.stringToTimestamp(calToDate);
 
-            if (fromDate.after(toDate)) {
-                errors.rejectValue(
-                        "calToDate",
-                        "error.createVacation.wrongtodate",
-                        "Дата окончания отпуска не может быть больше даты начала"
-                );
-            }
-            if (calendarService.find(toDate) == null){
-                errors.rejectValue(
-                        "calToDate",
-                        "error.createVacation.wrongyear",
-                        new Object[]{toDate.getYear()+1900},
-                        WRONG_YEAR_ERROR_MESSAGE
-                );
-            }
-        } else {
-            if (!calFromDateIsNotEmpty) {
-                errors.rejectValue(
-                        "calFromDate",
-                        "error.createVacation.fromdate.required",
-                        "Не указана дата начала отпуска"
-                );
-            }
+            validatePeriod(fromDate, toDate, errors);
+            validateDateExistsInCalendar(toDate, errors);
 
-            if (!calToDateIsNotEmpty) {
-                errors.rejectValue(
-                        "calToDate",
-                        "error.createVacation.todate.required",
-                        "Не указана дата окончания отпуска"
-                );
-            }
+        } else {
+            validateDatesIsNotEmpty(calFromDate, calFromDate, errors);
         }
     }
 }

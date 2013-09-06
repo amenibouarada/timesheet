@@ -6,7 +6,7 @@ import java.util.List;
  * @author rshamsutdinov
  * @version 1.0
  */
-public class VacationsForm extends AbstractFormForEmployee {
+public class VacationsForm extends CommonAbstractForm {
 
     public static final int ALL_VALUE = 0;
     public static final String REGIONS = "regions";
@@ -28,13 +28,9 @@ public class VacationsForm extends AbstractFormForEmployee {
 
     private Integer year;
     private Integer vacationId;
-    private String calFromDate;
-    private String calToDate;
     private Integer vacationType;
     private Integer managerId;
     private List<Integer> regions;
-    private List<Integer> regionsIdList;
-    private Integer regionId;
     private Integer approvalId;
     private Integer projectId;
     private Integer viewMode; // нужно для отображения вкладок, переключателей
@@ -55,36 +51,12 @@ public class VacationsForm extends AbstractFormForEmployee {
         this.vacationId = vacationId;
     }
 
-    public String getCalFromDate() {
-        return calFromDate;
-    }
-
-    public void setCalFromDate(String calFromDate) {
-        this.calFromDate = calFromDate;
-    }
-
-    public String getCalToDate() {
-        return calToDate;
-    }
-
-    public void setCalToDate(String calToDate) {
-        this.calToDate = calToDate;
-    }
-
     public Integer getVacationType() {
         return vacationType;
     }
 
     public void setVacationType(Integer vacationType) {
         this.vacationType = vacationType;
-    }
-
-    public List<Integer> getRegionsIdList() {
-        return regionsIdList;
-    }
-
-    public void setRegionsIdList(List<Integer> regionsIdList) {
-        this.regionsIdList = regionsIdList;
     }
 
     public List<Integer> getRegions() {
@@ -101,14 +73,6 @@ public class VacationsForm extends AbstractFormForEmployee {
 
     public void setManagerId(Integer managerId) {
         this.managerId = managerId;
-    }
-
-    public Integer getRegionId() {
-        return regionId;
-    }
-
-    public void setRegionId(Integer regionId) {
-        this.regionId = regionId;
     }
 
     public Integer getApprovalId() {

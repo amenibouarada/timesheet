@@ -40,7 +40,6 @@
     dojo.require(CALENDAR_EXT_PATH);
     require(["dojo/parser", "dijit/TitlePane"]);
 
-    var regionsIdList = ${regionsIdList};
     var managerList = ${managerListJson};
     var selectedEmployee = ${employeeId};
     var vacationListJSON =  ${vacationListByProjectJSON};
@@ -427,7 +426,7 @@
                                             <c:if test="${(status.count!=1)}"><tr class="trDelimeter"></c:if>
                                             <td rowspan="${years}">${cal.vacationType}</td>
                                         </c:if>
-                                        <c:if test="${years==1}">
+                                            <c:if test="${years==1}">
                                             <c:if test="${(status.count==1)}"><tr></c:if>
                                             <c:if test="${(status.count!=1)}"><tr class="trDelimeter"></c:if>
                                             <td>${cal.vacationType}</td>

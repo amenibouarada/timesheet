@@ -76,7 +76,6 @@ public class VacationsController extends AbstractControllerForEmployee {
                 : securityService.getSecurityPrincipal().getEmployee();
         vacationsForm.setDivisionId(employee.getDivision().getId());
         vacationsForm.setEmployeeId(employee.getId());
-        vacationsForm.setRegionsIdList(getRegionIdList());
         vacationsForm.setCalToDate(DateTimeUtil.currentYearLastDay());
         vacationsForm.setCalFromDate(DateTimeUtil.currentMonthFirstDay());
         vacationsForm.setVacationType(0);
@@ -156,7 +155,6 @@ public class VacationsController extends AbstractControllerForEmployee {
         modelAndView.addObject("regionId", vacationsForm.getRegions());
         modelAndView.addObject("projectId", vacationsForm.getProjectId() == null ? 0 : vacationsForm.getProjectId());
         modelAndView.addObject("regionList", getRegionList());
-        modelAndView.addObject("regionsIdList", getRegionIdList());
         modelAndView.addObject("calFromDate", dateFrom);
         modelAndView.addObject("calToDate", dateTo);
         modelAndView.addObject("vacationsList", revertList(vacations));

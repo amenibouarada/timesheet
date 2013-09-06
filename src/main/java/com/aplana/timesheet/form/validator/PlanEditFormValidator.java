@@ -15,7 +15,7 @@ import static com.aplana.timesheet.form.PlanEditForm.*;
  * @version 1.0
  */
 @Service
-public class PlanEditFormValidator extends AbstractDateValidator {
+public class PlanEditFormValidator extends AbstractValidator {
 
     private static final String ERROR_PLANEDIT_FORM = "error.planedit.form.";
 
