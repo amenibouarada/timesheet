@@ -21,11 +21,10 @@
     <li><a target="_blank" href="<c:url value='/managertools/report/5'/>"><fmt:message key="title.report05"/></a></li>
     <li><a target="_blank" href="<c:url value='/managertools/report/6'/>"><fmt:message key="title.report06"/></a></li>
     <li><a target="_blank" href="<c:url value='/managertools/report/7'/>"><fmt:message key="title.report07"/></a></li>
+
+    <c:if test="${pentahoUrl != null}">
+        <li><a target="_blank" href=${pentahoUrl}>Отчеты в Pentaho</a></li>
+    </c:if>
 </ul>
-<br/>
-<br/>
-<c:if test="${pentahoUrl != null}">
-	<a target="_blank" href=${pentahoUrl}>Отчеты в Pentaho</a>
-</c:if>
 </body>
 </html>
