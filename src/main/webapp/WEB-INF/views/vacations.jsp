@@ -400,20 +400,30 @@
                                     <table class="centered">
                                         <thead>
                                         <tr>
+                                        <th width="170">Тип отпуска</th>
                                             <th width="170">Год</th>
-                                            <th width="170">Тип отпуска</th>
                                             <th width="170">Календарные дни</th>
                                             <th width="170">Рабочие дни</th>
                                         </tr>
                                         </thead>
                                         <tbody>
-                                        <c:forEach var="cal" items="${calDaysCount}">
-                                            <tr>
+                                    <c:forEach var="cal" items="${calDaysCount}" varStatus="status">
+
+                                        <c:if test="${(status.count-1)%years == 0 && years!=1}">
+                                            <c:if test="${(status.count==1)}"><tr></c:if>
+                                            <c:if test="${(status.count!=1)}"><tr class="trDelimeter"></c:if>
+                                            <td rowspan="${years}">${cal.vacationType}</td>
+                                        </c:if>
+                                        <c:if test="${years==1}">
+                                            <c:if test="${(status.count==1)}"><tr></c:if>
+                                            <c:if test="${(status.count!=1)}"><tr class="trDelimeter"></c:if>
+                                            <td>${cal.vacationType}</td>
+                                        </c:if>
                                                 <td>${cal.year}</td>
-                                                <td>${cal.vacationType}</td>
                                                 <td>${cal.summaryCalDays}</td>
                                                 <td>${cal.summaryWorkDays}</td>
                                             </tr>
+
                                         </c:forEach>
                                         </tbody>
                                     </table>
