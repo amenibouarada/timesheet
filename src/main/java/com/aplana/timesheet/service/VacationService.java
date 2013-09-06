@@ -15,7 +15,6 @@ import com.aplana.timesheet.form.CreateVacationForm;
 import com.aplana.timesheet.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.vacationapproveprocess.VacationApprovalProcessService;
 import com.aplana.timesheet.util.DateTimeUtil;
-import com.aplana.timesheet.util.EnumsUtils;
 import com.aplana.timesheet.util.JsonUtil;
 import com.aplana.timesheet.util.ViewReportHelper;
 import com.google.common.base.Predicate;
@@ -156,27 +155,8 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
         }
 
         final Employee employee = securityService.getSecurityPrincipal().getEmployee();
-        final boolean isAdmin = employeeService.isEmployeeAdmin(employee.getId());
 
-        final DictionaryItem statusDictionaryItem = vacation.getStatus();
-        final VacationStatusEnum vacationStatus =
-                EnumsUtils.getEnumById(statusDictionaryItem.getId(), VacationStatusEnum.class);
-
-        if (
-                isVacationDeletePermission(vacation, employee) ||
-                isAdmin
-        ) {
-            if (!isAdmin &&
-                    (vacationStatus == VacationStatusEnum.REJECTED || vacationStatus == VacationStatusEnum.APPROVED) &&
-                    vacation.getType().getId() != VacationTypesEnum.PLANNED.getId()
-               ) {
-                throw new DeleteVacationException(String.format(
-                        "Нельзя удалить заявление на отпуск в статусе \"%s\". Для удаления данного заявления " +
-                                "необходимо написать на timesheet@aplana.com",
-                        statusDictionaryItem.getValue()
-                ));
-            }
-
+        if (isVacationDeletePermission(vacation, employee)) {
             /* для планируемых отпусков другая удалялка */
             if (vacation.getType().getId() == VacationTypesEnum.PLANNED.getId()) {
                 sendMailService.performPlannedVacationDeletedMailing(vacation);
@@ -185,11 +165,11 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
             }
 
             delete(vacation);
-
-            return;
+        } else {
+            throw new DeleteVacationException(String.format(
+                    "Нельзя удалить заявление на отпуск. Для удаления данного заявления " +
+                            "необходимо написать на timesheet@aplana.com"));
         }
-
-        throw new DeleteVacationException("Ошибка доступа");
     }
 
     @Transactional
@@ -359,12 +339,28 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
     /* функция возвращает можно ли удалить планируемый отпуск в таблице заявлений на отпуск */
     public Boolean isVacationDeletePermission(Vacation vacation, Employee employee) {
         if (employee != null && vacation != null) {
-            /* проверяем что это либо создатель отпуска либо сам отпускник */
-            if (vacation.getEmployee().equals(employee) || vacation.getAuthor().equals(employee))
+            /* проверим Админ ли текущий пользователь */
+            if (employeeService.isEmployeeAdmin(employee.getId())) {
                 return Boolean.TRUE;
-            /* проверяем что отпуск планируемый и текущий пользователь является лин. рук. отпускника */
-            if ( vacation.getType().getId() == VacationTypesEnum.PLANNED.getId() && employeeService.getLinearEmployees(vacation.getEmployee()).contains(employee) )
-                return Boolean.TRUE;
+            } else {
+                /* для запланированных отпусков проверяем что это либо создатель отпуска либо сам отпускник
+                * либо является лин. рук. отпускника */
+                if (vacation.getType().getId() == VacationTypesEnum.PLANNED.getId() &&
+                        (vacation.getEmployee().equals(employee) ||
+                                vacation.getAuthor().equals(employee) ||
+                                employeeService.getLinearEmployees(vacation.getEmployee()).contains(employee)
+                        )
+                   ){
+                    return Boolean.TRUE;
+                }
+                /* пользователь создатель или отпускник и статус не отклонено и не утверждено */
+                if ( (vacation.getEmployee().equals(employee) || vacation.getAuthor().equals(employee) ) &&
+                        vacation.getStatus().getId() != VacationStatusEnum.REJECTED.getId() &&
+                        vacation.getStatus().getId() != VacationStatusEnum.APPROVED.getId()
+                   ) {
+                    return Boolean.TRUE;
+                }
+            }
         }
         return Boolean.FALSE;
     }
