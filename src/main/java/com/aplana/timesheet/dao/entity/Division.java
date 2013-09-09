@@ -217,8 +217,8 @@ public class Division implements Identifiable, Comparable<Division> {
 
         Division division = (Division) o;
 
-        if (id != null ? !id.equals(division.id) : division.id != null) return false;
-        if (ldapName != null ? !ldapName.equals(division.ldapName) : division.ldapName != null) return false;
+        if (id != null ? !id.equals(division.getId()) : division.getId() != null) return false;
+        if (ldapName != null ? !ldapName.equals(division.getLdapName()) : division.getLdapName() != null) return false;
 
         return true;
     }
