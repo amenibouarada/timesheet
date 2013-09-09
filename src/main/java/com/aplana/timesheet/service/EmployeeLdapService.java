@@ -167,7 +167,7 @@ public class EmployeeLdapService extends AbstractServiceWithTransactionManagemen
             }
             trace.append("\n Synchronization JIRA name of all users with ldap finished.\n\n");
         } catch (Exception e) {
-            logger.error(" Exception in updateJiraNameAllUsersFromLdap : {}", e.getMessage());
+            logger.error(" Exception in updateJiraNameAllUsersFromLdap : {}", e);
             if (transactionStatus != null) {
                 rollback(transactionStatus);
             }
