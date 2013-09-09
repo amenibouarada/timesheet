@@ -83,7 +83,6 @@ public class EmployeeDAOTest extends AbstractTest {
         empl.setRegion(getRegion(1));
         empl.setLdap("ldap name");
         empl.setEndDate(null);
-        // todo после прояснения что за колонка ARCHIVED- добавить или удалить
         empl.setObjectSid("S-0-0-00-000000000-0000000000-0000000000-00000");
         empl.setJobRate(1f);
         empl.setManager2(getEmployee(1));
@@ -107,7 +106,6 @@ public class EmployeeDAOTest extends AbstractTest {
                         " region," +
                         " ldap," +
                         " end_date," +
-                        " archived," +
                         " ldap_object_sid," +
                         " job_rate," +
                         " manager2," +
@@ -125,7 +123,6 @@ public class EmployeeDAOTest extends AbstractTest {
                         " :region_id," +
                         " :ldap," +
                         " :end_date," +
-                        " :archived," +
                         " :ldap_object_sid," +
                         " :job_rate," +
                         " :manager2_id," +
@@ -142,7 +139,6 @@ public class EmployeeDAOTest extends AbstractTest {
         query.setParameter("region_id", expectedEmployee.getRegion().getId());
         query.setParameter("ldap", expectedEmployee.getLdap());
         query.setParameter("end_date", expectedEmployee.getEndDate(), TemporalType.TIMESTAMP);
-        query.setParameter("archived", false); // todo после прояснения что за колонка - добавить или удалить
         query.setParameter("ldap_object_sid", expectedEmployee.getObjectSid());
         query.setParameter("job_rate", expectedEmployee.getJobRate());
         query.setParameter("manager2_id", expectedEmployee.getManager2().getId());
@@ -172,7 +168,6 @@ public class EmployeeDAOTest extends AbstractTest {
         assertEquals(expectedEmployee.getRegion(), result.getRegion());
         assertEquals(expectedEmployee.getLdap(), result.getLdap());
         assertEquals(expectedEmployee.getEndDate(), result.getEndDate());
-//        assertEquals(expectedEmployee, result);// todo после прояснения что за колонка ARCHIVED- добавить или удалить
         assertEquals(expectedEmployee.getObjectSid(), result.getObjectSid());
         assertEquals(expectedEmployee.getJobRate(), result.getJobRate());
         assertEquals(expectedEmployee.getManager2(), result.getManager2());
@@ -208,7 +203,6 @@ public class EmployeeDAOTest extends AbstractTest {
         assertEquals(expectedEmployee.getRegion(), result.getRegion());
         assertEquals(expectedEmployee.getLdap(), result.getLdap());
         assertEquals(expectedEmployee.getEndDate(), result.getEndDate());
-//        assertEquals(expectedEmployee, result);// todo после прояснения что за колонка ARCHIVED- добавить или удалить
         assertEquals(expectedEmployee.getObjectSid(), result.getObjectSid());
         assertEquals(expectedEmployee.getJobRate(), result.getJobRate());
         assertEquals(expectedEmployee.getManager2(), result.getManager2());
