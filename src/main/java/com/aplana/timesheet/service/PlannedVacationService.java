@@ -51,7 +51,7 @@ public class PlannedVacationService {
         dateBefore = calendar2.getTime();
     }
 
-    public PlannedVacationService() {};
+    public PlannedVacationService() {}
 
 
     /**

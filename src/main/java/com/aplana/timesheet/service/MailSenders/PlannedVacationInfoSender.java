@@ -2,7 +2,6 @@ package com.aplana.timesheet.service.MailSenders;
 
 
 import com.aplana.timesheet.dao.entity.Employee;
-
 import com.aplana.timesheet.dao.entity.Vacation;
 import com.aplana.timesheet.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.SendMailService;
@@ -75,8 +74,8 @@ public class PlannedVacationInfoSender extends AbstractSenderWithAssistants<Map 
     protected void initMessageBody(Mail mail, MimeMessage message) throws MessagingException {
         Map model = new HashMap();
         Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.WEEK_OF_YEAR, -2);
-        SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy HH:mm");
+        //SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy HH:mm");
+        SimpleDateFormat format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
         model.put("forDate", format.format(calendar.getTime()));
         model.put("paramsForGenerateBody", mail.getParamsForGenerateBody());
 
