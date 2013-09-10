@@ -87,9 +87,9 @@ public class ViewReportsController extends AbstractControllerForEmployeeWithYear
             BigDecimal vacationDuration = next.getVacationDay() && next.getWorkDay() ? new BigDecimal(8) : BigDecimal.ZERO;
             durationFact = durationFact.add(vacationDuration);
             durationFact = durationFact.add(next.getDuration());
-            next.setDuration(next.getDuration().add(vacationDuration).setScale(2));
+            next.setDuration(next.getDuration().add(vacationDuration).setScale(2, BigDecimal.ROUND_HALF_UP));
         }
-        durationFact = durationFact.setScale(2);
+        durationFact = durationFact.setScale(2, BigDecimal.ROUND_HALF_UP);
         mav.addObject("durationFact", durationFact/*.doubleValue()*/);
         mav.addObject(
                 "durationPlan",
@@ -99,7 +99,7 @@ public class ViewReportsController extends AbstractControllerForEmployeeWithYear
                                 year,
                                 month
                         ) * TimeSheetConstants.WORK_DAY_DURATION * employee.getJobRate())
-                ).setScale(2)
+                ).setScale(2, BigDecimal.ROUND_HALF_UP)
         );
         Date toDate = new Date();
         Integer curYear = calendarService.getYearFromDate(toDate);
@@ -118,7 +118,7 @@ public class ViewReportsController extends AbstractControllerForEmployeeWithYear
                             month,
                             toDate
                     ) * TimeSheetConstants.WORK_DAY_DURATION * employee.getJobRate())
-                ).setScale(2)
+                ).setScale(2, BigDecimal.ROUND_HALF_UP)
         );
 
         mav.addObject("reportsDetail", employeeReportService.getMonthReport(employeeId, year, month));
