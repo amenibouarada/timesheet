@@ -88,10 +88,6 @@ public abstract class AbstractValidator implements Validator{
         }
     }
 
-    public void dateIsCorrect(){
-
-    }
-
     public void validateDateExistsInCalendar(Timestamp date, Errors errors){
         if (calendarService.find(date) == null){
             errors.rejectValue(

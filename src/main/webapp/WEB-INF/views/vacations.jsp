@@ -42,7 +42,7 @@
 
     var managerList = ${managerListJson};
     var selectedEmployee = ${employeeId};
-    var vacationListJSON =  ${vacationListByProjectJSON};
+    var vacationListJSON =  ${vacationListByRegionJSON};
     var fullProjectList = ${fullProjectListJsonWithDivisionId};
     var holidayList = ${holidayList};
 

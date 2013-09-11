@@ -38,6 +38,7 @@ public class AbstractValidatorTest {
     // создана не абстарактна форма для тестирования
     private class AbstractForm extends CommonAbstractForm{
         Integer year;
+        Integer month;
 
         public Integer getYear() {
             return year;
@@ -45,6 +46,14 @@ public class AbstractValidatorTest {
 
         public void setYear(Integer year) {
             this.year = year;
+        }
+
+        public Integer getMonth() {
+            return month;
+        }
+
+        public void setMonth(Integer month) {
+            this.month = month;
         }
     }
 
@@ -63,6 +72,7 @@ public class AbstractValidatorTest {
 
         when(calendarServiceMock.yearValid((Integer) any())).thenReturn(true);
         when(calendarServiceMock.find((Timestamp) any())).thenReturn(new Calendar(2000, 10, "month"));
+        when(calendarServiceMock.monthValid((Integer) any(), (Integer) any())).thenReturn(true);
         errors = new BeanPropertyBindingResult(commAbstractForm, "vacationsForm");
     }
 
@@ -111,6 +121,7 @@ public class AbstractValidatorTest {
         String fromDate = "21-03-2013";
         String toDate = "22-04-2013";
         abstractValidator.validateDatesIsNotEmpty(fromDate, toDate, errors);    // нет ошибок
+        assertEquals(0, errors.getErrorCount());
         fromDate = "";
         abstractValidator.validateDatesIsNotEmpty(fromDate, toDate, errors);    // +1 ошибка
         assertEquals(1, errors.getErrorCount());
@@ -120,65 +131,47 @@ public class AbstractValidatorTest {
         fromDate = "21-03-2013";
         abstractValidator.validateDatesIsNotEmpty(fromDate, toDate, errors);    // +1 ошибка
         assertEquals(4, errors.getErrorCount());
-
-        /*
-        void validateDatesIsNotEmpty(String fromDate, String toDate, Errors errors){
-            if (fromDate == null || fromDate.length() <= 0) {
-                errors.rejectValue(
-                        "calFromDate",
-                        "error.form.datefrom",
-                        "Не указана дата начала периода"
-                );
-            }
-
-            if (toDate == null || toDate.length() <= 0) {
-                errors.rejectValue(
-                        "calToDate",
-                        "error.form.dateto",
-                        "Не указана дата окончания периода"
-                );
-            }
-        }
-        */
     }
 
     @Test
     public void testValidateMonth(){
-/*
-    protected void validateMonth(Integer year, Integer month, Errors errors) {
-        // Месяц не выбран.
-        if ( isNotChoosed( month ) ) {
-            errors.rejectValue( "month",
-                    "error.tsform.month.required",
-                    "Не выбран месяц." );
-        }
-
-        // Неверный месяц
-        else if ( ! calendarService.monthValid(year, month) ) {
-            errors.rejectValue( "month",
-                    "error.tsform.month.required",
-                    "Выбран неверный месяц." );
-        }
-    }
-  */
+        Integer year  = 2013;
+        Integer month = 1;
+        abstractValidator.validateMonth(year, month, errors);    // нет ошибок
+        assertEquals(0, errors.getErrorCount());
+        month = null;
+        abstractValidator.validateMonth(year, month, errors);    // +1 ошибка
+        assertEquals(1, errors.getErrorCount());
+        month = 14;
+        when(calendarServiceMock.monthValid((Integer) any(), (Integer) any())).thenReturn(false);
+        abstractValidator.validateMonth(year, month, errors);    // +1 ошибка
+        assertEquals(2, errors.getErrorCount());
     }
 
     @Test
     public void testValidateEmployee(){
-    /*
-    void validateEmployee(Employee employee, Errors errors){
-        validateEmployeeId(employee.getId(), errors);
-    }
-    */
+        Integer employeeId = 12;
+        abstractValidator.validateEmployeeId(employeeId, errors);
+        assertEquals(0, errors.getErrorCount());
+        employeeId = null;
+        abstractValidator.validateEmployeeId(employeeId, errors);
+        assertEquals(1, errors.getErrorCount());
+        employeeId = -12;
+        abstractValidator.validateEmployeeId(employeeId, errors);
+        assertEquals(2, errors.getErrorCount());
     }
 
     @Test
     public void testValidateDivision(){
-    /*
-    void validateDivision(Division division, Errors errors){
-        validateDivisionId(division.getId(), errors);
-    }
-    */
+        Integer divisionId = 12;
+        abstractValidator.validateDivisionId(divisionId, errors);
+        assertEquals(0, errors.getErrorCount());
+        divisionId = null;
+        abstractValidator.validateDivisionId(divisionId, errors);
+        assertEquals(1, errors.getErrorCount());
+        divisionId = -12;
+        abstractValidator.validateDivisionId(divisionId, errors);
+        assertEquals(2, errors.getErrorCount());
     }
 
 
