@@ -456,7 +456,7 @@ public class PlanEditController {
         final List<Employee> employees;
         final Integer managerId = form.getManager();
         LOGGER.debug("manager = {}",managerId);
-        if (managerId == null || managerId == -1) {
+        if (managerId == null || managerId < 1) {
             employees = employeeService.getDivisionEmployees(
                     form.getDivisionId(),
                     date,
@@ -578,7 +578,7 @@ public class PlanEditController {
 
         map.put(
                 PERCENT_OF_CHARGE_PLAN,
-                aStringBuilder(formatPercentOfCharge(sumOfPlanCharge / summaryPlan))
+                aStringBuilder(formatPercentOfCharge((summaryPlan != 0) ? sumOfPlanCharge / summaryPlan : 0D))
         );
 
         appendNumberField(map, VACATION_PLAN, vacationPlan);
@@ -647,7 +647,7 @@ public class PlanEditController {
         }
 
         map.put(SUMMARY_FACT, JsonUtil.aNumberBuilder(summaryFact));
-        map.put(PERCENT_OF_CHARGE_FACT, aStringBuilder(formatPercentOfCharge(summaryFact / summaryPlan)));
+        map.put(PERCENT_OF_CHARGE_FACT, aStringBuilder(formatPercentOfCharge((summaryPlan != 0) ? summaryFact / summaryPlan : 0D)));
         map.put(CENTER_PROJECTS_FACT, JsonUtil.aNumberBuilder(centerProjectsFact));
         map.put(CENTER_PRESALES_FACT, JsonUtil.aNumberBuilder(centerPresalesFact));
         map.put(OTHER_PROJECTS_AND_PRESALES_FACT, JsonUtil.aNumberBuilder(otherProjectsFact));
