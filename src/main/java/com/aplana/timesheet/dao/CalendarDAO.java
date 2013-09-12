@@ -217,8 +217,7 @@ public class CalendarDAO {
                         " from Calendar c" +
                         " left join c.holidays h with (h.region.id is null or h.region.id = :regionId)" +
                         " where YEAR(c.calDate) = :year and MONTH(c.calDate) = :month" +
-                        " and c.calDate >= :dateBeg" +
-                        " and c.calDate < :dateEnd")
+                        " and c.calDate between :dateBeg and :dateEnd")
                 .setParameter("year", year)
                 .setParameter("month", month)
                 .setParameter("regionId", region.getId())
