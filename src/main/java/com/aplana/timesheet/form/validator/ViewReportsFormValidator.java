@@ -9,7 +9,7 @@ import org.springframework.validation.Errors;
 
 
 @Service
-public class ViewReportsFormValidator extends AbstractDateValidator {
+public class ViewReportsFormValidator extends AbstractValidator {
 	private static final Logger logger = LoggerFactory.getLogger(ViewReportsController.class);
 
     public boolean supports(Class<?> clazz) {

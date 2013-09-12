@@ -16,7 +16,7 @@ import java.util.Date;
  * @version 1.0
  */
 @Service
-public class CreatePlanForPeriodFormValidator extends AbstractDateValidator {
+public class CreatePlanForPeriodFormValidator extends AbstractValidator {
 
     private static final String ERROR_CODE_PREFIX = "error.createPlanForPeriodForm.";
 

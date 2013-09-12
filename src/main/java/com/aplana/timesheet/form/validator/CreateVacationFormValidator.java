@@ -66,12 +66,15 @@ public class CreateVacationFormValidator extends AbstractValidator {
         final String calToDate = createVacationForm.getCalToDate();
 
         final boolean isPlannedVacation = createVacationForm.getVacationType().equals(VacationTypesEnum.PLANNED.getId());
-        final Integer createTrashold = propertyProvider.getPlannedVacationCreateThreshold();
+        final Integer createThreshold= propertyProvider.getPlannedVacationCreateThreshold();
 
         DictionaryItem planned = dictionaryItemService.find(VacationTypesEnum.PLANNED.getId());
 
         final boolean calFromDateIsNotEmpty = StringUtils.length(calFromDate) > 0;
         final boolean calToDateIsNotEmpty = StringUtils.length(calToDate) > 0;
+
+        validateDivisionId(createVacationForm.getDivisionId(), errors);
+        validateEmployeeId(createVacationForm.getEmployeeId(), errors);
 
         if (calFromDateIsNotEmpty && calToDateIsNotEmpty) {
             final Timestamp fromDate = DateTimeUtil.stringToTimestamp(calFromDate);
@@ -82,7 +85,7 @@ public class CreateVacationFormValidator extends AbstractValidator {
                     employeeService.isEmployeeAdmin(securityService.getSecurityPrincipal().getEmployee().getId())
             )) {
                 final Date currentDate = new Date();
-                Date allowedDate = DateUtils.addDays(currentDate, createTrashold);
+                Date allowedDate = DateUtils.addDays(currentDate, createThreshold);
 
                 if (!fromDate.after(currentDate)) {
                     errors.rejectValue(
@@ -134,39 +137,13 @@ public class CreateVacationFormValidator extends AbstractValidator {
                 );
             }
 
-            if (fromDate.after(toDate)) {
-                errors.rejectValue(
-                        "calToDate",
-                        "error.createVacation.wrongtodate",
-                        "Дата окончания отпуска не может быть больше даты начала"
-                );
-            }
-            if (calendarService.find(toDate) == null){
-                Integer year = toDate.getYear() + 1900;
-                errors.rejectValue(
-                        "calToDate",
-                        "error.createVacation.wrongyear",
-                        new Object[]{year.toString()},
-                        WRONG_YEAR_ERROR_MESSAGE
-                );
-            }
-        } else {
-            if (!calFromDateIsNotEmpty) {
-                errors.rejectValue(
-                        "calFromDate",
-                        "error.createVacation.fromdate.required",
-                        "Не указана дата начала отпуска"
-                );
-            }
+            validatePeriod(fromDate, toDate, errors);
+            validateDateExistsInCalendar(toDate, errors);
 
-            if (!calToDateIsNotEmpty) {
-                errors.rejectValue(
-                        "calToDate",
-                        "error.createVacation.todate.required",
-                        "Не указана дата окончания отпуска"
-                );
-            }
+        } else {
+            validateDatesIsNotEmpty(calFromDate, calToDate, errors);
         }
+
 
         if (createVacationForm.getVacationType() == 0) {
             errors.reject(

@@ -76,7 +76,6 @@ public class VacationsController extends AbstractControllerForEmployee {
                 : securityService.getSecurityPrincipal().getEmployee();
         vacationsForm.setDivisionId(employee.getDivision().getId());
         vacationsForm.setEmployeeId(employee.getId());
-        vacationsForm.setRegionsIdList(getRegionIdList());
         vacationsForm.setCalToDate(DateTimeUtil.currentYearLastDay());
         vacationsForm.setCalFromDate(DateTimeUtil.currentMonthFirstDay());
         vacationsForm.setVacationType(0);
@@ -129,21 +128,21 @@ public class VacationsController extends AbstractControllerForEmployee {
         DictionaryItem vacationType = vacationsForm.getVacationType() != 0 ?
                 dictionaryItemService.find(vacationsForm.getVacationType()) : null;
 
-        final List<Vacation> vacations =
-                employeeId != null && employeeId != ALL_VALUE
-                ? vacationService.findVacations(employeeId, dateFrom, dateTo, vacationType)
-                : vacationService.findVacations(
-                        employeeService.getEmployees(employeeService.createDivisionList(divisionId),
-                                employeeService.createManagerList(managerId),
-                                employeeService.createRegionsList(regions),
-                                employeeService.createProjectList(projectId),
-                                dateFrom,
-                                dateTo,
-                                true
-                        ),
-                        dateFrom, dateTo, vacationType
-                )
-                ;
+        final List<Vacation> vacations;
+        if (employeeId != null && employeeId != ALL_VALUE){
+            vacations = vacationService.findVacations(employeeId, dateFrom, dateTo, vacationType);
+        } else {
+            List<Employee> employees = employeeService.getEmployees(
+                    employeeService.createDivisionList(divisionId),
+                    employeeService.createManagerList(managerId),
+                    employeeService.createRegionsList(regions),
+                    employeeService.createProjectList(projectId),
+                    dateFrom,
+                    dateTo,
+                    true
+            );
+            vacations = vacationService.findVacations(employees, dateFrom, dateTo, vacationType);
+        }
 
         final ModelAndView modelAndView = createMAVForEmployeeWithDivisionAndManagerAndRegion("vacations", employeeId, divisionId);
 
@@ -152,15 +151,12 @@ public class VacationsController extends AbstractControllerForEmployee {
         final Map<Vacation,Integer> calDays = new HashMap<Vacation, Integer>(vacationsSize);
         final Map<Vacation,Integer> workDays = new HashMap<Vacation, Integer>(vacationsSize);
 
-        modelAndView.addObject("getOrPost", 1);
-        modelAndView.addObject("regionId", vacationsForm.getRegions());
         modelAndView.addObject("projectId", vacationsForm.getProjectId() == null ? 0 : vacationsForm.getProjectId());
         modelAndView.addObject("regionList", getRegionList());
-        modelAndView.addObject("regionsIdList", getRegionIdList());
         modelAndView.addObject("calFromDate", dateFrom);
         modelAndView.addObject("calToDate", dateTo);
         modelAndView.addObject("vacationsList", revertList(vacations));
-        modelAndView.addObject("vacationListByProjectJSON", getVacationListByRegionJSON(vacations));
+        modelAndView.addObject("vacationListByRegionJSON", getVacationListByRegionJSON(vacations));
         modelAndView.addObject("calDays", calDays);
         modelAndView.addObject("workDays", workDays);
         modelAndView.addObject("holidayList", getHolidayListJSON(dateFrom, dateTo));
@@ -195,7 +191,6 @@ public class VacationsController extends AbstractControllerForEmployee {
         Integer lastYear = dateTo.getYear() + 1900;
         int summaryApproved = 0;
         int summaryRejected = 0;
-
 
         //Получаем списки, привязанные к типам отпусков
         Map<DictionaryItem,List<Vacation>> typedVacationMap = vacationService.splitVacationByTypes(vacations);
@@ -484,9 +479,10 @@ public class VacationsController extends AbstractControllerForEmployee {
      */
     @RequestMapping(value = "/vacations/getEmployeeList", headers = "Accept=text/plain;Charset=UTF-8")
     @ResponseBody
-    public String getVacationsCount(@ModelAttribute(VACATION_FORM) VacationsForm vacationsForm) {
+    public String getEmployeeList(@ModelAttribute(VACATION_FORM) VacationsForm vacationsForm) {
 
-        List<Employee> employeeList = employeeService.getEmployees(employeeService.createDivisionList(vacationsForm.getDivisionId()),
+        List<Employee> employeeList = employeeService.getEmployees(
+                employeeService.createDivisionList(vacationsForm.getDivisionId()),
                 employeeService.createManagerList(vacationsForm.getManagerId()),
                 employeeService.createRegionsList(vacationsForm.getRegions()),
                 employeeService.createProjectList(vacationsForm.getProjectId()),
