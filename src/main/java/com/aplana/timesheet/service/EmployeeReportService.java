@@ -2,9 +2,11 @@ package com.aplana.timesheet.service;
 
 import com.aplana.timesheet.constants.TimeSheetConstants;
 import com.aplana.timesheet.dao.EmployeeReportDAO;
-import com.aplana.timesheet.dao.entity.*;
+import com.aplana.timesheet.dao.entity.DictionaryItem;
+import com.aplana.timesheet.dao.entity.Employee;
+import com.aplana.timesheet.dao.entity.EmployeePlan;
+import com.aplana.timesheet.dao.entity.Project;
 import com.aplana.timesheet.enums.EmployeePlanType;
-import com.aplana.timesheet.enums.TypesOfActivityEnum;
 import com.aplana.timesheet.form.entity.EmployeeMonthReportDetail;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,9 +23,6 @@ public class EmployeeReportService {
 
     @Autowired
     private EmployeeReportDAO employeeMonthReportDAO;
-
-    @Autowired
-    private EmployeeProjectPlanService employeeProjectPlanService;
 
     @Autowired
     private EmployeePlanService employeePlanService;
@@ -43,6 +42,10 @@ public class EmployeeReportService {
     @Autowired
     private DictionaryItemService dictionaryItemService;
 
+    @Autowired
+    private ProjectService projectService;
+
+
     public List<EmployeeMonthReportDetail> getMonthReport(Integer employee_id, Integer year, Integer month) {
         Employee employee = employeeService.find(employee_id);
         List<Object[]> detailList = employeeMonthReportDAO.getEmployeeMonthData(employee_id, year, month);
@@ -58,9 +61,10 @@ public class EmployeeReportService {
         /* Итогошные значения */
         BigDecimal sumPlanH = BigDecimal.ZERO;
         BigDecimal sumFactH = BigDecimal.ZERO;
+
         /* вычисляем итого факт (для вычисления процента по каждой задаче) */
         for (Object[] item : detailList) {
-            sumFactH = sumFactH.add(BigDecimal.valueOf((Double) item[2]));
+            sumFactH = sumFactH.add((BigDecimal) item[3]);
         }
         /* отпуска */
         int vacationWorkDaysCount = vacationService.getVacationsWorkdaysCount(employee, year, month, null);
@@ -71,30 +75,16 @@ public class EmployeeReportService {
 
         /* идём по спроектам */
         for (Object[] item : detailList) {
-            DictionaryItem dictionaryItem = (DictionaryItem) item[0];
-            /* подменим активность "проектный пресейл" -> "проектом" */
-            if (dictionaryItem.getId().equals(TypesOfActivityEnum.PROJECT_PRESALE.getId())) {
-                dictionaryItem = dictionaryItemService.find(TypesOfActivityEnum.PROJECT.getId());
-            }
-            Project project = (Project) item[1];
-            BigDecimal workPlanH = BigDecimal.ZERO;
+            DictionaryItem actType = dictionaryItemService.find((Integer) item[0]);
+            Project project = projectService.find((Integer) item[1]);
+            BigDecimal workPlanH = new BigDecimal((Double) item[2], MathContext.DECIMAL64);
+            BigDecimal workFactH = (BigDecimal) item[3];
 
-            /* считаем плановое кол-во часов (для непроектной свой расчёт) */
-            if (dictionaryItem.getId() == EmployeePlanType.NON_PROJECT.getId()) {
-                EmployeePlan employeePlan = employeePlanService.tryFind(employee, year, month, dictionaryItem);
-                if (employeePlan != null) {
-                    workPlanH = BigDecimal.valueOf(employeePlan.getValue() * employee.getJobRate());
-                }
-            } else {
-                EmployeeProjectPlan projectPlan = employeeProjectPlanService.tryFind(employee, year, month, project);
-                if (projectPlan != null) {
-                    workPlanH = BigDecimal.valueOf(projectPlan.getValue() * employee.getJobRate());
-                }
-            }
-            BigDecimal workFactH = new BigDecimal((Double) item[2], MathContext.DECIMAL64);
-            /* складываем в Итого */
+            /* складываем в Итого план*/
             sumPlanH = sumPlanH.add(workPlanH);
-            result.add(new EmployeeMonthReportDetail(dictionaryItem, project, workPlanH, workFactH, workDurationPlan, sumFactH));
+
+            /* добавляем строку */
+            result.add(new EmployeeMonthReportDetail(actType, project, workPlanH, workFactH, workDurationPlan, sumFactH));
         }
 
         /* проверяем отпуска */
