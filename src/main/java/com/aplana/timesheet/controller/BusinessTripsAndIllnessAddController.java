@@ -10,7 +10,6 @@ import com.aplana.timesheet.exception.controller.BusinessTripsAndIllnessAddExcep
 import com.aplana.timesheet.form.BusinessTripsAndIllnessAddForm;
 import com.aplana.timesheet.form.validator.BusinessTripsAndIllnessAddFormValidator;
 import com.aplana.timesheet.service.*;
-import com.aplana.timesheet.util.DateTimeUtil;
 import com.aplana.timesheet.util.EmployeeHelper;
 import com.aplana.timesheet.util.EnumsUtils;
 import org.slf4j.Logger;
@@ -24,7 +23,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
-import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -167,8 +165,8 @@ public class BusinessTripsAndIllnessAddController extends AbstractController{
     public String getProjects(@PathVariable("employeeId") Integer employeeId,
                               @PathVariable("beginDate") String beginDateStr,
                               @PathVariable("endDate") String endDateStr){
-        final Timestamp beginDate = DateTimeUtil.stringToTimestamp(beginDateStr, DATE_FORMAT);
-        final Timestamp endDate = DateTimeUtil.stringToTimestamp(endDateStr, DATE_FORMAT);
+        //final Timestamp beginDate = DateTimeUtil.stringToTimestamp(beginDateStr, DATE_FORMAT);
+        //final Timestamp endDate = DateTimeUtil.stringToTimestamp(endDateStr, DATE_FORMAT);
         //final Employee employee = employeeService.find(employeeId);  //скорее всего, проекты надо для конкретного сотрудника брать будет. пока не надо.
 
         List<Project> projects = projectService.getAllProjects();

@@ -523,27 +523,32 @@ public class PlanEditController {
 
         Double centerProjectsPlan = null;
         Double centerPresalesPlan = null;
+        double otherProjectsPlan = 0;
         double sumOfPlanCharge = 0;
 
         for (EmployeeProjectPlan employeeProjectPlan : employeeProjectPlanService.find(employee, year, month)) {
             final Project project = employeeProjectPlan.getProject();
-            final Employee manager = project.getManager();
+            final double duration = nilIfNull(employeeProjectPlan.getValue());
 
-            if (manager != null && division.equals(manager.getDivision())) {
-                final double duration = nilIfNull(employeeProjectPlan.getValue());
-
-                if (isPresale(project)) {
-                    centerPresalesPlan = nilIfNull(centerPresalesPlan) + duration;
+            if (project != null) {
+                if (division.equals(project.getDivision())) {
+                    if (isPresale(project)) {
+                        centerPresalesPlan = nilIfNull(centerPresalesPlan) + duration;
+                    } else {
+                        centerProjectsPlan = nilIfNull(centerProjectsPlan) + duration;
+                    }
                 } else {
-                    centerProjectsPlan = nilIfNull(centerProjectsPlan) + duration;
+                    otherProjectsPlan += duration;
                 }
-            }
 
-            map.put(
-                    String.format("%d" + _PLAN, project.getId()),
-                    JsonUtil.aNumberBuilder(employeeProjectPlan.getValue())
-            );
+                map.put(
+                        String.format("%d" + _PLAN, project.getId()),
+                        JsonUtil.aNumberBuilder(employeeProjectPlan.getValue())
+                );
+            }
         }
+
+        map.put(OTHER_PROJECTS_AND_PRESALES_PLAN, JsonUtil.aNumberBuilder(otherProjectsPlan));
 
         Double summaryWorkHours = getEmployeeProjectDurationPlan(employee, year, month);
         Double nonProjectDuration = getEmployeeNonProjectDuration(employee, year, month);
@@ -616,9 +621,7 @@ public class PlanEditController {
                 if (project != null) {
                     projectId = project.getId();
 
-                    final Employee manager = project.getManager();
-
-                    if (manager != null && division.equals(manager.getDivision())) {
+                    if (division.equals(project.getDivision())) {
                         if (isPresale(project)) {
                             centerPresalesFact += duration;
                         } else {
