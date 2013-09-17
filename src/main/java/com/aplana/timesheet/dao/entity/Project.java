@@ -63,12 +63,12 @@ public class Project {
     @Column(name = "jira_project_key")
     private String jiraProjectKey;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "division", nullable = true) //todo Определиться обязательно ли поле к заполнению. Пока таблица заполняется отключил.
     @ForeignKey(name = "FK_PROJECT_DIVISION")
     private Division division;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "funding_type", nullable = true) //todo Определиться обязательно ли поле к заполнению. Пока таблица заполняется отключил.
     @ForeignKey(name = "FK_PROJECT_FUNDING_TYPE")
     private DictionaryItem fundingType;
