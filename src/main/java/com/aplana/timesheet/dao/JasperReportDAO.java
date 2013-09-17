@@ -48,7 +48,8 @@ public class JasperReportDAO {
                 "caldate", "duration", "day_type", "region", "region_name", "project_role", "project_state", "billable", "vacation_type" } );
         fieldsMap.put( Report04.class, new String[] { "date", "name", "region_name", "role" } );
         fieldsMap.put( Report05.class, new String[] { "calDate", "name", "value", "pctName", "actType",
-                "role", "taskName", "duration", "description", "problem", "region_name", "workplace", "project_role", "day_type", "billable", "plan" } );
+                "role", "taskName", "duration", "description", "problem", "region_name", "workplace", "project_role",
+                "day_type", "billable", "billable_comment", "plan" } );
         fieldsMap.put( Report06.class, new String[] { "duration", "project_role", "name", "act_cat", "region_name", "role", "act_type", "begin_date", "end_date"} );
     }
 
@@ -244,7 +245,8 @@ public class JasperReportDAO {
                         "       LEFT OUTER JOIN calendar calendar  ON timesheet.caldate=calendar.caldate " +
                         "       LEFT OUTER JOIN holiday holidays   ON calendar.caldate=holidays.caldate " +
                         "       LEFT OUTER JOIN project project    ON timesheet_details.proj_id=project.id " +
-                        "       LEFT OUTER JOIN employee_project_billable epbillable    ON project.id=epbillable.project_id and empl.id=epbillable.employee_id " +
+                        "       LEFT OUTER JOIN employee_project_billable epbillable    ON project.id = epbillable.project_id AND empl.id = epbillable.employee_id " +
+                        "                                                                  AND timesheet.caldate BETWEEN epbillable.start_date AND epbillable.end_date " +
                         "       LEFT OUTER JOIN overtime_cause overtime    ON overtime.timesheet_id=timesheet.id " +
                         "       LEFT OUTER JOIN dictionary_item over_cause    ON over_cause.id=overtime.overtime_cause_id " +
                         "       LEFT OUTER JOIN dictionary_item compensation    ON compensation.id=overtime.compensation_id " +
@@ -261,7 +263,7 @@ public class JasperReportDAO {
                                 (withDivisionClause ? "division.id = :emplDivisionId AND " : "") +
                                 (withRegionClause ? "region.id in :regionIds AND " : "") +
                                 workDaySeparator +
-                                (!report.getShowNonBillable()? BILLABLE_CLAUSE :WITHOUT_CLAUSE)+
+                                (report.getShowNonBillable() ? WITHOUT_CLAUSE : BILLABLE_CLAUSE) +
                         "        timesheet_details.act_type in :actTypes AND " +
                         "        timesheet.caldate BETWEEN :beginDate AND :endDate AND " +
                         "        (holidays.region is null OR holidays.region=region.id) " +
@@ -365,7 +367,8 @@ public class JasperReportDAO {
                                 "LEFT OUTER JOIN project_role project_role ON timesheet_details.projectrole_id=project_role.id " +
                                 "LEFT OUTER JOIN holiday holidays   ON calendar.caldate=holidays.caldate " +
                                 "LEFT OUTER JOIN region h_region   ON holidays.region=h_region.id " +
-                                "LEFT OUTER JOIN employee_project_billable epbillable    ON project.id=epbillable.project_id and empl.id=epbillable.employee_id " +
+                                "LEFT OUTER JOIN employee_project_billable epbillable    ON project.id=epbillable.project_id AND empl.id=epbillable.employee_id AND " +
+                                "                                                           timesheet.caldate BETWEEN epbillable.start_date AND  epbillable.end_date " +
                                 "LEFT OUTER JOIN dictionary_item project_state    ON project.state=project_state.id " +
                                 "LEFT OUTER JOIN vacation vacations ON " +
                                 "        empl.id=vacations.employee_id AND " +
@@ -517,7 +520,8 @@ public class JasperReportDAO {
                     "LEFT OUTER JOIN project_role project_role ON timesheet_details.projectrole_id=project_role.id " +
                     "LEFT OUTER JOIN holiday holidays   ON calendar.caldate=holidays.caldate " +
                     "LEFT OUTER JOIN region h_region   ON holidays.region=h_region.id " +
-                    "LEFT OUTER JOIN employee_project_billable epbillable    ON project.id=epbillable.project_id and empl.id=epbillable.employee_id " +
+                    "LEFT OUTER JOIN employee_project_billable epbillable    ON project.id=epbillable.project_id and empl.id=epbillable.employee_id AND " +
+                    "                                                           timesheet.caldate BETWEEN epbillable.start_date AND  epbillable.end_date " +
                     "LEFT OUTER JOIN dictionary_item project_state    ON project.state=project_state.id " +
                     "LEFT OUTER JOIN vacation vacations ON " +
                     "        empl.id=vacations.employee_id AND " +
@@ -710,7 +714,8 @@ public class JasperReportDAO {
                         "    WHEN (epbillable.billable is not null) THEN epbillable.billable " +
                         "    ELSE empl.billable " +
                         "END as col_14, " +
-                        "timesheet.plan as col_15 " +
+                        "epbillable.comment as col_15, " +
+                        "timesheet.plan as col_16 " +
                 "FROM time_sheet_detail AS timesheet_details " +
                         "INNER JOIN time_sheet timesheet ON timesheet_details.time_sheet_id=timesheet.id " +
                         "INNER JOIN employee empl    ON timesheet.emp_id=empl.id " +
@@ -725,7 +730,8 @@ public class JasperReportDAO {
                         "LEFT OUTER JOIN dictionary_item act_cat    ON timesheet_details.act_cat=act_cat.id " +
                         "LEFT OUTER JOIN dictionary_item workplace    ON timesheet_details.workplace_id=workplace.id " +
                         "LEFT OUTER JOIN holiday holidays   ON calendar.caldate=holidays.caldate " +
-                        "LEFT OUTER JOIN employee_project_billable epbillable    ON project.id=epbillable.project_id and empl.id=epbillable.employee_id " +
+                        "LEFT OUTER JOIN employee_project_billable epbillable    ON project.id=epbillable.project_id and empl.id=epbillable.employee_id AND " +
+                        "                                                           timesheet.caldate BETWEEN epbillable.start_date AND  epbillable.end_date " +
                 "where " +
                         (withDivisionClause ? DIVISION_SQL_CLAUSE : WITHOUT_CLAUSE) +
                         (withRegionClause ? REGION_SQL_CLAUSE : WITHOUT_CLAUSE) +

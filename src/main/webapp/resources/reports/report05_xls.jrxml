@@ -30,6 +30,7 @@
 	<field name="workplace" class="java.lang.String"/>
 	<field name="day_type" class="java.lang.Integer"/>
 	<field name="billable" class="java.lang.Boolean"/>
+	<field name="billable_comment" class="java.lang.String"/>
 	<field name="plan" class="java.lang.String"/>
 	<group name="Group1">
 		<groupExpression><![CDATA[$F{name}]]></groupExpression>
@@ -143,8 +144,13 @@
 				<textElement/>
 				<text><![CDATA[Учитывать в затратах]]></text>
 			</staticText>
+            <staticText>
+                <reportElement uuid="16090ad4-aa7e-4537-b1a4-927236190cc1" style="Column header" x="1627" y="0" width="250" height="28"/>
+                <textElement/>
+                <text><![CDATA[Комментарий]]></text>
+            </staticText>
 			<staticText>
-				<reportElement uuid="6da0d165-2da0-4edb-bdac-70c6c3733273" style="Column header" x="1627" y="0" width="253" height="28"/>
+				<reportElement uuid="6da0d165-2da0-4edb-bdac-70c6c3733273" style="Column header" x="1877" y="0" width="253" height="28"/>
 				<textElement/>
 				<text><![CDATA[План на следуюший день]]></text>
 			</staticText>
@@ -227,8 +233,13 @@
 				<textElement/>
 				<textFieldExpression><![CDATA[$F{billable}?"Да":"Нет"]]></textFieldExpression>
 			</textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement uuid="612d749d-2312-415d-827c-340d15a8fb86" style="Detail" stretchType="RelativeToTallestObject" x="1627" y="0" width="250" height="13"/>
+                <textElement/>
+                <textFieldExpression><![CDATA[$F{billable_comment} == null ? "" : $F{billable_comment}]]></textFieldExpression>
+            </textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement uuid="672ddc6f-fc4e-4f48-9b91-a924d9d734c7" style="Detail" stretchType="RelativeToTallestObject" x="1627" y="0" width="253" height="13"/>
+				<reportElement uuid="672ddc6f-fc4e-4f48-9b91-a924d9d734c7" style="Detail" stretchType="RelativeToTallestObject" x="1877" y="0" width="253" height="13"/>
 				<textElement/>
 				<textFieldExpression><![CDATA[$F{plan}]]></textFieldExpression>
 			</textField>
