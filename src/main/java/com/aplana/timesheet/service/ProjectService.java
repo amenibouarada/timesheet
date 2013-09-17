@@ -268,6 +268,21 @@ public class ProjectService {
         return employeeProjects;
     }
 
+    /**
+     * получаем список проектов, с руководителей которых нужно известить о болезни сотрудника
+     */
+    public List<Project> getProjectsForIllness (Illness illness) {
+        /* список проектов на период отпуска */
+        List<Project> employeeProjects = getEmployeeProjectPlanByDates(illness.getBeginDate(), illness.getEndDate(), illness.getEmployee());
+        /* список проектов в который учавствовал работник за последние Х дней*/
+        Integer beforeVacationDays = propertyProvider.getBeforeVacationDays();
+        Date periodBeginDate = DateUtils.addDays(illness.getEditionDate(), 0 - beforeVacationDays);
+        /* складываем оба списка */
+        employeeProjects.addAll(getEmployeeProjectsFromTimeSheetByDates(periodBeginDate, illness.getEditionDate(), illness.getEmployee()));
+
+        return employeeProjects;
+    }
+
     public List<Project> getProjectsForPeriod(Date fromDate, Date toDate) {
         return projectDAO.getProjectsForPeriod(fromDate, toDate);
     }

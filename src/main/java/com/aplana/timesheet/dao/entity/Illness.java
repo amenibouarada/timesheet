@@ -40,6 +40,14 @@ public class Illness implements Cloneable, Periodical, Identifiable {
     @Column(name = "comment")
     private String comment;
 
+    @Column(name = "edition_date")
+    private Date editionDate;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "author_id")
+    @ForeignKey(name = "fk_author")
+    private Employee author;
+
     @Transient
     private Long calendarDays = 0L;
 
@@ -124,5 +132,21 @@ public class Illness implements Cloneable, Periodical, Identifiable {
 
     public void setWorkDaysOnIllnessWorked(double workDaysOnIllnessWorked) {
         this.workDaysOnIllnessWorked = workDaysOnIllnessWorked;
+    }
+
+    public Date getEditionDate() {
+        return editionDate;
+    }
+
+    public void setEditionDate(Date editionDate) {
+        this.editionDate = editionDate;
+    }
+
+    public Employee getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(Employee author) {
+        this.author = author;
     }
 }

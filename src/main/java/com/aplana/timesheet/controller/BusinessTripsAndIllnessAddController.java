@@ -56,6 +56,10 @@ public class BusinessTripsAndIllnessAddController extends AbstractController{
     BusinessTripsAndIllnessAddFormValidator businessTripsAndIllnessAddFormValidator;
     @Autowired
     EmployeeHelper employeeHelper;
+    @Autowired
+    private SecurityService securityService;
+    @Autowired
+    private IllnessMailService illnessMailService;
 
     public static final String DATE_FORMAT = "dd.MM.yyyy";
 
@@ -250,8 +254,10 @@ public class BusinessTripsAndIllnessAddController extends AbstractController{
             illness.setEndDate(tsForm.getEndDate());
             illness.setReason(dictionaryItemService.find(tsForm.getReason()));
             illness.setComment(tsForm.getComment());
+            illness.setAuthor(securityService.getSecurityPrincipal().getEmployee());
+            illness.setEditionDate(new Date());
             illnessService.setIllness(illness);
-
+            illnessMailService.sendEditMail(illness);
             return getModelAndViewSuccess(illness.getEmployee(), illness.getEndDate(), ILLNESS);
         } catch (Exception e) {
             logger.error(ERROR_ILLNESS_EDIT, e);
@@ -316,8 +322,10 @@ public class BusinessTripsAndIllnessAddController extends AbstractController{
             illness.setEndDate(tsForm.getEndDate());
             illness.setComment(tsForm.getComment());
             illness.setReason(dictionaryItemService.find(tsForm.getReason()));
+            illness.setAuthor(securityService.getSecurityPrincipal().getEmployee());
+            illness.setEditionDate(new Date());
             illnessService.setIllness(illness);
-
+            illnessMailService.sendCreateMail(illness);
             return getModelAndViewSuccess(illness.getEmployee(), illness.getBeginDate(), ILLNESS);
         } catch (Exception e) {
             logger.error(ERROR_ILLNESS_SAVE, e);

@@ -145,6 +145,11 @@ public class TSPropertyProvider {
         return getProperties().getProperty("vacation.create.mail.marker", DEFAULT_PLANNED_VACATION_CREATE_MAIL_MARKER);
     }
 
+    public static final String DEFAULT_ILLNESS_DEFAULT_MAIL_MARKER = "[ILLNESS]";
+    public String getIllnessMailMarker() {
+        return getProperties().getProperty("illness.default.mail.marker", DEFAULT_ILLNESS_DEFAULT_MAIL_MARKER);
+    }
+
     final String DEFAULT_TIMESHEET_MAIL_MARKER = "[TIMESHEET]";
     public String getTimesheetMailMarker() {
         return getProperties().getProperty("ts.mail.marker=", DEFAULT_TIMESHEET_MAIL_MARKER);

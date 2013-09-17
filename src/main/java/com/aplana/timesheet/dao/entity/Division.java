@@ -65,6 +65,9 @@ public class Division implements Identifiable, Comparable<Division> {
     @Column(name = "plans_required")
     private Boolean plansRequired;
 
+    @Column(name = "tracking_illness")
+    private Boolean trackingIllness;
+
     public Division() {
     }
 
@@ -200,6 +203,13 @@ public class Division implements Identifiable, Comparable<Division> {
         this.plansRequired = plansRequired;
     }
 
+    public Boolean getTrackingIllness() {
+        return trackingIllness;
+    }
+
+    public void setTrackingIllness(Boolean trackingIllness) {
+        this.trackingIllness = trackingIllness;
+    }
 
     public String toString() {
         StringBuilder sb = new StringBuilder()
