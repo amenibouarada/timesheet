@@ -235,13 +235,25 @@ public class ProjectDAO {
         final CriteriaQuery select = query.select(from);
         final List<Predicate> predicates = new ArrayList<Predicate>();
 
+        final Path<Date> startDatePath = from.get("startDate");
+        final Path<Date> endDatePath = from.get("endDate");
+
         if (fromDate != null) {
-            predicates.add(criteriaBuilder.lessThanOrEqualTo(from.<Date>get("startDate"), fromDate));
+            predicates.add(
+                    criteriaBuilder.or(
+                        startDatePath.isNull(),
+                        criteriaBuilder.lessThanOrEqualTo(startDatePath, fromDate)
+                    )
+            );
+            predicates.add(
+                    criteriaBuilder.or(
+                            endDatePath.isNull(),
+                            criteriaBuilder.greaterThanOrEqualTo(endDatePath, fromDate)
+                    )
+            );
         }
 
         if (toDate != null) {
-            final Path<Date> endDatePath = from.get("endDate");
-
             predicates.add(
                     criteriaBuilder.or(
                             endDatePath.isNull(),

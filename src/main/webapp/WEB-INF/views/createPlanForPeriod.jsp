@@ -163,16 +163,6 @@
                     <form:options items="${employeeList}" itemValue="id" itemLabel="name" />
                 </form:select>
             </td>
-            <td>
-                <span class="label">Проект</span>
-            </td>
-            <td>
-                <form:select path="<%= CreatePlanForPeriodForm.PROJECT_ID %>" cssClass="without_dojo"
-                             onmouseover="showTooltip(this)" onmouseout="tooltip.hide()">
-                    <form:option value="0" label="" />
-                    <form:options items="${projectList}" itemValue="id" itemLabel="name" />
-                </form:select>
-            </td>
         </tr>
         <tr>
             <td>
@@ -190,6 +180,18 @@
                 <form:input path="<%= CreatePlanForPeriodForm.TO_DATE %>" required="true" data-dojo-type="DateBox"
                             cssClass="date_picker" isDisabledDate="isDisabledToDate"
                             onChange="updateDateConstraintsAndProjectList()" />
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <span class="label">Проект</span>
+            </td>
+            <td>
+                <form:select path="<%= CreatePlanForPeriodForm.PROJECT_ID %>" cssClass="without_dojo"
+                             onmouseover="showTooltip(this)" onmouseout="tooltip.hide()">
+                    <form:option value="0" label="" />
+                    <form:options items="${projectList}" itemValue="id" itemLabel="name" />
+                </form:select>
             </td>
         </tr>
         <tr>

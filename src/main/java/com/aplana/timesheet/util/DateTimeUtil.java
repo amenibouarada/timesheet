@@ -178,12 +178,15 @@ public class DateTimeUtil {
      * @return String
      */
     public static String currentMonthFirstDay() {
-        SimpleDateFormat sdf = new SimpleDateFormat(DATE_PATTERN);
+        return dateToString(currentMonthFirstDayDate());
+    }
+
+    public static Date currentMonthFirstDayDate() {
         Date curDate = new Date(System.currentTimeMillis());
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(curDate);
         calendar.set(Calendar.DAY_OF_MONTH, 1);
-        return sdf.format(calendar.getTime());
+        return calendar.getTime();
     }
 
     /**
@@ -497,22 +500,5 @@ public class DateTimeUtil {
         calendar.set(Calendar.MONTH, month - 1);
 
         return calendar;
-    }
-
-    public static String getLastDayOfYearMonth(Integer year, Integer month) {
-
-        Calendar calendar = getCalendar(year, month);
-
-        calendar.add(Calendar.MONTH, 1);
-        calendar.set(Calendar.DAY_OF_MONTH, 1);
-        calendar.add(Calendar.DATE, -1);
-
-        Date lastDayOfMonth = calendar.getTime();
-
-        return dateToString(lastDayOfMonth);
-    }
-
-    public static String getFirstDayOfYearMonth(Integer year, Integer month) {
-        return dateToString(createDate(year, month));
     }
 }
