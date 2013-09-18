@@ -6,6 +6,8 @@ public class Report05 extends BaseReport {
 
     public static final String jrNameFile="Отчет №5. Строки отчетов за день со всеми полями";
 
+    private Boolean showInactiveEmployees = false;
+
     @Override
     public String getJRName() {
         return jrName;
@@ -24,5 +26,13 @@ public class Report05 extends BaseReport {
 
     public void setEmployeeId(Integer employeeId) {
         this.employeeId = employeeId;
+    }
+
+    public Boolean getShowInactiveEmployees() {
+        return showInactiveEmployees;
+    }
+
+    public void setShowInactiveEmployees(Boolean showInactiveEmployees) {
+        this.showInactiveEmployees = showInactiveEmployees;
     }
 }

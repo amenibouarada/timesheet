@@ -68,7 +68,13 @@
 									 onmouseout="tooltip.hide();" path="projectId">
 							</form:select>
 						</td>
-					</tr>
+                        <fmt:message key='label.r02.show.inactive.employee' var="showInactiveEmployeeLabel"/>
+                        <td colspan="2" align="right"><form:checkbox path="showInactiveEmployees" name="showInactiveEmployees"
+                                                                     id="showInactiveEmployees"
+                                                                     cssClass="checkbox_without_dojo"
+                                                                     onchange="fillEmployeeListByDivision(dojo.byId('emplDivisionId'))"
+                                                                     label="${showInactiveEmployeeLabel}"/></td>
+                    </tr>
 					<tr>
 						<td><span class="label"><fmt:message key="label.r02.employee.center"/></span></td>
 						<td><form:select id="emplDivisionId" name="emplDivisionId" cssClass="without_dojo"

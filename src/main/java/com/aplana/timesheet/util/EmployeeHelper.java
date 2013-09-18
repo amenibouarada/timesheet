@@ -21,6 +21,7 @@ import java.util.*;
 
 import static argo.jdom.JsonNodeBuilders.anArrayBuilder;
 import static argo.jdom.JsonNodeBuilders.anObjectBuilder;
+import static com.aplana.timesheet.util.DateTimeUtil.MAX_DATE;
 import static com.aplana.timesheet.util.DateTimeUtil.dateToString;
 import static com.aplana.timesheet.util.JsonUtil.aStringBuilder;
 
@@ -43,6 +44,7 @@ public class EmployeeHelper {
     private static final String LAST_WORK_DATE = "lastWorkDate";
     private static final String DEFAULT_MANAGER = "-1";
     private static final String DATE_FORMAT = "dd.MM.yyyy";
+    private static final String ACTIVE_FLAG = "active";
 
     @Autowired
     private EmployeeService employeeService;
@@ -150,6 +152,56 @@ public class EmployeeHelper {
             builder.withElement(nodeBuilder.withField(DIVISION_EMPLOYEES, employeesBuilder));
         }
         return JsonUtil.format(builder.build());
+    }
+
+    @Transactional(readOnly = true)
+    public String getEmployeeListWithDivisionAndRegionAndActiveFlagJson(List<Division> divisions, Date reportDate) {
+        final JsonArrayNodeBuilder builder = anArrayBuilder();
+
+        for (Division division : divisions) {
+            final List<Employee> employees = employeeService.getEmployees(division, true);
+            final JsonObjectNodeBuilder nodeBuilder = anObjectBuilder();
+            final JsonArrayNodeBuilder employeesBuilder = anArrayBuilder();
+
+            nodeBuilder.withField(DIVISION_ID, aStringBuilder(division.getId()));
+
+            if (employees.isEmpty()) {
+                employeesBuilder.withElement(
+                        anObjectBuilder().
+                                withField(ID, aStringBuilder(0)).
+                                withField(VALUE, JsonNodeBuilders.aStringBuilder(StringUtils.EMPTY))
+                );
+            } else {
+                for (Employee employee : employees) {
+                    JsonObjectNodeBuilder objectNodeBuilder = anObjectBuilder().
+                            withField(ID, aStringBuilder(employee.getId())).
+                            withField(VALUE, JsonNodeBuilders.aStringBuilder(getValue(employee))).
+                            withField(REGION_ID, aStringBuilder(employee.getRegion().getId())).
+                            withField(ACTIVE_FLAG, aStringBuilder(isEmployeeActive(employee, reportDate)));
+
+                    employeesBuilder.withElement(objectNodeBuilder);
+                }
+            }
+            builder.withElement(nodeBuilder.withField(DIVISION_EMPLOYEES, employeesBuilder));
+        }
+        return JsonUtil.format(builder.build());
+    }
+
+    public Boolean isEmployeeActive(Employee employee, Date date) {
+        if (employee != null) {
+            Date beginDate = employee.getStartDate();
+            Date curDate = (date != null) ? date : new Date();
+            /* определим дату окончания работы
+            *  если её нет то считаем бесконечно большой
+            *  если есть то добавим день чтоб учесть последий рабочий день */
+            Date endDate = (employee.getEndDate() != null) ?
+                    DateUtils.addDays(employee.getEndDate(), 1) :
+                    DateTimeUtil.stringToDateForDB(MAX_DATE);
+            if (curDate.after(beginDate) && curDate.before(endDate)) {
+                return Boolean.TRUE;
+            }
+        }
+        return Boolean.FALSE;
     }
 
     @Transactional(readOnly = true)
