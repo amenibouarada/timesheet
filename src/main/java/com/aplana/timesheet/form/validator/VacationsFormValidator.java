@@ -53,7 +53,7 @@ public class VacationsFormValidator extends AbstractValidator {
             validateDateExistsInCalendar(toDate, errors);
 
         } else {
-            validateDatesIsNotEmpty(calFromDate, calFromDate, errors);
+            validateDatesIsNotEmpty(calFromDate, calToDate, errors);
         }
     }
 }

@@ -84,6 +84,7 @@ public class VacationsFormValidatorTest extends AbstractTest {
         vacationsFormValidator.validate(vacationsForm, errors);
         assertEquals(1, errors.getErrorCount());
 
+        setDefaultFormData();
         vacationsForm.setCalToDate("");
         vacationsFormValidator.validate(vacationsForm, errors);
         assertEquals(1, errors.getErrorCount());
@@ -94,7 +95,7 @@ public class VacationsFormValidatorTest extends AbstractTest {
     public void testFromDate(){
         vacationsForm.setCalFromDate("2010-10-10");
         vacationsFormValidator.validate(vacationsForm, errors);
-        assertEquals(1, errors.getErrorCount());
+        assertEquals(0, errors.getErrorCount());
 
         setDefaultFormData();
         when(calendarServiceMock.find((Timestamp) any())).thenReturn(null);
