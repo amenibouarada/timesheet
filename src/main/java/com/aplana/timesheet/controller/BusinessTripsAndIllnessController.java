@@ -91,6 +91,8 @@ public class BusinessTripsAndIllnessController extends AbstractController{
     IllnessService illnessService;
     @Autowired
     private RegionService regionregionService;
+    @Autowired
+    private IllnessMailService illnessMailService;
 
     @Autowired
     @Qualifier("illnessesQuickReportGenerator")
@@ -262,6 +264,7 @@ public class BusinessTripsAndIllnessController extends AbstractController{
      */
     private String deleteIllness(Integer reportId) throws BusinessTripsAndIllnessControllerException {
         try {
+            illnessMailService.sendDeleteMail(reportId);
             illnessService.deleteIllnessById(reportId);
             return StringUtils.EMPTY;
         } catch (Exception e) {

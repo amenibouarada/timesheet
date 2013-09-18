@@ -397,6 +397,21 @@ public class EmployeeDAO {
 
         return query.getResultList();
     }
+
+    /**
+     * Получаем младших менеджеров проекта (тимлиды, ведущие аналитики) той же специальности (роли)
+     */
+    public List<Employee> getProjectManagersSameRole(Project project, Employee employee) {
+        Query query = entityManager.createQuery("select pm.employee from ProjectManager as pm " +
+                "where pm.project = :project and pm.active=:active and " +
+                "pm.projectRole.id = :roleId")
+                .setParameter("project", project)
+                .setParameter("active", true)
+                .setParameter("roleId", employee.getJob().getId());
+
+        return query.getResultList();
+    }
+
     /**
      * Получаем младших менеджеров проекта (тимлиды, ведущие аналитики), которые еще не ответили на письмо о согласовании отпуска
      */

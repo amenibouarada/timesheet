@@ -93,7 +93,7 @@ public abstract class AbstractValidator implements Validator{
             errors.rejectValue(
                     "calToDate",
                     "error.createVacation.wrongyear",
-                    new Object[]{DateTimeUtil.getYear(date)+1900},
+                    new Object[]{DateTimeUtil.getYear(date)},
                     WRONG_YEAR_ERROR_MESSAGE
             );
         }

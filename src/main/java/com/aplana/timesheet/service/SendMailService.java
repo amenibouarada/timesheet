@@ -279,6 +279,18 @@ public class SendMailService{
         new PlannedVacationInfoSender(this, propertyProvider).sendMessage(managerEmployeesVacation);
     }
 
+    public void performIllnessCreateMailing(Illness illness) {
+        new IllnessCreateSender(this,propertyProvider, projectService, employeeService).sendMessage(illness);
+    }
+
+    public void performIllnessEditMailing(Illness illness) {
+        new IllnessEditSender(this,propertyProvider, projectService, employeeService).sendMessage(illness);
+    }
+
+    public void performIllnessDeleteMailing(Illness illness) {
+        new IllnessDeleteSender(this,propertyProvider, projectService, employeeService).sendMessage(illness);
+    }
+
     public String initMessageBodyForReport(TimeSheet timeSheet) {
         Map<String, Object> model1 = new HashMap<String, Object>();
         Iterator<TimeSheetDetail> iteratorTSD = timeSheet.getTimeSheetDetails().iterator();

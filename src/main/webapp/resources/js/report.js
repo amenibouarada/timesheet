@@ -41,7 +41,14 @@ function setDefaultRegion(){
 function fillEmployeeListByDivision(division) {
     var employeeSelect = dojo.byId("employeeId");
     var employeeOption = null;
+    if (division == null) {
+        division = dojo.byId("divisionId");
+
+        if (division.value == null)
+            division.value = 0;
+    }
     var divisionId = division.value;
+    var showInactiveEmployees = dojo.byId("showInactiveEmployees").checked;
     dojo.removeAttr(employeeSelect, "disabled");
     //Очищаем список сотрудников.
     employeeSelect.options.length = 0;
@@ -49,7 +56,7 @@ function fillEmployeeListByDivision(division) {
     for (var i = 0; i < employeeList.length; i++) {
         if (divisionId == employeeList[i].divId) {
             for (var j = 0; j < employeeList[i].divEmps.length; j++) {
-                if (employeeList[i].divEmps[j].id != 0) {
+                if (employeeList[i].divEmps[j].id != 0 && (showInactiveEmployees==true || employeeList[i].divEmps[j].active=='true')) {
                     employeeOption = dojo.doc.createElement("option");
                     dojo.attr(employeeOption, {
                         value:employeeList[i].divEmps[j].id

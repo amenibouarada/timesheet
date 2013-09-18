@@ -125,10 +125,10 @@ public class ProjectService {
         for (Project project : projectList) {
             final JsonObjectNodeBuilder projectBuilder = getProjectBuilder(project);
 
-            projectBuilder.withField(
-                    "ownerDivisionId",
-                    JsonUtil.aStringBuilder(project.getManager()!=null&&project.getManager().getDivision()!=null?project.getManager().getDivision().getId():0)
-            );
+            /* определим принадлежность проекта к центру */
+            Integer division_id = (project.getDivision() != null) ? project.getDivision().getId() : 0;
+
+            projectBuilder.withField("ownerDivisionId", JsonUtil.aStringBuilder(division_id));
 
             builder.withElement(projectBuilder);
         }
@@ -264,6 +264,21 @@ public class ProjectService {
         Date periodBeginDate = DateUtils.addDays(vacation.getCreationDate(), 0 - beforeVacationDays);
         /* складываем оба списка */
         employeeProjects.addAll(getEmployeeProjectsFromTimeSheetByDates(periodBeginDate, vacation.getCreationDate(), vacation.getEmployee()));
+
+        return employeeProjects;
+    }
+
+    /**
+     * получаем список проектов, с руководителей которых нужно известить о болезни сотрудника
+     */
+    public List<Project> getProjectsForIllness (Illness illness) {
+        /* список проектов на период отпуска */
+        List<Project> employeeProjects = getEmployeeProjectPlanByDates(illness.getBeginDate(), illness.getEndDate(), illness.getEmployee());
+        /* список проектов в который учавствовал работник за последние Х дней*/
+        Integer beforeVacationDays = propertyProvider.getBeforeVacationDays();
+        Date periodBeginDate = DateUtils.addDays(illness.getEditionDate(), 0 - beforeVacationDays);
+        /* складываем оба списка */
+        employeeProjects.addAll(getEmployeeProjectsFromTimeSheetByDates(periodBeginDate, illness.getEditionDate(), illness.getEmployee()));
 
         return employeeProjects;
     }

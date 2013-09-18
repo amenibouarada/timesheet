@@ -323,6 +323,46 @@ public class EmployeeService {
     }
 
     /**
+     * Получаем список менеджеров по проекту
+     */
+    public List<Employee> getProjectManagers(Project project) {
+        return employeeDAO.getProjectManagers(project);
+    }
+
+    /**
+     * Получаем младших менеджеров проекта (тимлиды, ведущие аналитики) той же специальности (роли)
+     */
+    public List<Employee> getProjectManagersSameRole(Project project, Employee employee) {
+        return employeeDAO.getProjectManagersSameRole(project, employee);
+    }
+
+    /**
+     * получаем список младших (тимлиды, ведущие аналитики) руководителей проектов, на которых сотрудник планирует свою занятость в даты болезни.
+     */
+    public Map<Employee, List<Project>> getJuniorProjectManagersAndProjects(List<Project> employeeProjects, Illness illness) {
+        Map<Employee, List<Project>> managersAndProjects = new HashMap<Employee, List<Project>>();
+        for (Project project : employeeProjects) {
+            if (! illness.getEmployee().getId().equals(project.getManager().getId())) {        //если оформляющий отпуск - руководитель этого проекта, то по этому проекту писем не рассылаем
+                List<Employee> managers = getProjectManagersSameRole(project, illness.getEmployee());
+                for (Employee manager : managers) {
+                    if (! manager.getId().equals(illness.getEmployee().getId())) {       //отсеиваем сотрудника, если он сам руководитель
+                        if (managersAndProjects.containsKey(manager)) {
+                            List<Project> projects = managersAndProjects.get(manager);
+                            projects.add(project);
+                        } else {
+                            ArrayList<Project> projectArrayList = new ArrayList<Project>(1);
+                            projectArrayList.add(project);
+                            managersAndProjects.put(manager, projectArrayList);
+                        }
+                    }
+                }
+            }
+        }
+
+        return managersAndProjects;
+    }
+
+    /**
      * получаем список младших (тимлиды, ведущие аналитики) руководителей проектов, на которых сотрудник планирует свою занятость в даты отпуска.
      */
     public Map<Employee, List<Project>> getJuniorProjectManagersAndProjects(List<Project> employeeProjects, final Vacation vacation) {

@@ -11,7 +11,8 @@ public class EmployeeMonthReportDetail implements Comparable<EmployeeMonthReport
     private Project project;
     private BigDecimal planHours;
     private BigDecimal factHours;
-    private BigDecimal durationPlan;
+    private BigDecimal planDuration;
+    private BigDecimal factDuration;
 
     public DictionaryItem getAct_type() {
         return act_type;
@@ -45,12 +46,29 @@ public class EmployeeMonthReportDetail implements Comparable<EmployeeMonthReport
         this.factHours = factHours;
     }
 
-    public EmployeeMonthReportDetail(DictionaryItem act_type, Project project, BigDecimal planHours, BigDecimal factHours, BigDecimal durationPlan) {
+    public BigDecimal getPlanDuration() {
+        return planDuration;
+    }
+
+    public void setPlanDuration(BigDecimal planDuration) {
+        this.planDuration = planDuration;
+    }
+
+    public BigDecimal getFactDuration() {
+        return factDuration;
+    }
+
+    public void setFactDuration(BigDecimal factDuration) {
+        this.factDuration = factDuration;
+    }
+
+    public EmployeeMonthReportDetail(DictionaryItem act_type, Project project, BigDecimal planHours, BigDecimal factHours, BigDecimal planDuration, BigDecimal factDuration) {
         this.act_type = act_type;
         this.project = project;
-        this.planHours = planHours.setScale(2, BigDecimal.ROUND_HALF_UP);
-        this.factHours = factHours.setScale(2, BigDecimal.ROUND_HALF_UP);
-        this.durationPlan = durationPlan.setScale(2, BigDecimal.ROUND_HALF_UP);
+        this.planHours = planHours.setScale(2, BigDecimal.ROUND_HALF_UP);;
+        this.factHours = factHours.setScale(2, BigDecimal.ROUND_HALF_UP);;
+        this.planDuration = planDuration.setScale(2, BigDecimal.ROUND_HALF_UP);;
+        this.factDuration = factDuration.setScale(2, BigDecimal.ROUND_HALF_UP);;
     }
 
     public int compareTo(EmployeeMonthReportDetail o) {
@@ -63,8 +81,8 @@ public class EmployeeMonthReportDetail implements Comparable<EmployeeMonthReport
     }
 
     public Integer getPlanPercent() {
-        if (durationPlan != null && !durationPlan.equals(BigDecimal.ZERO) && planHours != null) {
-            BigDecimal l = planHours.divide(durationPlan, BigDecimal.ROUND_HALF_EVEN).multiply(BigDecimal.valueOf(100));
+        if (planDuration != null && !planDuration.equals(BigDecimal.ZERO) && planHours != null) {
+            BigDecimal l = planHours.divide(planDuration, BigDecimal.ROUND_HALF_EVEN).multiply(BigDecimal.valueOf(100));
             return l.intValue();
         } else {
             return 0;
@@ -72,8 +90,8 @@ public class EmployeeMonthReportDetail implements Comparable<EmployeeMonthReport
     }
 
     public Integer getFactPercent() {
-        if (durationPlan != null && !durationPlan.equals(BigDecimal.ZERO) && factHours != null) {
-            BigDecimal l = factHours.divide(durationPlan, BigDecimal.ROUND_HALF_EVEN).multiply(BigDecimal.valueOf(100));
+        if (factDuration != null && !factDuration.equals(BigDecimal.ZERO) && factHours != null) {
+            BigDecimal l = factHours.divide(factDuration, BigDecimal.ROUND_HALF_EVEN).multiply(BigDecimal.valueOf(100));
             return l.intValue();
         } else {
             return 0;

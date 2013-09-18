@@ -59,6 +59,12 @@
                                  onmouseout="tooltip.hide();" onchange="setDefaultEmployeeJob(-1);">
                     <form:option label="Все" value="0"/>
                 </form:select></td>
+                <fmt:message key='label.r02.show.inactive.employee' var="showInactiveEmployeeLabel"/>
+                <td align="right"><form:checkbox path="showInactiveEmployees" name="showInactiveEmployees"
+                                                 id="showInactiveEmployees"
+                                                 cssClass="checkbox_without_dojo"
+                                                 onchange="fillEmployeeListByDivision()"
+                                                 label="${showInactiveEmployeeLabel}"/></td>
             </tr>
             <tr>
                 <td><span class="label">Начало периода</span><span style="color:red">*</span></td>

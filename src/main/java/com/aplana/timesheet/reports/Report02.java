@@ -24,6 +24,8 @@ public class Report02 extends BaseReport {
 
     private Boolean showInactiveProjects = false;
 
+    private Boolean showInactiveEmployees = false;
+
     private Boolean showNonBillable=true;
 
     public Integer getEmployeeId() {
@@ -64,5 +66,13 @@ public class Report02 extends BaseReport {
 
     public void setShowNonBillable(Boolean showNonBillable) {
         this.showNonBillable = showNonBillable;
+    }
+
+    public Boolean getShowInactiveEmployees() {
+        return showInactiveEmployees;
+    }
+
+    public void setShowInactiveEmployees(Boolean showInactiveEmployees) {
+        this.showInactiveEmployees = showInactiveEmployees;
     }
 }

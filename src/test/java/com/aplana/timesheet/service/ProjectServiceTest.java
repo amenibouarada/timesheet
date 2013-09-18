@@ -40,7 +40,7 @@ public class ProjectServiceTest extends AbstractJsonTest {
             result.append("\",\"active\":\"");
             result.append(project.isActive());
             result.append("\",\"ownerDivisionId\":\"");
-            result.append(project.getManager()!=null&&project.getManager().getDivision()!=null?project.getManager().getDivision().getId():0);
+            result.append(project.getDivision()!=null?project.getDivision().getId():0);
             result.append("\"}");
             result.append(",");
         }

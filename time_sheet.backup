@@ -4,7 +4,7 @@
 
 -- Dumped from database version 9.1.6
 -- Dumped by pg_dump version 9.1.6
--- Started on 2013-08-23 17:14:48
+-- Started on 2013-09-13 16:53:56
 
 SET statement_timeout = 0;
 SET client_encoding = 'UTF8';
@@ -13,7 +13,7 @@ SET check_function_bodies = false;
 SET client_min_messages = warning;
 
 --
--- TOC entry 220 (class 3079 OID 11639)
+-- TOC entry 217 (class 3079 OID 11639)
 -- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: 
 --
 
@@ -21,8 +21,8 @@ CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
 
 
 --
--- TOC entry 2287 (class 0 OID 0)
--- Dependencies: 220
+-- TOC entry 2276 (class 0 OID 0)
+-- Dependencies: 217
 -- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: 
 --
 
@@ -32,8 +32,8 @@ COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
 SET search_path = public, pg_catalog;
 
 --
--- TOC entry 232 (class 1255 OID 148697)
--- Dependencies: 6 683
+-- TOC entry 229 (class 1255 OID 150677)
+-- Dependencies: 671 6
 -- Name: initcalendar(date, date); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -72,7 +72,7 @@ $$;
 ALTER FUNCTION public.initcalendar(startdt date, stopdt date) OWNER TO postgres;
 
 --
--- TOC entry 161 (class 1259 OID 148698)
+-- TOC entry 161 (class 1259 OID 150678)
 -- Dependencies: 6
 -- Name: avail_act_cat_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
@@ -88,7 +88,7 @@ CREATE SEQUENCE avail_act_cat_seq
 ALTER TABLE public.avail_act_cat_seq OWNER TO postgres;
 
 --
--- TOC entry 2288 (class 0 OID 0)
+-- TOC entry 2277 (class 0 OID 0)
 -- Dependencies: 161
 -- Name: avail_act_cat_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -101,8 +101,8 @@ SET default_tablespace = '';
 SET default_with_oids = false;
 
 --
--- TOC entry 162 (class 1259 OID 148700)
--- Dependencies: 2046 6
+-- TOC entry 162 (class 1259 OID 150680)
+-- Dependencies: 2031 6
 -- Name: available_activity_category; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -118,7 +118,7 @@ CREATE TABLE available_activity_category (
 ALTER TABLE public.available_activity_category OWNER TO postgres;
 
 --
--- TOC entry 163 (class 1259 OID 148704)
+-- TOC entry 163 (class 1259 OID 150684)
 -- Dependencies: 6
 -- Name: business_trip_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
@@ -134,7 +134,7 @@ CREATE SEQUENCE business_trip_seq
 ALTER TABLE public.business_trip_seq OWNER TO postgres;
 
 --
--- TOC entry 2289 (class 0 OID 0)
+-- TOC entry 2278 (class 0 OID 0)
 -- Dependencies: 163
 -- Name: business_trip_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -143,8 +143,8 @@ SELECT pg_catalog.setval('business_trip_seq', 1, false);
 
 
 --
--- TOC entry 164 (class 1259 OID 148706)
--- Dependencies: 2047 6
+-- TOC entry 164 (class 1259 OID 150686)
+-- Dependencies: 2032 6
 -- Name: business_trip; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -162,7 +162,7 @@ CREATE TABLE business_trip (
 ALTER TABLE public.business_trip OWNER TO postgres;
 
 --
--- TOC entry 165 (class 1259 OID 148710)
+-- TOC entry 165 (class 1259 OID 150693)
 -- Dependencies: 6
 -- Name: calendar; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
@@ -178,7 +178,101 @@ CREATE TABLE calendar (
 ALTER TABLE public.calendar OWNER TO postgres;
 
 --
--- TOC entry 166 (class 1259 OID 148713)
+-- TOC entry 168 (class 1259 OID 150714)
+-- Dependencies: 6
+-- Name: dictionary; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE dictionary (
+    id integer NOT NULL,
+    name character varying(255) NOT NULL
+);
+
+
+ALTER TABLE public.dictionary OWNER TO postgres;
+
+--
+-- TOC entry 169 (class 1259 OID 150717)
+-- Dependencies: 6
+-- Name: dictionary_item; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE dictionary_item (
+    id integer NOT NULL,
+    value character varying(255) NOT NULL,
+    dict_id integer NOT NULL
+);
+
+
+ALTER TABLE public.dictionary_item OWNER TO postgres;
+
+--
+-- TOC entry 170 (class 1259 OID 150720)
+-- Dependencies: 2039 2040 6
+-- Name: division; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE division (
+    id integer NOT NULL,
+    active boolean DEFAULT true NOT NULL,
+    ldap_name character varying(255) NOT NULL,
+    leader character varying(100),
+    name character varying(255) NOT NULL,
+    leader_id integer,
+    ldap_object_sid character varying(50),
+    not_to_sync boolean,
+    department_name character varying(255),
+    sync_employee boolean,
+    ischeck boolean DEFAULT true NOT NULL,
+    email character varying(255),
+    plans_required boolean,
+    vacation_email character varying(255)
+);
+
+
+ALTER TABLE public.division OWNER TO postgres;
+
+--
+-- TOC entry 171 (class 1259 OID 150728)
+-- Dependencies: 6
+-- Name: division_project; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE division_project (
+    division_id integer NOT NULL,
+    project_id integer NOT NULL
+);
+
+
+ALTER TABLE public.division_project OWNER TO postgres;
+
+--
+-- TOC entry 172 (class 1259 OID 150731)
+-- Dependencies: 6
+-- Name: eivn_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE eivn_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.eivn_seq OWNER TO postgres;
+
+--
+-- TOC entry 2279 (class 0 OID 0)
+-- Dependencies: 172
+-- Name: eivn_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('eivn_seq', 1, false);
+
+
+--
+-- TOC entry 166 (class 1259 OID 150696)
 -- Dependencies: 6
 -- Name: emp_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
@@ -194,7 +288,7 @@ CREATE SEQUENCE emp_seq
 ALTER TABLE public.emp_seq OWNER TO postgres;
 
 --
--- TOC entry 2290 (class 0 OID 0)
+-- TOC entry 2280 (class 0 OID 0)
 -- Dependencies: 166
 -- Name: emp_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -203,8 +297,108 @@ SELECT pg_catalog.setval('emp_seq', 63, true);
 
 
 --
--- TOC entry 167 (class 1259 OID 148715)
--- Dependencies: 2048 2049 2050 2051 2052 2053 6
+-- TOC entry 173 (class 1259 OID 150733)
+-- Dependencies: 6
+-- Name: empinvl_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE empinvl_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.empinvl_seq OWNER TO postgres;
+
+--
+-- TOC entry 2281 (class 0 OID 0)
+-- Dependencies: 173
+-- Name: empinvl_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('empinvl_seq', 1, false);
+
+
+--
+-- TOC entry 174 (class 1259 OID 150735)
+-- Dependencies: 6
+-- Name: empl_permissions_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE empl_permissions_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.empl_permissions_seq OWNER TO postgres;
+
+--
+-- TOC entry 2282 (class 0 OID 0)
+-- Dependencies: 174
+-- Name: empl_permissions_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('empl_permissions_seq', 13, true);
+
+
+--
+-- TOC entry 175 (class 1259 OID 150737)
+-- Dependencies: 6
+-- Name: empl_plan_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE empl_plan_seq
+    START WITH 6733
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.empl_plan_seq OWNER TO postgres;
+
+--
+-- TOC entry 2283 (class 0 OID 0)
+-- Dependencies: 175
+-- Name: empl_plan_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('empl_plan_seq', 6733, true);
+
+
+--
+-- TOC entry 176 (class 1259 OID 150739)
+-- Dependencies: 6
+-- Name: empl_prj_plan_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE empl_prj_plan_seq
+    START WITH 6733
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.empl_prj_plan_seq OWNER TO postgres;
+
+--
+-- TOC entry 2284 (class 0 OID 0)
+-- Dependencies: 176
+-- Name: empl_prj_plan_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('empl_prj_plan_seq', 6733, true);
+
+
+--
+-- TOC entry 167 (class 1259 OID 150698)
+-- Dependencies: 2033 2034 2035 2036 2037 2038 6
 -- Name: employee; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -232,213 +426,7 @@ CREATE TABLE employee (
 ALTER TABLE public.employee OWNER TO postgres;
 
 --
--- TOC entry 168 (class 1259 OID 148727)
--- Dependencies: 2043 6
--- Name: department; Type: VIEW; Schema: public; Owner: postgres
---
-
-CREATE VIEW department AS
-    SELECT d.id, d.name, d.manager FROM employee d WHERE (EXISTS (SELECT 1 FROM employee e WHERE (e.manager = d.id)));
-
-
-ALTER TABLE public.department OWNER TO postgres;
-
---
--- TOC entry 169 (class 1259 OID 148731)
--- Dependencies: 6
--- Name: dictionary; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
---
-
-CREATE TABLE dictionary (
-    id integer NOT NULL,
-    name character varying(255) NOT NULL
-);
-
-
-ALTER TABLE public.dictionary OWNER TO postgres;
-
---
--- TOC entry 170 (class 1259 OID 148734)
--- Dependencies: 6
--- Name: dictionary_item; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
---
-
-CREATE TABLE dictionary_item (
-    id integer NOT NULL,
-    value character varying(255) NOT NULL,
-    dict_id integer NOT NULL
-);
-
-
-ALTER TABLE public.dictionary_item OWNER TO postgres;
-
---
--- TOC entry 171 (class 1259 OID 148737)
--- Dependencies: 2054 2055 6
--- Name: division; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
---
-
-CREATE TABLE division (
-    id integer NOT NULL,
-    active boolean DEFAULT true NOT NULL,
-    ldap_name character varying(255) NOT NULL,
-    leader character varying(100),
-    name character varying(255) NOT NULL,
-    leader_id integer,
-    ldap_object_sid character varying(50),
-    not_to_sync boolean,
-    department_name character varying(255),
-    sync_employee boolean,
-    ischeck boolean DEFAULT true NOT NULL,
-    email character varying(255),
-    plans_required boolean,
-    vacation_email character varying(255)
-);
-
-
-ALTER TABLE public.division OWNER TO postgres;
-
---
--- TOC entry 172 (class 1259 OID 148745)
--- Dependencies: 6
--- Name: division_project; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
---
-
-CREATE TABLE division_project (
-    division_id integer NOT NULL,
-    project_id integer NOT NULL
-);
-
-
-ALTER TABLE public.division_project OWNER TO postgres;
-
---
--- TOC entry 173 (class 1259 OID 148748)
--- Dependencies: 6
--- Name: eivn_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
-CREATE SEQUENCE eivn_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE public.eivn_seq OWNER TO postgres;
-
---
--- TOC entry 2291 (class 0 OID 0)
--- Dependencies: 173
--- Name: eivn_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('eivn_seq', 1, false);
-
-
---
--- TOC entry 174 (class 1259 OID 148750)
--- Dependencies: 6
--- Name: empinvl_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
-CREATE SEQUENCE empinvl_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE public.empinvl_seq OWNER TO postgres;
-
---
--- TOC entry 2292 (class 0 OID 0)
--- Dependencies: 174
--- Name: empinvl_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('empinvl_seq', 1, false);
-
-
---
--- TOC entry 175 (class 1259 OID 148752)
--- Dependencies: 6
--- Name: empl_permissions_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
-CREATE SEQUENCE empl_permissions_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE public.empl_permissions_seq OWNER TO postgres;
-
---
--- TOC entry 2293 (class 0 OID 0)
--- Dependencies: 175
--- Name: empl_permissions_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('empl_permissions_seq', 13, true);
-
-
---
--- TOC entry 176 (class 1259 OID 148754)
--- Dependencies: 6
--- Name: empl_plan_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
-CREATE SEQUENCE empl_plan_seq
-    START WITH 6733
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE public.empl_plan_seq OWNER TO postgres;
-
---
--- TOC entry 2294 (class 0 OID 0)
--- Dependencies: 176
--- Name: empl_plan_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('empl_plan_seq', 6733, false);
-
-
---
--- TOC entry 177 (class 1259 OID 148756)
--- Dependencies: 6
--- Name: empl_prj_plan_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
-CREATE SEQUENCE empl_prj_plan_seq
-    START WITH 6733
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE public.empl_prj_plan_seq OWNER TO postgres;
-
---
--- TOC entry 2295 (class 0 OID 0)
--- Dependencies: 177
--- Name: empl_prj_plan_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('empl_prj_plan_seq', 6733, false);
-
-
---
--- TOC entry 178 (class 1259 OID 148758)
+-- TOC entry 177 (class 1259 OID 150741)
 -- Dependencies: 6
 -- Name: employee_assistant_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
@@ -454,8 +442,8 @@ CREATE SEQUENCE employee_assistant_seq
 ALTER TABLE public.employee_assistant_seq OWNER TO postgres;
 
 --
--- TOC entry 2296 (class 0 OID 0)
--- Dependencies: 178
+-- TOC entry 2285 (class 0 OID 0)
+-- Dependencies: 177
 -- Name: employee_assistant_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
@@ -463,8 +451,8 @@ SELECT pg_catalog.setval('employee_assistant_seq', 1, false);
 
 
 --
--- TOC entry 179 (class 1259 OID 148760)
--- Dependencies: 2056 6
+-- TOC entry 178 (class 1259 OID 150743)
+-- Dependencies: 2041 6
 -- Name: employee_assistant; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -478,20 +466,8 @@ CREATE TABLE employee_assistant (
 ALTER TABLE public.employee_assistant OWNER TO postgres;
 
 --
--- TOC entry 180 (class 1259 OID 148764)
--- Dependencies: 2044 6
--- Name: employee_d; Type: VIEW; Schema: public; Owner: postgres
---
-
-CREATE VIEW employee_d AS
-    SELECT e.id, e.name, e.job, CASE WHEN (EXISTS (SELECT 1 FROM department d WHERE (d.id = e.id))) THEN e.id ELSE e.manager END AS dept FROM employee e;
-
-
-ALTER TABLE public.employee_d OWNER TO postgres;
-
---
--- TOC entry 181 (class 1259 OID 148768)
--- Dependencies: 2057 6
+-- TOC entry 179 (class 1259 OID 150751)
+-- Dependencies: 2042 6
 -- Name: employee_involved; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -507,8 +483,8 @@ CREATE TABLE employee_involved (
 ALTER TABLE public.employee_involved OWNER TO postgres;
 
 --
--- TOC entry 182 (class 1259 OID 148772)
--- Dependencies: 2058 6
+-- TOC entry 180 (class 1259 OID 150755)
+-- Dependencies: 2043 6
 -- Name: employee_permissions; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -522,8 +498,8 @@ CREATE TABLE employee_permissions (
 ALTER TABLE public.employee_permissions OWNER TO postgres;
 
 --
--- TOC entry 183 (class 1259 OID 148776)
--- Dependencies: 2059 6
+-- TOC entry 181 (class 1259 OID 150759)
+-- Dependencies: 2044 6
 -- Name: employee_plan; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -540,8 +516,8 @@ CREATE TABLE employee_plan (
 ALTER TABLE public.employee_plan OWNER TO postgres;
 
 --
--- TOC entry 184 (class 1259 OID 148780)
--- Dependencies: 6
+-- TOC entry 182 (class 1259 OID 150763)
+-- Dependencies: 2045 6
 -- Name: employee_project_billable; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -549,15 +525,18 @@ CREATE TABLE employee_project_billable (
     id integer NOT NULL,
     billable boolean NOT NULL,
     employee_id integer NOT NULL,
-    project_id integer NOT NULL
+    project_id integer NOT NULL,
+    start_date date DEFAULT '1900-01-01'::date,
+    end_date date,
+    comment character varying(255)
 );
 
 
 ALTER TABLE public.employee_project_billable OWNER TO postgres;
 
 --
--- TOC entry 185 (class 1259 OID 148783)
--- Dependencies: 2060 6
+-- TOC entry 183 (class 1259 OID 150766)
+-- Dependencies: 2046 6
 -- Name: employee_project_plan; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -574,7 +553,7 @@ CREATE TABLE employee_project_plan (
 ALTER TABLE public.employee_project_plan OWNER TO postgres;
 
 --
--- TOC entry 186 (class 1259 OID 148787)
+-- TOC entry 184 (class 1259 OID 150770)
 -- Dependencies: 6
 -- Name: employee_token; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
@@ -588,7 +567,489 @@ CREATE TABLE employee_token (
 ALTER TABLE public.employee_token OWNER TO postgres;
 
 --
--- TOC entry 187 (class 1259 OID 148793)
+-- TOC entry 189 (class 1259 OID 150798)
+-- Dependencies: 6
+-- Name: hibernate_sequence; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE hibernate_sequence
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.hibernate_sequence OWNER TO postgres;
+
+--
+-- TOC entry 2286 (class 0 OID 0)
+-- Dependencies: 189
+-- Name: hibernate_sequence; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('hibernate_sequence', 5086, true);
+
+
+--
+-- TOC entry 190 (class 1259 OID 150800)
+-- Dependencies: 6
+-- Name: holiday_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE holiday_seq
+    START WITH 250
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 20;
+
+
+ALTER TABLE public.holiday_seq OWNER TO postgres;
+
+--
+-- TOC entry 2287 (class 0 OID 0)
+-- Dependencies: 190
+-- Name: holiday_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('holiday_seq', 469, true);
+
+
+--
+-- TOC entry 191 (class 1259 OID 150802)
+-- Dependencies: 2049 6
+-- Name: holiday; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE holiday (
+    id numeric(10,0) DEFAULT nextval('holiday_seq'::regclass) NOT NULL,
+    caldate date NOT NULL,
+    region integer
+);
+
+
+ALTER TABLE public.holiday OWNER TO postgres;
+
+--
+-- TOC entry 192 (class 1259 OID 150806)
+-- Dependencies: 6
+-- Name: illness_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE illness_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.illness_seq OWNER TO postgres;
+
+--
+-- TOC entry 2288 (class 0 OID 0)
+-- Dependencies: 192
+-- Name: illness_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('illness_seq', 1, true);
+
+
+--
+-- TOC entry 193 (class 1259 OID 150808)
+-- Dependencies: 2050 6
+-- Name: illness; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE illness (
+    id integer DEFAULT nextval('illness_seq'::regclass) NOT NULL,
+    employee_id integer NOT NULL,
+    begin_date date NOT NULL,
+    end_date date NOT NULL,
+    reason_id integer NOT NULL,
+    comment character(600)
+);
+
+
+ALTER TABLE public.illness OWNER TO postgres;
+
+--
+-- TOC entry 194 (class 1259 OID 150815)
+-- Dependencies: 6
+-- Name: manager_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE manager_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.manager_seq OWNER TO postgres;
+
+--
+-- TOC entry 2289 (class 0 OID 0)
+-- Dependencies: 194
+-- Name: manager_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('manager_seq', 1, false);
+
+
+--
+-- TOC entry 195 (class 1259 OID 150817)
+-- Dependencies: 2051 6
+-- Name: manager; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE manager (
+    id integer DEFAULT nextval('manager_seq'::regclass) NOT NULL,
+    division_id integer NOT NULL,
+    employee_id integer NOT NULL,
+    region_id integer NOT NULL
+);
+
+
+ALTER TABLE public.manager OWNER TO postgres;
+
+--
+-- TOC entry 196 (class 1259 OID 150821)
+-- Dependencies: 6
+-- Name: overtime_cause_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE overtime_cause_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.overtime_cause_seq OWNER TO postgres;
+
+--
+-- TOC entry 2290 (class 0 OID 0)
+-- Dependencies: 196
+-- Name: overtime_cause_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('overtime_cause_seq', 4, true);
+
+
+--
+-- TOC entry 197 (class 1259 OID 150823)
+-- Dependencies: 2052 6
+-- Name: overtime_cause; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE overtime_cause (
+    id integer DEFAULT nextval('overtime_cause_seq'::regclass) NOT NULL,
+    timesheet_id integer NOT NULL,
+    overtime_cause_id integer NOT NULL,
+    comment character varying(256),
+    compensation_id integer
+);
+
+
+ALTER TABLE public.overtime_cause OWNER TO postgres;
+
+--
+-- TOC entry 198 (class 1259 OID 150827)
+-- Dependencies: 6
+-- Name: permission; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE permission (
+    id integer NOT NULL,
+    name character(50) NOT NULL
+);
+
+
+ALTER TABLE public.permission OWNER TO postgres;
+
+--
+-- TOC entry 199 (class 1259 OID 150830)
+-- Dependencies: 6
+-- Name: proj_part_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE proj_part_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.proj_part_seq OWNER TO postgres;
+
+--
+-- TOC entry 2291 (class 0 OID 0)
+-- Dependencies: 199
+-- Name: proj_part_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('proj_part_seq', 10, true);
+
+
+--
+-- TOC entry 200 (class 1259 OID 150832)
+-- Dependencies: 6
+-- Name: proj_role_permissions_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE proj_role_permissions_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.proj_role_permissions_seq OWNER TO postgres;
+
+--
+-- TOC entry 2292 (class 0 OID 0)
+-- Dependencies: 200
+-- Name: proj_role_permissions_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('proj_role_permissions_seq', 11, true);
+
+
+--
+-- TOC entry 201 (class 1259 OID 150834)
+-- Dependencies: 6
+-- Name: proj_task_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE proj_task_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.proj_task_seq OWNER TO postgres;
+
+--
+-- TOC entry 2293 (class 0 OID 0)
+-- Dependencies: 201
+-- Name: proj_task_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('proj_task_seq', 1, false);
+
+
+--
+-- TOC entry 202 (class 1259 OID 150836)
+-- Dependencies: 6
+-- Name: project_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE project_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.project_seq OWNER TO postgres;
+
+--
+-- TOC entry 2294 (class 0 OID 0)
+-- Dependencies: 202
+-- Name: project_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('project_seq', 109, true);
+
+
+--
+-- TOC entry 203 (class 1259 OID 150838)
+-- Dependencies: 2053 2054 2055 6
+-- Name: project; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE project (
+    id integer DEFAULT nextval('project_seq'::regclass) NOT NULL,
+    active boolean DEFAULT true NOT NULL,
+    cq_required boolean DEFAULT false NOT NULL,
+    name character varying(255) NOT NULL,
+    manager integer,
+    state integer NOT NULL,
+    projectid character varying(255),
+    start_date date,
+    end_date date,
+    jira_project_key character varying(255),
+    division integer,
+    funding_type integer
+);
+
+
+ALTER TABLE public.project OWNER TO postgres;
+
+--
+-- TOC entry 2295 (class 0 OID 0)
+-- Dependencies: 203
+-- Name: COLUMN project.jira_project_key; Type: COMMENT; Schema: public; Owner: postgres
+--
+
+COMMENT ON COLUMN project.jira_project_key IS 'поле с ключом проекта в JIRA';
+
+
+--
+-- TOC entry 2296 (class 0 OID 0)
+-- Dependencies: 203
+-- Name: COLUMN project.division; Type: COMMENT; Schema: public; Owner: postgres
+--
+
+COMMENT ON COLUMN project.division IS 'ответственное подразделение';
+
+
+--
+-- TOC entry 2297 (class 0 OID 0)
+-- Dependencies: 203
+-- Name: COLUMN project.funding_type; Type: COMMENT; Schema: public; Owner: postgres
+--
+
+COMMENT ON COLUMN project.funding_type IS 'Тип финансирования проекта';
+
+
+--
+-- TOC entry 204 (class 1259 OID 150847)
+-- Dependencies: 2056 2057 6
+-- Name: project_managers; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE project_managers (
+    id integer DEFAULT nextval('proj_part_seq'::regclass) NOT NULL,
+    active boolean DEFAULT true NOT NULL,
+    employee integer NOT NULL,
+    project integer NOT NULL,
+    project_role integer NOT NULL
+);
+
+
+ALTER TABLE public.project_managers OWNER TO postgres;
+
+--
+-- TOC entry 205 (class 1259 OID 150852)
+-- Dependencies: 2058 6
+-- Name: project_role; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE project_role (
+    id integer NOT NULL,
+    active boolean DEFAULT true NOT NULL,
+    code character varying(3) NOT NULL,
+    ldap_title character varying(255) NOT NULL,
+    name character varying(255) NOT NULL
+);
+
+
+ALTER TABLE public.project_role OWNER TO postgres;
+
+--
+-- TOC entry 206 (class 1259 OID 150859)
+-- Dependencies: 2059 6
+-- Name: project_role_permissions; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE project_role_permissions (
+    id integer DEFAULT nextval('proj_role_permissions_seq'::regclass) NOT NULL,
+    permission_id integer NOT NULL,
+    project_role_id integer NOT NULL
+);
+
+
+ALTER TABLE public.project_role_permissions OWNER TO postgres;
+
+--
+-- TOC entry 207 (class 1259 OID 150863)
+-- Dependencies: 2060 2061 6
+-- Name: project_task; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE project_task (
+    id integer DEFAULT nextval('proj_task_seq'::regclass) NOT NULL,
+    active boolean DEFAULT true NOT NULL,
+    name character varying(255) NOT NULL,
+    description text NOT NULL,
+    project integer,
+    sort_order character varying(10)
+);
+
+
+ALTER TABLE public.project_task OWNER TO postgres;
+
+--
+-- TOC entry 208 (class 1259 OID 150871)
+-- Dependencies: 6
+-- Name: region; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE region (
+    id integer NOT NULL,
+    name character varying(50) NOT NULL,
+    ldap_city character varying(255),
+    additional_emails character(1000)
+);
+
+
+ALTER TABLE public.region OWNER TO postgres;
+
+--
+-- TOC entry 209 (class 1259 OID 150877)
+-- Dependencies: 6
+-- Name: reportcheck_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE reportcheck_seq
+    START WITH 6733
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.reportcheck_seq OWNER TO postgres;
+
+--
+-- TOC entry 2298 (class 0 OID 0)
+-- Dependencies: 209
+-- Name: reportcheck_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('reportcheck_seq', 6733, true);
+
+
+--
+-- TOC entry 210 (class 1259 OID 150880)
+-- Dependencies: 2062 2063 6
+-- Name: reportcheck; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE reportcheck (
+    id integer DEFAULT nextval('reportcheck_seq'::regclass) NOT NULL,
+    checkdate character varying(255),
+    rnotsendnum integer,
+    sundaycheck boolean DEFAULT true NOT NULL,
+    division integer,
+    employee integer
+);
+
+
+ALTER TABLE public.reportcheck OWNER TO postgres;
+
+--
+-- TOC entry 185 (class 1259 OID 150776)
 -- Dependencies: 6
 -- Name: time_sheet_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
@@ -604,17 +1065,17 @@ CREATE SEQUENCE time_sheet_seq
 ALTER TABLE public.time_sheet_seq OWNER TO postgres;
 
 --
--- TOC entry 2297 (class 0 OID 0)
--- Dependencies: 187
+-- TOC entry 2299 (class 0 OID 0)
+-- Dependencies: 185
 -- Name: time_sheet_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('time_sheet_seq', 2397, true);
+SELECT pg_catalog.setval('time_sheet_seq', 2398, true);
 
 
 --
--- TOC entry 188 (class 1259 OID 148795)
--- Dependencies: 2061 6
+-- TOC entry 186 (class 1259 OID 150778)
+-- Dependencies: 2047 6
 -- Name: time_sheet; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -632,8 +1093,8 @@ CREATE TABLE time_sheet (
 ALTER TABLE public.time_sheet OWNER TO postgres;
 
 --
--- TOC entry 2298 (class 0 OID 0)
--- Dependencies: 188
+-- TOC entry 2300 (class 0 OID 0)
+-- Dependencies: 186
 -- Name: COLUMN time_sheet.effort_id; Type: COMMENT; Schema: public; Owner: postgres
 --
 
@@ -641,7 +1102,7 @@ COMMENT ON COLUMN time_sheet.effort_id IS 'Оценка усилий на сле
 
 
 --
--- TOC entry 189 (class 1259 OID 148802)
+-- TOC entry 187 (class 1259 OID 150785)
 -- Dependencies: 6
 -- Name: time_sheet_detail_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
@@ -657,17 +1118,17 @@ CREATE SEQUENCE time_sheet_detail_seq
 ALTER TABLE public.time_sheet_detail_seq OWNER TO postgres;
 
 --
--- TOC entry 2299 (class 0 OID 0)
--- Dependencies: 189
+-- TOC entry 2301 (class 0 OID 0)
+-- Dependencies: 187
 -- Name: time_sheet_detail_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('time_sheet_detail_seq', 3379, true);
+SELECT pg_catalog.setval('time_sheet_detail_seq', 3380, true);
 
 
 --
--- TOC entry 190 (class 1259 OID 148804)
--- Dependencies: 2062 6
+-- TOC entry 188 (class 1259 OID 150787)
+-- Dependencies: 2048 6
 -- Name: time_sheet_detail; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -675,8 +1136,7 @@ CREATE TABLE time_sheet_detail (
     id numeric(10,0) DEFAULT nextval('time_sheet_detail_seq'::regclass) NOT NULL,
     name character varying(255),
     description text,
-    duration numeric(3,1),
-    other character varying(255),
+    duration numeric(4,2),
     problem text,
     act_cat integer,
     act_type integer,
@@ -691,8 +1151,8 @@ CREATE TABLE time_sheet_detail (
 ALTER TABLE public.time_sheet_detail OWNER TO postgres;
 
 --
--- TOC entry 2300 (class 0 OID 0)
--- Dependencies: 190
+-- TOC entry 2302 (class 0 OID 0)
+-- Dependencies: 188
 -- Name: COLUMN time_sheet_detail.name; Type: COMMENT; Schema: public; Owner: postgres
 --
 
@@ -700,480 +1160,7 @@ COMMENT ON COLUMN time_sheet_detail.name IS 'старое поле, значен
 
 
 --
--- TOC entry 191 (class 1259 OID 148811)
--- Dependencies: 2045 6
--- Name: fact_view; Type: VIEW; Schema: public; Owner: postgres
---
-
-CREATE VIEW fact_view AS
-    SELECT t.emp_id, t.caldate, COALESCE(NULLIF(btrim((d.name)::text), ''::text), 'Пусто'::text) AS cq_id, d.proj_id, d.act_type, d.duration FROM (time_sheet t JOIN time_sheet_detail d ON ((d.time_sheet_id = t.id)));
-
-
-ALTER TABLE public.fact_view OWNER TO postgres;
-
---
--- TOC entry 192 (class 1259 OID 148815)
--- Dependencies: 6
--- Name: hibernate_sequence; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
-CREATE SEQUENCE hibernate_sequence
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE public.hibernate_sequence OWNER TO postgres;
-
---
--- TOC entry 2301 (class 0 OID 0)
--- Dependencies: 192
--- Name: hibernate_sequence; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('hibernate_sequence', 5085, true);
-
-
---
--- TOC entry 193 (class 1259 OID 148817)
--- Dependencies: 6
--- Name: holiday_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
-CREATE SEQUENCE holiday_seq
-    START WITH 250
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 20;
-
-
-ALTER TABLE public.holiday_seq OWNER TO postgres;
-
---
--- TOC entry 2302 (class 0 OID 0)
--- Dependencies: 193
--- Name: holiday_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('holiday_seq', 469, true);
-
-
---
--- TOC entry 194 (class 1259 OID 148819)
--- Dependencies: 2063 6
--- Name: holiday; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
---
-
-CREATE TABLE holiday (
-    id numeric(10,0) DEFAULT nextval('holiday_seq'::regclass) NOT NULL,
-    caldate date NOT NULL,
-    region integer
-);
-
-
-ALTER TABLE public.holiday OWNER TO postgres;
-
---
--- TOC entry 195 (class 1259 OID 148823)
--- Dependencies: 6
--- Name: illness_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
-CREATE SEQUENCE illness_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE public.illness_seq OWNER TO postgres;
-
---
--- TOC entry 2303 (class 0 OID 0)
--- Dependencies: 195
--- Name: illness_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('illness_seq', 1, true);
-
-
---
--- TOC entry 196 (class 1259 OID 148825)
--- Dependencies: 2064 6
--- Name: illness; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
---
-
-CREATE TABLE illness (
-    id integer DEFAULT nextval('illness_seq'::regclass) NOT NULL,
-    employee_id integer NOT NULL,
-    begin_date date NOT NULL,
-    end_date date NOT NULL,
-    reason_id integer NOT NULL,
-    comment character(600)
-);
-
-
-ALTER TABLE public.illness OWNER TO postgres;
-
---
--- TOC entry 197 (class 1259 OID 148829)
--- Dependencies: 6
--- Name: manager_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
-CREATE SEQUENCE manager_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE public.manager_seq OWNER TO postgres;
-
---
--- TOC entry 2304 (class 0 OID 0)
--- Dependencies: 197
--- Name: manager_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('manager_seq', 1, false);
-
-
---
--- TOC entry 198 (class 1259 OID 148831)
--- Dependencies: 2065 6
--- Name: manager; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
---
-
-CREATE TABLE manager (
-    id integer DEFAULT nextval('manager_seq'::regclass) NOT NULL,
-    division_id integer NOT NULL,
-    employee_id integer NOT NULL,
-    region_id integer NOT NULL
-);
-
-
-ALTER TABLE public.manager OWNER TO postgres;
-
---
--- TOC entry 199 (class 1259 OID 148835)
--- Dependencies: 6
--- Name: overtime_cause_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
-CREATE SEQUENCE overtime_cause_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE public.overtime_cause_seq OWNER TO postgres;
-
---
--- TOC entry 2305 (class 0 OID 0)
--- Dependencies: 199
--- Name: overtime_cause_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('overtime_cause_seq', 3, true);
-
-
---
--- TOC entry 200 (class 1259 OID 148837)
--- Dependencies: 2066 6
--- Name: overtime_cause; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
---
-
-CREATE TABLE overtime_cause (
-    id integer DEFAULT nextval('overtime_cause_seq'::regclass) NOT NULL,
-    timesheet_id integer NOT NULL,
-    overtime_cause_id integer NOT NULL,
-    comment character varying(256),
-    compensation_id integer
-);
-
-
-ALTER TABLE public.overtime_cause OWNER TO postgres;
-
---
--- TOC entry 201 (class 1259 OID 148841)
--- Dependencies: 6
--- Name: permission; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
---
-
-CREATE TABLE permission (
-    id integer NOT NULL,
-    name character(50) NOT NULL
-);
-
-
-ALTER TABLE public.permission OWNER TO postgres;
-
---
--- TOC entry 202 (class 1259 OID 148844)
--- Dependencies: 6
--- Name: proj_part_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
-CREATE SEQUENCE proj_part_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE public.proj_part_seq OWNER TO postgres;
-
---
--- TOC entry 2306 (class 0 OID 0)
--- Dependencies: 202
--- Name: proj_part_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('proj_part_seq', 10, true);
-
-
---
--- TOC entry 203 (class 1259 OID 148846)
--- Dependencies: 6
--- Name: proj_role_permissions_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
-CREATE SEQUENCE proj_role_permissions_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE public.proj_role_permissions_seq OWNER TO postgres;
-
---
--- TOC entry 2307 (class 0 OID 0)
--- Dependencies: 203
--- Name: proj_role_permissions_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('proj_role_permissions_seq', 11, true);
-
-
---
--- TOC entry 204 (class 1259 OID 148848)
--- Dependencies: 6
--- Name: proj_task_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
-CREATE SEQUENCE proj_task_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE public.proj_task_seq OWNER TO postgres;
-
---
--- TOC entry 2308 (class 0 OID 0)
--- Dependencies: 204
--- Name: proj_task_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('proj_task_seq', 1, false);
-
-
---
--- TOC entry 205 (class 1259 OID 148850)
--- Dependencies: 6
--- Name: project_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
-CREATE SEQUENCE project_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE public.project_seq OWNER TO postgres;
-
---
--- TOC entry 2309 (class 0 OID 0)
--- Dependencies: 205
--- Name: project_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('project_seq', 109, true);
-
-
---
--- TOC entry 206 (class 1259 OID 148852)
--- Dependencies: 2067 2068 2069 6
--- Name: project; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
---
-
-CREATE TABLE project (
-    id integer DEFAULT nextval('project_seq'::regclass) NOT NULL,
-    active boolean DEFAULT true NOT NULL,
-    cq_required boolean DEFAULT false NOT NULL,
-    name character varying(255) NOT NULL,
-    manager integer,
-    state integer NOT NULL,
-    projectid character varying(255),
-    start_date date,
-    end_date date,
-    jira_project_key character varying(255)
-);
-
-
-ALTER TABLE public.project OWNER TO postgres;
-
---
--- TOC entry 2310 (class 0 OID 0)
--- Dependencies: 206
--- Name: COLUMN project.jira_project_key; Type: COMMENT; Schema: public; Owner: postgres
---
-
-COMMENT ON COLUMN project.jira_project_key IS 'поле с ключом проекта в JIRA';
-
-
---
--- TOC entry 207 (class 1259 OID 148861)
--- Dependencies: 2070 2071 6
--- Name: project_managers; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
---
-
-CREATE TABLE project_managers (
-    id integer DEFAULT nextval('proj_part_seq'::regclass) NOT NULL,
-    active boolean DEFAULT true NOT NULL,
-    employee integer NOT NULL,
-    project integer NOT NULL,
-    project_role integer NOT NULL
-);
-
-
-ALTER TABLE public.project_managers OWNER TO postgres;
-
---
--- TOC entry 208 (class 1259 OID 148866)
--- Dependencies: 2072 6
--- Name: project_role; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
---
-
-CREATE TABLE project_role (
-    id integer NOT NULL,
-    active boolean DEFAULT true NOT NULL,
-    code character varying(3) NOT NULL,
-    ldap_title character varying(255) NOT NULL,
-    name character varying(255) NOT NULL
-);
-
-
-ALTER TABLE public.project_role OWNER TO postgres;
-
---
--- TOC entry 209 (class 1259 OID 148873)
--- Dependencies: 2073 6
--- Name: project_role_permissions; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
---
-
-CREATE TABLE project_role_permissions (
-    id integer DEFAULT nextval('proj_role_permissions_seq'::regclass) NOT NULL,
-    permission_id integer NOT NULL,
-    project_role_id integer NOT NULL
-);
-
-
-ALTER TABLE public.project_role_permissions OWNER TO postgres;
-
---
--- TOC entry 210 (class 1259 OID 148877)
--- Dependencies: 2074 2075 6
--- Name: project_task; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
---
-
-CREATE TABLE project_task (
-    id integer DEFAULT nextval('proj_task_seq'::regclass) NOT NULL,
-    active boolean DEFAULT true NOT NULL,
-    name character varying(255) NOT NULL,
-    description text NOT NULL,
-    project integer
-);
-
-
-ALTER TABLE public.project_task OWNER TO postgres;
-
---
--- TOC entry 211 (class 1259 OID 148885)
--- Dependencies: 6
--- Name: region; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
---
-
-CREATE TABLE region (
-    id integer NOT NULL,
-    name character varying(50) NOT NULL,
-    ldap_city character varying(255),
-    additional_emails character(1000)
-);
-
-
-ALTER TABLE public.region OWNER TO postgres;
-
---
--- TOC entry 212 (class 1259 OID 148891)
--- Dependencies: 6
--- Name: reportcheck_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
-CREATE SEQUENCE reportcheck_seq
-    START WITH 6733
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE public.reportcheck_seq OWNER TO postgres;
-
---
--- TOC entry 2311 (class 0 OID 0)
--- Dependencies: 212
--- Name: reportcheck_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('reportcheck_seq', 6733, true);
-
-
---
--- TOC entry 213 (class 1259 OID 148893)
--- Dependencies: 2076 2077 6
--- Name: reportcheck; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
---
-
-CREATE TABLE reportcheck (
-    id integer DEFAULT nextval('reportcheck_seq'::regclass) NOT NULL,
-    checkdate character varying(255),
-    rnotsendnum integer,
-    sundaycheck boolean DEFAULT true NOT NULL,
-    division integer,
-    employee integer
-);
-
-
-ALTER TABLE public.reportcheck OWNER TO postgres;
-
---
--- TOC entry 214 (class 1259 OID 148898)
+-- TOC entry 211 (class 1259 OID 150885)
 -- Dependencies: 6
 -- Name: vacation_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
@@ -1189,17 +1176,17 @@ CREATE SEQUENCE vacation_seq
 ALTER TABLE public.vacation_seq OWNER TO postgres;
 
 --
--- TOC entry 2312 (class 0 OID 0)
--- Dependencies: 214
+-- TOC entry 2303 (class 0 OID 0)
+-- Dependencies: 211
 -- Name: vacation_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('vacation_seq', 1, true);
+SELECT pg_catalog.setval('vacation_seq', 2, true);
 
 
 --
--- TOC entry 215 (class 1259 OID 148900)
--- Dependencies: 2078 6
+-- TOC entry 212 (class 1259 OID 150887)
+-- Dependencies: 2064 6
 -- Name: vacation; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -1219,7 +1206,7 @@ CREATE TABLE vacation (
 ALTER TABLE public.vacation OWNER TO postgres;
 
 --
--- TOC entry 216 (class 1259 OID 148904)
+-- TOC entry 213 (class 1259 OID 150894)
 -- Dependencies: 6
 -- Name: vacation_approval_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
@@ -1235,8 +1222,8 @@ CREATE SEQUENCE vacation_approval_seq
 ALTER TABLE public.vacation_approval_seq OWNER TO postgres;
 
 --
--- TOC entry 2313 (class 0 OID 0)
--- Dependencies: 216
+-- TOC entry 2304 (class 0 OID 0)
+-- Dependencies: 213
 -- Name: vacation_approval_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
@@ -1244,8 +1231,8 @@ SELECT pg_catalog.setval('vacation_approval_seq', 1, false);
 
 
 --
--- TOC entry 217 (class 1259 OID 148906)
--- Dependencies: 2079 6
+-- TOC entry 214 (class 1259 OID 150896)
+-- Dependencies: 2065 6
 -- Name: vacation_approval; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -1263,7 +1250,7 @@ CREATE TABLE vacation_approval (
 ALTER TABLE public.vacation_approval OWNER TO postgres;
 
 --
--- TOC entry 218 (class 1259 OID 148910)
+-- TOC entry 215 (class 1259 OID 150900)
 -- Dependencies: 6
 -- Name: vacation_approval_result; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
@@ -1278,7 +1265,7 @@ CREATE TABLE vacation_approval_result (
 ALTER TABLE public.vacation_approval_result OWNER TO postgres;
 
 --
--- TOC entry 219 (class 1259 OID 148913)
+-- TOC entry 216 (class 1259 OID 150903)
 -- Dependencies: 6
 -- Name: vacation_approval_result_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
@@ -1294,8 +1281,8 @@ CREATE SEQUENCE vacation_approval_result_seq
 ALTER TABLE public.vacation_approval_result_seq OWNER TO postgres;
 
 --
--- TOC entry 2314 (class 0 OID 0)
--- Dependencies: 219
+-- TOC entry 2305 (class 0 OID 0)
+-- Dependencies: 216
 -- Name: vacation_approval_result_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
@@ -1303,8 +1290,8 @@ SELECT pg_catalog.setval('vacation_approval_result_seq', 15, true);
 
 
 --
--- TOC entry 2248 (class 0 OID 148700)
--- Dependencies: 162 2280
+-- TOC entry 2237 (class 0 OID 150680)
+-- Dependencies: 162 2269
 -- Data for Name: available_activity_category; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -1468,8 +1455,8 @@ COPY available_activity_category (id, act_cat, act_type, project_role, descripti
 
 
 --
--- TOC entry 2249 (class 0 OID 148706)
--- Dependencies: 164 2280
+-- TOC entry 2238 (class 0 OID 150686)
+-- Dependencies: 164 2269
 -- Data for Name: business_trip; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -1478,8 +1465,8 @@ COPY business_trip (id, employee_id, begin_date, end_date, type_id, project_id, 
 
 
 --
--- TOC entry 2250 (class 0 OID 148710)
--- Dependencies: 165 2280
+-- TOC entry 2239 (class 0 OID 150693)
+-- Dependencies: 165 2269
 -- Data for Name: calendar; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -2949,8 +2936,8 @@ COPY calendar (caldate, month, month_txt, year) FROM stdin;
 
 
 --
--- TOC entry 2252 (class 0 OID 148731)
--- Dependencies: 169 2280
+-- TOC entry 2241 (class 0 OID 150714)
+-- Dependencies: 168 2269
 -- Data for Name: dictionary; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -2969,12 +2956,13 @@ COPY dictionary (id, name) FROM stdin;
 13	Типы компенсации
 14	Причины работы в выходной день
 15	Справочник оценок объёма работ на следующий день
+16	Тип финансирования проекта
 \.
 
 
 --
--- TOC entry 2253 (class 0 OID 148734)
--- Dependencies: 170 2280
+-- TOC entry 2242 (class 0 OID 150717)
+-- Dependencies: 169 2269
 -- Data for Name: dictionary_item; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -3064,12 +3052,14 @@ COPY dictionary_item (id, value, dict_id) FROM stdin;
 125	Все нормально	15
 126	У меня будет мало работы	15
 127	Я буду перегружен(а)	15
+128	Коммерческий проект	16
+129	Инвестиционный проект	16
 \.
 
 
 --
--- TOC entry 2254 (class 0 OID 148737)
--- Dependencies: 171 2280
+-- TOC entry 2243 (class 0 OID 150720)
+-- Dependencies: 170 2269
 -- Data for Name: division; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -3082,8 +3072,8 @@ COPY division (id, active, ldap_name, leader, name, leader_id, ldap_object_sid, 
 
 
 --
--- TOC entry 2255 (class 0 OID 148745)
--- Dependencies: 172 2280
+-- TOC entry 2244 (class 0 OID 150728)
+-- Dependencies: 171 2269
 -- Data for Name: division_project; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -3100,8 +3090,8 @@ COPY division_project (division_id, project_id) FROM stdin;
 
 
 --
--- TOC entry 2251 (class 0 OID 148715)
--- Dependencies: 167 2280
+-- TOC entry 2240 (class 0 OID 150698)
+-- Dependencies: 167 2269
 -- Data for Name: employee; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -3123,8 +3113,8 @@ COPY employee (id, archived, email, name, not_to_sync, start_date, division, job
 
 
 --
--- TOC entry 2256 (class 0 OID 148760)
--- Dependencies: 179 2280
+-- TOC entry 2245 (class 0 OID 150743)
+-- Dependencies: 178 2269
 -- Data for Name: employee_assistant; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -3133,8 +3123,8 @@ COPY employee_assistant (id, employee_id, assistant_id) FROM stdin;
 
 
 --
--- TOC entry 2257 (class 0 OID 148768)
--- Dependencies: 181 2280
+-- TOC entry 2246 (class 0 OID 150751)
+-- Dependencies: 179 2269
 -- Data for Name: employee_involved; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -3143,8 +3133,8 @@ COPY employee_involved (id, percent_of_involving, period_of_involving, employee,
 
 
 --
--- TOC entry 2258 (class 0 OID 148772)
--- Dependencies: 182 2280
+-- TOC entry 2247 (class 0 OID 150755)
+-- Dependencies: 180 2269
 -- Data for Name: employee_permissions; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -3172,38 +3162,41 @@ COPY employee_permissions (id, permission_id, employee_id) FROM stdin;
 
 
 --
--- TOC entry 2259 (class 0 OID 148776)
--- Dependencies: 183 2280
+-- TOC entry 2248 (class 0 OID 150759)
+-- Dependencies: 181 2269
 -- Data for Name: employee_plan; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY employee_plan (id, employee_id, item_id, year, month, value) FROM stdin;
+67330	625	114	2013	9	48
+67331	625	113	2013	9	8
 \.
 
 
 --
--- TOC entry 2260 (class 0 OID 148780)
--- Dependencies: 184 2280
+-- TOC entry 2249 (class 0 OID 150763)
+-- Dependencies: 182 2269
 -- Data for Name: employee_project_billable; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY employee_project_billable (id, billable, employee_id, project_id) FROM stdin;
+COPY employee_project_billable (id, billable, employee_id, project_id, start_date, end_date, comment) FROM stdin;
 \.
 
 
 --
--- TOC entry 2261 (class 0 OID 148783)
--- Dependencies: 185 2280
+-- TOC entry 2250 (class 0 OID 150766)
+-- Dependencies: 183 2269
 -- Data for Name: employee_project_plan; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY employee_project_plan (id, employee_id, project_id, year, month, value) FROM stdin;
+67330	625	1	2013	9	100
 \.
 
 
 --
--- TOC entry 2262 (class 0 OID 148787)
--- Dependencies: 186 2280
+-- TOC entry 2251 (class 0 OID 150770)
+-- Dependencies: 184 2269
 -- Data for Name: employee_token; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -3212,8 +3205,8 @@ COPY employee_token (key, employee_id) FROM stdin;
 
 
 --
--- TOC entry 2265 (class 0 OID 148819)
--- Dependencies: 194 2280
+-- TOC entry 2254 (class 0 OID 150802)
+-- Dependencies: 191 2269
 -- Data for Name: holiday; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -3654,8 +3647,8 @@ COPY holiday (id, caldate, region) FROM stdin;
 
 
 --
--- TOC entry 2266 (class 0 OID 148825)
--- Dependencies: 196 2280
+-- TOC entry 2255 (class 0 OID 150808)
+-- Dependencies: 193 2269
 -- Data for Name: illness; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -3665,8 +3658,8 @@ COPY illness (id, employee_id, begin_date, end_date, reason_id, comment) FROM st
 
 
 --
--- TOC entry 2267 (class 0 OID 148831)
--- Dependencies: 198 2280
+-- TOC entry 2256 (class 0 OID 150817)
+-- Dependencies: 195 2269
 -- Data for Name: manager; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -3675,20 +3668,21 @@ COPY manager (id, division_id, employee_id, region_id) FROM stdin;
 
 
 --
--- TOC entry 2268 (class 0 OID 148837)
--- Dependencies: 200 2280
+-- TOC entry 2257 (class 0 OID 150823)
+-- Dependencies: 197 2269
 -- Data for Name: overtime_cause; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY overtime_cause (id, timesheet_id, overtime_cause_id, comment, compensation_id) FROM stdin;
 10	23940	107		\N
 20	23950	103		\N
+40	23980	118		116
 \.
 
 
 --
--- TOC entry 2269 (class 0 OID 148841)
--- Dependencies: 201 2280
+-- TOC entry 2258 (class 0 OID 150827)
+-- Dependencies: 198 2269
 -- Data for Name: permission; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -3704,22 +3698,22 @@ COPY permission (id, name) FROM stdin;
 
 
 --
--- TOC entry 2270 (class 0 OID 148852)
--- Dependencies: 206 2280
+-- TOC entry 2259 (class 0 OID 150838)
+-- Dependencies: 203 2269
 -- Data for Name: project; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY project (id, active, cq_required, name, manager, state, projectid, start_date, end_date, jira_project_key) FROM stdin;
-2	t	f	Project 2	621	12	\N	2011-01-01	2015-01-01	\N
-4	t	f	Presale 2	621	13	\N	2011-01-01	2015-01-01	\N
-3	t	f	Presale 1	620	13	\N	2011-01-01	2015-01-01	ITTOPEX
-1	t	t	Project 1	620	12	\N	2011-01-01	2015-01-01	SBRFST
+COPY project (id, active, cq_required, name, manager, state, projectid, start_date, end_date, jira_project_key, division, funding_type) FROM stdin;
+2	t	f	Project 2	621	12	\N	2011-01-01	2015-01-01	\N	\N	128
+1	t	t	Project 1	620	12	\N	2011-01-01	2015-01-01	\N	\N	128
+4	t	f	Presale 2	621	13	\N	2011-01-01	2015-01-01	\N	\N	129
+3	t	f	Presale 1	620	13	\N	2011-01-01	2015-01-01	\N	\N	129
 \.
 
 
 --
--- TOC entry 2271 (class 0 OID 148861)
--- Dependencies: 207 2280
+-- TOC entry 2260 (class 0 OID 150847)
+-- Dependencies: 204 2269
 -- Data for Name: project_managers; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -3728,8 +3722,8 @@ COPY project_managers (id, active, employee, project, project_role) FROM stdin;
 
 
 --
--- TOC entry 2272 (class 0 OID 148866)
--- Dependencies: 208 2280
+-- TOC entry 2261 (class 0 OID 150852)
+-- Dependencies: 205 2269
 -- Data for Name: project_role; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -3744,8 +3738,8 @@ COPY project_role (id, active, code, ldap_title, name) FROM stdin;
 
 
 --
--- TOC entry 2273 (class 0 OID 148873)
--- Dependencies: 209 2280
+-- TOC entry 2262 (class 0 OID 150859)
+-- Dependencies: 206 2269
 -- Data for Name: project_role_permissions; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -3765,20 +3759,20 @@ COPY project_role_permissions (id, permission_id, project_role_id) FROM stdin;
 
 
 --
--- TOC entry 2274 (class 0 OID 148877)
--- Dependencies: 210 2280
+-- TOC entry 2263 (class 0 OID 150863)
+-- Dependencies: 207 2269
 -- Data for Name: project_task; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY project_task (id, active, name, description, project) FROM stdin;
-1	t	CQ00001	task 1	1
-2	t	CQ00002	task 2	1
+COPY project_task (id, active, name, description, project, sort_order) FROM stdin;
+1	t	CQ00001	task 1	1	\N
+2	t	CQ00002	task 2	1	\N
 \.
 
 
 --
--- TOC entry 2275 (class 0 OID 148885)
--- Dependencies: 211 2280
+-- TOC entry 2264 (class 0 OID 150871)
+-- Dependencies: 208 2269
 -- Data for Name: region; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -3791,8 +3785,8 @@ COPY region (id, name, ldap_city, additional_emails) FROM stdin;
 
 
 --
--- TOC entry 2276 (class 0 OID 148893)
--- Dependencies: 213 2280
+-- TOC entry 2265 (class 0 OID 150880)
+-- Dependencies: 210 2269
 -- Data for Name: reportcheck; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -3809,8 +3803,8 @@ COPY reportcheck (id, checkdate, rnotsendnum, sundaycheck, division, employee) F
 
 
 --
--- TOC entry 2263 (class 0 OID 148795)
--- Dependencies: 188 2280
+-- TOC entry 2252 (class 0 OID 150778)
+-- Dependencies: 186 2269
 -- Data for Name: time_sheet; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -3819,48 +3813,52 @@ COPY time_sheet (id, plan, caldate, emp_id, state, creation_date, effort_id) FRO
 23930	 fgjhgh gkhhjk	2012-12-31	623	\N	2013-02-19	125
 23940	df jfg jgj ghj	2013-02-04	623	\N	2013-02-19	125
 23950	j fgj fgjghj ghj gfj	2013-02-05	623	\N	2013-02-19	125
+23980	ывапв ыыу	2013-09-01	625	\N	2013-09-13	125
 \.
 
 
 --
--- TOC entry 2264 (class 0 OID 148804)
--- Dependencies: 190 2280
+-- TOC entry 2253 (class 0 OID 150787)
+-- Dependencies: 188 2269
 -- Data for Name: time_sheet_detail; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY time_sheet_detail (id, name, description, duration, other, problem, act_cat, act_type, proj_id, time_sheet_id, workplace_id, projectrole_id, task_id) FROM stdin;
-33740	CQ00001	1	1.0	\N		7	12	1	23920	\N	\N	\N
-33750	CQ00001	th trdh gj hg khg	8.0	\N		48	12	1	23930	49	15	1
-33760	CQ00002	fghj fgj gjg hj ghjh	12.0	\N		44	12	1	23940	52	15	2
-33770	CQ00001	fgh fh gfjg hg	5.0	\N		48	12	1	23950	49	16	1
+COPY time_sheet_detail (id, name, description, duration, problem, act_cat, act_type, proj_id, time_sheet_id, workplace_id, projectrole_id, task_id) FROM stdin;
+33740	CQ00001	1	1.00		7	12	1	23920	\N	\N	\N
+33750	CQ00001	th trdh gj hg khg	8.00		48	12	1	23930	49	15	1
+33760	CQ00002	fghj fgj gjg hj ghjh	12.00		44	12	1	23940	52	15	2
+33770	CQ00001	fgh fh gfjg hg	5.00		48	12	1	23950	49	16	1
+33800	\N	Активности по задачам не найдено	1.11		48	12	1	23980	49	15	1
 \.
 
 
 --
--- TOC entry 2277 (class 0 OID 148900)
--- Dependencies: 215 2280
+-- TOC entry 2266 (class 0 OID 150887)
+-- Dependencies: 212 2269
 -- Data for Name: vacation; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY vacation (id, creation_date, employee_id, begin_date, end_date, type_id, status_id, comment, author_id) FROM stdin;
 10	2013-02-19	623	2014-01-01	2014-01-16	62	57	trh rytjfukhg                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           	623
+20	2013-09-13	625	2013-09-23	2013-11-04	62	60	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        	625
 \.
 
 
 --
--- TOC entry 2278 (class 0 OID 148906)
--- Dependencies: 217 2280
+-- TOC entry 2267 (class 0 OID 150896)
+-- Dependencies: 214 2269
 -- Data for Name: vacation_approval; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY vacation_approval (id, vacation_id, manager_id, request_datetime, response_datetime, uid, result) FROM stdin;
 5085	10	620	2013-02-19	\N	309dd896-6397-4741-aa85-8ca774c525a8	\N
+5086	20	620	2013-09-13	2013-09-13	2470fc49-1c15-439e-b9d4-cc3269ed8da5	t
 \.
 
 
 --
--- TOC entry 2279 (class 0 OID 148910)
--- Dependencies: 218 2280
+-- TOC entry 2268 (class 0 OID 150900)
+-- Dependencies: 215 2269
 -- Data for Name: vacation_approval_result; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -3870,8 +3868,8 @@ COPY vacation_approval_result (id, vacation_approval_id, project_participant_id)
 
 
 --
--- TOC entry 2081 (class 2606 OID 148916)
--- Dependencies: 162 162 162 162 2281
+-- TOC entry 2067 (class 2606 OID 150906)
+-- Dependencies: 162 162 162 162 2270
 -- Name: available_activity_category_act_type_project_role_act_cat_key; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -3880,8 +3878,8 @@ ALTER TABLE ONLY available_activity_category
 
 
 --
--- TOC entry 2083 (class 2606 OID 148918)
--- Dependencies: 162 162 2281
+-- TOC entry 2069 (class 2606 OID 150908)
+-- Dependencies: 162 162 2270
 -- Name: available_activity_category_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -3890,8 +3888,8 @@ ALTER TABLE ONLY available_activity_category
 
 
 --
--- TOC entry 2085 (class 2606 OID 148920)
--- Dependencies: 164 164 2281
+-- TOC entry 2071 (class 2606 OID 150910)
+-- Dependencies: 164 164 2270
 -- Name: business_trip_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -3900,8 +3898,8 @@ ALTER TABLE ONLY business_trip
 
 
 --
--- TOC entry 2087 (class 2606 OID 148922)
--- Dependencies: 165 165 2281
+-- TOC entry 2073 (class 2606 OID 150912)
+-- Dependencies: 165 165 2270
 -- Name: calendar_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -3910,8 +3908,8 @@ ALTER TABLE ONLY calendar
 
 
 --
--- TOC entry 2103 (class 2606 OID 148924)
--- Dependencies: 170 170 2281
+-- TOC entry 2089 (class 2606 OID 150914)
+-- Dependencies: 169 169 2270
 -- Name: dictionary_item_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -3920,8 +3918,8 @@ ALTER TABLE ONLY dictionary_item
 
 
 --
--- TOC entry 2105 (class 2606 OID 148926)
--- Dependencies: 170 170 170 2281
+-- TOC entry 2091 (class 2606 OID 150916)
+-- Dependencies: 169 169 169 2270
 -- Name: dictionary_item_value_dict_id_key; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -3930,8 +3928,8 @@ ALTER TABLE ONLY dictionary_item
 
 
 --
--- TOC entry 2099 (class 2606 OID 148928)
--- Dependencies: 169 169 2281
+-- TOC entry 2085 (class 2606 OID 150918)
+-- Dependencies: 168 168 2270
 -- Name: dictionary_name_key; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -3940,8 +3938,8 @@ ALTER TABLE ONLY dictionary
 
 
 --
--- TOC entry 2101 (class 2606 OID 148930)
--- Dependencies: 169 169 2281
+-- TOC entry 2087 (class 2606 OID 150920)
+-- Dependencies: 168 168 2270
 -- Name: dictionary_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -3950,8 +3948,8 @@ ALTER TABLE ONLY dictionary
 
 
 --
--- TOC entry 2107 (class 2606 OID 148932)
--- Dependencies: 171 171 171 2281
+-- TOC entry 2093 (class 2606 OID 150922)
+-- Dependencies: 170 170 170 2270
 -- Name: division_ldap_name_name_key; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -3960,8 +3958,8 @@ ALTER TABLE ONLY division
 
 
 --
--- TOC entry 2109 (class 2606 OID 148934)
--- Dependencies: 171 171 2281
+-- TOC entry 2095 (class 2606 OID 150924)
+-- Dependencies: 170 170 2270
 -- Name: division_object_sid_unique; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -3970,8 +3968,8 @@ ALTER TABLE ONLY division
 
 
 --
--- TOC entry 2111 (class 2606 OID 148936)
--- Dependencies: 171 171 2281
+-- TOC entry 2097 (class 2606 OID 150926)
+-- Dependencies: 170 170 2270
 -- Name: division_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -3980,8 +3978,8 @@ ALTER TABLE ONLY division
 
 
 --
--- TOC entry 2113 (class 2606 OID 148938)
--- Dependencies: 172 172 172 2281
+-- TOC entry 2099 (class 2606 OID 150928)
+-- Dependencies: 171 171 171 2270
 -- Name: division_project_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -3990,8 +3988,8 @@ ALTER TABLE ONLY division_project
 
 
 --
--- TOC entry 2119 (class 2606 OID 148940)
--- Dependencies: 183 183 183 183 183 2281
+-- TOC entry 2105 (class 2606 OID 150930)
+-- Dependencies: 181 181 181 181 181 2270
 -- Name: empl_item_year_month_unique; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -4000,8 +3998,8 @@ ALTER TABLE ONLY employee_plan
 
 
 --
--- TOC entry 2117 (class 2606 OID 148942)
--- Dependencies: 182 182 2281
+-- TOC entry 2103 (class 2606 OID 150932)
+-- Dependencies: 180 180 2270
 -- Name: empl_permissions_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -4010,8 +4008,8 @@ ALTER TABLE ONLY employee_permissions
 
 
 --
--- TOC entry 2121 (class 2606 OID 148944)
--- Dependencies: 183 183 2281
+-- TOC entry 2107 (class 2606 OID 150934)
+-- Dependencies: 181 181 2270
 -- Name: empl_plan_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -4020,8 +4018,8 @@ ALTER TABLE ONLY employee_plan
 
 
 --
--- TOC entry 2127 (class 2606 OID 148946)
--- Dependencies: 185 185 2281
+-- TOC entry 2113 (class 2606 OID 150936)
+-- Dependencies: 183 183 2270
 -- Name: empl_prj_plan_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -4030,8 +4028,8 @@ ALTER TABLE ONLY employee_project_plan
 
 
 --
--- TOC entry 2129 (class 2606 OID 148948)
--- Dependencies: 185 185 185 185 185 2281
+-- TOC entry 2115 (class 2606 OID 150938)
+-- Dependencies: 183 183 183 183 183 2270
 -- Name: empl_proj_year_month_unique; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -4040,8 +4038,8 @@ ALTER TABLE ONLY employee_project_plan
 
 
 --
--- TOC entry 2115 (class 2606 OID 148950)
--- Dependencies: 181 181 2281
+-- TOC entry 2101 (class 2606 OID 150940)
+-- Dependencies: 179 179 2270
 -- Name: employee_involved_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -4050,8 +4048,8 @@ ALTER TABLE ONLY employee_involved
 
 
 --
--- TOC entry 2090 (class 2606 OID 148952)
--- Dependencies: 167 167 167 167 2281
+-- TOC entry 2076 (class 2606 OID 150942)
+-- Dependencies: 167 167 167 167 2270
 -- Name: employee_name_job_division_key; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -4060,8 +4058,8 @@ ALTER TABLE ONLY employee
 
 
 --
--- TOC entry 2092 (class 2606 OID 148954)
--- Dependencies: 167 167 2281
+-- TOC entry 2078 (class 2606 OID 150944)
+-- Dependencies: 167 167 2270
 -- Name: employee_object_sid_unique; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -4070,8 +4068,8 @@ ALTER TABLE ONLY employee
 
 
 --
--- TOC entry 2094 (class 2606 OID 148956)
--- Dependencies: 167 167 2281
+-- TOC entry 2080 (class 2606 OID 150946)
+-- Dependencies: 167 167 2270
 -- Name: employee_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -4080,8 +4078,8 @@ ALTER TABLE ONLY employee
 
 
 --
--- TOC entry 2123 (class 2606 OID 148958)
--- Dependencies: 184 184 184 2281
+-- TOC entry 2109 (class 2606 OID 150948)
+-- Dependencies: 182 182 182 2270
 -- Name: employee_project_billable_employee_id_project_id_key; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -4090,8 +4088,8 @@ ALTER TABLE ONLY employee_project_billable
 
 
 --
--- TOC entry 2125 (class 2606 OID 148960)
--- Dependencies: 184 184 2281
+-- TOC entry 2111 (class 2606 OID 150950)
+-- Dependencies: 182 182 2270
 -- Name: employee_project_billable_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -4100,8 +4098,8 @@ ALTER TABLE ONLY employee_project_billable
 
 
 --
--- TOC entry 2131 (class 2606 OID 148962)
--- Dependencies: 186 186 2281
+-- TOC entry 2117 (class 2606 OID 150952)
+-- Dependencies: 184 184 2270
 -- Name: employee_token_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -4110,8 +4108,8 @@ ALTER TABLE ONLY employee_token
 
 
 --
--- TOC entry 2140 (class 2606 OID 148964)
--- Dependencies: 194 194 2281
+-- TOC entry 2126 (class 2606 OID 150954)
+-- Dependencies: 191 191 2270
 -- Name: holidaypk; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -4120,8 +4118,8 @@ ALTER TABLE ONLY holiday
 
 
 --
--- TOC entry 2142 (class 2606 OID 148966)
--- Dependencies: 196 196 2281
+-- TOC entry 2128 (class 2606 OID 150956)
+-- Dependencies: 193 193 2270
 -- Name: illness_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -4130,8 +4128,8 @@ ALTER TABLE ONLY illness
 
 
 --
--- TOC entry 2097 (class 2606 OID 148968)
--- Dependencies: 167 167 2281
+-- TOC entry 2083 (class 2606 OID 150958)
+-- Dependencies: 167 167 2270
 -- Name: ldap; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -4140,8 +4138,8 @@ ALTER TABLE ONLY employee
 
 
 --
--- TOC entry 2144 (class 2606 OID 148970)
--- Dependencies: 198 198 2281
+-- TOC entry 2130 (class 2606 OID 150960)
+-- Dependencies: 195 195 2270
 -- Name: manager_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -4150,8 +4148,8 @@ ALTER TABLE ONLY manager
 
 
 --
--- TOC entry 2146 (class 2606 OID 148972)
--- Dependencies: 200 200 2281
+-- TOC entry 2132 (class 2606 OID 150962)
+-- Dependencies: 197 197 2270
 -- Name: overtime_cause_unique_timesheet_id; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -4160,8 +4158,8 @@ ALTER TABLE ONLY overtime_cause
 
 
 --
--- TOC entry 2148 (class 2606 OID 148974)
--- Dependencies: 200 200 2281
+-- TOC entry 2134 (class 2606 OID 150964)
+-- Dependencies: 197 197 2270
 -- Name: overtime_causes_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -4170,8 +4168,8 @@ ALTER TABLE ONLY overtime_cause
 
 
 --
--- TOC entry 2150 (class 2606 OID 148976)
--- Dependencies: 201 201 2281
+-- TOC entry 2136 (class 2606 OID 150966)
+-- Dependencies: 198 198 2270
 -- Name: permission_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -4180,8 +4178,8 @@ ALTER TABLE ONLY permission
 
 
 --
--- TOC entry 2180 (class 2606 OID 148978)
--- Dependencies: 218 218 2281
+-- TOC entry 2167 (class 2606 OID 150968)
+-- Dependencies: 215 215 2270
 -- Name: pk_vacation_approval_result; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -4190,8 +4188,8 @@ ALTER TABLE ONLY vacation_approval_result
 
 
 --
--- TOC entry 2164 (class 2606 OID 148980)
--- Dependencies: 209 209 2281
+-- TOC entry 2151 (class 2606 OID 150970)
+-- Dependencies: 206 206 2270
 -- Name: proj_role_permissions_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -4200,8 +4198,8 @@ ALTER TABLE ONLY project_role_permissions
 
 
 --
--- TOC entry 2152 (class 2606 OID 148982)
--- Dependencies: 206 206 2281
+-- TOC entry 2139 (class 2606 OID 150972)
+-- Dependencies: 203 203 2270
 -- Name: project_name_key; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -4210,8 +4208,8 @@ ALTER TABLE ONLY project
 
 
 --
--- TOC entry 2156 (class 2606 OID 148984)
--- Dependencies: 207 207 207 207 2281
+-- TOC entry 2143 (class 2606 OID 150974)
+-- Dependencies: 204 204 204 204 2270
 -- Name: project_participant_employee_project_role_project_key; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -4220,8 +4218,8 @@ ALTER TABLE ONLY project_managers
 
 
 --
--- TOC entry 2158 (class 2606 OID 148986)
--- Dependencies: 207 207 2281
+-- TOC entry 2145 (class 2606 OID 150976)
+-- Dependencies: 204 204 2270
 -- Name: project_participant_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -4230,8 +4228,8 @@ ALTER TABLE ONLY project_managers
 
 
 --
--- TOC entry 2154 (class 2606 OID 148988)
--- Dependencies: 206 206 2281
+-- TOC entry 2141 (class 2606 OID 150978)
+-- Dependencies: 203 203 2270
 -- Name: project_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -4240,8 +4238,8 @@ ALTER TABLE ONLY project
 
 
 --
--- TOC entry 2160 (class 2606 OID 148990)
--- Dependencies: 208 208 208 2281
+-- TOC entry 2147 (class 2606 OID 150980)
+-- Dependencies: 205 205 205 2270
 -- Name: project_role_name_code_key; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -4250,8 +4248,8 @@ ALTER TABLE ONLY project_role
 
 
 --
--- TOC entry 2162 (class 2606 OID 148992)
--- Dependencies: 208 208 2281
+-- TOC entry 2149 (class 2606 OID 150982)
+-- Dependencies: 205 205 2270
 -- Name: project_role_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -4260,8 +4258,8 @@ ALTER TABLE ONLY project_role
 
 
 --
--- TOC entry 2166 (class 2606 OID 148994)
--- Dependencies: 210 210 2281
+-- TOC entry 2153 (class 2606 OID 150984)
+-- Dependencies: 207 207 2270
 -- Name: project_task_cq_id_key; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -4270,8 +4268,8 @@ ALTER TABLE ONLY project_task
 
 
 --
--- TOC entry 2168 (class 2606 OID 148996)
--- Dependencies: 210 210 2281
+-- TOC entry 2155 (class 2606 OID 150986)
+-- Dependencies: 207 207 2270
 -- Name: project_task_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -4280,8 +4278,8 @@ ALTER TABLE ONLY project_task
 
 
 --
--- TOC entry 2170 (class 2606 OID 148998)
--- Dependencies: 211 211 2281
+-- TOC entry 2157 (class 2606 OID 150988)
+-- Dependencies: 208 208 2270
 -- Name: region_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -4290,8 +4288,8 @@ ALTER TABLE ONLY region
 
 
 --
--- TOC entry 2172 (class 2606 OID 149000)
--- Dependencies: 213 213 213 2281
+-- TOC entry 2159 (class 2606 OID 150990)
+-- Dependencies: 210 210 210 2270
 -- Name: reportcheck_checkdate_employee_key; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -4300,8 +4298,8 @@ ALTER TABLE ONLY reportcheck
 
 
 --
--- TOC entry 2174 (class 2606 OID 149002)
--- Dependencies: 213 213 2281
+-- TOC entry 2161 (class 2606 OID 150992)
+-- Dependencies: 210 210 2270
 -- Name: reportcheck_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -4310,8 +4308,8 @@ ALTER TABLE ONLY reportcheck
 
 
 --
--- TOC entry 2133 (class 2606 OID 149004)
--- Dependencies: 188 188 188 2281
+-- TOC entry 2119 (class 2606 OID 150994)
+-- Dependencies: 186 186 186 2270
 -- Name: time_sheet_caldate_emp_id_key; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -4320,8 +4318,8 @@ ALTER TABLE ONLY time_sheet
 
 
 --
--- TOC entry 2138 (class 2606 OID 149006)
--- Dependencies: 190 190 2281
+-- TOC entry 2124 (class 2606 OID 150996)
+-- Dependencies: 188 188 2270
 -- Name: time_sheet_detail_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -4330,8 +4328,8 @@ ALTER TABLE ONLY time_sheet_detail
 
 
 --
--- TOC entry 2135 (class 2606 OID 149008)
--- Dependencies: 188 188 2281
+-- TOC entry 2121 (class 2606 OID 150998)
+-- Dependencies: 186 186 2270
 -- Name: time_sheet_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -4340,8 +4338,8 @@ ALTER TABLE ONLY time_sheet
 
 
 --
--- TOC entry 2178 (class 2606 OID 149010)
--- Dependencies: 217 217 2281
+-- TOC entry 2165 (class 2606 OID 151000)
+-- Dependencies: 214 214 2270
 -- Name: vacation_approval_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -4350,8 +4348,8 @@ ALTER TABLE ONLY vacation_approval
 
 
 --
--- TOC entry 2176 (class 2606 OID 149012)
--- Dependencies: 215 215 2281
+-- TOC entry 2163 (class 2606 OID 151002)
+-- Dependencies: 212 212 2270
 -- Name: vacation_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -4360,8 +4358,8 @@ ALTER TABLE ONLY vacation
 
 
 --
--- TOC entry 2088 (class 1259 OID 149013)
--- Dependencies: 167 2281
+-- TOC entry 2074 (class 1259 OID 151003)
+-- Dependencies: 167 2270
 -- Name: emp_idx1; Type: INDEX; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -4369,8 +4367,8 @@ CREATE INDEX emp_idx1 ON employee USING btree (manager);
 
 
 --
--- TOC entry 2095 (class 1259 OID 149014)
--- Dependencies: 167 2281
+-- TOC entry 2081 (class 1259 OID 151004)
+-- Dependencies: 167 2270
 -- Name: fki_emp_region; Type: INDEX; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -4378,8 +4376,17 @@ CREATE INDEX fki_emp_region ON employee USING btree (region);
 
 
 --
--- TOC entry 2136 (class 1259 OID 149015)
--- Dependencies: 190 2281
+-- TOC entry 2137 (class 1259 OID 151352)
+-- Dependencies: 203 2270
+-- Name: fki_project_funding_type; Type: INDEX; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE INDEX fki_project_funding_type ON project USING btree (funding_type);
+
+
+--
+-- TOC entry 2122 (class 1259 OID 151005)
+-- Dependencies: 188 2270
 -- Name: time_sheet_det_idx1; Type: INDEX; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -4387,8 +4394,8 @@ CREATE INDEX time_sheet_det_idx1 ON time_sheet_detail USING btree (time_sheet_id
 
 
 --
--- TOC entry 2181 (class 2606 OID 149016)
--- Dependencies: 162 2102 170 2281
+-- TOC entry 2168 (class 2606 OID 151006)
+-- Dependencies: 169 162 2088 2270
 -- Name: fk_activity_category; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4397,8 +4404,8 @@ ALTER TABLE ONLY available_activity_category
 
 
 --
--- TOC entry 2182 (class 2606 OID 149021)
--- Dependencies: 170 162 2102 2281
+-- TOC entry 2169 (class 2606 OID 151011)
+-- Dependencies: 169 162 2088 2270
 -- Name: fk_activity_type; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4407,8 +4414,8 @@ ALTER TABLE ONLY available_activity_category
 
 
 --
--- TOC entry 2196 (class 2606 OID 149026)
--- Dependencies: 2093 179 167 2281
+-- TOC entry 2183 (class 2606 OID 151016)
+-- Dependencies: 167 178 2079 2270
 -- Name: fk_assistant; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4417,8 +4424,8 @@ ALTER TABLE ONLY employee_assistant
 
 
 --
--- TOC entry 2240 (class 2606 OID 149031)
--- Dependencies: 215 2093 167 2281
+-- TOC entry 2229 (class 2606 OID 151021)
+-- Dependencies: 2079 167 212 2270
 -- Name: fk_author; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4427,8 +4434,8 @@ ALTER TABLE ONLY vacation
 
 
 --
--- TOC entry 2184 (class 2606 OID 149036)
--- Dependencies: 2102 170 164 2281
+-- TOC entry 2171 (class 2606 OID 151026)
+-- Dependencies: 169 164 2088 2270
 -- Name: fk_business_trip_type; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4437,8 +4444,8 @@ ALTER TABLE ONLY business_trip
 
 
 --
--- TOC entry 2209 (class 2606 OID 149041)
--- Dependencies: 2086 165 188 2281
+-- TOC entry 2196 (class 2606 OID 151031)
+-- Dependencies: 2072 165 186 2270
 -- Name: fk_calendar; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4447,8 +4454,8 @@ ALTER TABLE ONLY time_sheet
 
 
 --
--- TOC entry 2220 (class 2606 OID 149046)
--- Dependencies: 2086 194 165 2281
+-- TOC entry 2207 (class 2606 OID 151036)
+-- Dependencies: 191 165 2072 2270
 -- Name: fk_calendar; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4457,8 +4464,8 @@ ALTER TABLE ONLY holiday
 
 
 --
--- TOC entry 2227 (class 2606 OID 149051)
--- Dependencies: 200 2102 170 2281
+-- TOC entry 2214 (class 2606 OID 151041)
+-- Dependencies: 2088 197 169 2270
 -- Name: fk_compensation_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4467,8 +4474,8 @@ ALTER TABLE ONLY overtime_cause
 
 
 --
--- TOC entry 2202 (class 2606 OID 149056)
--- Dependencies: 183 2102 170 2281
+-- TOC entry 2189 (class 2606 OID 151046)
+-- Dependencies: 2088 181 169 2270
 -- Name: fk_dic_item; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4477,8 +4484,8 @@ ALTER TABLE ONLY employee_plan
 
 
 --
--- TOC entry 2192 (class 2606 OID 149061)
--- Dependencies: 2100 169 170 2281
+-- TOC entry 2179 (class 2606 OID 151051)
+-- Dependencies: 2086 169 168 2270
 -- Name: fk_dictionary; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4487,8 +4494,8 @@ ALTER TABLE ONLY dictionary_item
 
 
 --
--- TOC entry 2224 (class 2606 OID 149066)
--- Dependencies: 171 2110 198 2281
+-- TOC entry 2211 (class 2606 OID 151056)
+-- Dependencies: 195 2096 170 2270
 -- Name: fk_division; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4497,8 +4504,8 @@ ALTER TABLE ONLY manager
 
 
 --
--- TOC entry 2194 (class 2606 OID 149071)
--- Dependencies: 172 2110 171 2281
+-- TOC entry 2181 (class 2606 OID 151061)
+-- Dependencies: 170 171 2096 2270
 -- Name: fk_division; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4507,8 +4514,8 @@ ALTER TABLE ONLY division_project
 
 
 --
--- TOC entry 2187 (class 2606 OID 149076)
--- Dependencies: 171 167 2110 2281
+-- TOC entry 2174 (class 2606 OID 151066)
+-- Dependencies: 167 170 2096 2270
 -- Name: fk_emp_division; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4517,8 +4524,8 @@ ALTER TABLE ONLY employee
 
 
 --
--- TOC entry 2188 (class 2606 OID 149081)
--- Dependencies: 208 167 2161 2281
+-- TOC entry 2175 (class 2606 OID 151071)
+-- Dependencies: 205 2148 167 2270
 -- Name: fk_emp_job; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4527,8 +4534,8 @@ ALTER TABLE ONLY employee
 
 
 --
--- TOC entry 2189 (class 2606 OID 149086)
--- Dependencies: 167 167 2093 2281
+-- TOC entry 2176 (class 2606 OID 151076)
+-- Dependencies: 167 167 2079 2270
 -- Name: fk_emp_manager; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4537,8 +4544,8 @@ ALTER TABLE ONLY employee
 
 
 --
--- TOC entry 2190 (class 2606 OID 149091)
--- Dependencies: 167 211 2169 2281
+-- TOC entry 2177 (class 2606 OID 151081)
+-- Dependencies: 2156 167 208 2270
 -- Name: fk_emp_region; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4547,8 +4554,8 @@ ALTER TABLE ONLY employee
 
 
 --
--- TOC entry 2210 (class 2606 OID 149101)
--- Dependencies: 188 167 2093 2281
+-- TOC entry 2197 (class 2606 OID 151086)
+-- Dependencies: 167 2079 186 2270
 -- Name: fk_employee; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4557,8 +4564,8 @@ ALTER TABLE ONLY time_sheet
 
 
 --
--- TOC entry 2198 (class 2606 OID 149106)
--- Dependencies: 2093 167 181 2281
+-- TOC entry 2185 (class 2606 OID 151091)
+-- Dependencies: 167 179 2079 2270
 -- Name: fk_employee; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4567,8 +4574,8 @@ ALTER TABLE ONLY employee_involved
 
 
 --
--- TOC entry 2225 (class 2606 OID 149111)
--- Dependencies: 2093 167 198 2281
+-- TOC entry 2212 (class 2606 OID 151096)
+-- Dependencies: 195 167 2079 2270
 -- Name: fk_employee; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4577,8 +4584,8 @@ ALTER TABLE ONLY manager
 
 
 --
--- TOC entry 2222 (class 2606 OID 149116)
--- Dependencies: 196 167 2093 2281
+-- TOC entry 2209 (class 2606 OID 151101)
+-- Dependencies: 2079 167 193 2270
 -- Name: fk_employee; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4587,8 +4594,8 @@ ALTER TABLE ONLY illness
 
 
 --
--- TOC entry 2185 (class 2606 OID 149121)
--- Dependencies: 2093 164 167 2281
+-- TOC entry 2172 (class 2606 OID 151106)
+-- Dependencies: 2079 167 164 2270
 -- Name: fk_employee; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4597,8 +4604,8 @@ ALTER TABLE ONLY business_trip
 
 
 --
--- TOC entry 2241 (class 2606 OID 149126)
--- Dependencies: 167 215 2093 2281
+-- TOC entry 2230 (class 2606 OID 151111)
+-- Dependencies: 212 167 2079 2270
 -- Name: fk_employee; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4607,8 +4614,8 @@ ALTER TABLE ONLY vacation
 
 
 --
--- TOC entry 2200 (class 2606 OID 149131)
--- Dependencies: 167 182 2093 2281
+-- TOC entry 2187 (class 2606 OID 151116)
+-- Dependencies: 2079 167 180 2270
 -- Name: fk_employee; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4617,8 +4624,8 @@ ALTER TABLE ONLY employee_permissions
 
 
 --
--- TOC entry 2193 (class 2606 OID 149136)
--- Dependencies: 171 2093 167 2281
+-- TOC entry 2180 (class 2606 OID 151121)
+-- Dependencies: 170 167 2079 2270
 -- Name: fk_employee; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4627,8 +4634,8 @@ ALTER TABLE ONLY division
 
 
 --
--- TOC entry 2206 (class 2606 OID 149141)
--- Dependencies: 167 2093 185 2281
+-- TOC entry 2193 (class 2606 OID 151126)
+-- Dependencies: 167 2079 183 2270
 -- Name: fk_employee; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4637,8 +4644,8 @@ ALTER TABLE ONLY employee_project_plan
 
 
 --
--- TOC entry 2203 (class 2606 OID 149146)
--- Dependencies: 2093 183 167 2281
+-- TOC entry 2190 (class 2606 OID 151131)
+-- Dependencies: 2079 181 167 2270
 -- Name: fk_employee; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4647,8 +4654,8 @@ ALTER TABLE ONLY employee_plan
 
 
 --
--- TOC entry 2208 (class 2606 OID 149151)
--- Dependencies: 2093 186 167 2281
+-- TOC entry 2195 (class 2606 OID 151136)
+-- Dependencies: 2079 167 184 2270
 -- Name: fk_employee; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4657,8 +4664,8 @@ ALTER TABLE ONLY employee_token
 
 
 --
--- TOC entry 2197 (class 2606 OID 149156)
--- Dependencies: 167 2093 179 2281
+-- TOC entry 2184 (class 2606 OID 151141)
+-- Dependencies: 2079 167 178 2270
 -- Name: fk_employee; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4667,8 +4674,8 @@ ALTER TABLE ONLY employee_assistant
 
 
 --
--- TOC entry 2204 (class 2606 OID 149161)
--- Dependencies: 184 2093 167 2281
+-- TOC entry 2191 (class 2606 OID 151146)
+-- Dependencies: 2079 182 167 2270
 -- Name: fk_employee; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4677,8 +4684,8 @@ ALTER TABLE ONLY employee_project_billable
 
 
 --
--- TOC entry 2232 (class 2606 OID 149352)
--- Dependencies: 2093 207 167 2281
+-- TOC entry 2221 (class 2606 OID 151151)
+-- Dependencies: 2079 204 167 2270
 -- Name: fk_employee; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4687,8 +4694,8 @@ ALTER TABLE ONLY project_managers
 
 
 --
--- TOC entry 2223 (class 2606 OID 149166)
--- Dependencies: 170 196 2102 2281
+-- TOC entry 2210 (class 2606 OID 151156)
+-- Dependencies: 193 2088 169 2270
 -- Name: fk_illness_reason; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4697,8 +4704,8 @@ ALTER TABLE ONLY illness
 
 
 --
--- TOC entry 2244 (class 2606 OID 149171)
--- Dependencies: 217 2093 167 2281
+-- TOC entry 2233 (class 2606 OID 151161)
+-- Dependencies: 2079 167 214 2270
 -- Name: fk_manager; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4707,8 +4714,8 @@ ALTER TABLE ONLY vacation_approval
 
 
 --
--- TOC entry 2191 (class 2606 OID 149176)
--- Dependencies: 167 167 2093 2281
+-- TOC entry 2178 (class 2606 OID 151166)
+-- Dependencies: 167 2079 167 2270
 -- Name: fk_manager2; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4717,8 +4724,8 @@ ALTER TABLE ONLY employee
 
 
 --
--- TOC entry 2228 (class 2606 OID 149181)
--- Dependencies: 200 2102 170 2281
+-- TOC entry 2215 (class 2606 OID 151171)
+-- Dependencies: 197 169 2088 2270
 -- Name: fk_overtime_cause; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4727,8 +4734,8 @@ ALTER TABLE ONLY overtime_cause
 
 
 --
--- TOC entry 2201 (class 2606 OID 149186)
--- Dependencies: 2149 201 182 2281
+-- TOC entry 2188 (class 2606 OID 151176)
+-- Dependencies: 180 198 2135 2270
 -- Name: fk_permission; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4737,8 +4744,8 @@ ALTER TABLE ONLY employee_permissions
 
 
 --
--- TOC entry 2235 (class 2606 OID 149191)
--- Dependencies: 2149 209 201 2281
+-- TOC entry 2224 (class 2606 OID 151181)
+-- Dependencies: 206 198 2135 2270
 -- Name: fk_permission; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4747,8 +4754,8 @@ ALTER TABLE ONLY project_role_permissions
 
 
 --
--- TOC entry 2237 (class 2606 OID 149196)
--- Dependencies: 210 206 2153 2281
+-- TOC entry 2226 (class 2606 OID 151186)
+-- Dependencies: 207 203 2140 2270
 -- Name: fk_project; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4757,8 +4764,8 @@ ALTER TABLE ONLY project_task
 
 
 --
--- TOC entry 2199 (class 2606 OID 149201)
--- Dependencies: 206 181 2153 2281
+-- TOC entry 2186 (class 2606 OID 151191)
+-- Dependencies: 179 203 2140 2270
 -- Name: fk_project; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4767,8 +4774,8 @@ ALTER TABLE ONLY employee_involved
 
 
 --
--- TOC entry 2195 (class 2606 OID 149206)
--- Dependencies: 206 172 2153 2281
+-- TOC entry 2182 (class 2606 OID 151196)
+-- Dependencies: 171 203 2140 2270
 -- Name: fk_project; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4777,8 +4784,8 @@ ALTER TABLE ONLY division_project
 
 
 --
--- TOC entry 2186 (class 2606 OID 149216)
--- Dependencies: 206 164 2153 2281
+-- TOC entry 2173 (class 2606 OID 151201)
+-- Dependencies: 164 2140 203 2270
 -- Name: fk_project; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4787,8 +4794,8 @@ ALTER TABLE ONLY business_trip
 
 
 --
--- TOC entry 2207 (class 2606 OID 149221)
--- Dependencies: 206 185 2153 2281
+-- TOC entry 2194 (class 2606 OID 151206)
+-- Dependencies: 183 2140 203 2270
 -- Name: fk_project; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4797,8 +4804,8 @@ ALTER TABLE ONLY employee_project_plan
 
 
 --
--- TOC entry 2205 (class 2606 OID 149226)
--- Dependencies: 206 184 2153 2281
+-- TOC entry 2192 (class 2606 OID 151211)
+-- Dependencies: 2140 203 182 2270
 -- Name: fk_project; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4807,8 +4814,8 @@ ALTER TABLE ONLY employee_project_billable
 
 
 --
--- TOC entry 2233 (class 2606 OID 149357)
--- Dependencies: 2153 206 207 2281
+-- TOC entry 2222 (class 2606 OID 151216)
+-- Dependencies: 2140 204 203 2270
 -- Name: fk_project; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4817,8 +4824,28 @@ ALTER TABLE ONLY project_managers
 
 
 --
--- TOC entry 2230 (class 2606 OID 149231)
--- Dependencies: 2093 167 206 2281
+-- TOC entry 2219 (class 2606 OID 151341)
+-- Dependencies: 170 2096 203 2270
+-- Name: fk_project_division; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY project
+    ADD CONSTRAINT fk_project_division FOREIGN KEY (division) REFERENCES division(id);
+
+
+--
+-- TOC entry 2220 (class 2606 OID 151347)
+-- Dependencies: 169 2088 203 2270
+-- Name: fk_project_funding_type; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY project
+    ADD CONSTRAINT fk_project_funding_type FOREIGN KEY (funding_type) REFERENCES dictionary_item(id);
+
+
+--
+-- TOC entry 2217 (class 2606 OID 151221)
+-- Dependencies: 203 2079 167 2270
 -- Name: fk_project_manager; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4827,8 +4854,8 @@ ALTER TABLE ONLY project
 
 
 --
--- TOC entry 2246 (class 2606 OID 149236)
--- Dependencies: 2157 218 207 2281
+-- TOC entry 2235 (class 2606 OID 151226)
+-- Dependencies: 215 2144 204 2270
 -- Name: fk_project_participant; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4837,8 +4864,8 @@ ALTER TABLE ONLY vacation_approval_result
 
 
 --
--- TOC entry 2183 (class 2606 OID 149241)
--- Dependencies: 2161 162 208 2281
+-- TOC entry 2170 (class 2606 OID 151231)
+-- Dependencies: 205 2148 162 2270
 -- Name: fk_project_role; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4847,8 +4874,8 @@ ALTER TABLE ONLY available_activity_category
 
 
 --
--- TOC entry 2236 (class 2606 OID 149251)
--- Dependencies: 2161 209 208 2281
+-- TOC entry 2225 (class 2606 OID 151236)
+-- Dependencies: 205 2148 206 2270
 -- Name: fk_project_role; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4857,8 +4884,8 @@ ALTER TABLE ONLY project_role_permissions
 
 
 --
--- TOC entry 2234 (class 2606 OID 149362)
--- Dependencies: 207 208 2161 2281
+-- TOC entry 2223 (class 2606 OID 151241)
+-- Dependencies: 2148 204 205 2270
 -- Name: fk_project_role; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4867,8 +4894,8 @@ ALTER TABLE ONLY project_managers
 
 
 --
--- TOC entry 2231 (class 2606 OID 149256)
--- Dependencies: 170 2102 206 2281
+-- TOC entry 2218 (class 2606 OID 151246)
+-- Dependencies: 203 169 2088 2270
 -- Name: fk_project_state; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4877,8 +4904,8 @@ ALTER TABLE ONLY project
 
 
 --
--- TOC entry 2226 (class 2606 OID 149261)
--- Dependencies: 198 211 2169 2281
+-- TOC entry 2213 (class 2606 OID 151251)
+-- Dependencies: 195 208 2156 2270
 -- Name: fk_region; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4887,8 +4914,8 @@ ALTER TABLE ONLY manager
 
 
 --
--- TOC entry 2221 (class 2606 OID 149266)
--- Dependencies: 211 2169 194 2281
+-- TOC entry 2208 (class 2606 OID 151256)
+-- Dependencies: 2156 208 191 2270
 -- Name: fk_region; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4897,8 +4924,8 @@ ALTER TABLE ONLY holiday
 
 
 --
--- TOC entry 2238 (class 2606 OID 149271)
--- Dependencies: 213 2110 171 2281
+-- TOC entry 2227 (class 2606 OID 151261)
+-- Dependencies: 210 2096 170 2270
 -- Name: fk_rep_division; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4907,8 +4934,8 @@ ALTER TABLE ONLY reportcheck
 
 
 --
--- TOC entry 2239 (class 2606 OID 149276)
--- Dependencies: 213 167 2093 2281
+-- TOC entry 2228 (class 2606 OID 151266)
+-- Dependencies: 210 167 2079 2270
 -- Name: fk_rep_employee; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4917,8 +4944,8 @@ ALTER TABLE ONLY reportcheck
 
 
 --
--- TOC entry 2213 (class 2606 OID 149281)
--- Dependencies: 188 190 2134 2281
+-- TOC entry 2200 (class 2606 OID 151271)
+-- Dependencies: 186 2120 188 2270
 -- Name: fk_time_sheet; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4927,8 +4954,8 @@ ALTER TABLE ONLY time_sheet_detail
 
 
 --
--- TOC entry 2214 (class 2606 OID 149286)
--- Dependencies: 170 190 2102 2281
+-- TOC entry 2201 (class 2606 OID 151276)
+-- Dependencies: 2088 169 188 2270
 -- Name: fk_time_sheet_cat; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4937,8 +4964,8 @@ ALTER TABLE ONLY time_sheet_detail
 
 
 --
--- TOC entry 2211 (class 2606 OID 149291)
--- Dependencies: 170 188 2102 2281
+-- TOC entry 2198 (class 2606 OID 151281)
+-- Dependencies: 2088 186 169 2270
 -- Name: fk_time_sheet_effort; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4947,8 +4974,8 @@ ALTER TABLE ONLY time_sheet
 
 
 --
--- TOC entry 2315 (class 0 OID 0)
--- Dependencies: 2211
+-- TOC entry 2306 (class 0 OID 0)
+-- Dependencies: 2198
 -- Name: CONSTRAINT fk_time_sheet_effort ON time_sheet; Type: COMMENT; Schema: public; Owner: postgres
 --
 
@@ -4956,8 +4983,8 @@ COMMENT ON CONSTRAINT fk_time_sheet_effort ON time_sheet IS 'Ссылка на �
 
 
 --
--- TOC entry 2215 (class 2606 OID 149296)
--- Dependencies: 206 190 2153 2281
+-- TOC entry 2202 (class 2606 OID 151286)
+-- Dependencies: 2140 203 188 2270
 -- Name: fk_time_sheet_project; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4966,8 +4993,8 @@ ALTER TABLE ONLY time_sheet_detail
 
 
 --
--- TOC entry 2216 (class 2606 OID 149301)
--- Dependencies: 208 190 2161 2281
+-- TOC entry 2203 (class 2606 OID 151291)
+-- Dependencies: 205 2148 188 2270
 -- Name: fk_time_sheet_project_role; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4976,8 +5003,8 @@ ALTER TABLE ONLY time_sheet_detail
 
 
 --
--- TOC entry 2217 (class 2606 OID 149306)
--- Dependencies: 190 210 2167 2281
+-- TOC entry 2204 (class 2606 OID 151296)
+-- Dependencies: 188 2154 207 2270
 -- Name: fk_time_sheet_project_task; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4986,8 +5013,8 @@ ALTER TABLE ONLY time_sheet_detail
 
 
 --
--- TOC entry 2212 (class 2606 OID 149311)
--- Dependencies: 188 170 2102 2281
+-- TOC entry 2199 (class 2606 OID 151301)
+-- Dependencies: 186 2088 169 2270
 -- Name: fk_time_sheet_state; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4996,8 +5023,8 @@ ALTER TABLE ONLY time_sheet
 
 
 --
--- TOC entry 2218 (class 2606 OID 149316)
--- Dependencies: 2102 190 170 2281
+-- TOC entry 2205 (class 2606 OID 151306)
+-- Dependencies: 188 2088 169 2270
 -- Name: fk_time_sheet_type; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5006,8 +5033,8 @@ ALTER TABLE ONLY time_sheet_detail
 
 
 --
--- TOC entry 2219 (class 2606 OID 149321)
--- Dependencies: 170 190 2102 2281
+-- TOC entry 2206 (class 2606 OID 151311)
+-- Dependencies: 188 2088 169 2270
 -- Name: fk_time_sheet_workplace; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5016,8 +5043,8 @@ ALTER TABLE ONLY time_sheet_detail
 
 
 --
--- TOC entry 2229 (class 2606 OID 149326)
--- Dependencies: 188 200 2134 2281
+-- TOC entry 2216 (class 2606 OID 151316)
+-- Dependencies: 197 2120 186 2270
 -- Name: fk_timesheet_in_overtime; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5026,8 +5053,8 @@ ALTER TABLE ONLY overtime_cause
 
 
 --
--- TOC entry 2245 (class 2606 OID 149331)
--- Dependencies: 2175 217 215 2281
+-- TOC entry 2234 (class 2606 OID 151321)
+-- Dependencies: 212 214 2162 2270
 -- Name: fk_vacation; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5036,8 +5063,8 @@ ALTER TABLE ONLY vacation_approval
 
 
 --
--- TOC entry 2247 (class 2606 OID 149336)
--- Dependencies: 2177 218 217 2281
+-- TOC entry 2236 (class 2606 OID 151326)
+-- Dependencies: 215 2164 214 2270
 -- Name: fk_vacation_approval; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5046,8 +5073,8 @@ ALTER TABLE ONLY vacation_approval_result
 
 
 --
--- TOC entry 2242 (class 2606 OID 149341)
--- Dependencies: 2102 170 215 2281
+-- TOC entry 2231 (class 2606 OID 151331)
+-- Dependencies: 2088 212 169 2270
 -- Name: fk_vacation_status; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5056,8 +5083,8 @@ ALTER TABLE ONLY vacation
 
 
 --
--- TOC entry 2243 (class 2606 OID 149346)
--- Dependencies: 2102 170 215 2281
+-- TOC entry 2232 (class 2606 OID 151336)
+-- Dependencies: 169 2088 212 2270
 -- Name: fk_vacation_type; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5066,7 +5093,7 @@ ALTER TABLE ONLY vacation
 
 
 --
--- TOC entry 2286 (class 0 OID 0)
+-- TOC entry 2275 (class 0 OID 0)
 -- Dependencies: 6
 -- Name: public; Type: ACL; Schema: -; Owner: postgres
 --
@@ -5077,7 +5104,7 @@ GRANT ALL ON SCHEMA public TO postgres;
 GRANT ALL ON SCHEMA public TO PUBLIC;
 
 
--- Completed on 2013-08-23 17:14:48
+-- Completed on 2013-09-13 16:53:57
 
 --
 -- PostgreSQL database dump complete
