@@ -1643,3 +1643,10 @@ function getJiraInfo(rowIndex) {
         });
     }
 }
+
+function clearErrorBox(divId) {
+    var target = dojo.byId(divId);
+    if (target != null) {
+        dojo.destroy(divId);
+    }
+}

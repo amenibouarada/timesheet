@@ -28,7 +28,7 @@
         <form:form commandName="reportForm" method="post" action="${formUrl}">
 
             <c:if test="${fn:length(errors) > 0}">
-                <div class="errors_box">
+                <div id="errorBoxId" class="errors_box">
                     <c:forEach items="${errors}" var="error">
                         <fmt:message key="${error.code}">
                             <fmt:param value="${error.arguments[0]}"/>
@@ -107,7 +107,7 @@
                 </div>
             </div>
 
-            <button id="make_report_button" style="width:210px" type="submit"><fmt:message key="label.report.form"/></button>
+            <button id="make_report_button" style="width:210px" type="submit" onclick="clearErrorBox('errorBoxId')"><fmt:message key="label.report.form"/></button>
         </form:form>
 </body>
 
