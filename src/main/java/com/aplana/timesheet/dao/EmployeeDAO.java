@@ -113,7 +113,7 @@ public class EmployeeDAO {
 		Query query;
 		if (division == null) {
 			query = entityManager.createQuery(
-                    "from Employee as e where e.notToSync=:notToSync"
+                    "from Employee as e where e.notToSync=:notToSync and e.division.active = true"
             );
 		} else {
 			query = entityManager.createQuery(
@@ -350,6 +350,7 @@ public class EmployeeDAO {
         return query.getResultList();
     }
 
+    /* возвращает список  */
     public List<Employee> getAllEmployees() {
         final Query query = entityManager.createQuery("from Employee e order by e.name");
 
