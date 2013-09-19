@@ -24,6 +24,15 @@
             vacationCreate_divisionChange(dojo.byId("divisionId"));
             dojo.byId("employeeId").value = ${employeeId};
             initCurrentDateInfo(${employeeId},dijit.byId('calFromDate').value,getUrl());
+
+            require(["dojo/on"], function(on){
+                on.once(dojo.byId("createVacationId"), "click", function(){
+                    createVacation(false);
+                });
+                on.once(dojo.byId("createApprovedVacationId"), "click", function(){
+                    createVacation(true);
+                });
+            });
         });
 
         dojo.require("dijit.form.DateTextBox");
@@ -359,9 +368,10 @@
         </tr>
     </table>
 
-    <button type="button" onclick="createVacation(false)">Создать</button>
+    <%--событие обрабатывается в скрипте по Id, чтобы исключить много нажатий--%>
+    <button id="createVacationId" type="button">Создать</button>
     <sec:authorize access="hasRole('ROLE_ADMIN')">
-        <button type="button" onclick="createVacation(true)">Добавить утвержденное заявление на отпуск</button>
+        <button id="createApprovedVacationId" type="button">Добавить утвержденное заявление на отпуск</button>
     </sec:authorize>
     <button type="button" onclick="cancel()">Отмена</button>
 </form:form>
