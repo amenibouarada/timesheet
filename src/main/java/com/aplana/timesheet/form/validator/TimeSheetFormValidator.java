@@ -593,21 +593,23 @@ public class TimeSheetFormValidator extends AbstractValidator {
 
     /* Проверка на правильность переработки недоработки или работы в выходной */
     private void validateCause(TimeSheetForm tsForm, Employee employee, Errors errors) {
+        /* РЦК может всё (трудяга!) */
+        if ( !employeeService.isEmployeeDivisionLeader(employee.getId()) ) {
         /* проверим работу в выходные/праздничные дни */
-        if ( calendarService.isHoliday(DateTimeUtil.stringToDateForDB(tsForm.getCalDate()),employee)
-                || vacationService.isDayVacationWithoutPlanned(employee,DateTimeUtil.stringToDateForDB(tsForm.getCalDate())) )
-        {
-            checkCause(tsForm, "работы в праздничный/выходной день", DictionaryEnum.WORK_ON_HOLIDAY_CAUSE, errors);
-            checkTypeOfCompensation(tsForm, errors);
-        } else {
+            if ( calendarService.isHoliday(DateTimeUtil.stringToDateForDB(tsForm.getCalDate()),employee)
+                    || vacationService.isDayVacationWithoutPlanned(employee,DateTimeUtil.stringToDateForDB(tsForm.getCalDate())) )
+            {
+                checkCause(tsForm, "работы в праздничный/выходной день", DictionaryEnum.WORK_ON_HOLIDAY_CAUSE, errors);
+                checkTypeOfCompensation(tsForm, errors);
+            } else {
             /* проверяем есть ли переработка */
-            if ( overtimeCauseService.isOvertimeDuration(tsForm) ) {
-                checkCause(tsForm, "переработки", DictionaryEnum.OVERTIME_CAUSE, errors);
-            }else{
+                if ( overtimeCauseService.isOvertimeDuration(tsForm) ) {
+                    checkCause(tsForm, "переработки", DictionaryEnum.OVERTIME_CAUSE, errors);
+                }else{
                 /* проверим есть ли недоработка (для начальника подразделения недоработка не учитывается) */
-                if ( overtimeCauseService.isUndertimeDuration(tsForm)
-                        && !employeeService.isEmployeeDivisionLeader(employee.getId()) ) {
-                    checkCause(tsForm, "недоработки", DictionaryEnum.UNDERTIME_CAUSE, errors);
+                    if ( overtimeCauseService.isUndertimeDuration(tsForm) ) {
+                        checkCause(tsForm, "недоработки", DictionaryEnum.UNDERTIME_CAUSE, errors);
+                    }
                 }
             }
         }
