@@ -62,19 +62,6 @@ public class VacationDAO {
         return query.getResultList();
     }
 
-    /* возвращает отпуск у сотрудника с заданой начальной даты */
-    public Vacation findVacation(Integer employeeId, Date beginDate, DictionaryItem typeId){
-        final Query query = typeId != null ?
-                entityManager.createQuery("from Vacation v where v.employee.id = :emp_id and v.beginDate = :begDate " +
-                        "and v.type = :typeId order by v.beginDate")
-                        .setParameter("emp_id", employeeId).setParameter("begDate", beginDate)
-                        .setParameter("typeId", typeId) :
-                entityManager.createQuery("from Vacation v where v.employee.id = :emp_id and v.beginDate = :begDate " +
-                        "order by v.beginDate")
-                        .setParameter("emp_id", employeeId).setParameter("begDate", beginDate);
-        return (Vacation) query.getSingleResult();
-    }
-
     public List<Vacation> findVacations(Integer year, Integer month, Integer employeeId) {
         final Query query =
                 entityManager.createQuery("from Vacation v " +
