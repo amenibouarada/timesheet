@@ -110,6 +110,8 @@
         function save() {
             if (validate()) {
                 dojo.byId("<%= CreatePlanForPeriodContoller.FORM %>").submit();
+            } else {
+                dojo.byId("save_button").disabled = false;
             }
         }
 
@@ -208,7 +210,7 @@
 
     <br />
 
-    <button style="width: 150px;" type="button" onclick="save()">Сохранить</button>
+    <button id="save_button" style="width: 150px;" type="button" onclick="this.disabled=true;save()" >Сохранить</button>
     <button style="width: 150px;" type="button" onclick="cancel()">Отмена</button>
 </form:form>
 

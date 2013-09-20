@@ -59,6 +59,12 @@
         dojo.ready(function () {
             window.focus();
             updateView();
+
+            require(["dojo/on"], function(on){
+                on.once(dojo.byId("create"), "click", function(){
+                    submitform();
+                });
+            });
         });
 
         function updateView(){
@@ -369,7 +375,7 @@
         <div style="clear:both"/>
 
         <div class="bigspace onblock">
-            <button id="create" type="button" class="button bigspace" onclick="submitform()">Сохранить</button>
+            <button id="create" type="button" class="button bigspace">Сохранить</button> <%--обработка в скрипте dojo.on--%>
             <button id="cancel" type="button" class="button bigspace" onclick="cancelform()">Отмена</button>
         </div>
 

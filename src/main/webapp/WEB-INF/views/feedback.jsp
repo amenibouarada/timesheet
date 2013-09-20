@@ -54,6 +54,7 @@
 
 			if (checkFileSize()) {
 				alert("Суммарный размер вложений превышает 8 Mb");
+                enableInput("send_button");
 				return;
 			}
             if (description != null && description.value != "") {
@@ -61,6 +62,7 @@
                 feedbackForm.submit();
             } else {
                 alert("Поле 'Текст сообщения' не определено.");
+                enableInput("send_button");
             }
         }
 
@@ -201,7 +203,7 @@
 
     <div id="marg_buttons" style="margin-top:10px; margin-bottom:10px ">
         <button id="send_button" name="send_button" style="width:150px" type="button"
-                onclick="submitform()">Отправить
+                onclick="disableInput(this.id);submitform()">Отправить
         </button>
 
         <button id="clear_button" name="clear_button" style="width:150px" type="button"
