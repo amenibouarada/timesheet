@@ -1326,8 +1326,18 @@ function checkDurationThenSendForm(){
                 }
             }
         });
-
-        var check = (((totalDuration < (8 - undertimeThreshold)) && !isDivisionLeader) || totalDuration > (8 + overtimeThreshold) ) || isHoliday || isVacation;
+              /* не РЦК */
+        var check = !isDivisionLeader &&
+                /*недоработка */
+            ( ( totalDuration < (8 - undertimeThreshold) ||
+                /* переработка */
+                totalDuration > (8 + overtimeThreshold)
+              ) ||
+              /* выходной и не РЦК */
+              isHoliday ||
+              /* работа в отпуск */
+              isVacation
+            );
         if (check) {
             var comment = dijit.byId("overtimeCauseComment");
 
@@ -1631,5 +1641,12 @@ function getJiraInfo(rowIndex) {
                 standbyElementJira.hide();
             }
         });
+    }
+}
+
+function clearErrorBox(divId) {
+    var target = dojo.byId(divId);
+    if (target != null) {
+        dojo.destroy(divId);
     }
 }

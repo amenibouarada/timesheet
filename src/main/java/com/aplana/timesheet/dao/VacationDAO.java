@@ -51,19 +51,6 @@ public class VacationDAO {
         return query.getResultList();
     }
 
-    /* возвращает отпуск у сотрудника с заданой начальной даты */
-    public Vacation findVacation(Integer employeeId, Date beginDate, DictionaryItem typeId){
-        final Query query = typeId != null ?
-                entityManager.createQuery("from Vacation v where v.employee.id = :emp_id and v.beginDate = :begDate " +
-                        "and v.type = :typeId order by v.beginDate")
-                        .setParameter("emp_id", employeeId).setParameter("begDate", beginDate)
-                        .setParameter("typeId", typeId) :
-                entityManager.createQuery("from Vacation v where v.employee.id = :emp_id and v.beginDate = :begDate " +
-                        "order by v.beginDate")
-                        .setParameter("emp_id", employeeId).setParameter("begDate", beginDate);
-        return (Vacation) query.getSingleResult();
-    }
-
     public List<Vacation> findVacationsByTypes(Integer year, Integer month, Integer employeeId,  List<DictionaryItem> types) {
         final Query query =
                 entityManager.createQuery("from Vacation v " +
@@ -119,8 +106,8 @@ public class VacationDAO {
     public Long getIntersectVacationsCount(Integer employeeId, Date fromDate, Date toDate, DictionaryItem typeVacation) {
         final Query query = entityManager.createQuery(
                 "select count(*) as c " +
-                "from Vacation v, DictionaryItem di " +
-                "where di.id = :status_id and ((:from_date between v.beginDate and v.endDate) or (:to_date between v.beginDate and v.endDate) or (v.beginDate between :from_date and :to_date))" +
+                        "from Vacation v, DictionaryItem di " +
+                        "where di.id = :status_id and ((:from_date between v.beginDate and v.endDate) or (:to_date between v.beginDate and v.endDate) or (v.beginDate between :from_date and :to_date))" +
                         " and not v.status = di and v.employee.id = :emp_id and v.type <> :type"
         ).setParameter("from_date", fromDate).setParameter("to_date", toDate).
                 setParameter("status_id", VacationStatusEnum.REJECTED.getId()).setParameter("emp_id", employeeId).setParameter("type",typeVacation);;
@@ -211,15 +198,15 @@ public class VacationDAO {
         }
 
         final Query query = entityManager.createNativeQuery(
-            String.format(
-                    textQuery,
-                String.format("%d-%d-1", year, month)
-            )
+                String.format(
+                        textQuery,
+                        String.format("%d-%d-1", year, month)
+                )
         ).setParameter("employee_id", employee.getId()).setParameter("status_id", status.getId()).
                 setParameter("region", employee.getRegion().getId());
 
         if (typeVacation != null) {
-           query.setParameter("type_id", typeVacation.getId());
+            query.setParameter("type_id", typeVacation.getId());
         }
 
         if (typeVacation == null && withoutPlannedAndNextWork) {

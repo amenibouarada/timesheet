@@ -113,7 +113,7 @@ public class EmployeeDAO {
 		Query query;
 		if (division == null) {
 			query = entityManager.createQuery(
-                    "from Employee as e where e.notToSync=:notToSync"
+                    "from Employee as e where e.notToSync=:notToSync and e.division.active = true"
             );
 		} else {
 			query = entityManager.createQuery(
@@ -154,21 +154,6 @@ public class EmployeeDAO {
 
         return query.getResultList();
     }
-
-    /**
-     * Возвращает список всех работников у которых начало запланированного отпуска находится в <b>begin</b>
-     * @param begin
-     * @return List<Employee>
-     */
-    public List<Employee> getEmployeeWithPlannedVacation (Date begin) {
-        Query query = this.entityManager.createQuery(
-                "select emp from Employee as emp where emp.id in " +
-                        "(select v.employee.id from Vacation as v where v.beginDate = :begin)"
-        ).setParameter("begin", begin);
-
-        return query.getResultList();
-    }
-
     /**
      * Возвращает список менеджеров для конкретного работника
      * @param employeeId
@@ -350,6 +335,7 @@ public class EmployeeDAO {
         return query.getResultList();
     }
 
+    /* возвращает список  */
     public List<Employee> getAllEmployees() {
         final Query query = entityManager.createQuery("from Employee e order by e.name");
 

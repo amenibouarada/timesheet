@@ -61,7 +61,7 @@ public class PlannedVacationInfoSender extends AbstractSenderWithAssistants<Map 
             Mail mail = new TimeSheetMail();
             ArrayList<String> toEmails = Lists.newArrayList(entry.getKey().getEmail());
             mail.setToEmails(toEmails);
-            mail.setSubject("Информация по планируемым отпускам сотрудников через две недели.");
+            mail.setSubject("Информация по планируемым отпускам сотрудников в ближайшие две недели.");
             mail.setParamsForGenerateBody(getBody(entry.getValue()));
             mail.setCcEmails(Arrays.asList(getAssistantEmail(getManagersEmails(mail, entry.getKey()))));
             mails.add(mail);

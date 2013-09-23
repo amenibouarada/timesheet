@@ -48,14 +48,18 @@ public class LdapDAO {
     }
 
     public EmployeeLdap getEmployeeByLdapName(String name) {
-        try {
-            EqualsFilter filter = new EqualsFilter("distinguishedName", name.replaceAll("/", ","));
-            logger.debug("LDAP Query {}", filter.encode());
-            EmployeeLdap first = (EmployeeLdap) Iterables.getFirst(ldapTemplate.search("", filter.encode(), new EmployeeAttributeMapper()), null);
-            logger.debug("LDAP Query finished. result = {}", first);
-            return first;
-        } catch (NameNotFoundException e) {
-            logger.debug("Not found: " + name);
+        if (name != null && !name.isEmpty()) {
+            try {
+                EqualsFilter filter = new EqualsFilter("distinguishedName", name.replaceAll("/", ","));
+                logger.debug("LDAP Query {}", filter.encode());
+                EmployeeLdap first = (EmployeeLdap) Iterables.getFirst(ldapTemplate.search("", filter.encode(), new EmployeeAttributeMapper()), null);
+                logger.debug("LDAP Query finished. result = {}", first);
+                return first;
+            } catch (NameNotFoundException e) {
+                logger.debug("Not found: " + name);
+                return null;
+            }
+        } else {
             return null;
         }
     }
@@ -87,14 +91,18 @@ public class LdapDAO {
     }
 
     public List<EmployeeLdap> getEmployeesByDepartmentNameFromDb(String department) {
-        logger.debug("DeparmentName – {}", department);
-        String[] split = department.split(",");
-        List<EmployeeLdap> result = new ArrayList<EmployeeLdap>();
+        if (department != null && !department.isEmpty()){
+            logger.debug("DeparmentName – {}", department);
+            String[] split = department.split(",");
+            List<EmployeeLdap> result = new ArrayList<EmployeeLdap>();
 
-        for (String s : split) {
-            result.addAll(getEmployees(s));
+            for (String s : split) {
+                result.addAll(getEmployees(s));
+            }
+            return result;
+        } else {
+            return null;
         }
-        return result;
     }
 
 	@SuppressWarnings("unchecked")
