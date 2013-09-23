@@ -496,4 +496,8 @@ public class DateTimeUtil {
 
         return calendar;
     }
+
+    public static String getOnlyDate(Date date){
+        return new SimpleDateFormat(VIEW_DATE_PATTERN).format(date);
+    }
 }
