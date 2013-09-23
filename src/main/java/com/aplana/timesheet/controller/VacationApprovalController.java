@@ -47,7 +47,7 @@ public class VacationApprovalController {
     final String NOT_ACCEPTED_YET = "%s, просьба принять решение по \"%s\" сотрудника %s из г. %s на период с %s по %s. %s";
     final String ACCEPTANCE = "Запрос \"%s\" сотрудника %s из г. %s на период с %s по %s %s.";
     final String ACCEPTED = "согласован";
-    final String REFUSE = "не согласован";
+    final String REFUSED = "не согласован";
     final String DATE_FORMAT = "dd.MM.yyyy";
     final String BAD_REQUEST = "Неверный запрос!";
     final String LOGGER_MESSAGE = "\n    UserIP: %s\n";
@@ -192,7 +192,7 @@ public class VacationApprovalController {
         if (result) {
             return ACCEPTED;
         }
-        return REFUSE;
+        return REFUSED;
     }
 
 

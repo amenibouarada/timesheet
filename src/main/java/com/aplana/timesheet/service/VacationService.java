@@ -1,11 +1,9 @@
 package com.aplana.timesheet.service;
 
+import argo.jdom.JsonArrayNodeBuilder;
 import argo.jdom.JsonObjectNodeBuilder;
 import com.aplana.timesheet.dao.VacationDAO;
-import com.aplana.timesheet.dao.entity.DictionaryItem;
-import com.aplana.timesheet.dao.entity.Employee;
-import com.aplana.timesheet.dao.entity.Holiday;
-import com.aplana.timesheet.dao.entity.Vacation;
+import com.aplana.timesheet.dao.entity.*;
 import com.aplana.timesheet.enums.VacationStatusEnum;
 import com.aplana.timesheet.enums.VacationTypesEnum;
 import com.aplana.timesheet.exception.service.DeleteVacationException;
@@ -21,6 +19,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang.time.DateFormatUtils;
+import org.apache.commons.lang.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,9 +30,13 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Nullable;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.Calendar;
 
 import static argo.jdom.JsonNodeBuilders.aStringBuilder;
+import static argo.jdom.JsonNodeBuilders.anArrayBuilder;
 import static argo.jdom.JsonNodeBuilders.anObjectBuilder;
+import static com.aplana.timesheet.util.DateTimeUtil.VIEW_DATE_PATTERN;
+import static com.aplana.timesheet.util.DateTimeUtil.dateToString;
 
 /**
  * @author rshamsutdinov
@@ -65,6 +68,9 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
 
     @Autowired
     protected CalendarService calendarService;
+
+    @Autowired
+    private RegionService regionService;
 
     private static final Logger logger = LoggerFactory.getLogger(VacationService.class);
 
@@ -101,14 +107,6 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
                 toDate,
                 item
         );
-    }
-
-    public List<Vacation> findVacations(Integer employeeId, Integer year) {
-        return vacationDAO.findVacations(employeeId, year);
-    }
-
-    public List<Vacation> findVacations(Integer year, Integer month, Integer employeeId) {
-        return vacationDAO.findVacations(year,month,employeeId);
     }
 
     public List<Vacation> findVacations(Integer employeeId, Date beginDate, Date endDate, DictionaryItem typeId) {
@@ -364,4 +362,71 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
         }
         return Boolean.FALSE;
     }
+
+    public String getVacationListByRegionJSON(List<Vacation> vacationList ) {
+        List<Region> regionList = regionService.getRegions();
+        List<Employee> employeeList = new ArrayList<Employee>();
+        for (Vacation vacation : vacationList) {
+            Employee employee = vacation.getEmployee();
+            if ( ! (employeeList.contains(employee)) ){
+                employeeList.add(employee);
+            }
+        }
+        final JsonArrayNodeBuilder result = anArrayBuilder();
+        // для каждого проекта смотрим сотрудников у которых есть отпуск
+        for (Region region : regionList){
+            JsonArrayNodeBuilder employeeNode = anArrayBuilder();
+            boolean hasEmployees = false;
+            for (Employee employee : employeeList){
+                if (employee.getRegion().getId().equals(region.getId())){
+                    JsonArrayNodeBuilder vacationNode = createVacationsNode(employee, vacationList);
+                    hasEmployees = true;
+                    employeeNode.withElement(anObjectBuilder().
+                            withField("employee", aStringBuilder(employee.getName())).
+                            withField("vacations", vacationNode));
+                }
+            }
+            if (hasEmployees){
+                result.withElement(
+                        anObjectBuilder().
+                                withField("region_id", aStringBuilder(region.getId().toString())).
+                                withField("region_name", aStringBuilder(region.getName())).
+                                withField("employeeList", employeeNode)
+                );
+            }
+        }
+        return JsonUtil.format(result);
+    }
+
+    public JsonArrayNodeBuilder createVacationsNode(Employee employee, List<Vacation> vacationList){
+        JsonArrayNodeBuilder vacationNode = anArrayBuilder();
+        for (Vacation vacation : vacationList){
+            if (vacation.getEmployee().equals(employee)){
+                vacationNode.withElement(anObjectBuilder().
+                        withField("beginDate", aStringBuilder(dateToString(vacation.getBeginDate(), VIEW_DATE_PATTERN))).
+                        withField("endDate", aStringBuilder(dateToString(vacation.getEndDate(), VIEW_DATE_PATTERN))).
+                        withField("status", aStringBuilder(vacation.getStatus().getValue())).
+                        withField("type", aStringBuilder(vacation.getType().getId().toString())).
+                        withField("typeName", aStringBuilder(vacation.getType().getValue())));
+
+            }
+        }
+        return vacationNode;
+    }
+
+    public String getHolidayListJSON(Date beginDate, Date endDate){
+        final JsonArrayNodeBuilder result = anArrayBuilder();
+        // т.к. отпуска могут начинаться ранее или позднее заданных дат, то на всякий случай прибавим к диапазону
+        // по месяцу с обоих концов
+        List<Holiday> holidays = calendarService.getHolidaysForRegion(DateUtils.addDays(beginDate, -30),
+                DateUtils.addDays(endDate, 30),
+                null);
+        for (Holiday holiday : holidays){
+            result.withElement(aStringBuilder(
+                    dateToString(
+                            holiday.getCalDate().getCalDate(), VIEW_DATE_PATTERN)));
+        }
+        return JsonUtil.format(result);
+    }
+
 }

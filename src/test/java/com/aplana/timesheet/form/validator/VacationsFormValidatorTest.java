@@ -79,35 +79,41 @@ public class VacationsFormValidatorTest extends AbstractTest {
     }
 
     @Test
-    public void testToDate(){
+    public void testToDate1(){
         vacationsForm.setCalToDate("2010-10-10");
+
         vacationsFormValidator.validate(vacationsForm, errors);
         assertEquals(1, errors.getErrorCount());
-
-        setDefaultFormData();
+    }
+    @Test
+    public void testToDate2(){
         vacationsForm.setCalToDate("");
+
         vacationsFormValidator.validate(vacationsForm, errors);
         assertEquals(1, errors.getErrorCount());
     }
 
-
     @Test
-    public void testFromDate(){
+    public void testFromDate1(){
         vacationsForm.setCalFromDate("2010-10-10");
+
         vacationsFormValidator.validate(vacationsForm, errors);
         assertEquals(0, errors.getErrorCount());
-
-        setDefaultFormData();
+    }
+    @Test
+    public void testFromDate2(){
         when(calendarServiceMock.find((Timestamp) any())).thenReturn(null);
         vacationsForm.setVacationType(PLANNED.getId());
         vacationsFormValidator.validate(vacationsForm, errors);
         assertEquals(1, errors.getErrorCount());
-
-        setDefaultFormData();
+    }
+    @Test
+    public void testFromDate3(){
         vacationsForm.setCalFromDate("");
         vacationsFormValidator.validate(vacationsForm, errors);
         assertEquals(1, errors.getErrorCount());
     }
+
 
 }
 

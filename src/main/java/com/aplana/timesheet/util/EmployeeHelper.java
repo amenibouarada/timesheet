@@ -61,6 +61,7 @@ public class EmployeeHelper {
     }
 
     /* !!! медленная функция, ниже написаны ужатые функции */
+    // ToDo разобраться почему функция медленная
     @Transactional(readOnly = true)
     public String getEmployeeListWithLastWorkdayJson(List<Division> divisions, Boolean filterFired, Boolean addDetails) {
         final JsonArrayNodeBuilder builder = anArrayBuilder();
@@ -154,6 +155,7 @@ public class EmployeeHelper {
         return JsonUtil.format(builder.build());
     }
 
+    // ToDo удалить и внести в предыдущий метод, убрать копипасту
     @Transactional(readOnly = true)
     public String getEmployeeListWithDivisionAndRegionAndActiveFlagJson(List<Division> divisions, Date reportDate) {
         final JsonArrayNodeBuilder builder = anArrayBuilder();
@@ -204,6 +206,7 @@ public class EmployeeHelper {
         return Boolean.FALSE;
     }
 
+    // ToDo эту копипасту тоже убрать
     @Transactional(readOnly = true)
     public String getEmployeeListWithDivisionJson(List<Division> divisions, Boolean filterFired) {
         final JsonArrayNodeBuilder builder = anArrayBuilder();
@@ -248,6 +251,7 @@ public class EmployeeHelper {
     }
 
     /* возвращает список всех активных сотрудников с минимальными данными */
+    // ToDo убрать неиспользуемый метод
     public String getEmployeesJson() {
         List<Employee> employees = employeeService.getEmployees();
         if (employees!= null && !employees.isEmpty()) {

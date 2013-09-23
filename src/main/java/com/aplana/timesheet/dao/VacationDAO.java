@@ -38,17 +38,6 @@ public class VacationDAO {
 
     private static final Logger logger = LoggerFactory.getLogger(VacationDAO.class);
 
-    /**
-     * Список заявлений на отпуск для конкретного сотрудника
-     */
-    public List<Vacation> findVacations(Integer employeeId, Integer year) {
-        final Query query =
-                entityManager.createQuery("from Vacation v where v.employee.id = :emp_id and (YEAR(v.beginDate) = :year or YEAR(v.endDate) = :year) order by v.beginDate")
-                        .setParameter("emp_id", employeeId).setParameter("year", year);
-
-        return query.getResultList();
-    }
-
     public List<Vacation> findVacations(Integer employeeId, Date beginDate, Date endDate, DictionaryItem typeId){
         final Query query = typeId != null ?
                 entityManager.createQuery("from Vacation v where v.employee.id = :emp_id and v.beginDate <= :endDate " +
@@ -73,17 +62,6 @@ public class VacationDAO {
                         "order by v.beginDate")
                         .setParameter("emp_id", employeeId).setParameter("begDate", beginDate);
         return (Vacation) query.getSingleResult();
-    }
-
-    public List<Vacation> findVacations(Integer year, Integer month, Integer employeeId) {
-        final Query query =
-                entityManager.createQuery("from Vacation v " +
-                        "where v.employee.id = :emp_id " +
-                        "and (YEAR(v.beginDate) = :year or YEAR(v.endDate) = :year) " +
-                        "and (MONTH(v.beginDate) = :month or MONTH(v.endDate) = :month) order by v.beginDate")
-                        .setParameter("emp_id", employeeId).setParameter("year", year).setParameter("month",month);
-
-        return query.getResultList();
     }
 
     public List<Vacation> findVacationsByTypes(Integer year, Integer month, Integer employeeId,  List<DictionaryItem> types) {
