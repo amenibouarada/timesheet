@@ -2,6 +2,7 @@
 <%@ page import="com.aplana.timesheet.controller.PlanEditController" %>
 <%@ page import="com.aplana.timesheet.form.CreatePlanForPeriodForm" %>
 <%@ page import="static com.aplana.timesheet.util.ResourceUtils.getResRealPath" %>
+<%@ page import="com.aplana.timesheet.util.DateTimeUtil" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
@@ -66,7 +67,7 @@
             putParamIfNotEmpty(requestContent, "<%= CreatePlanForPeriodContoller.TO_DATE_PARAM %>", toDateParam);
 
             function formatDate(date) {
-                return (date == null) ? "" : date.format("<%= CreatePlanForPeriodContoller.DATE_FORMAT.toLowerCase() %>");
+                return (date == null) ? "" : date.format("<%= DateTimeUtil.DATE_PATTERN.toLowerCase() %>");
             }
 
             function putParamIfNotEmpty(requestContent, paramName, paramValue) {
