@@ -24,15 +24,6 @@
             vacationCreate_divisionChange(dojo.byId("divisionId"));
             dojo.byId("employeeId").value = ${employeeId};
             initCurrentDateInfo(${employeeId},dijit.byId('calFromDate').value,getUrl());
-
-            require(["dojo/on"], function(on){
-                on.once(dojo.byId("createVacationId"), "click", function(){
-                    createVacation(false);
-                });
-                on.once(dojo.byId("createApprovedVacationId"), "click", function(){
-                    createVacation(true);
-                });
-            });
         });
 
         dojo.require("dijit.form.DateTextBox");
@@ -128,14 +119,18 @@
             date_picker.set("displayedValue", date);
         }
 
-        function createVacation(approved) {
+        var createVacation = function (approved) {
+            dojo.byId("createVacationId").disabled = true;
+            dojo.byId("createApprovedVacationId").disabled = true;
             var empId = dojo.byId("employeeId").value;
             if (validate()) {
                 createVacationForm.action =
                         "<%=request.getContextPath()%>/validateAndCreateVacation/" + empId + "/"
                                 + (approved ? "1" : "0");
                 createVacationForm.submit();
-            }
+            }else{
+                dojo.byId("createVacationId").disabled = false;
+                dojo.byId("createApprovedVacationId").disabled = false;            }
         }
 
         function validate() {
@@ -368,10 +363,9 @@
         </tr>
     </table>
 
-    <%--событие обрабатывается в скрипте по Id, чтобы исключить много нажатий--%>
-    <button id="createVacationId" type="button">Создать</button>
+    <button type="button" id="createVacationId"  onclick="createVacation(false)">Создать</button>
     <sec:authorize access="hasRole('ROLE_ADMIN')">
-        <button id="createApprovedVacationId" type="button">Добавить утвержденное заявление на отпуск</button>
+        <button type="button" id="createApprovedVacationId"  onclick="createVacation(true)">Добавить утвержденное заявление на отпуск</button>
     </sec:authorize>
     <button type="button" onclick="cancel()">Отмена</button>
 </form:form>
