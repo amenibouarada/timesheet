@@ -142,7 +142,7 @@ public class TSPropertyProvider {
 
     public static final String DEFAULT_PLANNED_VACATION_CREATE_MAIL_MARKER = "[VACATION PLAN]";
     public String getPlannedVacationCreateMailMarker() {
-        return getProperties().getProperty("vacation.create.mail.marker", DEFAULT_PLANNED_VACATION_CREATE_MAIL_MARKER);
+        return getProperties().getProperty("vacation.planned.create.mail.marker", DEFAULT_PLANNED_VACATION_CREATE_MAIL_MARKER);
     }
 
     public static final String DEFAULT_ILLNESS_DEFAULT_MAIL_MARKER = "[ILLNESS]";
@@ -152,7 +152,7 @@ public class TSPropertyProvider {
 
     final String DEFAULT_TIMESHEET_MAIL_MARKER = "[TIMESHEET]";
     public String getTimesheetMailMarker() {
-        return getProperties().getProperty("ts.mail.marker=", DEFAULT_TIMESHEET_MAIL_MARKER);
+        return getProperties().getProperty("ts.mail.marker", DEFAULT_TIMESHEET_MAIL_MARKER);
     }
 
     final Integer DEFAULT_VACATION_APPROVAL_ERROR_THRESHOLD = 100;
@@ -269,7 +269,7 @@ public class TSPropertyProvider {
     }
 
     public String getPathLibraryPadeg() {
-        return getProperties().getProperty("path.library.padeg",StringUtils.EMPTY);
+        return getProperties().getProperty("path.library.padeg", StringUtils.EMPTY);
     }
 
     public static final int LOGIN_THRESHOLD = 10;
