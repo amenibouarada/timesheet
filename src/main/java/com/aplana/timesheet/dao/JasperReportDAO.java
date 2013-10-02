@@ -369,7 +369,7 @@ public class JasperReportDAO {
                                 "LEFT OUTER JOIN region h_region   ON holidays.region=h_region.id " +
                                 "LEFT OUTER JOIN employee_project_billable epbillable    ON project.id=epbillable.project_id AND empl.id=epbillable.employee_id AND " +
                                 "                                                           timesheet.caldate BETWEEN epbillable.start_date AND  epbillable.end_date " +
-                                "LEFT OUTER JOIN dictionary_item project_state    ON project.state=project_state.id " +
+                                "LEFT OUTER JOIN dictionary_item project_state    ON timesheet_details.act_type=project_state.id " +
                                 "LEFT OUTER JOIN vacation vacations ON " +
                                 "        empl.id=vacations.employee_id AND " +
                                 "        timesheet.caldate BETWEEN vacations.begin_date AND vacations.end_date " +
@@ -522,7 +522,7 @@ public class JasperReportDAO {
                     "LEFT OUTER JOIN region h_region   ON holidays.region=h_region.id " +
                     "LEFT OUTER JOIN employee_project_billable epbillable    ON project.id=epbillable.project_id and empl.id=epbillable.employee_id AND " +
                     "                                                           timesheet.caldate BETWEEN epbillable.start_date AND  epbillable.end_date " +
-                    "LEFT OUTER JOIN dictionary_item project_state    ON project.state=project_state.id " +
+                    "LEFT OUTER JOIN dictionary_item project_state    ON timesheet_details.act_type=project_state.id " +
                     "LEFT OUTER JOIN vacation vacations ON " +
                     "        empl.id=vacations.employee_id AND " +
                     "        timesheet.caldate BETWEEN vacations.begin_date AND vacations.end_date " +
