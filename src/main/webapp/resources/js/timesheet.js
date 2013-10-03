@@ -565,12 +565,12 @@ function divisionChange(obj) {
     }
 }
 
+/*
+ Влючено ли поле выбора задачи для для текущей строчки
+ */
 function isEnableTaskSelect(rowIndex){
     var typeActivitySelect = dojo.byId("activity_type_id_" + rowIndex);
-    if (typeActivitySelect.value == "42" || typeActivitySelect.value == "14"){
-        return false;
-    }
-    return true;
+    return typeActivitySelect.value != "14";
 }
 
 /*
