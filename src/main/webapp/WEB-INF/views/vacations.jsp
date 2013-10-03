@@ -376,7 +376,7 @@
                         </td>
                         <td class="centered">${vacation.type.value}</td>
                         <td class="centered">${vacation.employee.name}</td>
-                        <td class="date"><fmt:formatDate value="${vacation.creationDate}" pattern="dd.MM.yyyy HH:mm"/></td>
+                        <td class="date"><fmt:formatDate value="${vacation.creationDate}" pattern="dd.MM.yyyy"/></td>
                         <td class="date"><fmt:formatDate value="${vacation.beginDate}" pattern="dd.MM.yyyy"/></td>
                         <td class="date"><fmt:formatDate value="${vacation.endDate}" pattern="dd.MM.yyyy"/></td>
                         <td class="centered">${calDays[vacation]}</td>
