@@ -378,6 +378,7 @@ public class JasperReportDAO {
                                 "%s " +
                         "WHERE " +
                                 "timesheet_details.duration > 0 AND " +
+                                "timesheet_details.act_type in (42, 12, 13)  AND " +    //TODO (aivanov 3.10.13) Создать емун и заменить циферки
                                 " %s %s %s %s %s " +
                                 "calendar.calDate between :beginDate AND :endDate " +
                         "GROUP BY " +
@@ -533,6 +534,7 @@ public class JasperReportDAO {
                     "%s " +
             "WHERE " +
                     "timesheet_details.duration > 0 AND " +
+                    "timesheet_details.act_type in (42, 12, 13)  AND " +    //TODO (aivanov 3.10.13) Создать емун и заменить циферки
                     " %s %s %s %s %s " +
                     "calendar.caldate between :beginDate AND :endDate " +
             "GROUP BY " +
