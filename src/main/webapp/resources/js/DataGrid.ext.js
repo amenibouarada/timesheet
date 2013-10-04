@@ -226,10 +226,23 @@ function showCol(button, colField) {
     switchColDisplay(button, colField, false, true);
 }
 
+function getNatural (DOMelement) {
+    var img = new Image();
+    img.src = DOMelement.src;
+    return {width: img.width, height: img.height};
+}
+
 function switchColDisplay(button, colField, /* Boolean */ hide, /* Boolean */ updateStructure) {
     var container = dojo.NodeList(button).parents(".colContainer")[0];
     var display = hide ? "none" : "";
     var buttonWidth = (button.style.width || (button.width + "px"));
+
+    // Если IE8 или ниже
+    if (buttonWidth == "0px"){
+        var natural = getNatural(button);
+        buttonWidth = natural.width;
+    }
+
     var grid = dijit.byId(dojo.NodeList(container).parents(".dojoxGrid")[0].id);
 
     dojo.forEach(grid.structure, function(structure) {
