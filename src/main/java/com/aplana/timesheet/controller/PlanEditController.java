@@ -553,7 +553,7 @@ public class PlanEditController {
         Double summaryWorkHours = getEmployeeProjectDurationPlan(employee, year, month);
         Double nonProjectDuration = getEmployeeNonProjectDuration(employee, year, month);
 
-        sumOfPlanCharge += nilIfNull(centerProjectsPlan) + nilIfNull(centerPresalesPlan);
+        sumOfPlanCharge += nilIfNull(centerProjectsPlan) + nilIfNull(centerPresalesPlan) + nilIfNull(otherProjectsPlan);
 
         Double vacationPlan = 0.0;
         try {
