@@ -28,6 +28,10 @@ th {
     background-color: #3C8CE6 !important;
 }
 
+.tundra .dojoxGridRowSelected .dojoxGridCell {
+    background-color: rgba(60, 140, 230, 0.54) !important;
+}
+
 .dojoxGridMasterHeader .dojoxGridRowTable {
     height: 88px !important;
 }
