@@ -236,9 +236,11 @@
             var businessTripType = dojo.byId("businessTripType").value;
             if (businessTripType == businesstrip_notproject){
                 document.getElementById("businesstripproject").className = 'off';
+                document.getElementById("projectId").disabled = true;
             }
             else {
                 document.getElementById("businesstripproject").className = 'onblock';
+                document.getElementById("projectId").disabled = false;
                 var beginDate = dojo.byId("beginDate").value;
                 var endDate = dojo.byId("endDate").value;
                 var projectIdElement = dojo.byId("projectId");
