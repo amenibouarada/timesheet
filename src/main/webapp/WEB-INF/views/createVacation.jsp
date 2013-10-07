@@ -119,7 +119,7 @@
             date_picker.set("displayedValue", date);
         }
 
-        var createVacation = function (approved) {
+        function createVacation(approved) {
             dojo.byId("createVacationId").disabled = true;
             dojo.byId("createApprovedVacationId").disabled = true;
             var empId = dojo.byId("employeeId").value;
