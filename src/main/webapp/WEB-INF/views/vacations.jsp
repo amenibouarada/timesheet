@@ -265,7 +265,7 @@
             <thead>
             <tr>
                 <th width="15" class="create-button">
-                    <img src="<c:url value="/resources/img/add.gif"/>" title="Создать" onclick="createVacation();"/>
+                    <img src="<c:url value="/resources/img/add.gif"/>" title="Создать" onclick="addVacation();"/>
                 </th>
                 <th width="160">Статус</th>
                 <th width="220">Тип отпуска</th>

@@ -153,7 +153,7 @@ function changeSelectedEmployee() {
     selectedEmployee = dojo.byId(EMPLOYEE_ID).value;
 }
 
-function createVacation() {
+function addVacation() {
     var empId = dojo.byId(EMPLOYEE_ID).value;
 
     vacationsForm.action = contextPath + "/createVacation/" + empId;
