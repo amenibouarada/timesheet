@@ -121,16 +121,20 @@
 
         function createVacation(approved) {
             dojo.byId("createVacationId").disabled = true;
-            dojo.byId("createApprovedVacationId").disabled = true;
+            var createVacAdminBtn = dojo.byId("createApprovedVacationId");
+            //Может быть null если пользователь не с админискими правами
+            if (createVacAdminBtn) createVacAdminBtn.disabled = true;
+
             var empId = dojo.byId("employeeId").value;
             if (validate()) {
                 createVacationForm.action =
                         "<%=request.getContextPath()%>/validateAndCreateVacation/" + empId + "/"
                                 + (approved ? "1" : "0");
                 createVacationForm.submit();
-            }else{
+            } else {
                 dojo.byId("createVacationId").disabled = false;
-                dojo.byId("createApprovedVacationId").disabled = false;            }
+                if (createVacAdminBtn) createVacAdminBtn.disabled = false;
+            }
         }
 
         function validate() {
