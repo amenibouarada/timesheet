@@ -575,6 +575,15 @@ public class PlanEditController {
 
             appendNumberField(map, getFieldNameForEmployeePlan(employeePlan), value);
         }
+        /* т.к. план по болезни входит в EmployeePlan перепишем его значением фактического */
+        map.put(
+                ILLNESS_PLAN,
+                JsonUtil.aNumberBuilder(
+                        TimeSheetConstants.WORK_DAY_DURATION * illnessService.getIllnessWorkdaysCount(
+                                employee, year, month
+                        )
+                )
+        );
 
         map.put(
                 SUMMARY_PLAN,
