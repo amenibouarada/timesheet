@@ -25,7 +25,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -138,8 +137,11 @@ public class BusinessTripsAndIllnessController extends AbstractController{
     public ModelAndView showDefaultIllnessReport(
             @PathVariable("divisionId") Integer divisionId,
             @PathVariable("employeeId") Integer employeeId,
-            @ModelAttribute("businesstripsandillness") BusinessTripsAndIllnessForm tsForm,
-            BindingResult result) throws BusinessTripsAndIllnessControllerException {
+            @ModelAttribute("businesstripsandillness") BusinessTripsAndIllnessForm tsForm
+    ) throws BusinessTripsAndIllnessControllerException {
+
+        savepoint("businesstripsandillness");
+
         Integer printtype = tsForm.getReportType();
         Integer manager = tsForm.getManager();
         List<Integer> regions = tsForm.getRegions();
@@ -254,10 +256,10 @@ public class BusinessTripsAndIllnessController extends AbstractController{
             @PathVariable("divisionId") Integer divisionId,
             @PathVariable("employeeId") Integer employeeId,
             @PathVariable("reportTypeId") Integer reportTypeId,
-            @ModelAttribute("businesstripsandillness") BusinessTripsAndIllnessForm tsForm,
-            BindingResult result) throws BusinessTripsAndIllnessControllerException {
+            @ModelAttribute("businesstripsandillness") BusinessTripsAndIllnessForm tsForm
+    ) throws BusinessTripsAndIllnessControllerException {
         tsForm.setReportType(reportTypeId);
-        return showDefaultIllnessReport(divisionId, employeeId, tsForm, result);
+        return showDefaultIllnessReport(divisionId, employeeId, tsForm);
     }
     /**
      * Удаляем больничный. Если удаление прошло нормально, то возвращаем пустую строку.
