@@ -258,7 +258,7 @@ public class BusinessTripsAndIllnessAddController extends AbstractController{
             illness.setEditionDate(new Date());
             illnessService.setIllness(illness);
             illnessMailService.sendEditMail(illness);
-            return getModelAndViewSuccess(illness.getEmployee(), illness.getEndDate(), ILLNESS);
+            return redirectTo("businesstripsandillness");
         } catch (Exception e) {
             logger.error(ERROR_ILLNESS_EDIT, e);
             throw new BusinessTripsAndIllnessAddException(ERROR_ILLNESS_EDIT, e);
@@ -282,8 +282,7 @@ public class BusinessTripsAndIllnessAddController extends AbstractController{
             businessTrip.setComment(tsForm.getComment());
 
             businessTripService.setBusinessTrip(businessTrip);
-
-            return getModelAndViewSuccess(businessTrip.getEmployee(), businessTrip.getBeginDate(), BUSINESS_TRIP);
+            return redirectTo("businesstripsandillness");
         } catch (Exception e) {
             logger.error(ERROR_BUSINESS_TRIP_EDIT, e);
             throw new BusinessTripsAndIllnessAddException(ERROR_BUSINESS_TRIP_EDIT, e);
@@ -326,7 +325,7 @@ public class BusinessTripsAndIllnessAddController extends AbstractController{
             illness.setEditionDate(new Date());
             illnessService.setIllness(illness);
             illnessMailService.sendCreateMail(illness);
-            return getModelAndViewSuccess(illness.getEmployee(), illness.getBeginDate(), ILLNESS);
+            return redirectTo("businesstripsandillness");
         } catch (Exception e) {
             logger.error(ERROR_ILLNESS_SAVE, e);
             throw new BusinessTripsAndIllnessAddException(ERROR_ILLNESS_SAVE, e);
@@ -347,7 +346,7 @@ public class BusinessTripsAndIllnessAddController extends AbstractController{
             businessTrip.setProject(projectService.find(tsForm.getProjectId()));
             businessTripService.setBusinessTrip(businessTrip);
 
-            return getModelAndViewSuccess(businessTrip.getEmployee(), businessTrip.getBeginDate(), BUSINESS_TRIP);
+            return redirectTo("businesstripsandillness");
         } catch (Exception e){
             logger.error(ERROR_BUSINESS_TRIP_SAVE, e);
             throw new BusinessTripsAndIllnessAddException(ERROR_BUSINESS_TRIP_SAVE, e);

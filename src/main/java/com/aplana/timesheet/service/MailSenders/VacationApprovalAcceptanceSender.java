@@ -12,6 +12,7 @@ import java.util.List;
 
 /**
  * @author iziyangirov
+ * Письмо отправляется, когда отпуск согласован одним из руководителей.
  */
 
 public class VacationApprovalAcceptanceSender extends AbstractSenderWithCcAddress<VacationApproval>

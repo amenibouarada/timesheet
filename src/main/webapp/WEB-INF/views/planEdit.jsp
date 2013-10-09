@@ -144,7 +144,7 @@ if (dataJson.length > 0) {
     var modelFields = ["<%= EMPLOYEE_ID %>"];
     var modelFieldsForSave = [
         "<%= EMPLOYEE_ID %>", "<%= OTHER_PROJECTS_AND_PRESALES_PLAN %>", "<%= NON_PROJECT_PLAN %>",
-        "<%= ILLNESS_PLAN %>", "<%= VACATION_PLAN %>"
+        "<%= VACATION_PLAN %>"
     ];
     var myStore = new dojo.data.ItemFileWriteStore({
         data:myStoreObject

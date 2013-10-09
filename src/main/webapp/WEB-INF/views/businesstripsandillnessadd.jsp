@@ -378,7 +378,7 @@
 
         <div class="bigspace onblock">
             <button id="create" type="button" class="button bigspace">Сохранить</button> <%--обработка в скрипте dojo.on--%>
-            <button id="cancel" type="button" class="button bigspace" onclick="cancelform()">Отмена</button>
+            <button id="cancel" type="button" class="button bigspace" onclick="window.history.back()">Отмена</button>
         </div>
 
         <div id="errorboxdiv" name="errorboxdiv" class="off errorbox">
