@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report4" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="c31930d3-0022-4bc0-b386-a15cdb17a18b">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report4" pageWidth="850" pageHeight="595" orientation="Landscape" columnWidth="810" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="c31930d3-0022-4bc0-b386-a15cdb17a18b">
 	<property name="net.sf.jasperreports.print.keep.full.text" value="true"/>
 	<property name="ireport.zoom" value="1.5"/>
 	<property name="ireport.x" value="0"/>
@@ -7,11 +7,14 @@
 	<import value="com.aplana.timesheet.util.DateTimeUtil"/>
 	<style name="Normal" isDefault="true" fontSize="8" pdfFontName="arial.ttf" pdfEncoding="Cp1251"/>
 	<style name="Title" style="Normal" fontName="Arial" fontSize="26"/>
-	<style name="SubTitle" style="Normal" forecolor="#666666" isBold="true"/>
+	<style name="SubTitle" style="Normal" forecolor="#666666" isBold="true">
+		<box topPadding="2" leftPadding="2" bottomPadding="2" rightPadding="2"/>
+	</style>
 	<style name="Column header" style="Normal" forecolor="#666666" isBold="true"/>
 	<style name="Group Header 3" style="Normal" forecolor="#000000" isBold="true"/>
 	<style name="Detail" style="Normal" backcolor="#FF0000"/>
 	<style name="ColoredDetail" style="Normal" forecolor="#000000">
+		<box topPadding="2" leftPadding="2" bottomPadding="2" rightPadding="2"/>
 		<conditionalStyle>
 			<conditionExpression><![CDATA[new Boolean($F{day_type}.equals(new Integer(1)) && $F{region} != null)]]></conditionExpression>
 			<style forecolor="#FF6700"/>
@@ -54,34 +57,34 @@
 	<group name="GroupByName">
 		<groupExpression><![CDATA[$F{name}]]></groupExpression>
 		<groupHeader>
-			<band height="13">
+			<band height="16">
 				<textField isStretchWithOverflow="true">
-					<reportElement uuid="bcec8fd7-be3d-4fff-a70c-7fd0ac353b2a" style="SubTitle" stretchType="RelativeToTallestObject" x="0" y="0" width="102" height="13"/>
+					<reportElement uuid="bcec8fd7-be3d-4fff-a70c-7fd0ac353b2a" style="SubTitle" stretchType="RelativeToTallestObject" x="0" y="0" width="102" height="16"/>
 					<textElement/>
 					<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
 				</textField>
-				<textField evaluationTime="Group" evaluationGroup="GroupByName" isStretchWithOverflow="true" pattern="">
-					<reportElement uuid="6e4e6704-a2b0-470f-b38b-52350f201116" style="SubTitle" stretchType="RelativeToTallestObject" x="621" y="0" width="50" height="13"/>
+				<textField isStretchWithOverflow="true" evaluationTime="Group" evaluationGroup="GroupByName" pattern="">
+					<reportElement uuid="6e4e6704-a2b0-470f-b38b-52350f201116" style="SubTitle" stretchType="RelativeToTallestObject" x="621" y="0" width="50" height="16"/>
 					<textElement/>
 					<textFieldExpression><![CDATA[new DecimalFormat("###0.00").format($V{DurationSumGroupByName}) + "/" + new DecimalFormat("###0.00").format($V{DurationHolidaySumGroupByName})]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true">
-					<reportElement uuid="c6f5f653-5077-46bb-9791-98dff9a46181" style="SubTitle" stretchType="RelativeToTallestObject" x="102" y="0" width="109" height="13"/>
+					<reportElement uuid="c6f5f653-5077-46bb-9791-98dff9a46181" style="SubTitle" stretchType="RelativeToTallestObject" x="102" y="0" width="109" height="16"/>
 					<textElement/>
 					<textFieldExpression><![CDATA[$F{empldivision}]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true">
-					<reportElement uuid="a1a254f9-9dd2-482d-8675-14bf6d4b2162" style="SubTitle" stretchType="RelativeToTallestObject" x="211" y="0" width="64" height="13"/>
+					<reportElement uuid="a1a254f9-9dd2-482d-8675-14bf6d4b2162" style="SubTitle" stretchType="RelativeToTallestObject" x="211" y="0" width="64" height="16"/>
 					<textElement/>
 					<textFieldExpression><![CDATA[$F{region_name}]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true">
-					<reportElement uuid="07a1e725-f993-48cb-a587-975f66dfeb1a" style="SubTitle" stretchType="RelativeToTallestObject" x="275" y="0" width="80" height="13"/>
+					<reportElement uuid="07a1e725-f993-48cb-a587-975f66dfeb1a" style="SubTitle" stretchType="RelativeToTallestObject" x="275" y="0" width="80" height="16"/>
 					<textElement/>
 					<textFieldExpression><![CDATA[$F{project_role}]]></textFieldExpression>
 				</textField>
 				<staticText>
-					<reportElement uuid="848e238c-5f38-4736-a728-07c0d8b97a4e" style="Column header" stretchType="RelativeToTallestObject" x="671" y="0" width="78" height="13"/>
+					<reportElement uuid="848e238c-5f38-4736-a728-07c0d8b97a4e" style="SubTitle" stretchType="RelativeToTallestObject" x="671" y="0" width="78" height="16"/>
 					<textElement/>
 					<text><![CDATA[Итого]]></text>
 				</staticText>
@@ -94,17 +97,17 @@
 	<title>
 		<band height="138">
 			<staticText>
-				<reportElement uuid="c702ebdb-a708-4b5d-a075-a2f6cd73e251" style="Title" x="0" y="0" width="802" height="90"/>
+				<reportElement uuid="c702ebdb-a708-4b5d-a075-a2f6cd73e251" style="Title" x="0" y="0" width="810" height="90"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle"/>
 				<text><![CDATA[Отчет №2. Сводный отчет затраченного времени по проекту]]></text>
 			</staticText>
 			<textField>
-				<reportElement uuid="0579e826-ff7b-408b-8837-5e59a39f7a72" style="SubTitle" x="0" y="90" width="802" height="24"/>
+				<reportElement uuid="0579e826-ff7b-408b-8837-5e59a39f7a72" style="SubTitle" x="0" y="90" width="810" height="24"/>
 				<textElement textAlignment="Center"/>
 				<textFieldExpression><![CDATA["Регион : "+ $P{reportParams}.wellFormedRegionList()]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement uuid="76b7298c-02e8-4894-a938-c6b791c0edff" style="SubTitle" x="0" y="114" width="802" height="24"/>
+				<reportElement uuid="76b7298c-02e8-4894-a938-c6b791c0edff" style="SubTitle" x="0" y="114" width="810" height="24"/>
 				<textElement textAlignment="Center"/>
 				<textFieldExpression><![CDATA["с " + DateTimeUtil.formatDateString($P{reportParams}.getBeginDate()) +
 " по " + DateTimeUtil.formatDateString($P{reportParams}.getEndDate())]]></textFieldExpression>
@@ -162,66 +165,66 @@
 				<text><![CDATA[Тип активности]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="189a3169-4b0b-49cb-ab6b-7fe9cb9eb2b4" style="Column header" x="749" y="0" width="53" height="21"/>
+				<reportElement uuid="189a3169-4b0b-49cb-ab6b-7fe9cb9eb2b4" style="Column header" x="749" y="0" width="61" height="21"/>
 				<textElement/>
 				<text><![CDATA[Учитывать в затратах]]></text>
 			</staticText>
 		</band>
 	</columnHeader>
 	<detail>
-		<band height="13">
+		<band height="15">
 			<textField isStretchWithOverflow="true">
-				<reportElement uuid="76b0b3d7-2320-49b3-b81d-4971e1605b01" style="ColoredDetail" stretchType="RelativeToTallestObject" x="0" y="0" width="102" height="13"/>
+				<reportElement uuid="76b0b3d7-2320-49b3-b81d-4971e1605b01" style="ColoredDetail" stretchType="RelativeToTallestObject" x="0" y="0" width="102" height="15"/>
 				<textElement/>
 				<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement uuid="3841c748-624a-4267-bf3e-7af13caa4d0c" style="ColoredDetail" stretchType="RelativeToTallestObject" x="102" y="0" width="109" height="13"/>
+				<reportElement uuid="3841c748-624a-4267-bf3e-7af13caa4d0c" style="ColoredDetail" stretchType="RelativeToTallestObject" x="102" y="0" width="109" height="15"/>
 				<textElement/>
 				<textFieldExpression><![CDATA[$F{empldivision}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement uuid="9487084f-64e5-4da8-8757-5f8e1476642f" style="ColoredDetail" stretchType="RelativeToTallestObject" x="211" y="0" width="64" height="13"/>
+				<reportElement uuid="9487084f-64e5-4da8-8757-5f8e1476642f" style="ColoredDetail" stretchType="RelativeToTallestObject" x="211" y="0" width="64" height="15"/>
 				<textElement/>
 				<textFieldExpression><![CDATA[$F{region_name}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement uuid="ac9c1f50-51f8-4db5-9be2-82fe3261642a" style="ColoredDetail" stretchType="RelativeToTallestObject" x="275" y="0" width="80" height="13"/>
+				<reportElement uuid="ac9c1f50-51f8-4db5-9be2-82fe3261642a" style="ColoredDetail" stretchType="RelativeToTallestObject" x="275" y="0" width="80" height="15"/>
 				<textElement/>
 				<textFieldExpression><![CDATA[$F{project_role}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement uuid="327fdca3-511a-4fa9-ac48-de7df535869c" style="ColoredDetail" stretchType="RelativeToTallestObject" x="355" y="0" width="53" height="13"/>
+				<reportElement uuid="327fdca3-511a-4fa9-ac48-de7df535869c" style="ColoredDetail" stretchType="RelativeToTallestObject" x="355" y="0" width="53" height="15"/>
 				<textElement/>
 				<textFieldExpression><![CDATA[$F{project_state}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement uuid="fcbe9434-d503-4bee-82d6-7c7027445b14" style="ColoredDetail" stretchType="RelativeToTallestObject" x="731" y="0" width="71" height="13"/>
+				<reportElement uuid="fcbe9434-d503-4bee-82d6-7c7027445b14" style="ColoredDetail" stretchType="RelativeToTallestObject" x="678" y="0" width="71" height="13"/>
 				<textElement/>
 				<textFieldExpression><![CDATA[$F{vacation_type}!=null?$F{vacation_type}:"Нет"]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement uuid="5d9b0d09-7c4a-4310-8024-182d6fdf6d34" style="ColoredDetail" stretchType="RelativeToTallestObject" x="408" y="0" width="129" height="13"/>
+				<reportElement uuid="5d9b0d09-7c4a-4310-8024-182d6fdf6d34" style="ColoredDetail" stretchType="RelativeToTallestObject" x="408" y="0" width="129" height="15"/>
 				<textElement/>
 				<textFieldExpression><![CDATA[$F{project}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement uuid="37084054-eb63-4627-b097-0657583a882b" style="ColoredDetail" stretchType="RelativeToTallestObject" x="537" y="0" width="84" height="13"/>
+				<reportElement uuid="37084054-eb63-4627-b097-0657583a882b" style="ColoredDetail" stretchType="RelativeToTallestObject" x="537" y="0" width="84" height="15"/>
 				<textElement/>
 				<textFieldExpression><![CDATA[$F{taskname}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement uuid="600f068f-ff6b-4845-8891-0666f094f376" style="ColoredDetail" stretchType="RelativeToTallestObject" x="621" y="0" width="50" height="13"/>
+				<reportElement uuid="600f068f-ff6b-4845-8891-0666f094f376" style="ColoredDetail" stretchType="RelativeToTallestObject" x="621" y="0" width="50" height="15"/>
 				<textElement/>
 				<textFieldExpression><![CDATA[$F{duration}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement uuid="8c599907-f7aa-45c8-8822-8bd3a09fd967" style="ColoredDetail" stretchType="RelativeToTallestObject" x="671" y="0" width="78" height="13"/>
+				<reportElement uuid="8c599907-f7aa-45c8-8822-8bd3a09fd967" style="ColoredDetail" stretchType="RelativeToTallestObject" x="671" y="0" width="78" height="15"/>
 				<textElement/>
 				<textFieldExpression><![CDATA[$F{day_type}.equals(new Integer(1)) ? ($F{region} == null?"Общий выходной":"Региональный выходной"):$F{day_type}.equals(new Integer(2)) ? $F{vacation_type}:$F{day_type}.equals(new Integer(3))?"Болезнь":"Рабочий день"]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement uuid="1beefc83-0e6a-4f38-accc-c677cd0639ba" style="ColoredDetail" stretchType="RelativeToTallestObject" x="749" y="0" width="53" height="13"/>
+				<reportElement uuid="1beefc83-0e6a-4f38-accc-c677cd0639ba" style="ColoredDetail" stretchType="RelativeToTallestObject" x="749" y="0" width="61" height="15"/>
 				<textElement/>
 				<textFieldExpression><![CDATA[$F{billable}?"Да":"Нет"]]></textFieldExpression>
 			</textField>
