@@ -39,6 +39,7 @@ import java.util.Calendar;
 import static argo.jdom.JsonNodeBuilders.aStringBuilder;
 import static argo.jdom.JsonNodeBuilders.anObjectBuilder;
 import static argo.jdom.JsonNodeFactories.*;
+import static com.aplana.timesheet.util.JsonUtil.aNumberBuilder;
 
 /**
  * @author rshamsutdinov
@@ -352,7 +353,7 @@ public class PlanEditController {
         String reportName = "Планирование занятости за "+calDate.getMonthTxt()+" "+year.toString()+" года";
 
         // TODO Спорный способ передавать сюда JSON, чтобы потом его снова разбирать. Переделать
-        planEditExcelReportService.createAndExportReport(reportName,dataAsJson, projectList, response, request);
+        planEditExcelReportService.createAndExportReport(reportName, dataAsJson, projectList, response, request);
 
         return null;
     }
@@ -489,7 +490,7 @@ public class PlanEditController {
 
         for (Employee employee : employees) {
             builder = anObjectBuilder().
-                    withField(EMPLOYEE_ID, JsonUtil.aNumberBuilder(employee.getId())).
+                    withField(EMPLOYEE_ID, aNumberBuilder(employee.getId())).
                     withField(EMPLOYEE, aStringBuilder(employee.getName()));
 
             workDaysCount = calendarService.getEmployeeRegionWorkDaysCount(employee, year, month);
@@ -541,15 +542,11 @@ public class PlanEditController {
                     otherProjectsPlan += duration;
                 }
 
-                map.put(
-                        String.format("%d" + _PLAN, project.getId()),
-                        JsonUtil.aNumberBuilder(employeeProjectPlan.getValue())
-                );
+                appendNumberField(map, String.format("%d" + _PLAN, project.getId()), employeeProjectPlan.getValue());
             }
         }
 
-        map.put(OTHER_PROJECTS_AND_PRESALES_PLAN, JsonUtil.aNumberBuilder(otherProjectsPlan));
-
+        appendNumberField(map, OTHER_PROJECTS_AND_PRESALES_PLAN, otherProjectsPlan);
         Double summaryWorkHours = getEmployeeProjectDurationPlan(employee, year, month);
         Double nonProjectDuration = getEmployeeNonProjectDuration(employee, year, month);
 
@@ -576,23 +573,18 @@ public class PlanEditController {
             appendNumberField(map, getFieldNameForEmployeePlan(employeePlan), value);
         }
         /* т.к. план по болезни входит в EmployeePlan перепишем его значением фактического */
-        map.put(
+        appendNumberField(
+                map,
                 ILLNESS_PLAN,
-                JsonUtil.aNumberBuilder(
-                        TimeSheetConstants.WORK_DAY_DURATION * illnessService.getIllnessWorkdaysCount(
-                                employee, year, month
-                        )
-                )
+                TimeSheetConstants.WORK_DAY_DURATION * illnessService.getIllnessWorkdaysCount(employee, year, month)
         );
 
-        map.put(
-                SUMMARY_PLAN,
-                JsonUtil.aNumberBuilder(summaryWorkHours+nonProjectDuration, summaryPlan)
-        );
+        appendStringField(map, SUMMARY_PLAN, formatSummaryPlan(summaryWorkHours + nonProjectDuration, summaryPlan));
 
-        map.put(
+        appendStringField(
+                map,
                 PERCENT_OF_CHARGE_PLAN,
-                aStringBuilder(formatPercentOfCharge((summaryPlan != 0) ? sumOfPlanCharge / summaryPlan : 0D))
+                formatPercentOfCharge((summaryPlan != 0) ? sumOfPlanCharge / summaryPlan : 0D)
         );
 
         appendNumberField(map, VACATION_PLAN, vacationPlan);
@@ -652,33 +644,37 @@ public class PlanEditController {
         final Map<String, JsonNodeBuilder> map = Maps.newHashMap();
 
         for (Map.Entry<Integer, Double> entry : projectsFactMap.entrySet()) {
-            map.put(
-                    String.format("%d" + _FACT, entry.getKey()),
-                    JsonUtil.aNumberBuilder(entry.getValue())
-            );
+            appendNumberField(map, String.format("%d" + _FACT, entry.getKey()), entry.getValue());
         }
 
-        map.put(SUMMARY_FACT, JsonUtil.aNumberBuilder(summaryFact));
-        map.put(PERCENT_OF_CHARGE_FACT, aStringBuilder(formatPercentOfCharge((summaryPlan != 0) ? summaryFact / summaryPlan : 0D)));
-        map.put(CENTER_PROJECTS_FACT, JsonUtil.aNumberBuilder(centerProjectsFact));
-        map.put(CENTER_PRESALES_FACT, JsonUtil.aNumberBuilder(centerPresalesFact));
-        map.put(OTHER_PROJECTS_AND_PRESALES_FACT, JsonUtil.aNumberBuilder(otherProjectsFact));
-        map.put(NON_PROJECT_FACT, JsonUtil.aNumberBuilder(nonProjectFact));
-        map.put(
-                ILLNESS_FACT,
-                JsonUtil.aNumberBuilder(
-                        TimeSheetConstants.WORK_DAY_DURATION * illnessService.getIllnessWorkdaysCount(
-                                employee, year, month
-                        )
-                )
+        appendNumberField(map, SUMMARY_FACT, summaryFact);
+
+        appendStringField(
+                map,
+                PERCENT_OF_CHARGE_FACT,
+                formatPercentOfCharge((summaryPlan != 0) ? summaryFact / summaryPlan : 0D)
         );
-        map.put(
+
+        appendNumberField(map, CENTER_PROJECTS_FACT, centerProjectsFact);
+
+        appendNumberField(map, CENTER_PRESALES_FACT, centerPresalesFact);
+
+        appendNumberField(map, OTHER_PROJECTS_AND_PRESALES_FACT, otherProjectsFact);
+
+        appendNumberField(map, NON_PROJECT_FACT, nonProjectFact);
+
+        appendNumberField(
+                map,
+                ILLNESS_FACT,
+                TimeSheetConstants.WORK_DAY_DURATION * illnessService.getIllnessWorkdaysCount(employee, year, month)
+        );
+
+        appendNumberField(
+                map,
                 VACATION_FACT,
-                JsonUtil.aNumberBuilder(
-                        TimeSheetConstants.WORK_DAY_DURATION * vacationService.getVacationsWorkdaysCount(
-                                employee, year, month,
-                                VacationStatusEnum.APPROVED
-                        )
+                TimeSheetConstants.WORK_DAY_DURATION * vacationService.getVacationsWorkdaysCount(
+                        employee, year, month,
+                        VacationStatusEnum.APPROVED
                 )
         );
 
@@ -686,7 +682,11 @@ public class PlanEditController {
     }
 
     private String formatPercentOfCharge(double normalizedValueOfCharge) {
-        return String.format(JsonUtil.NUMBER_FORMAT + "%%", normalizedValueOfCharge * 100);
+        return String.format("%d" + "%%", Math.round(normalizedValueOfCharge * 100));
+    }
+
+    private String formatSummaryPlan(double sumPlan, double monthPlan) {
+        return String.format("%d/%d", Math.round(sumPlan), Math.round(monthPlan));
     }
 
     private String getFieldNameForEmployeePlan(EmployeePlan employeePlan) {
@@ -701,7 +701,13 @@ public class PlanEditController {
 
     private void appendNumberField(Map<String, JsonNodeBuilder> map, String fieldName, Double value) {
         if (value != null) {
-            map.put(fieldName, JsonUtil.aNumberBuilder(value));
+            map.put(fieldName, aNumberBuilder(Math.round(value)));
+        }
+    }
+
+    private void appendStringField(Map<String, JsonNodeBuilder> map, String fieldName, String value) {
+        if (value != null && !value.isEmpty()) {
+            map.put(fieldName, aStringBuilder(value));
         }
     }
 

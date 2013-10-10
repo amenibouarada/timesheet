@@ -234,7 +234,7 @@ if (dataJson.length > 0) {
                     field:field,
                     noresize:true,
 
-                    width:(49 * scale) + "px",
+                    width:(29 * scale) + "px",
                     <sec:authorize access="hasRole('ROLE_PLAN_EDIT')">
                     <c:if test="${editable}">
                     editable:dojo.some(modelFieldsForSave, function (fieldForSave) {
@@ -252,7 +252,7 @@ if (dataJson.length > 0) {
                     var planField = group.field + "<%= _PLAN %>";
                     var factField = group.field + "<%= _FACT %>";
 
-                    view.cells.push(createCell("План", planField), createCell("Факт", factField));
+                    view.cells.push(createCell("П", planField), createCell("Ф", factField));
                     modelFields.push(planField, factField);
 
                     group.colSpan = 2;
