@@ -258,7 +258,12 @@ function switchColDisplay(button, colField, /* Boolean */ hide, /* Boolean */ up
                     var newWidth = (parseInt(buttonWidth) / item.childs.length) + "px";
 
                     dojo.forEach(item.childs, function(child) {
-                        child.editable = !hide;
+
+                        child.editable = hide ? !hide :
+                            dojo.some(modelFieldsForSave, function (fieldForSave) {
+                                return ((child.field == fieldForSave) && (child.field !== VACATION_PLAN_COLUMN));
+                            });
+
                         child.name = hide ? "<div>&nbsp;</div>" : child.srcName;
                         child.width = hide ? newWidth : child.srcWidth;
                     });
@@ -270,7 +275,11 @@ function switchColDisplay(button, colField, /* Boolean */ hide, /* Boolean */ up
                     }
 
                     item.width = hide ? buttonWidth : item.srcWidth;
-                    item.editable = !hide;
+
+                    child.editable = hide ? !hide :
+                        dojo.some(modelFieldsForSave, function (fieldForSave) {
+                            return ((child.field == fieldForSave) && (child.field !== VACATION_PLAN_COLUMN));
+                        });
                 }
 
                 dojo.query(".colTextHolder", container).forEach(function(textHolder) {
