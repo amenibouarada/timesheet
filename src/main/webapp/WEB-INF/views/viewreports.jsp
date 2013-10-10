@@ -53,7 +53,7 @@
                 } else {
                     var error = "";
                     if (year == 0 || year == null) {
-                        error += ("Необходимо выбрать год и месяц\n");
+                        error += ("Необходимо выбрать год и месяц!\n");
                     }
                     else if (month == 0 || month == null) {
                         error += ("Необходимо выбрать месяц!\n");
