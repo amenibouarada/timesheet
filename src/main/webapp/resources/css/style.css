@@ -392,6 +392,10 @@ table.report_params td {
     color: #f58383;
 }
 
+.dijitCalendarCurrentDate {
+    background-color: #6495ED !important;
+}
+
 textarea {
     resize: none; /* Скажем "нет" произволу браузеров! */
 }
