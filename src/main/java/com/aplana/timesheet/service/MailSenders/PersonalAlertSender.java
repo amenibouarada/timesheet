@@ -30,7 +30,7 @@ public class PersonalAlertSender extends AbstractSenderWithAssistants<List<Repor
         model.put("employee", Iterables.getFirst(mail.getEmployeeList(), null));
         model.put("timesheeturl",propertyProvider.getTimeSheetURL());
         String messageBody = VelocityEngineUtils.mergeTemplateIntoString(
-                sendMailService.velocityEngine, "alertpersonalmail.vm", model);
+                sendMailService.velocityEngine, "velocity/alertpersonalmail.vm", model);
         logger.debug("Message Body: {}", messageBody);
         try {
             message.setText(messageBody, "UTF-8", "html");

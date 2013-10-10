@@ -31,7 +31,7 @@ public class TimeSheetDeletedSender extends AbstractSenderWithAssistants<TimeShe
         model.put("dateStr", formatDateString(mail.getDate()));
 
         String messageBody = VelocityEngineUtils.mergeTemplateIntoString(
-                sendMailService.velocityEngine, "timesheetdeleted.vm", model) +
+                sendMailService.velocityEngine, "velocity/timesheetdeleted.vm", model) +
                 mail.getPreconstructedMessageBody();
         logger.debug("Message Body: {}", messageBody);
         try {
