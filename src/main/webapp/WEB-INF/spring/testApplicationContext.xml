@@ -49,4 +49,9 @@
           factory-method="getHttpRequest"
     />
 
+    <bean id="HTTPsession" class="com.aplana.timesheet.form.validator.FakeSessionAttributes"/>
+    <bean class="javax.servlet.http.HttpSession"
+          factory-bean="HTTPsession"
+          factory-method="getHttpSession"/>
+
 </beans>
