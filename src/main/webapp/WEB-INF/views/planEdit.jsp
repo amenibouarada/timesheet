@@ -54,6 +54,7 @@
 var VACATION_PLAN_COLUMN = 'vacation_plan';
 var hasChanges = false;
 var ALL_VALUE = <%= ALL_VALUE %>;
+var isEditable = ${editable};
 
 dojo.addOnLoad(function () {
 
