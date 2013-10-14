@@ -33,7 +33,7 @@ public class ManagerAlertSender extends AbstractSenderWithAssistants<List<Report
         model.put("region", mail.getDivision().getId() == 1 ? "show" : "");
 
         String messageBody = VelocityEngineUtils.mergeTemplateIntoString(
-                sendMailService.velocityEngine, "alertmail.vm", model);
+                sendMailService.velocityEngine, "velocity/alertmail.vm", model);
         logger.debug("Message Body: {}", messageBody);
         try {
             message.setText(messageBody, "UTF-8", "html");

@@ -22,6 +22,8 @@ public class PlanEditForm {
     public static final String SHOW_FACTS = "showFacts";
     public static final String SHOW_PROJECTS = "showProjects";
     public static final String SHOW_PRESALES = "showPresales";
+    public static final String SHOW_SUM_PROJECTS_PRESALES = "showSumProjectsPresales";
+    public static final String SHOW_SUM_FUNDING_TYPE = "showSumFundingType";
     public static final String JSON_DATA = "jsonData";
 
     private Integer divisionId;
@@ -34,6 +36,8 @@ public class PlanEditForm {
     private Boolean showFacts;
     private Boolean showProjects;
     private Boolean showPresales;
+    private Boolean showSumProjectsPresales;
+    private Boolean showSumFundingType;
     private String jsonData;
 
     public PlanEditForm() {
@@ -125,5 +129,21 @@ public class PlanEditForm {
 
     public void setManager(Integer manager) {
         this.manager = manager;
+    }
+
+    public Boolean getShowSumProjectsPresales() {
+        return showSumProjectsPresales;
+    }
+
+    public void setShowSumProjectsPresales(Boolean showSumProjectsPresales) {
+        this.showSumProjectsPresales = showSumProjectsPresales;
+    }
+
+    public Boolean getShowSumFundingType() {
+        return showSumFundingType;
+    }
+
+    public void setShowSumFundingType(Boolean showSumFundingType) {
+        this.showSumFundingType = showSumFundingType;
     }
 }

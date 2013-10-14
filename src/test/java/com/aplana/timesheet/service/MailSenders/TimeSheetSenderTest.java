@@ -35,7 +35,7 @@ public class TimeSheetSenderTest {
 
         model.put("paramsForGenerateBody", getParamsForGenerateBody());
 
-        return VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "sendmail.vm", model);
+        return VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "velocity/sendmail.vm", model);
     }
 
     private Object getParamsForGenerateBody() {

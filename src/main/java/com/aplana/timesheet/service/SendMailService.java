@@ -310,7 +310,7 @@ public class SendMailService{
 
         model.put("timeSheet", timeSheet);
         logger.info("follows initialization output from velocity");
-        return VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "report.vm", model);
+        return VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "velocity/report.vm", model);
     }
 
     public TimeSheetUser getSecurityPrincipal() {

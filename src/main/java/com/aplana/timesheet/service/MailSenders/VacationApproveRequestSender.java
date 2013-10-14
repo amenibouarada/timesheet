@@ -96,7 +96,7 @@ public class VacationApproveRequestSender extends AbstractVacationSender<Vacatio
             Map model = new HashMap();
             model.put("approvalList", approvalList.iterator());
             String messageBody = VelocityEngineUtils.mergeTemplateIntoString(
-                    sendMailService.velocityEngine, "vacationapprovals.vm", model);
+                    sendMailService.velocityEngine, "velocity/vacationapprovals.vm", model);
             logger.debug("Message Body: {}", messageBody);
             stringBuilder.append(messageBody);
         }

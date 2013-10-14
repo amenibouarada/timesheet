@@ -69,7 +69,7 @@ public class TimeSheetSender extends MailSender<TimeSheetForm> {
 
         logger.info("follows initialization output from velocity");
         String messageBody = VelocityEngineUtils.mergeTemplateIntoString(
-                sendMailService.velocityEngine, "sendmail.vm", model);
+                sendMailService.velocityEngine, "velocity/sendmail.vm", model);
         logger.debug("Message Body: {}", messageBody);
         try {
             message.setText(messageBody, "UTF-8", "html");

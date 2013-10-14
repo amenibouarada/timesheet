@@ -17,6 +17,7 @@
 			<beans:value>
 				resource.loader=class
 				class.resource.loader.class=org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader
+                resourceLoaderPath=/velocity
 				input.encoding=UTF-8
 				output.encoding=UTF-8
 			</beans:value>

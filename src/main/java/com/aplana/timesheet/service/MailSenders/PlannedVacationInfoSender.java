@@ -80,7 +80,7 @@ public class PlannedVacationInfoSender extends AbstractSenderWithAssistants<Map 
         model.put("paramsForGenerateBody", mail.getParamsForGenerateBody());
 
         String messageBody = VelocityEngineUtils.mergeTemplateIntoString(
-                sendMailService.velocityEngine, "plannedVacations.vm", model);
+                sendMailService.velocityEngine, "velocity/plannedVacations.vm", model);
         logger.debug("Message Body: {}", messageBody);
         try {
             message.setText(messageBody, "UTF-8", "html");

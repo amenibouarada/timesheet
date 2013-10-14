@@ -5,10 +5,7 @@ import argo.saj.InvalidSyntaxException;
 import com.aplana.timesheet.constants.TimeSheetConstants;
 import com.aplana.timesheet.dao.EmployeeDAO;
 import com.aplana.timesheet.dao.entity.*;
-import com.aplana.timesheet.enums.EmployeePlanType;
-import com.aplana.timesheet.enums.TSEnum;
-import com.aplana.timesheet.enums.TypesOfActivityEnum;
-import com.aplana.timesheet.enums.VacationStatusEnum;
+import com.aplana.timesheet.enums.*;
 import com.aplana.timesheet.exception.service.NotDataForYearInCalendarException;
 import com.aplana.timesheet.form.PlanEditForm;
 import com.aplana.timesheet.form.validator.PlanEditFormValidator;
@@ -64,6 +61,19 @@ public class PlanEditController {
     public static final String EMPLOYEE_ID = "employee_id";
     public static final String PERCENT_OF_CHARGE = "percent_of_charge";
 
+    public static final String SUMMARY_PROJECTS = "summary_projects";
+    public static final String SUMMARY_PRESALES = "summary_presales";
+    public static final String SUMMARY_INVESTMENT = "summary_investment";
+    public static final String SUMMARY_COMMERCIAL = "summary_commercial";
+    public static final String SUMMARY_PROJECTS_PLAN = SUMMARY_PROJECTS + _PLAN;
+    public static final String SUMMARY_PROJECTS_FACT = SUMMARY_PROJECTS + _FACT;
+    public static final String SUMMARY_PRESALES_PLAN = SUMMARY_PRESALES + _PLAN;
+    public static final String SUMMARY_PRESALES_FACT = SUMMARY_PRESALES + _FACT;
+    public static final String SUMMARY_INVESTMENT_PLAN = SUMMARY_INVESTMENT + _PLAN;
+    public static final String SUMMARY_INVESTMENT_FACT = SUMMARY_INVESTMENT + _FACT;
+    public static final String SUMMARY_COMMERCIAL_PLAN = SUMMARY_COMMERCIAL + _PLAN;
+    public static final String SUMMARY_COMMERCIAL_FACT = SUMMARY_COMMERCIAL + _FACT;
+
     public static final String PROJECT_ID = "id";
     public static final String PROJECT_NAME = "name";
     public static final String PROJECTS_PLANS = "projects_plans";
@@ -101,6 +111,8 @@ public class PlanEditController {
     private static final String COOKIE_SHOW_FACTS = "cookie_show_facts";
     private static final String COOKIE_SHOW_PROJECTS = "cookie_show_projects";
     private static final String COOKIE_SHOW_PRESALES = "cookie_show_presales";
+    private static final String COOKIE_SHOW_SUMMARY_PROJECTS_PRESALES = "cookie_show_summary_projects_presales";
+    private static final String COOKIE_SHOW_SUMMARY_FUNDING = "cookie_show_summary_funding";
     private static final String COOKIE_MONTH = "cookie_month";
     private static final String COOKIE_MANAGER = "cookie_manager";
     public  static final int    COOKIE_MAX_AGE = 999999999;
@@ -131,6 +143,18 @@ public class PlanEditController {
 
     private static boolean isPresale(Project project) {
         return (EnumsUtils.getEnumById(project.getState().getId(), TypesOfActivityEnum.class) == TypesOfActivityEnum.PRESALE);
+    }
+
+    private static boolean isProject(Project project) {
+        return (EnumsUtils.getEnumById(project.getState().getId(), TypesOfActivityEnum.class) == TypesOfActivityEnum.PROJECT);
+    }
+
+    private static boolean isCommercialProject(Project project) {
+        return (EnumsUtils.getEnumById(project.getFundingType().getId(), ProjectFundingTypeEnum.class) == ProjectFundingTypeEnum.COMMERCIAL_PROJECT);
+    }
+
+    private static boolean isInvestmentProject(Project project) {
+        return (EnumsUtils.getEnumById(project.getFundingType().getId(), ProjectFundingTypeEnum.class) == ProjectFundingTypeEnum.INVESTMENT_PROJECT);
     }
 
     private static <T> T defaultValue(T value, T defaultValue) {
@@ -272,6 +296,10 @@ public class PlanEditController {
                 form.setMonth(defaultValue(tryParseInt(value), form.getMonth()));
             } else if (COOKIE_MANAGER.equals(name)) {
                 form.setManager(defaultValue(tryParseInt(value), form.getManager()));
+            } else if (COOKIE_SHOW_SUMMARY_PROJECTS_PRESALES.equals(name)) {
+                form.setShowSumProjectsPresales(defaultValue(tryParseBoolean(value), form.getShowSumProjectsPresales()));
+            } else if (COOKIE_SHOW_SUMMARY_FUNDING.equals(name)) {
+                form.setShowSumFundingType(defaultValue(tryParseBoolean(value), form.getShowSumFundingType()));
             }
         }
     }
@@ -289,6 +317,8 @@ public class PlanEditController {
         form.setShowFacts(Boolean.TRUE);
         form.setShowProjects(Boolean.TRUE);
         form.setShowPresales(Boolean.TRUE);
+        form.setShowSumProjectsPresales(Boolean.TRUE);
+        form.setShowSumFundingType(Boolean.FALSE);
     }
 
     private List<Region> getRegionList() {
@@ -368,6 +398,8 @@ public class PlanEditController {
         addCookie(response, COOKIE_PROJECT_ROLES, StringUtils.join(form.getProjectRoles(), SEPARATOR));
         addCookie(response, COOKIE_MONTH, form.getMonth());
         addCookie(response, COOKIE_MANAGER, form.getManager());
+        addCookie(response, COOKIE_SHOW_SUMMARY_PROJECTS_PRESALES, form.getShowSumProjectsPresales());
+        addCookie(response, COOKIE_SHOW_SUMMARY_FUNDING, form.getShowSumFundingType());
     }
 
     private ModelAndView createModelAndView(PlanEditForm form, BindingResult bindingResult) {
@@ -499,11 +531,11 @@ public class PlanEditController {
             final double summaryPlan = TimeSheetConstants.WORK_DAY_DURATION * workDaysCount * employee.getJobRate();
 
             if (showPlans) {
-                appendToBuilder(builder, getPlans(employee, year, month, summaryPlan));
+                appendToBuilder(builder, getPlans(employee, year, month, summaryPlan, form));
             }
 
             if (showFacts) {
-                appendToBuilder(builder, getFacts(employee, year, month, summaryPlan));
+                appendToBuilder(builder, getFacts(employee, year, month, summaryPlan, form));
             }
 
             nodes.add(builder.build());
@@ -518,7 +550,7 @@ public class PlanEditController {
         }
     }
 
-    private Map<String, JsonNodeBuilder> getPlans(Employee employee, Integer year, Integer month, Double summaryPlan) {
+    private Map<String, JsonNodeBuilder> getPlans(Employee employee, Integer year, Integer month, Double summaryPlan, PlanEditForm form) {
         final Division division = employee.getDivision();
         final Map<String, JsonNodeBuilder> map = Maps.newHashMap();
 
@@ -526,6 +558,10 @@ public class PlanEditController {
         Double centerPresalesPlan = null;
         double otherProjectsPlan = 0;
         double sumOfPlanCharge = 0;
+        Double sumProjectsPlan = null;
+        Double sumPresalesPlan = null;
+        Double sumInvestPlan = null;
+        Double sumCommercePlan = null;
 
         for (EmployeeProjectPlan employeeProjectPlan : employeeProjectPlanService.find(employee, year, month)) {
             final Project project = employeeProjectPlan.getProject();
@@ -540,6 +576,21 @@ public class PlanEditController {
                     }
                 } else {
                     otherProjectsPlan += duration;
+                }
+
+                /* расчёт итого по проектам/пресейлам */
+                if (isProject(project)) {
+                    sumProjectsPlan = nilIfNull(sumProjectsPlan) + duration;
+                } else {
+                    sumPresalesPlan = nilIfNull(sumPresalesPlan) + duration;
+                }
+
+                /* расчёт итого по инвест/комерц проектам */
+                if (isProject(project) && isCommercialProject(project)) {
+                    sumCommercePlan = nilIfNull(sumCommercePlan) + duration;
+                }
+                if ( (isProject(project) && isInvestmentProject(project)) || (isPresale(project)) ) {
+                    sumInvestPlan = nilIfNull(sumInvestPlan) + duration;
                 }
 
                 appendNumberField(map, String.format("%d" + _PLAN, project.getId()), employeeProjectPlan.getValue());
@@ -563,12 +614,22 @@ public class PlanEditController {
         appendNumberField(map, CENTER_PROJECTS_PLAN, centerProjectsPlan);
         appendNumberField(map, CENTER_PRESALES_PLAN, centerPresalesPlan);
 
+        if (form.getShowSumProjectsPresales()) {
+            appendNumberField(map, SUMMARY_PROJECTS_PLAN, sumProjectsPlan);
+            appendNumberField(map, SUMMARY_PRESALES_PLAN, sumPresalesPlan);
+        }
+
         Double value;
 
         for (EmployeePlan employeePlan : employeePlanService.find(employee, year, month)) {
             value = employeePlan.getValue();
 
             sumOfPlanCharge += nilIfNull(value);
+
+            /* непроектная активность */
+            if ( employeePlan.getType().getId().equals(TypesOfActivityEnum.NON_PROJECT.getId()) ) {
+                sumInvestPlan = nilIfNull(sumInvestPlan) + value;
+            }
 
             appendNumberField(map, getFieldNameForEmployeePlan(employeePlan), value);
         }
@@ -578,6 +639,11 @@ public class PlanEditController {
                 ILLNESS_PLAN,
                 TimeSheetConstants.WORK_DAY_DURATION * illnessService.getIllnessWorkdaysCount(employee, year, month)
         );
+
+        if (form.getShowSumFundingType()) {
+            appendNumberField(map, SUMMARY_INVESTMENT_PLAN, sumInvestPlan);
+            appendNumberField(map, SUMMARY_COMMERCIAL_PLAN, sumCommercePlan);
+        }
 
         appendStringField(map, SUMMARY_PLAN, formatSummaryPlan(summaryWorkHours + nonProjectDuration, summaryPlan));
 
@@ -592,7 +658,7 @@ public class PlanEditController {
         return map;
     }
 
-    private Map<String, JsonNodeBuilder> getFacts(Employee employee, Integer year, Integer month, double summaryPlan) {
+    private Map<String, JsonNodeBuilder> getFacts(Employee employee, Integer year, Integer month, double summaryPlan, PlanEditForm form) {
         final Division division = employee.getDivision();
         final Map<Integer, Double> projectsFactMap = Maps.newHashMap();
 
@@ -601,6 +667,10 @@ public class PlanEditController {
         double centerPresalesFact = 0;
         double otherProjectsFact = 0;
         double nonProjectFact = 0;
+        Double sumProjectsFact = null;
+        Double sumPresalesFact = null;
+        Double sumInvestFact = null;
+        Double sumCommerceFact = null;
 
         Integer projectId;
 
@@ -632,6 +702,22 @@ public class PlanEditController {
                         otherProjectsFact += duration;
                     }
 
+                    /* расчёт итого по проектам/пресейлам */
+                    if (isProject(project)) {
+                        sumProjectsFact = nilIfNull(sumProjectsFact) + duration;
+                    } else {
+                        sumPresalesFact = nilIfNull(sumPresalesFact) + duration;
+                    }
+
+                    /* расчёт итого по инвест/комерц проектам */
+                    if (isProject(project) && isCommercialProject(project)) {
+                        sumCommerceFact = nilIfNull(sumCommerceFact) + duration;
+                    }
+                    if ( (isProject(project) && isInvestmentProject(project)) || (isPresale(project)) ) {
+                        sumInvestFact = nilIfNull(sumInvestFact) + duration;
+                    }
+
+
                     projectsFactMap.put(projectId, nilIfNull(projectsFactMap.get(projectId)) + duration);
                 }
             }
@@ -662,6 +748,16 @@ public class PlanEditController {
         appendNumberField(map, OTHER_PROJECTS_AND_PRESALES_FACT, otherProjectsFact);
 
         appendNumberField(map, NON_PROJECT_FACT, nonProjectFact);
+
+        if (form.getShowSumProjectsPresales()) {
+            appendNumberField(map, SUMMARY_PROJECTS_FACT, sumProjectsFact);
+            appendNumberField(map, SUMMARY_PRESALES_FACT, sumPresalesFact);
+        }
+
+        if (form.getShowSumFundingType()) {
+            appendNumberField(map, SUMMARY_INVESTMENT_FACT, nilIfNull(sumInvestFact) + nilIfNull(nonProjectFact));
+            appendNumberField(map, SUMMARY_COMMERCIAL_FACT, sumCommerceFact);
+        }
 
         appendNumberField(
                 map,
