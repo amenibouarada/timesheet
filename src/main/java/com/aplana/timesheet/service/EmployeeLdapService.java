@@ -1,5 +1,6 @@
 package com.aplana.timesheet.service;
 
+import com.aplana.timesheet.dao.EmployeeDAO;
 import com.aplana.timesheet.dao.LdapDAO;
 import com.aplana.timesheet.dao.ProjectRolePermissionsDAO;
 import com.aplana.timesheet.dao.entity.*;
@@ -493,6 +494,9 @@ public class EmployeeLdapService extends AbstractServiceWithTransactionManagemen
 
     }
 
+    @Autowired
+    private EmployeeDAO employeeDAO;
+
     private Employee createAndFillEmployee(
             EmployeeLdap employeeLdap,
             StringBuffer errors,
@@ -506,17 +510,18 @@ public class EmployeeLdapService extends AbstractServiceWithTransactionManagemen
         employee.setObjectSid(employeeLdap.getObjectSid());
         employee.setJiraName(employeeLdap.getMailNickname());
 
-        // Роли из БД по умолчанию ставятся только для новых сотрудников
-        if ((employee.getJob() != null) && (employeeType.equals(EmployeeType.NEW_EMPLOYEE))) {
-            setEmployeePermission(employee);
-        } else {
-            employee.setPermissions(new HashSet<Permission>());
-        }
-
         findAndFillJobField(employeeLdap, errors, employee);
         // важно установить Region и Division до установки Manager
         findAndFillRegionField(employeeLdap, errors, employee);
         findAndFillDivisionField(employeeLdap, employee, errors);
+
+        // Роли из БД по умолчанию ставятся только для новых сотрудников
+        //if ((employee.getJob() != null) && (employeeType.equals(EmployeeType.NEW_EMPLOYEE))) {
+        if (!employeeDAO.isNotToSync(employee)){
+            setEmployeePermission(employee);
+        } else {
+            employee.setPermissions(new HashSet<Permission>());
+        }
 
         switch (employeeType) {
             case NEW_EMPLOYEE:

@@ -3,6 +3,7 @@ package com.aplana.timesheet.service;
 import argo.jdom.JsonArrayNodeBuilder;
 import com.aplana.timesheet.constants.TimeSheetConstants;
 import com.aplana.timesheet.dao.EmployeeDAO;
+import com.aplana.timesheet.dao.RegionDAO;
 import com.aplana.timesheet.dao.entity.*;
 import com.aplana.timesheet.enums.PermissionsEnum;
 import com.aplana.timesheet.util.JsonUtil;
@@ -42,7 +43,8 @@ public class EmployeeService {
     private DivisionService divisionService;
     @Autowired
     private ProjectService projectService;
-
+    @Autowired
+    RegionDAO regionDAO;
 
     /**
     * Возвращает сотрудника по идентификатору.
@@ -200,18 +202,29 @@ public class EmployeeService {
      */
     @Transactional
     public StringBuffer setEmployees(List<Employee> employees) {
+        // Если город не задан
+        Region defaultCity = regionDAO.find("Москва");
         StringBuffer trace = new StringBuffer();
-        for (Employee emp : employees) {
-            if (!employeeDAO.isNotToSync(emp)) {
-                trace.append(String.format(
-                        "%s user: %s %s\n", emp.getId() != null ? "Updated" : "Added", emp.getEmail(), emp.getName()
-                ));
 
-                save(emp);
-            } else {
-                trace.append(String.format(
-                        "\nUser: %s %s marked not_to_sync.(Need update)\n%s\n\n",
-                        emp.getEmail(), emp.getName(), emp.toString()));
+        for (Employee emp : employees) {
+            if (emp.getRegion() == null){
+                emp.setRegion(defaultCity);
+            }
+            try{
+                if (!employeeDAO.isNotToSync(emp)) {
+                    trace.append(String.format(
+                            "%s user: %s %s\n", emp.getId() != null ? "Updated" : "Added", emp.getEmail(), emp.getName()
+                    ));
+
+                    save(emp);
+                } else {
+                    trace.append(String.format(
+                            "\nUser: %s %s marked not_to_sync.(Need update)\n%s\n\n",
+                            emp.getEmail(), emp.getName(), emp.toString()));
+                }
+            } catch (Exception e){
+                trace.append("exception: " + e);
+                logger.debug("update user failed", e);
             }
         }
         trace.append("\n\n");
