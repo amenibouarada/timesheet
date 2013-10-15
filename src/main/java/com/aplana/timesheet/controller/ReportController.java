@@ -15,8 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
-import java.util.Date;
-
 @Controller
 public class ReportController {
 	private static final Logger logger = LoggerFactory.getLogger(TimeSheetController.class);	 
@@ -33,7 +31,9 @@ public class ReportController {
 	SendMailService sendMailService;
 	@Autowired
 	ProjectService projectService;  
-	
+	@Autowired
+    ReportService reportService;
+
 	@RequestMapping(value = "/report/{year}/{month}/{day}/{employeeId}", method = RequestMethod.GET)
 	public ModelAndView sendViewReports ( @PathVariable("year") Integer year,@PathVariable("month") Integer month,@PathVariable("day") Integer day, @PathVariable("employeeId") Integer employeeId, @ModelAttribute("ReportForm") TimeSheetForm tsForm, BindingResult result) {		
 		logger.info("Date for report: {}.{}", year, month);
@@ -49,7 +49,7 @@ public class ReportController {
 
         mav.addObject("creationDate", (timeSheet != null && timeSheet.getCreationDate() != null) ?
                 DateTimeUtil.dateToString(timeSheet.getCreationDate(), DateTimeUtil.VIEW_DATE_TIME_PATTERN) : "");
-        mav.addObject("report", sendMailService.initMessageBodyForReport(timeSheet));
+        mav.addObject("report", reportService.modifyURL(sendMailService.initMessageBodyForReport(timeSheet)));
 
         logger.info("<<<<<<<<< End of RequestMapping <<<<<<<<<<<<<<<<<<<<<<");
         return mav;
