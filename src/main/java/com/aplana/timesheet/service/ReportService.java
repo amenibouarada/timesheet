@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,7 +54,7 @@ public class ReportService {
 
     @Transactional(readOnly = true)
     public String replaceJiraLink(String text){
-        List<String> jiraKeyList = projectDAO.getJiraKeyList();
+        List<String> jiraKeyList = getJiraKey();
         Matcher matcher = PATTERN_TASK.matcher(text);
 
         // Важен порядок
@@ -163,5 +164,20 @@ public class ReportService {
         }
 
         return result.toString();
+    }
+
+    @Transactional(readOnly = true)
+    public List<String> getJiraKey(){
+        List<String> result = new ArrayList<String>();
+
+        List<String> jiraKeyList = projectDAO.getJiraKeyList();
+        for(String keys : jiraKeyList){
+            String[] splitKey = keys.split(",");
+            for(int i=0; i<splitKey.length; ++i){
+                result.add(splitKey[i].trim());
+            }
+        }
+
+        return result;
     }
 }
