@@ -538,6 +538,7 @@ public class EmployeeLdapService extends AbstractServiceWithTransactionManagemen
                     empInDb = employeeService.findByEmail(employeeLdap.getEmail());
                 }
                 if (empInDb != null) {
+                    employee.setBillable(empInDb.isBillable());
                     employee.setId(empInDb.getId());
                     employee.setStartDate(empInDb.getStartDate());
                     employee.getPermissions().addAll(empInDb.getPermissions());
