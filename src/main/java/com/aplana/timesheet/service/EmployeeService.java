@@ -202,8 +202,8 @@ public class EmployeeService {
      */
     @Transactional
     public StringBuffer setEmployees(List<Employee> employees) {
-        // Если город не задан
-        Region defaultCity = regionDAO.find("Москва");
+        // Если город не найден - "Другой район"
+        Region defaultCity = regionDAO.find(1);
         StringBuffer trace = new StringBuffer();
 
         for (Employee emp : employees) {
