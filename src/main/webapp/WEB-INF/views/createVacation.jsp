@@ -1,4 +1,4 @@
-<%@ page import="com.aplana.timesheet.properties.TSPropertyProvider" %>
+<%@ page import="com.aplana.timesheet.system.properties.TSPropertyProvider" %>
 <%@page contentType="text/html" pageEncoding="UTF-8" %>
 
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>

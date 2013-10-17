@@ -1,7 +1,7 @@
 package com.aplana.timesheet.service.MailSenders;
 
 import com.aplana.timesheet.form.AdminMessageForm;
-import com.aplana.timesheet.properties.TSPropertyProvider;
+import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.SendMailService;
 
 import javax.mail.Multipart;

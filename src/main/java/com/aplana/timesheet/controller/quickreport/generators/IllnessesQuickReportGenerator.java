@@ -1,6 +1,6 @@
 package com.aplana.timesheet.controller.quickreport.generators;
 
-import com.aplana.timesheet.constants.TimeSheetConstants;
+import com.aplana.timesheet.system.constants.TimeSheetConstants;
 import com.aplana.timesheet.controller.quickreport.IllnessesQuickReport;
 import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.dao.entity.Illness;

@@ -12,11 +12,11 @@
     </bean>
     <!--Конец блока авторизации в Active Directory-->
     
-    <bean id="rememberService" class="com.aplana.timesheet.service.RememberService">
+    <bean id="rememberService" class="com.aplana.timesheet.system.security.RememberService">
         <property name="employeeTokenDAO" ref="employeeTokenDAO"/>
         <property name="LdapUserDetailsService" ref="myLdapUserDetailsService"/>
     </bean>
     <bean id="employeeTokenDAO" class="com.aplana.timesheet.dao.EmployeeTokenDAO"/>
-    <bean id="rememberMeAuthenticationProvider" class="com.aplana.timesheet.util.AuthenticationProviderImpl"/>
+    <bean id="rememberMeAuthenticationProvider" class="com.aplana.timesheet.system.security.AuthenticationProviderImpl"/>
 
 </beans>

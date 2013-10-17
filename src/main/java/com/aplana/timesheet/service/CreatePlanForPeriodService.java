@@ -1,6 +1,6 @@
 package com.aplana.timesheet.service;
 
-import com.aplana.timesheet.constants.TimeSheetConstants;
+import com.aplana.timesheet.system.constants.TimeSheetConstants;
 import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.dao.entity.EmployeeProjectPlan;
 import com.aplana.timesheet.dao.entity.Project;

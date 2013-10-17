@@ -3,7 +3,7 @@
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <%@ page import="static com.aplana.timesheet.form.EmploymentPlanningForm.*" %>
 <%@ page import="static com.aplana.timesheet.util.ResourceUtils.getResRealPath" %>
-<%@ page import="static com.aplana.timesheet.constants.TimeSheetConstants.DOJO_PATH" %>
+<%@ page import="static com.aplana.timesheet.system.constants.TimeSheetConstants.DOJO_PATH" %>
 
 <html>
 <head>

@@ -1,10 +1,11 @@
-package com.aplana.timesheet.service;
+package com.aplana.timesheet.system.security;
 
-import com.aplana.timesheet.constants.TimeSheetConstants;
+import com.aplana.timesheet.service.LdapUserDetailsService;
+import com.aplana.timesheet.system.constants.TimeSheetConstants;
 import com.aplana.timesheet.dao.EmployeeTokenDAO;
 import com.aplana.timesheet.dao.entity.EmployeeToken;
-import com.aplana.timesheet.util.RememberToken;
-import com.aplana.timesheet.util.TimeSheetUser;
+import com.aplana.timesheet.system.security.entity.RememberToken;
+import com.aplana.timesheet.system.security.entity.TimeSheetUser;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -21,7 +22,7 @@ import java.util.List;
 public class RememberService implements RememberMeServices, InitializingBean, LogoutHandler {
 
     private EmployeeTokenDAO employeeTokenDAO;
-    private LdapUserDetailsService LdapUserDetailsService;
+    private com.aplana.timesheet.service.LdapUserDetailsService LdapUserDetailsService;
 
     @Override
     @SuppressWarnings("empty-statement")

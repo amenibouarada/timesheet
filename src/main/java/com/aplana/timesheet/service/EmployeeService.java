@@ -1,7 +1,7 @@
 package com.aplana.timesheet.service;
 
 import argo.jdom.JsonArrayNodeBuilder;
-import com.aplana.timesheet.constants.TimeSheetConstants;
+import com.aplana.timesheet.system.constants.TimeSheetConstants;
 import com.aplana.timesheet.dao.EmployeeDAO;
 import com.aplana.timesheet.dao.RegionDAO;
 import com.aplana.timesheet.dao.entity.*;
@@ -24,7 +24,7 @@ import java.util.*;
 
 import static argo.jdom.JsonNodeBuilders.*;
 import static argo.jdom.JsonNodeFactories.string;
-import static com.aplana.timesheet.constants.RoleConstants.ROLE_ADMIN;
+import static com.aplana.timesheet.system.constants.RoleConstants.ROLE_ADMIN;
 
 @Service
 public class EmployeeService {

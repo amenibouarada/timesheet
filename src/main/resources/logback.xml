@@ -99,7 +99,7 @@
         <appender-ref ref="mail" />
     </logger>
 
-    <logger name="com.aplana.timesheet.security.AuthenticationFailureListener" level="info" additivity="false">
+    <logger name="com.aplana.timesheet.system.security.AuthenticationFailureListener" level="info" additivity="false">
         <appender-ref ref="access" />
     </logger>
 

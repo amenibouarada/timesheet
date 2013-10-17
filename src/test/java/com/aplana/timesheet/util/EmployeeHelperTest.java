@@ -9,6 +9,7 @@ import com.aplana.timesheet.dao.DivisionDAO;
 import com.aplana.timesheet.dao.entity.Division;
 import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.service.EmployeeService;
+import com.aplana.timesheet.service.helper.EmployeeHelper;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;

@@ -10,7 +10,8 @@ import com.aplana.timesheet.exception.controller.BusinessTripsAndIllnessAddExcep
 import com.aplana.timesheet.form.BusinessTripsAndIllnessAddForm;
 import com.aplana.timesheet.form.validator.BusinessTripsAndIllnessAddFormValidator;
 import com.aplana.timesheet.service.*;
-import com.aplana.timesheet.util.EmployeeHelper;
+import com.aplana.timesheet.service.helper.EmployeeHelper;
+import com.aplana.timesheet.system.security.SecurityService;
 import com.aplana.timesheet.util.EnumsUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,9 +27,6 @@ import org.springframework.web.servlet.ModelAndView;
 import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
-
-import static com.aplana.timesheet.enums.QuickReportTypesEnum.BUSINESS_TRIP;
-import static com.aplana.timesheet.enums.QuickReportTypesEnum.ILLNESS;
 
 /**
  * User: vsergeev

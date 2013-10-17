@@ -1,4 +1,4 @@
-<%@ page import="com.aplana.timesheet.properties.TSPropertyProvider" %>
+<%@ page import="com.aplana.timesheet.system.properties.TSPropertyProvider" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%
     String version = TSPropertyProvider.getFooterText();
