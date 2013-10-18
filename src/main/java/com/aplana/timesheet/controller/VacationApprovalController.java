@@ -5,7 +5,7 @@ import com.aplana.timesheet.dao.entity.Vacation;
 import com.aplana.timesheet.dao.entity.VacationApproval;
 import com.aplana.timesheet.exception.service.VacationApprovalServiceException;
 import com.aplana.timesheet.form.VacationApprovalForm;
-import com.aplana.timesheet.properties.TSPropertyProvider;
+import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.ManagerRoleNameService;
 import com.aplana.timesheet.service.SendMailService;
 import com.aplana.timesheet.service.VacationApprovalService;

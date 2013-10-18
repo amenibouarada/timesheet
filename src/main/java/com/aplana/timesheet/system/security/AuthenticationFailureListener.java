@@ -1,6 +1,6 @@
-package com.aplana.timesheet.security;
+package com.aplana.timesheet.system.security;
 
-import com.aplana.timesheet.properties.TSPropertyProvider;
+import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.SendMailService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

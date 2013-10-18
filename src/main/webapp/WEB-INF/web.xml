@@ -50,7 +50,7 @@
 
     <filter>
         <filter-name>AutentificationFilter</filter-name>
-        <filter-class>com.aplana.timesheet.filters.AutentificationFilter</filter-class>
+        <filter-class>com.aplana.timesheet.system.security.AutentificationFilter</filter-class>
 
     </filter>
 

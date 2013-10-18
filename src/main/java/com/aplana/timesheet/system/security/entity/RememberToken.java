@@ -1,7 +1,8 @@
-package com.aplana.timesheet.util;
+package com.aplana.timesheet.system.security.entity;
 
 import java.util.Collection;
 import java.util.List;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 

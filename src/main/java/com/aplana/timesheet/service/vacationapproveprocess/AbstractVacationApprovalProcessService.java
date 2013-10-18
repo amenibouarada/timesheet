@@ -4,7 +4,7 @@ import com.aplana.timesheet.dao.entity.*;
 import com.aplana.timesheet.enums.VacationStatusEnum;
 import com.aplana.timesheet.exception.service.CalendarServiceException;
 import com.aplana.timesheet.exception.service.VacationApprovalServiceException;
-import com.aplana.timesheet.properties.TSPropertyProvider;
+import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.*;
 import com.aplana.timesheet.util.DateTimeUtil;
 import com.google.common.collect.Lists;

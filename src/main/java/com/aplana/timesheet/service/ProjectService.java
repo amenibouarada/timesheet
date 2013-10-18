@@ -4,7 +4,7 @@ import argo.jdom.JsonArrayNodeBuilder;
 import argo.jdom.JsonObjectNodeBuilder;
 import com.aplana.timesheet.dao.ProjectDAO;
 import com.aplana.timesheet.dao.entity.*;
-import com.aplana.timesheet.properties.TSPropertyProvider;
+import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.util.JsonUtil;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
@@ -92,8 +92,8 @@ public class ProjectService {
 	
 	/**
 	 *Возвращает для указанного сотрудника список проектных ролей в проекте 
-	 *@param Project project проект
-	 *@param Employee employee сотрудник
+	 *@param project проект
+	 *@param employee сотрудник
 	 *@return List<ProjectRole> список проектных ролей
 	 */
     @Transactional(readOnly = true)

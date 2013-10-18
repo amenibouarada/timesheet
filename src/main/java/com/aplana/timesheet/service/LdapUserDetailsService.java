@@ -1,12 +1,12 @@
 package com.aplana.timesheet.service;
 
-import com.aplana.timesheet.constants.RoleConstants;
+import com.aplana.timesheet.system.constants.RoleConstants;
 import com.aplana.timesheet.dao.EmployeeDAO;
 import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.dao.entity.Permission;
 import com.aplana.timesheet.enums.PermissionsEnum;
 import com.aplana.timesheet.util.EnumsUtils;
-import com.aplana.timesheet.util.TimeSheetUser;
+import com.aplana.timesheet.system.security.entity.TimeSheetUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

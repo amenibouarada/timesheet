@@ -7,7 +7,7 @@ import com.aplana.timesheet.dao.entity.TimeSheet;
 import com.aplana.timesheet.enums.TypesOfActivityEnum;
 import com.aplana.timesheet.form.TimeSheetForm;
 import com.aplana.timesheet.form.TimeSheetTableRowForm;
-import com.aplana.timesheet.properties.TSPropertyProvider;
+import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.util.EnumsUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.List;
 
-import static com.aplana.timesheet.constants.TimeSheetConstants.WORK_DAY_DURATION;
+import static com.aplana.timesheet.system.constants.TimeSheetConstants.WORK_DAY_DURATION;
 
 /**
  * @author eshangareev

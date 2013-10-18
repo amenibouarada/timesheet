@@ -5,7 +5,7 @@ import com.aplana.timesheet.dao.JiraDAO;
 import com.aplana.timesheet.dao.ProjectDAO;
 import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.dao.entity.Project;
-import com.aplana.timesheet.properties.TSPropertyProvider;
+import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.util.DateTimeUtil;
 import com.atlassian.jira.rest.client.JiraRestClient;
 import com.atlassian.jira.rest.client.domain.Issue;

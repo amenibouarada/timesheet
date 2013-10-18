@@ -5,7 +5,8 @@ import com.aplana.timesheet.dao.entity.Division;
 import com.aplana.timesheet.exception.JReportBuildError;
 import com.aplana.timesheet.reports.TSJasperReport;
 import com.aplana.timesheet.service.*;
-import com.aplana.timesheet.util.EmployeeHelper;
+import com.aplana.timesheet.service.helper.EmployeeHelper;
+import com.aplana.timesheet.system.security.SecurityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.servlet.ModelAndView;
 

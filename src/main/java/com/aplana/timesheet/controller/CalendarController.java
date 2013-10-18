@@ -4,7 +4,7 @@ import com.aplana.timesheet.service.CalendarService;
 import com.aplana.timesheet.service.EmployeeService;
 import com.aplana.timesheet.service.VacationService;
 import com.aplana.timesheet.util.JsonUtil;
-import com.aplana.timesheet.util.ViewReportHelper;
+import com.aplana.timesheet.service.helper.ViewReportHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

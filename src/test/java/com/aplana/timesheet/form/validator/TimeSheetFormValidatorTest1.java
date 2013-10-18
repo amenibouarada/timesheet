@@ -5,7 +5,7 @@ import com.aplana.timesheet.dao.entity.*;
 import com.aplana.timesheet.enums.DictionaryEnum;
 import com.aplana.timesheet.form.TimeSheetForm;
 import com.aplana.timesheet.form.TimeSheetTableRowForm;
-import com.aplana.timesheet.properties.TSPropertyProvider;
+import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;

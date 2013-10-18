@@ -1,13 +1,13 @@
 package com.aplana.timesheet.controller;
 
-import com.aplana.timesheet.constants.PadegConstants;
-import com.aplana.timesheet.constants.TimeSheetConstants;
+import com.aplana.timesheet.system.constants.PadegConstants;
+import com.aplana.timesheet.system.constants.TimeSheetConstants;
 import com.aplana.timesheet.dao.entity.Calendar;
 import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.form.ViewReportsForm;
 import com.aplana.timesheet.form.entity.DayTimeSheet;
 import com.aplana.timesheet.form.validator.ViewReportsFormValidator;
-import com.aplana.timesheet.properties.TSPropertyProvider;
+import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.CalendarService;
 import com.aplana.timesheet.service.EmployeeReportService;
 import com.aplana.timesheet.service.TimeSheetService;
