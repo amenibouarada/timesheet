@@ -16,7 +16,7 @@
 		<property name="password" value="${ldap.password}" />
 		<property name="baseEnvironmentProperties">
 			<map>
-				<entry key="java.naming.referral" value="follow"/>
+				<entry key="java.naming.referral" value="ignore"/>
 				<entry key="java.naming.ldap.attributes.binary" value="objectSid"/>
 			</map>
 		</property>
