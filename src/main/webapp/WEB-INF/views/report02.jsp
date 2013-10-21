@@ -136,17 +136,20 @@
                         </td>
                     </tr>
 				</table>
-				<div class="radiogroup">
-					<div class="label"><fmt:message key="report.formattitle"/></div>
-					<ul class="radio">
-						<li><input type=radio name="printtype" id="printtype1" value="1" checked/><label
-								for="printtype1"><fmt:message key="label.report.html"/></label></li>
-						<li><input type=radio name="printtype" id="printtype2" value="2"/><label for="printtype2"><fmt:message key="label.report.excel"/></label>
-						</li>
-						<li><input type=radio name="printtype" id="printtype3" value="3"/><label for="printtype3"><fmt:message key="label.report.pdf"/></label>
-						</li>
-					</ul>
-				</div>
+                <div class="radiogroup">
+                    <div class="label"><fmt:message key="report.formattitle"/></div>
+                    <ul class="radio">
+                        <li><input type=radio name="printtype" id="printtype2" value="2" checked/>
+                            <label for="printtype2"><fmt:message key="label.report.excel"/></label>
+                        </li>
+                        <li><input type=radio name="printtype" id="printtype1" value="1" disabled/>
+                            <label for="printtype1"><fmt:message key="label.report.html"/></label>
+                        </li>
+                        <li><input type=radio name="printtype" id="printtype3" value="3" disabled/>
+                            <label for="printtype3"><fmt:message key="label.report.pdf"/></label>
+                        </li>
+                    </ul>
+                </div>
 
 			</div>
 
