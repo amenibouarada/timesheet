@@ -15,11 +15,9 @@ import java.util.*;
 import java.util.Calendar;
 
 /**
- * Created with IntelliJ IDEA.
  * User: bsirazetdinov
  * Date: 22.07.13
  * Time: 16:16
- * To change this template use File | Settings | File Templates.
  */
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, noRollbackFor = DataAccessException.class)
@@ -39,20 +37,11 @@ public class PlannedVacationService {
     @Autowired
     protected ProjectService projectService;
 
-    final static Date dateCurrent;
-    final static Date dateAfter;
-    final static Date dateBefore;
-    static {
-        final Calendar calendar2 = Calendar.getInstance();
-        dateCurrent = calendar2.getTime();
-        calendar2.add(Calendar.WEEK_OF_YEAR, 2);
-        dateAfter = calendar2.getTime();
-        calendar2.add(Calendar.WEEK_OF_YEAR, -4);
-        dateBefore = calendar2.getTime();
-    }
+    private Date dateCurrent;
+    private Date dateAfter;
+    private Date dateBefore;
 
     public PlannedVacationService() {}
-
 
     /**
      * Получаем руководителей сотрудников
@@ -143,6 +132,17 @@ public class PlannedVacationService {
 
     @Transactional
     public void service() {
+        setupDates();
+        logger.info("Start sending mail to managers! Current dates! dateCurrent {} dateAfter {} dateBefore {}", Arrays.asList(dateCurrent, dateAfter, dateBefore));
         sendMailService.plannedVacationInfoMailing(getManagerEmployeesVacation());
+    }
+
+    private void setupDates(){
+        final Calendar calendar2 = Calendar.getInstance();
+        dateCurrent = calendar2.getTime();
+        calendar2.add(Calendar.WEEK_OF_YEAR, 2);
+        dateAfter = calendar2.getTime();
+        calendar2.add(Calendar.WEEK_OF_YEAR, -4);
+        dateBefore = calendar2.getTime();
     }
 }
