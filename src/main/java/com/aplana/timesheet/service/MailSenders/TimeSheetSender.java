@@ -103,6 +103,14 @@ public class TimeSheetSender extends MailSender<TimeSheetForm> {
             return MailPriorityEnum.HIGH;
         }
 
+        if (params.getTimeSheetTablePart() != null) {
+            for (TimeSheetTableRowForm form : params.getTimeSheetTablePart()) {
+                if (form.getProblem() != null || !form.getProblem().isEmpty()) {
+                    return MailPriorityEnum.HIGH;
+                }
+            }
+        }
+
         return MailPriorityEnum.NORMAL;
     }
 
