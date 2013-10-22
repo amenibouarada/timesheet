@@ -66,6 +66,9 @@ function Gantt(gDiv, holidayList, type)
     this.DrawVacations = function () {
         var td = document.getElementsByClassName('GDay')[0];
         var num = td.clientWidth - TABLE_COLUMN_WIDTH + 1;
+        if (viewType == VIEW_GRAPHIC_BY_WEEK) {
+            num = 0;
+        }
         var dateDiff = 0;
         var gStr = "";
 
