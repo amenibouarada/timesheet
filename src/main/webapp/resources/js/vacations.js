@@ -13,26 +13,27 @@ function showGraphic(type) {
     var selectedTabInput = dojo.byId(VIEW_MODE);
     selectedTabInput.value = type;
 
-    if (vacationListJSON.length == 0){ // если нет данных для отображения
+    if (vacationListJSON.length == 0) { // если нет данных для отображения
         dojo.byId("emptyMessage").innerHTML = "Нет данных для отображения";
         return;
     }
     dojo.byId("emptyMessage").innerHTML = "";
 
-    if (type == VIEW_TABLE){ // если режим отображения - таблица
-        if (dojo.byId("byDay").checked){ // то смотрим, какой переключатель стоит
+    if (type == VIEW_TABLE) { // если режим отображения - таблица
+        if (dojo.byId("byDay").checked) { // то смотрим, какой переключатель стоит
             type = VIEW_GRAPHIC_BY_DAY;
-        }else{
+        } else {
             type = VIEW_GRAPHIC_BY_WEEK;
         }
     }
     var g = new Gantt(dojo.byId("graphic_div"), holidayList, type);
 
-    for (var i = 0; i < vacationListJSON.length; i++){
+    for (var i = 0; i < vacationListJSON.length; i++) {
         var vacation = new RegionEmployees(vacationListJSON[i].region_name, vacationListJSON[i].employeeList);
         g.AddRegionEmployeeList(vacation);
     }
 
+    //отрисовка только самой таблицы
     g.DrawTable();
 
     // растянем контейнер вкладок
@@ -44,14 +45,11 @@ function showGraphic(type) {
         });
     }
 
-    //т.к. размер колонки формируется уже после отрисовки таблицы
-    var num = {val: 0};
-    var td = document.getElementsByClassName('GDay')[0];
-    num.val = td.clientWidth - 14;
-    console.log("fd ", num.val);
-    if (num.val != 0) {
-        g.DrawVacations(num.val);
-    }
+    /*
+     т.к. размер колонки формируется уже после отрисовки таблицы
+     "содержимое" таблицы отрисовывается сейчас
+     */
+    g.DrawVacations();
 }
 
 function showVacations() {
@@ -184,7 +182,7 @@ function deleteApprover(apr_id) {
     if (!confirm("Удалить утверждающего?")) {
         return;
     } else {
-        console.log("apr_id = " + apr_id);
+//        console.log("apr_id = " + apr_id);
         dojo.byId(APPROVAL_ID).value = apr_id;
         vacationsForm.action = contextPath + "/vacations";
         vacationsForm.submit();

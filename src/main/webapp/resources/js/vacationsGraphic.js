@@ -40,32 +40,36 @@ function Gantt(gDiv, holidayList, type)
 {
     var GanttDiv = gDiv;
     var viewType = type;
-
+    var tableRowHeight = 20;
+    var TABLE_COLUMN_WIDTH = 0;
     var holidays = new Array();
     var date = new Date();
-    for (var i in holidayList){
+    for (var i in holidayList) {
         var dvArr = holidayList[i].split('.');
         date.setFullYear(dvArr[2], dvArr[1] - 1, dvArr[0]);
         holidays.push(date.toLocaleDateString());
     }
-
     var regionEmployeeList = new Array();
-    this.AddRegionEmployeeList = function(value){
+    this.AddRegionEmployeeList = function (value) {
         regionEmployeeList.push(value);
     }
-
-    var tableRowHeight = 20;
-    var tableColumnWidth = 15;
-    if (viewType == VIEW_GRAPHIC_BY_WEEK){
-        tableColumnWidth = 10;
+    if (viewType == VIEW_GRAPHIC_BY_WEEK) {
+        TABLE_COLUMN_WIDTH = 10;
+    } else {
+        TABLE_COLUMN_WIDTH = 15;
     }
 
-    this.DrawVacations = function(num) {
-        var offSet = 0;
+    /**
+     * функция отрисовки отпусков
+     * @constructor
+     */
+    this.DrawVacations = function () {
+        var td = document.getElementsByClassName('GDay')[0];
+        var num = td.clientWidth - TABLE_COLUMN_WIDTH + 1;
         var dateDiff = 0;
         var gStr = "";
 
-        if(regionEmployeeList.length <= 0){
+        if (regionEmployeeList.length <= 0) {
             return
         }
 
@@ -73,38 +77,39 @@ function Gantt(gDiv, holidayList, type)
         var minDate = findMinDate(vacations, viewType);
 
         var employeeCount = 0;
-        for (var i in regionEmployeeList){
+        for (var i in regionEmployeeList) {
             var employeeList = sortEmployeeList(regionEmployeeList[i].getEmployees());
             var indent = parseInt(i) + parseInt(employeeCount);
             gStr += "<div style='position:absolute; top:" + (tableRowHeight * indent + 38) + "px; left:5px'><b>" + regionEmployeeList[i].getRegion() + "</b></div>";
             employeeCount += employeeList.length;
-            for (var j in employeeList){
+            for (var j in employeeList) {
                 var vacationList = sortVacationsByType(employeeList[j].getVacations());
                 indent += 1;
-                for(var k in vacationList){
+                for (var k in vacationList) {
                     var color = getColorByType(vacationList[k].type);
-                    var tooltip = employeeList[j].getEmployee() + "\n" + vacationList[k].typeName + "\n" + vacationList[k].beginDate.toLocaleDateString() + " - " + vacationList[k].endDate.toLocaleDateString() + "\n" + vacationList[k].status ;
-                    offSet = (Date.parse(vacationList[k].beginDate) - Date.parse(minDate)) / (24 * 60 * 60 * 1000);
-                    if((Date.parse(vacationList[k].beginDate) - Date.parse(minDate))==0) {
+                    var tooltip = employeeList[j].getEmployee() + "\n" + vacationList[k].typeName + "\n" + vacationList[k].beginDate.toLocaleDateString() + " - " + vacationList[k].endDate.toLocaleDateString() + "\n" + vacationList[k].status;
+                    var offSet = (Date.parse(vacationList[k].beginDate) - Date.parse(minDate)) / (24 * 60 * 60 * 1000);
+                    if ((Date.parse(vacationList[k].beginDate) - Date.parse(minDate)) <= 0 && (viewType == VIEW_GRAPHIC_BY_DAY)) {
                         dateDiff = (Date.parse(vacationList[k].endDate) - Date.parse(vacationList[k].beginDate)) / (24 * 60 * 60 * 1000) + 1;
-                        gStr += "<div style='position:absolute; top:" + (tableRowHeight * indent + 37) + "px; left:" + (offSet * tableColumnWidth + 202 ) + "px; width:" + (tableColumnWidth * dateDiff - 1 + num) + "px'><div title='" + tooltip + "' class='GVacation' style='float:center;padding-left:3;" + "background-color:" + color + "; width:" + (tableColumnWidth * dateDiff - 1 +num) + "px;'>" + "</div></div>"; //+ vacationList[k].status
+                        gStr += "<div style='position:absolute; top:" + (tableRowHeight * indent + 37) + "px; left:" + (offSet * TABLE_COLUMN_WIDTH + 202 ) + "px; width:" + (TABLE_COLUMN_WIDTH * dateDiff - 1 + num) + "px'><div title='" + tooltip + "' class='GVacation' style='float:center;padding-left:3;" + "background-color:" + color + "; width:" + (TABLE_COLUMN_WIDTH * dateDiff - 1 + num) + "px;'>" + "</div></div>"; //+ vacationList[k].status
                     } else {
                         dateDiff = (Date.parse(vacationList[k].endDate) - Date.parse(vacationList[k].beginDate)) / (24 * 60 * 60 * 1000) + 1;
-                        gStr += "<div style='position:absolute; top:" + (tableRowHeight * indent + 37) + "px; left:" + (offSet * tableColumnWidth + 202 + num) + "px; width:" + (tableColumnWidth * dateDiff - 1) + "px'><div title='" + tooltip + "' class='GVacation' style='float:center;padding-left:3;" + "background-color:" + color + "; width:" + (tableColumnWidth * dateDiff - 1) + "px;'>" + "</div></div>"; //+ vacationList[k].status
+                        gStr += "<div style='position:absolute; top:" + (tableRowHeight * indent + 37) + "px; left:" + (offSet * TABLE_COLUMN_WIDTH + 202 + num) + "px; width:" + (TABLE_COLUMN_WIDTH * dateDiff - 1) + "px'><div title='" + tooltip + "' class='GVacation' style='float:center;padding-left:3;" + "background-color:" + color + "; width:" + (TABLE_COLUMN_WIDTH * dateDiff - 1) + "px;'>" + "</div></div>"; //+ vacationList[k].status
                     }
                 }
-                gStr += "<div style='position:absolute; top:" + (tableRowHeight * indent + 38) + "px; left:5px'>" +  employeeList[j].getEmployee() + "</div>";
+                gStr += "<div style='position:absolute; top:" + (tableRowHeight * indent + 38) + "px; left:5px'>" + employeeList[j].getEmployee() + "</div>";
             }
         }
         GanttDiv.innerHTML += gStr;
     }
 
-    this.DrawTable = function(){
-        var offSet = 0;
-        var dateDiff = 0;
-        var gStr = "";
+    /**
+     * функция отрисовки пустой таблицы графика отпусков
+     * @constructor
+     */
+    this.DrawTable = function () {
 
-        if(regionEmployeeList.length <= 0){
+        if (regionEmployeeList.length <= 0) {
             return
         }
 
@@ -113,9 +118,7 @@ function Gantt(gDiv, holidayList, type)
         var minDate = findMinDate(vacations, viewType);
 
         var tableRowCount = getTableRowCount(regionEmployeeList);
-        gStr = fillTableHeader(viewType, minDate, maxDate, holidays, tableRowCount, tableRowHeight, tableColumnWidth);
-
-        GanttDiv.innerHTML = gStr;
+        GanttDiv.innerHTML = fillTableHeader(viewType, minDate, maxDate, holidays, tableRowCount, tableRowHeight, TABLE_COLUMN_WIDTH);
     }
 }
 
