@@ -53,7 +53,14 @@ function Gantt(gDiv, holidayList, type)
     this.AddRegionEmployeeList = function(value){
         regionEmployeeList.push(value);
     }
-    this.Draw = function(){
+
+    var tableRowHeight = 20;
+    var tableColumnWidth = 15;
+    if (viewType == VIEW_GRAPHIC_BY_WEEK){
+        tableColumnWidth = 10;
+    }
+
+    this.DrawVacations = function(num) {
         var offSet = 0;
         var dateDiff = 0;
         var gStr = "";
@@ -63,15 +70,8 @@ function Gantt(gDiv, holidayList, type)
         }
 
         var vacations = createFullVacationsList(regionEmployeeList);
-        var maxDate = findMaxDate(vacations, viewType);
         var minDate = findMinDate(vacations, viewType);
-        var tableRowHeight = 20;
-        var tableColumnWidth = 15;
-        if (viewType == VIEW_GRAPHIC_BY_WEEK){
-            tableColumnWidth = 10;
-        }
-        var tableRowCount = getTableRowCount(regionEmployeeList);
-        gStr = fillTableHeader(viewType, minDate, maxDate, holidays, tableRowCount, tableRowHeight, tableColumnWidth);
+
         var employeeCount = 0;
         for (var i in regionEmployeeList){
             var employeeList = sortEmployeeList(regionEmployeeList[i].getEmployees());
@@ -84,13 +84,36 @@ function Gantt(gDiv, holidayList, type)
                 for(var k in vacationList){
                     var color = getColorByType(vacationList[k].type);
                     var tooltip = employeeList[j].getEmployee() + "\n" + vacationList[k].typeName + "\n" + vacationList[k].beginDate.toLocaleDateString() + " - " + vacationList[k].endDate.toLocaleDateString() + "\n" + vacationList[k].status ;
-                        offSet = (Date.parse(vacationList[k].beginDate) - Date.parse(minDate)) / (24 * 60 * 60 * 1000);
-                    dateDiff = (Date.parse(vacationList[k].endDate) - Date.parse(vacationList[k].beginDate)) / (24 * 60 * 60 * 1000) + 1;
-                    gStr += "<div style='position:absolute; top:" + (tableRowHeight * indent + 37) + "px; left:" + (offSet * tableColumnWidth + 202) + "px; width:" + (tableColumnWidth * dateDiff - 1) + "px'><div title='" + tooltip + "' class='GVacation' style='float:center;padding-left:3;" + "background-color:" + color + "; width:" + (tableColumnWidth * dateDiff - 1) + "px;'>" + "</div></div>"; //+ vacationList[k].status
+                    offSet = (Date.parse(vacationList[k].beginDate) - Date.parse(minDate)) / (24 * 60 * 60 * 1000);
+                    if((Date.parse(vacationList[k].beginDate) - Date.parse(minDate))==0) {
+                        dateDiff = (Date.parse(vacationList[k].endDate) - Date.parse(vacationList[k].beginDate)) / (24 * 60 * 60 * 1000) + 1;
+                        gStr += "<div style='position:absolute; top:" + (tableRowHeight * indent + 37) + "px; left:" + (offSet * tableColumnWidth + 202 ) + "px; width:" + (tableColumnWidth * dateDiff - 1 + num) + "px'><div title='" + tooltip + "' class='GVacation' style='float:center;padding-left:3;" + "background-color:" + color + "; width:" + (tableColumnWidth * dateDiff - 1 +num) + "px;'>" + "</div></div>"; //+ vacationList[k].status
+                    } else {
+                        dateDiff = (Date.parse(vacationList[k].endDate) - Date.parse(vacationList[k].beginDate)) / (24 * 60 * 60 * 1000) + 1;
+                        gStr += "<div style='position:absolute; top:" + (tableRowHeight * indent + 37) + "px; left:" + (offSet * tableColumnWidth + 202 + num) + "px; width:" + (tableColumnWidth * dateDiff - 1) + "px'><div title='" + tooltip + "' class='GVacation' style='float:center;padding-left:3;" + "background-color:" + color + "; width:" + (tableColumnWidth * dateDiff - 1) + "px;'>" + "</div></div>"; //+ vacationList[k].status
+                    }
                 }
                 gStr += "<div style='position:absolute; top:" + (tableRowHeight * indent + 38) + "px; left:5px'>" +  employeeList[j].getEmployee() + "</div>";
             }
         }
+        GanttDiv.innerHTML += gStr;
+    }
+
+    this.DrawTable = function(){
+        var offSet = 0;
+        var dateDiff = 0;
+        var gStr = "";
+
+        if(regionEmployeeList.length <= 0){
+            return
+        }
+
+        var vacations = createFullVacationsList(regionEmployeeList);
+        var maxDate = findMaxDate(vacations, viewType);
+        var minDate = findMinDate(vacations, viewType);
+
+        var tableRowCount = getTableRowCount(regionEmployeeList);
+        gStr = fillTableHeader(viewType, minDate, maxDate, holidays, tableRowCount, tableRowHeight, tableColumnWidth);
 
         GanttDiv.innerHTML = gStr;
     }
@@ -337,7 +360,7 @@ function fillTableHeader(viewType, minDate, maxDate, holidays, tableRowCount, ta
             if(dTemp.getDate() < getDaysInMonth(dTemp.getMonth() + 1, dTemp.getFullYear())){
                 colSpan++;
             }else{
-                firstRowStr += "<td class='GMonth' align='center' colspan='" + (colSpan + 1) + "'>" + getMonthByNumber(dTemp.getMonth() + 1) + " " + dTemp.getFullYear() + "</td>";
+                firstRowStr += "<td class='GMonthDayGraph' align='center' colspan='" + (colSpan + 1) + "'>" + getMonthByNumber(dTemp.getMonth() + 1) + " " + dTemp.getFullYear() + "</td>";
                 colSpan = 0;
             }
             dTemp.setDate(dTemp.getDate() + 1);

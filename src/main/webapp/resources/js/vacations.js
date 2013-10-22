@@ -33,7 +33,7 @@ function showGraphic(type) {
         g.AddRegionEmployeeList(vacation);
     }
 
-    g.Draw();
+    g.DrawTable();
 
     // растянем контейнер вкладок
     var tableGraphicWidth = dojo.byId("tableGraphic").clientWidth * 1.1;
@@ -42,6 +42,15 @@ function showGraphic(type) {
         dojo.attr(dojo.byId("tabContainer"), {
             style: "width: " + tableGraphicWidth + "px"
         });
+    }
+
+    //т.к. размер колонки формируется уже после отрисовки таблицы
+    var num = {val: 0};
+    var td = document.getElementsByClassName('GDay')[0];
+    num.val = td.clientWidth - 14;
+    console.log("fd ", num.val);
+    if (num.val != 0) {
+        g.DrawVacations(num.val);
     }
 }
 
