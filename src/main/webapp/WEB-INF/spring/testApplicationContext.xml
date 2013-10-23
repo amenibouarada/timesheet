@@ -1,53 +1,50 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:context="http://www.springframework.org/schema/context"
-	xmlns:tx="http://www.springframework.org/schema/tx"
-	xmlns:beans="http://www.springframework.org/schema/beans"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:beans="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
 						http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
 						http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
-						http://www.springframework.org/schema/tx 
-						http://www.springframework.org/schema/tx/spring-tx.xsd
 						http://www.springframework.org/schema/beans 
         				http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
-	<bean class="org.springframework.mock.web.MockServletContext"/>
-    <context:component-scan base-package="com.aplana.timesheet" />
+    <bean class="org.springframework.mock.web.MockServletContext"/>
+    <context:component-scan base-package="com.aplana.timesheet"/>
     <context:annotation-config/>
 
     <!-- Root Context: defines shared resources visible to all other web components -->
-	<import resource="db.xml" />
+    <import resource="db.xml"/>
 
     <!-- Spring Security -->
-    <import resource="app/security.xml" />
+    <import resource="app/security.xml"/>
 
     <!-- Imports user-defined @Velocity beans -->
-    <import resource="app/velocity.xml" />
+    <import resource="app/velocity.xml"/>
 
-	<import resource="app/springldap.xml"/>
+    <import resource="app/springldap.xml"/>
 
     <!-- Реализация авторизации в системе -->
     <!--<import resource="app/authentication_OpenLDAP.xml"/>     -->
     <import resource="app/authentication_ActiveDirectory.xml"/>
 
-	<!-- Application Message Bundle -->
-	<beans:bean id="messageSource"  
-        class="org.springframework.context.support.ReloadableResourceBundleMessageSource">  
-    	<beans:property name="basenames">
-    		<beans:list>
-    			<beans:value>/WEB-INF/messages/messages</beans:value>
-    			<beans:value>/WEB-INF/messages/errors</beans:value>
-    		</beans:list>
-    	</beans:property>
-    	<beans:property name="cacheSeconds" value="0" />
-  	</beans:bean>
+    <!-- Application Message Bundle -->
+    <beans:bean id="messageSource"
+                class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+        <beans:property name="basenames">
+            <beans:list>
+                <beans:value>/WEB-INF/messages/messages</beans:value>
+                <beans:value>/WEB-INF/messages/errors</beans:value>
+            </beans:list>
+        </beans:property>
+        <beans:property name="cacheSeconds" value="0"/>
+    </beans:bean>
 
     <bean id="HTTPrequest" class="com.aplana.timesheet.form.validator.FakeRequestAttributes"/>
     <bean class="javax.servlet.http.HttpServletRequest"
           factory-bean="HTTPrequest"
           factory-method="getHttpRequest"
-    />
+            />
 
     <bean id="HTTPsession" class="com.aplana.timesheet.form.validator.FakeSessionAttributes"/>
     <bean class="javax.servlet.http.HttpSession"

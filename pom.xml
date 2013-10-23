@@ -23,7 +23,6 @@
         <compiller.plugin.version>2.3.2</compiller.plugin.version>
         <maven.compiler.source>1.6</maven.compiler.source>
         <maven.compiler.target>1.6</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <war.plugin.version>2.1.1</war.plugin.version>
         <maven.tomcat.url>http://localhost:9090/manager/html</maven.tomcat.url>
         <maven.tomcat.update>true</maven.tomcat.update>

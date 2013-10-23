@@ -22,7 +22,7 @@
           class="org.springframework.security.ldap.search.FilterBasedLdapUserSearch">
         <constructor-arg index="0" value=""/>
         <constructor-arg index="1" value="${ldap.search.pattern}"/>
-        <constructor-arg index="2" ref="contextSource" />
+        <constructor-arg index="2" ref="contextSource"/>
     </bean>
     <!--Конец блока авторизации в OpenLDAP-->
 
@@ -31,7 +31,7 @@
         <property name="LdapUserDetailsService" ref="myLdapUserDetailsService"/>
     </bean>
     <bean id="employeeTokenDAO" class="com.aplana.timesheet.dao.EmployeeTokenDAO"/>
-    <bean id="rememberMeAuthenticationProvider" class="com.aplana.timesheet.system.security.AuthenticationProviderImpl"/>
-
+    <bean id="rememberMeAuthenticationProvider"
+          class="com.aplana.timesheet.system.security.AuthenticationProviderImpl"/>
 
 </beans>

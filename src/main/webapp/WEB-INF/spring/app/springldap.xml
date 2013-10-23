@@ -2,33 +2,30 @@
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
 
 <beans>
-
-    <bean id="placeholderConfig"
-          class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-        <property name="location" value="file:${pathToTsProperties}" />
+    <bean id="placeholderConfig" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="location" value="file:${pathToTsProperties}"/>
     </bean>
 
-	<bean id="contextSource"
-		  class="org.springframework.ldap.core.support.LdapContextSource">
-		<property name="url" value="${ldap.url}" />
-		<property name="base" value="${ldap.base}" />
-		<property name="userDn" value="${ldap.userDn}" />
-		<property name="password" value="${ldap.password}" />
-		<property name="baseEnvironmentProperties">
-			<map>
-				<entry key="java.naming.referral" value="ignore"/>
-				<entry key="java.naming.ldap.attributes.binary" value="objectSid"/>
-			</map>
-		</property>
-	</bean>
+    <bean id="contextSource"
+          class="org.springframework.ldap.core.support.LdapContextSource">
+        <property name="url" value="${ldap.url}"/>
+        <property name="base" value="${ldap.base}"/>
+        <property name="userDn" value="${ldap.userDn}"/>
+        <property name="password" value="${ldap.password}"/>
+        <property name="baseEnvironmentProperties">
+            <map>
+                <entry key="java.naming.referral" value="ignore"/>
+                <entry key="java.naming.ldap.attributes.binary" value="objectSid"/>
+            </map>
+        </property>
+    </bean>
 
-	<bean id="ldapTemplate" class="org.springframework.ldap.core.LdapTemplate">
-		<constructor-arg ref="contextSource" />
-		<property name="ignorePartialResultException" value="true"/>
-	</bean>
+    <bean id="ldapTemplate" class="org.springframework.ldap.core.LdapTemplate">
+        <constructor-arg ref="contextSource"/>
+        <property name="ignorePartialResultException" value="true"/>
+    </bean>
 
-	<bean id="ldapEmployee"
-		  class="com.aplana.timesheet.dao.LdapDAO">
-		<property name="ldapTemplate" ref="ldapTemplate" />
-	</bean>
+    <bean id="ldapEmployee" class="com.aplana.timesheet.dao.LdapDAO">
+        <property name="ldapTemplate" ref="ldapTemplate"/>
+    </bean>
 </beans>

@@ -7,119 +7,102 @@
         				http://www.springframework.org/schema/beans 
         				http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
-	<beans:bean id="placeholderConfig"
-		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-		<beans:property name="location" value="file:${pathToTsProperties}" />
-	</beans:bean>
-	
-	<!-- Enables the Spring MVC @Controller programming model -->
-	<annotation-driven />
-	
-	<!-- Scheduling synchronize with ldap by Quartz -->
-	<!--<beans:bean id="employeeLdapService"
-		class="com.aplana.timesheet.service.EmployeeLdapService" />-->
-		
-	<beans:bean id="employeeLdapServiceJob"
- 		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
-		<beans:property name="targetObject" ref="employeeLdapService" />
-		<beans:property name="targetMethod" value="synchronize" />
-	</beans:bean>
+    <beans:bean id="placeholderConfig" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <beans:property name="location" value="file:${pathToTsProperties}"/>
+    </beans:bean>
 
-	<beans:bean id="employeeLdapServiceCronTrigger"
-		class="org.springframework.scheduling.quartz.CronTriggerBean">
-		<beans:property name="jobDetail" ref="employeeLdapServiceJob" />
-		<!-- Запуск задачи каждый день в 22:01 по московскому времени -->
-		<beans:property name="cronExpression" value="${scheduler.ldap}" />
-	</beans:bean>
+    <!--Создание бинов для запуска синхронизации списка сотрудников с Ldap-->
+    <beans:bean id="employeeLdapService" class="com.aplana.timesheet.service.EmployeeLdapService"/>
 
-	<beans:bean id="oqProjectSyncServiceJob"
-				class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
-		<beans:property name="targetObject" ref="oqProgectSyncService" />
-		<beans:property name="targetMethod" value="sync" />
-	</beans:bean>
+    <beans:bean id="employeeLdapServiceJob"
+                class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <beans:property name="targetObject" ref="employeeLdapService"/>
+        <beans:property name="targetMethod" value="synchronize"/>
+    </beans:bean>
 
-	<beans:bean id="oqProjectSyncServiceCronTrigger"
-				class="org.springframework.scheduling.quartz.CronTriggerBean">
-		<beans:property name="jobDetail" ref="oqProjectSyncServiceJob" />
-		<beans:property name="cronExpression" value="${scheduler.oq}" />
-	</beans:bean>
-	
-	<beans:bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
-		<beans:property name="jobDetails">
-			<beans:list>
-				<beans:ref bean="employeeLdapServiceJob" />
-				<beans:ref bean="oqProjectSyncServiceJob" />
-			</beans:list>
-		</beans:property>
-		<beans:property name="triggers">
-			<beans:list>
-				<beans:ref bean="employeeLdapServiceCronTrigger" />
-				<beans:ref bean="oqProjectSyncServiceCronTrigger" />
-			</beans:list>
-		</beans:property>
-	</beans:bean>
+    <beans:bean id="employeeLdapServiceCronTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+        <beans:property name="jobDetail" ref="employeeLdapServiceJob"/>
+        <beans:property name="cronExpression" value="${scheduler.ldap}"/>
+    </beans:bean>
 
-	<beans:bean id="reportCheckService"
-		class="com.aplana.timesheet.service.ReportCheckService" />
-		
-	<beans:bean id="reportCheckServiceJob"
- 		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
-		<beans:property name="targetObject" ref="reportCheckService" />
-		<beans:property name="targetMethod" value="storeReportCheck" />
-	</beans:bean>
-	
-	<beans:bean id="reportCheckServiceCronTrigger"
-		class="org.springframework.scheduling.quartz.CronTriggerBean">
-		<beans:property name="jobDetail" ref="reportCheckServiceJob" />
-<!-- 		Запуск задачи каждый день в 00:00:00 по московскому времени -->
-		<beans:property name="cronExpression" value="${scheduler.reportcheck}" />
-	</beans:bean>
+    <!--Создание бинов для запуска синхронизации проектом с OQ-->
+    <beans:bean id="oqProgectSyncService" class="com.aplana.timesheet.service.OQProjectSyncService"/>
 
-    <beans:bean id="VacationApprovalAutoProcessService"
-                class="com.aplana.timesheet.service.vacationapproveprocess.VacationApprovalAutoProcessService" />
+    <beans:bean id="oqProjectSyncServiceJob"
+                class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <beans:property name="targetObject" ref="oqProgectSyncService"/>
+        <beans:property name="targetMethod" value="sync"/>
+    </beans:bean>
+
+    <beans:bean id="oqProjectSyncServiceCronTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+        <beans:property name="jobDetail" ref="oqProjectSyncServiceJob"/>
+        <beans:property name="cronExpression" value="${scheduler.oq}"/>
+    </beans:bean>
+
+    <!--Создание бинов для запуска синхронизации проектом с OQ-->
+    <beans:bean id="reportCheckService" class="com.aplana.timesheet.service.ReportCheckService"/>
+
+    <beans:bean id="reportCheckServiceJob"
+                class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <beans:property name="targetObject" ref="reportCheckService"/>
+        <beans:property name="targetMethod" value="storeReportCheck"/>
+    </beans:bean>
+
+    <beans:bean id="reportCheckServiceCronTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+        <beans:property name="jobDetail" ref="reportCheckServiceJob"/>
+        <beans:property name="cronExpression" value="${scheduler.reportcheck}"/>
+    </beans:bean>
+
+    <!--Создание бинов для запуска проверки на согласованность отпусков-->
+    <beans:bean id="vacationApprovalAutoProcessService"
+                class="com.aplana.timesheet.service.vacationapproveprocess.VacationApprovalAutoProcessService"/>
 
     <beans:bean id="vacationApprovalAutoProcessServiceJob"
                 class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
-        <beans:property name="targetObject" ref="VacationApprovalAutoProcessService" />
-        <beans:property name="targetMethod" value="checkAllVacations" />
+        <beans:property name="targetObject" ref="vacationApprovalAutoProcessService"/>
+        <beans:property name="targetMethod" value="checkAllVacations"/>
     </beans:bean>
 
     <beans:bean id="vacationApprovalAutoProcessServiceCronTrigger"
                 class="org.springframework.scheduling.quartz.CronTriggerBean">
-        <beans:property name="jobDetail" ref="vacationApprovalAutoProcessServiceJob" />
-        <beans:property name="cronExpression" value="${scheduler.vacationapprovalcheck}" />
+        <beans:property name="jobDetail" ref="vacationApprovalAutoProcessServiceJob"/>
+        <beans:property name="cronExpression" value="${scheduler.vacationapprovalcheck}"/>
     </beans:bean>
 
-    <beans:bean id="plannedVacationService"
-                class="com.aplana.timesheet.service.PlannedVacationService" />
+    <!--Создание бинов для запуска рассылки руководителям запланированных отпусков сотрудников-->
+    <beans:bean id="plannedVacationService" class="com.aplana.timesheet.service.PlannedVacationService"/>
 
     <beans:bean id="plannedVacationServiceJob"
                 class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
-        <beans:property name="targetObject" ref="plannedVacationService" />
-        <beans:property name="targetMethod" value="service" />
+        <beans:property name="targetObject" ref="plannedVacationService"/>
+        <beans:property name="targetMethod" value="service"/>
     </beans:bean>
 
-    <beans:bean id="plannedVacationServiceCronTrigger"
-                class="org.springframework.scheduling.quartz.CronTriggerBean">
-        <beans:property name="jobDetail" ref="plannedVacationServiceJob" />
-        <beans:property name="cronExpression" value="${scheduler.plannedvacationcheck}" />
+    <beans:bean id="plannedVacationServiceCronTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+        <beans:property name="jobDetail" ref="plannedVacationServiceJob"/>
+        <beans:property name="cronExpression" value="${scheduler.plannedvacationcheck}"/>
     </beans:bean>
 
-	<beans:bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
-		<beans:property name="jobDetails">
-			<beans:list>
-				<beans:ref bean="reportCheckServiceJob" />
-                <beans:ref bean="vacationApprovalAutoProcessServiceJob" />
-                <beans:ref bean="plannedVacationServiceJob" />
-			</beans:list>
-		</beans:property>
-		<beans:property name="triggers">
-			<beans:list>
-				<beans:ref bean="reportCheckServiceCronTrigger" />
-                <beans:ref bean="vacationApprovalAutoProcessServiceCronTrigger" />
-                <beans:ref bean="plannedVacationServiceCronTrigger" />
-			</beans:list>
-		</beans:property>
-	</beans:bean>
+    <!--Регистрация триггеров с задачами-->
+    <beans:bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <beans:property name="jobDetails">
+            <beans:list>
+                <beans:ref bean="reportCheckServiceJob"/>
+                <beans:ref bean="vacationApprovalAutoProcessServiceJob"/>
+                <beans:ref bean="plannedVacationServiceJob"/>
+                <beans:ref bean="employeeLdapServiceJob"/>
+                <beans:ref bean="oqProjectSyncServiceJob"/>
+            </beans:list>
+        </beans:property>
+        <beans:property name="triggers">
+            <beans:list>
+                <beans:ref bean="reportCheckServiceCronTrigger"/>
+                <beans:ref bean="vacationApprovalAutoProcessServiceCronTrigger"/>
+                <beans:ref bean="plannedVacationServiceCronTrigger"/>
+                <beans:ref bean="employeeLdapServiceCronTrigger"/>
+                <beans:ref bean="oqProjectSyncServiceCronTrigger"/>
+            </beans:list>
+        </beans:property>
+    </beans:bean>
 
 </beans:beans>
