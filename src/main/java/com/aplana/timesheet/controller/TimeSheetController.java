@@ -110,6 +110,13 @@ public class TimeSheetController {
         return mav;
     }
 
+    @RequestMapping(value = "/sendDraft",method = RequestMethod.POST)
+    public String sendDraft(@ModelAttribute("timeSheetForm") TimeSheetForm tsForm) {
+        logger.info("send draft");
+
+        return "redirect:timesheet";
+    }
+
     @RequestMapping(value = "/cqcodes", method = RequestMethod.GET)
     public String showCqCodes() {
         logger.info("Showing CQ Codes page!");

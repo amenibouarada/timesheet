@@ -51,7 +51,7 @@ public class TimeSheetDAO {
     @SuppressWarnings("unchecked")
     public TimeSheet findForDateAndEmployee(Calendar date, Integer employeeId) {
         Query query = entityManager.createQuery(
-                "select ts from TimeSheet as ts where ts.calDate = :calDate and ts.employee.id = :employeeId"
+                "select ts from TimeSheet as ts where ts.calDate = :calDate and ts.employee.id = :employeeId AND (ts.type = 0)"
         ).setParameter("calDate", date).setParameter("employeeId", employeeId);
 
         List<TimeSheet> result = query.getResultList();
@@ -152,7 +152,7 @@ public class TimeSheetDAO {
                 "select ts "
                         + "from TimeSheet as ts "
                         + "where ts.calDate <:calDate "
-                        + "and ts.employee.id = :employeeId "
+                        + "and ts.employee.id = :employeeId AND (ts.type = 0) "
                         + "order by ts.calDate desc"
         ).setParameter("calDate", date).setParameter("employeeId", employeeId);
 
@@ -175,6 +175,7 @@ public class TimeSheetDAO {
                 + "from TimeSheet as ts "
                 + "where ts.calDate = :calDate "
                 + "and ts.employee.id = :employeeId "
+                + "AND (ts.type = 0) "
                 + "order by ts.calDate asc"
         ).setParameter("calDate", nextDate).setParameter("employeeId", employeeId);
 
@@ -190,7 +191,7 @@ public class TimeSheetDAO {
     // возвращает следующий рабочий день, после даты последнего списания занятости
     public Calendar getDateNextAfterLastDayWithTS(Employee employee) {
         Query query = entityManager.createQuery(
-                "SELECT MAX(ts.calDate) FROM TimeSheet ts WHERE ts.employee = :employee"
+                "SELECT MAX(ts.calDate) FROM TimeSheet ts WHERE ts.employee = :employee and (ts.type = 0)"
         ).setParameter("employee", employee);
 
         if (!query.getResultList().isEmpty() && query.getSingleResult() != null) {
@@ -251,7 +252,7 @@ public class TimeSheetDAO {
 
     public List<TimeSheet> getTimeSheetsForEmployee(Employee employee, Integer year, Integer month) {
         final Query query = entityManager.createQuery(
-                "from TimeSheet ts where ts.employee = :employee and YEAR(ts.calDate.calDate) = :year and MONTH(ts.calDate.calDate) = :month"
+                "from TimeSheet ts where ts.employee = :employee and YEAR(ts.calDate.calDate) = :year and MONTH(ts.calDate.calDate) = :month and (ts.type = 0)"
         ).setParameter("employee", employee).setParameter("year", year).setParameter("month", month);
 
         return query.getResultList();
@@ -259,7 +260,7 @@ public class TimeSheetDAO {
 
     public Boolean timeSheetTrouble(Integer id) {
         final Query query = entityManager.createQuery(
-                "from TimeSheet ts inner join ts.timeSheetDetails tsd where ts.id = :id and tsd.problem <> ''"
+                "from TimeSheet ts inner join ts.timeSheetDetails tsd where ts.id = :id and tsd.problem <> '' and (ts.type = 0)"
         ).setParameter("id", id);
         return query.getResultList().size() != 0;
     }

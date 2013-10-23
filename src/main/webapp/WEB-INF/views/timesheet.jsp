@@ -255,7 +255,11 @@
             timeSheetForm.submit();
 
         }
-        if (s == 'newReport' && confirmCreateNewReport()) {
+        else if(s=='send_draft' ) {
+            timeSheetForm.action="sendDraft";
+            timeSheetForm.submit();
+        }
+        else if (s == 'newReport' && confirmCreateNewReport()) {
             timeSheetForm.action = "newReport";
             timeSheetForm.submit();
         }
@@ -272,6 +276,7 @@
         plan_text = plan_text.replace(/&amp;/g, '&');
         dojo.byId("description_id_" + GetFirstIdDescription()).value = plan_text;
     }
+
     function requiredCommentSet(){
         var overtimeCause = dijit.byId("overtimeCause").get("value");
         var undertimeExp = (overtimeCause ==<%= UndertimeCausesEnum.OTHER.getId() %>);
@@ -284,6 +289,26 @@
             dijit.byId("overtimeCauseComment").attr("required", false);
         }
      }
+
+    /**
+    Загрузка черновика
+     **/
+    function loadDraft() {
+
+    }
+
+    /**
+    Сохранить черновик
+     **/
+    function saveForRevision() {
+        var formattedDate;
+        var pickedDate = dijit.byId('calDate').get('value');
+        if (pickedDate) {
+            formattedDate = pickedDate.format("yyyy-mm-dd");
+        }
+        console.log(formattedDate);
+        submitform('send_draft');
+    }
 </script>
 <style type="text/css">
     #date_warning {
@@ -374,8 +399,11 @@
 
         <div id="plan_textarea"
              style="margin: 2px 0px 2px 0px; padding:2px 2px 2px 2px;border: solid 1px silver;"></div>
-        <button id="add_in_comments" type="button" style="width:300px" onclick="CopyPlan()">Скопировать в первый
-            комментарий
+        <button id="add_in_comments" type="button" style="width:300px" onclick="CopyPlan()">
+            Скопировать в первый комментарий
+        </button>
+        <button id="load_draft" type="button" style="width:200px" onclick="loadDraft()">
+            Загрузить черновик
         </button>
     </div>
     <div id="marg_buttons" style="margin-top:15px;">
@@ -551,8 +579,10 @@
             <tr>
                 <td class="no_border" width="155px">
                     <button id="submit_button" style="width:210px" onclick="checkDurationThenSendForm()" type="button">
-                        Отправить
-                        отчёт
+                        Отправить отчёт
+                    </button>
+                    <button id="save_for_revision" style="width:240px" onclick="saveForRevision()" type="button">
+                        Сохранить для доработки
                     </button>
                 </td>
                 <td class="no_border" width="220px">
