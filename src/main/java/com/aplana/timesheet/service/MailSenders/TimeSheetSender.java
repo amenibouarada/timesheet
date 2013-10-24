@@ -4,7 +4,7 @@ import com.aplana.timesheet.dao.entity.ProjectTask;
 import com.aplana.timesheet.enums.*;
 import com.aplana.timesheet.form.TimeSheetForm;
 import com.aplana.timesheet.form.TimeSheetTableRowForm;
-import com.aplana.timesheet.properties.TSPropertyProvider;
+import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.OvertimeCauseService;
 import com.aplana.timesheet.service.SendMailService;
 import com.google.common.annotations.VisibleForTesting;
@@ -69,7 +69,7 @@ public class TimeSheetSender extends MailSender<TimeSheetForm> {
 
         logger.info("follows initialization output from velocity");
         String messageBody = VelocityEngineUtils.mergeTemplateIntoString(
-                sendMailService.velocityEngine, "sendmail.vm", model);
+                sendMailService.velocityEngine, "velocity/sendmail.vm", model);
         logger.debug("Message Body: {}", messageBody);
         try {
             message.setText(messageBody, "UTF-8", "html");
@@ -101,6 +101,14 @@ public class TimeSheetSender extends MailSender<TimeSheetForm> {
         /* указана переработка по часам */
         if (overtimeCauseService.isOvertimeDuration(params)) {
             return MailPriorityEnum.HIGH;
+        }
+
+        if (params.getTimeSheetTablePart() != null) {
+            for (TimeSheetTableRowForm form : params.getTimeSheetTablePart()) {
+                if (form.getProblem() != null && !form.getProblem().isEmpty()) {
+                    return MailPriorityEnum.HIGH;
+                }
+            }
         }
 
         return MailPriorityEnum.NORMAL;

@@ -1,7 +1,7 @@
 <%@page contentType="text/html" pageEncoding="UTF-8" %>
 
 <%@ page import="com.aplana.timesheet.controller.CreatePlanForPeriodContoller" %>
-<%@ page import="static com.aplana.timesheet.constants.TimeSheetConstants.DOJO_PATH" %>
+<%@ page import="static com.aplana.timesheet.system.constants.TimeSheetConstants.DOJO_PATH" %>
 <%@ page import="static com.aplana.timesheet.controller.PlanEditController.*" %>
 <%@ page import="static com.aplana.timesheet.form.PlanEditForm.*" %>
 <%@ page import="static com.aplana.timesheet.controller.PlanEditController.PERCENT_OF_CHARGE" %>
@@ -54,6 +54,7 @@
 var VACATION_PLAN_COLUMN = 'vacation_plan';
 var hasChanges = false;
 var ALL_VALUE = <%= ALL_VALUE %>;
+var isEditable = ${editable};
 
 dojo.addOnLoad(function () {
 
@@ -206,6 +207,32 @@ if (dataJson.length > 0) {
             { name:"Отпуск", field:"<%= VACATION %>" }
         ];
 
+        <c:if test="${planEditForm.showSumProjectsPresales}">
+        firstView.groups.push(
+                {
+                    name: "Проекты",
+                    field: "<%= SUMMARY_PROJECTS %>"
+                },
+                {
+                    name: "Пресейлы",
+                    field: "<%= SUMMARY_PRESALES %>"
+                }
+        );
+        </c:if>
+
+        <c:if test="${planEditForm.showSumFundingType}">
+        firstView.groups.push(
+                {
+                    name: "Инвестиционные активности",
+                    field: "<%= SUMMARY_INVESTMENT %>"
+                },
+                {
+                    name: "Коммерческие активности",
+                    field: "<%= SUMMARY_COMMERCIAL %>"
+                }
+        );
+        </c:if>
+
         secondView.groups = [];
 
         dojo.forEach(projectList, function (project) {
@@ -234,7 +261,7 @@ if (dataJson.length > 0) {
                     field:field,
                     noresize:true,
 
-                    width:(49 * scale) + "px",
+                    width:(29 * scale) + "px",
                     <sec:authorize access="hasRole('ROLE_PLAN_EDIT')">
                     <c:if test="${editable}">
                     editable:dojo.some(modelFieldsForSave, function (fieldForSave) {
@@ -252,7 +279,7 @@ if (dataJson.length > 0) {
                     var planField = group.field + "<%= _PLAN %>";
                     var factField = group.field + "<%= _FACT %>";
 
-                    view.cells.push(createCell("План", planField), createCell("Факт", factField));
+                    view.cells.push(createCell("П", planField), createCell("Ф", factField));
                     modelFields.push(planField, factField);
 
                     group.colSpan = 2;
@@ -632,12 +659,6 @@ function log(text){
                             <td colspan="4" style="padding-top: 10px;">
                                 <table>
                                     <tr>
-                                        <td style="text-align: center">
-                                            <button id="show" style="width:150px;vertical-align: middle;" type="submit"
-                                                    onclick="return validate()">Показать
-                                            </button>
-                                        </td>
-
                                         <td>
                                             <div>
                                                 <form:checkbox id="<%= SHOW_PLANS %>" path="<%= SHOW_PLANS %>"
@@ -655,6 +676,24 @@ function log(text){
                                             <div style="padding-top: 5px;">
                                                 <form:checkbox path="<%= SHOW_PRESALES %>" label="Пресейлы"/>
                                             </div>
+                                        </td>
+
+                                        <td>
+                                            <div>
+                                                <form:checkbox id="<%= SHOW_SUM_PROJECTS_PRESALES %>" path="<%= SHOW_SUM_PROJECTS_PRESALES %>"
+                                                               label="Показывать Итого по проектам/пресейлам"/>
+                                            </div>
+                                            <div style="padding-top: 5px;">
+                                                <form:checkbox id="<%= SHOW_SUM_FUNDING_TYPE %>" path="<%= SHOW_SUM_FUNDING_TYPE %>"
+                                                               label="Показывать Итого по инвест./коммер."/>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="text-align: center">
+                                            <button id="show" style="width:150px;vertical-align: middle;" type="submit"
+                                                    onclick="return validate()">Показать
+                                            </button>
                                         </td>
                                     </tr>
                                 </table>

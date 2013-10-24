@@ -2,7 +2,7 @@ package com.aplana.timesheet.service.MailSenders;
 
 import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.dao.entity.ReportCheck;
-import com.aplana.timesheet.properties.TSPropertyProvider;
+import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.SendMailService;
 import com.aplana.timesheet.util.DateTimeUtil;
 import com.google.common.base.Function;
@@ -33,7 +33,7 @@ public class ManagerAlertSender extends AbstractSenderWithAssistants<List<Report
         model.put("region", mail.getDivision().getId() == 1 ? "show" : "");
 
         String messageBody = VelocityEngineUtils.mergeTemplateIntoString(
-                sendMailService.velocityEngine, "alertmail.vm", model);
+                sendMailService.velocityEngine, "velocity/alertmail.vm", model);
         logger.debug("Message Body: {}", messageBody);
         try {
             message.setText(messageBody, "UTF-8", "html");

@@ -2,10 +2,10 @@ package com.aplana.timesheet.controller;
 
 import com.aplana.timesheet.form.FeedbackForm;
 import com.aplana.timesheet.form.validator.FeedbackFormValidator;
-import com.aplana.timesheet.properties.TSPropertyProvider;
-import com.aplana.timesheet.service.SecurityService;
+import com.aplana.timesheet.system.properties.TSPropertyProvider;
+import com.aplana.timesheet.system.security.SecurityService;
 import com.aplana.timesheet.service.SendMailService;
-import com.aplana.timesheet.util.TimeSheetUser;
+import com.aplana.timesheet.system.security.entity.TimeSheetUser;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

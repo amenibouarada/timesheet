@@ -1,8 +1,8 @@
 package com.aplana.timesheet.service.MailSenders;
 
-import com.aplana.timesheet.constants.PadegConstants;
+import com.aplana.timesheet.system.constants.PadegConstants;
 import com.aplana.timesheet.dao.entity.Illness;
-import com.aplana.timesheet.properties.TSPropertyProvider;
+import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.EmployeeService;
 import com.aplana.timesheet.service.ProjectService;
 import com.aplana.timesheet.service.SendMailService;

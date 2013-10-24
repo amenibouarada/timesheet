@@ -7,7 +7,7 @@ import com.aplana.timesheet.enums.TSEnum;
 import com.aplana.timesheet.enums.TypesOfActivityEnum;
 import com.aplana.timesheet.form.TimeSheetForm;
 import com.aplana.timesheet.form.TimeSheetTableRowForm;
-import com.aplana.timesheet.properties.TSPropertyProvider;
+import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.*;
 import com.aplana.timesheet.util.DateTimeUtil;
 import com.google.common.annotations.VisibleForTesting;

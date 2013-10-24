@@ -4,7 +4,7 @@ import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.dao.entity.Region;
 import com.aplana.timesheet.dao.entity.Vacation;
 import com.aplana.timesheet.enums.VacationStatusEnum;
-import com.aplana.timesheet.properties.TSPropertyProvider;
+import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.SendMailService;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;

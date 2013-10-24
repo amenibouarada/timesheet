@@ -3,7 +3,7 @@ package com.aplana.timesheet.service.MailSenders;
 import com.aplana.timesheet.dao.entity.ApprovalResultModel;
 import com.aplana.timesheet.dao.entity.Vacation;
 import com.aplana.timesheet.dao.entity.VacationApproval;
-import com.aplana.timesheet.properties.TSPropertyProvider;
+import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.ManagerRoleNameService;
 import com.aplana.timesheet.service.SendMailService;
 import com.aplana.timesheet.service.VacationApprovalService;
@@ -96,7 +96,7 @@ public class VacationApproveRequestSender extends AbstractVacationSender<Vacatio
             Map model = new HashMap();
             model.put("approvalList", approvalList.iterator());
             String messageBody = VelocityEngineUtils.mergeTemplateIntoString(
-                    sendMailService.velocityEngine, "vacationapprovals.vm", model);
+                    sendMailService.velocityEngine, "velocity/vacationapprovals.vm", model);
             logger.debug("Message Body: {}", messageBody);
             stringBuilder.append(messageBody);
         }

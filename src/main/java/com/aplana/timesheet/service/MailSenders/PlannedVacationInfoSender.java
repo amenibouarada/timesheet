@@ -3,7 +3,7 @@ package com.aplana.timesheet.service.MailSenders;
 
 import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.dao.entity.Vacation;
-import com.aplana.timesheet.properties.TSPropertyProvider;
+import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.SendMailService;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
@@ -80,7 +80,7 @@ public class PlannedVacationInfoSender extends AbstractSenderWithAssistants<Map 
         model.put("paramsForGenerateBody", mail.getParamsForGenerateBody());
 
         String messageBody = VelocityEngineUtils.mergeTemplateIntoString(
-                sendMailService.velocityEngine, "plannedVacations.vm", model);
+                sendMailService.velocityEngine, "velocity/plannedVacations.vm", model);
         logger.debug("Message Body: {}", messageBody);
         try {
             message.setText(messageBody, "UTF-8", "html");

@@ -1,5 +1,6 @@
-package com.aplana.timesheet.util;
+package com.aplana.timesheet.system.security;
 
+import com.aplana.timesheet.system.security.entity.RememberToken;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;

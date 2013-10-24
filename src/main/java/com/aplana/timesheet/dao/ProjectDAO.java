@@ -7,10 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
+import javax.persistence.*;
 import javax.persistence.criteria.*;
 import java.util.*;
 import java.util.Calendar;
@@ -268,5 +265,14 @@ public class ProjectDAO {
         select.orderBy(criteriaBuilder.asc(from.get("name")));
 
         return entityManager.createQuery(query).getResultList();
+    }
+
+    /**
+     * Возвращает все префиксы у проектов
+     * @return
+     */
+    public List<String> getJiraKeyList(){
+        Query query = entityManager.createQuery("select distinct p.jiraProjectKey from Project p where p.jiraProjectKey is not null");
+        return query.getResultList();
     }
 }

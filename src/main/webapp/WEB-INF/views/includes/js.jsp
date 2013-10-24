@@ -1,4 +1,4 @@
-<%@ page import="static com.aplana.timesheet.constants.TimeSheetConstants.DOJO_PATH" %>
+<%@ page import="static com.aplana.timesheet.system.constants.TimeSheetConstants.DOJO_PATH" %>
 <%@ page import="static com.aplana.timesheet.util.ResourceUtils.getResRealPath" %>
 <!-- load Dojo -->
 <%!

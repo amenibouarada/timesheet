@@ -109,7 +109,8 @@
         <div class="radiogroup">
             <div class="label"><fmt:message key="report.formattitle"/></div>
             <ul class="radio">
-                <li><input type=radio name="printtype" id="printtype2" value="2" checked/><label for="printtype2">MS Excel</label>
+                <li><input type=radio name="printtype" id="printtype2" value="2" checked/>
+                    <label for="printtype2"><fmt:message key="label.report.excel"/></label>
                 </li>
             </ul>
         </div>

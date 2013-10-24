@@ -2,7 +2,7 @@ package com.aplana.timesheet.service.MailSenders;
 
 import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.dao.entity.TimeSheet;
-import com.aplana.timesheet.properties.TSPropertyProvider;
+import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.SendMailService;
 import com.aplana.timesheet.util.DateTimeUtil;
 import com.google.common.collect.Iterables;
@@ -31,7 +31,7 @@ public class TimeSheetDeletedSender extends AbstractSenderWithAssistants<TimeShe
         model.put("dateStr", formatDateString(mail.getDate()));
 
         String messageBody = VelocityEngineUtils.mergeTemplateIntoString(
-                sendMailService.velocityEngine, "timesheetdeleted.vm", model) +
+                sendMailService.velocityEngine, "velocity/timesheetdeleted.vm", model) +
                 mail.getPreconstructedMessageBody();
         logger.debug("Message Body: {}", messageBody);
         try {

@@ -1,4 +1,4 @@
-package com.aplana.timesheet.constants;
+package com.aplana.timesheet.system.constants;
 
 /**
  *

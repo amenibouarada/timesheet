@@ -7,11 +7,12 @@ import com.aplana.timesheet.form.AdminMessageForm;
 import com.aplana.timesheet.form.FeedbackForm;
 import com.aplana.timesheet.form.TimeSheetForm;
 import com.aplana.timesheet.form.TimeSheetTableRowForm;
-import com.aplana.timesheet.properties.TSPropertyProvider;
+import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.MailSenders.*;
+import com.aplana.timesheet.system.security.SecurityService;
 import com.aplana.timesheet.util.DateTimeUtil;
 import com.aplana.timesheet.util.EnumsUtils;
-import com.aplana.timesheet.util.TimeSheetUser;
+import com.aplana.timesheet.system.security.entity.TimeSheetUser;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
@@ -310,7 +311,7 @@ public class SendMailService{
 
         model.put("timeSheet", timeSheet);
         logger.info("follows initialization output from velocity");
-        return VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "report.vm", model);
+        return VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "velocity/report.vm", model);
     }
 
     public TimeSheetUser getSecurityPrincipal() {

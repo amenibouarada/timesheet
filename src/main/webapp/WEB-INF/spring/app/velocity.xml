@@ -1,26 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans:beans xmlns="http://www.springframework.org/schema/mvc"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns:beans="http://www.springframework.org/schema/beans"
-	xsi:schemaLocation="http://www.springframework.org/schema/mvc 
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:beans="http://www.springframework.org/schema/beans"
+             xsi:schemaLocation="http://www.springframework.org/schema/mvc
         				http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd
         				http://www.springframework.org/schema/beans 
         				http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
-   <!-- <beans:bean id="sendMailService" class="com.aplana.timesheet.service.SendMailService">
-		<beans:property name="velocityEngine" ref="velocityEngine" />
-	</beans:bean>-->
+    <!-- <beans:bean id="sendMailService" class="com.aplana.timesheet.service.SendMailService">
+         <beans:property name="velocityEngine" ref="velocityEngine" />
+     </beans:bean>-->
 
-	<beans:bean id="velocityEngine"
-		class="org.springframework.ui.velocity.VelocityEngineFactoryBean">
-		<beans:property name="velocityProperties">
-			<beans:value>
-				resource.loader=class
-				class.resource.loader.class=org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader
-				input.encoding=UTF-8
-				output.encoding=UTF-8
-			</beans:value>
-		</beans:property>
-	</beans:bean>
+    <beans:bean id="velocityEngine"
+                class="org.springframework.ui.velocity.VelocityEngineFactoryBean">
+        <beans:property name="velocityProperties">
+            <beans:value>
+                resource.loader=class
+                class.resource.loader.class=org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader
+                resourceLoaderPath=/velocity
+                input.encoding=UTF-8
+                output.encoding=UTF-8
+                velocimacro.library=
+            </beans:value>
+        </beans:property>
+    </beans:bean>
 
 </beans:beans>

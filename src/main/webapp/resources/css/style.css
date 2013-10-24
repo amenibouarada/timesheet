@@ -128,7 +128,7 @@ div.menu_holder table td {
 }
 
 #vacation_ill {
-    font: 12px;
+    font-size: 12px;
     color: #666;
 }
 
@@ -196,12 +196,12 @@ div.menu_holder table td {
     background-color: transparent !important;
     vertical-align: middle !important;
     border: #AAA solid 1px;
-    font: 12px;
+    font-size: 12px;
 }
 
 .checkbox_without_dojo {
     width: 23px;
-    font: 12px;
+    font-size: 12px;
     margin: 5px 5px 5px 0px;
 }
 
@@ -249,7 +249,7 @@ div.menu_holder table td {
 }
 
 #ttcont {
-    font: 10.5px;
+    font-size: 10.5px;
     display: block;
     padding: 2px 12px 3px 7px;
     margin-left: 5px;
@@ -390,6 +390,10 @@ table.report_params td {
 
 .classDateRedText {
     color: #f58383;
+}
+
+.dijitCalendarCurrentDate {
+    background-color: #6495ED !important;
 }
 
 textarea {
