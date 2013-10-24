@@ -54,7 +54,7 @@ public class FeedbackSender extends MailSender<FeedbackForm> {
 
         mail.setToEmails(Arrays.asList(propertyProvider.getMailProblemsAndProposalsCoaddress(params.getFeedbackType())));
         mail.setCcEmails(Arrays.asList(employeeEmail));
-        mail.setSubject(propertyProvider.getFeedbackMarker());
+        mail.setSubject(propertyProvider.getFeedbackMarker() + " Сообщение от пользователя системы списания занятости");
         mail.setFilePahts(Arrays.asList(params.getFile1Path(), params.getFile2Path()));
         mail.setPreconstructedMessageBody(
                 getMessageBody(employeeName, employeeEmail, params.getFeedbackDescription(), params.getFeedbackTypeName(), employeeDivision) );

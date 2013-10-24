@@ -73,6 +73,9 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
     @Autowired
     private RegionService regionService;
 
+    @Autowired
+    private TSPropertyProvider propertyProvider;
+
     private static final Logger logger = LoggerFactory.getLogger(VacationService.class);
 
     public static final String CANT_GET_EXIT_TO_WORK_EXCEPTION_MESSAGE = "Не удалось получить дату выхода из отпуска и количество дней.";
@@ -293,7 +296,7 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
             *  на пятницу для отпуска с сохранением содержания */
             if (vacationTypeId != null &&
                     vacationTypeId == VacationTypesEnum.WITH_PAY.getId() &&
-                    vacationDayCount > TSPropertyProvider.VACANTION_FRIDAY_INFORM_DAYS) {
+                    vacationDayCount > propertyProvider.getVacantionFridayInformDays()) {
                 Calendar calendar = new GregorianCalendar();
                 calendar.setTime(endDateT);
 
