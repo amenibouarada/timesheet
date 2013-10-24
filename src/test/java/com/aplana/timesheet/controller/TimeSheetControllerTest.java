@@ -3,6 +3,7 @@ package com.aplana.timesheet.controller;
 import com.aplana.timesheet.AbstractTimeSheetTest;
 import com.aplana.timesheet.dao.entity.*;
 import com.aplana.timesheet.enums.DictionaryEnum;
+import com.aplana.timesheet.enums.TypesOfTimeSheetEnum;
 import com.aplana.timesheet.form.TimeSheetForm;
 import com.aplana.timesheet.form.TimeSheetTableRowForm;
 import com.aplana.timesheet.form.validator.TimeSheetFormValidator;
@@ -408,7 +409,7 @@ public class TimeSheetControllerTest extends AbstractTimeSheetTest {
         BindingResult errors = new BeanPropertyBindingResult(timeSheetForm, "timeSheetForm");
         TimeSheet timeSheet = new TimeSheet();
         /* определяем поведение сервисов */
-        when(timeSheetService.storeTimeSheet(timeSheetForm)).thenReturn(timeSheet);
+        when(timeSheetService.storeTimeSheet(timeSheetForm, TypesOfTimeSheetEnum.REPORT)).thenReturn(timeSheet);
         /* тест */
         ModelAndView result = timeSheetController.sendTimeSheet(timeSheetForm, errors);
         /* проверка вызовов */
@@ -454,7 +455,7 @@ public class TimeSheetControllerTest extends AbstractTimeSheetTest {
         TimeSheet timeSheet = new TimeSheet();
 
         /* определяем поведение сервисов */
-        when(timeSheetService.storeTimeSheet(timeSheetForm)).thenReturn(timeSheet);
+        when(timeSheetService.storeTimeSheet(timeSheetForm, TypesOfTimeSheetEnum.REPORT)).thenReturn(timeSheet);
         when(timeSheetService.getSelectedProjectsJson(timeSheetForm)).thenReturn(selectedProjectsJSON);
         when(timeSheetService.getSelectedProjectRolesJson(timeSheetForm)).thenReturn(selectedProjectRolesJSON);
         when(timeSheetService.getSelectedProjectTasksJson(timeSheetForm)).thenReturn(selectedProjectTasksJSON);

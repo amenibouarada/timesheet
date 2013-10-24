@@ -200,12 +200,13 @@
                             <td class="date"><fmt:formatDate value="${report.calDate}" pattern="dd.MM.yyyy"/></td>
                             <td>
                                 <a target="_blank" href="<%=request.getContextPath()%>/report<fmt:formatDate value="${report.calDate}" pattern="/yyyy/MM/dd/"/>${report.timeSheet.employee.id}">Посмотреть отчёт</a>
+                                <%--кнопка удалить--%>
                                 <sec:authorize access="hasRole('ROLE_ADMIN')">
                                     <a href="#"
                                        onclick="deleteTimeSheet(${report.timeSheet.id},'${report.calDate}')"><img
                                             src="<c:url
                                      value="/resources/img/delete.png"/>" width="15px" title="Удалить"/></a>
-                                    </sec:authorize>
+                                </sec:authorize>
                             </td>
                             <td class="duration">${report.duration}</td>
                     </c:if>
@@ -237,6 +238,15 @@
                         <tr class="statusNotCome">
                             <td class="date"><fmt:formatDate value="${report.calDate}" pattern="dd.MM.yyyy"/></td>
                             <td></td>
+                            <td></td>
+                    </c:if>
+
+                    <c:if test="${report.statusHaveDraft}">
+                        <tr class="statusHaveDraft">
+                            <td class="date"><fmt:formatDate value="${report.calDate}" pattern="dd.MM.yyyy"/></td>
+                            <td>
+                                <a target="_blank" href="<%=request.getContextPath()%>/timesheet">Редактировать отчет</a>
+                            </td>
                             <td></td>
                     </c:if>
 

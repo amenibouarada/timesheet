@@ -9,6 +9,7 @@ import com.aplana.timesheet.dao.TimeSheetDetailDAO;
 import com.aplana.timesheet.dao.entity.*;
 import com.aplana.timesheet.dao.entity.Calendar;
 import com.aplana.timesheet.enums.DictionaryEnum;
+import com.aplana.timesheet.enums.TypesOfTimeSheetEnum;
 import com.aplana.timesheet.form.TimeSheetForm;
 import com.aplana.timesheet.form.TimeSheetTableRowForm;
 import com.aplana.timesheet.form.entity.DayTimeSheet;
@@ -79,7 +80,7 @@ public class TimeSheetService {
     public SecurityService securityService;
 
     @Transactional
-    public TimeSheet storeTimeSheet(TimeSheetForm tsForm) {
+    public TimeSheet storeTimeSheet(TimeSheetForm tsForm, TypesOfTimeSheetEnum type) {
         TimeSheet timeSheet = new TimeSheet();
         logger.debug("Selected employee id = {}", tsForm.getEmployeeId());
         logger.debug("Selected calDate = {}", tsForm.getCalDate());
@@ -132,8 +133,36 @@ public class TimeSheetService {
             }
         }
         timeSheet.setTimeSheetDetails(timeSheetDetails);
+        //сохраняем тип отчета
+        timeSheet.setType(type.getId());
+
+        //пытаемся узнать, может у нас есть ужде черновик вне зависисмости от
+        //на случай если появится еще состояния
+        if (TypesOfTimeSheetEnum.DRAFT == type || TypesOfTimeSheetEnum.REPORT == type) {
+            //todo Это бы заменить на проверку существования записи
+//            logger.info("searching..." + tsForm.getCalDate() + " " + tsForm.getEmployeeId());
+
+            TimeSheet forDateAndEmployeeTS = timeSheetDAO.findForDateAndEmployeeByTypes(
+                    calendarService.find(tsForm.getCalDate()),
+                    tsForm.getEmployeeId(),
+                    Arrays.asList(TypesOfTimeSheetEnum.REPORT, TypesOfTimeSheetEnum.DRAFT)
+            );
+
+//            logger.info("search..." + (forDateAndEmployeeTS != null ? "have" + forDateAndEmployeeTS.getId() : "null"));
+            if (forDateAndEmployeeTS != null) {
+                timeSheet.setId(forDateAndEmployeeTS.getId());
+                timeSheet.setCreationDate(new java.util.Date());
+//                logger.info("Timesheet updating..." + timeSheet.getId());
+                timeSheetDAO.storeTimeSheet(timeSheet);
+                logger.debug("TimeSheet object for employee {} ({}) updated.", tsForm.getEmployeeId(), timeSheet.getCalDate());
+                return timeSheet;
+            }
+        }
+
+//        logger.info("Timesheet saving...");
         timeSheetDAO.storeTimeSheet(timeSheet);
         logger.info("TimeSheet object for employee {} ({}) saved.", tsForm.getEmployeeId(), timeSheet.getCalDate());
+
         return timeSheet;
     }
 

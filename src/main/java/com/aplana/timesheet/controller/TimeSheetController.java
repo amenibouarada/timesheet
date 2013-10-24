@@ -2,6 +2,7 @@ package com.aplana.timesheet.controller;
 
 import com.aplana.timesheet.dao.entity.*;
 import com.aplana.timesheet.enums.DictionaryEnum;
+import com.aplana.timesheet.enums.TypesOfTimeSheetEnum;
 import com.aplana.timesheet.form.TimeSheetForm;
 import com.aplana.timesheet.form.validator.TimeSheetFormValidator;
 import com.aplana.timesheet.system.properties.TSPropertyProvider;
@@ -110,13 +111,6 @@ public class TimeSheetController {
         return mav;
     }
 
-    @RequestMapping(value = "/sendDraft",method = RequestMethod.POST)
-    public String sendDraft(@ModelAttribute("timeSheetForm") TimeSheetForm tsForm) {
-        logger.info("send draft");
-
-        return "redirect:timesheet";
-    }
-
     @RequestMapping(value = "/cqcodes", method = RequestMethod.GET)
     public String showCqCodes() {
         logger.info("Showing CQ Codes page!");
@@ -137,6 +131,16 @@ public class TimeSheetController {
     @RequestMapping(value = "/sendNewReport", method = RequestMethod.POST)
     public String sendNewReport() {
         return "redirect:timesheet";
+    }
+
+    @RequestMapping(value = "/sendDraft",method = RequestMethod.POST)
+    public ModelAndView sendDraft(@ModelAttribute("timeSheetForm") TimeSheetForm tsForm) {
+        timeSheetService.storeTimeSheet(tsForm, TypesOfTimeSheetEnum.DRAFT);
+
+        ModelAndView mav = new ModelAndView("draftSaved");
+        mav.addObject("timeSheetForm", tsForm);
+
+        return mav;
     }
 
     @RequestMapping(value = "/timesheet", method = RequestMethod.POST)
@@ -163,7 +167,7 @@ public class TimeSheetController {
 
             return mavWithErrors;
         }
-        TimeSheet timeSheet = timeSheetService.storeTimeSheet(tsForm);
+        TimeSheet timeSheet = timeSheetService.storeTimeSheet(tsForm, TypesOfTimeSheetEnum.REPORT);
         overtimeCauseService.store(timeSheet, tsForm);
         sendMailService.performMailing(tsForm);
 

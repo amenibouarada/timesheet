@@ -141,6 +141,7 @@ public class TimeSheet {
                 .append(" employee [").append(employee).append("]")
                 .append(" state [").append(state).append("]")
                 .append(" plan=").append(plan)
+                .append(" typeReport=").append(type)
                 .toString();
     }
 }

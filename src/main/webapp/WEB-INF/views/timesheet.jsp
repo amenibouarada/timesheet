@@ -203,7 +203,7 @@
         }
 
         var longIllness = dojo.byId("long_illness");
-        if (s == 'send' && confirmSendReport()) {
+        if ((s == 'send' && confirmSendReport()) || s=='send_draft') {
             var division = dojo.byId('divisionId');
             var employee = dojo.byId('employeeId');
             var rowsCount = dojo.query(".time_sheet_row").length;
@@ -247,17 +247,18 @@
                 deleteCookie("aplanaWorkPlace");
             else
                 setCookie('aplanaWorkPlace', workPlaceId, TimeAfter(7, 0, 0));
-            timeSheetForm.action = "timesheet";
+            if(s == 'send') {
+                timeSheetForm.action = "timesheet";
+            } else if(s == 'send_draft') {
+                timeSheetForm.action="sendDraft";
+            }
+
             processing();
             // disabled не включается в submit. поэтому снимем аттрибут.
             dojo.removeAttr("divisionId", "disabled");
             dojo.removeAttr("employeeId", "disabled");
             timeSheetForm.submit();
 
-        }
-        else if(s=='send_draft' ) {
-            timeSheetForm.action="sendDraft";
-            timeSheetForm.submit();
         }
         else if (s == 'newReport' && confirmCreateNewReport()) {
             timeSheetForm.action = "newReport";
