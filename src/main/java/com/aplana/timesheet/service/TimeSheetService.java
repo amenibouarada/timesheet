@@ -122,7 +122,7 @@ public class TimeSheetService {
                     timeSheetDetail.setProjectTask(projectTaskService.find(projectId, formRow.getProjectTaskId()));
                 }
                 // Сохраняем часы только для тех полей, которые не disabled
-                if (durationStr != null) {
+                if (durationStr != null && !durationStr.isEmpty()) {
                     duration = Double.parseDouble(durationStr.replace(",", "."));
                 }
                 timeSheetDetail.setDuration(duration);
@@ -136,25 +136,23 @@ public class TimeSheetService {
         //сохраняем тип отчета
         timeSheet.setType(type.getId());
 
-        //пытаемся узнать, может у нас есть ужде черновик вне зависисмости от
+        //пытаемся узнать, может у нас есть уже черновик вне зависисмости от типа отчета
         //на случай если появится еще состояния
         if (TypesOfTimeSheetEnum.DRAFT == type || TypesOfTimeSheetEnum.REPORT == type) {
-            //todo Это бы заменить на проверку существования записи
 //            logger.info("searching..." + tsForm.getCalDate() + " " + tsForm.getEmployeeId());
-
-            TimeSheet forDateAndEmployeeTS = timeSheetDAO.findForDateAndEmployeeByTypes(
+            Integer id = timeSheetDAO.findIdForDateAndEmployeeByTypes(
                     calendarService.find(tsForm.getCalDate()),
                     tsForm.getEmployeeId(),
                     Arrays.asList(TypesOfTimeSheetEnum.REPORT, TypesOfTimeSheetEnum.DRAFT)
             );
 
 //            logger.info("search..." + (forDateAndEmployeeTS != null ? "have" + forDateAndEmployeeTS.getId() : "null"));
-            if (forDateAndEmployeeTS != null) {
-                timeSheet.setId(forDateAndEmployeeTS.getId());
-                timeSheet.setCreationDate(new java.util.Date());
-//                logger.info("Timesheet updating..." + timeSheet.getId());
+            if (id != null) {
+                TimeSheet timeSheet2 = find(id);
+                timeSheetDAO.deleteAndFlush(timeSheet2);
+                logger.debug("Old TimeSheet object for employee {} ({}) deleted.", tsForm.getEmployeeId(), timeSheet.getCalDate());
                 timeSheetDAO.storeTimeSheet(timeSheet);
-                logger.debug("TimeSheet object for employee {} ({}) updated.", tsForm.getEmployeeId(), timeSheet.getCalDate());
+                logger.debug("TimeSheet object for employee {} ({}) saved.", tsForm.getEmployeeId(), timeSheet.getCalDate());
                 return timeSheet;
             }
         }
@@ -164,6 +162,23 @@ public class TimeSheetService {
         logger.info("TimeSheet object for employee {} ({}) saved.", tsForm.getEmployeeId(), timeSheet.getCalDate());
 
         return timeSheet;
+    }
+
+    /**
+     * Ищет в таблице timesheet запись соответсвующую date для сотрудника с
+     * идентификатором employeeId, с определенным типом и возвращает объект типа Timesheet.
+     *
+     * @param calDate    Дата в виде строки.
+     * @param employeeId Идентификатор сотрудника в базе данных.
+     * @return объект типа Timesheet, либо null, если объект не найден.
+     */
+    @Transactional
+    public TimeSheet findForDateAndEmployeeByTypes(String calDate, Integer employeeId, List<TypesOfTimeSheetEnum> types) {
+        return timeSheetDAO.findForDateAndEmployeeByTypes(
+                calendarService.find(calDate),
+                employeeId,
+                types
+        );
     }
 
     /**

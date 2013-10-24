@@ -392,6 +392,10 @@ table.report_params td {
     color: #f58383;
 }
 
+.classDateBrown {
+    color: #CC9966 ;
+}
+
 .dijitCalendarCurrentDate {
     background-color: #6495ED !important;
 }

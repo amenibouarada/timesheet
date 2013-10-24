@@ -63,6 +63,9 @@
                 case "2":   //выходной или праздничный день
                     return 'classDateRedText';
                     break;
+                case "3":
+                    return 'classDateBrown';
+                    break;
                 case "0":   //день без отчета
                     if (date <= getFirstWorkDate()) // день раньше начала работы
                         return '';
@@ -295,7 +298,28 @@
     Загрузка черновика
      **/
     function loadDraft() {
-
+//        var date = dijit.byId('calDate').value;
+//        var employeeId = dojo.byId('employeeId').value;
+//        var month = correctLength(date.getMonth() + 1);
+//        var year = date.getFullYear();
+//        var day = correctLength(date.getDate());
+//
+//        var corretDate = year + "-" + month + "-" + day;
+        console.log("324");
+        typeActivityChange(this);
+        reloadRowsState();
+        <%--dojo.xhrGet({--%>
+            <%--url: "${pageContext.request.contextPath}" + "/timesheet/loadDraft",--%>
+            <%--handleAs: "json",--%>
+            <%--timeout: 10000,--%>
+            <%--content: {date: corretDate, employeeId:employeeId},--%>
+            <%--load:function (data, ioArgs) {--%>
+                <%--console.log("work")--%>
+            <%--},--%>
+            <%--error:function (err, ioArgs) {--%>
+                <%--console.log("error");--%>
+            <%--}--%>
+        <%--});--%>
     }
 
     /**
@@ -307,7 +331,6 @@
         if (pickedDate) {
             formattedDate = pickedDate.format("yyyy-mm-dd");
         }
-        console.log(formattedDate);
         submitform('send_draft');
     }
 </script>

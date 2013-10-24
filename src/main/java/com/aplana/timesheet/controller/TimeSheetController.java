@@ -1,16 +1,17 @@
 package com.aplana.timesheet.controller;
 
+import argo.jdom.JsonObjectNodeBuilder;
 import com.aplana.timesheet.dao.entity.*;
 import com.aplana.timesheet.enums.DictionaryEnum;
 import com.aplana.timesheet.enums.TypesOfTimeSheetEnum;
 import com.aplana.timesheet.form.TimeSheetForm;
 import com.aplana.timesheet.form.validator.TimeSheetFormValidator;
-import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.*;
 import com.aplana.timesheet.service.helper.EmployeeHelper;
+import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.system.security.SecurityService;
-import com.aplana.timesheet.util.JsonUtil;
 import com.aplana.timesheet.system.security.entity.TimeSheetUser;
+import com.aplana.timesheet.util.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,10 +21,12 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static argo.jdom.JsonNodeBuilders.anObjectBuilder;
 import static argo.jdom.JsonNodeFactories.*;
 
 @Controller
@@ -68,8 +71,8 @@ public class TimeSheetController {
     private JiraService jiraService;
 
     @RequestMapping(value = "/timesheet", method = RequestMethod.GET)
-    public ModelAndView showMainForm(@RequestParam(value = "date",required = false) String date,
-                                     @RequestParam(value = "id",required = false) Integer id) {
+    public ModelAndView showMainForm(@RequestParam(value = "date", required = false) String date,
+                                     @RequestParam(value = "id", required = false) Integer id) {
         logger.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>");
         logger.info("Showing Time Sheet main page!");
         ModelAndView mav = new ModelAndView();
@@ -84,7 +87,7 @@ public class TimeSheetController {
             tsForm.setEmployeeId(id);
         } else if (securityUser != null) {
             if (id != null) {
-                String format = String.format("Can't find user by ID = %s. Was set current application user.",id);
+                String format = String.format("Can't find user by ID = %s. Was set current application user.", id);
                 logger.error(format);
             }
             tsForm.setDivisionId(securityUser.getEmployee().getDivision().getId());
@@ -133,7 +136,7 @@ public class TimeSheetController {
         return "redirect:timesheet";
     }
 
-    @RequestMapping(value = "/sendDraft",method = RequestMethod.POST)
+    @RequestMapping(value = "/sendDraft", method = RequestMethod.POST)
     public ModelAndView sendDraft(@ModelAttribute("timeSheetForm") TimeSheetForm tsForm) {
         timeSheetService.storeTimeSheet(tsForm, TypesOfTimeSheetEnum.DRAFT);
 
@@ -141,6 +144,33 @@ public class TimeSheetController {
         mav.addObject("timeSheetForm", tsForm);
 
         return mav;
+    }
+
+    @RequestMapping(value = "/timesheet/loadDraft", headers = "Accept=application/json;Charset=UTF-8")
+    public String loadDraft(@RequestParam("date") String date,
+                            @RequestParam("employeeId") Integer employeeId) {
+        logger.debug("##### " + date);
+        logger.debug("##### " + employeeId);
+
+        TimeSheet timeSheet = timeSheetService.findForDateAndEmployeeByTypes(date, employeeId, Arrays.asList(TypesOfTimeSheetEnum.DRAFT));
+
+        if (timeSheet != null) {
+            final JsonObjectNodeBuilder builder = anObjectBuilder();
+//            builder.withField("selectedProjectsJson");
+//            //проектная роль
+//            builder.withField("selectedProjectRolesJson",);
+//            //название проекта
+//            builder.withField("selectedProjectTasksJson");
+//            //место работы
+//            builder.withField("selectedWorkplaceJson");
+            //категория активности
+//            builder.withField("selectedActCategoriesJson");
+
+        } else {
+
+        }
+
+        return "";
     }
 
     @RequestMapping(value = "/timesheet", method = RequestMethod.POST)
@@ -219,10 +249,10 @@ public class TimeSheetController {
         result.put("workplaceJson", workplacesJson);
 
         result.put("overtimeCauseJson", dictionaryItemService.getDictionaryItemsInJson(dictionaryItemService
-                .getOvertimeCauses()) );
+                .getOvertimeCauses()));
         result.put("unfinishedDayCauseJson", dictionaryItemService.getDictionaryItemsInJson(dictionaryItemService
                 .getUnfinishedDayCauses()
-        ) );
+        ));
         result.put("overtimeThreshold", propertyProvider.getOvertimeThreshold());
         result.put("undertimeThreshold", propertyProvider.getUndertimeThreshold());
 
@@ -273,7 +303,8 @@ public class TimeSheetController {
 
     /**
      * Возвращает планы предыдущего дня и на следующего дня
-     * @param date (2012-11-25)
+     *
+     * @param date       (2012-11-25)
      * @param employeeId (573)
      * @return Json String
      */
