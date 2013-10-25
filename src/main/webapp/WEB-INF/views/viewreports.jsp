@@ -186,7 +186,7 @@
                     <c:if test="${report.statusHoliday}">
                         <tr class="statusHoliday">
                             <td class="date"><fmt:formatDate value="${report.calDate}" pattern="dd.MM.yyyy"/></td>
-                            <td>Выходной</td>
+                            <td>Выходной <a href="<%=request.getContextPath()%>/timesheet?date=<fmt:formatDate value="${report.calDate}" pattern="yyyy-MM-dd"/>&id=${employeeId}">(Создать)</a></td>
                             <td></td>
                     </c:if>
                     <c:if test="${report.statusNotStart}">

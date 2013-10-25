@@ -7,16 +7,16 @@
        http://www.springframework.org/schema/security
        http://www.springframework.org/schema/security/spring-security.xsd">
 
-    <security:http pattern="/resources/**" security="none" />
+    <security:http pattern="/resources/**" security="none"/>
 
-    <security:http pattern="/favicon.ico" security="none" />
+    <security:http pattern="/favicon.ico" security="none"/>
 
     <security:http pattern="/login*" security="none"/>
     <security:http pattern="/vacation_approval/**" security="none"/>
 
-<!-- 
-    <security:http use-expressions="true"  entry-point-ref="spnegoEntryPoint">
- -->    
+    <!--
+        <security:http use-expressions="true"  entry-point-ref="spnegoEntryPoint">
+     -->
     <security:http auto-config="true" use-expressions="true">
         <security:remember-me services-ref="rememberService"/>
         <security:intercept-url pattern="/admin/**" access="hasRole('ROLE_ADMIN')"/>
@@ -25,29 +25,29 @@
         <security:intercept-url pattern="/managertools" access="hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')"/>
         <security:intercept-url pattern="/timesheetDel/**" access="hasRole('ROLE_ADMIN')"/>
         <security:intercept-url pattern="/adminMessage" access="isAnonymous()"/>
-        <security:intercept-url pattern="/planEdit" access="hasAnyRole('ROLE_PLAN_EDIT', 'ROLE_PLAN_VIEW')" />
-        <security:intercept-url pattern="/planEdit/**" access="hasAnyRole('ROLE_PLAN_EDIT', 'ROLE_PLAN_VIEW')" />
-        <security:intercept-url pattern="/planSave" access="hasRole('ROLE_PLAN_EDIT')" />
-        <security:intercept-url pattern="/planSave/**" access="hasRole('ROLE_PLAN_EDIT')" />
-        <security:intercept-url pattern="/createPlanForPeriod" access="hasRole('ROLE_PLAN_EDIT')" />
-        <security:intercept-url pattern="/createPlanForPeriod/**" access="hasRole('ROLE_PLAN_EDIT')" />
-        <security:intercept-url pattern="/businesstripsandillnessadd" access="hasRole('CHANGE_ILLNESS_BUSINESS_TRIP')" />
+        <security:intercept-url pattern="/planEdit" access="hasAnyRole('ROLE_PLAN_EDIT', 'ROLE_PLAN_VIEW')"/>
+        <security:intercept-url pattern="/planEdit/**" access="hasAnyRole('ROLE_PLAN_EDIT', 'ROLE_PLAN_VIEW')"/>
+        <security:intercept-url pattern="/planSave" access="hasRole('ROLE_PLAN_EDIT')"/>
+        <security:intercept-url pattern="/planSave/**" access="hasRole('ROLE_PLAN_EDIT')"/>
+        <security:intercept-url pattern="/createPlanForPeriod" access="hasRole('ROLE_PLAN_EDIT')"/>
+        <security:intercept-url pattern="/createPlanForPeriod/**" access="hasRole('ROLE_PLAN_EDIT')"/>
+        <security:intercept-url pattern="/businesstripsandillnessadd" access="hasRole('CHANGE_ILLNESS_BUSINESS_TRIP')"/>
         <security:intercept-url pattern="/businesstripsandillnessadd/**"
-                                access="hasRole('CHANGE_ILLNESS_BUSINESS_TRIP')" />
+                                access="hasRole('CHANGE_ILLNESS_BUSINESS_TRIP')"/>
         <security:intercept-url pattern="/**" access="hasRole('ROLE_USER')"/>
-        <security:form-login  login-page="/login" default-target-url="/timesheet"
-                                            authentication-failure-url="/loginfailed"/>
+        <security:form-login login-page="/login" default-target-url="/timesheet"
+                             authentication-failure-url="/loginfailed"/>
         <security:logout logout-url="/logout" logout-success-url="/login"/>
-<!--
-		<security:custom-filter ref="spnegoAuthenticationProcessingFilter" position="BASIC_AUTH_FILTER" />
- -->
+        <!--
+                <security:custom-filter ref="spnegoAuthenticationProcessingFilter" position="BASIC_AUTH_FILTER" />
+         -->
     </security:http>
-    
+
     <security:authentication-manager>
         <security:authentication-provider ref="rememberMeAuthenticationProvider"/>
         <security:authentication-provider ref="ldapAuthProvider"/>
     </security:authentication-manager>
- 
+
     <bean class="org.springframework.security.web.access.expression.DefaultWebSecurityExpressionHandler"/>
 
     <!-- SPNEGO

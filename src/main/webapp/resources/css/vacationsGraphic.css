@@ -1,18 +1,27 @@
-.Gantt {
-    font-family: tahoma, arial, verdana;
+/*можно выделить в стиль .TTStyle*/
+.Gantt,
+.GVacationTitle,
+.GMonth,
+.GMonthDayGraph,
+.GWeekend,
+.GDay {
     font-size: 11px;
+    font-family: tahoma, arial, verdana;
 }
 
 .GVacationTitle {
-    font-family: tahoma, arial, verdana;
-    font-size: 11px;
     font-weight: bold;
 }
 
 .GMonth {
     padding-left: 5px;
-    font-family: tahoma, arial, verdana;
-    font-size: 11px;
+    font-weight: bold;
+}
+
+.GMonthDayGraph {
+    padding-left: 5px;
+    padding-right: 5px;
+    margin: 0px;
     font-weight: bold;
 }
 
@@ -22,16 +31,16 @@
 }
 
 .GWeekend {
-    font-family: tahoma, arial, verdana;
-    font-size: 11px;
     background-color: pink;
     text-align: center;
 }
 
 .GDay {
-    font-family: tahoma, arial, verdana;
-    font-size: 11px;
     text-align: center;
+}
+
+.GDayDiv {
+    display:inline-block;
 }
 
 .GVacation {

@@ -86,7 +86,7 @@
         #end
     #end
     #if ($paramsForGenerateBody.get($first, "effortInNextDay") != $null)
-        <li><h2><b>Моя оценка моего объема работ на следующий рабочий день:</b></h2></li>
+        <li><h2><b>Оценка объема работ на следующий рабочий день:</b></h2></li>
         #set ($planStrings = $paramsForGenerateBody.get($first, "effortInNextDay").split("\n"))
         #foreach ($planString in $planStrings)
             <span>$planString</span><br>
