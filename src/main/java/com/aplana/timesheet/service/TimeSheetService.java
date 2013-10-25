@@ -254,6 +254,11 @@ public class TimeSheetService {
      */
     @Transactional(readOnly = true)
     public String getPlansJson(String date, Integer employeeId) {
+        return JsonUtil.format(getPlansJsonBuilder(date,employeeId));
+    }
+
+    @Transactional(readOnly = true)
+    public JsonObjectNodeBuilder getPlansJsonBuilder(String date, Integer employeeId) {
         final JsonObjectNodeBuilder builder = anObjectBuilder();
 
         final TimeSheet lastTimeSheet = timeSheetDAO.findLastTimeSheetBefore(calendarService.find(date), employeeId);
@@ -274,8 +279,7 @@ public class TimeSheetService {
                 ) { // <APLANATS-458>
             builder.withField("next", getPlanBuilder(nextTimeSheet, false));
         }
-
-        return JsonUtil.format(builder);
+        return builder;
     }
 
     private JsonObjectNodeBuilder getPlanBuilder(TimeSheet timeSheet, Boolean nextOrPrev) {

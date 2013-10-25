@@ -245,7 +245,8 @@
                         <tr class="statusHaveDraft">
                             <td class="date"><fmt:formatDate value="${report.calDate}" pattern="dd.MM.yyyy"/></td>
                             <td>
-                                <a target="_blank" href="<%=request.getContextPath()%>/timesheet">Редактировать отчет</a>
+                                Черновик отчета
+                                <a href="<%=request.getContextPath()%>/timesheet" onclick=""><img src="<c:url value="/resources/img/edit.png"/>" width="15px" title="Редактировать отчет"/></a>
                             </td>
                             <td></td>
                     </c:if>
