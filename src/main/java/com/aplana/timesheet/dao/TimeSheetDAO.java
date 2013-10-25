@@ -136,7 +136,7 @@ public class TimeSheetDAO {
                         "h.id, " +
                         "ts.id, " +
                         "tsd.act_type "
-                        + "order by c.calDate asc, timesheet_id asc, ts.type desc"
+                        + "order by c.calDate asc, timesheet_id asc"
         ).setParameter("yearPar", year).setParameter("monthPar", month)
                 .setParameter("region", region).setParameter("employeeId", employee.getId());
 
@@ -145,14 +145,8 @@ public class TimeSheetDAO {
         List<DayTimeSheet> dayTSList = new ArrayList<DayTimeSheet>();
 
         HashMap<Long, DayTimeSheet> map = new HashMap<Long, DayTimeSheet>();
-        boolean i;
         for (Object object : result) {
             Object[] item = (Object[]) object;
-            i = false;
-            //убираем черновики
-            if ((item[5] != null) && (Integer) item[5] == 1) {
-                i = true;
-            }
 
             //дата в месяце
             Timestamp calDate = new Timestamp(((Date) item[0]).getTime());
@@ -171,8 +165,8 @@ public class TimeSheetDAO {
             }
 
             //если Map еще не содержит запись на эту дату
-            if (!map.containsKey(calDate.getTime()) || i) {
-                DayTimeSheet ds = new DayTimeSheet(calDate, holiday, tsId, actType, duration, employee, i);
+            if (!map.containsKey(calDate.getTime())) {
+                DayTimeSheet ds = new DayTimeSheet(calDate, holiday, tsId, actType, duration, employee, (item[5] != null) && (Integer) item[5] == 1);
                 ds.setTimeSheetDAO(this);
                 ds.setIllnessDAO(illnessDAO);
                 ds.setVacationDAO(vacationDAO);

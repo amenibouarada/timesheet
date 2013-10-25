@@ -278,6 +278,10 @@ div.menu_holder table td {
     width: 35px !important;
 }
 
+.durationDraftText {
+    color: #adadad;
+}
+
 .login_div {
     margin-top: 40px;
     text-align: center;

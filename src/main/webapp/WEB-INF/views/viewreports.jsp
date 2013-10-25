@@ -248,7 +248,9 @@
                                 Черновик отчета
                                 <a href="<%=request.getContextPath()%>/timesheet" onclick=""><img src="<c:url value="/resources/img/edit.png"/>" width="15px" title="Редактировать отчет"/></a>
                             </td>
-                            <td></td>
+                        <td class="durationDraft duration">
+                            <div class="durationDraftText">${report.duration}</div>
+                        </td>
                     </c:if>
 
                         <td>
