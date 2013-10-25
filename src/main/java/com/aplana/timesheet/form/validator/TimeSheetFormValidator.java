@@ -392,7 +392,7 @@ public class TimeSheetFormValidator extends AbstractValidator {
         } else if (!isEffortValid(tsForm.getEffortInNextDay())) {
             errors.rejectValue("effortInNextDay",
                     "error.tsform.effort.invalid",
-                    "Неверные данные в поле 'Моя оценка моего объема работ на следующий рабочий день'");
+                    "Неверные данные в поле 'Оценка объема работ на следующий рабочий день'");
         }
     }
 
