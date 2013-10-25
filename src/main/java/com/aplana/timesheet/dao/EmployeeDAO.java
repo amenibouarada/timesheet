@@ -594,4 +594,33 @@ public class EmployeeDAO {
         Query query = entityManager.createQuery("select emp.region.id from Employee emp where emp.endDate=null and emp.manager.id = :id group by emp.region").setParameter("id", id);
         return query.getResultList();
     }
+
+    /**
+     * Возвращает список сотрудников по центру, руководителю, списку должностей и списку регионов
+     * @param division - идентификатора центра
+     * @param manager - идентификатора руководителя
+     * @param projectRoleList - список идентификаторов должностей
+     * @param regionList - список идентификаторов регионов
+     * @return
+     */
+    public List<Employee> getEmployeeByDivisionManagerRoleRegion(Integer division, Integer manager, List<Integer> projectRoleList, List<Integer> regionList){
+        Query query = entityManager.createQuery(
+                "select " +
+                    "emp " +
+                "from " +
+                    "Employee emp " +
+                "where " +
+                     "emp.endDate is NULL " +
+                     "and emp.division.id = :division " +
+                     "and emp.manager.id = :manager " +
+                     "and emp.job.id in :projectRoleList " +
+                     "and emp.region.id in :regionList");
+
+        query.setParameter("division", division);
+        query.setParameter("manager", manager);
+        query.setParameter("projectRoleList", projectRoleList);
+        query.setParameter("regionList", regionList);
+
+        return query.getResultList();
+    }
 }

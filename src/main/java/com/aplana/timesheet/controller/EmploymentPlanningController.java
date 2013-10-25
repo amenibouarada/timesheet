@@ -1,78 +1,297 @@
 package com.aplana.timesheet.controller;
 
+import argo.jdom.*;
+import argo.saj.InvalidSyntaxException;
+import com.aplana.timesheet.dao.*;
 import com.aplana.timesheet.dao.entity.Calendar;
+import com.aplana.timesheet.dao.entity.*;
+import com.aplana.timesheet.form.AddEmployeeForm;
 import com.aplana.timesheet.form.EmploymentPlanningForm;
 import com.aplana.timesheet.service.CalendarService;
+import com.aplana.timesheet.service.EmployeeProjectPlanService;
 import com.aplana.timesheet.service.ProjectService;
 import com.aplana.timesheet.util.DateTimeUtil;
+import com.aplana.timesheet.util.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+
+import static argo.jdom.JsonNodeBuilders.*;
 
 @Controller
-public class EmploymentPlanningController {
+public class EmploymentPlanningController{
     private static final Logger logger = LoggerFactory.getLogger(EmploymentPlanningController.class);
-
-
 
     @Autowired
     private CalendarService calendarService;
+
     @Autowired
     private ProjectService projectService;
 
+    @Autowired
+    private EmployeeProjectPlanDAO employeeProjectPlanDAO;
 
+    @Autowired
+    private DivisionDAO divisionDAO;
+
+    @Autowired
+    private ManagerDAO managerDAO;
+
+    @Autowired
+    private ProjectRoleDAO projectRoleDAO;
+
+    @Autowired
+    private RegionDAO regionDAO;
+
+    @Autowired
+    private EmployeeDAO employeeDAO;
+
+    @Autowired
+    private EmployeeProjectPlanService employeeProjectPlanService;
+
+    @Autowired
+    private TimeSheetDAO timeSheetDAO;
 
     private List<com.aplana.timesheet.dao.entity.Calendar> getYearList() {
         return DateTimeUtil.getYearsList(calendarService);
     }
 
-
     /* страница по умолчанию */
     @RequestMapping("/employmentPlanning")
-    public ModelAndView showForm(
-            @ModelAttribute(EmploymentPlanningForm.FORM) EmploymentPlanningForm form,
-            HttpServletRequest request,
-            HttpServletResponse response
-    ) {
+    public ModelAndView showForm(@ModelAttribute(EmploymentPlanningForm.FORM) EmploymentPlanningForm form) {
         final ModelAndView modelAndView = new ModelAndView("employmentPlanning");
-
-        final List<Calendar> yearList = getYearList();
-
-        modelAndView.addObject("yearList", yearList);
-        modelAndView.addObject("monthList", calendarService.getMonthList(2013)); //todo исправить обработку месяцев и года
-        modelAndView.addObject("projectList", projectService.getAllProjects());
+        fillDefaultModelAndView(modelAndView);
+        fillDefaultForm(form);
+        modelAndView.addObject("form", form);
 
         return modelAndView;
     }
+
 
     /* страница с запрошенными данными */
     @RequestMapping(value = "/employmentPlanning", method = RequestMethod.POST)
-    public ModelAndView showTable(
-            @ModelAttribute(EmploymentPlanningForm.FORM) EmploymentPlanningForm form,
-            BindingResult bindingResult,
-            HttpServletResponse response
-    ) {
+    public ModelAndView showTable( @ModelAttribute(EmploymentPlanningForm.FORM) EmploymentPlanningForm form) {
         final ModelAndView modelAndView = new ModelAndView("employmentPlanning");
+        fillDefaultModelAndView(modelAndView);
+        modelAndView.addObject("form", form);
 
-        final List<Calendar> yearList = getYearList();
+        List<Object[]> projectPlanList = employeeProjectPlanDAO.getProjectPlan(form);
+        String projectPlanAsJSON = getProjectPlanAsJSON(projectPlanList);
 
-        modelAndView.addObject("yearList", yearList);
-        modelAndView.addObject("monthList", calendarService.getMonthList(2013)); //todo исправить обработку месяцев и года
-        modelAndView.addObject("projectList", projectService.getProjectsByDates(new Date(),new Date()));
+        modelAndView.addObject("projectPlan", projectPlanAsJSON);
 
         return modelAndView;
     }
 
+    /* Возвращает JSON для грида занятости сотрудников на проекте */
+    @RequestMapping(value="/employmentPlanning/getProjectPlanAsJSON", produces = "text/plain;charset=UTF-8")
+    @ResponseBody
+    public String showProjectPlan(@ModelAttribute(EmploymentPlanningForm.FORM) EmploymentPlanningForm form) {
+        List<Object[]> projectPlanList = employeeProjectPlanDAO.getProjectPlan(form);
+        String projectPlanAsJSON = getProjectPlanAsJSON(projectPlanList);
+
+        return projectPlanAsJSON;
+    }
+
+    /* Возвращает JSON для грида занятости сотрудника на проектах*/
+    @RequestMapping(value="/employmentPlanning/getEmployeePlanAsJSON", produces = "text/plain;charset=UTF-8")
+    @ResponseBody
+    public String showEmployeePlan(
+            @ModelAttribute(EmploymentPlanningForm.FORM) EmploymentPlanningForm form,
+            @RequestParam("employeeId") Integer employeeId
+    ) {
+        List<Object[]> planList = employeeProjectPlanDAO.getEmployeePlan(employeeId, form.getYearBeg(), form.getMonthBeg(), form.getYearEnd(), form.getMonthEnd());
+        List<Object[]> factList = timeSheetDAO.getEmployeeFact(employeeId, form.getYearBeg(), form.getMonthBeg(), form.getYearEnd(), form.getMonthEnd());
+
+        String employeePlanAsJSON = getEmployeePlanAsJSON(planList, factList);
+
+        return employeePlanAsJSON;
+    }
+
+
+    /* Возвращает JSON для форме выбора сотрудников */
+    @RequestMapping(value="/employmentPlanning/getAddEmployeeListAsJSON", produces = "text/plain;charset=UTF-8")
+    @ResponseBody
+    public String showAddEmployeeList(@ModelAttribute(AddEmployeeForm.ADD_FORM) AddEmployeeForm form) {
+        List<Employee> employeeList = employeeDAO.getEmployeeByDivisionManagerRoleRegion(form.getDivisionId(), form.getManagerId(), form.getProjectRoleListId(), form.getRegionListId());
+        String employeeListAsJSON = getEmployeeListAsJson(employeeList);
+
+        return employeeListAsJSON;
+    }
+
+    /* Сохраняем данные */
+    @RequestMapping(value="/employmentPlanning/setEmployeeProjectAsJSON", produces = "text/plain;charset=UTF-8")
+    @ResponseBody
+    public String saveEmployeeData(@ModelAttribute(EmploymentPlanningForm.FORM) EmploymentPlanningForm form,
+                                   @RequestParam("jsonData") String jsonData) throws InvalidSyntaxException {
+        JdomParser jdomParser = new JdomParser();
+        JsonRootNode rootNode = jdomParser.parse(jsonData);
+        List<JsonField> abc = rootNode.getFieldList();
+        JsonField jsonField = abc.get(0);
+        JsonNode jsonNode = jsonField.getValue();
+        List<JsonNode> jsonNodes = jsonNode.getElements();
+
+        for(JsonNode node : jsonNodes){
+            Integer employeeId = Integer.parseInt(node.getNumberValue("employee_id"));
+            String plan = node.getStringValue("plan");
+            if (plan!=null && !"".equals(plan)){
+                try{
+                    Double value = Double.parseDouble(plan);
+                    employeeProjectPlanService.updateEmployeeProjectPlan(employeeId, form, value);
+                }
+                catch(NumberFormatException nfe){
+                    //TODO something
+                }
+            }
+        }
+
+        return "ля-ля-ля";
+    }
+
+    public void fillDefaultModelAndView(ModelAndView modelAndView){
+        final List<Calendar> yearList = getYearList();
+        modelAndView.addObject("yearList", yearList);
+        modelAndView.addObject("monthList", calendarService.getMonthList(2013)); //todo исправить обработку месяцев и года
+        modelAndView.addObject("projectList", projectService.getProjectsByDates(new Date(), new Date()));
+        modelAndView.addObject("divisionList", divisionDAO.getActiveDivisions());
+        modelAndView.addObject("managerList", managerDAO.getManagerList());
+        modelAndView.addObject("projectRoleList", projectRoleDAO.getProjectRoles());
+        modelAndView.addObject("regionList", regionDAO.getRegions());
+
+        AddEmployeeForm addEmployeeForm = new AddEmployeeForm();
+        addEmployeeForm.setDivisionId(1);
+
+        modelAndView.addObject("addEmployeeForm", addEmployeeForm);
+    }
+
+    /**
+     * Значения по умолчанию для формы ввода поиска сотрудников
+     * @param form
+     */
+    public void fillDefaultForm(EmploymentPlanningForm form){
+        form.setMonthBeg(5);
+        form.setYearBeg(2013);
+        form.setMonthEnd(12);
+        form.setYearEnd(2013);
+        form.setProjectId(1150);
+    }
+
+    /**
+     * Получает JSON для грида занятости сотрудников на проекте
+     * @param planList
+     * @return
+     */
+    public String getProjectPlanAsJSON(List<Object[]> planList){
+        JsonArrayNodeBuilder builder = anArrayBuilder();
+        Map<Integer, JsonObjectNodeBuilder> jsonMap = new LinkedHashMap<Integer, JsonObjectNodeBuilder>();
+
+        for(Object[] result : planList){
+            Integer employee_id = (Integer)result[0];
+            String  employee_name = (String)result[1];
+            Integer year = (Integer)result[2];
+            Integer month = (Integer)result[3];
+            Double  value = (Double)result[4];
+
+            JsonObjectNodeBuilder objectNodeBuilder = jsonMap.get(employee_id);
+
+            if (objectNodeBuilder != null){
+                objectNodeBuilder.withField(year+"_"+month, aNumberBuilder(value.toString()));
+            } else {
+                objectNodeBuilder = anObjectBuilder();
+                objectNodeBuilder.
+                        withField("employee_id", aNumberBuilder(employee_id.toString())).
+                        withField("employee_name", aStringBuilder(employee_name)).
+                        withField(year+"_"+month, aNumberBuilder(value.toString()));
+                jsonMap.put(employee_id, objectNodeBuilder);
+            }
+        }
+
+        for(Map.Entry<Integer, JsonObjectNodeBuilder> entry : jsonMap.entrySet()){
+            builder.withElement(entry.getValue());
+        }
+
+        return JsonUtil.format(builder.build());
+    }
+
+    public String getEmployeePlanAsJSON(List<Object[]> planList, List<Object[]> factList){
+        JsonArrayNodeBuilder builder = anArrayBuilder();
+        Map<Integer, JsonObjectNodeBuilder> jsonMap = new LinkedHashMap<Integer, JsonObjectNodeBuilder>();
+
+        for(Object[] result : planList){
+            Integer projectId = (Integer)result[0];
+            String  projectName = (String)result[1];
+            Integer month = (Integer)result[2];
+            Integer year = (Integer)result[3];
+            Double  value = (Double)result[4];
+
+            JsonObjectNodeBuilder objectNodeBuilder = jsonMap.get(projectId);
+
+            if (objectNodeBuilder != null){
+                objectNodeBuilder.withField(year+"_"+month, aNumberBuilder(value.toString()));
+            } else {
+                objectNodeBuilder = anObjectBuilder();
+                objectNodeBuilder.withField("project_id", aNumberBuilder(projectId.toString()));
+                objectNodeBuilder.withField("project_name", aStringBuilder(projectName));
+                objectNodeBuilder.withField(year+"_"+month, aNumberBuilder(value.toString()));
+
+                jsonMap.put(projectId, objectNodeBuilder);
+            }
+        }
+
+        for(Object[] result : factList){
+            Integer projectId = (Integer)result[0];
+            String  projectName = (String)result[1];
+            Integer month = (Integer)result[2];
+            Integer year = (Integer)result[3];
+            Double  value = (Double)result[4];
+
+            if (projectId == null){
+                projectId = 12;
+            }
+
+            JsonObjectNodeBuilder objectNodeBuilder = jsonMap.get(projectId);
+
+            if (objectNodeBuilder != null){
+                objectNodeBuilder.withField(year+"-"+month, aNumberBuilder(value.toString()));
+            } else {
+                objectNodeBuilder = anObjectBuilder();
+                objectNodeBuilder.withField("project_id", aNumberBuilder(projectId.toString()));
+                objectNodeBuilder.withField("project_name", aStringBuilder(projectName));
+                objectNodeBuilder.withField(year+"-"+month, aNumberBuilder(value.toString()));
+
+                jsonMap.put(projectId, objectNodeBuilder);
+            }
+        }
+
+        for(Map.Entry<Integer, JsonObjectNodeBuilder> entry : jsonMap.entrySet()){
+            builder.withElement(entry.getValue());
+        }
+
+        return JsonUtil.format(builder.build());
+    }
+
+
+    /**
+     * Возвращает список работников как json {id, name}
+     * @param employeeList
+     * @return
+     */
+    public String getEmployeeListAsJson(List<Employee> employeeList){
+        JsonArrayNodeBuilder builder = anArrayBuilder();
+
+        for(Employee employee : employeeList){
+            JsonObjectNodeBuilder objectNodeBuilder = anObjectBuilder();
+            objectNodeBuilder.withField("employee_id", aNumberBuilder(employee.getId().toString()));
+            objectNodeBuilder.withField("employee_name", aStringBuilder(employee.getName()));
+            builder.withElement(objectNodeBuilder);
+        }
+
+        return JsonUtil.format(builder.build());
+    }
 
 }

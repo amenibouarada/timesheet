@@ -4,6 +4,7 @@ import com.aplana.timesheet.dao.EmployeeProjectPlanDAO;
 import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.dao.entity.EmployeeProjectPlan;
 import com.aplana.timesheet.dao.entity.Project;
+import com.aplana.timesheet.form.EmploymentPlanningForm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,5 +48,10 @@ public class EmployeeProjectPlanService {
     @Transactional
     public void remove(Employee employee, Integer year, Integer month) {
         employeeProjectPlanDAO.remove(employee, year, month);
+    }
+
+    @Transactional
+    public void updateEmployeeProjectPlan(Integer employeeId, EmploymentPlanningForm employmentPlanningForm, Double plan){
+        employeeProjectPlanDAO.updateEmployeeProjectPlan(employeeId, employmentPlanningForm, plan);
     }
 }
