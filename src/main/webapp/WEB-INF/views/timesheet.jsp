@@ -46,6 +46,7 @@
     var listOfActDescription = ${listOfActDescriptionJson};
     var workOnHolidayCauseList = ${workOnHolidayCauseJson};
     var defaultOvertimeCause = '${timeSheetForm.overtimeCause}';
+    var dataDraft='${data}';
 
     var root = getRootEventListener();
     var month = correctLength(new Date().getMonth() + 1);

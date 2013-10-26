@@ -7,9 +7,9 @@ import com.aplana.timesheet.enums.TypesOfTimeSheetEnum;
 import com.aplana.timesheet.form.TimeSheetForm;
 import com.aplana.timesheet.form.TimeSheetTableRowForm;
 import com.aplana.timesheet.form.validator.TimeSheetFormValidator;
-import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.*;
 import com.aplana.timesheet.service.helper.EmployeeHelper;
+import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.system.security.SecurityService;
 import com.aplana.timesheet.system.security.entity.TimeSheetUser;
 import org.junit.Before;
@@ -24,12 +24,12 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.*;
 
 /* Получился модульный тест, все запросы 'налево' (в сторонние сервисы) возвращают нужные значения */
@@ -212,14 +212,14 @@ public class TimeSheetControllerTest extends AbstractTimeSheetTest {
                 .thenReturn(workOnHolidayCausesJSON);
 
         /* тест */
-        ModelAndView result = timeSheetController.showMainForm(calDate, employee.getId());
+        ModelAndView result = timeSheetController.showMainForm(calDate, employee.getId(), null);
 
         /* проверка вызовов */
 
         /* анализ результата */
         assertNotNull(result);
 
-        Map<String,Object> resultMap = result.getModel();
+        Map<String, Object> resultMap = result.getModel();
         assertNotNull(resultMap);
 
         TimeSheetForm actualTS = (TimeSheetForm) resultMap.get("timeSheetForm");
@@ -252,7 +252,7 @@ public class TimeSheetControllerTest extends AbstractTimeSheetTest {
         assertEquals("Сравниваем список проектов в JSON", projectListJSON, resultMap.get("projectListJson"));
         assertEquals("Сравниваем проектных задач в JSON", projectsWithCqJSON, resultMap.get("projectTaskListJson"));
         assertEquals("Сравниваем список проектных ролей", projectRoles, resultMap.get("projectRoleList"));
-        assertEquals("Сравниваем список проектных ролей в JSON",projectRolesJSON, resultMap.get("projectRoleListJson"));
+        assertEquals("Сравниваем список проектных ролей в JSON", projectRolesJSON, resultMap.get("projectRoleListJson"));
         assertEquals("Сравниваем описание", listOfActDescriptionJSON, resultMap.get("listOfActDescriptionJson"));
         assertEquals("Сравниваем список компенсаций", typesOfCompensation, resultMap.get("typesOfCompensation"));
         assertEquals("Сравниваем причины в JSON", workOnHolidayCausesJSON, resultMap.get("workOnHolidayCauseJson"));
@@ -302,9 +302,9 @@ public class TimeSheetControllerTest extends AbstractTimeSheetTest {
     public void testDelTimeSheet_01() {
         /* заполняем входящие параметры */
         String requestResult = "Test";
-        String expected = "redirect:"+requestResult;
+        String expected = "redirect:" + requestResult;
 
-        Integer tsId=1;
+        Integer tsId = 1;
 
         Employee employee = new Employee();
         employee.setName("User");
@@ -337,7 +337,7 @@ public class TimeSheetControllerTest extends AbstractTimeSheetTest {
         /* выполняем тест */
         try {
             String actual = timeSheetController.delTimeSheet(1, request);
-        }catch (Exception e) {
+        } catch (Exception e) {
             /* анализ результатов */
             assertEquals("Не найден пользователь в контексте безопасности.", e.getMessage());
         }
@@ -474,7 +474,7 @@ public class TimeSheetControllerTest extends AbstractTimeSheetTest {
         /* анализ результата */
         assertNotNull(result);
 
-        Map<String,Object> resultMap = result.getModel();
+        Map<String, Object> resultMap = result.getModel();
         assertNotNull(resultMap);
 
         TimeSheetForm actualTS = (TimeSheetForm) resultMap.get("timeSheetForm");

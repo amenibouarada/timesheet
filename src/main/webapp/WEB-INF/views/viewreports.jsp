@@ -243,11 +243,13 @@
 
                     <c:if test="${report.statusHaveDraft}">
                         <tr class="statusHaveDraft">
-                            <td class="date"><fmt:formatDate value="${report.calDate}" pattern="dd.MM.yyyy"/></td>
-                            <td>
-                                Черновик отчета
-                                <a href="<%=request.getContextPath()%>/timesheet" onclick=""><img src="<c:url value="/resources/img/edit.png"/>" width="15px" title="Редактировать отчет"/></a>
-                            </td>
+                        <td class="date"><fmt:formatDate value="${report.calDate}" pattern="dd.MM.yyyy"/></td>
+                        <td>
+                            Черновик отчета
+                            <a href="<%=request.getContextPath()%>/timesheet?date=<fmt:formatDate value="${report.calDate}" pattern="yyyy-MM-dd"/>&id=${employeeId}&type=1"
+                               onclick=""><img src="<c:url value="/resources/img/edit.png"/>" width="15px"
+                                               title="Редактировать отчет"/></a>
+                        </td>
                         <td class="durationDraft duration">
                             <div class="durationDraftText">${report.duration}</div>
                         </td>

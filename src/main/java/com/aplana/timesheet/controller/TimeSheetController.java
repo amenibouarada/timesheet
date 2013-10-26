@@ -73,7 +73,8 @@ public class TimeSheetController {
 
     @RequestMapping(value = "/timesheet", method = RequestMethod.GET)
     public ModelAndView showMainForm(@RequestParam(value = "date", required = false) String date,
-                                     @RequestParam(value = "id", required = false) Integer id) {
+                                     @RequestParam(value = "id", required = false) Integer id,
+                                     @RequestParam(value = "type", required = false) Integer type) {
         logger.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>");
         logger.info("Showing Time Sheet main page!");
         ModelAndView mav = new ModelAndView();
@@ -111,6 +112,11 @@ public class TimeSheetController {
         mav.addObject("selectedWorkplaceJson", "[{row:'0', workplace:''}]");
         mav.addObject("selectedActCategoriesJson", "[{row:'0', actCat:''}]");
         mav.addAllObjects(getListsToMAV());
+
+        //если параметр передан и означает, что мы хотим загрузит черновик
+        if (type != null && TypesOfTimeSheetEnum.DRAFT.getId() == type) {
+            mav.addObject("data", "true");
+        }
 
         return mav;
     }
@@ -150,20 +156,35 @@ public class TimeSheetController {
         return mav;
     }
 
-    @RequestMapping(value = "/timesheet/showDraft")
-    public String forceLoadDraft(@RequestParam("date") String date) {
-
-
-
-        return "redirect:timesheet";
-    }
+//    @RequestMapping(value = "/timesheet/showDraft", method = RequestMethod.GET)
+//    public ModelAndView forceLoadDraft(@RequestParam(value = "date", required = true) String date,
+//                                       @RequestParam(value = "eId", required = true) Integer employeeId,
+//                                       @RequestParam(value = "dId", required = true) Integer divisionId,
+//                                       BindingResult result) {
+//        ModelAndView modelAndView = new ModelAndView("timesheet");
+//
+//        logger.info("##### " + date);
+//        logger.info("##### " + employeeId);
+//        logger.info("##### " + divisionId);
+//
+//        return modelAndView;
+//}
 
     @RequestMapping(value = "/timesheet/loadDraft", headers = "Accept=application/json;Charset=UTF-8")
     @ResponseBody
     public String loadDraft(@RequestParam("date") String date,
                             @RequestParam("employeeId") Integer employeeId) {
-        logger.debug("##### " + date);
-        logger.debug("##### " + employeeId);
+//        logger.debug("##### " + date);
+//        logger.debug("##### " + employeeId);
+        return JsonUtil.format(getJsonObjectNodeBuilder(date, employeeId));
+    }
+
+    /**
+     * @param date
+     * @param employeeId
+     * @return
+     */
+    private JsonObjectNodeBuilder getJsonObjectNodeBuilder(String date, Integer employeeId) {
         TimeSheet timeSheet = timeSheetService.findForDateAndEmployeeByTypes(date, employeeId, Arrays.asList(TypesOfTimeSheetEnum.DRAFT));
 
         final JsonArrayNodeBuilder builder = anArrayBuilder();
@@ -190,9 +211,7 @@ public class TimeSheetController {
                 );
             builderNode.withField("data", builder);
         }
-//        logger.debug("##### " + JsonUtil.format(builderNode));
-//        logger.debug("##### end");
-        return JsonUtil.format(builderNode);
+        return builderNode;
     }
 
     @RequestMapping(value = "/timesheet", method = RequestMethod.POST)
