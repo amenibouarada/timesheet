@@ -137,7 +137,11 @@ public class TimeSheetController {
         return "redirect:timesheet";
     }
 
-    //Пользователь нажал на кнопку "Отправить новый отчёт" на странице selected.jsp
+    /**
+     * Пользователь нажал на кнопку "Отправить новый отчёт" на странице selected.jsp
+     *
+     * @return редирект timesheet
+     */
     @RequestMapping(value = "/sendNewReport", method = RequestMethod.POST)
     public String sendNewReport() {
         return "redirect:timesheet";
@@ -156,62 +160,11 @@ public class TimeSheetController {
         return mav;
     }
 
-//    @RequestMapping(value = "/timesheet/showDraft", method = RequestMethod.GET)
-//    public ModelAndView forceLoadDraft(@RequestParam(value = "date", required = true) String date,
-//                                       @RequestParam(value = "eId", required = true) Integer employeeId,
-//                                       @RequestParam(value = "dId", required = true) Integer divisionId,
-//                                       BindingResult result) {
-//        ModelAndView modelAndView = new ModelAndView("timesheet");
-//
-//        logger.info("##### " + date);
-//        logger.info("##### " + employeeId);
-//        logger.info("##### " + divisionId);
-//
-//        return modelAndView;
-//}
-
     @RequestMapping(value = "/timesheet/loadDraft", headers = "Accept=application/json;Charset=UTF-8")
     @ResponseBody
     public String loadDraft(@RequestParam("date") String date,
                             @RequestParam("employeeId") Integer employeeId) {
-//        logger.debug("##### " + date);
-//        logger.debug("##### " + employeeId);
-        return JsonUtil.format(getJsonObjectNodeBuilder(date, employeeId));
-    }
-
-    /**
-     * @param date
-     * @param employeeId
-     * @return
-     */
-    private JsonObjectNodeBuilder getJsonObjectNodeBuilder(String date, Integer employeeId) {
-        TimeSheet timeSheet = timeSheetService.findForDateAndEmployeeByTypes(date, employeeId, Arrays.asList(TypesOfTimeSheetEnum.DRAFT));
-
-        final JsonArrayNodeBuilder builder = anArrayBuilder();
-        final JsonObjectNodeBuilder builderNode = anObjectBuilder();
-//        TimeSheetDetail timeSheetDetail=timeSheet.getTimeSheetDetails();
-        if (timeSheet != null && timeSheet.getTimeSheetDetails() != null && timeSheet.getTimeSheetDetails().size() != 0) {
-//            final JsonObjectNodeBuilder builder = anObjectBuilder();
-            int i = 0;
-            builderNode.withField("rows", aStringBuilder(String.valueOf(timeSheet.getTimeSheetDetails().size())));
-
-            for (TimeSheetDetail timeSheetDetail : timeSheet.getTimeSheetDetails())
-                builder.withElement(
-                        anObjectBuilder().
-                                withField("row", JsonUtil.aStringBuilder(i++)).
-                                withField("activity_type_id", aStringBuilder(timeSheetDetail.getActType() != null ? timeSheetDetail.getActType().getId().toString() : "0")).
-                                withField("workplace_id", aStringBuilder(timeSheetDetail.getWorkplace() != null ? timeSheetDetail.getWorkplace().getId().toString() : "0")).
-                                withField("project_id", aStringBuilder(timeSheetDetail.getProject() != null ? timeSheetDetail.getProject().getId().toString() : "0")).
-                                withField("project_role_id", aStringBuilder(timeSheetDetail.getProjectRole() != null ? timeSheetDetail.getProjectRole().getId().toString() : "0")).
-                                withField("activity_category_id", aStringBuilder(timeSheetDetail.getActCat() != null ? timeSheetDetail.getActCat().getId().toString() : "0")).
-                                withField("projectTask_id", aStringBuilder(timeSheetDetail.getProjectTask() != null ? timeSheetDetail.getProjectTask().getId().toString() : "0")).
-                                withField("duration_id", aStringBuilder(timeSheetDetail.getDuration() != null ? timeSheetDetail.getDuration().toString() : "")).
-                                withField("description_id", aStringBuilder(timeSheetDetail.getDescription() != null ? timeSheetDetail.getDescription() : "")).
-                                withField("problem_id", aStringBuilder(timeSheetDetail.getProblem() != null ? timeSheetDetail.getProblem() : ""))
-                );
-            builderNode.withField("data", builder);
-        }
-        return builderNode;
+        return JsonUtil.format(getJsonObjectNodeBuilderForReport(date, employeeId, Arrays.asList(TypesOfTimeSheetEnum.DRAFT)));
     }
 
     @RequestMapping(value = "/timesheet", method = RequestMethod.POST)
@@ -230,27 +183,6 @@ public class TimeSheetController {
         logger.info("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
 
         return mav;
-    }
-
-    private ModelAndView getModelAndViewForTimesheet(TimeSheetForm tsForm, BindingResult result) {
-        tsForm.unEscapeHTML();
-        logger.info("TimeSheetForm for employee {} has errors. Form not validated.", tsForm.getEmployeeId());
-        ModelAndView mavWithErrors = new ModelAndView("timesheet");
-        mavWithErrors.addObject("timeSheetForm", tsForm);
-        mavWithErrors.addObject("errors", result.getAllErrors());
-        mavWithErrors.addObject("selectedProjectsJson", timeSheetService.getSelectedProjectsJson(tsForm));
-        mavWithErrors.addObject("selectedProjectRolesJson", timeSheetService.getSelectedProjectRolesJson(tsForm));
-        mavWithErrors.addObject("selectedProjectTasksJson", timeSheetService.getSelectedProjectTasksJson(tsForm));
-        mavWithErrors.addObject("selectedWorkplaceJson", timeSheetService.getSelectedWorkplaceJson(tsForm));
-        mavWithErrors.addObject(
-                "selectedActCategoriesJson",
-                timeSheetService.getSelectedActCategoriesJson(tsForm)
-        );
-        mavWithErrors.addObject("selectedCalDateJson", timeSheetService.getSelectedCalDateJson(tsForm));
-        mavWithErrors.addObject("effortList", timeSheetService.getEffortList());
-        mavWithErrors.addAllObjects(getListsToMAV());
-
-        return mavWithErrors;
     }
 
     /**
@@ -276,11 +208,52 @@ public class TimeSheetController {
         return "redirect:" + httpRequest.getHeader("Referer");
     }
 
-    /*
-      * Возвращает HashMap со значениями для заполнения списков сотрудников,
-      * проектов, пресейлов, проектных задач, типов и категорий активности на
-      * форме приложения.
-      */
+    /**
+     * Возвращает планы предыдущего дня и на следующего дня.
+     * Так же данные о том, есть ли на этот день черновик
+     *
+     * @param date       (2012-11-25)
+     * @param employeeId (573)
+     * @return Json String
+     */
+    @RequestMapping(value = "/timesheet/daySupData", headers = "Accept=application/json;Charset=UTF-8")
+    @ResponseBody
+    public String getPlans(@RequestParam("date") String date,
+                           @RequestParam("employeeId") Integer employeeId) {
+
+        JsonObjectNodeBuilder jsonObjectNodeBuilder = timeSheetService.getPlansJsonBuilder(date, employeeId);
+        TimeSheet timeSheet = timeSheetService.findForDateAndEmployeeByTypes(date, employeeId, Arrays.asList(TypesOfTimeSheetEnum.DRAFT));
+        jsonObjectNodeBuilder.withField("draft", aStringBuilder(timeSheet != null && timeSheet.getId() != null ? "1" : "0"));
+        return JsonUtil.format(jsonObjectNodeBuilder);
+    }
+
+    @RequestMapping(value = "/timesheet/jiraIssues", headers = "Accept=application/octet-stream;Charset=UTF-8")
+    @ResponseBody
+    public String getJiraIssuesStr(@RequestParam("employeeId") Integer employeeId,
+                                   @RequestParam("date") String date,
+                                   @RequestParam("projectId") Integer projectId) {
+        return jiraService.getDayIssues(employeeId, date, projectId);
+    }
+
+    @RequestMapping(value = "/employee/isDivisionLeader", headers = "Accept=application/json")
+    @ResponseBody
+    public String isDivisionLeader(@RequestParam("employeeId") Integer employeeId) {
+        return JsonUtil.format(
+                object(
+                        field(
+                                "isDivisionLeader",
+                                employeeService.isEmployeeDivisionLeader(employeeId) ? trueNode() : falseNode())
+                )
+        );
+    }
+
+    /**
+     * Возвращает Map со значениями для заполнения списков сотрудников,
+     * проектов, пресейлов, проектных задач, типов и категорий активности на
+     * форме приложения.
+     *
+     * @return
+     */
     private Map<String, Object> getListsToMAV() {
         Map<String, Object> result = new HashMap<String, Object>();
 
@@ -347,41 +320,69 @@ public class TimeSheetController {
     }
 
     /**
-     * Возвращает планы предыдущего дня и на следующего дня.
-     * Так же данные о том, есть ли на этот день черновик
+     * Возвращает {@link JsonObjectNodeBuilder} в котором находится сохраненный черновик
+     * на дату и для пользователя
      *
-     * @param date       (2012-11-25)
-     * @param employeeId (573)
-     * @return Json String
+     * @param date       - дата отчета
+     * @param employeeId - идентификатор пользователя чей отчет прогружаем в @link JsonObjectNodeBuilder}
+     * @param types      - типы отчета, один из которых может быть возращен на указанныую дату
+     * @return {@link JsonObjectNodeBuilder}
      */
-    @RequestMapping(value = "/timesheet/daySupData", headers = "Accept=application/json;Charset=UTF-8")
-    @ResponseBody
-    public String getPlans(@RequestParam("date") String date,
-                           @RequestParam("employeeId") Integer employeeId) {
+    private JsonObjectNodeBuilder getJsonObjectNodeBuilderForReport(String date, Integer employeeId, List<TypesOfTimeSheetEnum> types) {
+        TimeSheet timeSheet = timeSheetService.findForDateAndEmployeeByTypes(date, employeeId, types);
 
-        JsonObjectNodeBuilder jsonObjectNodeBuilder = timeSheetService.getPlansJsonBuilder(date, employeeId);
-        TimeSheet timeSheet = timeSheetService.findForDateAndEmployeeByTypes(date, employeeId, Arrays.asList(TypesOfTimeSheetEnum.DRAFT));
-        jsonObjectNodeBuilder.withField("draft", aStringBuilder(timeSheet != null && timeSheet.getId() != null ? "1" : "0"));
-        return JsonUtil.format(jsonObjectNodeBuilder);
+        final JsonArrayNodeBuilder builder = anArrayBuilder();
+        final JsonObjectNodeBuilder builderNode = anObjectBuilder();
+//        TimeSheetDetail timeSheetDetail=timeSheet.getTimeSheetDetails();
+        if (timeSheet != null && timeSheet.getTimeSheetDetails() != null && timeSheet.getTimeSheetDetails().size() != 0) {
+//            final JsonObjectNodeBuilder builder = anObjectBuilder();
+            int i = 0;
+            builderNode.withField("rows", aStringBuilder(String.valueOf(timeSheet.getTimeSheetDetails().size())));
+
+            for (TimeSheetDetail timeSheetDetail : timeSheet.getTimeSheetDetails())
+                builder.withElement(
+                        anObjectBuilder().
+                                withField("row", JsonUtil.aStringBuilder(i++)).
+                                withField("activity_type_id", aStringBuilder(timeSheetDetail.getActType() != null ? timeSheetDetail.getActType().getId().toString() : "0")).
+                                withField("workplace_id", aStringBuilder(timeSheetDetail.getWorkplace() != null ? timeSheetDetail.getWorkplace().getId().toString() : "0")).
+                                withField("project_id", aStringBuilder(timeSheetDetail.getProject() != null ? timeSheetDetail.getProject().getId().toString() : "0")).
+                                withField("project_role_id", aStringBuilder(timeSheetDetail.getProjectRole() != null ? timeSheetDetail.getProjectRole().getId().toString() : "0")).
+                                withField("activity_category_id", aStringBuilder(timeSheetDetail.getActCat() != null ? timeSheetDetail.getActCat().getId().toString() : "0")).
+                                withField("projectTask_id", aStringBuilder(timeSheetDetail.getProjectTask() != null ? timeSheetDetail.getProjectTask().getId().toString() : "0")).
+                                withField("duration_id", aStringBuilder(timeSheetDetail.getDuration() != null ? timeSheetDetail.getDuration().toString() : "")).
+                                withField("description_id", aStringBuilder(timeSheetDetail.getDescription() != null ? timeSheetDetail.getDescription() : "")).
+                                withField("problem_id", aStringBuilder(timeSheetDetail.getProblem() != null ? timeSheetDetail.getProblem() : ""))
+                );
+            builderNode.withField("data", builder);
+        }
+        return builderNode;
     }
 
-    @RequestMapping(value = "/timesheet/jiraIssues", headers = "Accept=application/octet-stream;Charset=UTF-8")
-    @ResponseBody
-    public String getJiraIssuesStr(@RequestParam("employeeId") Integer employeeId,
-                                   @RequestParam("date") String date,
-                                   @RequestParam("projectId") Integer projectId) {
-        return jiraService.getDayIssues(employeeId, date, projectId);
-    }
-
-    @RequestMapping(value = "/employee/isDivisionLeader", headers = "Accept=application/json")
-    @ResponseBody
-    public String isDivisionLeader(@RequestParam("employeeId") Integer employeeId) {
-        return JsonUtil.format(
-                object(
-                        field(
-                                "isDivisionLeader",
-                                employeeService.isEmployeeDivisionLeader(employeeId) ? trueNode() : falseNode())
-                )
+    /**
+     * Формирует {@link ModelAndView} с отчетом для timesheet.jsp
+     *
+     * @param tsForm
+     * @param result
+     * @return
+     */
+    private ModelAndView getModelAndViewForTimesheet(TimeSheetForm tsForm, BindingResult result) {
+        tsForm.unEscapeHTML();
+        logger.info("TimeSheetForm for employee {} has errors. Form not validated.", tsForm.getEmployeeId());
+        ModelAndView mavWithErrors = new ModelAndView("timesheet");
+        mavWithErrors.addObject("timeSheetForm", tsForm);
+        mavWithErrors.addObject("errors", result.getAllErrors());
+        mavWithErrors.addObject("selectedProjectsJson", timeSheetService.getSelectedProjectsJson(tsForm));
+        mavWithErrors.addObject("selectedProjectRolesJson", timeSheetService.getSelectedProjectRolesJson(tsForm));
+        mavWithErrors.addObject("selectedProjectTasksJson", timeSheetService.getSelectedProjectTasksJson(tsForm));
+        mavWithErrors.addObject("selectedWorkplaceJson", timeSheetService.getSelectedWorkplaceJson(tsForm));
+        mavWithErrors.addObject(
+                "selectedActCategoriesJson",
+                timeSheetService.getSelectedActCategoriesJson(tsForm)
         );
+        mavWithErrors.addObject("selectedCalDateJson", timeSheetService.getSelectedCalDateJson(tsForm));
+        mavWithErrors.addObject("effortList", timeSheetService.getEffortList());
+        mavWithErrors.addAllObjects(getListsToMAV());
+
+        return mavWithErrors;
     }
 }
