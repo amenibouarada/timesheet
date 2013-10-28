@@ -185,7 +185,7 @@ public class ProjectDAO {
 
     public List<Project> getEmployeeProjectsFromTimeSheetByDates(Date beginDate, Date endDate, Employee employee) {
         Query query = entityManager.createQuery("select tsd.project from TimeSheetDetail as tsd " +
-                "where tsd.timeSheet.employee = :employee and tsd.timeSheet.calDate.calDate between :beginDate and :endDate")
+                "where tsd.timeSheet.employee = :employee and (tsd.timeSheet.type = 0) and tsd.timeSheet.calDate.calDate between :beginDate and :endDate")
                 .setParameter("employee", employee)
                 .setParameter("beginDate", beginDate)
                 .setParameter("endDate", endDate);

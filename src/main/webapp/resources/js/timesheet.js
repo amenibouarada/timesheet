@@ -950,6 +950,10 @@ function reloadRowsState() {
         sortSelectOptions(projectRoleSelect);
         sortSelectOptions(taskSelect);
     }
+
+    if(dataDraft!=null && dataDraft=="true") {
+        loadDraft();
+    }
 }
 
 /* Восстанавливает содержимое компонентов отчёта после возврата страницы валидатором. */

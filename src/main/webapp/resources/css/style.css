@@ -278,6 +278,10 @@ div.menu_holder table td {
     width: 35px !important;
 }
 
+.durationDraftText {
+    color: #adadad;
+}
+
 .login_div {
     margin-top: 40px;
     text-align: center;
@@ -390,6 +394,10 @@ table.report_params td {
 
 .classDateRedText {
     color: #f58383;
+}
+
+.classDateBrown {
+    color: #CC9966 ;
 }
 
 .dijitCalendarCurrentDate {

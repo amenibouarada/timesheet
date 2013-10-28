@@ -30,14 +30,16 @@ public class DayTimeSheet implements Comparable<DayTimeSheet> {
     private BigDecimal duration;
     private Boolean isLoadTimeSheet = false;
     private TimeSheet timeSheet;
+    private boolean haveDraft;
 
-    public DayTimeSheet(Timestamp calendarDate, Boolean isHoliday, Integer timeSheetId, Integer act_type, BigDecimal dur, Employee emp) {
+    public DayTimeSheet(Timestamp calendarDate, Boolean isHoliday, Integer timeSheetId, Integer act_type, BigDecimal dur, Employee emp, boolean haveDraft) {
         this.setCalDate(calendarDate);
         this.setWorkDay(!isHoliday); // APLANATS-266. workday = true - выходной день, а false - рабочий!
         this.setId(timeSheetId);
         this.setAct_type(act_type);
         this.setDuration(dur);
         this.setEmp(emp);
+        this.haveDraft = haveDraft;
     }
 
     public void setIllnessDAO(IllnessDAO illnessDAO) {
@@ -100,7 +102,6 @@ public class DayTimeSheet implements Comparable<DayTimeSheet> {
     }
 
     /**
-     *
      * @return TimeSheet или null
      */
     public TimeSheet getTimeSheet() {
@@ -147,15 +148,16 @@ public class DayTimeSheet implements Comparable<DayTimeSheet> {
      * @return
      */
     public Boolean getStatusNotStart() {
-        return this.getWorkDay() && this.getEmp().getStartDate().after( this.getCalDate() );
+        return this.getWorkDay() && this.getEmp().getStartDate().after(this.getCalDate());
     }
 
     /**
      * Этот день ещё не настал (больше чем текущая дата)
+     *
      * @return
      */
     public Boolean getStatusNotCome() {
-        return ! this.getStatusHoliday() && this.getCurrent().before( this.getCalDate() ) && this.getTimeSheet() == null;
+        return !this.getStatusHoliday() && this.getCurrent().before(this.getCalDate()) && this.getTimeSheet() == null;
     }
 
     /**
@@ -164,51 +166,63 @@ public class DayTimeSheet implements Comparable<DayTimeSheet> {
      * @return
      */
     public Boolean getStatusNormalDay() {
-        return this.getWorkDay() && this.getTimeSheet() != null;
+        return this.getWorkDay() && this.getTimeSheet() != null && !haveDraft;
     }
 
     /**
      * Рабочий день и у человека нет отчёта
-     * @return 
+     *
+     * @return
      */
     public Boolean getStatusNoReport() {
-        return ! this.getStatusNotCome() && this.getWorkDay() && this.getTimeSheet() == null && ! this.getStatusNotStart();
+        return !this.getStatusNotCome() && this.getWorkDay() && this.getTimeSheet() == null && !this.getStatusNotStart();
     }
 
     /**
      * Выходной день и у человека есть отчёт(скорей всего работал в выходные)
-     * @return 
+     *
+     * @return
      */
     public Boolean getStatusWorkOnHoliday() {
-        return ! this.getWorkDay() && this.getTimeSheet() != null;
+        return !this.getWorkDay() && this.getTimeSheet() != null && !haveDraft;
     }
 
     /**
      * Выходной день и человек не работал, отдых
-     * @return 
+     *
+     * @return
      */
     public Boolean getStatusHoliday() {
-        return ! this.getWorkDay() && this.getTimeSheet() == null;
+        return !this.getWorkDay() && this.getTimeSheet() == null;
+    }
+
+    /**
+     * У человека есть черновик на этот день, и нет отчета
+     *
+     * @return
+     */
+    public Boolean getStatusHaveDraft() {
+        return !getStatusWorkOnHoliday() && !getStatusNormalDay() && haveDraft;
     }
 
     @Override
-    public boolean equals( Object o ) {
-        if ( this == o ) return true;
-        if ( ! ( o instanceof DayTimeSheet ) ) return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof DayTimeSheet)) return false;
 
-        DayTimeSheet that = ( DayTimeSheet ) o;
+        DayTimeSheet that = (DayTimeSheet) o;
 
-        if ( ! act_type.equals( that.act_type ) ) return false;
-        if ( ! calDate.equals( that.calDate ) ) return false;
-        if ( ! getCurrent().equals(that.getCurrent()) ) return false;
-        if ( ! duration.equals( that.duration ) ) return false;
-        if ( ! emp.equals( that.emp ) ) return false;
-        if ( ! id.equals( that.id ) ) return false;
-        if ( ! isLoadDuration.equals( that.isLoadDuration ) ) return false;
-        if ( ! isLoadTimeSheet.equals( that.isLoadTimeSheet ) ) return false;
-        if ( ! timeSheet.equals( that.timeSheet ) ) return false;
-        if ( ! timeSheetDAO.equals( that.timeSheetDAO ) ) return false;
-        if ( ! workDay.equals( that.workDay ) ) return false;
+        if (!act_type.equals(that.act_type)) return false;
+        if (!calDate.equals(that.calDate)) return false;
+        if (!getCurrent().equals(that.getCurrent())) return false;
+        if (!duration.equals(that.duration)) return false;
+        if (!emp.equals(that.emp)) return false;
+        if (!id.equals(that.id)) return false;
+        if (!isLoadDuration.equals(that.isLoadDuration)) return false;
+        if (!isLoadTimeSheet.equals(that.isLoadTimeSheet)) return false;
+        if (!timeSheet.equals(that.timeSheet)) return false;
+        if (!timeSheetDAO.equals(that.timeSheetDAO)) return false;
+        if (!workDay.equals(that.workDay)) return false;
 
         return true;
     }
@@ -231,13 +245,13 @@ public class DayTimeSheet implements Comparable<DayTimeSheet> {
 
     // является данный день больничным или нет
     @Transactional(readOnly = true)
-    public Boolean getIllnessDay(){
+    public Boolean getIllnessDay() {
         return illnessDAO.isDayIllness(emp, new Date(calDate.getTime()));
     }
 
     // является данный день отпуском или нет, без учета планируемых отпусков
     @Transactional(readOnly = true)
-    public Boolean getVacationDay(){
+    public Boolean getVacationDay() {
         return vacationDAO.isDayVacationWithoutPlanned(emp, new Date(calDate.getTime()));
     }
 
@@ -258,7 +272,7 @@ public class DayTimeSheet implements Comparable<DayTimeSheet> {
 
     // является данный день командировкой
     @Transactional(readOnly = true)
-    public Boolean getBusinessTripDay(){
+    public Boolean getBusinessTripDay() {
         return businessTripDAO.isDayBusinessTrip(emp, new Date(calDate.getTime()));
     }
 
