@@ -188,18 +188,23 @@
                     }
 
                     if (data.draft != null) {
-                        dojo.removeAttr("load_draft", "disabled");
+                        dojo.setStyle("load_draft",{"visibility":"visible"});
+                        dojo.setStyle("load_draft_text",{"visibility":"visible"});
                         if (data.draft == 1) {
-                            dojo.removeAttr("load_draft", "disabled");
+                            dojo.setStyle("load_draft",{"visibility":"visible"});
+                            dojo.setStyle("load_draft_text",{"visibility":"visible"});
                         } else if (data.draft == 0) {
-                            dojo.attr("load_draft", {disabled: "disabled"});
+                            dojo.setStyle("load_draft",{"visibility":"hidden"});
+                            dojo.setStyle("load_draft_text",{"visibility":"hidden"});
                         } else {
                             //такого быть не должно
-                            dojo.removeAttr("load_draft", "disabled");
+                            dojo.setStyle("load_draft",{"visibility":"visible"});
+                            dojo.setStyle("load_draft_text",{"visibility":"visible"});
                         }
                     } else {
                         //такого быть не должно
-                        dojo.removeAttr("load_draft", "disabled");
+                        dojo.setStyle("load_draft",{"visibility":"visible"});
+                        dojo.setStyle("load_draft_text",{"visibility":"visible"});
                     }
                 }
             },
@@ -514,25 +519,26 @@ function loadDraft() {
 </div>
 
 <div style="width: 100%;">
-    <div>
-    <span id="lbPrevPlan">Планы предыдущего рабочего дня:</span>
+    <div style="float:left;width: 450px;">
+        <span id="lbPrevPlan">Планы предыдущего рабочего дня:</span>
+    </div>
+    <div id="load_draft_text" style="float:left;text-align: right; width:425px;color: red;">
+        Имеется черновик не отправленного отчета!
     </div>
     <div id="plan_textarea"
-         style="margin: 2px 0px 2px 0px; padding:2px 2px 2px 2px;border: solid 1px silver;float:left;width: 450px;"></div>
-    <div style="width: 220px;height: 1px;float:left">
-
-    </div>
-    <div style="float:left;text-align: center; display: table-cell;margin: 0px;padding: 0px;">
+         style="margin: 2px 0px 2px 0px; padding:2px 2px 2px 2px;border: solid 1px silver;float:left;clear: left;width: 450px;"></div>
+    <div style="float:left;text-align: center; display: table-cell;margin: 0px;padding: 0px;text-align: right;width: 425px;">
         <button id="load_draft" type="button" style="width:200px;" onclick="loadDraft()">
             Загрузить черновик
         </button>
     </div>
     <div style="clear: left;">
-    <button id="add_in_comments" type="button" style="width:300px" onclick="CopyPlan()">
-        Скопировать в первый комментарий
-    </button>
+        <button id="add_in_comments" type="button" style="width:300px" onclick="CopyPlan()">
+            Скопировать в первый комментарий
+        </button>
     </div>
 </div>
+
 <div id="marg_buttons" style="margin-top:15px;">
 
         <%--перенесен в шапку таблицы как картинка--%>
