@@ -142,6 +142,7 @@ public class PlannedVacationServiceTest extends AbstractJsonTest{
         timeSheet.setEffortInNextDay(dictionaryItemService.getItemsByDictionaryId(DictionaryEnum.EFFORT_IN_NEXTDAY.getId()).get(0));
         timeSheet.setOvertimeCause(timeSheet.getOvertimeCause());
         timeSheet.setState(null);
+        timeSheet.setType(0);
 
         return timeSheet;
     }

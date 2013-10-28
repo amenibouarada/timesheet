@@ -786,7 +786,7 @@ public class JasperReportDAO {
                 "WHERE " +
                         "tsd.actType = act.actType AND " +
                         "tsd.actCat = act.actCat AND " +
-                        "tsd.timeSheet.type = 0 AND" +
+                        "tsd.timeSheet.type = 0 AND " +
                         (withRegionClause ? REGION_CLAUSE : WITHOUT_CLAUSE) +
                         (withProjectClause ? PROJECT_CLAUSE : WITHOUT_CLAUSE) +
                         (withDatesClause?"tsd.timeSheet.calDate.calDate between :beginDate AND :endDate AND ":WITHOUT_CLAUSE) +

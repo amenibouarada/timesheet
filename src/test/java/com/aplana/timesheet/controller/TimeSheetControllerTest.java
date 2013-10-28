@@ -1,5 +1,6 @@
 package com.aplana.timesheet.controller;
 
+import argo.jdom.JsonObjectNodeBuilder;
 import com.aplana.timesheet.AbstractTimeSheetTest;
 import com.aplana.timesheet.dao.entity.*;
 import com.aplana.timesheet.enums.DictionaryEnum;
@@ -12,6 +13,8 @@ import com.aplana.timesheet.service.helper.EmployeeHelper;
 import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.system.security.SecurityService;
 import com.aplana.timesheet.system.security.entity.TimeSheetUser;
+import com.aplana.timesheet.util.JsonUtil;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,9 +28,12 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import static argo.jdom.JsonNodeBuilders.aStringBuilder;
+import static argo.jdom.JsonNodeBuilders.anObjectBuilder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.*;
@@ -348,16 +354,17 @@ public class TimeSheetControllerTest extends AbstractTimeSheetTest {
         /* входные данные */
         String date = "2013-01-01";
         Integer employeeId = 1;
-        String expected = "Планы просто зае..ь";
+        String expected = JsonUtil.format(anObjectBuilder().withField("draft", aStringBuilder("0")));
 
         /* определяем поведение сервисов */
-        when(timeSheetService.getPlansJson(date, employeeId)).thenReturn(expected);
-
+//        when(timeSheetService.getPlansJson(date, employeeId)).thenReturn(expected);
+        when(timeSheetService.getPlansJsonBuilder(date, employeeId)).thenReturn(anObjectBuilder());
+        when(timeSheetService.findForDateAndEmployeeByTypes(date, employeeId, Arrays.asList(TypesOfTimeSheetEnum.DRAFT))).thenReturn(null);
         /* тест */
         String actual = timeSheetController.getPlans(date, employeeId);
 
         /* проверка вызовов */
-        verify(timeSheetService).getPlansJson(date, employeeId);
+        verify(timeSheetService).getPlansJsonBuilder(date, employeeId);
 
         /* анализ результата */
         assertEquals(expected, actual);
