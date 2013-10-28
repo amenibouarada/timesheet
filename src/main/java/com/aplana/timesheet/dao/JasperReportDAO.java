@@ -349,7 +349,7 @@ public class JasperReportDAO {
                                 "               END " +
                                 "       END " +
                                 "END as day_type, " +
-                                "max(h_region.id) as col_6, " +
+                                "max(region.id) as col_6, " +
                                 "region.name as col_7, " +
                                 "project_role.name as col_8, " +
                                 "project_state.value as col_9, " +
@@ -367,8 +367,7 @@ public class JasperReportDAO {
                                 "INNER JOIN region region        ON empl.region=region.id " +
                                 "LEFT OUTER JOIN project_task project_task ON timesheet_details.task_id=project_task.id " +
                                 "LEFT OUTER JOIN project_role project_role ON timesheet_details.projectrole_id=project_role.id " +
-                                "LEFT OUTER JOIN holiday holidays   ON calendar.caldate=holidays.caldate " +
-                                "LEFT OUTER JOIN region h_region   ON holidays.region=h_region.id " +
+                                "LEFT OUTER JOIN holiday holidays   ON calendar.caldate=holidays.caldate AND (holidays.region IS NULL OR holidays.region = empl.region) " +
                                 "LEFT OUTER JOIN employee_project_billable epbillable    ON project.id=epbillable.project_id AND empl.id=epbillable.employee_id AND " +
                                 "                                                           timesheet.caldate BETWEEN epbillable.start_date AND  epbillable.end_date " +
                                 "LEFT OUTER JOIN dictionary_item project_state    ON timesheet_details.act_type=project_state.id " +
@@ -504,7 +503,7 @@ public class JasperReportDAO {
                     "               END " +
                     "       END " +
                     "END as col_6, " +
-                    "h_region.id as col_7, " +
+                    "region.id as col_7, " +
                     "region.name as col_8, " +
                     "project_role.name as col_9, " +
                     "project_state.value as col_10, " +
@@ -522,8 +521,7 @@ public class JasperReportDAO {
                     "INNER JOIN region region        ON empl.region=region.id " +
                     "LEFT OUTER JOIN project_task project_task ON timesheet_details.task_id=project_task.id " +
                     "LEFT OUTER JOIN project_role project_role ON timesheet_details.projectrole_id=project_role.id " +
-                    "LEFT OUTER JOIN holiday holidays   ON calendar.caldate=holidays.caldate " +
-                    "LEFT OUTER JOIN region h_region   ON holidays.region=h_region.id " +
+                    "LEFT OUTER JOIN holiday holidays   ON calendar.caldate=holidays.caldate AND (holidays.region IS NULL OR holidays.region = empl.region) " +
                     "LEFT OUTER JOIN employee_project_billable epbillable    ON project.id=epbillable.project_id and empl.id=epbillable.employee_id AND " +
                     "                                                           timesheet.caldate BETWEEN epbillable.start_date AND  epbillable.end_date " +
                     "LEFT OUTER JOIN dictionary_item project_state    ON timesheet_details.act_type=project_state.id " +
@@ -555,7 +553,7 @@ public class JasperReportDAO {
                     "vacations.id, " +
                     "illnesses.id, " +
                     "trip.id, " +
-                    "h_region.id, " +
+                    "region.id, " +
                     "region.id, " +
                     "region.name, " +
                     "epbillable.billable, " +
@@ -735,7 +733,7 @@ public class JasperReportDAO {
                         "LEFT OUTER JOIN dictionary_item act_type    ON timesheet_details.act_type=act_type.id " +
                         "LEFT OUTER JOIN dictionary_item act_cat    ON timesheet_details.act_cat=act_cat.id " +
                         "LEFT OUTER JOIN dictionary_item workplace    ON timesheet_details.workplace_id=workplace.id " +
-                        "LEFT OUTER JOIN holiday holidays   ON calendar.caldate=holidays.caldate " +
+                        "LEFT OUTER JOIN holiday holidays   ON calendar.caldate=holidays.caldate AND (holidays.region IS NULL OR holidays.region = empl.region) " +
                         "LEFT OUTER JOIN employee_project_billable epbillable    ON project.id=epbillable.project_id and empl.id=epbillable.employee_id AND " +
                         "                                                           timesheet.caldate BETWEEN epbillable.start_date AND  epbillable.end_date " +
                 "where " +
