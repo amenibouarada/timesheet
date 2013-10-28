@@ -1,17 +1,17 @@
 var month = new Array();
 
-month[0] = "January";
-month[1] = "February";
-month[2] = "March";
-month[3] = "April";
-month[4] = "May";
-month[5] = "June";
-month[6] = "July";
-month[7] = "August";
-month[8] = "September";
-month[9] = "October";
-month[10]= "November";
-month[11]= "December";
+month[0] = "Январь";
+month[1] = "Февраль";
+month[2] = "Март";
+month[3] = "Апрель";
+month[4] = "Май";
+month[5] = "Июнь";
+month[6] = "Июль";
+month[7] = "Август";
+month[8] = "Сентябрь";
+month[9] = "Октябрь";
+month[10]= "Ноябрь";
+month[11]= "Декабрь";
 
 // Число ли это
 function isNumber(n) {
@@ -198,9 +198,7 @@ function additionEmployeeDataHandler(division, manager, roleList, regionList, ha
     });
 }
 
-/**
- * Сохранение данных
- */
+// Делает ajax запрос, для сохранения планируемого процента занятости
 function saveEmployeeDataHandler(projectId, monthBeg, yearBeg, monthEnd, yearEnd, jsonData, handler){
     dojo.xhrPost({
         url: "/employmentPlanning/setEmployeeProjectAsJSON",
@@ -222,6 +220,7 @@ function saveEmployeeDataHandler(projectId, monthBeg, yearBeg, monthEnd, yearEnd
     });
 }
 
+// Переводит объект в JSON
 function itemToJSON(store, items){
     var data = [];
     if(items && store){
