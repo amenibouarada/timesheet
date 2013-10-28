@@ -174,7 +174,7 @@
             <thead>
                 <tr>
                     <th width="150">Дата</th>
-                    <th width="150">Статус</th>
+                    <th width="160">Статус</th>
                     <th width="150">Часы</th>
                     <th width="150">Отсутствие</th>
                     <th width="160">Проблемы</th>
@@ -245,10 +245,12 @@
                         <tr class="statusHaveDraft">
                         <td class="date"><fmt:formatDate value="${report.calDate}" pattern="dd.MM.yyyy"/></td>
                         <td>
-                            Черновик отчета
+                            Черновик
                             <a href="<%=request.getContextPath()%>/timesheet?date=<fmt:formatDate value="${report.calDate}" pattern="yyyy-MM-dd"/>&id=${employeeId}&type=1"
-                               onclick=""><img src="<c:url value="/resources/img/edit.png"/>" width="15px"
-                                               title="Редактировать отчет"/></a>
+                               onclick="">(Редактировать)
+                                <%--<img src="<c:url value="/resources/img/edit.png"/>" width="15px"--%>
+                                               <%--title="Редактировать отчет"/>--%>
+                            </a>
                         </td>
                         <td class="durationDraft duration">
                             <div class="durationDraftText">${report.duration}</div>

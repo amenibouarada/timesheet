@@ -83,7 +83,7 @@ public class TimeSheetFormValidator extends AbstractValidator {
                     ? getByCode(employee.getJob().getCode())
                     : NOT_DEFINED;
             checkForEffectiveActTypes(tsTablePart, tsForm.getEmployeeId(), errors);
-
+            validateSelectedDate(tsForm, selectedEmployeeId, errors);
             for (TimeSheetTableRowForm formRow : tsTablePart) {
                 Integer actTypeId = formRow.getActivityTypeId();
                 if (actTypeId == null || actTypeId == 0) {

@@ -149,11 +149,14 @@ public class TimeSheetController {
 
     @RequestMapping(value = "/sendDraft", method = RequestMethod.POST)
     public ModelAndView sendDraft(@ModelAttribute("timeSheetForm") TimeSheetForm tsForm, BindingResult result) {
-        timeSheetService.storeTimeSheet(tsForm, TypesOfTimeSheetEnum.DRAFT);
+
         tsFormValidator.validateDraft(tsForm, result);
         if (result.hasErrors()) {
             return getModelAndViewForTimesheet(tsForm, result);
         }
+
+        timeSheetService.storeTimeSheet(tsForm, TypesOfTimeSheetEnum.DRAFT);
+
         ModelAndView mav = new ModelAndView("draftSaved");
         mav.addObject("timeSheetForm", tsForm);
 

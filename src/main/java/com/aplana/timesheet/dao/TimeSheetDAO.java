@@ -71,11 +71,11 @@ public class TimeSheetDAO {
             }
             stringBuilder.append(")");
         }
-        logger.debug(stringBuilder.toString());
+        //logger.debug(stringBuilder.toString());
         Query query = entityManager.createQuery(
                 "select ts from TimeSheet as ts where ts.calDate = :calDate and ts.employee.id = :employeeId " + stringBuilder.toString()
         ).setParameter("calDate", date).setParameter("employeeId", employeeId);
-        logger.debug(query.toString());
+        //logger.debug(query.toString());
         List<TimeSheet> result = query.getResultList();
 
         return result.isEmpty() ? null : result.get(0);

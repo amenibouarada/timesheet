@@ -46,7 +46,7 @@
     var listOfActDescription = ${listOfActDescriptionJson};
     var workOnHolidayCauseList = ${workOnHolidayCauseJson};
     var defaultOvertimeCause = '${timeSheetForm.overtimeCause}';
-    var dataDraft='${data}';
+    var dataDraft = '${data}';
 
     var root = getRootEventListener();
     var month = correctLength(new Date().getMonth() + 1);
@@ -510,21 +510,30 @@ function loadDraft() {
                 required="true" onMouseOver="tooltip.show(getTitle(this));" onMouseOut="tooltip.hide();"
                 onChange="onCalDateChange(this)"/>
     <span id="date_warning"></span>
-    <button id="load_draft" type="button" style="width:150px;margin-left:5px;" onclick="loadDraft()">
-        Загрузить черновик
-    </button>
+
 </div>
 
-    <div style="width: 500px;">
-        <span id="lbPrevPlan">Планы предыдущего рабочего дня:</span>
+<div style="width: 100%;">
+    <div>
+    <span id="lbPrevPlan">Планы предыдущего рабочего дня:</span>
+    </div>
+    <div id="plan_textarea"
+         style="margin: 2px 0px 2px 0px; padding:2px 2px 2px 2px;border: solid 1px silver;float:left;width: 450px;"></div>
+    <div style="width: 220px;height: 1px;float:left">
 
-        <div id="plan_textarea"
-             style="margin: 2px 0px 2px 0px; padding:2px 2px 2px 2px;border: solid 1px silver;"></div>
-        <button id="add_in_comments" type="button" style="width:300px" onclick="CopyPlan()">
-            Скопировать в первый комментарий
+    </div>
+    <div style="float:left;text-align: center; display: table-cell;margin: 0px;padding: 0px;">
+        <button id="load_draft" type="button" style="width:200px;" onclick="loadDraft()">
+            Загрузить черновик
         </button>
     </div>
-    <div id="marg_buttons" style="margin-top:15px;">
+    <div style="clear: left;">
+    <button id="add_in_comments" type="button" style="width:300px" onclick="CopyPlan()">
+        Скопировать в первый комментарий
+    </button>
+    </div>
+</div>
+<div id="marg_buttons" style="margin-top:15px;">
 
         <%--перенесен в шапку таблицы как картинка--%>
         <%--<button id="add_row_button" style="width:150px" type="button">Добавить строку</button>--%>
@@ -686,20 +695,25 @@ function loadDraft() {
         <br/>
     </div>
 </div>
-<div id="effort_box" >
+<div id="effort_box">
     <span class="label">Оценка объема работ на следующий рабочий день:</span>
-    <form:select path="effortInNextDay" id="effortInNextDay" class="without_dojo" onmouseover="tooltip.show(getTitle(this));" onmouseout="tooltip.hide();">
+    <form:select path="effortInNextDay" id="effortInNextDay" class="without_dojo"
+                 onmouseover="tooltip.show(getTitle(this));" onmouseout="tooltip.hide();">
         <form:options items="${effortList}" itemLabel="value" itemValue="id"/>
     </form:select>
 </div>
-<div>
+<div style="margin-top: 5px;">
     <table>
         <tr>
-            <td class="no_border" width="155px">
-                <button id="submit_button" style="width:210px" onclick="checkDurationThenSendForm()" type="button">
-                    Отправить
-                    отчёт
+            <td class="no_border">
+                <button id="save_for_revision" style="margin-left:5px;width:210px" onclick="submitform('send_draft')"
+                        type="button">
+                    Сохранить для доработки
                 </button>
+                <button id="submit_button" style="width:210px" onclick="checkDurationThenSendForm()" type="button">
+                    Отправить отчёт
+                </button>
+
             </td>
             <td class="no_border" width="220px">
                 <button id="new_report_button" style="width:210px; display:none;" type="button"
