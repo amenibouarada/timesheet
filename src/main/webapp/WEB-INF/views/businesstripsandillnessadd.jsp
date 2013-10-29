@@ -59,12 +59,7 @@
         dojo.ready(function () {
             window.focus();
             updateView();
-
-            require(["dojo/on"], function(on){
-                on.once(dojo.byId("create"), "click", function(){
-                    submitform();
-                });
-            });
+            updateDateConstraints();
         });
 
         function updateView(){
@@ -106,6 +101,7 @@
         }
 
         function submitform(){
+            dojo.byId("create").disabled = true;
             if (validate()){
                 if (${reportId == null}){
                     var employeeId = getEmployeeId();
@@ -114,27 +110,13 @@
                     mainForm.action = "<%=request.getContextPath()%>/businesstripsandillnessadd/trySave/" + "${reportId}";
                 }
                 mainForm.submit();
+            }else{
+                dojo.byId("create").disabled = false;
             }
         }
 
         function cancelform(){
-//            закоментированно до лучших времён
-            <%--var reportType = parseInt(dojo.byId("reportType").value);--%>
-            <%--var employeeId = parseInt(dojo.byId("employeeId").value);--%>
-            <%--if (employeeId > 0) {--%>
-                <%--switch (reportType) {--%>
-                    <%--case illnessReportType:--%>
-                        <%--mainForm.action = "<%=request.getContextPath()%>/businesstripsandillness/illness/" + employeeId;--%>
-                        <%--break;--%>
-                    <%--case businessTripReportType :--%>
-                        <%--mainForm.action = "<%=request.getContextPath()%>/businesstripsandillness/businesstrip/" + employeeId;--%>
-                        <%--break;--%>
-                    <%--default: mainForm.action = "<%=request.getContextPath()%>/businesstripsandillness/";--%>
-                <%--}--%>
-            <%--} else {--%>
-                mainForm.action = "<%=request.getContextPath()%>/businesstripsandillness/";
-//            }
-
+            mainForm.action = "<%=request.getContextPath()%>/businesstripsandillness/";
             mainForm.submit();
         }
 
@@ -283,6 +265,14 @@
             }
         }
 
+        function updateDateConstraints() {
+            var fromDateBox = dijit.byId("beginDate");
+            var toDateBox = dijit.byId("endDate");
+
+            fromDateBox.set('constraints', { max: toDateBox.value });
+            toDateBox.set('constraints', { min: fromDateBox.value });
+        }
+
     </script>
 </head>
 <body>
@@ -327,13 +317,13 @@
         <div class="checkboxeslabel lowspace">Дата с:</div>
         <div class="checkboxesselect lowspace">
             <form:input path="beginDate" id="beginDate" class="date_picker" cssClass="fullwidth date_picker" data-dojo-type="DateTextBox" required="true"
-                        onMouseOver="tooltip.show(getTitle(this));" onMouseOut="tooltip.hide();" onchange="updateProject()"/>
+                        onMouseOver="tooltip.show(getTitle(this));" onMouseOut="tooltip.hide();" onchange="updateProject(); updateDateConstraints();"/>
         </div>
 
         <div class="checkboxeslabel lowspace">Дата по:</div>
         <div class="checkboxesselect lowspace">
             <form:input path="endDate" id="endDate" class="date_picker" cssClass="fullwidth date_picker" data-dojo-type="DateTextBox" required="true"
-                        onMouseOver="tooltip.show(getTitle(this));" onMouseOut="tooltip.hide();" onchange="updateProject()"/>
+                        onMouseOver="tooltip.show(getTitle(this));" onMouseOut="tooltip.hide();" onchange="updateProject(); updateDateConstraints();"/>
         </div>
 
         <div id="illness" class="creationform">
@@ -377,7 +367,7 @@
         <div style="clear:both"/>
 
         <div class="bigspace onblock">
-            <button id="create" type="button" class="button bigspace">Сохранить</button> <%--обработка в скрипте dojo.on--%>
+            <button id="create" type="button" class="button bigspace" onclick="submitform();">Сохранить</button>
             <button id="cancel" type="button" class="button bigspace" onclick="window.history.back()">Отмена</button>
         </div>
 
