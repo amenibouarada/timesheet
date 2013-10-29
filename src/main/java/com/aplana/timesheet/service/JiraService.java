@@ -94,7 +94,8 @@ public class JiraService {
                     .append(" or reporter changed from ").append(user).append(onDate)
                     .append(" or reporter changed to ").append(user).append(onDate)
                     .append((createdDate.isEmpty()) ? "" : createdDate)
-                    .append(")");
+                    .append(" or (status = \"3\" AND assignee = ").append(user)
+                    .append("))");
 /*  пример строки запроса*/
 //  project in (APLANATS) and
 // (status changed by Nlebedev on 2013-07-31
@@ -103,6 +104,7 @@ public class JiraService {
 //  or reporter changed from Nlebedev on 2013-07-31
 //  or reporter changed to Nlebedev on 2013-07-31
 //  or (reporter = Nlebedev and created > 2013-07-31 and created < 2013-08-01)
+//  or (status = "3" AND assignee = Nlebedev)
 //  )
 
         }
