@@ -152,7 +152,7 @@ public class VacationsController extends AbstractControllerForEmployee {
         modelAndView.addObject("calFromDate", dateFrom);
         modelAndView.addObject("calToDate", dateTo);
         modelAndView.addObject("vacationsList", Lists.reverse(vacations));
-        modelAndView.addObject("vacationListByRegionJSON", vacationService.getVacationListByRegionJSON(vacations));
+        modelAndView.addObject("vacationListByRegionJSON", vacationService.getVacationListByRegionJSON(dateFrom, dateTo,vacations));
         modelAndView.addObject("calDays", calDays);
         modelAndView.addObject("workDays", workDays);
         modelAndView.addObject("holidayList", vacationService.getHolidayListJSON(dateFrom, dateTo));

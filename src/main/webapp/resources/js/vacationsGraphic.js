@@ -1,6 +1,7 @@
-function RegionEmployees(regionName, regionEmployees){
+function RegionEmployees(regionName, regionEmployees, holidayList){
     var region = regionName;
     var employees = new Array();
+    var holiday=holidayList;
     for (var i in regionEmployees){
         var employeeName = regionEmployees[i].employee;
         var employeeVacations = regionEmployees[i].vacations;
@@ -10,6 +11,7 @@ function RegionEmployees(regionName, regionEmployees){
 
     this.getRegion   = function(){ return region};
     this.getEmployees = function(){ return employees};
+    this.getHoliday = function() {return holiday};
 }
 
 function EmployeeVacations(employeeName, employeeVacations){
@@ -85,6 +87,14 @@ function Gantt(gDiv, holidayList, type)
             var indent = parseInt(i) + parseInt(employeeCount);
             gStr += "<div style='position:absolute; top:" + (tableRowHeight * indent + 38) + "px; left:5px'><b>" + regionEmployeeList[i].getRegion() + "</b></div>";
             employeeCount += employeeList.length;
+            for (var hol in regionEmployeeList[i].getHoliday()) {
+                var fr = new Date();
+                var dvArr = regionEmployeeList[i].getHoliday()[hol].split('.');
+                fr.setFullYear(dvArr[2], dvArr[1] - 1, dvArr[0]);
+                var leftOffset = (((Date.parse(fr.format("yyyy-mm-dd")) - Date.parse(minDate.format("yyyy-mm-dd"))) / (24 * 60 * 60 * 1000))) * TABLE_COLUMN_WIDTH + 202 + num;
+                var heightDivision = (employeeList.length + 1) * 20 + 8; //это надо править - счетать широкие-узкие строки, чистый тык пальцем
+                gStr += "<div style='position:absolute; top:" + (tableRowHeight * indent + 38 - 8) + "px; left:" + leftOffset + "px; width:" + (TABLE_COLUMN_WIDTH - 1) + "px'><div title='Региональный праздник' class='GVacation' style='float:center;padding-left:3;background-color:sandybrown; width:" + (TABLE_COLUMN_WIDTH - 1) + "px;height:" + heightDivision + "px;'></div></div>";
+            }
             for (var j in employeeList) {
                 var vacationList = sortVacationsByType(employeeList[j].getVacations());
                 indent += 1;
@@ -93,6 +103,7 @@ function Gantt(gDiv, holidayList, type)
                     var tooltip = employeeList[j].getEmployee() + "\n" + vacationList[k].typeName + "\n" + vacationList[k].beginDate.toLocaleDateString() + " - " + vacationList[k].endDate.toLocaleDateString() + "\n" + vacationList[k].status;
                     var offSet = (Date.parse(vacationList[k].beginDate) - Date.parse(minDate)) / (24 * 60 * 60 * 1000);
                     if ((Date.parse(vacationList[k].beginDate) - Date.parse(minDate)) <= 0 && (viewType == VIEW_GRAPHIC_BY_DAY)) {
+//                        console.log("11 "+(vacationList[k].endDate));
                         dateDiff = (Date.parse(vacationList[k].endDate) - Date.parse(vacationList[k].beginDate)) / (24 * 60 * 60 * 1000) + 1;
                         gStr += "<div style='position:absolute; top:" + (tableRowHeight * indent + 37) + "px; left:" + (offSet * TABLE_COLUMN_WIDTH + 202 ) + "px; width:" + (TABLE_COLUMN_WIDTH * dateDiff - 1 + num) + "px'><div title='" + tooltip + "' class='GVacation' style='float:center;padding-left:3;" + "background-color:" + color + "; width:" + (TABLE_COLUMN_WIDTH * dateDiff - 1 + num) + "px;'>" + "</div></div>"; //+ vacationList[k].status
                     } else {
@@ -102,7 +113,7 @@ function Gantt(gDiv, holidayList, type)
                 }
                 gStr += "<div style='position:absolute; top:" + (tableRowHeight * indent + 38) + "px; left:5px'>" + employeeList[j].getEmployee() + "</div>";
             }
-        }
+             }
         GanttDiv.innerHTML += gStr;
     }
 
