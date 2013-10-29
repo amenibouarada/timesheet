@@ -131,7 +131,7 @@ public class VacationsControllerTest extends AbstractTest {
         when(dictionaryItemService.find(vacationType.getId())).         thenReturn(vacationType);
         when(dictionaryItemService.getItemsByDictionaryId(DictionaryEnum.VACATION_TYPE.getId())).
                                                                         thenReturn(vacationTypes);
-        when(vacationService.getVacationListByRegionJSON((List < Vacation >) any())).
+        when(vacationService.getVacationListByRegionJSON((Date)any(), (Date) any(),(List < Vacation >) any())).
                                                                         thenReturn(vacationsListJSON);
         when(vacationService.getHolidayListJSON(resetHours(fromDate), resetHours(toDate))).
                                                                         thenReturn(holidayListJSON);
