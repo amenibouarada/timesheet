@@ -31,8 +31,10 @@ public abstract class AbstractSenderWithAssistants<T> extends MailSender<T> {
     protected final List<String> getAssistantEmail(Set<String> managersEmails) {
         final List<EmployeeAssistant> employeeAssistants = sendMailService.getEmployeeAssistant(managersEmails);
         List<String> emails = new ArrayList<String>();
-        for (EmployeeAssistant assistant : employeeAssistants) {
-            emails.add(assistant.getAssistant().getEmail());
+        if (employeeAssistants != null) {
+            for (EmployeeAssistant assistant : employeeAssistants) {
+                emails.add(assistant.getAssistant().getEmail());
+            }
         }
         return emails;
     }
