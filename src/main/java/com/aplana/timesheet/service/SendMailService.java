@@ -348,7 +348,7 @@ public class SendMailService {
         return employeeService.getJuniorProjectManagersAndProjects(Arrays.asList(project), vacation);
     }
 
-    public EmployeeAssistant getEmployeeAssistant(Set<String> managersEmails) {
+    public List<EmployeeAssistant> getEmployeeAssistant(Set<String> managersEmails) {
         return employeeAssistantService.tryFind(managersEmails);
     }
 
