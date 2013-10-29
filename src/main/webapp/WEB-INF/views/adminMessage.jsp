@@ -17,7 +17,7 @@
 </head>
 <body>
 
-    <h1><fmt:message key="admin.sendMessage"/></h1><br>
+    <h1><fmt:message key="admin.sendMessage"/></h1><br/>
 
     <form:form commandName="adminMessageForm" method="post">
 
@@ -29,13 +29,13 @@
                     </fmt:message><br/>
                 </c:forEach>
             </div>
-            <br>
+            <br/>
         </c:if>
 
-        <label for="email">Введите email:</label><br>
-        <form:input path="email" id="email" style="width:300px;"></form:input><br><br>
-        <label for="description">Суть проблемы:</label><br>
-        <form:textarea rows="10" cols="50" path="description" id="description"></form:textarea><br><br>
+        <label for="email">Введите email:</label><br/>
+        <form:input path="email" id="email" style="width:300px;"/><br/><br/>
+        <label for="description">Суть проблемы:</label><br/>
+        <form:textarea rows="10" cols="50" path="description" id="description"/><br/><br/>
         <input type="submit" value="Отправить сообщение" style="width:170px" onclick="submitMessage()">
         <input type="button" value="Вернуться" style="width:100px" onclick="location.href='/login'">
     </form:form>

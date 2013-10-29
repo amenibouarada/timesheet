@@ -18,37 +18,37 @@
             setFilter();
         });
 
-        function setFilter(){
+        function setFilter() {
             var division = ${currentUserDivisionId};
             var filter = dojo.byId("filter");
             filter.value = division;
         }
 
-        function filterChange(obj){
+        function filterChange(obj) {
             var divisionId = obj.value;
             if (${editable}) {
                 mainForm.action = "<%=request.getContextPath()%>/admin/update/assignmentleaders/" + divisionId + "/edit";
-            }else{
+            } else {
                 mainForm.action = "<%=request.getContextPath()%>/admin/update/assignmentleaders/" + divisionId + "/view";
             }
             mainForm.submit();
         }
 
-        function saveResult(obj){
+        function saveResult(obj) {
             var divisionId = obj.value;
             mainForm.action = "<%=request.getContextPath()%>/admin/update/assignmentleaders/save/" + divisionId;
             mainForm.submit();
         }
 
-        function edit(obj){
+        function edit(obj) {
             var divisionId = obj.value;
-            mainForm.action = "<%=request.getContextPath()%>/admin/update/assignmentleaders/" + divisionId +"/edit";
+            mainForm.action = "<%=request.getContextPath()%>/admin/update/assignmentleaders/" + divisionId + "/edit";
             mainForm.submit();
         }
 
-        function cancel(obj){
+        function cancel(obj) {
             var divisionId = obj.value;
-            mainForm.action = "<%=request.getContextPath()%>/admin/update/assignmentleaders/" + divisionId +"/view";
+            mainForm.action = "<%=request.getContextPath()%>/admin/update/assignmentleaders/" + divisionId + "/view";
             mainForm.submit();
         }
 
