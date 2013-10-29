@@ -36,36 +36,24 @@ public class TimeSheetController {
 
     @Autowired
     protected HttpServletRequest request;
-    @Autowired
-    private DivisionService divisionService;
+
     @Autowired
     private EmployeeService employeeService;
-    @Autowired
-    private DictionaryItemService dictionaryItemService;
-    @Autowired
-    private ProjectService projectService;
+
     @Autowired
     ProjectManagerService projectManagerService;
-    @Autowired
-    private ProjectTaskService projectTaskService;
-    @Autowired
-    private ProjectRoleService projectRoleService;
+
     @Autowired
     private TimeSheetService timeSheetService;
-    @Autowired
-    private AvailableActivityCategoryService availableActivityCategoryService;
+
     @Autowired
     private TimeSheetFormValidator tsFormValidator;
     @Autowired
     private SendMailService sendMailService;
-    @Autowired
-    private EmployeeLdapService employeeLdapService;
+
     @Autowired
     private SecurityService securityService;
-    @Autowired
-    private EmployeeHelper employeeHelper;
-    @Autowired
-    private TSPropertyProvider propertyProvider;
+
     @Autowired
     private OvertimeCauseService overtimeCauseService;
     @Autowired
@@ -111,7 +99,7 @@ public class TimeSheetController {
         mav.addObject("selectedProjectsJson", "[{row:'0', project:''}]");
         mav.addObject("selectedWorkplaceJson", "[{row:'0', workplace:''}]");
         mav.addObject("selectedActCategoriesJson", "[{row:'0', actCat:''}]");
-        mav.addAllObjects(getListsToMAV());
+        mav.addAllObjects(timeSheetService.getListsToMAV(request));
 
         //если параметр передан и означает, что мы хотим загрузит черновик
         if (type != null && TypesOfTimeSheetEnum.DRAFT.getId() == type) {
@@ -250,77 +238,7 @@ public class TimeSheetController {
         );
     }
 
-    /**
-     * Возвращает Map со значениями для заполнения списков сотрудников,
-     * проектов, пресейлов, проектных задач, типов и категорий активности на
-     * форме приложения.
-     *
-     * @return
-     */
-    private Map<String, Object> getListsToMAV() {
-        Map<String, Object> result = new HashMap<String, Object>();
 
-        List<DictionaryItem> typesOfActivity = dictionaryItemService.getTypesOfActivity();
-        result.put("actTypeList", typesOfActivity);
-
-        String typesOfActivityJson = dictionaryItemService.getDictionaryItemsInJson(typesOfActivity);
-        result.put("actTypeJson", typesOfActivityJson);
-
-        String workplacesJson = dictionaryItemService.getDictionaryItemsInJson(dictionaryItemService.getWorkplaces());
-        result.put("workplaceJson", workplacesJson);
-
-        result.put("overtimeCauseJson", dictionaryItemService.getDictionaryItemsInJson(dictionaryItemService
-                .getOvertimeCauses()));
-        result.put("unfinishedDayCauseJson", dictionaryItemService.getDictionaryItemsInJson(dictionaryItemService
-                .getUnfinishedDayCauses()
-        ));
-        result.put("overtimeThreshold", propertyProvider.getOvertimeThreshold());
-        result.put("undertimeThreshold", propertyProvider.getUndertimeThreshold());
-
-        List<Division> divisions = divisionService.getDivisions();
-        result.put("divisionList", divisions);
-
-        String employeeListJson = employeeHelper.getEmployeeListWithLastWorkdayJson(divisions, employeeService.isShowAll(request), true);
-        result.put("employeeListJson", employeeListJson);
-
-        List<DictionaryItem> categoryOfActivity = dictionaryItemService.getCategoryOfActivity();
-        result.put("actCategoryList", categoryOfActivity);
-
-        String actCategoryListJson = dictionaryItemService.getDictionaryItemsInJson(categoryOfActivity);
-        result.put("actCategoryListJson", actCategoryListJson);
-
-        result.put("availableActCategoriesJson", availableActivityCategoryService.getAvailableActCategoriesJson());
-
-        result.put("projectListJson", projectService.getProjectListJson(divisions));
-        result.put(
-                "projectTaskListJson",
-                projectTaskService.getProjectTaskListJson(projectService.getProjectsWithCq())
-        );
-
-        List<ProjectRole> projectRoleList = projectRoleService.getProjectRoles();
-
-        for (int i = 0; i < projectRoleList.size(); i++) {
-            if (projectRoleList.get(i).getCode().equals("ND")) {  // Убираем из списка роль "Не определена" APLANATS-270
-                projectRoleList.remove(i);
-                break;
-            }
-        }
-
-        result.put("projectRoleList", projectRoleList);
-        result.put("projectRoleListJson", projectRoleService.getProjectRoleListJson(projectRoleList));
-
-        result.put("listOfActDescriptionJson", timeSheetService.getListOfActDescription());
-        result.put(
-                "typesOfCompensation",
-                dictionaryItemService.getItemsByDictionaryId(DictionaryEnum.TYPES_OF_COMPENSATION.getId())
-        );
-        result.put(
-                "workOnHolidayCauseJson",
-                dictionaryItemService.getDictionaryItemsInJson(DictionaryEnum.WORK_ON_HOLIDAY_CAUSE.getId())
-        );
-
-        return result;
-    }
 
     /**
      * Возвращает {@link JsonObjectNodeBuilder} в котором находится сохраненный черновик
@@ -384,7 +302,7 @@ public class TimeSheetController {
         );
         mavWithErrors.addObject("selectedCalDateJson", timeSheetService.getSelectedCalDateJson(tsForm));
         mavWithErrors.addObject("effortList", timeSheetService.getEffortList());
-        mavWithErrors.addAllObjects(getListsToMAV());
+        mavWithErrors.addAllObjects(timeSheetService.getListsToMAV(request));
 
         return mavWithErrors;
     }

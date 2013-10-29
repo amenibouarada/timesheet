@@ -78,8 +78,6 @@
             <li><a href="admin/update/siddisabledusersfromldap"><fmt:message key="link.disabledsidsync"/></a></li>
             <li><a href="admin/update/sidallusersfromldap"><fmt:message key="link.allsidsync"/></a></li>
             <li><a href="admin/update/jiranameallusersfromldap"><fmt:message key="link.alljiranamesync"/></a></li>
-            <%--<li><a href="admin/update/objectSid"><fmt:message key="link.update.object.sid"/></a></li>--%>
-            <%--<li><a href="admin/update/assignmentleaders"><fmt:message key="link.assignmentleaders"/></a></li>--%>
 
         </ul>
 
