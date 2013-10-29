@@ -39,6 +39,9 @@ public class TimeSheet {
     @ForeignKey(name = "FK_TIME_SHEET_EFFORT")
     private DictionaryItem effortInNextDay;
 
+    @Column(columnDefinition = "integer NOT NULL DEFAULT 0", name = "type")
+    private Integer type;
+
     @OneToMany(mappedBy = "timeSheet", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @OrderBy("id asc")
     private Set<TimeSheetDetail> timeSheetDetails;
@@ -48,6 +51,14 @@ public class TimeSheet {
 
     @Column(name = "creation_date")
     private Date creationDate;
+
+    public Integer getType() {
+        return type;
+    }
+
+    public void setType(Integer type) {
+        this.type = type;
+    }
 
     public Date getCreationDate() {
         return creationDate;
@@ -130,6 +141,7 @@ public class TimeSheet {
                 .append(" employee [").append(employee).append("]")
                 .append(" state [").append(state).append("]")
                 .append(" plan=").append(plan)
+                .append(" typeReport=").append(type)
                 .toString();
     }
 }

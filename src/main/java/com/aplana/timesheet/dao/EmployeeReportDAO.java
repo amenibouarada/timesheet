@@ -45,6 +45,7 @@ public class EmployeeReportDAO {
                 "inner join dictionary_item di on tsd.act_type = di.id\n" +
                 "left outer join project p on p.id=tsd.proj_id\n" +
                 "where  c.year = :year\n" +
+                "and ts.type = 0\n" +
                 "and    c.month = :month\n" +
                 "and    ts.emp_id = :employee_id\n" +
                 ") as foo\n" +

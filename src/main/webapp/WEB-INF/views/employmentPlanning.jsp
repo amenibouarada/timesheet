@@ -54,45 +54,46 @@
             var leftView = {
                 noscroll: true,
                 sortable: false,
-                cells: [[
-                    {'name': 'Employee <img align="right" width="15px" src = "<c:url value="/resources/img/add.gif"/>" onclick="employeeDialog.show();"/>', 'field': 'employee_name', 'width': '200px'}
+                cells: [[{
+                    'name': 'Employee <img align="right" width="15px" src = "<c:url value="/resources/img/add.gif"/>" onclick="employeeDialog.show();"/>',
+                    'field': 'employee_name',
+                    'width': '200px',
+                    noresize: true}
                 ]]};
 
             var input_layout = [];
+            input_layout.push({
+                name: 'Планируемый процент занятости  <img align="right" width="15px" src = "<c:url value="/resources/img/edit.png"/>" onclick="savePlan();"/>',
+                width: '150px',
+                editable: true,
+                formatter: formatterEditableData,
+                field: 'plan',
+                noresize: true
+            });
+
             iterateMonth(yearStart, monthStart, yearEnd, monthEnd, function(month, year){
                 input_layout.push({
                     name: getMonthByNumber(month)+ ", " + year,
                     field: year + "_" + month,
-                    width: '200px',
+                    width: '100px',
                     formatter: formatterData,
-                    editable: false
+                    editable: false,
+                    noresize: true
                 });
             });
-            <%--input_layout.push({--%>
-                <%--name: 'Планируемый процент занятости  <img align="right" width="15px" src = "<c:url value="/resources/img/edit.png"/>" onclick="savePlan();"/>',--%>
-                <%--width: '200px',--%>
-                <%--editable: true,--%>
-                <%--formatter: formatterEditableData,--%>
-                <%--field: 'plan'--%>
-            <%--});--%>
             var middleView = {
                 cells: [input_layout]
             };
 
-            var layout = [leftView, middleView, {cells: [{
-                name: 'Планируемый процент занятости  <img align="right" width="15px" src = "<c:url value="/resources/img/edit.png"/>" onclick="savePlan();"/>',
-                width: '200px',
-                editable: true,
-                formatter: formatterEditableData,
-                field: 'plan'
-            }]}];
+            var layout = [leftView, middleView];
 
             var grid = new dojox.grid.DataGrid({
                 id: 'projectGrid',
                 store: store,
                 structure: layout,
                 rowSelector: '20px',
-                width: '800px',
+                width: '400px',
+                noresize: true,
                 canSort: function(){return false;},
                 onApplyCellEdit: function(inValue, inRowIndex, inFieldIndex){
                     if (inFieldIndex == "plan"){
@@ -118,6 +119,94 @@
             });
         };
 
+        function createLayout(isFact, yearStart, monthStart, yearEnd, monthEnd){
+            var leftView = {
+                noscroll: true,
+                cells: [[
+                    {
+                        'name': 'Проект',
+                        'field': 'project_name',
+                        'width': '200px',
+                        noresize: true
+                    },{
+                        'name': 'Среднее за период',
+                        'field': '0_0',
+                        'width': '150px',
+                        formatter: formatterData,
+                        noresize: true}
+                ]]
+            };
+
+            var dataLayout = [];
+
+            var headerLayout = [];
+            var padding = (dojo.isWebKit ? 1 : 1.25);
+            var cellStyles = "padding-left: "+padding+"px; padding-right: "+padding+"px;";
+
+            if (isFact){
+                iterateMonth(yearStart, monthStart, yearEnd, monthEnd, function(month, year){
+                    headerLayout.push({
+                        name: getMonthByNumber(month)+ ", " + year,
+                        colSpan: 2,
+                        headerStyles: "width: 100px;",
+                        cellStyles: cellStyles,
+                        noresize: true
+                    });
+                });
+            }
+            var middleView = {};
+
+            if (isFact){
+                middleView.cells = [headerLayout, dataLayout];
+                middleView.onBeforeRow = function(inDataIndex, inSubRows) {
+                    var hidden = (inDataIndex >= 0);
+
+                    for (var i = inSubRows.length - 2; i >= 0; i--) {
+                        inSubRows[i].hidden = hidden;
+                    }
+                }
+            } else {
+                middleView.cells = [dataLayout];
+            }
+
+            iterateMonth(yearStart, monthStart, yearEnd, monthEnd, function(month, year){
+                if (isFact){
+                    dataLayout.push({
+                        name: 'П',
+                        field: year + "_" + month,
+                        formatter: formatterData,
+                        width: '50px',
+                        headerStyles: "width: 50px;",
+                        cellStyles: cellStyles,
+                        noresize: true
+                    });
+
+                    dataLayout.push({
+                        name: 'Ф',
+                        field: year + "-" + month,
+                        formatter: formatterData,
+                        width: '50px',
+                        headerStyles: "width: 50px;",
+                        cellStyles: cellStyles,
+                        noresize: true
+                    });
+                } else {
+                    dataLayout.push({
+                        name: getMonthByNumber(month)+ ", " + year,
+                        field: year + "_" + month,
+                        formatter: formatterData,
+                        width: '100px',
+                        editable: false,
+                        noresize: true
+                    });
+                }
+            });
+
+            var layout = [leftView, middleView];
+
+            return layout;
+        }
+
         // Создает грид "сотрудник-проекты"
         function initEmployeeGrid(dataJson, yearStart, monthStart, yearEnd, monthEnd){
             var data = {
@@ -138,79 +227,15 @@
 
             var store = new dojo.data.ItemFileWriteStore({data: data});
 
-            var leftView = {
-                noscroll: true,
-                cells: [[{
-                    'name': 'Project',
-                    'field': 'project_name',
-                    'width': '200px'
-                }]]};
-
-            var dataLayout = [];
-            var headerLayout = [];
-
-            var cellStyles = "padding-left: 1px; padding-right: 1px;";
-
-            iterateMonth(yearStart, monthStart, yearEnd, monthEnd, function(month, year){
-                headerLayout.push({
-                    name: getMonthByNumber(month)+ ", " + year,
-                    colSpan: 2,
-                    headerStyles: "width: 200px;",
-                    cellStyles: cellStyles
-                });
-            });
-
-            var middleView = {
-                cells: [/*[{width: 'auto', hidden: true}],*/ headerLayout, dataLayout],
-                onBeforeRow: function(inDataIndex, inSubRows) {
-                    var hidden = (inDataIndex >= 0);
-
-                    for (var i = inSubRows.length - 2; i >= 0; i--) {
-                        inSubRows[i].hidden = hidden;
-                    }
-                }
-            };
-
-
-            iterateMonth(yearStart, monthStart, yearEnd, monthEnd, function(month, year){
-                dataLayout.push({
-                    name: 'П',
-                    field: year + "_" + month,
-                    formatter: formatterData,
-                    width: '100px',
-                    headerStyles: "width: 100px;",
-                    cellStyles: cellStyles
-                });
-
-                dataLayout.push({
-                    name: 'Ф',
-                    field: year + "-" + month,
-                    formatter: formatterData,
-                    width: '100px',
-                    headerStyles: "width: 100px;",
-                    cellStyles: cellStyles
-                });
-            });
-
-//            dataLayout.push({
-//                'name': 'Среднее за период',
-//                'field': '0_0',
-//                'width': '100px',
-//                formatter: formatterEditableData,
-//                rowSpan: 2
-//            });
-
-            var layout = [leftView, middleView, {cells: [{
-                'name': 'Среднее за период',
-                'field': '0_0',
-                'width': '100px',
-                formatter: formatterEditableData}]}];
+            var isFact = dojo.byId("isFact").checked;
+            var layout = createLayout(isFact, yearStart, monthStart, yearEnd, monthEnd);
 
             var grid = new dojox.grid.DataGrid({
                 id: 'employeeGrid',
                 store: store,
                 structure: layout,
-                rowSelector: '20px'
+                rowSelector: '20px',
+                width: '400px'
             });
 
             grid.placeAt("employeeGridDiv");
@@ -218,7 +243,6 @@
         };
 
         // Динамически перестраивает грид "сотрудник-проекты"
-        // yearStart, monthStart, yearEnd, monthEnd - не используется, нужны если менять структуру грида
         function refreshEmployeeGrid(response, yearStart, monthStart, yearEnd, monthEnd){
             var data = {
                 identifier: "project_id",
@@ -236,10 +260,14 @@
                 data.items.push(row);
             });
 
+            var isFact = dojo.byId("isFact").checked;
+            var layout = createLayout(isFact, yearStart, monthStart, yearEnd, monthEnd);
+
             var store = new dojo.data.ItemFileWriteStore({data: data});
             var grid = dijit.byId("employeeGrid");
             grid.store.close();
             grid.setStore(store);
+            grid.setStructure(layout);
             grid.render();
         }
 
@@ -300,6 +328,7 @@
             });
         }
 
+        // Очищает select'ы на форме выбора сотрудников
         function clearDialogSelection(){
             var projectRoleListId = dojo.byId("projectRoleListId");
             var regionListId = dojo.byId("regionListId");
@@ -356,6 +385,8 @@
                     actionAfterSave);
             }});
 
+            // После сохранения перестраиваем гриды
+            // TODO избавиться от $ - переделать на js
             function actionAfterSave(result){
                 projectDataHandler(${form.projectId}, ${form.yearBeg}, ${form.monthBeg}, ${form.yearEnd}, ${form.monthEnd}, refreshProjectGrid);
                 employeeDataHandler(0, ${form.yearBeg}, ${form.monthBeg}, ${form.yearEnd}, ${form.monthEnd}, refreshEmployeeGrid);
@@ -414,7 +445,8 @@
     <div id="projectGridDiv" style="height: 30em;"></div>
     <br/>
     <span id="spanEmployeeName"></span>
-    &nbsp;<input type="checkbox" name="isFact">Отображать фактическое значение</input>
+    <br/>
+    <input type="checkbox" id="isFact" checked>Отображать фактическое значение</input>
     <br/>
     <div id="employeeGridDiv" style="height: 30em;"></div>
     <br>
@@ -424,7 +456,7 @@
         <form:form commandName="<%= ADD_FORM %>">
             <table class="dijitDialogPaneContentArea">
                 <tr>
-                    <td><label>Division:</label></td>
+                    <td><label>Центр </label></td>
                     <td>
                         <form:select path="divisionId" class="without_dojo" onchange="updateAdditionEmployeeList()">
                             <form:options items="${divisionList}" itemLabel="name" itemValue="id"/>
@@ -432,7 +464,7 @@
                     <td>
                 </tr>
                 <tr>
-                    <td><label>Manager:</label></td>
+                    <td><label>Руководитель </label></td>
                     <td>
                         <form:select path="managerId" class="without_dojo" onchange="updateAdditionEmployeeList()">
                             <form:options items="${managerList}" itemLabel="employee.name" itemValue="employee.id"/>
@@ -440,7 +472,7 @@
                     <td>
                 </tr>
                 <tr>
-                    <td><label>Project role:</label></td>
+                    <td><label>Должности </label></td>
                     <td>
                         <form:select path="projectRoleListId" multiple="true" onchange="updateAdditionEmployeeList()">
                             <form:options items="${projectRoleList}" itemLabel="name" itemValue="id"/>
@@ -448,7 +480,7 @@
                     <td>
                 </tr>
                 <tr>
-                    <td><label>Region:</label></td>
+                    <td><label>Регионы </label></td>
                     <td>
                         <form:select path="regionListId" multiple="true" onchange="updateAdditionEmployeeList()">
                             <form:options items="${regionList}" itemLabel="name" itemValue="id"/>
@@ -456,7 +488,7 @@
                     <td>
                 </tr>
                 <tr>
-                    <td><label>Employee:</label></td>
+                    <td><label>Сотрудники </label></td>
                     <td>
                         <select id="additionEmployeeList" multiple="true" />
                     <td>
@@ -464,7 +496,7 @@
             </table>
 
             <div class="dijitDialogPaneActionBar">
-                <button type="button" id="ok" onclick="addRow();">add</button>
+                <button type="button" onclick="addRow();">Добавить</button>
             </div>
         </form:form>
     </div>

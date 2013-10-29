@@ -9,6 +9,7 @@ import com.aplana.timesheet.dao.TimeSheetDetailDAO;
 import com.aplana.timesheet.dao.entity.*;
 import com.aplana.timesheet.dao.entity.Calendar;
 import com.aplana.timesheet.enums.DictionaryEnum;
+import com.aplana.timesheet.enums.TypesOfTimeSheetEnum;
 import com.aplana.timesheet.form.TimeSheetForm;
 import com.aplana.timesheet.form.TimeSheetTableRowForm;
 import com.aplana.timesheet.form.entity.DayTimeSheet;
@@ -79,7 +80,7 @@ public class TimeSheetService {
     public SecurityService securityService;
 
     @Transactional
-    public TimeSheet storeTimeSheet(TimeSheetForm tsForm) {
+    public TimeSheet storeTimeSheet(TimeSheetForm tsForm, TypesOfTimeSheetEnum type) {
         TimeSheet timeSheet = new TimeSheet();
         logger.debug("Selected employee id = {}", tsForm.getEmployeeId());
         logger.debug("Selected calDate = {}", tsForm.getCalDate());
@@ -121,7 +122,7 @@ public class TimeSheetService {
                     timeSheetDetail.setProjectTask(projectTaskService.find(projectId, formRow.getProjectTaskId()));
                 }
                 // Сохраняем часы только для тех полей, которые не disabled
-                if (durationStr != null) {
+                if (durationStr != null && !durationStr.isEmpty()) {
                     duration = Double.parseDouble(durationStr.replace(",", "."));
                 }
                 timeSheetDetail.setDuration(duration);
@@ -132,9 +133,52 @@ public class TimeSheetService {
             }
         }
         timeSheet.setTimeSheetDetails(timeSheetDetails);
+        //сохраняем тип отчета
+        timeSheet.setType(type.getId());
+
+        //пытаемся узнать, может у нас есть уже черновик вне зависисмости от типа отчета
+        //на случай если появится еще состояния
+        if (TypesOfTimeSheetEnum.DRAFT == type || TypesOfTimeSheetEnum.REPORT == type) {
+//            logger.info("searching..." + tsForm.getCalDate() + " " + tsForm.getEmployeeId());
+            Integer id = timeSheetDAO.findIdForDateAndEmployeeByTypes(
+                    calendarService.find(tsForm.getCalDate()),
+                    tsForm.getEmployeeId(),
+                    Arrays.asList(TypesOfTimeSheetEnum.REPORT, TypesOfTimeSheetEnum.DRAFT)
+            );
+
+//            logger.info("search..." + (forDateAndEmployeeTS != null ? "have" + forDateAndEmployeeTS.getId() : "null"));
+            if (id != null) {
+                TimeSheet timeSheet2 = find(id);
+                timeSheetDAO.deleteAndFlush(timeSheet2);
+                logger.debug("Old TimeSheet object for employee {} ({}) deleted.", tsForm.getEmployeeId(), timeSheet.getCalDate());
+                timeSheetDAO.storeTimeSheet(timeSheet);
+                logger.debug("TimeSheet object for employee {} ({}) saved.", tsForm.getEmployeeId(), timeSheet.getCalDate());
+                return timeSheet;
+            }
+        }
+
+//        logger.info("Timesheet saving...");
         timeSheetDAO.storeTimeSheet(timeSheet);
         logger.info("TimeSheet object for employee {} ({}) saved.", tsForm.getEmployeeId(), timeSheet.getCalDate());
+
         return timeSheet;
+    }
+
+    /**
+     * Ищет в таблице timesheet запись соответсвующую date для сотрудника с
+     * идентификатором employeeId, с определенным типом и возвращает объект типа Timesheet.
+     *
+     * @param calDate    Дата в виде строки.
+     * @param employeeId Идентификатор сотрудника в базе данных.
+     * @return объект типа Timesheet, либо null, если объект не найден.
+     */
+    @Transactional
+    public TimeSheet findForDateAndEmployeeByTypes(String calDate, Integer employeeId, List<TypesOfTimeSheetEnum> types) {
+        return timeSheetDAO.findForDateAndEmployeeByTypes(
+                calendarService.find(calDate),
+                employeeId,
+                types
+        );
     }
 
     /**
@@ -210,6 +254,11 @@ public class TimeSheetService {
      */
     @Transactional(readOnly = true)
     public String getPlansJson(String date, Integer employeeId) {
+        return JsonUtil.format(getPlansJsonBuilder(date,employeeId));
+    }
+
+    @Transactional(readOnly = true)
+    public JsonObjectNodeBuilder getPlansJsonBuilder(String date, Integer employeeId) {
         final JsonObjectNodeBuilder builder = anObjectBuilder();
 
         final TimeSheet lastTimeSheet = timeSheetDAO.findLastTimeSheetBefore(calendarService.find(date), employeeId);
@@ -230,8 +279,7 @@ public class TimeSheetService {
                 ) { // <APLANATS-458>
             builder.withField("next", getPlanBuilder(nextTimeSheet, false));
         }
-
-        return JsonUtil.format(builder);
+        return builder;
     }
 
     private JsonObjectNodeBuilder getPlanBuilder(TimeSheet timeSheet, Boolean nextOrPrev) {
