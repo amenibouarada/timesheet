@@ -4,10 +4,10 @@ import javax.servlet.http.HttpSession;
 
 /**
  * @author pmakarov
- * mock для тестов
+ *         mock для тестов
  */
 public class FakeSessionAttributes {
-    public HttpSession getHttpSession(){
+    public HttpSession getHttpSession() {
         return null;
     }
 }

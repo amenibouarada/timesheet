@@ -1,4 +1,5 @@
 package com.aplana.timesheet.service;
+
 import com.aplana.timesheet.AbstractJsonTest;
 import com.aplana.timesheet.dao.*;
 import com.aplana.timesheet.dao.entity.*;
@@ -6,8 +7,6 @@ import com.aplana.timesheet.dao.entity.*;
 import com.aplana.timesheet.enums.DictionaryEnum;
 import com.aplana.timesheet.enums.VacationStatusEnum;
 import com.aplana.timesheet.util.DateTimeUtil;
-import junit.framework.Assert;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,11 +15,8 @@ import java.util.*;
 import java.util.Calendar;
 
 /**
- * Created with IntelliJ IDEA.
  * User: bsirazetdinov
  * Date: 07.08.13
- * Time: 13:57
- * To change this template use File | Settings | File Templates.
  */
 public class PlannedVacationServiceTest extends AbstractJsonTest{
 

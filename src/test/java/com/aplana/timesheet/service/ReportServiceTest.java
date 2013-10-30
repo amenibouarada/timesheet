@@ -1,18 +1,12 @@
 package com.aplana.timesheet.service;
 
+import com.aplana.timesheet.AbstractTest;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = {"classpath:WEB-INF/spring/testApplicationContext.xml"})
-
-public class ReporServiceTest {
+public class ReportServiceTest extends AbstractTest {
     /**
      http://jira.aplana.com/browse/ITIASMK-398
      APLANATS-780 - Формирование отчетов. Сообщение "Не найдены отчеты, удовлетворяющие заданным параметрам" не исчезает
