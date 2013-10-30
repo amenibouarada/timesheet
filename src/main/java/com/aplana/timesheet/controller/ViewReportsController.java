@@ -86,7 +86,9 @@ public class ViewReportsController extends AbstractControllerForEmployeeWithYear
             DayTimeSheet next = iterator.next();
             BigDecimal vacationDuration = next.getVacationDay() && next.getWorkDay() ? new BigDecimal(8) : BigDecimal.ZERO;
             durationFact = durationFact.add(vacationDuration);
-            durationFact = durationFact.add(next.getDuration());
+            //если это не черновик
+            if(!next.getStatusHaveDraft())
+                durationFact = durationFact.add(next.getDuration());
             next.setDuration(next.getDuration().add(vacationDuration).setScale(2, BigDecimal.ROUND_HALF_UP));
         }
         durationFact = durationFact.setScale(2, BigDecimal.ROUND_HALF_UP);

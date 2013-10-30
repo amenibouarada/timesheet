@@ -29,7 +29,7 @@ function showGraphic(type) {
     var g = new Gantt(dojo.byId("graphic_div"), holidayList, type);
 
     for (var i = 0; i < vacationListJSON.length; i++) {
-        var vacation = new RegionEmployees(vacationListJSON[i].region_name, vacationListJSON[i].employeeList);
+        var vacation = new RegionEmployees(vacationListJSON[i].region_name, vacationListJSON[i].employeeList, vacationListJSON[i].holidays);
         g.AddRegionEmployeeList(vacation);
     }
 

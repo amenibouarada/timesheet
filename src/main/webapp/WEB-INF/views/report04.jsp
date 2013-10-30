@@ -101,7 +101,6 @@
             </ul>
         </div>
 
-
     </div>
 
     <button id="make_report_button" style="width:210px" type="submit" onclick="clearErrorBox('errorBoxId')">Сформировать отчет</button>

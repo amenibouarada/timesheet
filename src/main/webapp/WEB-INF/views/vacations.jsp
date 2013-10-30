@@ -449,7 +449,7 @@
             </c:choose>
         </table>
     </div>
-    <div data-dojo-type="dijit/layout/ContentPane" id="secondTab" title="График">
+    <div data-dojo-type="dijit/layout/ContentPane" id="secondTab" title="График" onShow="showGraphic(dojo.byId(VIEW_MODE).value)">
         <div style="padding-left: 10px">
 
             <br>

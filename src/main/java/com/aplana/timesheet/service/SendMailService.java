@@ -7,12 +7,12 @@ import com.aplana.timesheet.form.AdminMessageForm;
 import com.aplana.timesheet.form.FeedbackForm;
 import com.aplana.timesheet.form.TimeSheetForm;
 import com.aplana.timesheet.form.TimeSheetTableRowForm;
-import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.MailSenders.*;
+import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.system.security.SecurityService;
+import com.aplana.timesheet.system.security.entity.TimeSheetUser;
 import com.aplana.timesheet.util.DateTimeUtil;
 import com.aplana.timesheet.util.EnumsUtils;
-import com.aplana.timesheet.system.security.entity.TimeSheetUser;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
@@ -34,7 +34,7 @@ import java.util.*;
 import static com.aplana.timesheet.enums.TypesOfActivityEnum.*;
 
 @Service
-public class SendMailService{
+public class SendMailService {
     private static final Logger logger = LoggerFactory.getLogger(SendMailService.class);
 
     private final Predicate<ProjectActivityInfo> LEAVE_PRESALE_AND_PROJECTS_ONLY =
@@ -47,42 +47,47 @@ public class SendMailService{
             });
     private final Function<ProjectManager, String> GET_EMAIL_FROM_MANAGER
             = new Function<ProjectManager, String>() {
-        @Nullable @Override
+        @Nullable
+        @Override
         public String apply(@Nullable ProjectManager projectManager) {
             return projectManager.getEmployee().getEmail();
         }
     };
 
-    private Function<ProjectActivityInfo,String> GET_EMAILS_OF_INTERESTED_MANAGERS_FROM_PROJECT_FOR_CURRENT_ROLE
+    private Function<ProjectActivityInfo, String> GET_EMAILS_OF_INTERESTED_MANAGERS_FROM_PROJECT_FOR_CURRENT_ROLE
             = new Function<ProjectActivityInfo, String>() {
-        @Nullable @Override
+        @Nullable
+        @Override
         public String apply(@Nullable ProjectActivityInfo input) {
             final ProjectRolesEnum roleInCurrentProject = input.getProjectRole();
 
             final Project project = projectService.find(input.getProjectId());
 
             return Joiner.on(",").join(
-                Iterables.transform(
-                    Iterables.filter(
-                        projectService.getManagers(projectService.find(input.getProjectId())),
-                            new Predicate<ProjectManager>() {
-                                @Override
-                                public boolean apply(@Nullable ProjectManager manager) {
-                                    if(manager == null || manager.getProjectRole()==null){
-                                        return false;
-                                    }
-                                    if (manager.getEmployee().getId().equals(project.getManager().getId())){
-                                        return true;
-                                    }
-                                    if(EnumsUtils.tryFindById(manager.getProjectRole().getId(),ProjectRolesEnum.class)==ProjectRolesEnum.HEAD){
-                                        return true;
-                                    }
-                                    return (manager.getProjectRole().getId().equals(roleInCurrentProject.getId()));
+                    Iterables.transform(
+                            Iterables.filter(
+                                    projectService.getManagers(projectService.find(input.getProjectId())),
+                                    new Predicate<ProjectManager>() {
+                                        @Override
+                                        public boolean apply(@Nullable ProjectManager manager) {
+                                            if (manager == null || manager.getProjectRole() == null) {
+                                                return false;
+                                            }
+                                            if (manager.getEmployee().getId().equals(project.getManager().getId())) {
+                                                return true;
+                                            }
+                                            if (EnumsUtils.tryFindById(manager.getProjectRole().getId(), ProjectRolesEnum.class) == ProjectRolesEnum.HEAD) {
+                                                return true;
+                                            }
+                                            return (manager.getProjectRole().getId().equals(roleInCurrentProject.getId()));
 
-                                } }),
-                        GET_EMAIL_FROM_MANAGER
-                )
-        ); } };
+                                        }
+                                    }),
+                            GET_EMAIL_FROM_MANAGER
+                    )
+            );
+        }
+    };
 
     @Autowired
     public VelocityEngine velocityEngine;
@@ -113,6 +118,7 @@ public class SendMailService{
     /**
      * Возвращает строку с адресами линейных руководителей сотрудника
      * (непосредственного и всех вышестоящих) разделёнными запятой.
+     *
      * @param empId
      */
     public String getEmployeesManagersEmails(Integer empId) {
@@ -139,7 +145,7 @@ public class SendMailService{
     /**
      * Возвращает ФИО сотрудника
      */
-    public String getEmployeeFIO(Integer empId){
+    public String getEmployeeFIO(Integer empId) {
         return empId == null ? null : employeeService.find(empId).getName();
     }
 
@@ -153,6 +159,7 @@ public class SendMailService{
 
     /**
      * Возвращает строку с адресами менеджеров проектов/пресейлов
+     *
      * @param tsForm
      */
     public String getProjectsManagersEmails(TimeSheetForm tsForm) {
@@ -189,6 +196,7 @@ public class SendMailService{
 
     /**
      * Получает email адреса из всех проектов
+     *
      * @param ts
      * @return string строка содержащая email's которым относится данный timesheet
      */
@@ -204,7 +212,7 @@ public class SendMailService{
                 , ",");
     }
 
-    public List<Employee> getEmployeesList(Division division){
+    public List<Employee> getEmployeesList(Division division) {
         return employeeService.getEmployees(division, false);
     }
 
@@ -252,28 +260,28 @@ public class SendMailService{
         new PlannedVacationDeletedSender(this, propertyProvider, employeeService, projectService).sendMessage(vacation);
     }
 
-    public void performVacationApprovedSender (Vacation vacation, List<String> emails) {
+    public void performVacationApprovedSender(Vacation vacation, List<String> emails) {
         new VacationApprovedSender(this, propertyProvider, emails).sendMessage(vacation);
     }
 
-    public void performExceptionSender(String problem){
+    public void performExceptionSender(String problem) {
         new ExceptionSender(this, propertyProvider).sendMessage(problem);
     }
 
-    public void performVacationApprovalErrorThresholdMailing(){
+    public void performVacationApprovalErrorThresholdMailing() {
         new VacationApprovalErrorThresholdSender(this, propertyProvider).sendMessage("");
     }
 
-    public void loginFailureErrorThresholdMailing(){
+    public void loginFailureErrorThresholdMailing() {
         new LoginFailureErrorThresholdSender(this, propertyProvider).sendMessage("");
     }
 
-    public void performVacationAcceptanceMailing(VacationApproval vacationApproval){
+    public void performVacationAcceptanceMailing(VacationApproval vacationApproval) {
         new VacationApprovalAcceptanceSender(this, propertyProvider).sendMessage(vacationApproval);
     }
 
     public void performVacationCreateMailing(Vacation vacation) {
-        new VacationCreateSender(this,propertyProvider,vacationApprovalService,managerRoleNameService).sendMessage(vacation);
+        new VacationCreateSender(this, propertyProvider, vacationApprovalService, managerRoleNameService).sendMessage(vacation);
     }
 
     public void plannedVacationInfoMailing(Map<Employee, Set<Vacation>> managerEmployeesVacation) {
@@ -281,23 +289,25 @@ public class SendMailService{
     }
 
     public void performIllnessCreateMailing(Illness illness) {
-        new IllnessCreateSender(this,propertyProvider, projectService, employeeService).sendMessage(illness);
+        new IllnessCreateSender(this, propertyProvider, projectService, employeeService).sendMessage(illness);
     }
 
     public void performIllnessEditMailing(Illness illness) {
-        new IllnessEditSender(this,propertyProvider, projectService, employeeService).sendMessage(illness);
+        new IllnessEditSender(this, propertyProvider, projectService, employeeService).sendMessage(illness);
     }
 
     public void performIllnessDeleteMailing(Illness illness) {
-        new IllnessDeleteSender(this,propertyProvider, projectService, employeeService).sendMessage(illness);
+        new IllnessDeleteSender(this, propertyProvider, projectService, employeeService).sendMessage(illness);
     }
 
     public String initMessageBodyForReport(TimeSheet timeSheet) {
         Map<String, Object> model1 = new HashMap<String, Object>();
         Iterator<TimeSheetDetail> iteratorTSD = timeSheet.getTimeSheetDetails().iterator();
         BigDecimal summDuration = BigDecimal.ZERO;
-        while (iteratorTSD.hasNext()){
-            summDuration = summDuration.add(BigDecimal.valueOf(iteratorTSD.next().getDuration())); //todo переделать на bigdecimal
+        while (iteratorTSD.hasNext()) {
+            Double duration = iteratorTSD.next().getDuration();
+            if (duration != null)
+                summDuration = summDuration.add(BigDecimal.valueOf(duration)); //todo переделать на bigdecimal
         }
         model1.put("summDuration", summDuration.setScale(2, BigDecimal.ROUND_HALF_UP));
         model1.put("dictionaryItemService", dictionaryItemService);
@@ -326,7 +336,7 @@ public class SendMailService{
         return overtimeCauseService.getCauseName(tsForm);
     }
 
-    public Integer getOverUnderTimeDictId(Integer overtimeCause){
+    public Integer getOverUnderTimeDictId(Integer overtimeCause) {
         return overtimeCauseService.getDictId(overtimeCause);
     }
 
@@ -338,7 +348,7 @@ public class SendMailService{
         return employeeService.getJuniorProjectManagersAndProjects(Arrays.asList(project), vacation);
     }
 
-    public EmployeeAssistant getEmployeeAssistant(Set<String> managersEmails) {
+    public List<EmployeeAssistant> getEmployeeAssistant(Set<String> managersEmails) {
         return employeeAssistantService.tryFind(managersEmails);
     }
 
@@ -354,11 +364,11 @@ public class SendMailService{
         for (TimeSheetDetail timeSheetDetail : timeSheetDetails) {
             project = timeSheetDetail.getProject();
 
-            if (project != null && project.getManager() != null  &&
+            if (project != null && project.getManager() != null &&
                     TypesOfActivityEnum.isProjectOrPresale(
                             EnumsUtils.tryFindById(timeSheetDetail.getActType().getId(), TypesOfActivityEnum.class)
                     )
-            ) {
+                    ) {
                 emails.add(project.getManager().getEmail());
             }
         }
@@ -395,7 +405,9 @@ public class SendMailService{
 
     interface ProjectActivityInfo {
         TypesOfActivityEnum getTypeOfActivity();
+
         ProjectRolesEnum getProjectRole();
+
         Integer getProjectId();
     }
 

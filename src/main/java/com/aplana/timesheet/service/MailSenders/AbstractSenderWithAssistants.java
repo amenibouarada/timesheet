@@ -9,6 +9,8 @@ import com.aplana.timesheet.service.VacationApprovalService;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang.StringUtils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -26,10 +28,15 @@ public abstract class AbstractSenderWithAssistants<T> extends MailSender<T> {
         super(sendMailService, propertyProvider, vacationApprovalService, managerRoleNameService);
     }
 
-    protected final String getAssistantEmail(Set<String> managersEmails) {
-        final EmployeeAssistant employeeAssistant = sendMailService.getEmployeeAssistant(managersEmails);
-
-        return (employeeAssistant == null) ? StringUtils.EMPTY : employeeAssistant.getAssistant().getEmail();
+    protected final List<String> getAssistantEmail(Set<String> managersEmails) {
+        final List<EmployeeAssistant> employeeAssistants = sendMailService.getEmployeeAssistant(managersEmails);
+        List<String> emails = new ArrayList<String>();
+        if (employeeAssistants != null) {
+            for (EmployeeAssistant assistant : employeeAssistants) {
+                emails.add(assistant.getAssistant().getEmail());
+            }
+        }
+        return emails;
     }
 
     protected final Set<String> getManagersEmails(Mail mail, Employee employee) {

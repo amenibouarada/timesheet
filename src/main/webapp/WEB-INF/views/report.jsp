@@ -13,7 +13,6 @@
         });
     </script>
     <title><fmt:message key="report"/></title>
-
 </head>
 <body>
 
@@ -24,6 +23,7 @@
     </fmt:param>
     <fmt:param value="${year}"/>
 </fmt:message></h1>
+
 <br/>
 
 <form:form method="post" commandName="ReportForm" name="mainForm">
@@ -37,12 +37,12 @@
             </c:forEach>
         </div>
     </c:if>
-    <br>
+    <br/>
     ${report}
     <c:if test="${fn:length(creationDate) > 0}">
-        <br>
+        <br/>
         <b>Отчет был создан ${creationDate} мск</b>
-        <br>
+        <br/>
     </c:if>
     <button id="close" style="width:210px" type="button" onclick="window.close()">Закрыть</button>
 </form:form>

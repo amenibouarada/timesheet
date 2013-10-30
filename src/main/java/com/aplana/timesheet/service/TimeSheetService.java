@@ -9,9 +9,12 @@ import com.aplana.timesheet.dao.TimeSheetDetailDAO;
 import com.aplana.timesheet.dao.entity.*;
 import com.aplana.timesheet.dao.entity.Calendar;
 import com.aplana.timesheet.enums.DictionaryEnum;
+import com.aplana.timesheet.enums.TypesOfTimeSheetEnum;
 import com.aplana.timesheet.form.TimeSheetForm;
 import com.aplana.timesheet.form.TimeSheetTableRowForm;
 import com.aplana.timesheet.form.entity.DayTimeSheet;
+import com.aplana.timesheet.service.helper.EmployeeHelper;
+import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.system.security.SecurityService;
 import com.aplana.timesheet.util.DateTimeUtil;
 import com.aplana.timesheet.util.JsonUtil;
@@ -24,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 import static argo.jdom.JsonNodeBuilders.*;
@@ -46,7 +50,7 @@ public class TimeSheetService {
     private TimeSheetDAO timeSheetDAO;
 
     @Autowired
-    private TimeSheetDetailDAO timeSheetDetailDAO;
+    private TSPropertyProvider propertyProvider;
 
     @Autowired
     private EmployeeDAO employeeDAO;
@@ -59,6 +63,9 @@ public class TimeSheetService {
 
     @Autowired
     private EmployeeService employeeService;
+
+    @Autowired
+    private DivisionService divisionService;
 
     @Autowired
     private DictionaryItemService dictionaryItemService;
@@ -78,8 +85,14 @@ public class TimeSheetService {
     @Autowired
     public SecurityService securityService;
 
+    @Autowired
+    private EmployeeHelper employeeHelper;
+
+    @Autowired
+    private AvailableActivityCategoryService availableActivityCategoryService;
+
     @Transactional
-    public TimeSheet storeTimeSheet(TimeSheetForm tsForm) {
+    public TimeSheet storeTimeSheet(TimeSheetForm tsForm, TypesOfTimeSheetEnum type) {
         TimeSheet timeSheet = new TimeSheet();
         logger.debug("Selected employee id = {}", tsForm.getEmployeeId());
         logger.debug("Selected calDate = {}", tsForm.getCalDate());
@@ -121,7 +134,7 @@ public class TimeSheetService {
                     timeSheetDetail.setProjectTask(projectTaskService.find(projectId, formRow.getProjectTaskId()));
                 }
                 // Сохраняем часы только для тех полей, которые не disabled
-                if (durationStr != null) {
+                if (durationStr != null && !durationStr.isEmpty()) {
                     duration = Double.parseDouble(durationStr.replace(",", "."));
                 }
                 timeSheetDetail.setDuration(duration);
@@ -132,9 +145,52 @@ public class TimeSheetService {
             }
         }
         timeSheet.setTimeSheetDetails(timeSheetDetails);
+        //сохраняем тип отчета
+        timeSheet.setType(type.getId());
+
+        //пытаемся узнать, может у нас есть уже черновик вне зависисмости от типа отчета
+        //на случай если появится еще состояния
+        if (TypesOfTimeSheetEnum.DRAFT == type || TypesOfTimeSheetEnum.REPORT == type) {
+//            logger.info("searching..." + tsForm.getCalDate() + " " + tsForm.getEmployeeId());
+            Integer id = timeSheetDAO.findIdForDateAndEmployeeByTypes(
+                    calendarService.find(tsForm.getCalDate()),
+                    tsForm.getEmployeeId(),
+                    Arrays.asList(TypesOfTimeSheetEnum.REPORT, TypesOfTimeSheetEnum.DRAFT)
+            );
+
+//            logger.info("search..." + (forDateAndEmployeeTS != null ? "have" + forDateAndEmployeeTS.getId() : "null"));
+            if (id != null) {
+                TimeSheet timeSheet2 = find(id);
+                timeSheetDAO.deleteAndFlush(timeSheet2);
+                logger.debug("Old TimeSheet object for employee {} ({}) deleted.", tsForm.getEmployeeId(), timeSheet.getCalDate());
+                timeSheetDAO.storeTimeSheet(timeSheet);
+                logger.debug("TimeSheet object for employee {} ({}) saved.", tsForm.getEmployeeId(), timeSheet.getCalDate());
+                return timeSheet;
+            }
+        }
+
+//        logger.info("Timesheet saving...");
         timeSheetDAO.storeTimeSheet(timeSheet);
         logger.info("TimeSheet object for employee {} ({}) saved.", tsForm.getEmployeeId(), timeSheet.getCalDate());
+
         return timeSheet;
+    }
+
+    /**
+     * Ищет в таблице timesheet запись соответсвующую date для сотрудника с
+     * идентификатором employeeId, с определенным типом и возвращает объект типа Timesheet.
+     *
+     * @param calDate    Дата в виде строки.
+     * @param employeeId Идентификатор сотрудника в базе данных.
+     * @return объект типа Timesheet, либо null, если объект не найден.
+     */
+    @Transactional
+    public TimeSheet findForDateAndEmployeeByTypes(String calDate, Integer employeeId, List<TypesOfTimeSheetEnum> types) {
+        return timeSheetDAO.findForDateAndEmployeeByTypes(
+                calendarService.find(calDate),
+                employeeId,
+                types
+        );
     }
 
     /**
@@ -210,6 +266,11 @@ public class TimeSheetService {
      */
     @Transactional(readOnly = true)
     public String getPlansJson(String date, Integer employeeId) {
+        return JsonUtil.format(getPlansJsonBuilder(date,employeeId));
+    }
+
+    @Transactional(readOnly = true)
+    public JsonObjectNodeBuilder getPlansJsonBuilder(String date, Integer employeeId) {
         final JsonObjectNodeBuilder builder = anObjectBuilder();
 
         final TimeSheet lastTimeSheet = timeSheetDAO.findLastTimeSheetBefore(calendarService.find(date), employeeId);
@@ -230,8 +291,7 @@ public class TimeSheetService {
                 ) { // <APLANATS-458>
             builder.withField("next", getPlanBuilder(nextTimeSheet, false));
         }
-
-        return JsonUtil.format(builder);
+        return builder;
     }
 
     private JsonObjectNodeBuilder getPlanBuilder(TimeSheet timeSheet, Boolean nextOrPrev) {
@@ -464,5 +524,78 @@ public class TimeSheetService {
 
     public List<DictionaryItem> getEffortList() {
         return dictionaryItemService.getItemsByDictionaryId(DictionaryEnum.EFFORT_IN_NEXTDAY.getId());
+    }
+
+    /**
+     * Возвращает Map со значениями для заполнения списков сотрудников,
+     * проектов, пресейлов, проектных задач, типов и категорий активности на
+     * форме приложения.
+     *
+     * @return
+     */
+    @Transactional(readOnly = true)
+    public Map<String, Object> getListsToMAV(HttpServletRequest request) {
+        Map<String, Object> result = new HashMap<String, Object>();
+
+        List<DictionaryItem> typesOfActivity = dictionaryItemService.getTypesOfActivity();
+        result.put("actTypeList", typesOfActivity);
+
+        String typesOfActivityJson = dictionaryItemService.getDictionaryItemsInJson(typesOfActivity);
+        result.put("actTypeJson", typesOfActivityJson);
+
+        String workplacesJson = dictionaryItemService.getDictionaryItemsInJson(dictionaryItemService.getWorkplaces());
+        result.put("workplaceJson", workplacesJson);
+
+        result.put("overtimeCauseJson", dictionaryItemService.getDictionaryItemsInJson(dictionaryItemService
+                .getOvertimeCauses()));
+        result.put("unfinishedDayCauseJson", dictionaryItemService.getDictionaryItemsInJson(dictionaryItemService
+                .getUnfinishedDayCauses()
+        ));
+        result.put("overtimeThreshold", propertyProvider.getOvertimeThreshold());
+        result.put("undertimeThreshold", propertyProvider.getUndertimeThreshold());
+
+        List<Division> divisions = divisionService.getDivisions();
+        result.put("divisionList", divisions);
+
+        String employeeListJson = employeeHelper.getEmployeeListWithLastWorkdayJson(divisions, employeeService.isShowAll(request), true);
+        result.put("employeeListJson", employeeListJson);
+
+        List<DictionaryItem> categoryOfActivity = dictionaryItemService.getCategoryOfActivity();
+        result.put("actCategoryList", categoryOfActivity);
+
+        String actCategoryListJson = dictionaryItemService.getDictionaryItemsInJson(categoryOfActivity);
+        result.put("actCategoryListJson", actCategoryListJson);
+
+        result.put("availableActCategoriesJson", availableActivityCategoryService.getAvailableActCategoriesJson());
+
+        result.put("projectListJson", projectService.getProjectListJson(divisions));
+        result.put(
+                "projectTaskListJson",
+                projectTaskService.getProjectTaskListJson(projectService.getProjectsWithCq())
+        );
+
+        List<ProjectRole> projectRoleList = projectRoleService.getProjectRoles();
+
+        for (int i = 0; i < projectRoleList.size(); i++) {
+            if (projectRoleList.get(i).getCode().equals("ND")) {  // Убираем из списка роль "Не определена" APLANATS-270
+                projectRoleList.remove(i);
+                break;
+            }
+        }
+
+        result.put("projectRoleList", projectRoleList);
+        result.put("projectRoleListJson", projectRoleService.getProjectRoleListJson(projectRoleList));
+
+        result.put("listOfActDescriptionJson", getListOfActDescription());
+        result.put(
+                "typesOfCompensation",
+                dictionaryItemService.getItemsByDictionaryId(DictionaryEnum.TYPES_OF_COMPENSATION.getId())
+        );
+        result.put(
+                "workOnHolidayCauseJson",
+                dictionaryItemService.getDictionaryItemsInJson(DictionaryEnum.WORK_ON_HOLIDAY_CAUSE.getId())
+        );
+
+        return result;
     }
 }

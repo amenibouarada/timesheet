@@ -155,7 +155,8 @@ public class JasperReportDAO {
                 "where " +
                     (withDivisionClause ? DIVISION_SQL_CLAUSE : WITHOUT_CLAUSE) +
                     (withRegionClause ? REGION_SQL_CLAUSE : WITHOUT_CLAUSE ) +
-                    "calendar.calDate between :beginDate and :endDate ");
+                    "(calendar.calDate between :beginDate and :endDate) " +
+                    "AND (timesheet.type = 0) ");
 
         if (withRegionClause)
             projQuery.setParameter("regionIds", report.getRegionIds());
@@ -266,6 +267,7 @@ public class JasperReportDAO {
                                 (report.getShowNonBillable() ? WITHOUT_CLAUSE : BILLABLE_CLAUSE) +
                         "        timesheet_details.act_type in :actTypes AND " +
                         "        timesheet.caldate BETWEEN :beginDate AND :endDate AND " +
+                        "        (timesheet.type = 0) AND " +
                         "        (holidays.region is null OR holidays.region=region.id) " +
                         "GROUP BY" +
                         "        empl.id ," +
@@ -383,6 +385,7 @@ public class JasperReportDAO {
                                 "timesheet_details.act_type in (42, 12, 13)  AND " +    //TODO (aivanov 3.10.13) Создать емун и заменить циферки
                                 " %s %s %s %s %s " +
                                 "calendar.calDate between :beginDate AND :endDate " +
+                                "AND (timesheet.type = 0) " +
                         "GROUP BY " +
                                 "empl.name, " +
                                 "division.name, " +
@@ -539,6 +542,7 @@ public class JasperReportDAO {
                     "timesheet_details.act_type in (42, 12, 13)  AND " +    //TODO (aivanov 3.10.13) Создать емун и заменить циферки
                     " %s %s %s %s %s " +
                     "calendar.caldate between :beginDate AND :endDate " +
+                    "AND (timesheet.type = 0) " +
             "GROUP BY " +
                     "empl.name, " +
                     "division.name, " +
@@ -662,7 +666,7 @@ public class JasperReportDAO {
                     "        employee.not_to_sync=FALSE AND  " +
                     "        (employee.manager IS NOT NULL) AND  " +
                     "        (calendar.caldate NOT IN  " +
-                    "                (SELECT timesheet.caldate FROM time_sheet timesheet WHERE timesheet.emp_id=employee.id)) AND  " +
+                    "                (SELECT timesheet.caldate FROM time_sheet timesheet WHERE timesheet.emp_id=employee.id AND (timesheet.type = 0))) AND  " +
                     "        (calendar.caldate NOT IN   " +
                     "                (SELECT holiday.caldate FROM holiday holiday WHERE holiday.region IS NULL OR holiday.region=employee.region)) AND  " +
                     "        employee.start_date<=calendar.caldate  " +
@@ -737,6 +741,7 @@ public class JasperReportDAO {
                         (withRegionClause ? REGION_SQL_CLAUSE : WITHOUT_CLAUSE) +
                         (withEmployeeClause ? EMPLOYEE_SQL_CLAUSE : WITHOUT_CLAUSE) +
                         "calendar.calDate between :beginDate and :endDate " +
+                        "AND (timesheet.type = 0) " +
                 "order by calendar.calDate, empl.name ");
 
         if (withRegionClause) {
@@ -777,8 +782,9 @@ public class JasperReportDAO {
                         "join tsd.timeSheet.employee empl " +
                         "join empl.region r " +
                 "WHERE " +
-                        "tsd.actType=act.actType AND " +
-                        "tsd.actCat=act.actCat AND " +
+                        "tsd.actType = act.actType AND " +
+                        "tsd.actCat = act.actCat AND " +
+                        "tsd.timeSheet.type = 0 AND " +
                         (withRegionClause ? REGION_CLAUSE : WITHOUT_CLAUSE) +
                         (withProjectClause ? PROJECT_CLAUSE : WITHOUT_CLAUSE) +
                         (withDatesClause?"tsd.timeSheet.calDate.calDate between :beginDate AND :endDate AND ":WITHOUT_CLAUSE) +
@@ -804,6 +810,7 @@ public class JasperReportDAO {
                             "join tsd.timeSheet.employee empl " +
                             "join empl.region r " +
                     "WHERE " +
+                            "(tsd.timeSheet.type = 0) AND " +
                             (withRegionClause ? REGION_CLAUSE : WITHOUT_CLAUSE) +
                             (withProjectClause ? PROJECT_CLAUSE : WITHOUT_CLAUSE) +
                             (withDatesClause?"tsd.timeSheet.calDate.calDate between :beginDate AND :endDate AND":WITHOUT_CLAUSE)+
@@ -1121,7 +1128,7 @@ public class JasperReportDAO {
                     "JOIN ts.employee emp " +
                     "JOIN project.manager as manager " +
                     "JOIN manager.division as md " +
-                    "WHERE emp.division.id = :divisionEmployeeId " +
+                    "WHERE emp.division.id = :divisionEmployeeId AND (ts.type = 0) " +
                     "AND ts.calDate.calDate between :beginDate AND :endDate " +
                     "GROUP BY 1, 3 " +
                     "ORDER BY 2 DESC ");
@@ -1135,7 +1142,7 @@ public class JasperReportDAO {
                     "JOIN ts.employee emp " +
                     "JOIN project.manager as manager " +
                     "JOIN manager.division as md " +
-                    "WHERE ts.calDate.calDate between :beginDate AND :endDate " +
+                    "WHERE ts.calDate.calDate between :beginDate AND :endDate AND (ts.type = 0) " +
                     "GROUP BY 1, 3 " +
                     "ORDER BY 2 DESC ");
             query.setParameter("beginDate", new Timestamp(periodStart.getTime()));
@@ -1155,7 +1162,7 @@ public class JasperReportDAO {
                             "JOIN ts.employee emp " +
                             "JOIN project.manager as manager " +
                             "JOIN manager.division as md " +
-                            "WHERE emp.division.id = :divisionEmployeeId AND division.id = :divisionOwnerId " +
+                            "WHERE emp.division.id = :divisionEmployeeId AND division.id = :divisionOwnerId AND (ts.type = 0) " +
                             "AND ts.calDate.calDate between :beginDate AND :endDate " +
                             "GROUP BY 1, 3 " +
                             "ORDER BY 2 DESC");
@@ -1173,7 +1180,7 @@ public class JasperReportDAO {
                             "JOIN project.manager as manager " +
                             "JOIN manager.division as md " +
                             "WHERE division.id = :divisionOwnerId " +
-                            "AND ts.calDate.calDate between :beginDate AND :endDate " +
+                            "AND ts.calDate.calDate between :beginDate AND :endDate AND (ts.type = 0) " +
                             "GROUP BY 1, 3 " +
                             "ORDER BY 2 DESC");
             query.setParameter("beginDate", new Timestamp(periodStart.getTime()));
@@ -1193,7 +1200,7 @@ public class JasperReportDAO {
                             "JOIN tsd.timeSheet ts " +
                             "JOIN ts.employee as emp " +
                             "WHERE p.id = :projectId " +
-                            "AND ts.calDate.calDate between :beginDate AND :endDate " +
+                            "AND ts.calDate.calDate between :beginDate AND :endDate AND (ts.type = 0) " +
                             "GROUP BY 1, 3, 2, 5, 6"
             );
             query.setParameter("projectId", projectId);
@@ -1206,7 +1213,7 @@ public class JasperReportDAO {
                             "LEFT JOIN p.timeSheetDetail tsd " +
                             "JOIN tsd.timeSheet ts " +
                             "JOIN ts.employee as emp " +
-                            "WHERE p.id = :projectId AND emp.division.id = :divisionEmployeeId " +
+                            "WHERE p.id = :projectId AND emp.division.id = :divisionEmployeeId AND (ts.type = 0) " +
                             "AND ts.calDate.calDate between :beginDate AND :endDate " +
                             "GROUP BY 1, 3, 2, 5, 6"
             );

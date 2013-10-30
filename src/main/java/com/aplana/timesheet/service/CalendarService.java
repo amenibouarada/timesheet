@@ -200,6 +200,20 @@ public class CalendarService {
         return calendarDAO.getHolidaysForRegion(minDate, maxDate, region);
     }
 
+    /**
+     * Возвращает список праздничных дней только для указанного региона
+     * @param dateFrom
+     * @param dateTo
+     * @param region
+     * @return
+     */
+    public List<Holiday> getHolidaysOnlyForRegion(Date dateFrom, Date dateTo, Region region) {
+        if (region == null){
+            return calendarDAO.getHolidaysInInterval(dateFrom, dateTo);
+        }
+        return calendarDAO.getHolidaysOnlyForRegion(dateFrom, dateTo, region);
+    }
+
     public boolean isHoliday(Date date, Employee employee) {
         return (getHolidaysCountForRegion(date, date, (employee == null) ? null : employee.getRegion()) > 0);
     }
