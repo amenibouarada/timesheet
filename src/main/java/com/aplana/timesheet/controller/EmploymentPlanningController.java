@@ -4,7 +4,7 @@ import argo.jdom.*;
 import argo.saj.InvalidSyntaxException;
 import com.aplana.timesheet.dao.*;
 import com.aplana.timesheet.dao.entity.Calendar;
-import com.aplana.timesheet.dao.entity.*;
+import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.form.AddEmployeeForm;
 import com.aplana.timesheet.form.EmploymentPlanningForm;
 import com.aplana.timesheet.service.CalendarService;
@@ -26,6 +26,7 @@ import static argo.jdom.JsonNodeBuilders.*;
 @Controller
 public class EmploymentPlanningController{
     private static final Logger logger = LoggerFactory.getLogger(EmploymentPlanningController.class);
+    private static final Integer ALL = -1;
 
     @Autowired
     private CalendarService calendarService;
@@ -54,9 +55,6 @@ public class EmploymentPlanningController{
     @Autowired
     private EmployeeProjectPlanService employeeProjectPlanService;
 
-    @Autowired
-    private TimeSheetDAO timeSheetDAO;
-
     private List<com.aplana.timesheet.dao.entity.Calendar> getYearList() {
         return DateTimeUtil.getYearsList(calendarService);
     }
@@ -80,11 +78,6 @@ public class EmploymentPlanningController{
         fillDefaultModelAndView(modelAndView);
         modelAndView.addObject("form", form);
 
-        List<Object[]> projectPlanList = employeeProjectPlanDAO.getProjectPlan(form);
-        String projectPlanAsJSON = getProjectPlanAsJSON(projectPlanList);
-
-        modelAndView.addObject("projectPlan", projectPlanAsJSON);
-
         return modelAndView;
     }
 
@@ -106,9 +99,8 @@ public class EmploymentPlanningController{
             @RequestParam("employeeId") Integer employeeId
     ) {
         List<Object[]> planList = employeeProjectPlanDAO.getEmployeePlan(employeeId, form.getYearBeg(), form.getMonthBeg(), form.getYearEnd(), form.getMonthEnd());
-        List<Object[]> factList = timeSheetDAO.getEmployeeFact(employeeId, form.getYearBeg(), form.getMonthBeg(), form.getYearEnd(), form.getMonthEnd());
 
-        String employeePlanAsJSON = getEmployeePlanAsJSON(planList, factList);
+        String employeePlanAsJSON = getEmployeePlanAsJSON(planList);
 
         return employeePlanAsJSON;
     }
@@ -124,15 +116,15 @@ public class EmploymentPlanningController{
         return employeeListAsJSON;
     }
 
-    /* Сохраняем данные */
+    /* Сохраняем данные по сохранение сотрудников*/
     @RequestMapping(value="/employmentPlanning/setEmployeeProjectAsJSON", produces = "text/plain;charset=UTF-8")
     @ResponseBody
     public String saveEmployeeData(@ModelAttribute(EmploymentPlanningForm.FORM) EmploymentPlanningForm form,
                                    @RequestParam("jsonData") String jsonData) throws InvalidSyntaxException {
         JdomParser jdomParser = new JdomParser();
         JsonRootNode rootNode = jdomParser.parse(jsonData);
-        List<JsonField> abc = rootNode.getFieldList();
-        JsonField jsonField = abc.get(0);
+        List<JsonField> jsonFieldList = rootNode.getFieldList();
+        JsonField jsonField = jsonFieldList.get(0);
         JsonNode jsonNode = jsonField.getValue();
         List<JsonNode> jsonNodes = jsonNode.getElements();
 
@@ -153,15 +145,55 @@ public class EmploymentPlanningController{
         return "ля-ля-ля";
     }
 
+
+    /* Сохраняем данные по сохранение сотрудников*/
+    @RequestMapping(value="/employmentPlanning/setProjectDataAsJSON", produces = "text/plain;charset=UTF-8")
+    @ResponseBody
+    public String saveProjectData(@RequestParam("employeeId") Integer employeeId,
+                                   @RequestParam("jsonData") String jsonData) throws InvalidSyntaxException {
+        JdomParser jdomParser = new JdomParser();
+        JsonRootNode rootNode = jdomParser.parse(jsonData);
+        List<JsonField> jsonFieldList = rootNode.getFieldList();
+        JsonField jsonField = jsonFieldList.get(0);
+        JsonNode jsonNode = jsonField.getValue();
+        List<JsonNode> jsonNodes = jsonNode.getElements();
+
+        for(JsonNode node : jsonNodes){
+            Integer projectId = Integer.parseInt(node.getNumberValue("project_id"));
+            String fields = node.getStringValue("fields");
+            if (fields!=null && !"".equals(fields)){
+                String[] yearMonthArray = fields.split(";");
+                for(String key : yearMonthArray){
+                    String[] yearMonth = key.split("_");
+                    Double value = Double.parseDouble(node.getNumberValue(key));
+                    Integer year = Integer.parseInt(yearMonth[0]);
+                    Integer month = Integer.parseInt(yearMonth[1]);
+
+                    EmploymentPlanningForm employmentPlanningForm = new EmploymentPlanningForm();
+                    employmentPlanningForm.setProjectId(projectId);
+                    employmentPlanningForm.setMonthBeg(month);
+                    employmentPlanningForm.setMonthEnd(month);
+                    employmentPlanningForm.setYearBeg(year);
+                    employmentPlanningForm.setYearEnd(year);
+
+                    employeeProjectPlanService.updateEmployeeProjectPlan(employeeId, employmentPlanningForm, value);
+                }
+            }
+        }
+
+        return "бла-бла-бла";
+    }
+
     public void fillDefaultModelAndView(ModelAndView modelAndView){
         final List<Calendar> yearList = getYearList();
         modelAndView.addObject("yearList", yearList);
-        modelAndView.addObject("monthList", calendarService.getMonthList(2013)); //todo исправить обработку месяцев и года
+        modelAndView.addObject("monthList", calendarService.getMonthList(2013));
         modelAndView.addObject("projectList", projectService.getProjectsByDates(new Date(), new Date()));
         modelAndView.addObject("divisionList", divisionDAO.getActiveDivisions());
         modelAndView.addObject("managerList", managerDAO.getManagerList());
         modelAndView.addObject("projectRoleList", projectRoleDAO.getProjectRoles());
         modelAndView.addObject("regionList", regionDAO.getRegions());
+        modelAndView.addObject("all", ALL);
 
         AddEmployeeForm addEmployeeForm = new AddEmployeeForm();
         addEmployeeForm.setDivisionId(1);
@@ -174,11 +206,18 @@ public class EmploymentPlanningController{
      * @param form
      */
     public void fillDefaultForm(EmploymentPlanningForm form){
-        form.setMonthBeg(5);
-        form.setYearBeg(2013);
+        Date date = new Date();
+        java.util.Calendar calendar = GregorianCalendar.getInstance();
+        calendar.setTime(date);
+
+        Integer month = calendar.get(java.util.Calendar.MONTH);
+        Integer year = calendar.get(java.util.Calendar.YEAR);
+
+        form.setMonthBeg(month);
+        form.setYearBeg(year);
         form.setMonthEnd(12);
-        form.setYearEnd(2013);
-        form.setProjectId(1150);
+        form.setYearEnd(year);
+        form.setProjectId(ALL);
     }
 
     /**
@@ -218,7 +257,7 @@ public class EmploymentPlanningController{
         return JsonUtil.format(builder.build());
     }
 
-    public String getEmployeePlanAsJSON(List<Object[]> planList, List<Object[]> factList){
+    public String getEmployeePlanAsJSON(List<Object[]> planList){
         JsonArrayNodeBuilder builder = anArrayBuilder();
         Map<Integer, JsonObjectNodeBuilder> jsonMap = new LinkedHashMap<Integer, JsonObjectNodeBuilder>();
 
@@ -228,41 +267,24 @@ public class EmploymentPlanningController{
             Integer month = (Integer)result[2];
             Integer year = (Integer)result[3];
             Double  value = (Double)result[4];
+            Integer isFact = (Integer) result[5];
 
-            JsonObjectNodeBuilder objectNodeBuilder = jsonMap.get(projectId);
-
-            if (objectNodeBuilder != null){
-                objectNodeBuilder.withField(year+"_"+month, aNumberBuilder(value.toString()));
+            String key;
+            if (isFact.equals(1)){
+                key = year + "-" + month;
             } else {
-                objectNodeBuilder = anObjectBuilder();
-                objectNodeBuilder.withField("project_id", aNumberBuilder(projectId.toString()));
-                objectNodeBuilder.withField("project_name", aStringBuilder(projectName));
-                objectNodeBuilder.withField(year+"_"+month, aNumberBuilder(value.toString()));
-
-                jsonMap.put(projectId, objectNodeBuilder);
-            }
-        }
-
-        for(Object[] result : factList){
-            Integer projectId = (Integer)result[0];
-            String  projectName = (String)result[1];
-            Integer month = (Integer)result[2];
-            Integer year = (Integer)result[3];
-            Double  value = (Double)result[4];
-
-            if (projectId == null){
-                projectId = 12;
+                key = year + "_" + month;
             }
 
             JsonObjectNodeBuilder objectNodeBuilder = jsonMap.get(projectId);
 
             if (objectNodeBuilder != null){
-                objectNodeBuilder.withField(year+"-"+month, aNumberBuilder(value.toString()));
+                objectNodeBuilder.withField(key, aNumberBuilder(value.toString()));
             } else {
                 objectNodeBuilder = anObjectBuilder();
                 objectNodeBuilder.withField("project_id", aNumberBuilder(projectId.toString()));
                 objectNodeBuilder.withField("project_name", aStringBuilder(projectName));
-                objectNodeBuilder.withField(year+"-"+month, aNumberBuilder(value.toString()));
+                objectNodeBuilder.withField(key, aNumberBuilder(value.toString()));
 
                 jsonMap.put(projectId, objectNodeBuilder);
             }
@@ -277,7 +299,7 @@ public class EmploymentPlanningController{
 
 
     /**
-     * Возвращает список работников как json {id, name}
+     * Возвращает список сотрудников как json {id, name}
      * @param employeeList
      * @return
      */

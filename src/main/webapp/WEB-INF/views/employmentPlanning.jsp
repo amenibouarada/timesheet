@@ -16,9 +16,10 @@
         @import "<%= DOJO_PATH %>/dojox/grid/resources/tundraGrid.css";
         .dojoxGrid table { margin: 0;}
         html, body { width: 100%; height: 100%; margin: 0; }
-        .header {padding-right: 300px; border: 1px}
-        .semiHeaderFirst {padding-left: 3000px; border: 0px; width: 100px}
-        .semiHeaderSecond {padding-right: 1000px; border: 0px}
+        .editedCell {
+            color: #FF8500;
+            text-align: center;
+        }
     </style>
 
     <script type="text/javascript">
@@ -46,6 +47,7 @@
                         row[field] = 0;
                     }
                 }
+                row["plan"] = '';
                 data.items.push(row);
             });
 
@@ -54,22 +56,68 @@
             var leftView = {
                 noscroll: true,
                 sortable: false,
-                cells: [[{
-                    'name': 'Employee <img align="right" width="15px" src = "<c:url value="/resources/img/add.gif"/>" onclick="employeeDialog.show();"/>',
-                    'field': 'employee_name',
-                    'width': '200px',
-                    noresize: true}
+                cells: [[
+                    {name: 'Сотрудник <img align="right" width="15px" src = "<c:url value="/resources/img/add.gif"/>" onclick="employeeDialog.show();"/>',
+                    field: 'employee_name',
+                    width: '200px',
+                    noresize: true,
+                    formatter: function(cellValue, rowIndex){
+                        var item = grid.getItem(rowIndex);
+                        if (item){
+                            var employeeId = item["employee_id"];
+                            var changed = item["changed"];
+                            var plan = item["plan"]
+
+                            if (changed == "yes" && plan && plan != ""){
+                                var isNew = item["isNew"];
+
+                                if (isNew == "yes"){
+                                    var spanValue = dojo.create(
+                                            "span",
+                                            {
+                                                innerHTML:cellValue,
+                                                class: "editedCell"
+                                            }
+                                    ).outerHTML
+
+                                    return spanValue + ' <img align="right" width="15px" src = "<c:url value="/resources/img/delete.png"/>" onclick="removeRow('+employeeId+');"/>'
+                                } else{
+                                    return cellValue + ' <img align="right" width="15px" src = "<c:url value="/resources/img/delete.png"/>" onclick="cancelChange('+employeeId+');"/>'
+                                }
+                            }
+                        }
+                        return cellValue;
+                    }
+                    },
+
+                    {name: 'Планируемый процент занятости',
+                    width: '100px',
+                    editable: true,
+                    defaultValue: '',
+                    formatter: function(cellValue, rowIndex){
+                        var item = grid.getItem(rowIndex);
+                        if (item){
+                            var changed = item["changed"];
+
+                            if (changed == "yes"){
+                                var spanValue = dojo.create(
+                                    "span",
+                                    {
+                                        innerHTML:cellValue,
+                                        class: "editedCell"
+                                    }
+                                ).outerHTML
+                                return spanValue;
+                            }
+                        }
+                        return cellValue;
+                    },
+                    field: 'plan',
+                    noresize: true,
+                    styles: 'text-align: center;'}
                 ]]};
 
             var input_layout = [];
-            input_layout.push({
-                name: 'Планируемый процент занятости  <img align="right" width="15px" src = "<c:url value="/resources/img/edit.png"/>" onclick="savePlan();"/>',
-                width: '150px',
-                editable: true,
-                formatter: formatterEditableData,
-                field: 'plan',
-                noresize: true
-            });
 
             iterateMonth(yearStart, monthStart, yearEnd, monthEnd, function(month, year){
                 input_layout.push({
@@ -78,7 +126,8 @@
                     width: '100px',
                     formatter: formatterData,
                     editable: false,
-                    noresize: true
+                    noresize: true,
+                    styles: 'text-align: center;'
                 });
             });
             var middleView = {
@@ -94,12 +143,18 @@
                 rowSelector: '20px',
                 width: '400px',
                 noresize: true,
+                autoHeight: true,
+                styles: 'text-align: center;',
                 canSort: function(){return false;},
                 onApplyCellEdit: function(inValue, inRowIndex, inFieldIndex){
                     if (inFieldIndex == "plan"){
                         var item = grid.getItem(inRowIndex);
                         if (item){
-                            store.setValue(item, 'changed', 'yes');
+                            if (inValue == "undefined"){
+                                grid.store.setValue(item, 'plan', '');
+                                return;
+                            }
+                            grid.store.setValue(item, 'changed', 'yes');
                         }
                     }
                 }
@@ -119,21 +174,59 @@
             });
         };
 
-        function createLayout(isFact, yearStart, monthStart, yearEnd, monthEnd){
+        // Динамически перестраивает грид "проект-сотрудники"
+        // yearStart, monthStart, yearEnd, monthEnd - не используется, нужны если менять структуру грида
+        function refreshProjectGrid(response, yearStart, monthStart, yearEnd, monthEnd){
+            var data = {
+                identifier: "employee_id",
+                items: []
+            };
+
+            var data_list = dojo.fromJson(response);
+
+            dojo.forEach(data_list, function (row) {
+                for (var field in row) {
+                    if (typeof row[field] == typeof undefined) {
+                        row[field] = 0;
+                    }
+                }
+                row["plan"] = '';
+                data.items.push(row);
+            });
+
+            var store = new dojo.data.ItemFileWriteStore({data: data});
+            var grid = dijit.byId("projectGrid");
+            grid.store.close();
+            grid.setStore(store);
+            grid.render();
+        }
+
+        // Создает structure для грида "сотрудник-проекты"
+        function createLayout(isFact, employeeId, yearStart, monthStart, yearEnd, monthEnd){
+            var grid = dijit.byId("employeeGrid");
+            var cnt = monthCount(yearStart, monthStart, yearEnd, monthEnd);
+
             var leftView = {
                 noscroll: true,
                 cells: [[
                     {
-                        'name': 'Проект',
-                        'field': 'project_name',
-                        'width': '200px',
-                        noresize: true
-                    },{
-                        'name': 'Среднее за период',
-                        'field': '0_0',
-                        'width': '150px',
-                        formatter: formatterData,
-                        noresize: true}
+                        name: 'Проект',
+                        field: 'project_name',
+                        width: '200px',
+                        noresize: true,
+                        formatter: function(cellValue, rowIndex){
+                            var item = grid.getItem(rowIndex);
+                            if (item){
+                                var projectId = item["project_id"];
+                                var changed = item["changed"];
+
+                                if (changed == 'yes'){
+                                    return cellValue + '<img align="right" width="15px" src = "<c:url value="/resources/img/delete.png"/>" onclick="cancelEmployeeChange('+projectId+');"/><img align="right" width="15px" src = "<c:url value="/resources/img/edit.png"/>" onclick="saveEmployeePlan('+employeeId+','+projectId+');"/>'
+                                }
+                            }
+                            return cellValue;
+                        }
+                    }
                 ]]
             };
 
@@ -141,19 +234,29 @@
 
             var headerLayout = [];
             var padding = (dojo.isWebKit ? 1 : 1.25);
-            var cellStyles = "padding-left: "+padding+"px; padding-right: "+padding+"px;";
+            var cellStyles = "padding-left: "+padding+"px; padding-right: "+padding+"px; text-align: center;";
 
             if (isFact){
+                headerLayout.push({
+                    name: 'Среднее за период',
+                    colSpan: 2,
+                    headerStyles: "width: 100px; text-align: center;",
+                    cellStyles: cellStyles,
+                    noresize: true
+                });
+
                 iterateMonth(yearStart, monthStart, yearEnd, monthEnd, function(month, year){
                     headerLayout.push({
                         name: getMonthByNumber(month)+ ", " + year,
                         colSpan: 2,
-                        headerStyles: "width: 100px;",
+                        headerStyles: "width: 100px; text-align: center;",
                         cellStyles: cellStyles,
                         noresize: true
                     });
                 });
             }
+
+
             var middleView = {};
 
             if (isFact){
@@ -169,6 +272,55 @@
                 middleView.cells = [dataLayout];
             }
 
+            if (isFact){
+                dataLayout.push({
+                    name: 'П',
+                    width: '50px',
+                    headerStyles: "width: 50px; text-align: center;",
+                    cellStyles: cellStyles,
+                    noresize: true,
+                    formatter: function(cellValue, rowIndex){
+                        var item = grid.getItem(rowIndex);
+                        var value = 0;
+                        iterateMonth(yearStart, monthStart, yearEnd, monthEnd, function(month, year){
+                            value+=Number(item[year+"_"+month]);
+                        });
+                        return textFormat(Math.round(value/cnt));
+                    }
+                });
+
+                dataLayout.push({
+                    name: 'Ф',
+                    width: '50px',
+                    headerStyles: "width: 50px; text-align: center;",
+                    cellStyles: cellStyles,
+                    noresize: true,
+                    formatter: function(cellValue, rowIndex){
+                        var item = grid.getItem(rowIndex);
+                        var value = 0;
+                        iterateMonth(yearStart, monthStart, yearEnd, monthEnd, function(month, year){
+                            value+=Number(item[year+"-"+month]);
+                        });
+                        return textFormat(Math.round(value/cnt));
+                    }
+                });
+            } else {
+                dataLayout.push({
+                    name: 'Среднее за период',
+                    formatter: function(cellValue, rowIndex){
+                        var item = grid.getItem(rowIndex);
+                        var value = 0;
+                        iterateMonth(yearStart, monthStart, yearEnd, monthEnd, function(month, year){
+                            value+=Number(item[year+"_"+month]);
+                        });
+                        return textFormat(value/cnt);
+                    },
+                    width: '100px',
+                    noresize: true,
+                    styles: 'text-align: center;'
+                });
+            }
+
             iterateMonth(yearStart, monthStart, yearEnd, monthEnd, function(month, year){
                 if (isFact){
                     dataLayout.push({
@@ -176,8 +328,9 @@
                         field: year + "_" + month,
                         formatter: formatterData,
                         width: '50px',
-                        headerStyles: "width: 50px;",
+                        headerStyles: "width: 50px; text-align: center;",
                         cellStyles: cellStyles,
+                        editable: true,
                         noresize: true
                     });
 
@@ -186,7 +339,7 @@
                         field: year + "-" + month,
                         formatter: formatterData,
                         width: '50px',
-                        headerStyles: "width: 50px;",
+                        headerStyles: "width: 50px; text-align: center;",
                         cellStyles: cellStyles,
                         noresize: true
                     });
@@ -196,8 +349,9 @@
                         field: year + "_" + month,
                         formatter: formatterData,
                         width: '100px',
-                        editable: false,
-                        noresize: true
+                        editable: true,
+                        noresize: true,
+                        styles: 'text-align: center;'
                     });
                 }
             });
@@ -207,8 +361,11 @@
             return layout;
         }
 
-        // Создает грид "сотрудник-проекты"
-        function initEmployeeGrid(dataJson, yearStart, monthStart, yearEnd, monthEnd){
+        // Первоначальные значения грида "сотрудник-проекты" - для отмены изменений
+        var clearData = {};
+
+        // Создает store для грида "сотрудник-проекты"
+        function createStore(dataJson, yearStart, monthStart, yearEnd, monthEnd){
             var data = {
                 identifier: "project_id",
                 items: []
@@ -217,25 +374,80 @@
             var data_list = dojo.fromJson(dataJson);
 
             dojo.forEach(data_list, function (row) {
+
                 for (var field in row) {
                     if (typeof row[field] == typeof undefined) {
                         row[field] = "";
                     }
                 }
+
+                iterateMonth(yearStart, monthStart, yearEnd, monthEnd, function(month, year){
+                    var planKey = year + '_' + month;
+                    var factKey = year + '-' + month;
+                    var avgKey = '0_0';
+
+                    if (row[planKey] == undefined){
+                        row[planKey] = 0;
+                    }
+
+                    if (row[factKey] == undefined){
+                        row[factKey] = 0;
+                    }
+
+                    if (row[avgKey] == undefined){
+                        row[avgKey] = 0;
+                    }
+
+                });
+
                 data.items.push(row);
+            });
+
+            // Сохранение первоначальный данных
+            dojo.forEach(data.items, function(row){
+                var projectId = row["project_id"];
+                clearData[projectId] = {};
+                for(var key in row){
+                    clearData[projectId][key] = row[key];
+                }
             });
 
             var store = new dojo.data.ItemFileWriteStore({data: data});
 
+            return store;
+        }
+
+        // Создает грид "сотрудник-проекты"
+        function initEmployeeGrid(dataJson, employeeId, yearStart, monthStart, yearEnd, monthEnd){
+            var store = createStore(dataJson, yearStart, monthStart, yearEnd, monthEnd);
+
             var isFact = dojo.byId("isFact").checked;
-            var layout = createLayout(isFact, yearStart, monthStart, yearEnd, monthEnd);
+            var layout = createLayout(isFact, employeeId, yearStart, monthStart, yearEnd, monthEnd);
 
             var grid = new dojox.grid.DataGrid({
                 id: 'employeeGrid',
                 store: store,
                 structure: layout,
                 rowSelector: '20px',
-                width: '400px'
+                width: '400px',
+                autoHeight: true,
+                onApplyCellEdit: function(inValue, inRowIndex, inFieldIndex){
+                    var item = grid.getItem(inRowIndex);
+                    if (item){
+                        if (inValue == clearData[item["project_id"]][inFieldIndex]){
+                            return;
+                        }
+                        item["changed"] = 'yes';
+
+                        var value = item["fields"];
+                        if (value){
+                            value += ";" + inFieldIndex;
+                        } else {
+                            value = inFieldIndex;
+                        }
+                        grid.store.setValue(item, 'fields', value);
+                    }
+                }
             });
 
             grid.placeAt("employeeGridDiv");
@@ -243,61 +455,34 @@
         };
 
         // Динамически перестраивает грид "сотрудник-проекты"
-        function refreshEmployeeGrid(response, yearStart, monthStart, yearEnd, monthEnd){
-            var data = {
-                identifier: "project_id",
-                items: []
-            };
-
-            var data_list = dojo.fromJson(response);
-
-            dojo.forEach(data_list, function (row) {
-                for (var field in row) {
-                    if (typeof row[field] == typeof undefined) {
-                        row[field] = "";
-                    }
-                }
-                data.items.push(row);
-            });
-
+        function refreshEmployeeGrid(response, employeeId, yearStart, monthStart, yearEnd, monthEnd){
             var isFact = dojo.byId("isFact").checked;
-            var layout = createLayout(isFact, yearStart, monthStart, yearEnd, monthEnd);
-
-            var store = new dojo.data.ItemFileWriteStore({data: data});
+            var store = createStore(response, yearStart, monthStart, yearEnd, monthEnd);
+            var layout = createLayout(isFact, employeeId, yearStart, monthStart, yearEnd, monthEnd);
             var grid = dijit.byId("employeeGrid");
+
             grid.store.close();
             grid.setStore(store);
             grid.setStructure(layout);
-            grid.render();
-        }
 
-        // Динамически перестраивает грид "проект-сотрудники"
-        // yearStart, monthStart, yearEnd, monthEnd - не используется, нужны если менять структуру грида
-        function refreshProjectGrid(response, yearStart, monthStart, yearEnd, monthEnd){
-            var data = {
-                identifier: "employee_id",
-                items: []
-            };
 
-            var data_list = dojo.fromJson(response);
-
-            dojo.forEach(data_list, function (row) {
-                for (var field in row) {
-                    if (typeof row[field] == typeof undefined) {
-                        row[field] = "";
-                    }
+            var projectId = dojo.byId("projectId").value;
+            function actionSelection(items){
+                if (grid.selection.selectedIndex >= 0){
+                    grid.selection.setSelected(grid.selection.selectedIndex, false);
                 }
-                data.items.push(row);
-            });
+                dojo.forEach(items, function(item){
+                    var index = grid.getItemIndex(item);
+                    console.log(index);
+                    grid.selection.setSelected(index, true);
+                });
+            }
+            grid.store.fetch({query: {project_id: projectId}, onComplete: actionSelection, queryOptions: {deep:true}});
 
-            var store = new dojo.data.ItemFileWriteStore({data: data});
-            var grid = dijit.byId("projectGrid");
-            grid.store.close();
-            grid.setStore(store);
             grid.render();
         }
 
-        // Обновляет список работников на форме добавления работников
+        // Обновляет список сотрудников на форме добавления сотрудников
         function updateAdditionEmployeeList(){
             var divisionId = dojo.byId("divisionId").value;
             var managerId = dojo.byId("managerId").value;
@@ -320,10 +505,17 @@
                         map[item["employee_id"]] = item;
                     }
 
+                    var selectSize = 0;
                     dojo.forEach(dojo.fromJson(response), function (row) {
+                        ++selectSize;
                         var disable = map[row["employee_id"]] != undefined;
                         dojo.create("option", { value: row["employee_id"], innerHTML: row["employee_name"], disabled: disable}, employeeSelect);
                     });
+
+                    if (selectSize == 0){
+                        dojo.create("option", { value: "-1", innerHTML: "Сотрудников не найдено", disabled: true}, employeeSelect);
+                        return;
+                    }
                 }
             });
         }
@@ -346,15 +538,63 @@
             var employeeList = getSelectObjects(select);
 
             dojo.forEach(employeeList, function (row){
+                var employeeId = parseFloat(row.value);
+
                 var myNewItem = {
-                    employee_id:  parseFloat(row.value),
+                    employee_id: employeeId,
                     employee_name: row.text,
-                    changed: "yes"
+                    changed: "yes",
+                    isNew: "yes",
+                    plan: "0"
                 };
                 grid.store.newItem(myNewItem);
             });
             employeeDialog.hide();
             clearDialogSelection();
+        }
+
+        // Удаление строки грида "проект-сотрудники"
+        function removeRow(employeeId){
+            var grid = dijit.byId("projectGrid");
+
+            grid.store.fetch({query: {employee_id: employeeId}, onComplete: delRow, queryOptions: {deep:true}});
+            function delRow(items){
+                dojo.forEach(items, function(item){
+                    grid.store.deleteItem(item);
+                });
+            }
+
+        }
+
+        // Отмена изменения плана на гриде "проект-сотрудники"
+        function cancelChange(employeeId){
+            var grid = dijit.byId("projectGrid");
+
+            grid.store.fetch({query: {employee_id: employeeId}, queryOptions: {deep:true}, onComplete: function(items){
+                dojo.forEach(items, function(item){
+                    grid.store.setValue(item, 'plan', '');
+                    grid.store.setValue(item, 'changed', 'no');
+                    grid.store.setValue(item, 'isNew', 'no');
+                });
+            }});
+        }
+
+        // Откат для изменений для строки на гриде "сотрудник-проекты"
+        function cancelEmployeeChange(projectId){
+            var grid = dijit.byId("employeeGrid");
+
+            grid.store.fetch({query: {project_id: projectId}, queryOptions: {deep:true}, onComplete: function(items){
+                dojo.forEach(items, function(item){
+                    var project = clearData[projectId];
+                    for(key in project){
+                        if (key!="project_id"){
+                            grid.store.setValue(item, key, project[key]);
+                        }
+                    }
+                    grid.store.setValue(item, 'changed', 'no');
+                    grid.store.setValue(item, 'fields', '');
+                });
+            }});
         }
 
         // Инициализация при загрузке
@@ -364,8 +604,8 @@
             employeeDataHandler(0, ${form.yearBeg}, ${form.monthBeg}, ${form.yearEnd}, ${form.monthEnd}, initEmployeeGrid);
         });
 
-        // Отправка данных на сервер для сохранения
-        function savePlan(){
+        // Отправка данных на сервер для сохранения. Грид проект-сотрудники
+        function saveProjectPlan(){
             var grid = dijit.byId("projectGrid");
 
             var monthBeg  = dojo.byId("monthBeg").value;
@@ -374,29 +614,53 @@
             var yearEnd   = dojo.byId("yearEnd").value;
             var projectId = dojo.byId("projectId").value;
 
-            grid.store.fetch({query: {changed: "yes"}, queryOptions: {deep:true}, onComplete: function(items){
+            grid.store.fetch({query: {changed: 'yes'}, queryOptions: {deep:true}, onComplete: function(items){
                 saveEmployeeDataHandler(
                     projectId,
                     monthBeg,
                     yearBeg,
                     monthEnd,
                     yearEnd,
-                    itemToJSON(grid.store, items),
-                    actionAfterSave);
+                    '{"employee": [' + itemToJSON(grid.store, items) + ']}',
+                    actionAfterSaveProject);
             }});
 
             // После сохранения перестраиваем гриды
             // TODO избавиться от $ - переделать на js
-            function actionAfterSave(result){
+            function actionAfterSaveProject(result){
                 projectDataHandler(${form.projectId}, ${form.yearBeg}, ${form.monthBeg}, ${form.yearEnd}, ${form.monthEnd}, refreshProjectGrid);
                 employeeDataHandler(0, ${form.yearBeg}, ${form.monthBeg}, ${form.yearEnd}, ${form.monthEnd}, refreshEmployeeGrid);
+            }
+        }
+
+        // Отправлка данных на сервер для сохранения. Грид сотрудник-проекты
+        function saveEmployeePlan(employeeId, projectId){
+            var grid = dijit.byId("employeeGrid");
+
+            function actionAfterSaveEmployee(result){
+                projectDataHandler(${form.projectId}, ${form.yearBeg}, ${form.monthBeg}, ${form.yearEnd}, ${form.monthEnd}, refreshProjectGrid);
+                employeeDataHandler(employeeId, ${form.yearBeg}, ${form.monthBeg}, ${form.yearEnd}, ${form.monthEnd}, refreshEmployeeGrid);
+
+            }
+
+            function saveProjectData(items){
+                saveProjectDataHandler(
+                        '{"project": [' + itemToJSON(grid.store, items) + ']}',
+                        employeeId,
+                        actionAfterSaveEmployee);
+            }
+
+            if (isNumber(projectId)){
+                grid.store.fetch({query: {project_id: projectId}, queryOptions: {deep:true}, onComplete: saveProjectData});
+            } else {
+                grid.store.fetch({query: {changed: 'yes'}, queryOptions: {deep:true}, onComplete: saveProjectData});
             }
         }
     </script>
 </head>
 
 <body>
-<form:form method="post" commandName="<%= FORM %>">
+<form:form method="post" commandName="employmentPlanningForm">
     <table>
         <tr>
             <td>
@@ -434,21 +698,42 @@
             </td>
             <td colspan="2">
                 <form:select path="projectId">
+                    <form:option label="" value="${all}"/>
                     <form:options items="${projectList}" itemLabel="name" itemValue="id"/>
                 </form:select>
             </td>
         </tr>
     </table>
 
-    <input style="width:150px;margin-left: 23px;" type="submit" value="Показать планы"/>
+    <input style="width:150px;margin-left: 23px;" type="button" value="Показать планы" onclick="submitSaveButton();"/>
+    <input style="width:150px;margin-left: 23px;" type="button" value="Сохранить" onclick="saveProjectPlan();"/>
 </form:form>
-    <div id="projectGridDiv" style="height: 30em;"></div>
+    <script>
+        function submitSaveButton(){
+            var monthBeg  = dojo.byId("monthBeg").value;
+            var yearBeg   = dojo.byId("yearBeg").value;
+            var monthEnd  = dojo.byId("monthEnd").value;
+            var yearEnd   = dojo.byId("yearEnd").value;
+
+            var dateStart = new Date(yearBeg, monthBeg);
+            var dateEnd = new Date(yearEnd, monthEnd);
+
+            if (dateEnd < dateStart){
+                alert("Дата конца периода превышает дату начала");
+            } else {
+                var form = dojo.byId("employmentPlanningForm");
+                form.submit();
+            }
+        }
+    </script>
+
+    <div id="projectGridDiv" ></div>
     <br/>
     <span id="spanEmployeeName"></span>
     <br/>
     <input type="checkbox" id="isFact" checked>Отображать фактическое значение</input>
     <br/>
-    <div id="employeeGridDiv" style="height: 30em;"></div>
+    <div id="employeeGridDiv" ></div>
     <br>
 
     <div data-dojo-type="dijit/Dialog" data-dojo-id="employeeDialog" title="Add employee">
@@ -467,6 +752,7 @@
                     <td><label>Руководитель </label></td>
                     <td>
                         <form:select path="managerId" class="without_dojo" onchange="updateAdditionEmployeeList()">
+                            <form:option label="Все руководители" value="${all}"/>
                             <form:options items="${managerList}" itemLabel="employee.name" itemValue="employee.id"/>
                         </form:select>
                     <td>

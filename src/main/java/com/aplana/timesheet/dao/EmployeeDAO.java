@@ -613,7 +613,7 @@ public class EmployeeDAO {
                 "where " +
                      "emp.endDate is NULL " +
                      "and emp.division.id = :division " +
-                     "and emp.manager.id = :manager " +
+                     "and (emp.manager.id = :manager or :manager = -1)" +
                      "and emp.job.id in :projectRoleList " +
                      "and emp.region.id in :regionList");
 

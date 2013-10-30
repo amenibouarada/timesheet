@@ -84,6 +84,34 @@ function iterateMonth(yearStart, monthStart, yearEnd, monthEnd, handler){
     }
 }
 
+function monthCount(yearStart, monthStart, yearEnd, monthEnd){
+    var cnt = 0;
+    iterateMonth(yearStart, monthStart, yearEnd, monthEnd, function(){++cnt});
+    return cnt;
+}
+
+
+function textFormat(value, color){
+    if (color === undefined){
+        color = 'gray';
+        if (isNumber(value)){
+            value = Math.round(value);
+            if (value > 100) {
+                color = "red";
+            } else if (value > 0){
+                color = "black";
+            }
+        }
+    }
+    return dojo.create(
+        "span",
+        {
+            innerHTML:value + '%',
+            style:"color: " + color + "; font-weight: bold"
+        }
+    ).outerHTML
+}
+
 // Формат вывода ячеек в гриде
 function formatterData(value){
     var color = "gray";
@@ -96,7 +124,7 @@ function formatterData(value){
             showValue = Math.round(value);
             if (value > 100) {
                 color = "red";
-            } else {
+            } else if (value > 0){
                 color = "black";
             }
         } else {
@@ -104,13 +132,7 @@ function formatterData(value){
         }
     }
 
-    return dojo.create(
-        "span",
-        {
-            innerHTML:showValue +'%',
-            style:"color: " + color + "; font-weight: bold"
-        }
-    ).outerHTML;
+    return textFormat(showValue, color);
 }
 
 // Формат вывода ячеек в гриде для редактируемых полей
@@ -127,13 +149,7 @@ function formatterEditableData(value){
         }
     }
 
-    return dojo.create(
-        "span",
-        {
-            innerHTML:showValue,
-            style:"color: " + color + "; font-weight: bold"
-        }
-    ).outerHTML;
+    return textFormat(showValue, color);
 }
 // Делает ajax запрос по занятости сотрудников на проекте, полученный json ответ отправляет в функцию handler(json_value)
 function projectDataHandler(projectId, yearStart, monthStart, yearEnd, monthEnd, handler){
@@ -169,7 +185,7 @@ function employeeDataHandler(employeeId, yearStart, monthStart, yearEnd, monthEn
         },
         handleAs: "text",
         load: function(response, ioArgs) {
-            handler(response, yearStart, monthStart, yearEnd, monthEnd);
+            handler(response, employeeId, yearStart, monthStart, yearEnd, monthEnd);
         },
         error: function(response, ioArgs) {
             alert('employeeDataHandler Panic !');
@@ -215,7 +231,26 @@ function saveEmployeeDataHandler(projectId, monthBeg, yearBeg, monthEnd, yearEnd
             handler(response);
         },
         error: function(response, ioArgs) {
-            alert('additionEmployeeDataHandler Panic !');
+            alert('saveEmployeeDataHandler Panic !');
+        }
+    });
+}
+
+
+// Делает ajax запрос, для сохранения планируемого процента занятости
+function saveProjectDataHandler(jsonData, employeeId, handler){
+    dojo.xhrPost({
+        url: "/employmentPlanning/setProjectDataAsJSON",
+        content: {
+             jsonData: jsonData,
+             employeeId: employeeId
+        },
+        handleAs: "text",
+        load: function(response, ioArgs) {
+            handler(response);
+        },
+        error: function(response, ioArgs) {
+            alert('saveProjectDataHandler Panic !');
         }
     });
 }
@@ -260,5 +295,5 @@ function itemToJSON(store, items){
             }
         }
     }
-    return '{"employee": [' + data + ']}';
+    return data;
 }

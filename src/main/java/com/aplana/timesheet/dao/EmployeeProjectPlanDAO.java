@@ -67,7 +67,7 @@ public class EmployeeProjectPlanDAO {
     }
 
     /**
-     * Возвращает суммарную процентную занятость сотрудника по проектам.
+     * Возвращает суммарную процентную занятость сотрудников по проекту.
      * @return List<Object[3]>:
      *         Object[0] - employee_id,
      *         Object[1] - employee_name,
@@ -79,7 +79,38 @@ public class EmployeeProjectPlanDAO {
         Query query = entityManager.createNativeQuery(
             "with emp as " +
             "( " +
-                "select epp.employee_id, e.region from employee_project_plan epp, employee e where epp.project_id = :projectId and epp.employee_id = e.id " +
+                "select " +
+                    "epp.employee_id, e.region " +
+                "from " +
+                    "employee_project_plan epp, employee e " +
+                "where " +
+                    "epp.project_id = :projectId and epp.employee_id = e.id " +
+                    "and epp.value > 0 " +
+                    "and ( " +
+                    "   (epp.year = :yearStart and epp.year = :yearEnd   and epp.month between :monthStart and :monthEnd) " +
+                    "or (epp.year = :yearStart and epp.year < :yearEnd   and epp.month > :monthStart) " +
+                    "or (epp.year = :yearEnd   and epp.year > :yearStart and epp.month < :monthEnd) " +
+                    "or (epp.year > :yearStart and epp.year < :yearEnd) " +
+                    ") " +
+            "), " +
+            "no_project_data(employee_id, month, year, value) as " +
+            "( " +
+                "select " +
+                    "ep.employee_id, ep.month, ep.year, ep.value " +
+                "from " +
+                    "dictionary_item d " +
+                    "left join employee_plan ep on " +
+                    "(" +
+                        "d.id = ep.item_id " +
+                        "and ( " +
+                        "   (ep.year = :yearStart and ep.year = :yearEnd   and ep.month between :monthStart and :monthEnd) " +
+                        "or (ep.year = :yearStart and ep.year < :yearEnd   and ep.month > :monthStart) " +
+                        "or (ep.year = :yearEnd   and ep.year > :yearStart and ep.month < :monthEnd) " +
+                        "or (ep.year > :yearStart and ep.year < :yearEnd) " +
+                        ") " +
+                    ") " +
+                "where " +
+                    "dict_id = 12 " +
             ") " +
             "select " +
                     //TODO в дне всегда 8 рабочих часов?
@@ -89,10 +120,14 @@ public class EmployeeProjectPlanDAO {
                     "select " +
                         "epp.employee_id, epp.month, epp.year, sum(epp.value) val " +
                     "from " +
-                        "employee_project_plan epp " +
+                        "(" +
+                            "select epp.employee_id, epp.month, epp.year, epp.value from employee_project_plan epp " +
+                            "union all " +
+                            "select ep.employee_id, ep.month, ep.year, ep.value from no_project_data ep " +
+                        ") epp " +
                     "where " +
-                        "epp.value > 0 " +
-                        "and epp.employee_id in (select employee_id from emp) " +
+                        "epp.employee_id in (select employee_id from emp) " +
+                        "and epp.value > 0 " +
                         "and ( " +
                         "   (epp.year = :yearStart and epp.year = :yearEnd   and epp.month between :monthStart and :monthEnd) " +
                         "or (epp.year = :yearStart and epp.year < :yearEnd   and epp.month > :monthStart) " +
@@ -135,7 +170,7 @@ public class EmployeeProjectPlanDAO {
     }
 
     /**
-     * Для одного работника
+     * Обновляет планы за период. Merge для одного сотрудника
      * @param employeeId
      * @param employmentPlanningForm
      * @param plan
@@ -199,12 +234,13 @@ public class EmployeeProjectPlanDAO {
     /**
      * Возвращает планы работника за период по проектам
      * @param employeeId - идентификатор работника
-     * @return List<Object[5]>
-     *     Object[0] - project_id
+     * @return List<Object[6]>
+     *     Object[0] - project_id, если ==0 - по всем проектам
      *     Object[1] - project_name
      *     Object[2] - month
      *     Object[3] - year
      *     Object[4] - percent (сумма, запланированных часов по конкретному проекту, делить на количество рабочих часов в месяце)
+     *     Object[5] - 0 - план, 1 - факт
      *
      *     project_id == 0 => Итого: сумма по всем проектам
      *     month == 0 && year == 0 => Среднее за период
@@ -231,7 +267,7 @@ public class EmployeeProjectPlanDAO {
             "group by " +
                 "r.id, c.month, c.year " +
             "), " +
-            "no_project(id, nm, month, year, val) as " +
+            "no_project_data(id, nm, month, year, val) as " +
             "( " +
                 "select " +
                     "-d.id id, d.value nm, ep.month, ep.year, 100*ep.value/(8*wd.cnt) val " +
@@ -252,7 +288,7 @@ public class EmployeeProjectPlanDAO {
                 "where " +
                     "dict_id = 12 " +
             "), " +
-            "project as " +
+            "project_data as " +
             "( " +
                 "select " +
                     "epp.project_id, p.name, epp.month, epp.year, 100*epp.value/(8*wd.cnt) " +
@@ -263,6 +299,7 @@ public class EmployeeProjectPlanDAO {
                     "left join workDay wd on (wd.region = e.region and epp.month = wd.month and epp.year = wd.year) " +
                 "where " +
                     "epp.employee_id = :employeeId " +
+                    "and epp.value > 0 " +
                     "and ( " +
                     "   (epp.year = :yearStart and epp.year = :yearEnd   and epp.month between :monthStart and :monthEnd) " +
                     "or (epp.year = :yearStart and epp.year < :yearEnd   and epp.month > :monthStart) " +
@@ -270,24 +307,58 @@ public class EmployeeProjectPlanDAO {
                     "or (epp.year > :yearStart and epp.year < :yearEnd) " +
                     ") " +
             "), " +
-            "data as " +
+            "plan_data as " +
             "( " +
                 "select " +
                     "id, nm, month, year, val " +
                 "from " +
                 "( " +
-                    "select * from no_project union all select * from project " +
+                    "select * from no_project_data union all select * from project_data " +
                 ") t " +
+            "), " +
+            "project_fact as " +
+            "( " +
+                "select " +
+                    "c.month, c.year, tsd.proj_id, pr.name nm, sum(tsd.duration) dur " +
+                "from " +
+                    "time_sheet ts, " +
+                    "time_sheet_detail tsd, " +
+                    "calendar c, " +
+                    "project pr " +
+                "where " +
+                    "ts.calDate = c.calDate " +
+                    "and tsd.proj_id = pr.id " +
+                    "and ts.id = tsd.time_sheet_id " +
+                    "and ts.emp_id = :employeeId " +
+                    "and ( " +
+                    "   (c.year = :yearStart and c.year = :yearEnd   and c.month between :monthStart and :monthEnd) " +
+                    "or (c.year = :yearStart and c.year < :yearEnd   and c.month > :monthStart) " +
+                    "or (c.year = :yearEnd   and c.year > :yearStart and c.month < :monthEnd) " +
+                    "or (c.year > :yearStart and c.year < :yearEnd) " +
+                    ") " +
+                "group by " +
+                    "c.month, c.year, tsd.proj_id, pr.name " +
+            "), " +
+            "fact_data as " +
+            "( " +
+                "select " +
+                    "pf.month, pf.year, pf.proj_id, pf.nm, 100*dur/(8*wd.cnt) prc " +
+                "from " +
+                    "project_fact pf " +
+                    "left join employee e on (e.id = :employeeId) " +
+                    "left join workDay wd on (wd.region = e.region and pf.month = wd.month and pf.year = wd.year) " +
             ") " +
             "select " +
-                "id, nm, month, year, val " +
+                "id, nm, month, year, val, isFact " +
             "from " +
             "( " +
-                "select 0 id, 'Итого' nm, month, year, sum(val) val from data where month is not null and year is not null group by month, year " +
+                "select 0 id, 'Итого' nm, month, year, sum(val) val, 0 isFact from plan_data where month is not null and year is not null group by month, year " +
                     "union all " +
-                "select id, nm, month, year, val from data where month is not NULL and year is not NULL " +
+                "select id, nm, month, year, val, 0 from plan_data where month is not NULL and year is not NULL " +
                     "union all " +
-                "select id, nm, 0, 0, coalesce(avg(val), 0) from data group by id, nm " +
+                "select coalesce(f.proj_id, 112), f.nm, f.month, f.year, f.prc, 1 from fact_data f " +
+                    "union all " +
+                "select 0, 'Итого', f.month, f.year, sum(f.prc), 1 from fact_data f group by f.month, f.year " +
             ") t " +
             "order by case sign(t.id) when -1 then 0 when 1 then 1 when 0 then 2 end, nm ");
 
