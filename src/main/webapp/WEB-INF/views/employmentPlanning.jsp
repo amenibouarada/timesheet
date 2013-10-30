@@ -456,15 +456,29 @@
 
         // Динамически перестраивает грид "сотрудник-проекты"
         function refreshEmployeeGrid(response, employeeId, yearStart, monthStart, yearEnd, monthEnd){
-            var store = createStore(response, yearStart, monthStart, yearEnd, monthEnd);
-
             var isFact = dojo.byId("isFact").checked;
-
+            var store = createStore(response, yearStart, monthStart, yearEnd, monthEnd);
             var layout = createLayout(isFact, employeeId, yearStart, monthStart, yearEnd, monthEnd);
             var grid = dijit.byId("employeeGrid");
+
             grid.store.close();
             grid.setStore(store);
             grid.setStructure(layout);
+
+
+            var projectId = dojo.byId("projectId").value;
+            function actionSelection(items){
+                if (grid.selection.selectedIndex >= 0){
+                    grid.selection.setSelected(grid.selection.selectedIndex, false);
+                }
+                dojo.forEach(items, function(item){
+                    var index = grid.getItemIndex(item);
+                    console.log(index);
+                    grid.selection.setSelected(index, true);
+                });
+            }
+            grid.store.fetch({query: {project_id: projectId}, onComplete: actionSelection, queryOptions: {deep:true}});
+
             grid.render();
         }
 
@@ -626,6 +640,7 @@
             function actionAfterSaveEmployee(result){
                 projectDataHandler(${form.projectId}, ${form.yearBeg}, ${form.monthBeg}, ${form.yearEnd}, ${form.monthEnd}, refreshProjectGrid);
                 employeeDataHandler(employeeId, ${form.yearBeg}, ${form.monthBeg}, ${form.yearEnd}, ${form.monthEnd}, refreshEmployeeGrid);
+
             }
 
             function saveProjectData(items){
