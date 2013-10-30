@@ -39,9 +39,6 @@
                         <sec:authorize access="hasRole('ROLE_ADMIN')">
                             <li><a href="<c:url value='/admin'/>"><fmt:message key="title.admin"/></a></li>
                         </sec:authorize>
-                        <sec:authorize access="hasAnyRole('ROLE_PLAN_EDIT', 'ROLE_PLAN_VIEW')">
-                            <li><a href="<c:url value='/employmentPlanning'/>"><fmt:message key="title.employmentPlanning"/></a></li>
-                        </sec:authorize>
                         <li><a href="<c:url value='/feedback'/>"><fmt:message key="menu.feedback"/></a></li>
                     </ul>
                 </td>

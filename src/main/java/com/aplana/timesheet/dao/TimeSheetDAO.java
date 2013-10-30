@@ -263,37 +263,4 @@ public class TimeSheetDAO {
         ).setParameter("id", id);
         return query.getResultList().size() != 0;
     }
-
-    /**
-     * Возвращает фактическое время работы сотрудника по всем проектам за период
-     * @return
-     */
-    public List<Object[]> getEmployeeFact(Integer employeeId, Integer yearBeg, Integer monthBeg, Integer yearEnd, Integer monthEnd){
-        Query query = entityManager.createQuery(
-                "select " +
-                        "d.project.id, d.project.name, c.month, c.year, sum(d.duration) " +
-                "from " +
-                        "TimeSheet t " +
-                        "join t.calDate c " +
-                        "join t.timeSheetDetails d " +
-                "where " +
-                        "t.employee.id = :employeeId " +
-                        "and ( " +
-                        "   (c.year = :yearStart and c.year = :yearEnd   and c.month between :monthStart and :monthEnd) " +
-                        "or (c.year = :yearStart and c.year < :yearEnd   and c.month > :monthStart) " +
-                        "or (c.year = :yearEnd   and c.year > :yearStart and c.month < :monthEnd) " +
-                        "or (c.year > :yearStart and c.year < :yearEnd) " +
-                        ") " +
-                "group by " +
-                        "d.project.id, d.project.name, c.month, c.year ");
-
-        query.setParameter("employeeId", employeeId);
-        query.setParameter("monthStart", monthBeg);
-        query.setParameter("yearStart", yearBeg);
-        query.setParameter("monthEnd", monthEnd);
-        query.setParameter("yearEnd", yearEnd);
-
-        return query.getResultList();
-    }
-
 }
