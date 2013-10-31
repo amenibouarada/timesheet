@@ -39,6 +39,20 @@
         <beans:property name="cronExpression" value="${scheduler.oq}"/>
     </beans:bean>
 
+    <!-- Создание бинов для запуска активации/деактивации заместителей -->
+    <beans:bean id="employeeAssistantService" class="com.aplana.timesheet.service.EmployeeAssistantService"/>
+
+    <beans:bean id="employeeAssistantServiceJob"
+            class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <beans:property name="targetObject" ref="employeeAssistantService"/>
+        <beans:property name="targetMethod" value="changeAssistantActivity"/>
+    </beans:bean>
+
+    <beans:bean id="employeeAssistantServiceCronTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+        <beans:property name="jobDetail" ref="employeeAssistantServiceJob"/>
+        <beans:property name="cronExpression" value="${scheduler.checkAssistantMailing}"/>
+    </beans:bean>
+
     <!--Создание бинов для запуска синхронизации проектом с OQ-->
     <beans:bean id="reportCheckService" class="com.aplana.timesheet.service.ReportCheckService"/>
 

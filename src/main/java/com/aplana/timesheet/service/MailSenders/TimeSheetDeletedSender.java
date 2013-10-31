@@ -6,6 +6,7 @@ import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.SendMailService;
 import com.aplana.timesheet.util.DateTimeUtil;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
 import org.springframework.ui.velocity.VelocityEngineUtils;
 
 import javax.mail.MessagingException;
@@ -47,7 +48,7 @@ public class TimeSheetDeletedSender extends AbstractSenderWithAssistants<TimeShe
         logger.info("Performing mailing about deleted timesheet.");
         Mail mail = new TimeSheetMail();
         mail.setToEmails(getToEmails(params));
-        mail.setCcEmails(Arrays.asList(getAssistantEmail(getManagersEmails(mail, employee))));
+        mail.setCcEmails(Arrays.asList(getAssistantEmail(Sets.newHashSet(mail.getToEmails()))));
         mail.setEmployeeList(Arrays.asList(employee));
         String date = DateTimeUtil.formatDate(params.getCalDate().getCalDate());
         mail.setDate(date);

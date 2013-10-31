@@ -2,11 +2,10 @@ package com.aplana.timesheet.service.MailSenders;
 
 import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.dao.entity.EmployeeAssistant;
-import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.ManagerRoleNameService;
 import com.aplana.timesheet.service.SendMailService;
 import com.aplana.timesheet.service.VacationApprovalService;
-import com.google.common.collect.Sets;
+import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.Set;
@@ -29,17 +28,13 @@ public abstract class AbstractSenderWithAssistants<T> extends MailSender<T> {
     protected final String getAssistantEmail(Set<String> managersEmails) {
         final EmployeeAssistant employeeAssistant = sendMailService.getEmployeeAssistant(managersEmails);
 
-        return (employeeAssistant == null) ? StringUtils.EMPTY : employeeAssistant.getAssistant().getEmail();
-    }
-
-    protected final Set<String> getManagersEmails(Mail mail, Employee employee) {
-        final Set<String> emails = Sets.newHashSet(mail.getToEmails());
-
-        if (employee.getManager() != null || employee.getManager2() != null) {
-            emails.remove(employee.getEmail());
+        if (employeeAssistant != null && employeeAssistant.isActive()){
+            Employee assistant = employeeAssistant.getAssistant();
+            if (assistant.getEndDate() == null){
+                return employeeAssistant.getAssistant().getEmail();
+            }
         }
-        emails.remove(TSPropertyProvider.getMailFromAddress());
-
-        return emails;
+        return StringUtils.EMPTY;
     }
+
 }

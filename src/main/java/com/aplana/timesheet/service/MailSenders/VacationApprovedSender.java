@@ -7,6 +7,7 @@ import com.aplana.timesheet.enums.VacationStatusEnum;
 import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.SendMailService;
 import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateFormatUtils;
@@ -47,7 +48,7 @@ public class VacationApprovedSender extends AbstractVacationSenderWithCopyToAuth
         final Collection<String> ccEmails =
                 new ArrayList<String>(getAdditionalEmailsForRegion(employee.getRegion()));
 
-        ccEmails.add(getAssistantEmail(getManagersEmails(mail, employee)));
+        ccEmails.add(getAssistantEmail(Sets.newHashSet(mail.getToEmails())));
 
         // оповещаем отдел кадров подразделения
         if (employee.getDivision() != null) {

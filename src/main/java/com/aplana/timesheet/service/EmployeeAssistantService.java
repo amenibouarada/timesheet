@@ -17,12 +17,20 @@ public class EmployeeAssistantService {
     @Autowired
     private EmployeeAssistantDAO employeeAssistantDAO;
 
+    @Autowired
+    private PlannedVacationService plannedVacationService;
+
     public EmployeeAssistant find(Set<String> managersEmails) {
         return employeeAssistantDAO.find(managersEmails);
     }
 
     public EmployeeAssistant tryFind(Set<String> managersEmails) {
         return employeeAssistantDAO.tryFind(managersEmails);
+    }
+
+    public void changeAssistantActivity(){
+        employeeAssistantDAO.updateEmployeeAssistantActiveStatus();
+        plannedVacationService.service();
     }
 
 }

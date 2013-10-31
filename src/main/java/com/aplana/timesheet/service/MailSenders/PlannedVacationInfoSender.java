@@ -7,6 +7,7 @@ import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.SendMailService;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import org.springframework.ui.velocity.VelocityEngineUtils;
 
@@ -63,7 +64,7 @@ public class PlannedVacationInfoSender extends AbstractSenderWithAssistants<Map 
             mail.setToEmails(toEmails);
             mail.setSubject("Информация по планируемым отпускам сотрудников в ближайшие две недели.");
             mail.setParamsForGenerateBody(getBody(entry.getValue()));
-            mail.setCcEmails(Arrays.asList(getAssistantEmail(getManagersEmails(mail, entry.getKey()))));
+            mail.setCcEmails(Arrays.asList(getAssistantEmail(Sets.newHashSet(mail.getToEmails()))));
             mails.add(mail);
         }
 

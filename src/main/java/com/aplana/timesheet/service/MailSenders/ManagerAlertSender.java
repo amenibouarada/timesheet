@@ -67,7 +67,7 @@ public class ManagerAlertSender extends AbstractSenderWithAssistants<List<Report
                 List<ReportCheck> currentReportCheckList = entry.getValue();
 
                 mail.setToEmails(Arrays.asList(currentManager.getEmail()));
-                mail.setCcEmails(Arrays.asList(getAssistantEmail(getManagersEmails(mail, currentManager))));
+                mail.setCcEmails(Arrays.asList(getAssistantEmail(Sets.newHashSet(mail.getToEmails()))));
                 mail.setSubject(getSubject(currentReportCheckList));
                 mail.setDivision(currentReportCheckList.get(0).getDivision());
                 mail.setEmployeeList(getEmployeeList(currentManager, currentReportCheckList));

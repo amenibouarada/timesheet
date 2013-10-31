@@ -41,6 +41,8 @@ public class UpdateController {
     private LdapDAO ldapDAO;
     @Autowired
     private EmployeeService employeeService;
+    @Autowired
+    private EmployeeAssistantService employeeAssistantService;
 
     public void setEmployeeLdapService(EmployeeLdapService employeeLdapService) {
         this.employeeLdapService = employeeLdapService;
@@ -175,6 +177,12 @@ public class UpdateController {
             }
         }
 
+        return "redirect:/admin";
+    }
+
+    @RequestMapping(value = "/update/employeeassistantactivestatus")
+    public String updateEmployeeAssistantActiveStatus() {
+        employeeAssistantService.changeAssistantActivity();
         return "redirect:/admin";
     }
 }
