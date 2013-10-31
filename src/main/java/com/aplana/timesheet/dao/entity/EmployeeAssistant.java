@@ -29,7 +29,7 @@ public class EmployeeAssistant {
     private Employee assistant;
 
     @Column(columnDefinition = "bool")
-    private boolean active;
+    private Boolean active;
 
     public Integer getId() {
         return id;
@@ -55,11 +55,11 @@ public class EmployeeAssistant {
         this.assistant = assistant;
     }
 
-    public boolean isActive() {
+    public Boolean getActive() {
         return active;
     }
 
-    public void setActive(boolean active) {
+    public void setActive(Boolean active) {
         this.active = active;
     }
 }
