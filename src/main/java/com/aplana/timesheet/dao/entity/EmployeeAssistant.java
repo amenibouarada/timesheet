@@ -55,7 +55,7 @@ public class EmployeeAssistant {
         this.assistant = assistant;
     }
 
-    public Boolean getActive() {
+    public Boolean isActive() {
         return active;
     }
 
