@@ -14,9 +14,8 @@ import java.util.List;
  * @author eshangareev
  * @version 1.0
  */
-/*@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = {"classpath:WEB-INF/spring/testApplicationContext.xml"})
-public class DivisionDAOTest {
+/*
+public class DivisionDAOTest extends AbstractTest{
     @Autowired
     DivisionDAO divisionDAO;
 

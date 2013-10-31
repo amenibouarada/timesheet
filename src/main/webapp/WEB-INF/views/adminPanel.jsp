@@ -78,7 +78,7 @@
             <li><a href="admin/update/siddisabledusersfromldap"><fmt:message key="link.disabledsidsync"/></a></li>
             <li><a href="admin/update/sidallusersfromldap"><fmt:message key="link.allsidsync"/></a></li>
             <li><a href="admin/update/jiranameallusersfromldap"><fmt:message key="link.alljiranamesync"/></a></li>
-
+            <li><a href="admin/update/employeeassistantactivestatus"><fmt:message key="link.employeeassistantactivestatus"/></a></li>
         </ul>
 
     </body>

@@ -26,4 +26,8 @@ public class EmployeeAssistantService {
         return employeeAssistantDAO.tryFind(managersEmails);
     }
 
+    public void changeAssistantActivity(){
+        employeeAssistantDAO.updateEmployeeAssistantActiveStatus();
+    }
+
 }

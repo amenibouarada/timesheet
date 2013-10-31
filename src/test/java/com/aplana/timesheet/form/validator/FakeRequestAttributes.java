@@ -7,7 +7,7 @@ import javax.servlet.http.HttpServletRequest;
  */
 
 public class FakeRequestAttributes {
-    public HttpServletRequest getHttpRequest(){
+    public HttpServletRequest getHttpRequest() {
         return null;
     }
 }
