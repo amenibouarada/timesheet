@@ -94,15 +94,21 @@ function monthCount(yearStart, monthStart, yearEnd, monthEnd){
 function textFormat(value, color){
     if (color === undefined){
         color = 'gray';
-        if (isNumber(value)){
-            value = Math.round(value);
-            if (value > 100) {
-                color = "red";
-            } else if (value > 0){
-                color = "black";
-            }
+    }
+
+    if (value === undefined || value == null){
+        value = "0";
+    }
+
+    if (isNumber(value)){
+        value = Math.round(value);
+        if (value > 100) {
+            color = "#E32636";
+        } else if (value > 0){
+            color = "black";
         }
     }
+
     return dojo.create(
         "span",
         {
@@ -114,25 +120,7 @@ function textFormat(value, color){
 
 // Формат вывода ячеек в гриде
 function formatterData(value){
-    var color = "gray";
-    var showValue;
-
-    if (value === undefined){
-        showValue = "0";
-    } else {
-        if (isNumber(value)){
-            showValue = Math.round(value);
-            if (value > 100) {
-                color = "red";
-            } else if (value > 0){
-                color = "black";
-            }
-        } else {
-            showValue = value;
-        }
-    }
-
-    return textFormat(showValue, color);
+    return textFormat(value);
 }
 
 // Формат вывода ячеек в гриде для редактируемых полей

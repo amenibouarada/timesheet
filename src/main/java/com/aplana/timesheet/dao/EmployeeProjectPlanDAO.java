@@ -354,7 +354,7 @@ public class EmployeeProjectPlanDAO {
             "( " +
                 "select 0 id, 'Итого' nm, month, year, sum(val) val, 0 isFact from plan_data where month is not null and year is not null group by month, year " +
                     "union all " +
-                "select id, nm, month, year, val, 0 from plan_data where month is not NULL and year is not NULL " +
+                "select id, nm, month, year, val, 0 from plan_data " +
                     "union all " +
                 "select coalesce(f.proj_id, 112), f.nm, f.month, f.year, f.prc, 1 from fact_data f " +
                     "union all " +

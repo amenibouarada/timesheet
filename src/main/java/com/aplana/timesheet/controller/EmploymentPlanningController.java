@@ -116,7 +116,7 @@ public class EmploymentPlanningController{
         return employeeListAsJSON;
     }
 
-    /* Сохраняем данные по сохранение сотрудников*/
+    /* Сохраняем данные план по сотрудникам для проекту*/
     @RequestMapping(value="/employmentPlanning/setEmployeeProjectAsJSON", produces = "text/plain;charset=UTF-8")
     @ResponseBody
     public String saveEmployeeData(@ModelAttribute(EmploymentPlanningForm.FORM) EmploymentPlanningForm form,
@@ -146,7 +146,7 @@ public class EmploymentPlanningController{
     }
 
 
-    /* Сохраняем данные по сохранение сотрудников*/
+    /* Сохраняем данные по проектам для сотрудника*/
     @RequestMapping(value="/employmentPlanning/setProjectDataAsJSON", produces = "text/plain;charset=UTF-8")
     @ResponseBody
     public String saveProjectData(@RequestParam("employeeId") Integer employeeId,
@@ -274,6 +274,10 @@ public class EmploymentPlanningController{
                 key = year + "-" + month;
             } else {
                 key = year + "_" + month;
+            }
+
+            if (value == null){
+                value = -1d;
             }
 
             JsonObjectNodeBuilder objectNodeBuilder = jsonMap.get(projectId);

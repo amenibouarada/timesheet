@@ -12,13 +12,19 @@
     <title></title>
     <script src="<%= getResRealPath("/resources/js/employmentPlanning.js", application) %>" type="text/javascript"></script>
     <style type="text/css">
-        @import "<%= DOJO_PATH %>/dojox/grid/resources/Grid.css";
         @import "<%= DOJO_PATH %>/dojox/grid/resources/tundraGrid.css";
-        .dojoxGrid table { margin: 0;}
-        html, body { width: 100%; height: 100%; margin: 0; }
+        <%--Для сокрытия строка грида, выходящие за грид--%>
+        div.dojoxGridRow {width: 100%;}
+        .tundra .dojoxGridHeader{
+            background-color: white;
+        }
+        <%----%>
         .editedCell {
             color: #FF8500;
             text-align: center;
+        }
+        .employeeLabel {
+            font-size: 14px;
         }
     </style>
 
@@ -65,10 +71,10 @@
                         var item = grid.getItem(rowIndex);
                         if (item){
                             var employeeId = item["employee_id"];
-                            var changed = item["changed"];
+                            var isChanged = item["isChanged"];
                             var plan = item["plan"]
 
-                            if (changed == "yes" && plan && plan != ""){
+                            if (isChanged == 1 && plan && plan != ""){
                                 var isNew = item["isNew"];
 
                                 if (isNew == "yes"){
@@ -97,9 +103,9 @@
                     formatter: function(cellValue, rowIndex){
                         var item = grid.getItem(rowIndex);
                         if (item){
-                            var changed = item["changed"];
+                            var isChanged = item["isChanged"];
 
-                            if (changed == "yes"){
+                            if (isChanged == 1){
                                 var spanValue = dojo.create(
                                     "span",
                                     {
@@ -140,9 +146,7 @@
                 id: 'projectGrid',
                 store: store,
                 structure: layout,
-                rowSelector: '20px',
-                width: '400px',
-                noresize: true,
+                rowSelector: '0px',
                 autoHeight: true,
                 styles: 'text-align: center;',
                 canSort: function(){return false;},
@@ -154,7 +158,8 @@
                                 grid.store.setValue(item, 'plan', '');
                                 return;
                             }
-                            grid.store.setValue(item, 'changed', 'yes');
+                            grid.store.setValue(item, 'isChanged', 1);
+                            grid.store.save();
                         }
                     }
                 }
@@ -163,14 +168,27 @@
             grid.placeAt("projectGridDiv");
             grid.startup();
 
+            if (grid.rowCount>0){
+                dojo.byId("spanEmployeeName").innerHTML = "Выберите пользователя для показа детализации планов";
+            }
+
             dojo.connect(grid, "onRowClick", function(e){
-                var item = grid.getItem(e.rowIndex);
-                if (item){
-                    var employeeId = item["employee_id"];
-                    var employeeName = item["employee_name"];
-                    dojo.byId("spanEmployeeName").innerHTML = 'Загрузка сотрудника "'+employeeName+'" по проектам';
-                    employeeDataHandler(employeeId, ${form.yearBeg}, ${form.monthBeg}, ${form.yearEnd}, ${form.monthEnd}, refreshEmployeeGrid);
-                }
+                var grid2 = dijit.byId("employeeGrid");
+                grid2.store.fetch({query: {isChanged: 1}, queryOptions: {deep:true}, onComplete: function(items){
+                    if (items.length>0){
+                        alert("Перед сменой сотрудника необходимо сохранить или отменить изменения");
+                        return;
+                    } else {
+                        var item = grid.getItem(e.rowIndex);
+                        if (item){
+                            var employeeId = item["employee_id"];
+                            var employeeName = item["employee_name"];
+                            dojo.byId("spanEmployeeName").innerHTML = 'Загрузка сотрудника "'+employeeName+'" по проектам';
+                            dojo.byId("divEmployeeInfo").hidden = false;
+                            employeeDataHandler(employeeId, ${form.yearBeg}, ${form.monthBeg}, ${form.yearEnd}, ${form.monthEnd}, refreshEmployeeGrid);
+                        }
+                    }
+                }});
             });
         };
 
@@ -218,9 +236,9 @@
                             var item = grid.getItem(rowIndex);
                             if (item){
                                 var projectId = item["project_id"];
-                                var changed = item["changed"];
+                                var isChanged = item["isChanged"];
 
-                                if (changed == 'yes'){
+                                if (isChanged == 1){
                                     return cellValue + '<img align="right" width="15px" src = "<c:url value="/resources/img/delete.png"/>" onclick="cancelEmployeeChange('+projectId+');"/><img align="right" width="15px" src = "<c:url value="/resources/img/edit.png"/>" onclick="saveEmployeePlan('+employeeId+','+projectId+');"/>'
                                 }
                             }
@@ -384,7 +402,6 @@
                 iterateMonth(yearStart, monthStart, yearEnd, monthEnd, function(month, year){
                     var planKey = year + '_' + month;
                     var factKey = year + '-' + month;
-                    var avgKey = '0_0';
 
                     if (row[planKey] == undefined){
                         row[planKey] = 0;
@@ -393,11 +410,6 @@
                     if (row[factKey] == undefined){
                         row[factKey] = 0;
                     }
-
-                    if (row[avgKey] == undefined){
-                        row[avgKey] = 0;
-                    }
-
                 });
 
                 data.items.push(row);
@@ -428,7 +440,7 @@
                 id: 'employeeGrid',
                 store: store,
                 structure: layout,
-                rowSelector: '20px',
+                rowSelector: '0px',
                 width: '400px',
                 autoHeight: true,
                 onApplyCellEdit: function(inValue, inRowIndex, inFieldIndex){
@@ -437,16 +449,23 @@
                         if (inValue == clearData[item["project_id"]][inFieldIndex]){
                             return;
                         }
-                        item["changed"] = 'yes';
-
                         var value = item["fields"];
                         if (value){
                             value += ";" + inFieldIndex;
                         } else {
                             value = inFieldIndex;
                         }
+                        grid.store.setValue(item, 'isChanged', 1);
                         grid.store.setValue(item, 'fields', value);
                     }
+                    grid.store.save();
+                },
+                canEdit: function(inCell, inRowIndex){
+                    var item = grid.getItem(inRowIndex);
+                    if (item["project_id"]<=0){
+                        return false;
+                    }
+                    return true;
                 }
             });
 
@@ -473,7 +492,6 @@
                 }
                 dojo.forEach(items, function(item){
                     var index = grid.getItemIndex(item);
-                    console.log(index);
                     grid.selection.setSelected(index, true);
                 });
             }
@@ -507,9 +525,10 @@
 
                     var selectSize = 0;
                     dojo.forEach(dojo.fromJson(response), function (row) {
-                        ++selectSize;
-                        var disable = map[row["employee_id"]] != undefined;
-                        dojo.create("option", { value: row["employee_id"], innerHTML: row["employee_name"], disabled: disable}, employeeSelect);
+                        if(map[row["employee_id"]] === undefined){
+                            ++selectSize;
+                            dojo.create("option", { value: row["employee_id"], innerHTML: row["employee_name"]}, employeeSelect);
+                        }
                     });
 
                     if (selectSize == 0){
@@ -543,7 +562,7 @@
                 var myNewItem = {
                     employee_id: employeeId,
                     employee_name: row.text,
-                    changed: "yes",
+                    isChanged: 1,
                     isNew: "yes",
                     plan: "0"
                 };
@@ -573,9 +592,10 @@
             grid.store.fetch({query: {employee_id: employeeId}, queryOptions: {deep:true}, onComplete: function(items){
                 dojo.forEach(items, function(item){
                     grid.store.setValue(item, 'plan', '');
-                    grid.store.setValue(item, 'changed', 'no');
+                    grid.store.setValue(item, 'isChanged', 0);
                     grid.store.setValue(item, 'isNew', 'no');
                 });
+                grid.store.save();
             }});
         }
 
@@ -584,16 +604,19 @@
             var grid = dijit.byId("employeeGrid");
 
             grid.store.fetch({query: {project_id: projectId}, queryOptions: {deep:true}, onComplete: function(items){
+                console.log(items);
                 dojo.forEach(items, function(item){
                     var project = clearData[projectId];
                     for(key in project){
-                        if (key!="project_id"){
+                        console.log({}.toString.call(project[key]));
+                        if (key!="project_id" && key!="isChanged"){
                             grid.store.setValue(item, key, project[key]);
                         }
                     }
-                    grid.store.setValue(item, 'changed', 'no');
-                    grid.store.setValue(item, 'fields', '');
+                    grid.store.setValue(item, 'isChanged', 0);
+                    grid.store.setValue(item, 'fields', undefined);
                 });
+                grid.store.save();
             }});
         }
 
@@ -614,7 +637,7 @@
             var yearEnd   = dojo.byId("yearEnd").value;
             var projectId = dojo.byId("projectId").value;
 
-            grid.store.fetch({query: {changed: 'yes'}, queryOptions: {deep:true}, onComplete: function(items){
+            grid.store.fetch({query: {isChanged: 1}, queryOptions: {deep:true}, onComplete: function(items){
                 saveEmployeeDataHandler(
                     projectId,
                     monthBeg,
@@ -651,9 +674,9 @@
             }
 
             if (isNumber(projectId)){
-                grid.store.fetch({query: {project_id: projectId}, queryOptions: {deep:true}, onComplete: saveProjectData});
+                grid.store.fetch({query: {project_id: projectId, isChanged: 1}, queryOptions: {deep:true}, onComplete: saveProjectData});
             } else {
-                grid.store.fetch({query: {changed: 'yes'}, queryOptions: {deep:true}, onComplete: saveProjectData});
+                grid.store.fetch({query: {isChanged: 1}, queryOptions: {deep:true}, onComplete: saveProjectData});
             }
         }
     </script>
@@ -727,16 +750,17 @@
         }
     </script>
 
-    <div id="projectGridDiv" ></div>
+    <div id="projectGridDiv" style="width: auto; max-width: 100%;"></div>
     <br/>
-    <span id="spanEmployeeName"></span>
-    <br/>
-    <input type="checkbox" id="isFact" checked>Отображать фактическое значение</input>
-    <br/>
-    <div id="employeeGridDiv" ></div>
-    <br>
+    <span id="spanEmployeeName" class="employeeLabel">&nbsp;</span>
+    <div id="divEmployeeInfo" hidden="true">
+        <br/>
+        <input type="checkbox" id="isFact" checked><span class="employeeLabel">Отображать фактическое значение</span></input>
+        <br/>
+        <div id="employeeGridDiv" ></div>
+    </div>
 
-    <div data-dojo-type="dijit/Dialog" data-dojo-id="employeeDialog" title="Add employee">
+    <div data-dojo-type="dijit/Dialog" data-dojo-id="employeeDialog" title="Добавить сотрудника">
 
         <form:form commandName="<%= ADD_FORM %>">
             <table class="dijitDialogPaneContentArea">
