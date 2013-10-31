@@ -13,7 +13,7 @@
     <body>
         <script type="text/javascript" src="<%= getResRealPath("/resources/js/report.js", application) %>"></script>
         <script type="text/javascript">
-            dojo.ready(function (){
+            dojo.ready(function () {
                 var defaultDivision = "${employeeDivision}";
                 var lastDivision = "${reportForm.divisionOwner}";
                 if (lastDivision != "") {

@@ -1,5 +1,6 @@
 package com.aplana.timesheet.dao;
 
+import com.aplana.timesheet.AbstractTest;
 import com.aplana.timesheet.enums.OvertimeCategory;
 import com.aplana.timesheet.enums.RegionsEnum;
 import com.aplana.timesheet.reports.BaseReport;
@@ -20,9 +21,7 @@ import java.util.Date;
  * @author eshangareev
  * @version 1.0
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = {"classpath:WEB-INF/spring/testApplicationContext.xml"})
-public class JasperReportDAOTest {
+public class JasperReportDAOTest extends AbstractTest {
 
     @Autowired
     JasperReportDAO dao;

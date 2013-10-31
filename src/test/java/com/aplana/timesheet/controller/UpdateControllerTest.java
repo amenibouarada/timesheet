@@ -10,9 +10,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
  * @author eshangareev
  * @version 1.0
  */
-/*@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = {"classpath:WEB-INF/spring/testApplicationContext.xml"})
-public class UpdateControllerTest {
+/*
+public class UpdateControllerTest extends AbstractTest{
     @Autowired
     private UpdateController updateController;
 

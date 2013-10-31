@@ -6,17 +6,17 @@
     private static final String CALENDAR_EXT_RES_PATH = "/resources/js/Calendar.ext.js";
 %>
 
-<script
-        src="<%=request.getContextPath()%><%= DOJO_PATH %>/dojo/dojo.js"
-        djConfig="parseOnLoad: true,
-                  locale:'ru'">
+<script type="text/javascript">
+    var dojoConfig = {
+        parseOnLoad: true,
+        locale:'ru'
+    };
 </script>
-<script
-        src="<%= getResRealPath("/resources/js/timesheet.js", application) %>">
-</script>
-<script
-        src="<%= getResRealPath("/resources/js/dformat.js", application) %>">
-</script>
+
+<script type="text/javascript" src="<%=request.getContextPath()%><%= DOJO_PATH %>/dojo/dojo.js"></script>
+
+<script type="text/javascript" src="<%= getResRealPath("/resources/js/timesheet.js", application) %>"></script>
+<script type="text/javascript" src="<%= getResRealPath("/resources/js/dformat.js", application) %>"></script>
 
 <script type="text/javascript" src="<%= getResRealPath(CALENDAR_EXT_RES_PATH, application) %>"></script>
 <script type="text/javascript" src="<%= getResRealPath(DATE_TEXT_BOX_EXT_JS_PATH, application) %>"></script>

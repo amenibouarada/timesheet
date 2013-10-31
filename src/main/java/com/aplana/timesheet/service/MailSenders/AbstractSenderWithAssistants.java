@@ -8,6 +8,8 @@ import com.aplana.timesheet.service.VacationApprovalService;
 import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import org.apache.commons.lang.StringUtils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 /**

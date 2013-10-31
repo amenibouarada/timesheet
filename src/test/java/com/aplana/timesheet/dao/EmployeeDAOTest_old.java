@@ -19,9 +19,8 @@ import java.util.List;
  * @author eshangareev
  * @version 1.0
  */
-/*@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = {"classpath:WEB-INF/spring/testApplicationContext.xml"})
-public class EmployeeDAOTest {
+/*
+public class EmployeeDAOTest extends AbstractTest{
     @Autowired
     private EmployeeDAO employeeDAO;
 

@@ -13,6 +13,8 @@ import com.aplana.timesheet.enums.TypesOfTimeSheetEnum;
 import com.aplana.timesheet.form.TimeSheetForm;
 import com.aplana.timesheet.form.TimeSheetTableRowForm;
 import com.aplana.timesheet.form.entity.DayTimeSheet;
+import com.aplana.timesheet.service.helper.EmployeeHelper;
+import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.system.security.SecurityService;
 import com.aplana.timesheet.util.DateTimeUtil;
 import com.aplana.timesheet.util.JsonUtil;
@@ -25,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 import static argo.jdom.JsonNodeBuilders.*;
@@ -47,7 +50,7 @@ public class TimeSheetService {
     private TimeSheetDAO timeSheetDAO;
 
     @Autowired
-    private TimeSheetDetailDAO timeSheetDetailDAO;
+    private TSPropertyProvider propertyProvider;
 
     @Autowired
     private EmployeeDAO employeeDAO;
@@ -60,6 +63,9 @@ public class TimeSheetService {
 
     @Autowired
     private EmployeeService employeeService;
+
+    @Autowired
+    private DivisionService divisionService;
 
     @Autowired
     private DictionaryItemService dictionaryItemService;
@@ -78,6 +84,12 @@ public class TimeSheetService {
 
     @Autowired
     public SecurityService securityService;
+
+    @Autowired
+    private EmployeeHelper employeeHelper;
+
+    @Autowired
+    private AvailableActivityCategoryService availableActivityCategoryService;
 
     @Transactional
     public TimeSheet storeTimeSheet(TimeSheetForm tsForm, TypesOfTimeSheetEnum type) {
@@ -512,5 +524,78 @@ public class TimeSheetService {
 
     public List<DictionaryItem> getEffortList() {
         return dictionaryItemService.getItemsByDictionaryId(DictionaryEnum.EFFORT_IN_NEXTDAY.getId());
+    }
+
+    /**
+     * Возвращает Map со значениями для заполнения списков сотрудников,
+     * проектов, пресейлов, проектных задач, типов и категорий активности на
+     * форме приложения.
+     *
+     * @return
+     */
+    @Transactional(readOnly = true)
+    public Map<String, Object> getListsToMAV(HttpServletRequest request) {
+        Map<String, Object> result = new HashMap<String, Object>();
+
+        List<DictionaryItem> typesOfActivity = dictionaryItemService.getTypesOfActivity();
+        result.put("actTypeList", typesOfActivity);
+
+        String typesOfActivityJson = dictionaryItemService.getDictionaryItemsInJson(typesOfActivity);
+        result.put("actTypeJson", typesOfActivityJson);
+
+        String workplacesJson = dictionaryItemService.getDictionaryItemsInJson(dictionaryItemService.getWorkplaces());
+        result.put("workplaceJson", workplacesJson);
+
+        result.put("overtimeCauseJson", dictionaryItemService.getDictionaryItemsInJson(dictionaryItemService
+                .getOvertimeCauses()));
+        result.put("unfinishedDayCauseJson", dictionaryItemService.getDictionaryItemsInJson(dictionaryItemService
+                .getUnfinishedDayCauses()
+        ));
+        result.put("overtimeThreshold", propertyProvider.getOvertimeThreshold());
+        result.put("undertimeThreshold", propertyProvider.getUndertimeThreshold());
+
+        List<Division> divisions = divisionService.getDivisions();
+        result.put("divisionList", divisions);
+
+        String employeeListJson = employeeHelper.getEmployeeListWithLastWorkdayJson(divisions, employeeService.isShowAll(request), true);
+        result.put("employeeListJson", employeeListJson);
+
+        List<DictionaryItem> categoryOfActivity = dictionaryItemService.getCategoryOfActivity();
+        result.put("actCategoryList", categoryOfActivity);
+
+        String actCategoryListJson = dictionaryItemService.getDictionaryItemsInJson(categoryOfActivity);
+        result.put("actCategoryListJson", actCategoryListJson);
+
+        result.put("availableActCategoriesJson", availableActivityCategoryService.getAvailableActCategoriesJson());
+
+        result.put("projectListJson", projectService.getProjectListJson(divisions));
+        result.put(
+                "projectTaskListJson",
+                projectTaskService.getProjectTaskListJson(projectService.getProjectsWithCq())
+        );
+
+        List<ProjectRole> projectRoleList = projectRoleService.getProjectRoles();
+
+        for (int i = 0; i < projectRoleList.size(); i++) {
+            if (projectRoleList.get(i).getCode().equals("ND")) {  // Убираем из списка роль "Не определена" APLANATS-270
+                projectRoleList.remove(i);
+                break;
+            }
+        }
+
+        result.put("projectRoleList", projectRoleList);
+        result.put("projectRoleListJson", projectRoleService.getProjectRoleListJson(projectRoleList));
+
+        result.put("listOfActDescriptionJson", getListOfActDescription());
+        result.put(
+                "typesOfCompensation",
+                dictionaryItemService.getItemsByDictionaryId(DictionaryEnum.TYPES_OF_COMPENSATION.getId())
+        );
+        result.put(
+                "workOnHolidayCauseJson",
+                dictionaryItemService.getDictionaryItemsInJson(DictionaryEnum.WORK_ON_HOLIDAY_CAUSE.getId())
+        );
+
+        return result;
     }
 }

@@ -36,6 +36,13 @@ public class CalendarDAO {
             REGION
     );
 
+    private static final String HOLIDAYS_ONLY_FOR_REGION_BETWEEN_DATES = String.format(
+            "from Holiday as h where ((h.calDate.calDate between :%s and :%s) and h.region = :%s)",
+            BEGIN_DATE,
+            END_DATE,
+            REGION
+    );
+
     @PersistenceContext
 	private EntityManager entityManager;
 
@@ -130,8 +137,8 @@ public class CalendarDAO {
 
         Query query = entityManager.createQuery(
                 "select max(c) from Calendar as c " +
-                "left outer join c.holidays as h with h.region.id is null " +
-                "where c.calDate<=:calDatePar and h.id is null "
+                        "left outer join c.holidays as h with h.region.id is null " +
+                        "where c.calDate<=:calDatePar and h.id is null "
         ).setParameter("calDatePar", monthLastDay);
 
         return (Calendar) query.getSingleResult();
@@ -172,6 +179,21 @@ public class CalendarDAO {
         final Query query = entityManager.createQuery(HOLIDAYS_FOR_REGION_BETWEEN_DATES);
 
         setParametersForHolidaysQuery(beginDate, endDate, region, query);
+
+        return query.getResultList();
+    }
+
+    /**
+     * Возвращает список праздничных дней только для указанного региона
+     * @param dateFrom
+     * @param dateTo
+     * @param region
+     * @return
+     */
+    public List<Holiday> getHolidaysOnlyForRegion(Date dateFrom, Date dateTo, Region region) {
+        final Query query = entityManager.createQuery(HOLIDAYS_ONLY_FOR_REGION_BETWEEN_DATES);
+
+        setParametersForHolidaysQuery(dateFrom, dateTo, region, query);
 
         return query.getResultList();
     }

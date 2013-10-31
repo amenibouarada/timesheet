@@ -12,10 +12,10 @@
 
 <br/>
 <form:form method="post" action="sendNewReport" commandName="timeSheetForm">
-    <form:hidden path="employeeId" id="employeeId"></form:hidden>
-    <form:hidden path="divisionId" id="divisionId"></form:hidden>
+    <form:hidden path="employeeId" id="employeeId"/>
+    <form:hidden path="divisionId" id="divisionId"/>
     <div><b>Отчет успешно отправлен!</b></div>
-    <br>
+    <br/>
     <button id="submit_button" type="submit">Отправить новый отчёт</button>
     <button id="view_reports_button" type="button" onclick="openViewReportsWindow()">Просмотр отчетов</button>
 </form:form>

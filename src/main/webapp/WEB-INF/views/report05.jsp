@@ -21,7 +21,7 @@
         fillEmployeeListByDivision(reportForm.divisionId);
 
     });
-	var employeeList = ${employeeListJson};
+    var employeeList = ${employeeListJson};
 </script>
 
 <h1><fmt:message key="title.reportparams"/></h1>

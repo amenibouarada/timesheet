@@ -11,6 +11,7 @@ import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 import static com.google.common.collect.Iterables.isEmpty;
@@ -25,7 +26,7 @@ public class EmployeeAssistantDAO {
     @PersistenceContext
     private EntityManager entityManager;
 
-    public EmployeeAssistant find(Set<String> managersEmails) {
+    public List<EmployeeAssistant> find(Set<String> managersEmails) {
         if (isEmpty(managersEmails)) {
             throw new NoResultException();
         }
@@ -34,10 +35,10 @@ public class EmployeeAssistantDAO {
                 "from EmployeeAssistant ea where ea.employee.email in :emails"
         ).setParameter("emails", managersEmails);
 
-        return (EmployeeAssistant) query.getSingleResult();
+        return query.getResultList();
     }
 
-    public EmployeeAssistant tryFind(Set<String> managersEmails) {
+    public List<EmployeeAssistant> tryFind(Set<String> managersEmails) {
         try {
             return find(managersEmails);
         } catch (NoResultException ex) {

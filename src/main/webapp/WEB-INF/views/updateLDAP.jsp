@@ -15,9 +15,9 @@
 <h1><fmt:message key="title.updateldap"/></h1>
 
 <c:if test="${trace != null}">
-<p>
-	${trace}
-</p>
+    <p>
+            ${trace}
+    </p>
 </c:if>
 
 </body>

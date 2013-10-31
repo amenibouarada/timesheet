@@ -1,6 +1,5 @@
 package com.aplana.timesheet.controller;
 
-import argo.jdom.JsonObjectNodeBuilder;
 import com.aplana.timesheet.AbstractTimeSheetTest;
 import com.aplana.timesheet.dao.entity.*;
 import com.aplana.timesheet.enums.DictionaryEnum;
@@ -14,23 +13,21 @@ import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.system.security.SecurityService;
 import com.aplana.timesheet.system.security.entity.TimeSheetUser;
 import com.aplana.timesheet.util.JsonUtil;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static argo.jdom.JsonNodeBuilders.aStringBuilder;
 import static argo.jdom.JsonNodeBuilders.anObjectBuilder;
@@ -184,7 +181,6 @@ public class TimeSheetControllerTest extends AbstractTimeSheetTest {
         // причины работы в выхи
         String workOnHolidayCausesJSON = "JSON rabota ne volk v les ne ubezhit";
 
-
         /* определяем поведение сервисов */
         when(securityService.getSecurityPrincipal()).thenReturn(timeSheetUser);
         when(employeeService.find(employee.getId())).thenReturn(employee);
@@ -217,6 +213,73 @@ public class TimeSheetControllerTest extends AbstractTimeSheetTest {
         when(dictionaryItemService.getDictionaryItemsInJson(DictionaryEnum.WORK_ON_HOLIDAY_CAUSE.getId()))
                 .thenReturn(workOnHolidayCausesJSON);
 
+        when(timeSheetService.getListsToMAV(request)).then(new Answer<Object>() {
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                Map<String, Object> result = new HashMap<String, Object>();
+
+                List<DictionaryItem> typesOfActivity = dictionaryItemService.getTypesOfActivity();
+                result.put("actTypeList", typesOfActivity);
+
+                String typesOfActivityJson = dictionaryItemService.getDictionaryItemsInJson(typesOfActivity);
+                result.put("actTypeJson", typesOfActivityJson);
+
+                String workplacesJson = dictionaryItemService.getDictionaryItemsInJson(dictionaryItemService.getWorkplaces());
+                result.put("workplaceJson", workplacesJson);
+
+                result.put("overtimeCauseJson", dictionaryItemService.getDictionaryItemsInJson(dictionaryItemService
+                        .getOvertimeCauses()));
+                result.put("unfinishedDayCauseJson", dictionaryItemService.getDictionaryItemsInJson(dictionaryItemService
+                        .getUnfinishedDayCauses()
+                ));
+                result.put("overtimeThreshold", propertyProvider.getOvertimeThreshold());
+                result.put("undertimeThreshold", propertyProvider.getUndertimeThreshold());
+
+                List<Division> divisions = divisionService.getDivisions();
+                result.put("divisionList", divisions);
+
+                String employeeListJson = employeeHelper.getEmployeeListWithLastWorkdayJson(divisions, employeeService.isShowAll(request), true);
+                result.put("employeeListJson", employeeListJson);
+
+                List<DictionaryItem> categoryOfActivity = dictionaryItemService.getCategoryOfActivity();
+                result.put("actCategoryList", categoryOfActivity);
+
+                String actCategoryListJson = dictionaryItemService.getDictionaryItemsInJson(categoryOfActivity);
+                result.put("actCategoryListJson", actCategoryListJson);
+
+                result.put("availableActCategoriesJson", availableActivityCategoryService.getAvailableActCategoriesJson());
+
+                result.put("projectListJson", projectService.getProjectListJson(divisions));
+                result.put(
+                        "projectTaskListJson",
+                        projectTaskService.getProjectTaskListJson(projectService.getProjectsWithCq())
+                );
+
+                List<ProjectRole> projectRoleList = projectRoleService.getProjectRoles();
+
+                for (int i = 0; i < projectRoleList.size(); i++) {
+                    if (projectRoleList.get(i).getCode().equals("ND")) {  // Убираем из списка роль "Не определена" APLANATS-270
+                        projectRoleList.remove(i);
+                        break;
+                    }
+                }
+
+                result.put("projectRoleList", projectRoleList);
+                result.put("projectRoleListJson", projectRoleService.getProjectRoleListJson(projectRoleList));
+
+                result.put("listOfActDescriptionJson", timeSheetService.getListOfActDescription());
+                result.put(
+                        "typesOfCompensation",
+                        dictionaryItemService.getItemsByDictionaryId(DictionaryEnum.TYPES_OF_COMPENSATION.getId())
+                );
+                result.put(
+                        "workOnHolidayCauseJson",
+                        dictionaryItemService.getDictionaryItemsInJson(DictionaryEnum.WORK_ON_HOLIDAY_CAUSE.getId())
+                );
+
+                return result;
+            }
+        });
         /* тест */
         ModelAndView result = timeSheetController.showMainForm(calDate, employee.getId(), null);
 
