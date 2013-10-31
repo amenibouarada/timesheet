@@ -64,7 +64,7 @@ public class PlannedVacationInfoSender extends AbstractSenderWithAssistants<Map 
             mail.setToEmails(toEmails);
             mail.setSubject("Информация по планируемым отпускам сотрудников в ближайшие две недели.");
             mail.setParamsForGenerateBody(getBody(entry.getValue()));
-            mail.setCcEmails(Arrays.asList(getAssistantEmail(Sets.newHashSet(mail.getToEmails()))));
+            mail.setCcEmails(getAssistantEmail(Sets.newHashSet(mail.getToEmails())));
             mails.add(mail);
         }
 

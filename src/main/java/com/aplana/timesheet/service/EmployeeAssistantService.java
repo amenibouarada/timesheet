@@ -18,7 +18,7 @@ public class EmployeeAssistantService {
     @Autowired
     private EmployeeAssistantDAO employeeAssistantDAO;
 
-    public EmployeeAssistant find(Set<String> managersEmails) {
+    public List<EmployeeAssistant> find(Set<String> managersEmails) {
         return employeeAssistantDAO.find(managersEmails);
     }
 
