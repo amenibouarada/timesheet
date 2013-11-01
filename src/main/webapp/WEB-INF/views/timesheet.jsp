@@ -188,23 +188,8 @@
                     }
 
                     if (data.draft != null) {
-                        dojo.setStyle("load_draft",{"visibility":"visible"});
-                        dojo.setStyle("load_draft_text",{"visibility":"visible"});
-                        if (data.draft == 1) {
-                            dojo.setStyle("load_draft",{"visibility":"visible"});
-                            dojo.setStyle("load_draft_text",{"visibility":"visible"});
-                        } else if (data.draft == 0) {
-                            dojo.setStyle("load_draft",{"visibility":"hidden"});
-                            dojo.setStyle("load_draft_text",{"visibility":"hidden"});
-                        } else {
-                            //такого быть не должно
-                            dojo.setStyle("load_draft",{"visibility":"visible"});
-                            dojo.setStyle("load_draft_text",{"visibility":"visible"});
-                        }
-                    } else {
-                        //такого быть не должно
-                        dojo.setStyle("load_draft",{"visibility":"visible"});
-                        dojo.setStyle("load_draft_text",{"visibility":"visible"});
+                        hideShowElement("load_draft", data.draft == 0);
+                        hideShowElement("load_draft_text", data.draft == 0);
                     }
                 }
             },
@@ -215,6 +200,10 @@
                 }
             }
         });
+    }
+
+    function hideShowElement(id, isHide) {
+        dojo.setStyle(id, {"display": isHide ? "none" : ""});
     }
 
 </script>
@@ -522,13 +511,13 @@ function loadDraft() {
     <div style="float:left;width: 450px;">
         <span id="lbPrevPlan">Планы предыдущего рабочего дня:</span>
     </div>
-    <div id="load_draft_text" style="float:left;text-align: right; width:425px;color: red;">
+    <div id="load_draft_text" style="float:left;text-align: right; width:425px;color: red;display: none;">
         Имеется черновик не отправленного отчета!
     </div>
     <div id="plan_textarea"
-         style="margin: 2px 0px 2px 0px; padding:2px 2px 2px 2px;border: solid 1px silver;float:left;clear: left;width: 450px;"></div>
-    <div style="float:left;text-align: center; display: table-cell;margin: 0px;padding: 0px;text-align: right;width: 425px;">
-        <button id="load_draft" type="button" style="width:200px;" onclick="loadDraft()">
+         style="margin: 2px 0px; padding:2px;border: solid 1px silver;float:left;clear: left;width: 450px;"></div>
+    <div style="float:left;text-align: right;width: 425px;">
+        <button id="load_draft" type="button" style="width:200px;display: none;" onclick="loadDraft()">
             Загрузить черновик
         </button>
     </div>
