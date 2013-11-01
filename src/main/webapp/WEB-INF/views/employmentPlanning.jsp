@@ -731,7 +731,7 @@
     <input style="width:150px;margin-left: 23px;" type="button" value="Показать планы" onclick="submitSaveButton();"/>
     <input style="width:150px;margin-left: 23px;" type="button" value="Сохранить" onclick="saveProjectPlan();"/>
 </form:form>
-    <script>
+    <script type="text/javascript">
         function submitSaveButton(){
             var monthBeg  = dojo.byId("monthBeg").value;
             var yearBeg   = dojo.byId("yearBeg").value;
