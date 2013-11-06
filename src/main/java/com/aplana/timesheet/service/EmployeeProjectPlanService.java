@@ -54,4 +54,9 @@ public class EmployeeProjectPlanService {
     public void updateEmployeeProjectPlan(Integer employeeId, EmploymentPlanningForm employmentPlanningForm, Double plan){
         employeeProjectPlanDAO.updateEmployeeProjectPlan(employeeId, employmentPlanningForm, plan);
     }
+
+    @Transactional
+    public void updateEmployeeNotProjectPlan(Integer employeeId, EmploymentPlanningForm employmentPlanningForm, Double plan){
+        employeeProjectPlanDAO.updateEmployeeNotProjectPlan(employeeId, employmentPlanningForm, plan);
+    }
 }

@@ -170,13 +170,18 @@ public class EmploymentPlanningController{
                     Integer month = Integer.parseInt(yearMonth[1]);
 
                     EmploymentPlanningForm employmentPlanningForm = new EmploymentPlanningForm();
-                    employmentPlanningForm.setProjectId(projectId);
                     employmentPlanningForm.setMonthBeg(month);
                     employmentPlanningForm.setMonthEnd(month);
                     employmentPlanningForm.setYearBeg(year);
                     employmentPlanningForm.setYearEnd(year);
 
-                    employeeProjectPlanService.updateEmployeeProjectPlan(employeeId, employmentPlanningForm, value);
+                    if (projectId > 0){
+                        employmentPlanningForm.setProjectId(projectId);
+                        employeeProjectPlanService.updateEmployeeProjectPlan(employeeId, employmentPlanningForm, value);
+                    } else {
+                        employmentPlanningForm.setProjectId(-projectId);
+                        employeeProjectPlanService.updateEmployeeNotProjectPlan(employeeId, employmentPlanningForm, value);
+                    }
                 }
             }
         }

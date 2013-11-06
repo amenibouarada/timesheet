@@ -170,7 +170,7 @@ public class EmployeeProjectPlanDAO {
     }
 
     /**
-     * Обновляет планы за период. Merge для одного сотрудника
+     * Обновляет планы по проектам за период. Merge для одного сотрудника
      * @param employeeId
      * @param employmentPlanningForm
      * @param plan
@@ -212,6 +212,68 @@ public class EmployeeProjectPlanDAO {
                 ") " +
                 "insert into employee_project_plan" +
                     "(employee_id, project_id, month, year, value) " +
+                "select " +
+                    ":employeeId, :projectId, wrk.month, wrk.year, 8*:plan*wrk.cnt/100 " +
+                "from " +
+                    "workDay wrk " +
+                "where " +
+                    "(year, month) not in (select year, month from upsert)");
+
+        query.setParameter("projectId", employmentPlanningForm.getProjectId());
+        query.setParameter("monthStart", employmentPlanningForm.getMonthBeg());
+        query.setParameter("yearStart", employmentPlanningForm.getYearBeg());
+        query.setParameter("monthEnd", employmentPlanningForm.getMonthEnd());
+        query.setParameter("yearEnd", employmentPlanningForm.getYearEnd());
+
+        query.setParameter("employeeId", employeeId);
+        query.setParameter("plan", plan);
+
+        query.executeUpdate();
+    }
+
+    /**
+     * Обновляет планы по не-проектам за период. Merge для одного сотрудника
+     * @param employeeId
+     * @param employmentPlanningForm
+     * @param plan
+     */
+    public void updateEmployeeNotProjectPlan(Integer employeeId, EmploymentPlanningForm employmentPlanningForm, Double plan){
+
+        Query query = entityManager.createNativeQuery(
+                "with workDay(year, month, cnt) as " +
+                "( " +
+                    "select " +
+                        "c.year, c.month, count(case when h.id is null then 1 end) val " +
+                    "from " +
+                        "region r " +
+                        "cross join calendar c " +
+                        "left join holiday h on (c.caldate = h.caldate and (r.id  = h.region or h.region is NULL)) " +
+                    "where " +
+                        "r.id in (select e.region from employee e where e.id = :employeeId) " +
+                        "and ( " +
+                        "   (c.year = :yearStart and c.year = :yearEnd   and c.month between :monthStart and :monthEnd) " +
+                        "or (c.year = :yearStart and c.year < :yearEnd   and c.month > :monthStart) " +
+                        "or (c.year = :yearEnd   and c.year > :yearStart and c.month < :monthEnd) " +
+                        "or (c.year > :yearStart and c.year < :yearEnd) " +
+                        ") " +
+                    "group by " +
+                        "r.id, c.month, c.year " +
+                "), " +
+                "upsert as " +
+                "( " +
+                    "update " +
+                        "employee_plan ep " +
+                    "set " +
+                        "value = 8*:plan*wrk.cnt/100 " +
+                    "from " +
+                        "(select w.year, w.month, w.cnt from workDay w) wrk " +
+                    "where " +
+                        "ep.item_id = :projectId and ep.employee_id = :employeeId " +
+                        "and wrk.year = ep.year and wrk.month = ep.month " +
+                        "returning ep.year, ep.month " +
+                ") " +
+                "insert into employee_plan" +
+                    "(employee_id, item_id, month, year, value) " +
                 "select " +
                     ":employeeId, :projectId, wrk.month, wrk.year, 8*:plan*wrk.cnt/100 " +
                 "from " +

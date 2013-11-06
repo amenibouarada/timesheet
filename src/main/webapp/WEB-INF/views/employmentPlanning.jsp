@@ -173,24 +173,20 @@
             }
 
             dojo.connect(grid, "onRowClick", function(e){
-                var grid2 = dijit.byId("employeeGrid");
-                grid2.store.fetch({query: {isChanged: 1}, queryOptions: {deep:true}, onComplete: function(items){
-                    if (items.length>0){
-                        alert("Перед сменой сотрудника необходимо сохранить или отменить изменения");
-                        return;
-                    } else {
-                        var item = grid.getItem(e.rowIndex);
-                        if (item){
-                            var employeeId = item["employee_id"];
-                            var employeeName = item["employee_name"];
-                            dojo.byId("spanEmployeeName").innerHTML = 'Загрузка сотрудника "'+employeeName+'" по проектам';
-                            dojo.byId("divEmployeeInfo").hidden = false;
-                            employeeDataHandler(employeeId, ${form.yearBeg}, ${form.monthBeg}, ${form.yearEnd}, ${form.monthEnd}, refreshEmployeeGrid);
-                        }
+                function action(){
+                    var item = grid.getItem(e.rowIndex);
+                    if (item){
+                        var employeeId = item["employee_id"];
+                        var employeeName = item["employee_name"];
+                        dojo.byId("spanEmployeeName").innerHTML = 'Загрузка сотрудника "'+employeeName+'" по проектам';
+                        dojo.byId("divEmployeeInfo").hidden = false;
+                        employeeDataHandler(employeeId, ${form.yearBeg}, ${form.monthBeg}, ${form.yearEnd}, ${form.monthEnd}, refreshEmployeeGrid);
                     }
-                }});
+                }
+
+                checkChanges(action);
             });
-        };
+        }
 
         // Динамически перестраивает грид "проект-сотрудники"
         // yearStart, monthStart, yearEnd, monthEnd - не используется, нужны если менять структуру грида
@@ -459,14 +455,15 @@
                         grid.store.setValue(item, 'fields', value);
                     }
                     grid.store.save();
-                },
-                canEdit: function(inCell, inRowIndex){
-                    var item = grid.getItem(inRowIndex);
-                    if (item["project_id"]<=0){
-                        return false;
-                    }
-                    return true;
                 }
+                //,
+//                canEdit: function(inCell, inRowIndex){
+//                    var item = grid.getItem(inRowIndex);
+//                    if (item["project_id"]<=0){
+//                        return false;
+//                    }
+//                    return true;
+//                }
             });
 
             grid.placeAt("employeeGridDiv");
@@ -604,17 +601,15 @@
             var grid = dijit.byId("employeeGrid");
 
             grid.store.fetch({query: {project_id: projectId}, queryOptions: {deep:true}, onComplete: function(items){
-                console.log(items);
                 dojo.forEach(items, function(item){
                     var project = clearData[projectId];
                     for(key in project){
-                        console.log({}.toString.call(project[key]));
                         if (key!="project_id" && key!="isChanged"){
                             grid.store.setValue(item, key, project[key]);
                         }
                     }
                     grid.store.setValue(item, 'isChanged', 0);
-                    grid.store.setValue(item, 'fields', undefined);
+                    grid.store.setValue(item, 'fields', null);
                 });
                 grid.store.save();
             }});
@@ -629,30 +624,33 @@
 
         // Отправка данных на сервер для сохранения. Грид проект-сотрудники
         function saveProjectPlan(){
-            var grid = dijit.byId("projectGrid");
+            checkChanges(saving);
+            function saving(){
+                var grid = dijit.byId("projectGrid");
 
-            var monthBeg  = dojo.byId("monthBeg").value;
-            var yearBeg   = dojo.byId("yearBeg").value;
-            var monthEnd  = dojo.byId("monthEnd").value;
-            var yearEnd   = dojo.byId("yearEnd").value;
-            var projectId = dojo.byId("projectId").value;
+                var monthBeg  = dojo.byId("monthBeg").value;
+                var yearBeg   = dojo.byId("yearBeg").value;
+                var monthEnd  = dojo.byId("monthEnd").value;
+                var yearEnd   = dojo.byId("yearEnd").value;
+                var projectId = dojo.byId("projectId").value;
 
-            grid.store.fetch({query: {isChanged: 1}, queryOptions: {deep:true}, onComplete: function(items){
-                saveEmployeeDataHandler(
-                    projectId,
-                    monthBeg,
-                    yearBeg,
-                    monthEnd,
-                    yearEnd,
-                    '{"employee": [' + itemToJSON(grid.store, items) + ']}',
-                    actionAfterSaveProject);
-            }});
+                grid.store.fetch({query: {isChanged: 1}, queryOptions: {deep:true}, onComplete: function(items){
+                    saveEmployeeDataHandler(
+                            projectId,
+                            monthBeg,
+                            yearBeg,
+                            monthEnd,
+                            yearEnd,
+                            '{"employee": [' + itemToJSON(grid.store, items) + ']}',
+                            actionAfterSaveProject);
+                }});
 
-            // После сохранения перестраиваем гриды
-            // TODO избавиться от $ - переделать на js
-            function actionAfterSaveProject(result){
-                projectDataHandler(${form.projectId}, ${form.yearBeg}, ${form.monthBeg}, ${form.yearEnd}, ${form.monthEnd}, refreshProjectGrid);
-                employeeDataHandler(0, ${form.yearBeg}, ${form.monthBeg}, ${form.yearEnd}, ${form.monthEnd}, refreshEmployeeGrid);
+                // После сохранения перестраиваем гриды
+                // TODO избавиться от $ - переделать на js
+                function actionAfterSaveProject(result){
+                    projectDataHandler(${form.projectId}, ${form.yearBeg}, ${form.monthBeg}, ${form.yearEnd}, ${form.monthEnd}, refreshProjectGrid);
+                    employeeDataHandler(0, ${form.yearBeg}, ${form.monthBeg}, ${form.yearEnd}, ${form.monthEnd}, refreshEmployeeGrid);
+                }
             }
         }
 
@@ -678,6 +676,18 @@
             } else {
                 grid.store.fetch({query: {isChanged: 1}, queryOptions: {deep:true}, onComplete: saveProjectData});
             }
+        }
+
+        function checkChanges(handler){
+            var grid2 = dijit.byId("employeeGrid");
+            grid2.store.fetch({query: {isChanged: 1}, queryOptions: {deep:true}, onComplete: function(items){
+                if (items.length>0){
+                    alert("Перед сменой сотрудника необходимо сохранить или отменить изменения");
+                    return;
+                } else {
+                    handler();
+                }
+            }});
         }
     </script>
 </head>
@@ -733,19 +743,22 @@
 </form:form>
     <script>
         function submitSaveButton(){
-            var monthBeg  = dojo.byId("monthBeg").value;
-            var yearBeg   = dojo.byId("yearBeg").value;
-            var monthEnd  = dojo.byId("monthEnd").value;
-            var yearEnd   = dojo.byId("yearEnd").value;
+            checkChanges(save);
+            function save(){
+                var monthBeg  = dojo.byId("monthBeg").value;
+                var yearBeg   = dojo.byId("yearBeg").value;
+                var monthEnd  = dojo.byId("monthEnd").value;
+                var yearEnd   = dojo.byId("yearEnd").value;
 
-            var dateStart = new Date(yearBeg, monthBeg);
-            var dateEnd = new Date(yearEnd, monthEnd);
+                var dateStart = new Date(yearBeg, monthBeg);
+                var dateEnd = new Date(yearEnd, monthEnd);
 
-            if (dateEnd < dateStart){
-                alert("Дата конца периода превышает дату начала");
-            } else {
-                var form = dojo.byId("employmentPlanningForm");
-                form.submit();
+                if (dateEnd < dateStart){
+                    alert("Дата конца периода превышает дату начала");
+                } else {
+                    var form = dojo.byId("employmentPlanningForm");
+                    form.submit();
+                }
             }
         }
     </script>
