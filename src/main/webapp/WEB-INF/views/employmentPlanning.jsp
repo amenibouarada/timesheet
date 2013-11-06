@@ -239,7 +239,7 @@
                                 var isChanged = item["isChanged"];
 
                                 if (isChanged == 1){
-                                    return cellValue + '<img align="right" width="15px" src = "<c:url value="/resources/img/delete.png"/>" onclick="cancelEmployeeChange('+projectId+');"/><img align="right" width="15px" src = "<c:url value="/resources/img/edit.png"/>" onclick="saveEmployeePlan('+employeeId+','+projectId+');"/>'
+                                    return cellValue + '<img align="right" width="15px" src = "<c:url value="/resources/img/delete.png"/>" onclick="cancelEmployeeChange('+projectId+');"/><img align="right" width="15px" src = "<c:url value="/resources/img/ok.png"/>" onclick="saveEmployeePlan('+employeeId+','+projectId+');"/>'
                                 }
                             }
                             return cellValue;
