@@ -2,14 +2,12 @@ package com.aplana.timesheet.system.security;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 /**
  * User: eyaroslavtsev
  * Date: 06.08.12
- * Time: 14:10
  */
 public class AutentificationFilter implements Filter {
     @Override
@@ -22,7 +20,7 @@ public class AutentificationFilter implements Filter {
         HttpServletRequest request = (HttpServletRequest) req;
         HttpSession session = request.getSession(false);
         try {
-            session.setAttribute("lastLogin", request.getParameter("j_username") );
+            session.setAttribute("lastLogin", request.getParameter("j_username"));
         } catch (Exception ex) {
             session.setAttribute("lastLogin", "");
         }
@@ -31,7 +29,6 @@ public class AutentificationFilter implements Filter {
 
     @Override
     public void init(FilterConfig config) throws ServletException {
-
     }
 
 }

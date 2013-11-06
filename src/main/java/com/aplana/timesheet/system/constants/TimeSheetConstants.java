@@ -1,7 +1,6 @@
 package com.aplana.timesheet.system.constants;
 
 /**
- *
  * @author aimamutdinov
  */
 public class TimeSheetConstants {

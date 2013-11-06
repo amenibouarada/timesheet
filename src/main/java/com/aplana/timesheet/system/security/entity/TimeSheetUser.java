@@ -9,6 +9,8 @@ import java.util.Collection;
 
 public class TimeSheetUser extends User {
 
+    private Employee employee;
+
     public Employee getEmployee() {
         return employee;
     }
@@ -20,8 +22,6 @@ public class TimeSheetUser extends User {
 
         this.employee = employee;
     }
-
-    private Employee employee;
 
     public TimeSheetUser(Employee user, Collection<? extends GrantedAuthority> authorities) {
         super(user.getName(), "[PROTECTED]", authorities);

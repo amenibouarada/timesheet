@@ -27,13 +27,12 @@ public class TSPropertyProvider {
 
     /**
      * Единый метод для загрузки почтовых настроек
-     *
      */
     public static Properties getProperties() {
         if (needUpdate || properties == null) {
             try {
                 properties = new Properties();
-                properties.load(new FileInputStream( System.getProperty("pathToTsProperties") ));
+                properties.load(new FileInputStream(System.getProperty("pathToTsProperties")));
 
                 needUpdate = false;
 
@@ -87,7 +86,7 @@ public class TSPropertyProvider {
     }
 
     public String getMailDebugAddress() {
-        return  getProperties().getProperty("mail.debug.address");
+        return getProperties().getProperty("mail.debug.address");
     }
 
     public String getMailSmtpPort() {
@@ -174,7 +173,7 @@ public class TSPropertyProvider {
         return getProperties().getProperty("mail.marker.feedback", "[TS FEEDBACK]");
     }
 
-    public Integer getVacationApprovalErrorThreshold(){
+    public Integer getVacationApprovalErrorThreshold() {
         return readIntProperty("vacation.approval.error.threshold", 100);
     }
 
@@ -272,7 +271,7 @@ public class TSPropertyProvider {
     private Integer readIntProperty(String keyName, Integer defaultValue) {
         try {
             return Integer.parseInt(getProperties().getProperty(keyName));
-        } catch (NullPointerException ex){
+        } catch (NullPointerException ex) {
             return defaultValue;
         } catch (NumberFormatException ex) {
             return defaultValue;

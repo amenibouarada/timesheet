@@ -9,10 +9,7 @@ public class SecurityService {
 
     public TimeSheetUser getSecurityPrincipal() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (principal instanceof TimeSheetUser)
-            return (TimeSheetUser) principal;
-        else
-            return null;
+        return principal instanceof TimeSheetUser ? (TimeSheetUser) principal : null;
     }
 
 }

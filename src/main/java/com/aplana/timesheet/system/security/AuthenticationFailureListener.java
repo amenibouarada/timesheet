@@ -17,7 +17,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Created by user abayanov
  * Date: 12.07.13
- * Time: 14:34
  */
 @Component
 public class AuthenticationFailureListener implements ApplicationListener<AuthenticationFailureBadCredentialsEvent> {

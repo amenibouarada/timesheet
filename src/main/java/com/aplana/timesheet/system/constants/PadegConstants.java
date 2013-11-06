@@ -1,10 +1,8 @@
 package com.aplana.timesheet.system.constants;
 
 /**
- * Created by user
  * User: abayanov
  * Date: 20.06.13
- * Time: 10:49
  */
 public class PadegConstants {
     public static final int Imenitelnyy = 1;
@@ -16,13 +14,20 @@ public class PadegConstants {
 
     public static String padegToString(Integer padeg) {
         switch (padeg) {
-            case Imenitelnyy: return "Imenitelnyy";
-            case Roditelnyy: return "Roditelnyy";
-            case Datelnyy: return "Datelnyy";
-            case Vinitelnyy: return "Vinitelnyy";
-            case Tvoritelnyy: return "Tvoritelnyy";
-            case Predlojnyy: return "Predlojnyy";
-            default: return null;
+            case Imenitelnyy:
+                return "Imenitelnyy";
+            case Roditelnyy:
+                return "Roditelnyy";
+            case Datelnyy:
+                return "Datelnyy";
+            case Vinitelnyy:
+                return "Vinitelnyy";
+            case Tvoritelnyy:
+                return "Tvoritelnyy";
+            case Predlojnyy:
+                return "Predlojnyy";
+            default:
+                return null;
         }
     }
 }

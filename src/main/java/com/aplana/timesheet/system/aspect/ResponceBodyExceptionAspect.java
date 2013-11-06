@@ -15,13 +15,14 @@ public class ResponceBodyExceptionAspect {
     private static final Logger logger = LoggerFactory.getLogger(ResponceBodyExceptionAspect.class);
 
     @Pointcut("@annotation(org.springframework.web.bind.annotation.ResponseBody)")
-    public void aroundResponseBody() {}
+    public void aroundResponseBody() {
+    }
 
     @Around("aroundResponseBody()")
     public Object profile(ProceedingJoinPoint pjp) throws Throwable {
-        try{
+        try {
             return pjp.proceed();
-        }catch(Exception e){
+        } catch (Exception e) {
             logger.error("Error in @ResponceBody method", e);
             return null;
         }

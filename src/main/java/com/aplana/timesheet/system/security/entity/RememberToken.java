@@ -7,7 +7,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 
 /**
- *
  * @author ekuvshinov
  */
 public class RememberToken implements Authentication {
@@ -15,13 +14,14 @@ public class RememberToken implements Authentication {
     List<GrantedAuthority> authorities;
     TimeSheetUser principal;
     Object credentials;
-    
+
     public RememberToken(TimeSheetUser principal, Object credentials, List<GrantedAuthority> authorities) {
         this.authorities = authorities;
         this.principal = principal;
         this.credentials = credentials;
         setAuthenticated(true);
     }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return authorities;
@@ -47,11 +47,6 @@ public class RememberToken implements Authentication {
         return this.authenticated;
     }
 
-    /**
-     *
-     * @param bln
-     * @throws IllegalArgumentException
-     */
     @Override
     public void setAuthenticated(boolean bln) throws IllegalArgumentException {
         this.authenticated = bln;
