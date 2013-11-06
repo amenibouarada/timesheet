@@ -251,11 +251,14 @@ if (dataJson.length > 0) {
                 view.cells = [];
             }
 
-            function createCell(name, field) {
+            function createCell(name, field, newScale) {
                 var scale = 2;
             <c:if test="${planEditForm.showPlans and planEditForm.showFacts}">
                 scale = 1;
             </c:if>
+                if (newScale != null){
+                    scale = newScale;
+                }
                 return {
                     name:name,
                     field:field,
@@ -279,7 +282,11 @@ if (dataJson.length > 0) {
                     var planField = group.field + "<%= _PLAN %>";
                     var factField = group.field + "<%= _FACT %>";
 
-                    view.cells.push(createCell("П", planField), createCell("Ф", factField));
+                    if (group.field == "<%= SUMMARY %>"){
+                        view.cells.push(createCell("П", planField, 2), createCell("Ф", factField));
+                    }else{
+                        view.cells.push(createCell("П", planField), createCell("Ф", factField));
+                    }
                     modelFields.push(planField, factField);
 
                     group.colSpan = 2;
