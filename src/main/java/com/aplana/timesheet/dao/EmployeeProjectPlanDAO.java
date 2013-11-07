@@ -297,15 +297,13 @@ public class EmployeeProjectPlanDAO {
      * Возвращает планы работника за период по проектам
      * @param employeeId - идентификатор работника
      * @return List<Object[6]>
-     *     Object[0] - project_id, если ==0 - по всем проектам
+     *     Object[0] - project_id
      *     Object[1] - project_name
      *     Object[2] - month
      *     Object[3] - year
      *     Object[4] - percent (сумма, запланированных часов по конкретному проекту, делить на количество рабочих часов в месяце)
      *     Object[5] - 0 - план, 1 - факт
      *
-     *     project_id == 0 => Итого: сумма по всем проектам
-     *     month == 0 && year == 0 => Среднее за период
      */
 
     public List<Object[]> getEmployeePlan(Integer employeeId, Integer yearBeg, Integer monthBeg, Integer yearEnd, Integer monthEnd){
@@ -414,13 +412,9 @@ public class EmployeeProjectPlanDAO {
                 "id, nm, month, year, val, isFact " +
             "from " +
             "( " +
-                "select 0 id, 'Итого' nm, month, year, sum(val) val, 0 isFact from plan_data where month is not null and year is not null group by month, year " +
+                "select id, nm, month, year, val, 0 isFact from plan_data " +
                     "union all " +
-                "select id, nm, month, year, val, 0 from plan_data " +
-                    "union all " +
-                "select coalesce(f.proj_id, 112), f.nm, f.month, f.year, f.prc, 1 from fact_data f " +
-                    "union all " +
-                "select 0, 'Итого', f.month, f.year, sum(f.prc), 1 from fact_data f group by f.month, f.year " +
+                "select coalesce(f.proj_id, 112), f.nm, f.month, f.year, f.prc, 1 isFact from fact_data f " +
             ") t " +
             "order by case sign(t.id) when -1 then 0 when 1 then 1 when 0 then 2 end, nm ");
 
