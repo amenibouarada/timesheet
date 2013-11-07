@@ -18,7 +18,10 @@ public class AutentificationFilter implements Filter {
     public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain) throws ServletException, IOException {
 
         HttpServletRequest request = (HttpServletRequest) req;
-        HttpSession session = request.getSession(true);
+        HttpSession session = request.getSession(false);
+        if (session == null) {
+            session = request.getSession(true);
+        }
         try {
             session.setAttribute("lastLogin", request.getParameter("j_username"));
         } catch (Exception ex) {
