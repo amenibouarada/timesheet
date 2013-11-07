@@ -60,6 +60,16 @@
 				<text><![CDATA[Регион]]></text>
 			</staticText>
 			<staticText>
+				<reportElement uuid="102f4059-671f-4009-8cf8-897598c01b45" style="Column header" x="204" y="0" width="128" height="13"/>
+				<textElement/>
+				<text><![CDATA[Роль в системе]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="b54a578b-5108-49e8-989f-2d9721cb74e9" style="Column header" x="332" y="0" width="80" height="13"/>
+				<textElement/>
+				<text><![CDATA[Тип активности]]></text>
+			</staticText>
+			<staticText>
 				<reportElement uuid="727e194c-546d-4f52-81ee-01b573270ef1" style="Column header" x="412" y="0" width="127" height="13"/>
 				<textElement/>
 				<text><![CDATA[Проектная роль]]></text>
@@ -73,16 +83,6 @@
 				<reportElement uuid="af943e1d-1117-4ad4-9d91-06695d5bae65" style="Column header" x="668" y="0" width="60" height="13"/>
 				<textElement/>
 				<text><![CDATA[Часы]]></text>
-			</staticText>
-			<staticText>
-				<reportElement uuid="102f4059-671f-4009-8cf8-897598c01b45" style="Column header" x="204" y="0" width="128" height="13"/>
-				<textElement/>
-				<text><![CDATA[Роль в системе]]></text>
-			</staticText>
-			<staticText>
-				<reportElement uuid="b54a578b-5108-49e8-989f-2d9721cb74e9" style="Column header" x="332" y="0" width="80" height="13"/>
-				<textElement/>
-				<text><![CDATA[Тип активности]]></text>
 			</staticText>
 		</band>
 	</columnHeader>

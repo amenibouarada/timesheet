@@ -144,72 +144,58 @@
 		<band height="27">
 			<staticText>
 				<reportElement uuid="a435515d-c08c-47ee-9927-252a93fc41bc" style="Column header" x="0" y="0" width="99" height="27"/>
-				<textElement/>
 				<text><![CDATA[Сотрудник]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="30f081df-7e19-4c50-a3dc-d28593bfc203" style="Column header" x="99" y="0" width="105" height="27"/>
-				<textElement/>
 				<text><![CDATA[Подразделение]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="4b4efc2e-98f6-4939-9c47-54f450d1cc3c" style="Column header" x="204" y="0" width="56" height="27"/>
-				<textElement/>
+				<reportElement uuid="4b4efc2e-98f6-4939-9c47-54f450d1cc3c" style="Column header" x="204" y="0" width="55" height="27"/>
 				<text><![CDATA[Регион]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="23d6e145-0e1f-4b36-89b5-d03b5a5427c2" style="Column header" x="259" y="0" width="79" height="27"/>
-				<textElement/>
 				<text><![CDATA[Роль]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="e3e2972c-c098-4ef3-85a8-883766a02382" style="Column header" x="338" y="0" width="57" height="27"/>
-				<textElement/>
 				<text><![CDATA[Тип активности]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="857955e8-c607-4f0d-9f9f-785b462ebd95" style="Column header" x="395" y="0" width="97" height="27"/>
-				<textElement/>
 				<text><![CDATA[Проект]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="afc09518-8864-4a11-9693-d76cdd5ba543" style="Column header" x="492" y="0" width="102" height="27"/>
-				<textElement/>
 				<text><![CDATA[Задача]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="f76f9ad4-f1f2-4701-aee5-d94c57f00428" style="Column header" x="594" y="0" width="55" height="27"/>
-				<textElement/>
 				<text><![CDATA[Дата]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="b6aecf97-d6ab-4bdc-9c59-8c84be32984a" style="Column header" x="649" y="0" width="62" height="27"/>
-				<textElement/>
 				<text><![CDATA[Часы]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="7920fcc1-cfbb-45bb-b50f-0facead596b2" style="Column header" x="711" y="0" width="76" height="27"/>
-				<textElement/>
 				<text><![CDATA[Тип]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="a3703c07-95ef-400f-b868-415ed70cc764" style="Column header" x="787" y="0" width="40" height="27"/>
-				<textElement/>
 				<text><![CDATA[Отпуск]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="73eee41e-83e4-4496-8c3b-173d782d5315" style="Column header" x="827" y="0" width="53" height="27"/>
-				<textElement/>
 				<text><![CDATA[Болезнь]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="bb2e55ba-80b1-486f-84e6-be80eabb7953" style="Column header" x="880" y="0" width="75" height="27"/>
-				<textElement/>
 				<text><![CDATA[Командировка]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="fa7db6eb-40e7-4b33-b658-34a00d305e86" style="Column header" x="955" y="0" width="71" height="27"/>
-				<textElement/>
 				<text><![CDATA[Учитывать в затратах]]></text>
 			</staticText>
 		</band>
@@ -249,20 +235,20 @@
 				<textFieldExpression><![CDATA[$F{project_role}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement uuid="73bbeb1e-d043-4582-8f72-ca4ec347bdf7" style="ColoredDetail" stretchType="RelativeToTallestObject" x="395" y="0" width="97" height="15"/>
-				<textElement>
-					<font fontName="SansSerif" size="8" isUnderline="false" isStrikeThrough="false"/>
-					<paragraph lineSpacing="Double"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{project}]]></textFieldExpression>
-			</textField>
-			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement uuid="37730351-4b3c-49da-acdd-0261b2f3c31a" style="ColoredDetail" stretchType="RelativeToTallestObject" x="338" y="0" width="57" height="15"/>
 				<textElement>
 					<font fontName="SansSerif" size="8" isUnderline="false" isStrikeThrough="false"/>
 					<paragraph lineSpacing="Double"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{project_state}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement uuid="73bbeb1e-d043-4582-8f72-ca4ec347bdf7" style="ColoredDetail" stretchType="RelativeToTallestObject" x="395" y="0" width="97" height="15"/>
+				<textElement>
+					<font fontName="SansSerif" size="8" isUnderline="false" isStrikeThrough="false"/>
+					<paragraph lineSpacing="Double"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{project}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement uuid="e6b1c7b8-3bf4-4500-8e1c-4bea794dd609" style="ColoredDetail" stretchType="RelativeToTallestObject" x="492" y="0" width="102" height="15"/>
