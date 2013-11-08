@@ -666,14 +666,15 @@ function log(text){
                             <td colspan="4" style="padding-top: 10px;">
                                 <table>
                                     <tr>
+                                        <td valign="top"><b>Показывать колонки</b></td>
                                         <td>
                                             <div>
                                                 <form:checkbox id="<%= SHOW_PLANS %>" path="<%= SHOW_PLANS %>"
-                                                               label="Показывать плановые показатели"/>
+                                                               label="План"/>
                                             </div>
                                             <div style="padding-top: 5px;">
                                                 <form:checkbox id="<%= SHOW_FACTS %>" path="<%= SHOW_FACTS %>"
-                                                               label="Показывать фактические показатели"/>
+                                                               label="Факт"/>
                                             </div>
                                         </td>
                                         <td>
@@ -684,24 +685,18 @@ function log(text){
                                                 <form:checkbox path="<%= SHOW_PRESALES %>" label="Пресейлы"/>
                                             </div>
                                         </td>
-
                                         <td>
                                             <div>
                                                 <form:checkbox id="<%= SHOW_SUM_PROJECTS_PRESALES %>" path="<%= SHOW_SUM_PROJECTS_PRESALES %>"
-                                                               label="Показывать Итого по проектам/пресейлам"/>
+                                                               label="Итого по проектам/пресейлам"/>
                                             </div>
                                             <div style="padding-top: 5px;">
                                                 <form:checkbox id="<%= SHOW_SUM_FUNDING_TYPE %>" path="<%= SHOW_SUM_FUNDING_TYPE %>"
-                                                               label="Показывать Итого по инвест./коммер."/>
+                                                               label="Итого по инвест./коммер."/>
                                             </div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td style="text-align: center">
-                                            <button id="show" style="width:150px;vertical-align: middle;" type="submit"
-                                                    onclick="return validate()">Показать
-                                            </button>
-                                        </td>
                                     </tr>
                                 </table>
                             </td>
@@ -709,7 +704,7 @@ function log(text){
                     </table>
                 </div>
             </td>
-            <td>
+            <td class="topAlignTD" style="padding-top: 10px;">
                 <div class="blockElement">
                     <table>
                         <tr>
@@ -728,7 +723,7 @@ function log(text){
                     </table>
                 </div>
             </td>
-            <td>
+            <td class="topAlignTD" style="padding-top: 10px;">
                 <div class="blockElement">
                     <table>
                         <tr>
@@ -749,21 +744,33 @@ function log(text){
             </td>
         </tr>
     </table>
+    <table>
+        <tr>
+            <td style="text-align: center">
+                <button id="show" style="width:150px;vertical-align: middle;" type="submit"
+                        onclick="return validate()">Показать
+                </button>
+            </td>
+            <sec:authorize access="hasRole('ROLE_PLAN_EDIT')">
+                <td style="padding-left: 300px">
 
-    <sec:authorize access="hasRole('ROLE_PLAN_EDIT')">
-        <c:if test="${fn:length(jsonDataToShow) > 0 and editable}">
-            <button style="width:150px;margin-left: 23px;" onclick="save()" type="button">Сохранить планы</button>
-        </c:if>
-        <button style="margin-left: 20px;" onclick="createPlanForPeriod()" type="button">
-            Запланировать на период
-        </button>
-        <button style="margin-left: 20px;" onclick="exportTableInExcel()" type="button">
-            Сохранить в Excel
-        </button>
-        <button style="margin-left: 20px;" onclick="location.href='/employmentPlanning';" type="button">
-            Планирование занятости
-        </button>
-    </sec:authorize>
+                <c:if test="${fn:length(jsonDataToShow) > 0 and editable}">
+                        <button style="width:150px;margin-left: 23px;" onclick="save()" type="button">Сохранить планы</button>
+                    </td>
+                    <td>
+                </c:if>
+
+                    <button style="margin-left: 20px;" onclick="createPlanForPeriod()" type="button">Запланировать на период</button>
+                </td>
+                <td>
+                    <button style="margin-left: 20px;" onclick="exportTableInExcel()" type="button">Сохранить в Excel</button>
+                </td>
+                <td>
+                    <button style="margin-left: 20px;" onclick="location.href='/employmentPlanning';" type="button">Планирование занятости</button>
+                </td>
+            </sec:authorize>
+        </tr>
+    </table>
 </form:form>
 
 <br/>
