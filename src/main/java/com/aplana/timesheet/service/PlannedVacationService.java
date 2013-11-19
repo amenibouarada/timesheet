@@ -3,6 +3,8 @@ package com.aplana.timesheet.service;
 import com.aplana.timesheet.dao.*;
 import com.aplana.timesheet.dao.entity.*;
 
+import com.aplana.timesheet.enums.VacationStatusEnum;
+import com.aplana.timesheet.enums.VacationTypesEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +38,9 @@ public class PlannedVacationService {
 
     @Autowired
     protected ProjectService projectService;
+
+    @Autowired
+    private DictionaryItemService dictionaryItemService;
 
     private Date dateCurrent;
     private Date dateAfter;
@@ -114,17 +119,22 @@ public class PlannedVacationService {
         Map<Employee, Set<Employee>> employeeManagers = getEmployeeManagers(employees);
 
         Map<Employee, Set<Employee>> managerEmployees = reverseEmployeeManagersToManagerEmployees(employeeManagers);
-        
-        
+
         Map<Employee, Set<Vacation>> managerEmployeesVacation = new HashMap<Employee, Set<Vacation>>();
+
+        DictionaryItem approved = dictionaryItemService.find(VacationStatusEnum.APPROVED.getId()); //статус - Утвержденно
+
         for(Map.Entry<Employee, Set<Employee>> entry : managerEmployees.entrySet()) {
             Set<Vacation> vacations = new TreeSet<Vacation>();
 
             for (Employee employee:entry.getValue()) {
-                vacations.addAll(vacationDAO.findVacations(employee.getId(), dateCurrent, dateAfter, null));
+                //добавление утвержденных отпусков
+                vacations.addAll(vacationDAO.findVacationsByStatus(employee.getId(), dateCurrent, dateAfter, approved));
             }
 
-            managerEmployeesVacation.put(entry.getKey(), new TreeSet<Vacation>(vacations));
+            if (vacations.size() > 0) {
+                managerEmployeesVacation.put(entry.getKey(), new TreeSet<Vacation>(vacations));
+            }
         }
         
         return managerEmployeesVacation;

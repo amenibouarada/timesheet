@@ -169,6 +169,7 @@ div.menu_holder table td {
 .errorbox{
     background-color: #FFFF00;
     width: 90%;
+    padding: 4px;
     color: #FF0000;
 }
 

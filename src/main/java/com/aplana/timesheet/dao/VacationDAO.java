@@ -51,6 +51,26 @@ public class VacationDAO {
         return query.getResultList();
     }
 
+    /**
+     * Поиск утвержденных вакансий сотрудника за отрезок времени
+     * @param employeeId идентификатор сотрудника
+     * @param beginDate Начало отрезка дат за который происходит отпуск
+     * @param endDate конец отрезка дат за который происходит отпуск
+     * @param status ентити справочника статусов отпуска.
+     * @see com.aplana.timesheet.enums.VacationStatusEnum
+     * @return Список утверженных отпусков
+     */
+    public List<Vacation> findVacationsByStatus(Integer employeeId, Date beginDate, Date endDate, DictionaryItem status){
+        final Query query = entityManager.createQuery(
+                "from Vacation v where v.employee.id = :emp_id and v.beginDate <= :endDate " +
+                        "and v.endDate >= :beginDate and v.status = :status order by v.beginDate"
+        )       .setParameter("emp_id", employeeId)
+                .setParameter("beginDate", beginDate)
+                .setParameter("endDate", endDate)
+                .setParameter("status", status);
+        return query.getResultList();
+    }
+
     public List<Vacation> findVacationsByTypes(Integer year, Integer month, Integer employeeId,  List<DictionaryItem> types) {
         final Query query =
                 entityManager.createQuery("from Vacation v " +
@@ -110,7 +130,7 @@ public class VacationDAO {
                         "where di.id = :status_id and ((:from_date between v.beginDate and v.endDate) or (:to_date between v.beginDate and v.endDate) or (v.beginDate between :from_date and :to_date))" +
                         " and not v.status = di and v.employee.id = :emp_id and v.type <> :type"
         ).setParameter("from_date", fromDate).setParameter("to_date", toDate).
-                setParameter("status_id", VacationStatusEnum.REJECTED.getId()).setParameter("emp_id", employeeId).setParameter("type",typeVacation);;
+                setParameter("status_id", VacationStatusEnum.REJECTED.getId()).setParameter("emp_id", employeeId).setParameter("type",typeVacation);
 
         return (Long) query.getSingleResult();
     }
