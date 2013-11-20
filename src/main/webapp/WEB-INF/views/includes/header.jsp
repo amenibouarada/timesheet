@@ -26,8 +26,8 @@
         </span>
     </div>
 
-    <div class="menu_holder">
-        <ul style="list-style-type: none; float: left">
+    <div id="cssmenu">
+        <ul>
             <li><a href="<c:url value='/'/>"><fmt:message key="menu.main"/></a></li>
             <li><a href="<c:url value='/viewreports'/>"><fmt:message key="title.viewreports"/></a></li>
             <sec:authorize access="hasAnyRole('ROLE_PLAN_EDIT', 'ROLE_PLAN_VIEW')">

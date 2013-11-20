@@ -41,7 +41,7 @@ h1, h2, h3, h4, h5, h6 {
     padding-top: 3px;
     font-size: 24px;
     color: #888;
-    height: 72px;
+    height: 69px;
 }
 
 .content_wrapper {
@@ -70,50 +70,12 @@ h1, h2, h3, h4, h5, h6 {
     width: 50%;
 }
 
-
-
-
 .employee_name {
     line-height: 35px;
     font-size: 14px;
     position: absolute;
     top: 35px;
     right: 5px;
-}
-
-div.menu_holder {
-    /*padding-top: 40px;*/
-    width: 100%
-}
-
-div.menu_holder ul {
-    list-style-type: none;
-    margin: auto;
-    padding-left: 0px;
-    color: #371C1C;
-}
-
-div.menu_holder li {
-    float: left;
-    width: 270px;
-}
-
-div.menu_holder ul a, div.menu_holder span a {
-    padding-right: 32px;
-    padding-left: 32px;
-    display: block;
-    line-height: 35px;
-    font-size: 14px;
-    color: #371C1C;
-    /*text-decoration: none;*/
-}
-
-div.menu_holder ul a:hover, div.menu_holder span a:hover {
-    text-decoration: none;
-}
-
-div.menu_holder table td {
-    border: none;
 }
 
 #logo {
