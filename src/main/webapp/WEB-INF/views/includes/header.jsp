@@ -19,34 +19,32 @@
     Корпоративная система списания занятости
 </div>
 <sec:authorize access="isAuthenticated()">
-    <div class="employee_name">Сотрудник: <sec:authentication property="principal.employee.name"/></div>
+    <div class="employee_name">
+        <sec:authentication property="principal.employee.name"/>
+        <span style="border-left: 1px solid #d9d9d9; border-right: 1px solid #ffffff; padding: 0px 5px">
+            <a style="text-decoration: none; color: #371C1C;" href="<c:url value='/logout'/>">Выйти</a>
+        </span>
+    </div>
 
     <div class="menu_holder">
-        <table style="width: 100%">
-            <tr>
-                <td>
-                    <ul style="list-style-type: none; float: left">
-                        <li><a href="<c:url value='/'/>"><fmt:message key="menu.main"/></a></li>
-                        <li><a href="<c:url value='/viewreports'/>"><fmt:message key="title.viewreports"/></a></li>
-                        <sec:authorize access="hasAnyRole('ROLE_PLAN_EDIT', 'ROLE_PLAN_VIEW')">
-                        <li><a href="<c:url value='/planEdit'/>"><fmt:message key="title.planEdit"/></a></li>
-                        </sec:authorize>
-                        <li><a href="<c:url value='/businesstripsandillness'/>"><fmt:message key="title.businesstripsandillness"/></a></li>
-                        <li><a href="<c:url value='/vacations'/>"><fmt:message key="title.vacations"/><span id="vacationCount"></span></a></li>
-                        <sec:authorize access="hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')">
-                            <li><a href="<c:url value='/managertools'/>"><fmt:message key="title.manager"/></a></li>
-                        </sec:authorize>
-                        <sec:authorize access="hasRole('ROLE_ADMIN')">
-                            <li><a href="<c:url value='/admin'/>"><fmt:message key="title.admin"/></a></li>
-                        </sec:authorize>
-                        <li><a href="<c:url value='/feedback'/>"><fmt:message key="menu.feedback"/></a></li>
-                    </ul>
-                </td>
-                <td>
-                    <span style="float: right"><a href="<c:url value='/logout'/>">Выйти</a></span>
-                </td>
-            </tr>
-        </table>
+        <ul style="list-style-type: none; float: left">
+            <li><a href="<c:url value='/'/>"><fmt:message key="menu.main"/></a></li>
+            <li><a href="<c:url value='/viewreports'/>"><fmt:message key="title.viewreports"/></a></li>
+            <sec:authorize access="hasAnyRole('ROLE_PLAN_EDIT', 'ROLE_PLAN_VIEW')">
+                <li><a href="<c:url value='/planEdit'/>"><fmt:message key="title.planEdit"/></a></li>
+            </sec:authorize>
+            <li><a href="<c:url value='/businesstripsandillness'/>"><fmt:message
+                    key="title.businesstripsandillness"/></a></li>
+            <li><a href="<c:url value='/vacations'/>"><fmt:message key="title.vacations"/><span
+                    id="vacationCount"></span></a></li>
+            <sec:authorize access="hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')">
+                <li><a href="<c:url value='/managertools'/>"><fmt:message key="title.manager"/></a></li>
+            </sec:authorize>
+            <sec:authorize access="hasRole('ROLE_ADMIN')">
+                <li><a href="<c:url value='/admin'/>"><fmt:message key="title.admin"/></a></li>
+            </sec:authorize>
+            <li><a href="<c:url value='/feedback'/>"><fmt:message key="menu.feedback"/></a></li>
+        </ul>
     </div>
 </sec:authorize>
 

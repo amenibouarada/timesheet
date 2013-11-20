@@ -40,27 +40,24 @@ h1, h2, h3, h4, h5, h6 {
     height: 72px;
 }
 
+.employee_name {
+    line-height: 35px;
+    font-size: 14px;
+    position: absolute;
+    top: 35px;
+    right: 5px;
+}
+
 div.menu_holder {
     /*padding-top: 40px;*/
+    width: 100%
 }
 
 div.menu_holder ul {
     list-style-type: none;
     margin: auto;
     padding-left: 0px;
-}
-
-.employee_name {
-    float: right;
-    padding-right: 32px;
-    padding-left: 32px;
-    display: block;
-    line-height: 35px;
-    font-size: 14px;
     color: #371C1C;
-    position: absolute;
-    top: 35px;
-    right: 0;
 }
 
 div.menu_holder li {
@@ -75,6 +72,7 @@ div.menu_holder ul a, div.menu_holder span a {
     line-height: 35px;
     font-size: 14px;
     color: #371C1C;
+    /*text-decoration: none;*/
 }
 
 div.menu_holder ul a:hover, div.menu_holder span a:hover {
