@@ -73,7 +73,7 @@
 
         <br/>
 
-        <div id="messageBox" style="text-align: left!important; width: 90%"></div>
+        <div id="messageBox" style="text-align: left!important; width: 90%;padding: 4px;"></div>
         <br/>
         <input type="checkbox" name="showAllUser" id="allUserCheckBox" onChange="updateShowUser();"
                <c:if test="${showalluser == true}">checked="checked"</c:if>

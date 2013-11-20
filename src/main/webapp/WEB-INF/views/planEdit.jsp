@@ -42,11 +42,6 @@
     #planEditForm label {
         padding-left: 2px;
     }
-
-    #footer {
-        display: none;
-    }
-
 </style>
 
 <script type="text/javascript">
