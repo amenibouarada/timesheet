@@ -24,4 +24,12 @@ public class Pair<P, Q> {
     public void setSecond(Q second) {
         this.second = second;
     }
+
+    @Override
+    public String toString() {
+        return "Pair{" +
+                "first=" + first +
+                ", second=" + second +
+                '}';
+    }
 }
