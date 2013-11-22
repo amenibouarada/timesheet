@@ -1,0 +1,33 @@
+#planEditForm > table {
+    margin-bottom: 10px;
+}
+
+#planEditForm td {
+    padding: 2px;
+}
+
+#planEditForm table table {
+    width: 100%;
+}
+
+#planEditForm label {
+    padding-left: 2px;
+}
+
+#footer {
+    display: none;
+}
+
+.topAlignTD {
+    padding: 5px;
+    vertical-align: top;
+}
+.blockYearMonth {
+    float: left;
+    position: relative;
+}
+.blockElement {
+    float: left;
+    position: relative;
+    top: -8px;
+}

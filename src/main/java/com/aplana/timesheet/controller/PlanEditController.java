@@ -2,14 +2,13 @@ package com.aplana.timesheet.controller;
 
 import argo.jdom.*;
 import argo.saj.InvalidSyntaxException;
-import com.aplana.timesheet.system.constants.TimeSheetConstants;
 import com.aplana.timesheet.dao.EmployeeDAO;
 import com.aplana.timesheet.dao.entity.*;
 import com.aplana.timesheet.enums.*;
-import com.aplana.timesheet.exception.service.NotDataForYearInCalendarException;
 import com.aplana.timesheet.form.PlanEditForm;
 import com.aplana.timesheet.form.validator.PlanEditFormValidator;
 import com.aplana.timesheet.service.*;
+import com.aplana.timesheet.system.constants.TimeSheetConstants;
 import com.aplana.timesheet.system.security.SecurityService;
 import com.aplana.timesheet.util.DateTimeUtil;
 import com.aplana.timesheet.util.EnumsUtils;
@@ -46,6 +45,51 @@ import static com.aplana.timesheet.util.JsonUtil.aNumberBuilder;
 @Controller
 public class PlanEditController {
 
+    @Autowired
+    private PlanEditFormValidator planEditFormValidator;
+
+    @Autowired
+    private SecurityService securityService;
+
+    @Autowired
+    private ProjectService projectService;
+
+    @Autowired
+    private ProjectRoleService projectRoleService;
+
+    @Autowired
+    private RegionService regionService;
+
+    @Autowired
+    private DivisionService divisionService;
+
+    @Autowired
+    private CalendarService calendarService;
+
+    @Autowired
+    private EmployeeService employeeService;
+
+    @Autowired
+    private TimeSheetService timeSheetService;
+
+    @Autowired
+    private EmployeeProjectPlanService employeeProjectPlanService;
+
+    @Autowired
+    private EmployeePlanService employeePlanService;
+
+    @Autowired
+    private PlanEditService planEditService;
+
+    @Autowired
+    private VacationService vacationService;
+
+    @Autowired
+    private PlanEditExcelReportService planEditExcelReportService;
+
+    @Autowired
+    private IllnessService illnessService;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(PlanEditController.class);
 
     public static final String _PLAN = "_plan";
@@ -54,37 +98,44 @@ public class PlanEditController {
     public static final String SUMMARY = "summary";
     public static final String CENTER_PROJECTS = "center_projects";
     public static final String CENTER_PRESALES = "center_presales";
+    public static final String OTHER_PROJECT = "other_project";
+    public static final String OTHER_PRESALE = "other_presale";
     public static final String OTHER_PROJECTS_AND_PRESALES = "other_projects_and_presales";
+    public static final String OTHER_INVEST_PROJECT = "other_invest_project";
+    public static final String OTHER_COMERCIAL_PROJECT = "other_comercial_project";
     public static final String NON_PROJECT = "non_project";
     public static final String ILLNESS = "illness";
     public static final String VACATION = "vacation";
     public static final String EMPLOYEE = "employee";
     public static final String EMPLOYEE_ID = "employee_id";
+    public static final String EMPLOYEE_DIVISION = "employee_division";
     public static final String PERCENT_OF_CHARGE = "percent_of_charge";
 
     public static final String SUMMARY_PROJECTS = "summary_projects";
     public static final String SUMMARY_PRESALES = "summary_presales";
     public static final String SUMMARY_INVESTMENT = "summary_investment";
     public static final String SUMMARY_COMMERCIAL = "summary_commercial";
-    public static final String SUMMARY_PROJECTS_PLAN = SUMMARY_PROJECTS + _PLAN;
     public static final String SUMMARY_PROJECTS_FACT = SUMMARY_PROJECTS + _FACT;
-    public static final String SUMMARY_PRESALES_PLAN = SUMMARY_PRESALES + _PLAN;
     public static final String SUMMARY_PRESALES_FACT = SUMMARY_PRESALES + _FACT;
-    public static final String SUMMARY_INVESTMENT_PLAN = SUMMARY_INVESTMENT + _PLAN;
     public static final String SUMMARY_INVESTMENT_FACT = SUMMARY_INVESTMENT + _FACT;
-    public static final String SUMMARY_COMMERCIAL_PLAN = SUMMARY_COMMERCIAL + _PLAN;
     public static final String SUMMARY_COMMERCIAL_FACT = SUMMARY_COMMERCIAL + _FACT;
 
     public static final String PROJECT_ID = "id";
     public static final String PROJECT_NAME = "name";
+    public static final String PROJECT_DIVISION = "project_division";
+    public static final String PROJECT_TYPE = "project_type";
+    public static final String PROJECT_FUNDING_TYPE = "project_funding_type";
     public static final String PROJECTS_PLANS = "projects_plans";
-    public static final String SUMMARY_PLAN = SUMMARY + _PLAN;
 
     public static final String SUMMARY_FACT = SUMMARY + _FACT;
-    public static final String CENTER_PROJECTS_PLAN = CENTER_PROJECTS + _PLAN;
     public static final String CENTER_PROJECTS_FACT = CENTER_PROJECTS + _FACT;
-    public static final String CENTER_PRESALES_PLAN = CENTER_PRESALES + _PLAN;
     public static final String CENTER_PRESALES_FACT = CENTER_PRESALES + _FACT;
+
+    public static final String OTHER_PROJECT_PLAN = OTHER_PROJECT + _PLAN;
+    public static final String OTHER_PRESALE_PLAN = OTHER_PRESALE + _PLAN;
+    public static final String OTHER_INVEST_PROJECT_PLAN = OTHER_INVEST_PROJECT + _PLAN;
+    public static final String OTHER_COMERCIAL_PROJECT_PLAN = OTHER_COMERCIAL_PROJECT + _PLAN;
+
     public static final String OTHER_PROJECTS_AND_PRESALES_PLAN = OTHER_PROJECTS_AND_PRESALES + _PLAN;
     public static final String OTHER_PROJECTS_AND_PRESALES_FACT = OTHER_PROJECTS_AND_PRESALES + _FACT;
     public static final String NON_PROJECT_PLAN = NON_PROJECT + _PLAN;
@@ -93,8 +144,8 @@ public class PlanEditController {
     public static final String ILLNESS_FACT = ILLNESS + _FACT;
     public static final String VACATION_PLAN = VACATION + _PLAN;
     public static final String VACATION_FACT = VACATION + _FACT;
-    public static final String PERCENT_OF_CHARGE_PLAN = PERCENT_OF_CHARGE + _PLAN;
     public static final String PERCENT_OF_CHARGE_FACT = PERCENT_OF_CHARGE + _FACT;
+    public static final String MONTH_PLAN = "month_plan";
 
     public static final String JSON_DATA_YEAR = "year";
     public static final String JSON_DATA_MONTH = "month";
@@ -205,51 +256,6 @@ public class PlanEditController {
         response.addCookie(cookie);
     }
 
-    @Autowired
-    private PlanEditFormValidator planEditFormValidator;
-
-    @Autowired
-    private SecurityService securityService;
-
-    @Autowired
-    private ProjectService projectService;
-
-    @Autowired
-    private ProjectRoleService projectRoleService;
-
-    @Autowired
-    private RegionService regionregionService;
-
-    @Autowired
-    private DivisionService divisionService;
-
-    @Autowired
-    private CalendarService calendarService;
-
-    @Autowired
-    private EmployeeService employeeService;
-
-    @Autowired
-    private TimeSheetService timeSheetService;
-
-    @Autowired
-    private EmployeeProjectPlanService employeeProjectPlanService;
-
-    @Autowired
-    private EmployeePlanService employeePlanService;
-
-    @Autowired
-    private PlanEditService planEditService;
-
-    @Autowired
-    private VacationService vacationService;
-
-    @Autowired
-    private PlanEditExcelReportService planEditExcelReportService;
-
-    @Autowired
-    private IllnessService illnessService;
-
     @RequestMapping(PLAN_EDIT_URL)
     public ModelAndView showForm(
             @ModelAttribute(PlanEditForm.FORM) PlanEditForm form,
@@ -262,6 +268,64 @@ public class PlanEditController {
         saveCookie(form, response);
 
         return createModelAndView(form, bindingResult);
+    }
+
+    @RequestMapping(value = PLAN_EDIT_URL, method = RequestMethod.POST)
+    public ModelAndView showTable(
+            @ModelAttribute(PlanEditForm.FORM) PlanEditForm form,
+            BindingResult bindingResult,
+            HttpServletResponse response
+    ) {
+        final ModelAndView modelAndView = createModelAndView(form, bindingResult);
+
+        if (!bindingResult.hasErrors()) {
+            saveCookie(form, response);
+        }
+
+        return modelAndView;
+    }
+
+    @RequestMapping(value = EXPORT_TABLE_EXCEL+"/{year}/{month}", method = RequestMethod.POST)
+    public ModelAndView exportTableExcel(
+            @ModelAttribute("year") Integer year,
+            @ModelAttribute("month") Integer month,
+            @ModelAttribute(PlanEditForm.FORM) PlanEditForm form,
+            BindingResult bindingResult, HttpServletRequest request,
+            HttpServletResponse response
+    ) {
+
+        final Date date = DateTimeUtil.createDate(year, month);
+
+        List<Project> projectList = getProjects(form, date);
+        String dataAsJson = getDataAsJson(form, date, projectList);
+
+        com.aplana.timesheet.dao.entity.Calendar calDate = calendarService.find(new Timestamp(date.getTime()));
+
+        String reportName = "Планирование занятости за "+calDate.getMonthTxt()+" "+year.toString()+" года";
+
+        // TODO Спорный способ передавать сюда JSON, чтобы потом его снова разбирать. Переделать
+        planEditExcelReportService.createAndExportReport(reportName, dataAsJson, projectList, response, request);
+
+        return null;
+    }
+
+    @RequestMapping(value = PLAN_SAVE_URL, method = RequestMethod.POST)
+    public String save(
+            @ModelAttribute(PlanEditForm.FORM) PlanEditForm form,
+            HttpServletResponse response
+    ) {
+        try {
+            final JsonRootNode rootNode = JsonUtil.parse(form.getJsonData());
+            final Integer year = JsonUtil.getDecNumberValue(rootNode, JSON_DATA_YEAR);
+            final Integer month = JsonUtil.getDecNumberValue(rootNode, JSON_DATA_MONTH);
+
+            planEditService.savePlans(rootNode, year, month);
+        } catch (InvalidSyntaxException e) {
+            LOGGER.error(e.getLocalizedMessage());
+            throw new RuntimeException(e);
+        }
+        saveCookie(form, response);
+        return "redirect:" + PLAN_EDIT_URL;
     }
 
     /**
@@ -323,7 +387,7 @@ public class PlanEditController {
     }
 
     private List<Region> getRegionList() {
-        return regionregionService.getRegions();
+        return regionService.getRegions();
     }
 
     private List<Employee> getManagerList() {
@@ -348,45 +412,6 @@ public class PlanEditController {
 
     private String getMonthMapAsJson(List<com.aplana.timesheet.dao.entity.Calendar> yearList) {
         return DateTimeUtil.getMonthListJson(yearList, calendarService);
-    }
-
-    @RequestMapping(value = PLAN_EDIT_URL, method = RequestMethod.POST)
-    public ModelAndView showTable(
-            @ModelAttribute(PlanEditForm.FORM) PlanEditForm form,
-            BindingResult bindingResult,
-            HttpServletResponse response
-    ) {
-        final ModelAndView modelAndView = createModelAndView(form, bindingResult);
-
-        if (!bindingResult.hasErrors()) {
-            saveCookie(form, response);
-        }
-
-        return modelAndView;
-    }
-
-    @RequestMapping(value = EXPORT_TABLE_EXCEL+"/{year}/{month}", method = RequestMethod.POST)
-    public ModelAndView exportTableExcel(
-            @ModelAttribute("year") Integer year,
-            @ModelAttribute("month") Integer month,
-            @ModelAttribute(PlanEditForm.FORM) PlanEditForm form,
-            BindingResult bindingResult, HttpServletRequest request,
-            HttpServletResponse response
-    ) {
-
-        final Date date = DateTimeUtil.createDate(year, month);
-
-        String dataAsJson = getDataAsJson(form, date);
-        List<Project> projectList = getProjects(form, date);
-
-        com.aplana.timesheet.dao.entity.Calendar calDate = calendarService.find(new Timestamp(date.getTime()));
-
-        String reportName = "Планирование занятости за "+calDate.getMonthTxt()+" "+year.toString()+" года";
-
-        // TODO Спорный способ передавать сюда JSON, чтобы потом его снова разбирать. Переделать
-        planEditExcelReportService.createAndExportReport(reportName, dataAsJson, projectList, response, request);
-
-        return null;
     }
 
     private void saveCookie(PlanEditForm form, HttpServletResponse response) {
@@ -440,9 +465,10 @@ public class PlanEditController {
 
     private void fillTableData(ModelAndView modelAndView, PlanEditForm form) {
         final Date date = DateTimeUtil.createDate(form.getYear(), form.getMonth());
+        List<Project> projectList = getProjects(form, date);
 
-        modelAndView.addObject("jsonDataToShow", getDataAsJson(form, date));
-        modelAndView.addObject("projectListJson", getProjectListAsJson(getProjects(form, date)));
+        modelAndView.addObject("projectListJson", getProjectListAsJson(projectList));
+        modelAndView.addObject("jsonDataToShow", getDataAsJson(form, date, projectList));
     }
 
     private List<Project> getProjects(PlanEditForm form, Date date) {
@@ -464,7 +490,13 @@ public class PlanEditController {
             nodes.add(
                     object(
                             field(PROJECT_ID, number(project.getId())),
-                            field(PROJECT_NAME, string(project.getName()))
+                            field(PROJECT_NAME, string(project.getName())),
+                            field(PROJECT_DIVISION,
+                                    number( project.getDivision() != null ? project.getDivision().getId() : -1 )
+                            ),
+                            field(PROJECT_TYPE, number( project.getState().getId() )),
+                            field(PROJECT_FUNDING_TYPE,
+                                    number(project.getFundingType() != null ? project.getFundingType().getId() : -1))
                     )
             );
         }
@@ -486,7 +518,7 @@ public class PlanEditController {
         return states;
     }
 
-    private String getDataAsJson(PlanEditForm form, Date date) {
+    private String getDataAsJson(PlanEditForm form, Date date, List<Project> projectList) {
         final List<Employee> employees;
         final Integer managerId = form.getManager();
         LOGGER.debug("manager = {}",managerId);
@@ -524,15 +556,15 @@ public class PlanEditController {
         for (Employee employee : employees) {
             builder = anObjectBuilder().
                     withField(EMPLOYEE_ID, aNumberBuilder(employee.getId())).
-                    withField(EMPLOYEE, aStringBuilder(employee.getName()));
+                    withField(EMPLOYEE, aStringBuilder(employee.getName())).
+                    withField(EMPLOYEE_DIVISION, aNumberBuilder(employee.getDivision().getId()));
 
             workDaysCount = calendarService.getEmployeeRegionWorkDaysCount(employee, year, month);
-
 
             final double summaryPlan = TimeSheetConstants.WORK_DAY_DURATION * workDaysCount * employee.getJobRate();
 
             if (showPlans) {
-                appendToBuilder(builder, getPlans(employee, year, month, summaryPlan, form));
+                appendToBuilder(builder, getPlans(employee, year, month, summaryPlan, form, projectList));
             }
 
             if (showFacts) {
@@ -551,147 +583,98 @@ public class PlanEditController {
         }
     }
 
-    private Map<String, JsonNodeBuilder> getPlans(Employee employee, Integer year, Integer month, Double summaryPlan, PlanEditForm form) {
-        final Division division = employee.getDivision();
+    private Map<String, JsonNodeBuilder> getPlans(Employee employee, Integer year, Integer month, Double summaryPlan, PlanEditForm form, List<Project> projectListToShow) {
         final Map<String, JsonNodeBuilder> map = Maps.newHashMap();
 
-        Double centerProjectsPlan = null;
-        Double centerPresalesPlan = null;
-        double otherProjectsPlan = 0;
-        double sumOfPlanCharge = 0;
-        Double sumProjectsPlan = null;
-        Double sumPresalesPlan = null;
-        Double sumInvestPlan = null;
-        Double sumCommercePlan = null;
+        Double otherProjectsPlan = 0.0;
+        Double otherPresalePlan  = 0.0;
+        Double otherInvestProjectPlan = 0.0;
+        Double otherComercialProjectPlan = 0.0;
+        Double vacationPlan =
+                vacationService.getVacationsWorkdaysCount(employee, year, month) * TimeSheetConstants.WORK_DAY_DURATION;
+        Double illnessPlan  =
+                illnessService.getIllnessWorkdaysCount(employee, year, month) * TimeSheetConstants.WORK_DAY_DURATION;
 
         for (EmployeeProjectPlan employeeProjectPlan : employeeProjectPlanService.find(employee, year, month)) {
             final Project project = employeeProjectPlan.getProject();
-            final double duration = nilIfNull(employeeProjectPlan.getValue());
-
+            double duration = nilIfNull(employeeProjectPlan.getValue());
+            duration = getPercent(duration, summaryPlan); // так как отображается в процентах, то переводим
             if (project != null) {
-                if (division.equals(project.getDivision())) {
-                    if (isPresale(project)) {
-                        centerPresalesPlan = nilIfNull(centerPresalesPlan) + duration;
-                    } else {
-                        centerProjectsPlan = nilIfNull(centerProjectsPlan) + duration;
+                if ( !project.getDivisions().contains(employee.getDivision())) {
+                    if (isPresale(project)){
+                        otherPresalePlan  += duration;
+                    }else{
+                        otherProjectsPlan += duration;
                     }
-                } else {
-                    otherProjectsPlan += duration;
                 }
-
-                /* расчёт итого по проектам/пресейлам */
-                if (isProject(project)) {
-                    sumProjectsPlan = nilIfNull(sumProjectsPlan) + duration;
-                } else {
-                    sumPresalesPlan = nilIfNull(sumPresalesPlan) + duration;
+                if ( ! projectListToShow.contains(project)){
+                    if (isCommercialProject(project)){
+                        otherComercialProjectPlan += duration;
+                    }else{
+                        otherInvestProjectPlan += duration;
+                    }
                 }
-
-                /* расчёт итого по инвест/комерц проектам */
-                if (isProject(project) && isCommercialProject(project)) {
-                    sumCommercePlan = nilIfNull(sumCommercePlan) + duration;
-                }
-                if ( (isProject(project) && isInvestmentProject(project)) || (isPresale(project)) ) {
-                    sumInvestPlan = nilIfNull(sumInvestPlan) + duration;
-                }
-
-                appendNumberField(map, String.format("%d" + _PLAN, project.getId()), employeeProjectPlan.getValue());
+                appendNumberField(map, String.format("%d" + _PLAN, project.getId()), duration);
             }
         }
-
-        appendNumberField(map, OTHER_PROJECTS_AND_PRESALES_PLAN, otherProjectsPlan);
-        Double summaryWorkHours = getEmployeeProjectDurationPlan(employee, year, month);
-        Double nonProjectDuration = getEmployeeNonProjectDuration(employee, year, month);
-
-        sumOfPlanCharge += nilIfNull(centerProjectsPlan) + nilIfNull(centerPresalesPlan) + nilIfNull(otherProjectsPlan);
-
-        Double vacationPlan = 0.0;
-        try {
-            vacationPlan = vacationService.getVacationsWorkdaysCount(employee, year, month);
-        } catch (NotDataForYearInCalendarException e) {
-            LOGGER.error("Error in com.aplana.timesheet.controller.PlanEditController.getPlans : " + e.getMessage());
-        }
-        vacationPlan*=TimeSheetConstants.WORK_DAY_DURATION;
-
-        appendNumberField(map, CENTER_PROJECTS_PLAN, centerProjectsPlan);
-        appendNumberField(map, CENTER_PRESALES_PLAN, centerPresalesPlan);
-
-        if (form.getShowSumProjectsPresales()) {
-            appendNumberField(map, SUMMARY_PROJECTS_PLAN, sumProjectsPlan);
-            appendNumberField(map, SUMMARY_PRESALES_PLAN, sumPresalesPlan);
-        }
-
-        Double value;
 
         for (EmployeePlan employeePlan : employeePlanService.find(employee, year, month)) {
-            value = employeePlan.getValue();
-
-            sumOfPlanCharge += nilIfNull(value);
-
-            /* непроектная активность */
-            if ( employeePlan.getType().getId().equals(TypesOfActivityEnum.NON_PROJECT.getId()) ) {
-                sumInvestPlan = nilIfNull(sumInvestPlan) + value;
-            }
-
-            appendNumberField(map, getFieldNameForEmployeePlan(employeePlan), value);
-        }
-        /* т.к. план по болезни входит в EmployeePlan перепишем его значением фактического */
-        appendNumberField(
-                map,
-                ILLNESS_PLAN,
-                TimeSheetConstants.WORK_DAY_DURATION * illnessService.getIllnessWorkdaysCount(employee, year, month)
-        );
-
-        if (form.getShowSumFundingType()) {
-            appendNumberField(map, SUMMARY_INVESTMENT_PLAN, sumInvestPlan);
-            appendNumberField(map, SUMMARY_COMMERCIAL_PLAN, sumCommercePlan);
+            Double duration = nilIfNull(employeePlan.getValue());
+            appendNumberField(map, getFieldNameForEmployeePlan(employeePlan), duration);
         }
 
-        appendStringField(map, SUMMARY_PLAN, formatSummaryPlan(summaryWorkHours + nonProjectDuration, summaryPlan));
-
-        appendStringField(
-                map,
-                PERCENT_OF_CHARGE_PLAN,
-                formatPercentOfCharge((summaryPlan != 0) ? sumOfPlanCharge / summaryPlan : 0D)
-        );
-
+        appendNumberField(map, OTHER_PROJECT_PLAN, otherProjectsPlan);
+        appendNumberField(map, OTHER_PRESALE_PLAN, otherPresalePlan);
+        appendNumberField(map, OTHER_PROJECTS_AND_PRESALES_PLAN, otherProjectsPlan + otherPresalePlan);
+        appendNumberField(map, OTHER_COMERCIAL_PROJECT_PLAN, otherComercialProjectPlan);
+        appendNumberField(map, OTHER_INVEST_PROJECT_PLAN, otherInvestProjectPlan);
+        appendNumberField(map, ILLNESS_PLAN, illnessPlan);
         appendNumberField(map, VACATION_PLAN, vacationPlan);
+        appendStringField(map, MONTH_PLAN, round(summaryPlan));
 
         return map;
+    }
+
+    private String round(Double value){
+        return (new Long(Math.round(value))).toString();
+    }
+
+    private Double getPercent(Double partValue, Double total){
+        return partValue / total * 100;
     }
 
     private Map<String, JsonNodeBuilder> getFacts(Employee employee, Integer year, Integer month, double summaryPlan, PlanEditForm form) {
         final Division division = employee.getDivision();
         final Map<Integer, Double> projectsFactMap = Maps.newHashMap();
 
-        double summaryFact = 0;
-        double centerProjectsFact = 0;
-        double centerPresalesFact = 0;
-        double otherProjectsFact = 0;
-        double nonProjectFact = 0;
-        Double sumProjectsFact = null;
-        Double sumPresalesFact = null;
-        Double sumInvestFact = null;
-        Double sumCommerceFact = null;
-
-        Integer projectId;
+        Double summaryFact        = 0.0;
+        Double centerProjectsFact = 0.0;
+        Double centerPresalesFact = 0.0;
+        Double otherProjectsFact  = 0.0;
+        Double nonProjectFact     = 0.0;
+        Double sumProjectsFact    = 0.0;
+        Double sumPresalesFact    = 0.0;
+        Double sumInvestFact      = 0.0;
+        Double sumCommerceFact    = 0.0;
+        Double illnessFact        =
+                illnessService.getIllnessWorkdaysCount(employee, year, month) * TimeSheetConstants.WORK_DAY_DURATION ;
+        Double vacationFact       =
+                vacationService.getVacationsWorkdaysCount(employee, year, month, VacationStatusEnum.APPROVED) * TimeSheetConstants.WORK_DAY_DURATION;
 
         for (TimeSheet timeSheet : timeSheetService.getTimeSheetsForEmployee(employee, year, month)) {
             for (TimeSheetDetail timeSheetDetail : timeSheet.getTimeSheetDetails()) {
-                final double duration = nilIfNull(timeSheetDetail.getDuration());
-
+                double duration = nilIfNull(timeSheetDetail.getDuration());
+                duration = getPercent(duration, summaryPlan); // так как отображается в процентах, то переводим
                 summaryFact += duration;
 
-                final TypesOfActivityEnum actType =
-                        EnumsUtils.getEnumById(timeSheetDetail.getActType().getId(), TypesOfActivityEnum.class);
-
-                if (actType == TypesOfActivityEnum.NON_PROJECT) {
+                if (timeSheetDetail.getActType().getId().equals(TypesOfActivityEnum.NON_PROJECT.getId())) {
                     nonProjectFact += duration;
                 }
 
                 final Project project = timeSheetDetail.getProject();
 
                 if (project != null) {
-                    projectId = project.getId();
+                    Integer projectId = project.getId();
 
                     if (division.equals(project.getDivision())) {
                         if (isPresale(project)) {
@@ -705,81 +688,48 @@ public class PlanEditController {
 
                     /* расчёт итого по проектам/пресейлам */
                     if (isProject(project)) {
-                        sumProjectsFact = nilIfNull(sumProjectsFact) + duration;
+                        sumProjectsFact += duration;
                     } else {
-                        sumPresalesFact = nilIfNull(sumPresalesFact) + duration;
+                        sumPresalesFact += duration;
                     }
 
                     /* расчёт итого по инвест/комерц проектам */
-                    if (isProject(project) && isCommercialProject(project)) {
-                        sumCommerceFact = nilIfNull(sumCommerceFact) + duration;
+                    if (isCommercialProject(project)) {
+                        sumCommerceFact += duration;
+                    }else{
+                        sumInvestFact += duration;
                     }
-                    if ( (isProject(project) && isInvestmentProject(project)) || (isPresale(project)) ) {
-                        sumInvestFact = nilIfNull(sumInvestFact) + duration;
-                    }
-
 
                     projectsFactMap.put(projectId, nilIfNull(projectsFactMap.get(projectId)) + duration);
                 }
             }
         }
-
-        summaryFact += TimeSheetConstants.WORK_DAY_DURATION * vacationService.getVacationsWorkdaysCount(
-                employee, year, month,
-                VacationStatusEnum.APPROVED);
-
         final Map<String, JsonNodeBuilder> map = Maps.newHashMap();
 
         for (Map.Entry<Integer, Double> entry : projectsFactMap.entrySet()) {
             appendNumberField(map, String.format("%d" + _FACT, entry.getKey()), entry.getValue());
         }
 
-        appendNumberField(map, SUMMARY_FACT, summaryFact);
+        summaryFact += vacationFact;
 
-        appendStringField(
-                map,
-                PERCENT_OF_CHARGE_FACT,
-                formatPercentOfCharge((summaryPlan != 0) ? summaryFact / summaryPlan : 0D)
-        );
-
+        appendNumberField(map, SUMMARY_FACT, summaryPlan * summaryFact / 100);
+        appendStringField(map, PERCENT_OF_CHARGE_FACT, round(summaryFact));
         appendNumberField(map, CENTER_PROJECTS_FACT, centerProjectsFact);
-
         appendNumberField(map, CENTER_PRESALES_FACT, centerPresalesFact);
-
         appendNumberField(map, OTHER_PROJECTS_AND_PRESALES_FACT, otherProjectsFact);
-
         appendNumberField(map, NON_PROJECT_FACT, nonProjectFact);
-
         if (form.getShowSumProjectsPresales()) {
             appendNumberField(map, SUMMARY_PROJECTS_FACT, sumProjectsFact);
             appendNumberField(map, SUMMARY_PRESALES_FACT, sumPresalesFact);
         }
-
         if (form.getShowSumFundingType()) {
-            appendNumberField(map, SUMMARY_INVESTMENT_FACT, nilIfNull(sumInvestFact) + nilIfNull(nonProjectFact));
+            appendNumberField(map, SUMMARY_INVESTMENT_FACT, sumInvestFact + nonProjectFact);
             appendNumberField(map, SUMMARY_COMMERCIAL_FACT, sumCommerceFact);
         }
-
-        appendNumberField(
-                map,
-                ILLNESS_FACT,
-                TimeSheetConstants.WORK_DAY_DURATION * illnessService.getIllnessWorkdaysCount(employee, year, month)
-        );
-
-        appendNumberField(
-                map,
-                VACATION_FACT,
-                TimeSheetConstants.WORK_DAY_DURATION * vacationService.getVacationsWorkdaysCount(
-                        employee, year, month,
-                        VacationStatusEnum.APPROVED
-                )
-        );
+        appendNumberField(map, ILLNESS_FACT, illnessFact);
+        appendNumberField(map, VACATION_FACT, vacationFact);
 
         return map;
-    }
-
-    private String formatPercentOfCharge(double normalizedValueOfCharge) {
-        return String.format("%d" + "%%", Math.round(normalizedValueOfCharge * 100));
     }
 
     private String formatSummaryPlan(double sumPlan, double monthPlan) {
@@ -827,42 +777,4 @@ public class PlanEditController {
 
         return projectRoles;
     }
-
-    @RequestMapping(value = PLAN_SAVE_URL, method = RequestMethod.POST)
-    public String save(
-            @ModelAttribute(PlanEditForm.FORM) PlanEditForm form,
-            HttpServletResponse response
-    ) {
-        try {
-            final JsonRootNode rootNode = JsonUtil.parse(form.getJsonData());
-            final Integer year = JsonUtil.getDecNumberValue(rootNode, JSON_DATA_YEAR);
-            final Integer month = JsonUtil.getDecNumberValue(rootNode, JSON_DATA_MONTH);
-
-            planEditService.savePlans(rootNode, year, month);
-        } catch (InvalidSyntaxException e) {
-            LOGGER.error(e.getLocalizedMessage());
-            throw new RuntimeException(e);
-        }
-        saveCookie(form, response);
-        return "redirect:" + PLAN_EDIT_URL;
-    }
-
-    public Double getEmployeeProjectDurationPlan(Employee employee, Integer year, Integer month) {
-        Double duration = 0.0;
-        for (EmployeeProjectPlan employeeProjectPlan : employeeProjectPlanService.find(employee, year, month)) {
-            duration += nilIfNull(employeeProjectPlan.getValue());
-        }
-        return duration;
-    }
-
-    public Double getEmployeeNonProjectDuration(Employee employee, Integer year, Integer month) {
-        Double duration = 0.0;
-        for (EmployeePlan employeePlan : employeePlanService.find(employee, year, month)) {
-            if (employeePlan.getType()!= null && employeePlan.getType().getId().equals(EmployeePlanType.NON_PROJECT.getId())) {
-                duration += nilIfNull(employeePlan.getValue());
-            }
-        }
-        return duration;
-    }
-
 }

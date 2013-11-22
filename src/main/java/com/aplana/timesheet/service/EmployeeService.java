@@ -281,6 +281,7 @@ public class EmployeeService {
         return employeeDAO.getDivisionEmployees(divisionId, date, regionIds, projectRoleIds);
     }
 
+    // ToDo нельзя ли эту логику перенести в запрос?
     public List<Employee> getDivisionEmployeesByManager(Integer divisionId, Date date, List<Integer> regionIds, List<Integer> projectRoleIds,Integer managerId) {
         List<Employee> divisionEmployeesByManager = employeeDAO.getDivisionEmployeesByManager(divisionId, date, regionIds, projectRoleIds, managerId);
         List<Employee> divisionEmployeesTemp = new ArrayList<Employee>();

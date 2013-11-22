@@ -183,8 +183,15 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
         return vacationsWorkdaysCount;
     }
 
-    public Double getVacationsWorkdaysCount(Employee employee, Integer year, Integer month) throws NotDataForYearInCalendarException {
-        return viewReportHelper.getCountVacationAndPlannedVacationDays(year, month, employee.getId()).doubleValue();
+    // ToDo удалить exception
+    public Double getVacationsWorkdaysCount(Employee employee, Integer year, Integer month) {
+        try {
+            return viewReportHelper.getCountVacationAndPlannedVacationDays(year, month, employee.getId()).doubleValue();
+        } catch (NotDataForYearInCalendarException e) {
+            final Logger LOGGER = LoggerFactory.getLogger(VacationService.class);
+            LOGGER.error("Error in com.aplana.timesheet.controller.VacationService.getVacationsWorkdaysCount : " + e.getMessage());
+        }
+        return null;
     }
 
     public Map<DictionaryItem, List<Vacation>> splitVacationByTypes(List<Vacation> vacations) {

@@ -8,7 +8,7 @@ import java.util.List;
  */
 public class PlanEditForm {
 
-    public static final int ALL_VALUE = -1;
+    public static final int ALL_VALUE = 0;
 
     public static final String FORM = "planEditForm";
 
