@@ -135,7 +135,7 @@
         setDefaultDate(dojo.byId("employeeId").value);
         reloadTimeSheetState();
         recalculateDuration();
-        refreshPlans(dijit.byId('calDate').value, dojo.byId('employeeId').value);
+        //refreshPlans(dijit.byId('calDate').value, dojo.byId('employeeId').value);
 
         // инициализация данных по выходным и отчетам для текущей даты
         initCurrentDateInfo('${timeSheetForm.employeeId}', dijit.byId('calDate').value, '/calendar/dates');
@@ -187,10 +187,12 @@
                         dojo.byId("lbNextPlan").innerHTML = "Планы на следующий рабочий день:";
                     }
 
-                    if (data.draft != null) {
-                        hideShowElement("load_draft", data.draft == 0);
-                        hideShowElement("load_draft_text", data.draft == 0);
+                    if (data.draft != null || dataDraft) {
+                        console.log(dataDraft);
+                        hideShowElement("load_draft", dataDraft || data.draft == 0);
+                        hideShowElement("load_draft_text", dataDraft || data.draft == 0);
                     }
+                    dataDraft = false;
                 }
             },
             error: function (err, ioArgs) {
@@ -226,7 +228,7 @@ function submitform(s) {
         var diffProjects = false;
         var diffWorkPlaces = false;
         for (var i = 0; i < rowsCount; i++) {
-            projectComponent = dojo.query("#project_id_" + i)
+            projectComponent = dojo.query("#project_id_" + i);
             if (!diffProjects && projectComponent.length > 0)
                 if (projectComponent[0].value) {
                     if (projectId && (projectId != projectComponent[0].value)) {
@@ -374,17 +376,20 @@ function loadDraft() {
                 var div = dojo.byId('time_sheet_table');
                 var tr = div.getElementsByClassName('time_sheet_row');
                 rowsCount = tr.length;
-                for (var i = 0; i < rowsCount; i++) {
-                    console.log("!");
+                for (var j = 0; j < rowsCount; j++) {
                     tr[0].parentNode.removeChild(tr[0]);
                 }
                 for (var i = 0; i < data.data.length; i++) {
                     addNewRow();
                     loadDraftRow(i, data.data);
                 }
+
+                hideShowElement("load_draft", true);
+                hideShowElement("load_draft_text", true);
             }
 
             //todo более правильная версия, но не работает польностью
+            //а нафига она тут?
 //            var div = dojo.byId('time_sheet_table');
 //            var tr = div.getElementsByClassName('time_sheet_row');
 //            rowsCount = tr.length;
@@ -652,32 +657,24 @@ function loadDraft() {
                                                       onkeyup="somethingChanged();"/></td>
                     <td class="top_align"><form:textarea wrap="soft"
                                                          path="timeSheetTablePart[${row.index}].description"
-                                                         rows="4" style="width: 100%"
+                                                         rows="3" style="width: 100%"
                                                          id="description_id_${row.index}"
                                                          onkeyup="somethingChanged();"/></td>
-                    <td class="text_center_align" id="jira_button_id_${row.index}">
 
-                    </td>
+                    <td class="text_center_align" id="jira_button_id_${row.index}"/>
+
                     <td class="top_align"><form:textarea wrap="soft" path="timeSheetTablePart[${row.index}].problem"
-                                                         rows="4" style="width: 100%" id="problem_id_${row.index}"
+                                                         rows="3" style="width: 100%" id="problem_id_${row.index}"
                                                          onkeyup="somethingChanged();"/></td>
                 </tr>
             </c:forEach>
         </c:if>
 
         <tr style="height : 20px;" id="total_duration_row">
-            <td></td>
-            <td></td>
-            <td>&nbsp;ИТОГО</td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
+            <td colspan="7"/>
+            <td style="text-align: right">&nbsp;ИТОГО</td>
             <td id="total_duration" class="text_right_align">0</td>
-            <td></td>
-            <td></td>
-            <td></td>
+            <td colspan="3"/>
         </tr>
     </table>
 </div>

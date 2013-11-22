@@ -41,11 +41,7 @@
 				size2 = 0;
 			}
 			var totalSize = size1 + size2;
-			if (totalSize > 8388608) {
-				return true;
-			} else {
-				return false;
-			}
+			return totalSize > 8388608;
 		}		
 
         //проверяем и отсылаем форму

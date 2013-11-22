@@ -15,7 +15,9 @@
 	<style name="Group Header 2" style="Normal" forecolor="#666666" isBold="true"/>
 	<style name="Group Header 3" style="Normal" forecolor="#000000" isBold="true"/>
 	<style name="Column header" style="Normal" forecolor="#666666" isBold="true"/>
-	<style name="Detail" style="Normal" backcolor="#FF0000"/>
+	<style name="Detail" style="Normal" backcolor="#FF0000"  >
+        <paragraph lineSpacing="Double" tabStopWidth="40"/>
+	</style>
 	<parameter name="reportParams" class="com.aplana.timesheet.reports.Report01" isForPrompting="false"/>
 	<field name="name" class="java.lang.String"/>
 	<field name="caldate" class="java.util.Date"/>
@@ -49,29 +51,29 @@
 	<group name="GroupByName">
 		<groupExpression><![CDATA[$F{name}]]></groupExpression>
 		<groupHeader>
-			<band height="13">
+			<band height="15">
 				<textField isStretchWithOverflow="true" evaluationTime="Group" evaluationGroup="GroupByOvertime" isBlankWhenNull="true">
-					<reportElement uuid="a1446b57-8bad-4ecd-929e-c87aeb526e12" style="Group Header 2" x="0" y="0" width="106" height="13"/>
+					<reportElement uuid="a1446b57-8bad-4ecd-929e-c87aeb526e12" style="Group Header 2" x="0" y="0" width="106" height="15"/>
 					<textElement/>
 					<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement uuid="5971c534-816b-4fff-b8c0-a8e7032f9965" style="Group Header 2" x="172" y="0" width="90" height="13"/>
+					<reportElement uuid="5971c534-816b-4fff-b8c0-a8e7032f9965" style="Group Header 2" x="172" y="0" width="90" height="15"/>
 					<textElement/>
 					<textFieldExpression><![CDATA[$F{region_name}]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" evaluationTime="Group" evaluationGroup="GroupByName" isBlankWhenNull="true">
-					<reportElement uuid="9dbe74b3-0dc0-46a2-b615-3b5cb6cf6831" style="Group Header 2" x="466" y="0" width="60" height="13"/>
+					<reportElement uuid="9dbe74b3-0dc0-46a2-b615-3b5cb6cf6831" style="Group Header 2" x="466" y="0" width="60" height="15"/>
 					<textElement/>
 					<textFieldExpression><![CDATA[$V{totalHours}]]></textFieldExpression>
 				</textField>
 				<staticText>
-					<reportElement uuid="848e238c-5f38-4736-a728-07c0d8b97a4e" style="Group Header 2" x="616" y="0" width="30" height="13"/>
+					<reportElement uuid="848e238c-5f38-4736-a728-07c0d8b97a4e" style="Group Header 2" x="616" y="0" width="30" height="15"/>
 					<textElement/>
 					<text><![CDATA[Да]]></text>
 				</staticText>
 				<textField isStretchWithOverflow="true" evaluationTime="Group" evaluationGroup="GroupByRole" isBlankWhenNull="true">
-					<reportElement uuid="848e238c-5f38-4736-a728-07c0d8b97a4e" style="Group Header 2" x="646" y="0" width="90" height="13"/>
+					<reportElement uuid="848e238c-5f38-4736-a728-07c0d8b97a4e" style="Group Header 2"  x="646" y="0" width="90" height="15"/>
 					<textElement/>
 					<textFieldExpression><![CDATA[$F{project_role}]]></textFieldExpression>
 				</textField>
@@ -176,114 +178,69 @@
 			<printWhenExpression><![CDATA[!$V{holVacIllDay}]]></printWhenExpression>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement uuid="b1f611cf-8131-4840-8eb7-a6f13faf1aba" style="Detail" stretchType="RelativeToTallestObject" x="0" y="0" width="106" height="15"/>
-				<textElement>
-					<paragraph lineSpacing="Double" tabStopWidth="40"/>
-				</textElement>
 				<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement uuid="e858fcad-559b-46be-9ddd-8b613567f4fb" style="Detail" stretchType="RelativeToTallestObject" x="106" y="0" width="66" height="15"/>
-				<textElement>
-					<paragraph lineSpacing="Double" tabStopWidth="40"/>
-				</textElement>
 				<textFieldExpression><![CDATA[new SimpleDateFormat("dd-MM-yyyy").format($F{caldate})]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement uuid="5971c534-816b-4fff-b8c0-a8e7032f9965" style="Detail" stretchType="RelativeToTallestObject" x="172" y="0" width="90" height="15"/>
-				<textElement>
-					<paragraph lineSpacing="Double" tabStopWidth="40"/>
-				</textElement>
 				<textFieldExpression><![CDATA[$F{region_name}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement uuid="96088c92-39ae-4efb-8aaf-fcb066ccd7f2" style="Detail" stretchType="RelativeToTallestObject" x="262" y="0" width="204" height="15"/>
-				<textElement>
-					<paragraph lineSpacing="Double" tabStopWidth="40"/>
-				</textElement>
 				<textFieldExpression><![CDATA[$F{projnames}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement uuid="9dbe74b3-0dc0-46a2-b615-3b5cb6cf6831" style="Detail" stretchType="RelativeToTallestObject" x="466" y="0" width="60" height="15"/>
-				<textElement>
-					<paragraph lineSpacing="Double" tabStopWidth="40"/>
-				</textElement>
 				<textFieldExpression><![CDATA[$F{overtime}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement uuid="0332b6bd-f0bf-4297-a531-aa79b02ffaaf" style="Detail" stretchType="RelativeToTallestObject" x="526" y="0" width="90" height="15"/>
-				<textElement>
-					<paragraph lineSpacing="Double" tabStopWidth="40"/>
-				</textElement>
 				<textFieldExpression><![CDATA["Переработка"]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement uuid="848e238c-5f38-4736-a728-07c0d8b97a4e" style="Detail" stretchType="RelativeToTallestObject" x="646" y="0" width="90" height="15"/>
-				<textElement>
-					<paragraph lineSpacing="Double" tabStopWidth="40"/>
-				</textElement>
 				<textFieldExpression><![CDATA[$F{project_role}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement uuid="848e238c-5f38-4736-a728-07c0d8b97a4e" style="Detail" stretchType="RelativeToTallestObject" x="827" y="0" width="93" height="15"/>
-				<textElement>
-					<paragraph lineSpacing="Double" tabStopWidth="40"/>
-				</textElement>
 				<textFieldExpression><![CDATA[$F{overtime_cause}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement uuid="848e238c-5f38-4736-a728-07c0d8b97a4e" style="Detail" stretchType="RelativeToTallestObject" x="920" y="0" width="90" height="15"/>
-				<textElement>
-					<paragraph lineSpacing="Double" tabStopWidth="40"/>
-				</textElement>
 				<textFieldExpression><![CDATA[$F{comment}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement uuid="848e238c-5f38-4736-a728-07c0d8b97a4e" style="Detail" stretchType="RelativeToTallestObject" x="1010" y="0" width="157" height="15"/>
-				<textElement>
-					<paragraph lineSpacing="Double" tabStopWidth="40"/>
-				</textElement>
 				<textFieldExpression><![CDATA[$F{compensation}]]></textFieldExpression>
 			</textField>
 		</band>
-		<band height="13">
+		<band height="15">
 			<printWhenExpression><![CDATA[$V{holVacIllDay}]]></printWhenExpression>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement uuid="3c0aefb9-174b-4fda-9595-fc361254eed8" style="Detail" stretchType="RelativeToTallestObject" x="0" y="0" width="106" height="13"/>
-				<textElement>
-					<paragraph lineSpacing="Double"/>
-				</textElement>
+				<reportElement uuid="3c0aefb9-174b-4fda-9595-fc361254eed8" style="Detail" stretchType="RelativeToTallestObject" x="0" y="0" width="106" height="15"/>
 				<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement uuid="720e46af-f353-46d6-9aa1-c5a38337623c" style="Detail" stretchType="RelativeToTallestObject" x="106" y="0" width="66" height="13"/>
-				<textElement>
-					<paragraph lineSpacing="Double"/>
-				</textElement>
+				<reportElement uuid="720e46af-f353-46d6-9aa1-c5a38337623c" style="Detail" stretchType="RelativeToTallestObject" x="106" y="0" width="66" height="15"/>
 				<textFieldExpression><![CDATA[new SimpleDateFormat("dd-MM-yyyy").format($F{caldate})]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement uuid="5971c534-816b-4fff-b8c0-a8e7032f9965" style="Detail" stretchType="RelativeToTallestObject" x="172" y="0" width="90" height="13"/>
-				<textElement>
-					<paragraph lineSpacing="Double"/>
-				</textElement>
+				<reportElement uuid="5971c534-816b-4fff-b8c0-a8e7032f9965" style="Detail" stretchType="RelativeToTallestObject" x="172" y="0" width="90" height="15"/>
 				<textFieldExpression><![CDATA[$F{region_name}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement uuid="f73f6d82-a9ce-4b0c-8b68-635b699af1a6" style="Detail" stretchType="RelativeToTallestObject" x="262" y="0" width="204" height="13"/>
-				<textElement>
-					<paragraph lineSpacing="Double"/>
-				</textElement>
+				<reportElement uuid="f73f6d82-a9ce-4b0c-8b68-635b699af1a6" style="Detail" stretchType="RelativeToTallestObject" x="262" y="0" width="204" height="15"/>
 				<textFieldExpression><![CDATA[$F{projdetail}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement uuid="85147d2e-148b-4703-8bdb-1e99a8ab5e91" style="Detail" stretchType="RelativeToTallestObject" x="466" y="0" width="60" height="13"/>
-				<textElement>
-					<paragraph lineSpacing="Double"/>
-				</textElement>
+				<reportElement uuid="85147d2e-148b-4703-8bdb-1e99a8ab5e91" style="Detail" stretchType="RelativeToTallestObject" x="466" y="0" width="60" height="15"/>
 				<textFieldExpression><![CDATA[$F{durationdetail}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement uuid="5971c534-816b-4fff-b8c0-a8e7032f9965" style="Detail" stretchType="RelativeToTallestObject" x="526" y="0" width="120" height="13"/>
+				<reportElement uuid="5971c534-816b-4fff-b8c0-a8e7032f9965" style="Detail" stretchType="RelativeToTallestObject" x="526" y="0" width="120" height="15"/>
 				<textElement>
 					<paragraph lineSpacing="Double" lineSpacingSize="1.0"/>
 				</textElement>
@@ -293,19 +250,25 @@
                                                $F{illness} != null  ? "Болезнь" : "<НЕ ОПРЕДЕЛЕНО>"]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement uuid="848e238c-5f38-4736-a728-07c0d8b97a4e" style="Detail" stretchType="RelativeToTallestObject" x="646" y="0" width="90" height="13"/>
-				<textElement>
-					<paragraph lineSpacing="Double"/>
-				</textElement>
+				<reportElement uuid="848e238c-5f38-4736-a728-07c0d8b97a4e" style="Detail" stretchType="RelativeToTallestObject" x="646" y="0" width="90" height="15"/>
 				<textFieldExpression><![CDATA[$F{project_role}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement uuid="848e238c-5f38-4736-a728-07c0d8b97a4e" style="Detail" stretchType="RelativeToTallestObject" x="736" y="0" width="91" height="13"/>
-				<textElement>
-					<paragraph lineSpacing="Double"/>
-				</textElement>
+				<reportElement uuid="848e238c-5f38-4736-a728-07c0d8b97a4e" style="Detail" stretchType="RelativeToTallestObject" x="736" y="0" width="91" height="15"/>
 				<textFieldExpression><![CDATA[$F{billable}?"Да":"Нет"]]></textFieldExpression>
 			</textField>
+            <textField isStretchWithOverflow="true" isBlankWhenNull="true">
+                <reportElement uuid="848e238c-5f38-4736-a728-07c0d8b97a4e" style="Detail" stretchType="RelativeToTallestObject" x="827" y="0" width="93" height="15"/>
+                <textFieldExpression><![CDATA[$F{overtime_cause}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true" isBlankWhenNull="true">
+                <reportElement uuid="848e238c-5f38-4736-a728-07c0d8b97a4e" style="Detail" stretchType="RelativeToTallestObject" x="920" y="0" width="90" height="15"/>
+                <textFieldExpression><![CDATA[$F{comment}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true" isBlankWhenNull="true">
+                <reportElement uuid="848e238c-5f38-4736-a728-07c0d8b97a4e" style="Detail" stretchType="RelativeToTallestObject" x="1010" y="0" width="157" height="15"/>
+                <textFieldExpression><![CDATA[$F{compensation}]]></textFieldExpression>
+            </textField>
 		</band>
 	</detail>
 </jasperReport>

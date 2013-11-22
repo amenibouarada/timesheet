@@ -197,7 +197,7 @@ function addNewRow() {
         id:"description_id_" + newRowIndex,
         name:"timeSheetTablePart[" + newRowIndex + "].description",
         wrap:"soft",
-        rows:"4",
+        rows:"3",
         style: "width: 100%"
     });
     descriptionCell.appendChild(descriptionTextarea);
@@ -231,7 +231,7 @@ function addNewRow() {
         id:"problem_id_" + newRowIndex,
         name:"timeSheetTablePart[" + newRowIndex + "].problem",
         wrap:"soft",
-        rows:"4",
+        rows:"3",
         style: "width: 100%"
     });
     problemCell.appendChild(problemTextarea);

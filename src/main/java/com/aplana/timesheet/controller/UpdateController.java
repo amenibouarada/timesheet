@@ -43,6 +43,8 @@ public class UpdateController {
     private EmployeeService employeeService;
     @Autowired
     private EmployeeAssistantService employeeAssistantService;
+    @Autowired
+    private PlannedVacationService plannedVacationService;
 
     public void setEmployeeLdapService(EmployeeLdapService employeeLdapService) {
         this.employeeLdapService = employeeLdapService;
@@ -184,5 +186,20 @@ public class UpdateController {
     public String updateEmployeeAssistantActiveStatus() {
         employeeAssistantService.changeAssistantActivity();
         return "redirect:/admin";
+    }
+
+    /**
+     * Запуск рассылки писем о ближайщих отпусках сотрудников
+     * @return ошибку или удачу
+     */
+    @RequestMapping(value = "/update/schedulerplannedvacationcheck", produces = "text/plain;charset=UTF-8")
+    @ResponseBody
+    public String startSchedulerPlannedVacationCheck() {
+        try {
+            plannedVacationService.service();
+        } catch (Exception e) {
+            return "Ошибка! " + e.getLocalizedMessage();
+        }
+        return "операция завершена успешно.";
     }
 }

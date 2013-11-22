@@ -11,34 +11,44 @@
         <title><fmt:message key="title.adminpanel"/></title>
         <script type="text/javascript">
             window.onload = function () {
-                var updatePropertiesLink = document.getElementById("updateProperties");
-                updatePropertiesLink.href = "#";
-                updatePropertiesLink.onclick = function () {
-                    var text = updatePropertiesLink.innerHTML;
-                    updatePropertiesLink.innerHTML = "<img src=\"<c:url value="/resources/img/loading_small.gif"/>\"/>" + text;
+                ajaxClick("updateProperties", "/admin/update/propertiesAJAX", "Настройки системы успешно обновлены из файла");
+                ajaxClick("schedulerplannedvacationcheck", "/admin/update/schedulerplannedvacationcheck", "Рассылка писем об отпусках:");
+            };
+
+            function ajaxClick(id, url, mess){
+                var link = dojo.byId(id);
+                link.href = "#";
+                link.onclick = function () {
+                    var text = link.innerHTML;
+                    link.innerHTML = "<img src=\"<c:url value="/resources/img/loading_small.gif"/>\"/>" + text;
 
                     dojo.xhrGet({
-                        url: "<%= request.getContextPath()%>/admin/update/propertiesAJAX",
+                        url: "<%= request.getContextPath()%>" + url,
                         handleAs: "text",
 
                         load: function (data) {
                             if (data.size == 0) {
                                 data = "неизвестно";
                             }
-                            showTextMessage("Настройки системы успешно обновлены из файла " + data);
-                            updatePropertiesLink.innerHTML = text;
+                            showTextMessage(mess + " " + data, false);
+                            link.innerHTML = text;
                         },
 
                         error: function (error) {
-                            updatePropertiesLink.setAttribute("class", "error");
-                            updatePropertiesLink.innerHTML = error;
+                            showTextMessage("Произошла ошибка " + error, true);
+                            link.innerHTML = text;
                         }
                     });
                 }
-            };
+            }
 
-            function showTextMessage(msg) {
-                var messagebox = document.getElementById("messageBox");
+            function showTextMessage(msg, isError) {
+                var messagebox = dojo.byId("messageBox");
+                //Сбрасываем стиль
+                messagebox.style.display = 'block';
+                messagebox.setAttribute("class", "");
+
+                messagebox.setAttribute("class", isError ? "errorbox" : "info-gray");
                 messagebox.innerHTML = "<b>" + msg + "</b>";
             }
 
@@ -63,7 +73,8 @@
 
         <br/>
 
-        <div id="messageBox"></div>
+        <div id="messageBox" style="text-align: left!important; width: 90%;padding: 4px;"></div>
+        <br/>
         <input type="checkbox" name="showAllUser" id="allUserCheckBox" onChange="updateShowUser();"
                <c:if test="${showalluser == true}">checked="checked"</c:if>
                 > <fmt:message key="link.showalluser"/>
@@ -79,6 +90,7 @@
             <li><a href="admin/update/sidallusersfromldap"><fmt:message key="link.allsidsync"/></a></li>
             <li><a href="admin/update/jiranameallusersfromldap"><fmt:message key="link.alljiranamesync"/></a></li>
             <li><a href="admin/update/employeeassistantactivestatus"><fmt:message key="link.employeeassistantactivestatus"/></a></li>
+            <li><a href="admin/update/schedulerplannedvacationcheck" id="schedulerplannedvacationcheck"><fmt:message key="link.schedulerplannedvacationcheck"/></a></li>
         </ul>
 
     </body>

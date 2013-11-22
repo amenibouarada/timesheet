@@ -21,8 +21,8 @@ import java.util.regex.Pattern;
 public class ReportService {
 
     private static final String JIRA_URL = "http://jira.aplana.com/browse/";
-    private static final Pattern PATTERN_TASK = Pattern.compile("\\b[a-zA-ZА-Яа-я0-9-/]+\\b");
-    private static final Pattern PATTERN_JIRA_URL = Pattern.compile("(https?://)?([a-zA-ZА-Яа-я-]+).aplana.com((/browse/(\\w+-\\d+))|([a-zA-ZА-Яа-я-./!]+))?");
+    private static final Pattern PATTERN_TASK = Pattern.compile("\\b[a-zA-ZА-Яа-я0-9-/?]+\\b");
+    private static final Pattern PATTERN_JIRA_URL = Pattern.compile("(https?://)?([a-zA-ZА-Яа-я0-9-]+).aplana.com((/browse/(\\w+-\\d+))|([a-zA-ZА-Яа-я-./!]+))?");
 
     @Autowired
     public ProjectDAO projectDAO;

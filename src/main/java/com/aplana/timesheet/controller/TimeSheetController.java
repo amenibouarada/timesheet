@@ -3,13 +3,10 @@ package com.aplana.timesheet.controller;
 import argo.jdom.JsonArrayNodeBuilder;
 import argo.jdom.JsonObjectNodeBuilder;
 import com.aplana.timesheet.dao.entity.*;
-import com.aplana.timesheet.enums.DictionaryEnum;
 import com.aplana.timesheet.enums.TypesOfTimeSheetEnum;
 import com.aplana.timesheet.form.TimeSheetForm;
 import com.aplana.timesheet.form.validator.TimeSheetFormValidator;
 import com.aplana.timesheet.service.*;
-import com.aplana.timesheet.service.helper.EmployeeHelper;
-import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.system.security.SecurityService;
 import com.aplana.timesheet.system.security.entity.TimeSheetUser;
 import com.aplana.timesheet.util.JsonUtil;
@@ -23,9 +20,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static argo.jdom.JsonNodeBuilders.*;
 import static argo.jdom.JsonNodeFactories.*;
@@ -151,6 +146,12 @@ public class TimeSheetController {
         return mav;
     }
 
+    /**
+     * Метод для вызова загрузки черновика
+     * @param date день за который заполнен черновик
+     * @param employeeId идентификатор сотрудника заполнившего черновик
+     * @return json строку с данными
+     */
     @RequestMapping(value = "/timesheet/loadDraft", headers = "Accept=application/json;Charset=UTF-8")
     @ResponseBody
     public String loadDraft(@RequestParam("date") String date,
