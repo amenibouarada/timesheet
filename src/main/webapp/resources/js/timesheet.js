@@ -702,12 +702,7 @@ function fillProjectList(rowIndex, projectState) {
 
 /* Добавляет в указанный select пустой option. */
 function insertEmptyOption(select) {
-    var option = dojo.doc.createElement("option");
-    dojo.attr(option, {
-        value:"0"
-    });
-    option.innerHTML = "";
-    select.appendChild(option);
+    insertEmptyOptionWithCaptionInHead(select, "");
 }
 
 /* Добавляет в указанный select пустой option с указанной подписью. */
