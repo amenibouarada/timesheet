@@ -51,10 +51,9 @@ public abstract class AbstractController {
     public void savepoint(String uniqueSavepointName){
         Map<String, Object> parameterMap = request.getParameterMap();
         Pair<String, Map> link = new Pair(request.getRequestURI(), parameterMap);
+        session.setAttribute(uniqueSavepointName, link);
 
         logger.debug("savepoint["+uniqueSavepointName+"]" + link);
-
-        session.setAttribute(uniqueSavepointName, link);
     }
 
 

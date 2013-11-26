@@ -113,7 +113,8 @@ public class SendMailService {
     private ProjectTaskService projectTaskService;
     @Autowired
     private ManagerRoleNameService managerRoleNameService;
-
+    @Autowired
+    private ReportService reportService;
 
     /**
      * Возвращает строку с адресами линейных руководителей сотрудника
@@ -217,7 +218,7 @@ public class SendMailService {
     }
 
     public void performMailing(TimeSheetForm form) {
-        new TimeSheetSender(this, propertyProvider, overtimeCauseService).sendMessage(form);
+        new TimeSheetSender(this, propertyProvider, overtimeCauseService, reportService).sendMessage(form);
     }
 
     public void performFeedbackMailing(FeedbackForm form) {

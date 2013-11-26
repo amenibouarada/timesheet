@@ -21,8 +21,8 @@ import java.util.regex.Pattern;
 public class ReportService {
 
     private static final String JIRA_URL = "http://jira.aplana.com/browse/";
-    private static final Pattern PATTERN_TASK = Pattern.compile("\\b[a-zA-ZА-Яа-я0-9-/?]+\\b");
-    private static final Pattern PATTERN_JIRA_URL = Pattern.compile("(https?://)?([a-zA-ZА-Яа-я0-9-]+).aplana.com((/browse/(\\w+-\\d+))|([a-zA-ZА-Яа-я-./!]+))?");
+    private static final Pattern PATTERN_TASK = Pattern.compile("\\b[a-zA-ZА-Яа-я0-9-/?=]+\\b");
+    private static final Pattern PATTERN_APLANA_URL = Pattern.compile("(https?://)?([a-zA-ZА-Яа-я0-9-]+).aplana.com((/browse/(\\w+-\\d+))|([0-9a-zA-ZА-Яа-я-./!?=$&_%]+))?");
 
     @Autowired
     public ProjectDAO projectDAO;
@@ -90,6 +90,7 @@ public class ReportService {
         }
 
         StringBuffer result = new StringBuffer(text);
+        // TODO кривой replace
         // При замене подстроки в строке, последующие индексы сдвигаются, offset - изменение
         Integer offset = 0;
 
@@ -117,7 +118,7 @@ public class ReportService {
      * @return
      */
     public String shorterLink(String text){
-        Matcher matcher = PATTERN_JIRA_URL.matcher(text);
+        Matcher matcher = PATTERN_APLANA_URL.matcher(text);
 
         // Важен порядок
         Map<Pair<Integer, Integer>, String> replaceMap = new LinkedHashMap<Pair<Integer, Integer>, String>();
@@ -137,6 +138,7 @@ public class ReportService {
 
             StringBuffer word = new StringBuffer(128);
             if (task != null){
+                // Для джиры
                 word.append(task);
             } else {
                 // Для конфлуенса или других внутренних ресурсов
@@ -151,6 +153,7 @@ public class ReportService {
         }
 
         StringBuffer result = new StringBuffer(text);
+        // TODO кривой replace
         // При замене подстроки в строке, последующие индексы сдвигаются, offset - изменение
         Integer offset = 0;
 

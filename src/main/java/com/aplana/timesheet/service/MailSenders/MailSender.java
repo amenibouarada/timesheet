@@ -1,16 +1,14 @@
 package com.aplana.timesheet.service.MailSenders;
 
+import com.aplana.timesheet.service.*;
 import com.aplana.timesheet.system.properties.TSPropertyProvider;
-import com.aplana.timesheet.service.ManagerRoleNameService;
-import com.aplana.timesheet.service.OvertimeCauseService;
-import com.aplana.timesheet.service.SendMailService;
-import com.aplana.timesheet.service.VacationApprovalService;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.mail.*;
 import javax.mail.internet.AddressException;
@@ -225,6 +223,9 @@ public class MailSender<T> {
     protected String getSubjectFormat() {
         return "%s";
     }
+
+    @Autowired
+    ReportService reportService;
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     protected void initMessageBody(Mail mail, MimeMessage message) throws MessagingException {

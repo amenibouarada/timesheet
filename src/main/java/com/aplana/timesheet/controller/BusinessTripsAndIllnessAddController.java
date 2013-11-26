@@ -343,7 +343,6 @@ public class BusinessTripsAndIllnessAddController extends AbstractController{
             businessTrip.setType(dictionaryItemService.find(tsForm.getBusinessTripType()));
             businessTrip.setProject(projectService.find(tsForm.getProjectId()));
             businessTripService.setBusinessTrip(businessTrip);
-
             return redirectTo("businesstripsandillness");
         } catch (Exception e){
             logger.error(ERROR_BUSINESS_TRIP_SAVE, e);

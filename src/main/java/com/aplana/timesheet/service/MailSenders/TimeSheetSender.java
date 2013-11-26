@@ -4,9 +4,10 @@ import com.aplana.timesheet.dao.entity.ProjectTask;
 import com.aplana.timesheet.enums.*;
 import com.aplana.timesheet.form.TimeSheetForm;
 import com.aplana.timesheet.form.TimeSheetTableRowForm;
-import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.OvertimeCauseService;
+import com.aplana.timesheet.service.ReportService;
 import com.aplana.timesheet.service.SendMailService;
+import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
@@ -41,9 +42,10 @@ public class TimeSheetSender extends MailSender<TimeSheetForm> {
     public static final String TYPE_OF_COMPENSATION = "typeOfCompensation";
     public static final String EFFORT_IN_NEXTDAY = "effortInNextDay";
     private String employeeEmail;
-
-    public TimeSheetSender(SendMailService sendMailService, TSPropertyProvider propertyProvider, OvertimeCauseService overtimeCauseService) {
+    private ReportService reportService;
+    public TimeSheetSender(SendMailService sendMailService, TSPropertyProvider propertyProvider, OvertimeCauseService overtimeCauseService, ReportService reportService) {
         super(sendMailService, propertyProvider, overtimeCauseService);
+        this.reportService = reportService;
     }
 
     @Override
@@ -72,7 +74,7 @@ public class TimeSheetSender extends MailSender<TimeSheetForm> {
                 sendMailService.velocityEngine, "velocity/sendmail.vm", model);
         logger.debug("Message Body: {}", messageBody);
         try {
-            message.setText(messageBody, "UTF-8", "html");
+            message.setText(reportService.modifyURL(messageBody), "UTF-8", "html");
         } catch (MessagingException e) {
             logger.error("Error while init message body.", e);
         }
