@@ -10,13 +10,13 @@ import com.aplana.timesheet.enums.QuickReportTypesEnum;
 import com.aplana.timesheet.enums.RegionsEnum;
 import com.aplana.timesheet.exception.controller.BusinessTripsAndIllnessControllerException;
 import com.aplana.timesheet.form.BusinessTripsAndIllnessForm;
-import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.*;
-import com.aplana.timesheet.system.security.SecurityService;
-import com.aplana.timesheet.util.DateNumbers;
 import com.aplana.timesheet.service.helper.EmployeeHelper;
-import com.aplana.timesheet.util.EnumsUtils;
+import com.aplana.timesheet.system.properties.TSPropertyProvider;
+import com.aplana.timesheet.system.security.SecurityService;
 import com.aplana.timesheet.system.security.entity.TimeSheetUser;
+import com.aplana.timesheet.util.DateNumbers;
+import com.aplana.timesheet.util.EnumsUtils;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import org.apache.commons.lang.StringUtils;
@@ -26,10 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.annotation.Nullable;
@@ -138,10 +135,26 @@ public class BusinessTripsAndIllnessController extends AbstractController{
     public ModelAndView showDefaultIllnessReport(
             @PathVariable("divisionId") Integer divisionId,
             @PathVariable("employeeId") Integer employeeId,
-            @ModelAttribute("businesstripsandillness") BusinessTripsAndIllnessForm tsForm
+            @ModelAttribute("businesstripsandillness") BusinessTripsAndIllnessForm tsForm,
+            @RequestParam(value="back", required=false) String back
     ) throws BusinessTripsAndIllnessControllerException {
 
-        savepoint("businesstripsandillness");
+//        savepoint("businesstripsandillness");
+        if (back != null){
+            Integer backDivisionId = (Integer)session.getAttribute("divisionId");
+            Integer backEmployeeId = (Integer)session.getAttribute("employeeId");
+            BusinessTripsAndIllnessForm backTsForm = (BusinessTripsAndIllnessForm)session.getAttribute("tsForm");
+
+            if (backDivisionId != null && backEmployeeId != null && backTsForm != null){
+                divisionId = backDivisionId;
+                employeeId = backEmployeeId;
+                tsForm = backTsForm;
+            }
+        } else {
+            session.setAttribute("divisionId", divisionId);
+            session.setAttribute("employeeId", employeeId);
+            session.setAttribute("tsForm", tsForm);
+        }
 
         Integer printtype = tsForm.getReportType();
         Integer manager = tsForm.getManager();
@@ -156,7 +169,7 @@ public class BusinessTripsAndIllnessController extends AbstractController{
             dateFrom = calendarService.getMinDateMonth(year,month);
             tsForm.setDateFrom(dateFrom);
         }
-        return getBusinessTripsOrIllnessReport(divisionId, regions, employeeId, manager, dateFrom, dateTo, printtype);
+        return getBusinessTripsOrIllnessReport(divisionId, regions, employeeId, manager, dateFrom, dateTo, printtype, tsForm);
     }
 
     @RequestMapping(value = "/businesstripsandillness/businesstrip/{employeeId}")
@@ -198,13 +211,14 @@ public class BusinessTripsAndIllnessController extends AbstractController{
         List<Integer> regions = new ArrayList<Integer>();
         regions.add(employee.getRegion().getId());
 
-        return getBusinessTripsOrIllnessReport(employee.getDivision().getId(), regions, employee.getId(), employee.getManager().getId(), dateFrom, dateTo, printType);
+        return getBusinessTripsOrIllnessReport(employee.getDivision().getId(), regions, employee.getId(), employee.getManager().getId(), dateFrom, dateTo, printType, null);
     }
 
     private ModelAndView getBusinessTripsOrIllnessReport(Integer divisionId, List<Integer> regions, Integer employeeId, Integer manager,
                                                          Date dateFrom,
                                                          Date dateTo,
-                                                         Integer printtype)
+                                                         Integer printtype,
+                                                         BusinessTripsAndIllnessForm tsForm)
             throws BusinessTripsAndIllnessControllerException {
         boolean hasAnyEmployee = false;
         boolean hasAnyReports = false;
@@ -248,6 +262,9 @@ public class BusinessTripsAndIllnessController extends AbstractController{
         modelAndView.addObject("forAll", allFlag);
         modelAndView.addObject("hasAnyEmployee", hasAnyEmployee); // найден ли хотя бы один сотрудник
         modelAndView.addObject("hasAnyReports", hasAnyReports);   // найден ли хотя бы один отчет
+        if (tsForm != null){
+            modelAndView.addObject("businesstripsandillness", tsForm);
+        }
 
         return modelAndView;
     }
@@ -257,10 +274,11 @@ public class BusinessTripsAndIllnessController extends AbstractController{
             @PathVariable("divisionId") Integer divisionId,
             @PathVariable("employeeId") Integer employeeId,
             @PathVariable("reportTypeId") Integer reportTypeId,
-            @ModelAttribute("businesstripsandillness") BusinessTripsAndIllnessForm tsForm
+            @ModelAttribute("businesstripsandillness") BusinessTripsAndIllnessForm tsForm,
+            @RequestParam(value="employeeId", required=false) String back
     ) throws BusinessTripsAndIllnessControllerException {
         tsForm.setReportType(reportTypeId);
-        return showDefaultIllnessReport(divisionId, employeeId, tsForm);
+        return showDefaultIllnessReport(divisionId, employeeId, tsForm, back);
     }
     /**
      * Удаляем больничный. Если удаление прошло нормально, то возвращаем пустую строку.

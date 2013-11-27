@@ -44,10 +44,10 @@ public abstract class AbstractController {
     }
 
     /**
-     * Сохраняет в сессии: URI и параметы GET/POST запроса
+     * Сохраняет в сессии: URI и параметы GET/POST запроса.
+     * !!! Не работает на нашем томкате :(.
      * @param uniqueSavepointName - уникальное значение для идентификации
      */
-
     public void savepoint(String uniqueSavepointName){
         Map<String, Object> parameterMap = request.getParameterMap();
         Pair<String, Map> link = new Pair(request.getRequestURI(), parameterMap);
@@ -56,9 +56,9 @@ public abstract class AbstractController {
         logger.debug("savepoint["+uniqueSavepointName+"]" + link);
     }
 
-
     /**
-     * Возвращает ModelAndView с редиректом на ранее сохраненную точку
+     * Возвращает ModelAndView с редиректом на ранее сохраненную точку.
+     * !!! Не работает на нашем томкате :(.
      * @param uniqueSavepointName - уникальное значение для идентификации
      * @return - ModelAndView
      */

@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.Date;
 import java.util.List;
@@ -104,7 +105,10 @@ public class BusinessTripsAndIllnessAddController extends AbstractController{
     @RequestMapping(value = "/businesstripsandillnessadd/tryAdd/{employeeId}")
     public ModelAndView validateAndAddBusinessTripOrIllness(
             @ModelAttribute("businesstripsandillnessadd") BusinessTripsAndIllnessAddForm tsForm,
-            BindingResult result, @PathVariable("employeeId") Integer employeeId) throws BusinessTripsAndIllnessAddException {
+            BindingResult result,
+            @PathVariable("employeeId") Integer employeeId,
+            RedirectAttributes redirectAttributes) throws BusinessTripsAndIllnessAddException {
+        redirectAttributes.addAttribute("back", "1");
         Employee employee = employeeService.find(employeeId);
         tsForm.setEmployee(employee);
         businessTripsAndIllnessAddFormValidator.validate(tsForm, result);
@@ -129,7 +133,10 @@ public class BusinessTripsAndIllnessAddController extends AbstractController{
     @RequestMapping(value = "/businesstripsandillnessadd/trySave/{reportId}")
     public ModelAndView validateAndSaveBusinessTripOrIllness(
             @ModelAttribute("businesstripsandillnessadd") BusinessTripsAndIllnessAddForm tsForm,
-            BindingResult result, @PathVariable("reportId") Integer reportId) throws BusinessTripsAndIllnessAddException {
+            BindingResult result,
+            @PathVariable("reportId") Integer reportId,
+            RedirectAttributes redirectAttributes) throws BusinessTripsAndIllnessAddException {
+        redirectAttributes.addAttribute("back", "1");
         tsForm.setReportId(reportId);
         businessTripsAndIllnessAddFormValidator.validate(tsForm, result);
         if (result.hasErrors()){
@@ -191,7 +198,7 @@ public class BusinessTripsAndIllnessAddController extends AbstractController{
      * Возвращает формочку с табличкой по больничным или командировкам выбранного сотрудника за выбранный месяц и
      * результат о выполнении операции
      */
-    private ModelAndView getModelAndViewSuccess(Employee employee, Date reportDate, QuickReportTypesEnum reportType) {
+    private ModelAndView getModelAndViewSuccess(Employee employee, Date reportDate) {
         Integer divisionId = employee.getDivision().getId();
         Integer employeeId = employee.getId();
 
@@ -200,7 +207,7 @@ public class BusinessTripsAndIllnessAddController extends AbstractController{
         int year = calendar.get(java.util.Calendar.YEAR);
         int month = calendar.get(java.util.Calendar.MONTH) + 1;
 
-        return new ModelAndView(String.format("redirect:/businesstripsandillness/%s/%s/%s", divisionId, employeeId, reportType.getId()));
+        return new ModelAndView(String.format("redirect:/businesstripsandillness/%s/%s", divisionId, employeeId));
     }
 
     /**
@@ -256,7 +263,7 @@ public class BusinessTripsAndIllnessAddController extends AbstractController{
             illness.setEditionDate(new Date());
             illnessService.setIllness(illness);
             illnessMailService.sendEditMail(illness);
-            return redirectTo("businesstripsandillness");
+            return getModelAndViewSuccess(illness.getEmployee(), illness.getEndDate());
         } catch (Exception e) {
             logger.error(ERROR_ILLNESS_EDIT, e);
             throw new BusinessTripsAndIllnessAddException(ERROR_ILLNESS_EDIT, e);
@@ -280,7 +287,7 @@ public class BusinessTripsAndIllnessAddController extends AbstractController{
             businessTrip.setComment(tsForm.getComment());
 
             businessTripService.setBusinessTrip(businessTrip);
-            return redirectTo("businesstripsandillness");
+            return getModelAndViewSuccess(businessTrip.getEmployee(), businessTrip.getBeginDate());
         } catch (Exception e) {
             logger.error(ERROR_BUSINESS_TRIP_EDIT, e);
             throw new BusinessTripsAndIllnessAddException(ERROR_BUSINESS_TRIP_EDIT, e);
@@ -323,7 +330,7 @@ public class BusinessTripsAndIllnessAddController extends AbstractController{
             illness.setEditionDate(new Date());
             illnessService.setIllness(illness);
             illnessMailService.sendCreateMail(illness);
-            return redirectTo("businesstripsandillness");
+            return getModelAndViewSuccess(illness.getEmployee(), illness.getBeginDate());
         } catch (Exception e) {
             logger.error(ERROR_ILLNESS_SAVE, e);
             throw new BusinessTripsAndIllnessAddException(ERROR_ILLNESS_SAVE, e);
@@ -343,7 +350,7 @@ public class BusinessTripsAndIllnessAddController extends AbstractController{
             businessTrip.setType(dictionaryItemService.find(tsForm.getBusinessTripType()));
             businessTrip.setProject(projectService.find(tsForm.getProjectId()));
             businessTripService.setBusinessTrip(businessTrip);
-            return redirectTo("businesstripsandillness");
+            return getModelAndViewSuccess(businessTrip.getEmployee(), businessTrip.getBeginDate());
         } catch (Exception e){
             logger.error(ERROR_BUSINESS_TRIP_SAVE, e);
             throw new BusinessTripsAndIllnessAddException(ERROR_BUSINESS_TRIP_SAVE, e);
