@@ -420,17 +420,26 @@ public class SendMailService {
                 return new ProjectActivityInfo() {
                     @Override
                     public TypesOfActivityEnum getTypeOfActivity() {
-                        return TypesOfActivityEnum.getById(input.getActivityTypeId());
+                        if (input != null && input.getActivityTypeId() != null) {
+                            return TypesOfActivityEnum.getById(input.getActivityTypeId());
+                        }
+                        return null;
                     }
 
                     @Override
                     public ProjectRolesEnum getProjectRole() {
-                        return ProjectRolesEnum.getById(input.getProjectRoleId());
+                        if (input != null && input.getProjectRoleId() != null) {
+                            return ProjectRolesEnum.getById(input.getProjectRoleId());
+                        }
+                        return null;
                     }
 
                     @Override
                     public Integer getProjectId() {
-                        return input.getProjectId();
+                        if (input != null && input.getProjectId() != null) {
+                            return input.getProjectId();
+                        }
+                        return null;
                     }
                 };
             }
@@ -445,12 +454,15 @@ public class SendMailService {
                 return new ProjectActivityInfo() {
                     @Override
                     public TypesOfActivityEnum getTypeOfActivity() {
-                        return TypesOfActivityEnum.getById(input.getActType().getId());
+                        if (input != null && input.getActType() != null) {
+                            return TypesOfActivityEnum.getById(input.getActType().getId());
+                        }
+                        return null;
                     }
 
                     @Override
                     public ProjectRolesEnum getProjectRole() {
-                        if (input.getProjectRole() != null) {
+                        if (input != null && input.getProjectRole() != null) {
                             return ProjectRolesEnum.getById(input.getProjectRole().getId());
                         }
                         return null;
@@ -458,7 +470,10 @@ public class SendMailService {
 
                     @Override
                     public Integer getProjectId() {
-                        return input.getProject().getId();
+                        if (input != null && input.getProject() != null) {
+                            return input.getProject().getId();
+                        }
+                        return null;
                     }
                 };
             }

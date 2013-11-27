@@ -724,9 +724,9 @@ public class JasperReportDAO {
                         "INNER JOIN time_sheet timesheet ON timesheet_details.time_sheet_id=timesheet.id " +
                         "INNER JOIN employee empl    ON timesheet.emp_id=empl.id " +
                         "INNER JOIN calendar calendar  ON timesheet.caldate=calendar.caldate " +
-                        "INNER JOIN project project    ON timesheet_details.proj_id=project.id " +
+                        "LEFT OUTER  JOIN project project    ON timesheet_details.proj_id=project.id " +
                         "INNER JOIN region region        ON empl.region=region.id " +
-                        "INNER JOIN project_role project_role        ON timesheet_details.projectrole_id=project_role.id " +
+                        "LEFT OUTER  JOIN project_role project_role        ON timesheet_details.projectrole_id=project_role.id " +
                         "INNER JOIN project_role job        ON empl.job=job.id " +
                         "INNER JOIN division division    ON empl.division=division.id " +
                         "LEFT OUTER JOIN project_task project_task ON timesheet_details.task_id=project_task.id " +

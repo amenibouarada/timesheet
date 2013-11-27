@@ -663,6 +663,10 @@ public class PlanEditController {
 
         for (TimeSheet timeSheet : timeSheetService.getTimeSheetsForEmployee(employee, year, month)) {
             for (TimeSheetDetail timeSheetDetail : timeSheet.getTimeSheetDetails()) {
+                if(timeSheetDetail.getActType() == null){
+                    // пропускаем пустые отчеты
+                    continue;
+                }
                 double duration = nilIfNull(timeSheetDetail.getDuration());
                 duration = getPercent(duration, summaryPlan); // так как отображается в процентах, то переводим
                 summaryFact += duration;

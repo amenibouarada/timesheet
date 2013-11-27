@@ -95,7 +95,7 @@ public class TimeSheetFormValidator extends AbstractValidator {
         } else {
             errors.rejectValue("timeSheetTablePart[" + notNullRowNumber + "].activityCategoryId",
                     "error.tsform.timesheet.requiredOne",
-                    "Нельзя сохранить пустой отчет");
+                    "Нельзя сохранить пустой черновик");
         }
     }
 
