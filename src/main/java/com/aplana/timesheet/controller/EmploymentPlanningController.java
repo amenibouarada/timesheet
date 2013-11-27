@@ -116,7 +116,7 @@ public class EmploymentPlanningController{
         return employeeListAsJSON;
     }
 
-    /* Сохраняем данные план по сотрудникам для проекту*/
+    /* Сохраняем данные план по сотрудникам для проектa*/
     @RequestMapping(value="/employmentPlanning/setEmployeeProjectAsJSON", produces = "text/plain;charset=UTF-8")
     @ResponseBody
     public String saveEmployeeData(@ModelAttribute(EmploymentPlanningForm.FORM) EmploymentPlanningForm form,
@@ -138,6 +138,7 @@ public class EmploymentPlanningController{
                 }
                 catch(NumberFormatException nfe){
                     //TODO something
+                    new RuntimeException(nfe);
                 }
             }
         }
