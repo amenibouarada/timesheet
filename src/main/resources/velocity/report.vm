@@ -65,7 +65,11 @@
                     #end
                 </li>
             #else
-                <b> Ошибочно заполнена строка отчета</b>
+                #if ($duration != $null && $duration.equals($"") != $true)
+                    <b> Записей нет </b>
+                #else
+                    <b> Ошибочно заполнена строка отчета</b>
+                #end
             #end
         #end
         <h2><b>Всего было потрачено ${summDuration} ч.</b></h2>

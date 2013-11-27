@@ -5,11 +5,11 @@ import argo.jdom.JsonObjectNodeBuilder;
 import com.aplana.timesheet.dao.AvailableActivityCategoryDAO;
 import com.aplana.timesheet.dao.EmployeeDAO;
 import com.aplana.timesheet.dao.TimeSheetDAO;
-import com.aplana.timesheet.dao.TimeSheetDetailDAO;
 import com.aplana.timesheet.dao.entity.*;
 import com.aplana.timesheet.dao.entity.Calendar;
 import com.aplana.timesheet.enums.DictionaryEnum;
 import com.aplana.timesheet.enums.TypesOfTimeSheetEnum;
+import com.aplana.timesheet.enums.UndertimeCausesEnum;
 import com.aplana.timesheet.form.TimeSheetForm;
 import com.aplana.timesheet.form.TimeSheetTableRowForm;
 import com.aplana.timesheet.form.entity.DayTimeSheet;
@@ -17,6 +17,7 @@ import com.aplana.timesheet.service.helper.EmployeeHelper;
 import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.system.security.SecurityService;
 import com.aplana.timesheet.util.DateTimeUtil;
+import com.aplana.timesheet.util.EnumsUtils;
 import com.aplana.timesheet.util.JsonUtil;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
@@ -101,22 +102,20 @@ public class TimeSheetService {
         timeSheet.setPlan(tsForm.getPlan());
         timeSheet.setEffortInNextDay(dictionaryItemService.find(tsForm.getEffortInNextDay()));
 
-        List<TimeSheetTableRowForm> tsTablePart = tsForm.getTimeSheetTablePart();
-        Set<TimeSheetDetail> timeSheetDetails = new LinkedHashSet<TimeSheetDetail>();
-        if (tsTablePart != null) { // Отчет может быть вообще без строк списания
-            for (TimeSheetTableRowForm formRow : tsTablePart) {
-                // По каким-то неведомым причинам при нажатии на кнопку веб
-                // интерфейса "Удалить выбранные строки"
-                // (если выбраны промежуточные строки) они удаляются с формы, но в
-                // объект формы вместо них
-                // попадают null`ы. Мы эти строки удаляем из объекта формы. Если
-                // удалять последние строки (с конца
-                // табличной части формы), то все работает корректно.
-                if (formRow.getActivityTypeId() == null) {
-                    tsTablePart.remove(formRow);
-                    continue;
-                }
+        List<TimeSheetTableRowForm> tsTablePart = new ArrayList<TimeSheetTableRowForm>();
+        if (tsForm.getTimeSheetTablePart() != null) {
+            tsTablePart.addAll(tsForm.getTimeSheetTablePart());
+        }
+        //очищаем от некорректных строк
+        for (TimeSheetTableRowForm form : tsTablePart) {
+            if (form.getActivityTypeId() == null) {
+                tsTablePart.remove(form);
+            }
+        }
 
+        Set<TimeSheetDetail> timeSheetDetails = new LinkedHashSet<TimeSheetDetail>();
+        if (!tsTablePart.isEmpty()) { // Отчет может быть вообще без строк списания
+            for (TimeSheetTableRowForm formRow : tsTablePart) {
                 TimeSheetDetail timeSheetDetail = new TimeSheetDetail();
                 timeSheetDetail.setTimeSheet(timeSheet);
                 timeSheetDetail.setActType(dictionaryItemService.find(formRow.getActivityTypeId()));
@@ -143,6 +142,16 @@ public class TimeSheetService {
                 timeSheetDetail.setProjectRole(projectRoleService.find(formRow.getProjectRoleId()));
                 timeSheetDetails.add(timeSheetDetail);
             }
+        } else {
+            // Если записей в таблице нет то создаем пустую запись с 0 часами
+            // Такое возможно если отправляют пустой отчет
+            TimeSheetDetail timeSheetDetail = new TimeSheetDetail();
+            timeSheetDetail.setDuration((double) 0);
+            timeSheetDetail.setTimeSheet(timeSheet);
+            UndertimeCausesEnum causesEnum = EnumsUtils.getEnumById(tsForm.getOvertimeCause(), UndertimeCausesEnum.class);
+            String comment = causesEnum.getName() + ":" + tsForm.getOvertimeCauseComment();
+            timeSheetDetail.setDescription(comment);
+            timeSheetDetails.add(timeSheetDetail);
         }
         timeSheet.setTimeSheetDetails(timeSheetDetails);
         //сохраняем тип отчета
@@ -151,14 +160,12 @@ public class TimeSheetService {
         //пытаемся узнать, может у нас есть уже черновик вне зависисмости от типа отчета
         //на случай если появится еще состояния
         if (TypesOfTimeSheetEnum.DRAFT == type || TypesOfTimeSheetEnum.REPORT == type) {
-//            logger.info("searching..." + tsForm.getCalDate() + " " + tsForm.getEmployeeId());
             Integer id = timeSheetDAO.findIdForDateAndEmployeeByTypes(
                     calendarService.find(tsForm.getCalDate()),
                     tsForm.getEmployeeId(),
                     Arrays.asList(TypesOfTimeSheetEnum.REPORT, TypesOfTimeSheetEnum.DRAFT)
             );
 
-//            logger.info("search..." + (forDateAndEmployeeTS != null ? "have" + forDateAndEmployeeTS.getId() : "null"));
             if (id != null) {
                 TimeSheet timeSheet2 = find(id);
                 timeSheetDAO.deleteAndFlush(timeSheet2);
@@ -169,7 +176,6 @@ public class TimeSheetService {
             }
         }
 
-//        logger.info("Timesheet saving...");
         timeSheetDAO.storeTimeSheet(timeSheet);
         logger.info("TimeSheet object for employee {} ({}) saved.", tsForm.getEmployeeId(), timeSheet.getCalDate());
 

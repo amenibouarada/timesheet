@@ -160,7 +160,7 @@ public class TimeSheetDAO {
             Integer actType = item[4] != null ? ((Integer) item[4]) : null;
 
             // Если нерабочая активность - сразу проставим в duration 0
-            if (duration != null && !TypesOfActivityEnum.isEfficientActivity(actType)) {
+            if (duration != null && actType != null && !TypesOfActivityEnum.isEfficientActivity(actType)) {
                 duration = BigDecimal.ZERO;
             }
 
