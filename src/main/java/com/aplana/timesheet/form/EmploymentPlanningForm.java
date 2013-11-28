@@ -9,6 +9,7 @@ public class EmploymentPlanningForm {
     private Integer yearEnd;
     private Integer monthEnd;
     private Integer projectId;
+    private Integer selectDivisionId;
 
     public Integer getYearBeg() {
         return yearBeg;
@@ -53,4 +54,11 @@ public class EmploymentPlanningForm {
     public EmploymentPlanningForm() {
     }
 
+    public Integer getSelectDivisionId() {
+        return selectDivisionId;
+    }
+
+    public void setSelectDivisionId(Integer selectDivisionId) {
+        this.selectDivisionId = selectDivisionId;
+    }
 }

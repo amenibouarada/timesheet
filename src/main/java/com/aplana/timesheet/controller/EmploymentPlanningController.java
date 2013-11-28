@@ -5,11 +5,13 @@ import argo.saj.InvalidSyntaxException;
 import com.aplana.timesheet.dao.*;
 import com.aplana.timesheet.dao.entity.Calendar;
 import com.aplana.timesheet.dao.entity.Employee;
+import com.aplana.timesheet.dao.entity.Project;
 import com.aplana.timesheet.form.AddEmployeeForm;
 import com.aplana.timesheet.form.EmploymentPlanningForm;
 import com.aplana.timesheet.service.CalendarService;
 import com.aplana.timesheet.service.EmployeeProjectPlanService;
 import com.aplana.timesheet.service.ProjectService;
+import com.aplana.timesheet.system.security.SecurityService;
 import com.aplana.timesheet.util.DateTimeUtil;
 import com.aplana.timesheet.util.JsonUtil;
 import org.slf4j.Logger;
@@ -54,6 +56,9 @@ public class EmploymentPlanningController{
 
     @Autowired
     private EmployeeProjectPlanService employeeProjectPlanService;
+
+    @Autowired
+    private SecurityService securityService;
 
     private List<com.aplana.timesheet.dao.entity.Calendar> getYearList() {
         return DateTimeUtil.getYearsList(calendarService);
@@ -114,6 +119,16 @@ public class EmploymentPlanningController{
         String employeeListAsJSON = getEmployeeListAsJson(employeeList);
 
         return employeeListAsJSON;
+    }
+
+    /* Возвращает JSON для форме выбора сотрудников */
+    @RequestMapping(value="/employmentPlanning/getProjectByDivisionAsJSON", produces = "text/plain;charset=UTF-8")
+    @ResponseBody
+    public String showAddEmployeeList(@RequestParam("divisionId") String divisionId) {
+        List<Project> projectList = divisionDAO.getProjectList(Integer.parseInt(divisionId));
+        String projectListAsJson = getProjectListAsJson(projectList);
+
+        return projectListAsJson;
     }
 
     /* Сохраняем данные план по сотрудникам для проектa*/
@@ -192,9 +207,11 @@ public class EmploymentPlanningController{
 
     public void fillDefaultModelAndView(ModelAndView modelAndView){
         final List<Calendar> yearList = getYearList();
+        Employee currentUser = securityService.getSecurityPrincipal().getEmployee();
+
         modelAndView.addObject("yearList", yearList);
         modelAndView.addObject("monthList", calendarService.getMonthList(2013));
-        modelAndView.addObject("projectList", projectService.getProjectsByDates(new Date(), new Date()));
+        modelAndView.addObject("projectList", divisionDAO.getProjectList(currentUser.getDivision().getId()));
         modelAndView.addObject("divisionList", divisionDAO.getActiveDivisions());
         modelAndView.addObject("managerList", managerDAO.getManagerList());
         modelAndView.addObject("projectRoleList", projectRoleDAO.getProjectRoles());
@@ -212,6 +229,8 @@ public class EmploymentPlanningController{
      * @param form
      */
     public void fillDefaultForm(EmploymentPlanningForm form){
+        Employee currentUser = securityService.getSecurityPrincipal().getEmployee();
+
         Date date = new Date();
         java.util.Calendar calendar = GregorianCalendar.getInstance();
         calendar.setTime(date);
@@ -224,6 +243,7 @@ public class EmploymentPlanningController{
         form.setMonthEnd(12);
         form.setYearEnd(year);
         form.setProjectId(ALL);
+        form.setSelectDivisionId(currentUser.getDivision().getId());
     }
 
     /**
@@ -326,4 +346,21 @@ public class EmploymentPlanningController{
         return JsonUtil.format(builder.build());
     }
 
+    /**
+     * Возвращает список проектов как json {id, name}
+     * @param projectList
+     * @return
+     */
+    public String getProjectListAsJson(List<Project> projectList){
+        JsonArrayNodeBuilder builder = anArrayBuilder();
+
+        for(Project project : projectList){
+            JsonObjectNodeBuilder objectNodeBuilder = anObjectBuilder();
+            objectNodeBuilder.withField("project_id", aNumberBuilder(project.getId().toString()));
+            objectNodeBuilder.withField("project_name", aStringBuilder(project.getName()));
+            builder.withElement(objectNodeBuilder);
+        }
+
+        return JsonUtil.format(builder.build());
+    }
 }

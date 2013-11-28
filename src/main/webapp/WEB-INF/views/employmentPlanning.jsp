@@ -268,73 +268,73 @@ function createLayoutEmployee(isFact, employeeId, yearStart, monthStart, yearEnd
     var cellStyles = "padding-left: "+padding+"px; padding-right: "+padding+"px; text-align: center;";
 
     if (isFact){
-    headerLayout.push({
-        name: 'Среднее за период',
-        colSpan: 2,
-        headerStyles: "width: 100px; text-align: center;",
-        cellStyles: cellStyles,
-        noresize: true
-    });
-
-    iterateMonth(yearStart, monthStart, yearEnd, monthEnd, function(month, year){
         headerLayout.push({
-            name: getMonthByNumber(month)+ ", " + year,
+            name: 'Среднее за период',
             colSpan: 2,
             headerStyles: "width: 100px; text-align: center;",
             cellStyles: cellStyles,
             noresize: true
         });
-    });
+
+        iterateMonth(yearStart, monthStart, yearEnd, monthEnd, function(month, year){
+            headerLayout.push({
+                name: getMonthByNumber(month)+ ", " + year,
+                colSpan: 2,
+                headerStyles: "width: 100px; text-align: center;",
+                cellStyles: cellStyles,
+                noresize: true
+            });
+        });
     }
 
 
     var middleView = {};
 
     if (isFact){
-    middleView.cells = [headerLayout, dataLayout];
-    middleView.onBeforeRow = function(inDataIndex, inSubRows) {
-        var hidden = (inDataIndex >= 0);
+        middleView.cells = [headerLayout, dataLayout];
+        middleView.onBeforeRow = function(inDataIndex, inSubRows) {
+            var hidden = (inDataIndex >= 0);
 
-        for (var i = inSubRows.length - 2; i >= 0; i--) {
-            inSubRows[i].hidden = hidden;
-        }
+            for (var i = inSubRows.length - 2; i >= 0; i--) {
+                inSubRows[i].hidden = hidden;
+            }
     }
     } else {
         middleView.cells = [dataLayout];
     }
 
     if (isFact){
-    dataLayout.push({
-        name: 'П',
-        width: '50px',
-        headerStyles: "width: 50px; text-align: center;",
-        cellStyles: cellStyles,
-        noresize: true,
-        formatter: function(cellValue, rowIndex){
-            var item = grid.getItem(rowIndex);
-            var value = 0;
-            iterateMonth(yearStart, monthStart, yearEnd, monthEnd, function(month, year){
-                value+=Number(item[year+"_"+month]);
-            });
-            return textFormat(Math.round(value/cnt));
-        }
-    });
+        dataLayout.push({
+            name: 'П',
+            width: '50px',
+            headerStyles: "width: 50px; text-align: center;",
+            cellStyles: cellStyles,
+            noresize: true,
+            formatter: function(cellValue, rowIndex){
+                var item = grid.getItem(rowIndex);
+                var value = 0;
+                iterateMonth(yearStart, monthStart, yearEnd, monthEnd, function(month, year){
+                    value+=Number(item[year+"_"+month]);
+                });
+                return textFormat(Math.round(value/cnt));
+            }
+        });
 
-    dataLayout.push({
-        name: 'Ф',
-        width: '50px',
-        headerStyles: "width: 50px; text-align: center;",
-        cellStyles: cellStyles,
-        noresize: true,
-        formatter: function(cellValue, rowIndex){
-            var item = grid.getItem(rowIndex);
-            var value = 0;
-            iterateMonth(yearStart, monthStart, yearEnd, monthEnd, function(month, year){
-                value+=Number(item[year+"-"+month]);
-            });
-            return textFormat(Math.round(value/cnt));
-        }
-    });
+        dataLayout.push({
+            name: 'Ф',
+            width: '50px',
+            headerStyles: "width: 50px; text-align: center;",
+            cellStyles: cellStyles,
+            noresize: true,
+            formatter: function(cellValue, rowIndex){
+                var item = grid.getItem(rowIndex);
+                var value = 0;
+                iterateMonth(yearStart, monthStart, yearEnd, monthEnd, function(month, year){
+                    value+=Number(item[year+"-"+month]);
+                });
+                return textFormat(Math.round(value/cnt));
+            }
+        });
     } else {
         dataLayout.push({
             name: 'Среднее за период',
@@ -354,36 +354,36 @@ function createLayoutEmployee(isFact, employeeId, yearStart, monthStart, yearEnd
 
     iterateMonth(yearStart, monthStart, yearEnd, monthEnd, function(month, year){
         if (isFact){
-        dataLayout.push({
-            name: 'П',
-            field: year + "_" + month,
-            formatter: formatterData,
-            width: '50px',
-            headerStyles: "width: 50px; text-align: center;",
-            cellStyles: cellStyles,
-            editable: true,
-            noresize: true
-        });
-
-        dataLayout.push({
-            name: 'Ф',
-            field: year + "-" + month,
-            formatter: formatterData,
-            width: '50px',
-            headerStyles: "width: 50px; text-align: center;",
-            cellStyles: cellStyles,
-            noresize: true
-        });
-        } else {
             dataLayout.push({
-                name: getMonthByNumber(month)+ ", " + year,
+                name: 'П',
                 field: year + "_" + month,
                 formatter: formatterData,
-                width: '100px',
+                width: '50px',
+                headerStyles: "width: 50px; text-align: center;",
+                cellStyles: cellStyles,
                 editable: true,
-                noresize: true,
-                styles: 'text-align: center;'
-    });
+                noresize: true
+            });
+
+            dataLayout.push({
+                name: 'Ф',
+                field: year + "-" + month,
+                formatter: formatterData,
+                width: '50px',
+                headerStyles: "width: 50px; text-align: center;",
+                cellStyles: cellStyles,
+                noresize: true
+            });
+            } else {
+                dataLayout.push({
+                    name: getMonthByNumber(month)+ ", " + year,
+                    field: year + "_" + month,
+                    formatter: formatterData,
+                    width: '100px',
+                    editable: true,
+                    noresize: true,
+                    styles: 'text-align: center;'
+            });
         }
     });
 
@@ -846,6 +846,16 @@ function hidePlan(){
     grid2.setStructure(layout);
     grid2.render();
 }
+
+function updateProjectList(){
+    var selectDivision = dojo.byId("selectDivisionId");
+    additionProjectDataHandler(selectDivision.value, function(response){
+        clearSelectValues(dojo.byId("projectId"));
+        dojo.forEach(dojo.fromJson(response), function (row) {
+            dojo.create("option", { value: row["project_id"], innerHTML: row["project_name"]}, dojo.byId("projectId"));
+        });
+    });
+}
 </script>
 </head>
 
@@ -853,16 +863,24 @@ function hidePlan(){
 <form:form method="post" commandName="employmentPlanningForm">
     <table>
         <tr>
+            <td><span class="label">Центр</span></td>
+            <td colspan="2">
+                <form:select path="selectDivisionId" onchange="updateProjectList()">
+                    <form:options items="${divisionList}" itemLabel="name" itemValue="id"/>
+                </form:select>
+            <td>
+        </tr>
+        <tr>
             <td>
                 <span class="label">Месяц, год начала периода:</span>
             </td>
             <td>
-                <form:select path="monthBeg" class="without_dojo" >
+                <form:select path="monthBeg">
                     <form:options items="${monthList}" itemLabel="monthTxt" itemValue="month"/>
                 </form:select>
             </td>
             <td>
-                <form:select path="yearBeg" class="without_dojo" >
+                <form:select path="yearBeg">
                     <form:options items="${yearList}" itemLabel="year" itemValue="year"/>
                 </form:select>
             </td>
@@ -872,12 +890,12 @@ function hidePlan(){
                 <span class="label">Месяц, год конца периода:</span>
             </td>
             <td>
-                <form:select path="monthEnd" class="without_dojo" >
+                <form:select path="monthEnd">
                     <form:options items="${monthList}" itemLabel="monthTxt" itemValue="month"/>
                 </form:select>
             </td>
             <td>
-                <form:select path="yearEnd" class="without_dojo" >
+                <form:select path="yearEnd">
                     <form:options items="${yearList}" itemLabel="year" itemValue="year"/>
                 </form:select>
             </td>
@@ -907,7 +925,7 @@ function hidePlan(){
 
     <div id="divEmployeeInfo" hidden="true">
         <br/><input type="checkbox" id="isFactCheckBox" onclick="hidePlan()" checked><span class="employeeLabel">Отображать фактическое значение</span></input><br/>
-        <div id="employeeGridDiv" ></div>
+        <div id="employeeGridDiv"></div>
     </div>
 </div>
 
@@ -918,7 +936,7 @@ function hidePlan(){
             <tr>
                 <td><label>Центр </label></td>
                 <td>
-                    <form:select path="divisionId" class="without_dojo" onchange="updateAdditionEmployeeList()">
+                    <form:select path="divisionId" onchange="updateAdditionEmployeeList()">
                         <form:options items="${divisionList}" itemLabel="name" itemValue="id"/>
                     </form:select>
                 <td>
@@ -926,7 +944,7 @@ function hidePlan(){
             <tr>
                 <td><label>Руководитель </label></td>
                 <td>
-                    <form:select path="managerId" class="without_dojo" onchange="updateAdditionEmployeeList()">
+                    <form:select path="managerId" onchange="updateAdditionEmployeeList()">
                         <form:option label="Все руководители" value="${all}"/>
                         <form:options items="${managerList}" itemLabel="employee.name" itemValue="employee.id"/>
                     </form:select>
