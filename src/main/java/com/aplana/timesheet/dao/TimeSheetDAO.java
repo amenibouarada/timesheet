@@ -121,7 +121,7 @@ public class TimeSheetDAO {
                         "ts.id timesheet_id, " +
                         "SUM(tsd.duration), " +
                         "tsd.act_type, " +
-                        "ts.type "
+                        "ts.ts_type_id "
                         + "from calendar c "
                         + "left outer join time_sheet as ts " +
                         "on ts.emp_id = :employeeId and ts.caldate=c.caldate "
@@ -158,6 +158,8 @@ public class TimeSheetDAO {
             BigDecimal duration = item[3] != null ? ((BigDecimal) item[3]) : null;
             //по этому полю определяем отпуск\отгул и т.п.
             Integer actType = item[4] != null ? ((Integer) item[4]) : null;
+            //по этому полю определяем отчет или черновик
+            Integer tsType = item[5] != null ? ((Integer) item[5]) : null;
 
             // Если нерабочая активность - сразу проставим в duration 0
             if (duration != null && actType != null && !TypesOfActivityEnum.isEfficientActivity(actType)) {
@@ -166,7 +168,7 @@ public class TimeSheetDAO {
 
             //если Map еще не содержит запись на эту дату
             if (!map.containsKey(calDate.getTime())) {
-                DayTimeSheet ds = new DayTimeSheet(calDate, holiday, tsId, actType, duration, employee, (item[5] != null) && (Integer) item[5] == 1);
+                DayTimeSheet ds = new DayTimeSheet(calDate, holiday, tsId, actType, duration, employee, tsType != null && TypesOfTimeSheetEnum.DRAFT.getId() == tsType);
                 ds.setTimeSheetDAO(this);
                 ds.setIllnessDAO(illnessDAO);
                 ds.setVacationDAO(vacationDAO);
@@ -202,7 +204,7 @@ public class TimeSheetDAO {
                 "select ts "
                         + "from TimeSheet as ts "
                         + "where ts.calDate <:calDate "
-                        + "and ts.employee.id = :employeeId AND (ts.type = 0) "
+                        + "and ts.employee.id = :employeeId AND (ts.type = "+TypesOfTimeSheetEnum.REPORT.getId()+") "
                         + "order by ts.calDate desc"
         ).setParameter("calDate", date).setParameter("employeeId", employeeId);
 
@@ -225,7 +227,7 @@ public class TimeSheetDAO {
                 + "from TimeSheet as ts "
                 + "where ts.calDate = :calDate "
                 + "and ts.employee.id = :employeeId "
-                + "AND (ts.type = 0) "
+                + "AND (ts.type = "+TypesOfTimeSheetEnum.REPORT.getId()+") "
                 + "order by ts.calDate asc"
         ).setParameter("calDate", nextDate).setParameter("employeeId", employeeId);
 
@@ -241,7 +243,10 @@ public class TimeSheetDAO {
     // возвращает следующий рабочий день, после даты последнего списания занятости
     public Calendar getDateNextAfterLastDayWithTS(Employee employee) {
         Query query = entityManager.createQuery(
-                "SELECT MAX(ts.calDate) FROM TimeSheet ts WHERE ts.employee = :employee and (ts.type = 0)"
+                "SELECT MAX(ts.calDate) " +
+                        "FROM TimeSheet ts " +
+                        "WHERE ts.employee = :employee " +
+                        "and (ts.type = "+TypesOfTimeSheetEnum.REPORT.getId()+")"
         ).setParameter("employee", employee);
 
         if (!query.getResultList().isEmpty() && query.getSingleResult() != null) {
@@ -264,7 +269,6 @@ public class TimeSheetDAO {
                 "       FROM calendar cal" +
                 "       INNER JOIN time_sheet ts on cal.caldate=ts.caldate" +
                 "       INNER JOIN employee emp on emp.id=ts.emp_id" +
-//                "       WHERE (ts.type = 0)" +
                 "       GROUP BY emp.id" +
                 "      ) tscal" +
                 " INNER JOIN employee emp1 ON emp1.id=tscal.empid" +
@@ -308,7 +312,11 @@ public class TimeSheetDAO {
 
     public List<TimeSheet> getTimeSheetsForEmployee(Employee employee, Integer year, Integer month) {
         final Query query = entityManager.createQuery(
-                "from TimeSheet ts where ts.employee = :employee and YEAR(ts.calDate.calDate) = :year and MONTH(ts.calDate.calDate) = :month and (ts.type = 0)"
+                "from TimeSheet ts " +
+                        "where ts.employee = :employee " +
+                        "and YEAR(ts.calDate.calDate) = :year " +
+                        "and MONTH(ts.calDate.calDate) = :month " +
+                        "and (ts.type = "+TypesOfTimeSheetEnum.REPORT.getId()+")"
         ).setParameter("employee", employee).setParameter("year", year).setParameter("month", month);
 
         return query.getResultList();
@@ -316,7 +324,9 @@ public class TimeSheetDAO {
 
     public Boolean timeSheetTrouble(Integer id) {
         final Query query = entityManager.createQuery(
-                "from TimeSheet ts inner join ts.timeSheetDetails tsd where ts.id = :id and tsd.problem <> '' and (ts.type = 0)"
+                "from TimeSheet ts inner join ts.timeSheetDetails tsd " +
+                        "where ts.id = :id and tsd.problem <> '' " +
+                        "and (ts.type = "+TypesOfTimeSheetEnum.REPORT.getId()+")"
         ).setParameter("id", id);
         return query.getResultList().size() != 0;
     }
@@ -333,8 +343,12 @@ public class TimeSheetDAO {
         }
 
         final Query query = entityManager.createQuery(
-                "SELECT ts.id from TimeSheet ts where ts.calDate = :calDate and ts.employee.id = :employeeId " + stringBuilder.toString()
-        ).setParameter("calDate", calendar).setParameter("employeeId", employeeId);
+                "SELECT ts.id from TimeSheet ts " +
+                        "where ts.calDate = :calDate " +
+                        "and ts.employee.id = :employeeId " +
+                        stringBuilder.toString()
+        )       .setParameter("calDate", calendar)
+                .setParameter("employeeId", employeeId);
 
         List resultList = query.getResultList();
         return resultList != null && !resultList.isEmpty() ? ((Integer) resultList.get(0)) : null;

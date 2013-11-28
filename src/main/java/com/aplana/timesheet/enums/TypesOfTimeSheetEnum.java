@@ -1,12 +1,15 @@
 package com.aplana.timesheet.enums;
 
 /**
+ * Вид списания
+ * @see com.aplana.timesheet.enums.DictionaryEnum#TIMESHEET_TYPE
+ *
  * @author <a href="mailto:Evgeniy.Yaroslavtsev@aplana.com">Evgeniy Yaroslavtsev</a>
  * @see <a href="http://conf.aplana.com/pages/viewpage.action?pageId=1874744">Аналитика</a>
  */
-public enum TypesOfTimeSheetEnum {
-    REPORT(0, "Отчет"),
-    DRAFT(1, "Черновик");
+public enum TypesOfTimeSheetEnum implements TSEnum {
+    REPORT(131, "Отчет"),
+    DRAFT(132, "Черновик отчета");
 
     private int id;
     private String name;

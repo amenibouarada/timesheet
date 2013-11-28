@@ -1,5 +1,6 @@
 <%@ page import="java.io.File" %>
 <%@ page import="com.aplana.timesheet.enums.EffortInNextDayEnum" %>
+<%@ page import="com.aplana.timesheet.enums.TypesOfTimeSheetEnum" %>
 <%@page contentType="text/html" pageEncoding="UTF-8" %>
 
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
@@ -246,7 +247,7 @@
                         <td class="date"><fmt:formatDate value="${report.calDate}" pattern="dd.MM.yyyy"/></td>
                         <td>
                             Черновик
-                            <a href="<%=request.getContextPath()%>/timesheet?date=<fmt:formatDate value="${report.calDate}" pattern="yyyy-MM-dd"/>&id=${employeeId}&type=1"
+                            <a href="<%=request.getContextPath()%>/timesheet?date=<fmt:formatDate value="${report.calDate}" pattern="yyyy-MM-dd"/>&id=${employeeId}&type=<%=TypesOfTimeSheetEnum.DRAFT.getId()%>"
                                onclick="">(Редактировать)
                                 <%--<img src="<c:url value="/resources/img/edit.png"/>" width="15px"--%>
                                                <%--title="Редактировать отчет"/>--%>

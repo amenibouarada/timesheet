@@ -417,7 +417,7 @@ public class TimeSheetControllerTest extends AbstractTimeSheetTest {
         /* входные данные */
         String date = "2013-01-01";
         Integer employeeId = 1;
-        String expected = JsonUtil.format(anObjectBuilder().withField("draft", aStringBuilder("0")));
+        String expected = JsonUtil.format(anObjectBuilder().withField("isDraft", aStringBuilder("false")));
 
         /* определяем поведение сервисов */
 //        when(timeSheetService.getPlansJson(date, employeeId)).thenReturn(expected);

@@ -187,10 +187,10 @@
                         dojo.byId("lbNextPlan").innerHTML = "Планы на следующий рабочий день:";
                     }
 
-                    if (data.draft != null || dataDraft) {
+                    if (data.isDraft != null || dataDraft) {
                         console.log(dataDraft);
-                        hideShowElement("load_draft", dataDraft || data.draft == 0);
-                        hideShowElement("load_draft_text", dataDraft || data.draft == 0);
+                        hideShowElement("load_draft", dataDraft || data.isDraft == "false");
+                        hideShowElement("load_draft_text", dataDraft || data.isDraft == "false");
                     }
                     dataDraft = false;
                 }
@@ -205,6 +205,7 @@
     }
 
     function hideShowElement(id, isHide) {
+        console.log(id + " " + isHide);
         dojo.setStyle(id, {"display": isHide ? "none" : ""});
     }
 
@@ -278,11 +279,6 @@ function submitform(s) {
         timeSheetForm.action = "newReport";
         timeSheetForm.submit();
     }
-//            if (s == 'problem') {
-//                var empId = dojo.byId("employeeId").value;
-//                var divId = dojo.byId("divisionId").value;
-//                window.open('problem/' + divId + '/' + empId, 'problem_window');
-//            }
 }
 
 function CopyPlan() {
@@ -374,10 +370,10 @@ function loadDraft() {
         load: function (data, ioArgs) {
             if (data && ioArgs && ioArgs.args && ioArgs.args.content) {
                 var div = dojo.byId('time_sheet_table');
-                var tr = div.getElementsByClassName('time_sheet_row');
+                var tr = document.querySelectorAll('.time_sheet_row');
                 rowsCount = tr.length;
                 for (var j = 0; j < rowsCount; j++) {
-                    tr[0].parentNode.removeChild(tr[0]);
+                    tr[j].parentNode.removeChild(tr[j]);
                 }
                 for (var i = 0; i < data.data.length; i++) {
                     addNewRow();

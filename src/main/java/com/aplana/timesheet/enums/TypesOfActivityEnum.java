@@ -113,4 +113,11 @@ public enum TypesOfActivityEnum implements TSEnum {
                 activityType == TIME_OFF_FOR_OVERTIME || activityType == HOLIDAY
         );
     }
+    /*
+        Возвращает перечисление в виде строки через запятую id типов активности которые будут учитываться в отчетах
+        42, 12, 13
+     */
+    public static String getOnlyWorkTypeString(){
+        return String.valueOf(PROJECT.getId()) + ',' + PROJECT_PRESALE.getId() + ',' + PRESALE.getId();
+    }
 }
