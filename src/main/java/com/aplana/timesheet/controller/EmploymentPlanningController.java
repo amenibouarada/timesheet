@@ -131,7 +131,7 @@ public class EmploymentPlanningController{
         return projectListAsJson;
     }
 
-    /* Сохраняем данные план по сотрудникам для проектa*/
+    /* Сохраняем данные план по сотрудникам по проекту*/
     @RequestMapping(value="/employmentPlanning/setEmployeeProjectAsJSON", produces = "text/plain;charset=UTF-8")
     @ResponseBody
     public String saveEmployeeData(@ModelAttribute(EmploymentPlanningForm.FORM) EmploymentPlanningForm form,
