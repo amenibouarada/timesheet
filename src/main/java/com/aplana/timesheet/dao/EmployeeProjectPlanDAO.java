@@ -3,6 +3,7 @@ package com.aplana.timesheet.dao;
 import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.dao.entity.EmployeeProjectPlan;
 import com.aplana.timesheet.dao.entity.Project;
+import com.aplana.timesheet.enums.TypesOfTimeSheetEnum;
 import com.aplana.timesheet.form.EmploymentPlanningForm;
 import org.springframework.stereotype.Repository;
 
@@ -387,6 +388,7 @@ public class EmployeeProjectPlanDAO {
                     "project pr " +
                 "where " +
                     "ts.calDate = c.calDate " +
+                    "and ts.type = " + TypesOfTimeSheetEnum.REPORT.getId() +
                     "and tsd.proj_id = pr.id " +
                     "and ts.id = tsd.time_sheet_id " +
                     "and ts.emp_id = :employeeId " +

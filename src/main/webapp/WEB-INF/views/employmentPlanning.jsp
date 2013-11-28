@@ -213,6 +213,14 @@ function initProjectGrid(dataJson, yearStart, monthStart, yearEnd, monthEnd){
 // Динамически перестраивает грид "проект-сотрудники"
 // yearStart, monthStart, yearEnd, monthEnd - не используется, нужны если менять структуру грида
 function refreshProjectGrid(response, yearStart, monthStart, yearEnd, monthEnd){
+    if (dojo.fromJson(response).length > 0){
+        dojo.style(dojo.byId("grids"), 'display', '');
+        dojo.style(dojo.byId("errorBox"), 'display', 'none');
+    } else {
+        dojo.style(dojo.byId("errorBox"), 'display', '');
+        dojo.byId("errorBox").innerHTML = 'По данному проекту отсутвует запланированная занятость сотрудников';
+    }
+
     var grid = dijit.byId("projectGrid");
     var store = createStoreProject(response, yearStart, monthStart, yearEnd, monthEnd);
     var layout = createLayoutProject(response, yearStart, monthStart, yearEnd, monthEnd);
@@ -222,8 +230,10 @@ function refreshProjectGrid(response, yearStart, monthStart, yearEnd, monthEnd){
     grid.render();
 }
 
+var globalEmployeeId;
 // Создает structure для грида "сотрудник-проекты"
 function createLayoutEmployee(isFact, employeeId, yearStart, monthStart, yearEnd, monthEnd){
+    globalEmployeeId = employeeId;
     var grid = dijit.byId("employeeGrid");
     var cnt = monthCount(yearStart, monthStart, yearEnd, monthEnd);
 
@@ -288,7 +298,7 @@ function createLayoutEmployee(isFact, employeeId, yearStart, monthStart, yearEnd
             for (var i = inSubRows.length - 2; i >= 0; i--) {
                 inSubRows[i].hidden = hidden;
             }
-        }
+    }
     } else {
         middleView.cells = [dataLayout];
     }
@@ -364,15 +374,15 @@ function createLayoutEmployee(isFact, employeeId, yearStart, monthStart, yearEnd
                 cellStyles: cellStyles,
                 noresize: true
             });
-        } else {
-            dataLayout.push({
-                name: getMonthByNumber(month)+ ", " + year,
-                field: year + "_" + month,
-                formatter: formatterData,
-                width: '100px',
-                editable: true,
-                noresize: true,
-                styles: 'text-align: center;'
+            } else {
+                dataLayout.push({
+                    name: getMonthByNumber(month)+ ", " + year,
+                    field: year + "_" + month,
+                    formatter: formatterData,
+                    width: '100px',
+                    editable: true,
+                    noresize: true,
+                    styles: 'text-align: center;'
             });
         }
     });
@@ -405,12 +415,12 @@ function calcTotalRow(items, yearStart, monthStart, yearEnd, monthEnd){
 
                 var planVal = Number(item[planKey]);
                 var factVal = Number(item[factKey]);
-                /*
+
                 if (item["isChanged"] == 1){
                     planVal = clearData[projectId][planKey];
                     factVal = clearData[projectId][factKey];
                 }
-                */
+
                 if (factVal){
                     resultMap[factKey] += factVal;
                 }
@@ -505,7 +515,7 @@ function createStoreEmployee(dataJson, yearStart, monthStart, yearEnd, monthEnd)
 function initEmployeeGrid(dataJson, employeeId, yearStart, monthStart, yearEnd, monthEnd){
     var store = createStoreEmployee(dataJson, yearStart, monthStart, yearEnd, monthEnd);
 
-    var isFact = dojo.byId("isFact").checked;
+    var isFact = dojo.byId("isFactCheckBox").checked;
     var layout = createLayoutEmployee(isFact, employeeId, yearStart, monthStart, yearEnd, monthEnd);
 
     var grid = new dojox.grid.DataGrid({
@@ -531,6 +541,10 @@ function initEmployeeGrid(dataJson, employeeId, yearStart, monthStart, yearEnd, 
                 grid.store.setValue(item, 'fields', value);
             }
             grid.store.save();
+        },
+        canEdit: function(inCell, inRowIndex) {
+            var item = grid.getItem(inRowIndex);
+            return item["project_id"]>0;
         }
     });
 
@@ -540,7 +554,7 @@ function initEmployeeGrid(dataJson, employeeId, yearStart, monthStart, yearEnd, 
 
 // Динамически перестраивает грид "сотрудник-проекты"
 function refreshEmployeeGrid(response, employeeId, yearStart, monthStart, yearEnd, monthEnd){
-    var isFact = dojo.byId("isFact").checked;
+    var isFact = dojo.byId("isFactCheckBox").checked;
     var store = createStoreEmployee(response, yearStart, monthStart, yearEnd, monthEnd);
     var layout = createLayoutEmployee(isFact, employeeId, yearStart, monthStart, yearEnd, monthEnd);
     var grid = dijit.byId("employeeGrid");
@@ -716,7 +730,7 @@ function saveProjectPlan(){
         // После сохранения перестраиваем гриды
         // TODO избавиться от $ - переделать на js
         function actionAfterSaveProject(result){
-            projectDataHandler(${form.projectId}, ${form.yearBeg}, ${form.monthBeg}, ${form.yearEnd}, ${form.monthEnd}, refreshProjectGrid);
+            projectDataHandler(projectId, yearBeg, monthBeg, yearEnd, monthEnd, refreshProjectGrid);
             employeeDataHandler(0, ${form.yearBeg}, ${form.monthBeg}, ${form.yearEnd}, ${form.monthEnd}, refreshEmployeeGrid);
         }
     }
@@ -766,6 +780,10 @@ function saveEmployeePlan(employeeId, projectId){
                 actionAfterSaveEmployee);
 
         dojo.forEach(items, function(item){
+            var projectId = item["project_id"];
+            for(var key in item){
+                clearData[projectId][key] = Number(item[key]);
+            }
             grid.store.setValue(item, 'isChanged', 0);
             grid.store.setValue(item, 'fields', null);
         });
@@ -814,6 +832,30 @@ function submitSaveButton(){
         }
     }
 }
+
+function hidePlan(){
+    var isFact = dojo.byId("isFactCheckBox").checked;
+    var grid2 = dijit.byId("employeeGrid");
+
+    var monthStart = Number(dojo.byId("monthBeg").value);
+    var yearStart  = Number(dojo.byId("yearBeg").value);
+    var monthEnd   = Number(dojo.byId("monthEnd").value);
+    var yearEnd    = Number(dojo.byId("yearEnd").value);
+
+    var layout = createLayoutEmployee(isFact, globalEmployeeId, yearStart, monthStart, yearEnd, monthEnd)
+    grid2.setStructure(layout);
+    grid2.render();
+}
+
+function updateProjectList(){
+    var selectDivision = dojo.byId("selectDivisionId");
+    additionProjectDataHandler(selectDivision.value, function(response){
+        clearSelectValues(dojo.byId("projectId"));
+        dojo.forEach(dojo.fromJson(response), function (row) {
+            dojo.create("option", { value: row["project_id"], innerHTML: row["project_name"]}, dojo.byId("projectId"));
+        });
+    });
+}
 </script>
 </head>
 
@@ -821,16 +863,24 @@ function submitSaveButton(){
 <form:form method="post" commandName="employmentPlanningForm">
     <table>
         <tr>
+            <td><span class="label">Центр</span></td>
+            <td colspan="2">
+                <form:select path="selectDivisionId" onchange="updateProjectList()">
+                    <form:options items="${divisionList}" itemLabel="name" itemValue="id"/>
+                </form:select>
+            <td>
+        </tr>
+        <tr>
             <td>
                 <span class="label">Месяц, год начала периода:</span>
             </td>
             <td>
-                <form:select path="monthBeg" class="without_dojo" >
+                <form:select path="monthBeg">
                     <form:options items="${monthList}" itemLabel="monthTxt" itemValue="month"/>
                 </form:select>
             </td>
             <td>
-                <form:select path="yearBeg" class="without_dojo" >
+                <form:select path="yearBeg">
                     <form:options items="${yearList}" itemLabel="year" itemValue="year"/>
                 </form:select>
             </td>
@@ -840,12 +890,12 @@ function submitSaveButton(){
                 <span class="label">Месяц, год конца периода:</span>
             </td>
             <td>
-                <form:select path="monthEnd" class="without_dojo" >
+                <form:select path="monthEnd">
                     <form:options items="${monthList}" itemLabel="monthTxt" itemValue="month"/>
                 </form:select>
             </td>
             <td>
-                <form:select path="yearEnd" class="without_dojo" >
+                <form:select path="yearEnd">
                     <form:options items="${yearList}" itemLabel="year" itemValue="year"/>
                 </form:select>
             </td>
@@ -867,14 +917,16 @@ function submitSaveButton(){
     <input style="width:150px;margin-left: 23px;" type="button" value="Сохранить" onclick="saveProjectPlan();"/>
 </form:form>
 
-<div id="projectGridDiv" style="width: auto; max-width: 100%;"></div>
-<br/>
-<span id="spanEmployeeName" class="employeeLabel">&nbsp;</span>
-<div id="divEmployeeInfo" hidden="true">
-    <br/>
-    <input type="checkbox" id="isFact" checked><span class="employeeLabel">Отображать фактическое значение</span></input>
-    <br/>
-    <div id="employeeGridDiv" ></div>
+<div class="errors_box" id="errorBox" style="display: none"></div>
+<div id="grids"  style="display: none">
+    <div id="projectGridDiv" style="width: auto; max-width: 100%;"></div><br/>
+
+    <span id="spanEmployeeName" class="employeeLabel">&nbsp;</span>
+
+    <div id="divEmployeeInfo" hidden="true">
+        <br/><input type="checkbox" id="isFactCheckBox" onclick="hidePlan()" checked><span class="employeeLabel">Отображать фактическое значение</span></input><br/>
+        <div id="employeeGridDiv"></div>
+    </div>
 </div>
 
 <div data-dojo-type="dijit/Dialog" data-dojo-id="employeeDialog" title="Добавить сотрудника">
@@ -884,7 +936,7 @@ function submitSaveButton(){
             <tr>
                 <td><label>Центр </label></td>
                 <td>
-                    <form:select path="divisionId" class="without_dojo" onchange="updateAdditionEmployeeList()">
+                    <form:select path="divisionId" onchange="updateAdditionEmployeeList()">
                         <form:options items="${divisionList}" itemLabel="name" itemValue="id"/>
                     </form:select>
                 <td>
@@ -892,7 +944,7 @@ function submitSaveButton(){
             <tr>
                 <td><label>Руководитель </label></td>
                 <td>
-                    <form:select path="managerId" class="without_dojo" onchange="updateAdditionEmployeeList()">
+                    <form:select path="managerId" onchange="updateAdditionEmployeeList()">
                         <form:option label="Все руководители" value="${all}"/>
                         <form:options items="${managerList}" itemLabel="employee.name" itemValue="employee.id"/>
                     </form:select>
@@ -924,7 +976,9 @@ function submitSaveButton(){
 
         <div class="dijitDialogPaneActionBar">
             <button type="button" onclick="addRow();">Добавить</button>
+            <button type="button" onclick="employeeDialog.hide();">Отмена</button>
         </div>
+
     </form:form>
 </div>
 </body>

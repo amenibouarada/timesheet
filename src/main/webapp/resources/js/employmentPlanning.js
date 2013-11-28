@@ -202,6 +202,24 @@ function additionEmployeeDataHandler(division, manager, roleList, regionList, ha
     });
 }
 
+// Делает ajax запрос, возвращающий проекты по центру,
+// полученны ответ в виде JSON передает в функцию handler(json_value)
+function additionProjectDataHandler(division, handler){
+    dojo.xhrGet({
+        url: "/employmentPlanning/getProjectByDivisionAsJSON",
+        content: {
+            divisionId: division
+        },
+        handleAs: "text",
+        load: function(response, ioArgs) {
+            handler(response);
+        },
+        error: function(response, ioArgs) {
+            alert('additionEmployeeDataHandler Panic !');
+        }
+    });
+}
+
 // Делает ajax запрос, для сохранения планируемого процента занятости
 function saveEmployeeDataHandler(projectId, monthBeg, yearBeg, monthEnd, yearEnd, jsonData, handler){
     dojo.xhrPost({
