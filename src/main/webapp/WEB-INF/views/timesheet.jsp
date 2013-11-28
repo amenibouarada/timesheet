@@ -383,41 +383,11 @@ function loadDraft() {
                 hideShowElement("load_draft", true);
                 hideShowElement("load_draft_text", true);
             }
-
-            //todo более правильная версия, но не работает польностью
-            //а нафига она тут?
-//            var div = dojo.byId('time_sheet_table');
-//            var tr = div.getElementsByClassName('time_sheet_row');
-//            rowsCount = tr.length;
-//            if (data.data.length > rowsCount) {
-//                console.log("@");
-//                for (var i = 0; i < data.data.length - rowsCount; i++) {
-//                    addNewRow();
-//                }
-//            } else if (data.data.length < rowsCount) {
-//                //тут все завязанно на айдишнике таблице и классе строк таблицы
-//                //больше до идентификатора никак не добраться
-//                for (i = 0; i < rowsCount - data.data.length; i++) {
-//                    tr[data.data.length].parentNode.removeChild(tr[data.data.length]);
-//                }
-//                recalculateRowNumbers();
-//                recalculateDuration();
-//            }
-//            if (data && ioArgs && ioArgs.args && ioArgs.args.content) {
-//                for (var i = 0; i < data.data.length; i++) {
-//                    var id = tr[i].getAttribute('id');
-//                    var num_id = id.substring(id.lastIndexOf("_") + 1, id.length);
-//                    loadDraftRow(num_id, data.data);
-//                }
-//            }
         },
         error: function (err, ioArgs) {
             console.log("error");
         }
     });
-
-//        var rowsCount = dojo.query(".time_sheet_row").length;
-
 }
 
 
