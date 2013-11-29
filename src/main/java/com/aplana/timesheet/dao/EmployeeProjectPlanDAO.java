@@ -1,6 +1,7 @@
 package com.aplana.timesheet.dao;
 
 import com.aplana.timesheet.dao.entity.Employee;
+import com.aplana.timesheet.dao.entity.EmployeePercentPlan;
 import com.aplana.timesheet.dao.entity.EmployeeProjectPlan;
 import com.aplana.timesheet.dao.entity.Project;
 import com.aplana.timesheet.enums.EmployeePlanType;
@@ -77,6 +78,8 @@ public class EmployeeProjectPlanDAO {
      *         Object[2] - year,
      *         Object[3] - month
      *         Object[4] - percent(сумма, запланированных часов по всем проектам, делить на количество рабочих часов в месяце)
+     *
+     * NativeNamedQuery только с позиционными связными переменными неудобно использовать.
      */
     public List<Object[]> getProjectPlan(EmploymentPlanningForm employmentPlanningForm){
         Query query = entityManager.createNativeQuery(
@@ -117,7 +120,7 @@ public class EmployeeProjectPlanDAO {
             ") " +
             "select " +
                     //TODO в дне всегда 8 рабочих часов?
-                "e.id, e.name, fct.year, fct.month, 100*fct.val/(8*wrk.val)" +
+                " e.id, e.name, fct.year, fct.month, 100*fct.val/(8*wrk.val) " +
             "from " +
                 "( " +
                     "select " +
@@ -307,6 +310,7 @@ public class EmployeeProjectPlanDAO {
      *     Object[4] - percent (сумма, запланированных часов по конкретному проекту, делить на количество рабочих часов в месяце)
      *     Object[5] - 0 - план, 1 - факт
      *
+     *     NativeNamedQuery только с позиционными связными переменными неудобно использовать.
      */
 
     public List<Object[]> getEmployeePlan(Integer employeeId, Integer yearBeg, Integer monthBeg, Integer yearEnd, Integer monthEnd){

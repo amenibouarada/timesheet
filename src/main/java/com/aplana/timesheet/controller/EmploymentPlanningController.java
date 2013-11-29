@@ -2,9 +2,7 @@ package com.aplana.timesheet.controller;
 
 import argo.jdom.*;
 import argo.saj.InvalidSyntaxException;
-import com.aplana.timesheet.dao.entity.Calendar;
-import com.aplana.timesheet.dao.entity.Employee;
-import com.aplana.timesheet.dao.entity.Project;
+import com.aplana.timesheet.dao.entity.*;
 import com.aplana.timesheet.form.AddEmployeeForm;
 import com.aplana.timesheet.form.EmploymentPlanningForm;
 import com.aplana.timesheet.service.*;
@@ -19,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.util.*;
+import java.util.Calendar;
 
 import static argo.jdom.JsonNodeBuilders.*;
 
@@ -81,7 +80,7 @@ public class EmploymentPlanningController{
     @RequestMapping(value="/employmentPlanning/getProjectPlanAsJSON", produces = "text/plain;charset=UTF-8")
     @ResponseBody
     public String showProjectPlan(@ModelAttribute(EmploymentPlanningForm.FORM) EmploymentPlanningForm form) {
-        List<Object[]> projectPlanList = employeeProjectPlanService.getProjectPlan(form);
+        List<EmployeePercentPlan> projectPlanList = employeeProjectPlanService.getProjectPlan(form);
         String projectPlanAsJSON = getProjectPlanAsJSON(projectPlanList);
 
         return projectPlanAsJSON;
@@ -94,7 +93,7 @@ public class EmploymentPlanningController{
             @ModelAttribute(EmploymentPlanningForm.FORM) EmploymentPlanningForm form,
             @RequestParam("employeeId") Integer employeeId
     ) {
-        List<Object[]> planList = employeeProjectPlanService.getEmployeePlan(employeeId, form.getYearBeg(), form.getMonthBeg(), form.getYearEnd(), form.getMonthEnd());
+        List<ProjectPercentPlan> planList = employeeProjectPlanService.getEmployeePlan(employeeId, form.getYearBeg(), form.getMonthBeg(), form.getYearEnd(), form.getMonthEnd());
 
         String employeePlanAsJSON = getEmployeePlanAsJSON(planList);
 
@@ -197,7 +196,7 @@ public class EmploymentPlanningController{
     }
 
     public void fillDefaultModelAndView(ModelAndView modelAndView){
-        final List<Calendar> yearList = getYearList();
+        final List<com.aplana.timesheet.dao.entity.Calendar> yearList = getYearList();
         Employee currentUser = securityService.getSecurityPrincipal().getEmployee();
 
         modelAndView.addObject("yearList", yearList);
@@ -242,16 +241,16 @@ public class EmploymentPlanningController{
      * @param planList
      * @return
      */
-    public String getProjectPlanAsJSON(List<Object[]> planList){
+    public String getProjectPlanAsJSON(List<EmployeePercentPlan> planList){
         JsonArrayNodeBuilder builder = anArrayBuilder();
         Map<Integer, JsonObjectNodeBuilder> jsonMap = new LinkedHashMap<Integer, JsonObjectNodeBuilder>();
 
-        for(Object[] result : planList){
-            Integer employee_id = (Integer)result[0];
-            String  employee_name = (String)result[1];
-            Integer year = (Integer)result[2];
-            Integer month = (Integer)result[3];
-            Double  value = (Double)result[4];
+        for(EmployeePercentPlan result : planList){
+            Integer employee_id = result.getEmployeeId();
+            String  employee_name = result.getEmployeeName();
+            Integer year = result.getYear();
+            Integer month = result.getMonth();
+            Double  value = result.getPercent();
 
             JsonObjectNodeBuilder objectNodeBuilder = jsonMap.get(employee_id);
 
@@ -274,17 +273,17 @@ public class EmploymentPlanningController{
         return JsonUtil.format(builder.build());
     }
 
-    public String getEmployeePlanAsJSON(List<Object[]> planList){
+    public String getEmployeePlanAsJSON(List<ProjectPercentPlan> planList){
         JsonArrayNodeBuilder builder = anArrayBuilder();
         Map<Integer, JsonObjectNodeBuilder> jsonMap = new LinkedHashMap<Integer, JsonObjectNodeBuilder>();
 
-        for(Object[] result : planList){
-            Integer projectId = (Integer)result[0];
-            String  projectName = (String)result[1];
-            Integer month = (Integer)result[2];
-            Integer year = (Integer)result[3];
-            Double  value = (Double)result[4];
-            Integer isFact = (Integer) result[5];
+        for(ProjectPercentPlan result : planList){
+            Integer projectId = result.getProjectId();
+            String  projectName = result.getProjectName();
+            Integer month = result.getMonth();
+            Integer year = result.getYear();
+            Double  value = result.getPercent();
+            Integer isFact = result.getFact();
 
             String key;
             if (isFact.equals(1)){

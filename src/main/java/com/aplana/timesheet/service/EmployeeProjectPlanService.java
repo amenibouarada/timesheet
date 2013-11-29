@@ -1,14 +1,13 @@
 package com.aplana.timesheet.service;
 
 import com.aplana.timesheet.dao.EmployeeProjectPlanDAO;
-import com.aplana.timesheet.dao.entity.Employee;
-import com.aplana.timesheet.dao.entity.EmployeeProjectPlan;
-import com.aplana.timesheet.dao.entity.Project;
+import com.aplana.timesheet.dao.entity.*;
 import com.aplana.timesheet.form.EmploymentPlanningForm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -61,12 +60,41 @@ public class EmployeeProjectPlanService {
     }
 
     @Transactional(readOnly = true)
-    public List<Object[]> getProjectPlan(EmploymentPlanningForm employmentPlanningForm){
-        return employeeProjectPlanDAO.getProjectPlan(employmentPlanningForm);
+    public List<EmployeePercentPlan> getProjectPlan(EmploymentPlanningForm employmentPlanningForm){
+        List<Object[]> projectPlan = employeeProjectPlanDAO.getProjectPlan(employmentPlanningForm);
+        List<EmployeePercentPlan> percentPlanList = new ArrayList<EmployeePercentPlan>(projectPlan.size());
+
+        for (Object[] objectPlan : projectPlan){
+            Integer employeeId = (Integer)objectPlan[0];
+            String  employeeName = (String)objectPlan[1];
+            Integer year = (Integer)objectPlan[2];
+            Integer month = (Integer)objectPlan[3];
+            Double  value = (Double)objectPlan[4];
+
+            EmployeePercentPlan employeePercentPlan = new EmployeePercentPlan(employeeId, employeeName, year, month, value);
+            percentPlanList.add(employeePercentPlan);
+        }
+
+        return percentPlanList;
     }
 
     @Transactional(readOnly = true)
-    public List<Object[]> getEmployeePlan(Integer employeeId, Integer yearBeg, Integer monthBeg, Integer yearEnd, Integer monthEnd){
-        return employeeProjectPlanDAO.getEmployeePlan(employeeId, yearBeg, monthBeg, yearEnd, monthEnd);
+    public List<ProjectPercentPlan> getEmployeePlan(Integer employeeId, Integer yearBeg, Integer monthBeg, Integer yearEnd, Integer monthEnd){
+        List<Object[]> employeePlan =  employeeProjectPlanDAO.getEmployeePlan(employeeId, yearBeg, monthBeg, yearEnd, monthEnd);
+        List<ProjectPercentPlan> percentPlanList = new ArrayList<ProjectPercentPlan>(employeePlan.size());
+
+        for (Object[] projectPlan : employeePlan){
+            Integer projectId = (Integer)projectPlan[0];
+            String  projectName = (String)projectPlan[1];
+            Integer month = (Integer)projectPlan[2];
+            Integer year = (Integer)projectPlan[3];
+            Double  value = (Double)projectPlan[4];
+            Integer isFact = (Integer) projectPlan[5];
+
+            ProjectPercentPlan projectPercentPlan = new ProjectPercentPlan(projectId, projectName, month, year, value, isFact);
+            percentPlanList.add(projectPercentPlan);
+        }
+
+        return percentPlanList;
     }
 }
