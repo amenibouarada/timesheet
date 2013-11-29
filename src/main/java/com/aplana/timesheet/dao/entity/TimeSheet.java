@@ -1,6 +1,5 @@
 package com.aplana.timesheet.dao.entity;
 
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.hibernate.annotations.ForeignKey;
 
 import javax.persistence.*;
@@ -39,8 +38,10 @@ public class TimeSheet {
     @ForeignKey(name = "FK_TIME_SHEET_EFFORT")
     private DictionaryItem effortInNextDay;
 
-    @Column(columnDefinition = "integer NOT NULL DEFAULT 0", name = "type")
-    private Integer type;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ts_type_id")
+    @ForeignKey(name = "FK_TIME_SHEET_TS_TYPE")
+    private DictionaryItem type;
 
     @OneToMany(mappedBy = "timeSheet", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @OrderBy("id asc")
@@ -52,11 +53,11 @@ public class TimeSheet {
     @Column(name = "creation_date")
     private Date creationDate;
 
-    public Integer getType() {
+    public DictionaryItem getType() {
         return type;
     }
 
-    public void setType(Integer type) {
+    public void setType(DictionaryItem type) {
         this.type = type;
     }
 

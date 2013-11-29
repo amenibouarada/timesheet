@@ -187,10 +187,10 @@
                         dojo.byId("lbNextPlan").innerHTML = "Планы на следующий рабочий день:";
                     }
 
-                    if (data.draft != null || dataDraft) {
+                    if (data.isDraft != null || dataDraft) {
                         console.log(dataDraft);
-                        hideShowElement("load_draft", dataDraft || data.draft == 0);
-                        hideShowElement("load_draft_text", dataDraft || data.draft == 0);
+                        hideShowElement("load_draft", dataDraft || data.isDraft == "false");
+                        hideShowElement("load_draft_text", dataDraft || data.isDraft == "false");
                     }
                     dataDraft = false;
                 }
@@ -205,6 +205,7 @@
     }
 
     function hideShowElement(id, isHide) {
+        console.log(id + " " + isHide);
         dojo.setStyle(id, {"display": isHide ? "none" : ""});
     }
 
@@ -278,11 +279,6 @@ function submitform(s) {
         timeSheetForm.action = "newReport";
         timeSheetForm.submit();
     }
-//            if (s == 'problem') {
-//                var empId = dojo.byId("employeeId").value;
-//                var divId = dojo.byId("divisionId").value;
-//                window.open('problem/' + divId + '/' + empId, 'problem_window');
-//            }
 }
 
 function CopyPlan() {
@@ -374,10 +370,10 @@ function loadDraft() {
         load: function (data, ioArgs) {
             if (data && ioArgs && ioArgs.args && ioArgs.args.content) {
                 var div = dojo.byId('time_sheet_table');
-                var tr = div.getElementsByClassName('time_sheet_row');
+                var tr = document.querySelectorAll('.time_sheet_row');
                 rowsCount = tr.length;
                 for (var j = 0; j < rowsCount; j++) {
-                    tr[0].parentNode.removeChild(tr[0]);
+                    tr[j].parentNode.removeChild(tr[j]);
                 }
                 for (var i = 0; i < data.data.length; i++) {
                     addNewRow();
@@ -387,41 +383,11 @@ function loadDraft() {
                 hideShowElement("load_draft", true);
                 hideShowElement("load_draft_text", true);
             }
-
-            //todo более правильная версия, но не работает польностью
-            //а нафига она тут?
-//            var div = dojo.byId('time_sheet_table');
-//            var tr = div.getElementsByClassName('time_sheet_row');
-//            rowsCount = tr.length;
-//            if (data.data.length > rowsCount) {
-//                console.log("@");
-//                for (var i = 0; i < data.data.length - rowsCount; i++) {
-//                    addNewRow();
-//                }
-//            } else if (data.data.length < rowsCount) {
-//                //тут все завязанно на айдишнике таблице и классе строк таблицы
-//                //больше до идентификатора никак не добраться
-//                for (i = 0; i < rowsCount - data.data.length; i++) {
-//                    tr[data.data.length].parentNode.removeChild(tr[data.data.length]);
-//                }
-//                recalculateRowNumbers();
-//                recalculateDuration();
-//            }
-//            if (data && ioArgs && ioArgs.args && ioArgs.args.content) {
-//                for (var i = 0; i < data.data.length; i++) {
-//                    var id = tr[i].getAttribute('id');
-//                    var num_id = id.substring(id.lastIndexOf("_") + 1, id.length);
-//                    loadDraftRow(num_id, data.data);
-//                }
-//            }
         },
         error: function (err, ioArgs) {
             console.log("error");
         }
     });
-
-//        var rowsCount = dojo.query(".time_sheet_row").length;
-
 }
 
 

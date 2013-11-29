@@ -2,6 +2,7 @@ package com.aplana.timesheet.dao;
 
 import com.aplana.timesheet.dao.entity.*;
 import com.aplana.timesheet.enums.TypesOfActivityEnum;
+import com.aplana.timesheet.enums.TypesOfTimeSheetEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -185,7 +186,7 @@ public class ProjectDAO {
 
     public List<Project> getEmployeeProjectsFromTimeSheetByDates(Date beginDate, Date endDate, Employee employee) {
         Query query = entityManager.createQuery("select tsd.project from TimeSheetDetail as tsd " +
-                "where tsd.timeSheet.employee = :employee and (tsd.timeSheet.type = 0) and tsd.timeSheet.calDate.calDate between :beginDate and :endDate")
+                "where tsd.timeSheet.employee = :employee and (tsd.timeSheet.type = "+ TypesOfTimeSheetEnum.REPORT.getId()+") and tsd.timeSheet.calDate.calDate between :beginDate and :endDate")
                 .setParameter("employee", employee)
                 .setParameter("beginDate", beginDate)
                 .setParameter("endDate", endDate);

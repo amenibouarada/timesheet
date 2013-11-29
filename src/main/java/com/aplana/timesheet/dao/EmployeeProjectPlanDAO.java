@@ -390,7 +390,7 @@ public class EmployeeProjectPlanDAO {
                     "project pr " +
                 "where " +
                     "ts.calDate = c.calDate " +
-                    "and ts.type = " + TypesOfTimeSheetEnum.REPORT.getId() +
+                    "and ts.ts_type_id = " + TypesOfTimeSheetEnum.REPORT.getId() +
                     "and tsd.proj_id = pr.id " +
                     "and ts.id = tsd.time_sheet_id " +
                     "and ts.emp_id = :employeeId " +

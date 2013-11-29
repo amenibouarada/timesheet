@@ -5,6 +5,7 @@ import com.aplana.timesheet.dao.*;
 import com.aplana.timesheet.dao.entity.*;
 
 import com.aplana.timesheet.enums.DictionaryEnum;
+import com.aplana.timesheet.enums.TypesOfTimeSheetEnum;
 import com.aplana.timesheet.enums.VacationStatusEnum;
 import com.aplana.timesheet.util.DateTimeUtil;
 import org.junit.Before;
@@ -138,7 +139,7 @@ public class PlannedVacationServiceTest extends AbstractJsonTest{
         timeSheet.setEffortInNextDay(dictionaryItemService.getItemsByDictionaryId(DictionaryEnum.EFFORT_IN_NEXTDAY.getId()).get(0));
         timeSheet.setOvertimeCause(timeSheet.getOvertimeCause());
         timeSheet.setState(null);
-        timeSheet.setType(0);
+        timeSheet.setType(dictionaryItemService.find(TypesOfTimeSheetEnum.REPORT.getId()));
 
         return timeSheet;
     }

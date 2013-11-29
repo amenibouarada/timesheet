@@ -1,6 +1,7 @@
 package com.aplana.timesheet.dao;
 
 import com.aplana.timesheet.dao.entity.*;
+import com.aplana.timesheet.enums.TypesOfTimeSheetEnum;
 import com.aplana.timesheet.util.DateTimeUtil;
 import com.google.common.collect.Iterables;
 import org.apache.commons.lang.time.DateUtils;
@@ -272,7 +273,7 @@ public class EmployeeDAO {
                         "where (tsd.actType.id = 14 or tsd.actType.id = 12 or tsd.actType.id = 13 or tsd.actType.id = 42) " +
                         "and (ts.calDate.calDate between :beginDate and :endDate) " +
                         "and (ts.employee = :employee) " +
-                        "and (ts.type = 0)");
+                        "and (ts.type = "+ TypesOfTimeSheetEnum.REPORT.getId()+")");
         query.setParameter("beginDate", beginDate);
         query.setParameter("endDate", endDate);
         query.setParameter("employee", employee);
@@ -485,7 +486,7 @@ public class EmployeeDAO {
             if (lookPreviousTwoWeekTimesheet){
                 queryString.append(" OR (e.id IN (SELECT ts.employee FROM TimeSheet ts WHERE ts.id IN " +
                         "(SELECT tsd.timeSheet FROM TimeSheetDetail tsd WHERE tsd.project IN :projects) AND " +
-                        "ts.calDate.calDate between :twoWeekEarlyDate AND :beginDate AND ts.type = 0))");
+                        "ts.calDate.calDate between :twoWeekEarlyDate AND :beginDate AND ts.type = "+TypesOfTimeSheetEnum.REPORT.getId()+"))");
                 parameters.put("twoWeekEarlyDate", twoWeekEarlyDate);
                 parameters.put("beginDate", beginDate);
             }

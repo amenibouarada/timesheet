@@ -97,9 +97,7 @@ public class TimeSheetController {
         mav.addAllObjects(timeSheetService.getListsToMAV(request));
 
         //если параметр передан и означает, что мы хотим загрузит черновик
-        if (type != null && TypesOfTimeSheetEnum.DRAFT.getId() == type) {
-            mav.addObject("data", "true");
-        }
+        mav.addObject("data", String.valueOf(type != null && TypesOfTimeSheetEnum.DRAFT.getId() == type));
 
         return mav;
     }
@@ -215,7 +213,7 @@ public class TimeSheetController {
 
         JsonObjectNodeBuilder jsonObjectNodeBuilder = timeSheetService.getPlansJsonBuilder(date, employeeId);
         TimeSheet timeSheet = timeSheetService.findForDateAndEmployeeByTypes(date, employeeId, Arrays.asList(TypesOfTimeSheetEnum.DRAFT));
-        jsonObjectNodeBuilder.withField("draft", aStringBuilder(timeSheet != null && timeSheet.getId() != null ? "1" : "0"));
+        jsonObjectNodeBuilder.withField("isDraft", aStringBuilder(timeSheet != null && timeSheet.getId() != null ? "true" : "false"));
         return JsonUtil.format(jsonObjectNodeBuilder);
     }
 
@@ -238,8 +236,6 @@ public class TimeSheetController {
                 )
         );
     }
-
-
 
     /**
      * Возвращает {@link JsonObjectNodeBuilder} в котором находится сохраненный черновик

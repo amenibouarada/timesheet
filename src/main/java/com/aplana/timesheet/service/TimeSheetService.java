@@ -155,7 +155,7 @@ public class TimeSheetService {
         }
         timeSheet.setTimeSheetDetails(timeSheetDetails);
         //сохраняем тип отчета
-        timeSheet.setType(type.getId());
+        timeSheet.setType(dictionaryItemService.find(type.getId()));
 
         //пытаемся узнать, может у нас есть уже черновик вне зависисмости от типа отчета
         //на случай если появится еще состояния

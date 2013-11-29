@@ -6,12 +6,16 @@ import com.aplana.timesheet.dao.TimeSheetDAO;
 import com.aplana.timesheet.dao.VacationDAO;
 import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.dao.entity.TimeSheet;
+import com.aplana.timesheet.util.DateTimeUtil;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.Date;
 
+/*
+Самый дебильный класс во всем проекте!
+ */
 public class DayTimeSheet implements Comparable<DayTimeSheet> {
 
     private TimeSheetDAO timeSheetDAO;
@@ -157,7 +161,24 @@ public class DayTimeSheet implements Comparable<DayTimeSheet> {
      * @return
      */
     public Boolean getStatusNotCome() {
-        return !this.getStatusHoliday() && this.getCurrent().before(this.getCalDate()) && this.getTimeSheet() == null;
+        return !this.getStatusHoliday() && getIsDayNotCome() && this.getTimeSheet() == null;
+    }
+
+    /*
+     * Имя метода соответсвует тому что он выполняет
+     * Этот день ещё не настал (больше чем текущая дата)
+     */
+    public Boolean getIsDayNotCome(){
+        return getCurrent().before(getCalDate());
+    }
+
+    /*
+     * Этот день ещё не настал (больше чем текущая дата)
+     * Имя метода соответсвует тому что он выполняет
+    */
+    public Boolean getIsCalDateLongAgo(){
+        long threeMonthsAgo = getCurrent().getTime() - DateTimeUtil.THREE_MONTHS_IN_MILLS;
+        return threeMonthsAgo > getCalDate().getTime();
     }
 
     /**

@@ -2,6 +2,8 @@ package com.aplana.timesheet.dao;
 
 import com.aplana.timesheet.enums.OvertimeCategory;
 import com.aplana.timesheet.enums.Report07PeriodTypeEnum;
+import com.aplana.timesheet.enums.TypesOfActivityEnum;
+import com.aplana.timesheet.enums.TypesOfTimeSheetEnum;
 import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.reports.*;
 import com.aplana.timesheet.util.DateTimeUtil;
@@ -65,6 +67,9 @@ public class JasperReportDAO {
     private static final String PROJECT_SQL_CLAUSE  = "project.id=:projectId AND ";
     private static final String BILLABLE_CLAUSE = "(epbillable.billable = 'true' OR (epbillable.billable is null AND empl.billable = 'true')) AND ";
     private static final String HIDE_INACTIVE_PROJECTS_CLAUSE = "AND project.active = 'true' ";
+
+    private static final String NOT_DRAFT_ONLY_CLAUSE = "AND ts_type.id = " + TypesOfTimeSheetEnum.REPORT.getId() + " ";
+    private static final String JOIN_TIMESHEET_TO_DICTIONARY_ON_TS_TYPE = "INNER JOIN dictionary_item ts_type ON timesheet.ts_type_id=ts_type.id ";
 
     private static final String WITHOUT_CLAUSE  = "";
 
@@ -150,13 +155,14 @@ public class JasperReportDAO {
                     "       INNER JOIN employee empl    ON timesheet.emp_id=empl.id " +
                     "       INNER JOIN region region        ON empl.region=region.id " +
                     "       INNER JOIN division division    ON empl.division=division.id " +
+                            JOIN_TIMESHEET_TO_DICTIONARY_ON_TS_TYPE +
                     "       LEFT OUTER JOIN calendar calendar  ON timesheet.caldate=calendar.caldate " +
                     "       LEFT OUTER JOIN project project    ON timesheet_details.proj_id=project.id " +
                 "where " +
                     (withDivisionClause ? DIVISION_SQL_CLAUSE : WITHOUT_CLAUSE) +
                     (withRegionClause ? REGION_SQL_CLAUSE : WITHOUT_CLAUSE ) +
                     "(calendar.calDate between :beginDate and :endDate) " +
-                    "AND (timesheet.type = 0) ");
+                    NOT_DRAFT_ONLY_CLAUSE);
 
         if (withRegionClause)
             projQuery.setParameter("regionIds", report.getRegionIds());
@@ -243,6 +249,7 @@ public class JasperReportDAO {
                         "       INNER JOIN employee empl    ON timesheet.emp_id=empl.id " +
                         "       INNER JOIN region region        ON empl.region=region.id " +
                         "       INNER JOIN division division    ON empl.division=division.id " +
+                                JOIN_TIMESHEET_TO_DICTIONARY_ON_TS_TYPE +
                         "       LEFT OUTER JOIN calendar calendar  ON timesheet.caldate=calendar.caldate " +
                         "       LEFT OUTER JOIN holiday holidays   ON calendar.caldate=holidays.caldate " +
                         "       LEFT OUTER JOIN project project    ON timesheet_details.proj_id=project.id " +
@@ -266,9 +273,9 @@ public class JasperReportDAO {
                                 workDaySeparator +
                                 (report.getShowNonBillable() ? WITHOUT_CLAUSE : BILLABLE_CLAUSE) +
                         "        timesheet_details.act_type in :actTypes AND " +
-                        "        timesheet.caldate BETWEEN :beginDate AND :endDate AND " +
-                        "        (timesheet.type = 0) AND " +
-                        "        (holidays.region is null OR holidays.region=region.id) " +
+                        "        timesheet.caldate BETWEEN :beginDate AND :endDate " +
+                                 NOT_DRAFT_ONLY_CLAUSE +
+                        "        AND (holidays.region is null OR holidays.region=region.id) " +
                         "GROUP BY" +
                         "        empl.id ," +
                         "        empl.name ," +
@@ -365,6 +372,7 @@ public class JasperReportDAO {
                                 "INNER JOIN division division    ON empl.division=division.id " +
                                 "INNER JOIN project project    ON timesheet_details.proj_id=project.id " + "%s " +
                                 "INNER JOIN region region        ON empl.region=region.id " +
+                                JOIN_TIMESHEET_TO_DICTIONARY_ON_TS_TYPE +
                                 "LEFT OUTER JOIN project_task project_task ON timesheet_details.task_id=project_task.id " +
                                 "LEFT OUTER JOIN project_role project_role ON timesheet_details.projectrole_id=project_role.id " +
                                 "LEFT OUTER JOIN holiday holidays   ON calendar.caldate=holidays.caldate AND (holidays.region IS NULL OR holidays.region = empl.region) " +
@@ -382,10 +390,10 @@ public class JasperReportDAO {
                                 "%s " +
                         "WHERE " +
                                 "timesheet_details.duration > 0 AND " +
-                                "timesheet_details.act_type in (42, 12, 13)  AND " +    //TODO (aivanov 3.10.13) Создать емун и заменить циферки
+                                "timesheet_details.act_type in ("+ TypesOfActivityEnum.getOnlyWorkTypeString()+")  AND " +
                                 " %s %s %s %s %s " +
                                 "calendar.calDate between :beginDate AND :endDate " +
-                                "AND (timesheet.type = 0) " +
+                                NOT_DRAFT_ONLY_CLAUSE +
                         "GROUP BY " +
                                 "empl.name, " +
                                 "division.name, " +
@@ -519,6 +527,7 @@ public class JasperReportDAO {
                     "INNER JOIN division division    ON empl.division=division.id " +
                     "INNER JOIN project project    ON timesheet_details.proj_id=project.id " + "%s " +
                     "INNER JOIN region region        ON empl.region=region.id " +
+                    JOIN_TIMESHEET_TO_DICTIONARY_ON_TS_TYPE +
                     "LEFT OUTER JOIN project_task project_task ON timesheet_details.task_id=project_task.id " +
                     "LEFT OUTER JOIN project_role project_role ON timesheet_details.projectrole_id=project_role.id " +
                     "LEFT OUTER JOIN holiday holidays   ON calendar.caldate=holidays.caldate AND (holidays.region IS NULL OR holidays.region = empl.region) " +
@@ -539,10 +548,10 @@ public class JasperReportDAO {
                     "%s " +
             "WHERE " +
                     "timesheet_details.duration > 0 AND " +
-                    "timesheet_details.act_type in (42, 12, 13)  AND " +    //TODO (aivanov 3.10.13) Создать емун и заменить циферки
+                    "timesheet_details.act_type in ("+ TypesOfActivityEnum.getOnlyWorkTypeString()+")  AND " +
                     " %s %s %s %s %s " +
                     "calendar.caldate between :beginDate AND :endDate " +
-                    "AND (timesheet.type = 0) " +
+                    NOT_DRAFT_ONLY_CLAUSE +
             "GROUP BY " +
                     "empl.name, " +
                     "division.name, " +
@@ -666,7 +675,7 @@ public class JasperReportDAO {
                     "        employee.not_to_sync=FALSE AND  " +
                     "        (employee.manager IS NOT NULL) AND  " +
                     "        (calendar.caldate NOT IN  " +
-                    "                (SELECT timesheet.caldate FROM time_sheet timesheet WHERE timesheet.emp_id=employee.id AND (timesheet.type = 0))) AND  " +
+                    "                (SELECT timesheet.caldate FROM time_sheet timesheet WHERE timesheet.emp_id=employee.id AND (timesheet.ts_type_id = "+TypesOfTimeSheetEnum.REPORT.getId()+"))) AND  " +
                     "        (calendar.caldate NOT IN   " +
                     "                (SELECT holiday.caldate FROM holiday holiday WHERE holiday.region IS NULL OR holiday.region=employee.region)) AND  " +
                     "        employee.start_date<=calendar.caldate  " +
@@ -721,28 +730,30 @@ public class JasperReportDAO {
                         "epbillable.comment as col_15, " +
                         "timesheet.plan as col_16 " +
                 "FROM time_sheet_detail AS timesheet_details " +
-                        "INNER JOIN time_sheet timesheet ON timesheet_details.time_sheet_id=timesheet.id " +
-                        "INNER JOIN employee empl    ON timesheet.emp_id=empl.id " +
-                        "INNER JOIN calendar calendar  ON timesheet.caldate=calendar.caldate " +
-                        "LEFT OUTER  JOIN project project    ON timesheet_details.proj_id=project.id " +
-                        "INNER JOIN region region        ON empl.region=region.id " +
-                        "LEFT OUTER  JOIN project_role project_role        ON timesheet_details.projectrole_id=project_role.id " +
+                        "INNER JOIN time_sheet timesheet    ON timesheet_details.time_sheet_id=timesheet.id " +
+                        "INNER JOIN employee empl           ON timesheet.emp_id=empl.id " +
+                        "INNER JOIN calendar calendar       ON timesheet.caldate=calendar.caldate " +
+                        JOIN_TIMESHEET_TO_DICTIONARY_ON_TS_TYPE +
+                        "INNER JOIN region region           ON empl.region=region.id " +
                         "INNER JOIN project_role job        ON empl.job=job.id " +
-                        "INNER JOIN division division    ON empl.division=division.id " +
+                        "INNER JOIN division division       ON empl.division=division.id " +
+                        "LEFT OUTER JOIN project project    ON timesheet_details.proj_id=project.id " +
+                        "LEFT OUTER JOIN project_role project_role ON timesheet_details.projectrole_id=project_role.id " +
                         "LEFT OUTER JOIN project_task project_task ON timesheet_details.task_id=project_task.id " +
-                        "LEFT OUTER JOIN dictionary_item act_type    ON timesheet_details.act_type=act_type.id " +
-                        "LEFT OUTER JOIN dictionary_item act_cat    ON timesheet_details.act_cat=act_cat.id " +
-                        "LEFT OUTER JOIN dictionary_item workplace    ON timesheet_details.workplace_id=workplace.id " +
-                        "LEFT OUTER JOIN holiday holidays   ON calendar.caldate=holidays.caldate AND (holidays.region IS NULL OR holidays.region = empl.region) " +
-                        "LEFT OUTER JOIN employee_project_billable epbillable    ON project.id=epbillable.project_id and empl.id=epbillable.employee_id AND " +
-                        "                                                           timesheet.caldate BETWEEN epbillable.start_date AND  epbillable.end_date " +
+                        "LEFT OUTER JOIN dictionary_item act_type  ON timesheet_details.act_type=act_type.id " +
+                        "LEFT OUTER JOIN dictionary_item act_cat   ON timesheet_details.act_cat=act_cat.id " +
+                        "LEFT OUTER JOIN dictionary_item workplace ON timesheet_details.workplace_id=workplace.id " +
+                        "LEFT OUTER JOIN holiday holidays          ON calendar.caldate=holidays.caldate AND (holidays.region IS NULL OR holidays.region = empl.region) " +
+                        "LEFT OUTER JOIN employee_project_billable epbillable    " +
+                        "ON project.id=epbillable.project_id and empl.id=epbillable.employee_id " +
+                        "                   AND timesheet.caldate BETWEEN epbillable.start_date AND  epbillable.end_date " +
                 "where " +
                         (withDivisionClause ? DIVISION_SQL_CLAUSE : WITHOUT_CLAUSE) +
                         (withRegionClause ? REGION_SQL_CLAUSE : WITHOUT_CLAUSE) +
                         (withEmployeeClause ? EMPLOYEE_SQL_CLAUSE : WITHOUT_CLAUSE) +
                         "calendar.calDate between :beginDate and :endDate " +
-                        "AND (timesheet.type = 0) " +
-                "order by calendar.calDate, empl.name ");
+                        NOT_DRAFT_ONLY_CLAUSE +
+                " order by calendar.calDate, empl.name ");
 
         if (withRegionClause) {
 			query.setParameter("regionIds", report.getRegionIds());
@@ -784,7 +795,7 @@ public class JasperReportDAO {
                 "WHERE " +
                         "tsd.actType = act.actType AND " +
                         "tsd.actCat = act.actCat AND " +
-                        "tsd.timeSheet.type = 0 AND " +
+                        "tsd.timeSheet.type = "+TypesOfTimeSheetEnum.REPORT.getId()+" AND " +
                         (withRegionClause ? REGION_CLAUSE : WITHOUT_CLAUSE) +
                         (withProjectClause ? PROJECT_CLAUSE : WITHOUT_CLAUSE) +
                         (withDatesClause?"tsd.timeSheet.calDate.calDate between :beginDate AND :endDate AND ":WITHOUT_CLAUSE) +
@@ -810,7 +821,7 @@ public class JasperReportDAO {
                             "join tsd.timeSheet.employee empl " +
                             "join empl.region r " +
                     "WHERE " +
-                            "(tsd.timeSheet.type = 0) AND " +
+                            "(tsd.timeSheet.type = "+TypesOfTimeSheetEnum.REPORT.getId()+") AND " +
                             (withRegionClause ? REGION_CLAUSE : WITHOUT_CLAUSE) +
                             (withProjectClause ? PROJECT_CLAUSE : WITHOUT_CLAUSE) +
                             (withDatesClause?"tsd.timeSheet.calDate.calDate between :beginDate AND :endDate AND":WITHOUT_CLAUSE)+
@@ -1128,7 +1139,7 @@ public class JasperReportDAO {
                     "JOIN ts.employee emp " +
                     "JOIN project.manager as manager " +
                     "JOIN manager.division as md " +
-                    "WHERE emp.division.id = :divisionEmployeeId AND (ts.type = 0) " +
+                    "WHERE emp.division.id = :divisionEmployeeId AND (ts.type = "+TypesOfTimeSheetEnum.REPORT.getId()+") " +
                     "AND ts.calDate.calDate between :beginDate AND :endDate " +
                     "GROUP BY 1, 3 " +
                     "ORDER BY 2 DESC ");
@@ -1142,7 +1153,7 @@ public class JasperReportDAO {
                     "JOIN ts.employee emp " +
                     "JOIN project.manager as manager " +
                     "JOIN manager.division as md " +
-                    "WHERE ts.calDate.calDate between :beginDate AND :endDate AND (ts.type = 0) " +
+                    "WHERE ts.calDate.calDate between :beginDate AND :endDate AND (ts.type = "+TypesOfTimeSheetEnum.REPORT.getId()+") " +
                     "GROUP BY 1, 3 " +
                     "ORDER BY 2 DESC ");
             query.setParameter("beginDate", new Timestamp(periodStart.getTime()));
@@ -1162,7 +1173,7 @@ public class JasperReportDAO {
                             "JOIN ts.employee emp " +
                             "JOIN project.manager as manager " +
                             "JOIN manager.division as md " +
-                            "WHERE emp.division.id = :divisionEmployeeId AND division.id = :divisionOwnerId AND (ts.type = 0) " +
+                            "WHERE emp.division.id = :divisionEmployeeId AND division.id = :divisionOwnerId AND (ts.type = "+TypesOfTimeSheetEnum.REPORT.getId()+") " +
                             "AND ts.calDate.calDate between :beginDate AND :endDate " +
                             "GROUP BY 1, 3 " +
                             "ORDER BY 2 DESC");
@@ -1180,7 +1191,7 @@ public class JasperReportDAO {
                             "JOIN project.manager as manager " +
                             "JOIN manager.division as md " +
                             "WHERE division.id = :divisionOwnerId " +
-                            "AND ts.calDate.calDate between :beginDate AND :endDate AND (ts.type = 0) " +
+                            "AND ts.calDate.calDate between :beginDate AND :endDate AND (ts.type = "+TypesOfTimeSheetEnum.REPORT.getId()+") " +
                             "GROUP BY 1, 3 " +
                             "ORDER BY 2 DESC");
             query.setParameter("beginDate", new Timestamp(periodStart.getTime()));
@@ -1200,7 +1211,7 @@ public class JasperReportDAO {
                             "JOIN tsd.timeSheet ts " +
                             "JOIN ts.employee as emp " +
                             "WHERE p.id = :projectId " +
-                            "AND ts.calDate.calDate between :beginDate AND :endDate AND (ts.type = 0) " +
+                            "AND ts.calDate.calDate between :beginDate AND :endDate AND (ts.type = "+TypesOfTimeSheetEnum.REPORT.getId()+") " +
                             "GROUP BY 1, 3, 2, 5, 6"
             );
             query.setParameter("projectId", projectId);
@@ -1213,7 +1224,7 @@ public class JasperReportDAO {
                             "LEFT JOIN p.timeSheetDetail tsd " +
                             "JOIN tsd.timeSheet ts " +
                             "JOIN ts.employee as emp " +
-                            "WHERE p.id = :projectId AND emp.division.id = :divisionEmployeeId AND (ts.type = 0) " +
+                            "WHERE p.id = :projectId AND emp.division.id = :divisionEmployeeId AND (ts.type = "+TypesOfTimeSheetEnum.REPORT.getId()+") " +
                             "AND ts.calDate.calDate between :beginDate AND :endDate " +
                             "GROUP BY 1, 3, 2, 5, 6"
             );
