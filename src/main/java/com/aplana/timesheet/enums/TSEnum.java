@@ -6,5 +6,6 @@ package com.aplana.timesheet.enums;
  */
 public interface TSEnum {
     int getId();
+
     String getName();
 }
