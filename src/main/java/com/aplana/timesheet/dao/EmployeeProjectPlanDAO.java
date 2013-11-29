@@ -3,6 +3,8 @@ package com.aplana.timesheet.dao;
 import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.dao.entity.EmployeeProjectPlan;
 import com.aplana.timesheet.dao.entity.Project;
+import com.aplana.timesheet.enums.EmployeePlanType;
+import com.aplana.timesheet.enums.TypesOfActivityEnum;
 import com.aplana.timesheet.enums.TypesOfTimeSheetEnum;
 import com.aplana.timesheet.form.EmploymentPlanningForm;
 import org.springframework.stereotype.Repository;
@@ -111,7 +113,7 @@ public class EmployeeProjectPlanDAO {
                         ") " +
                     ") " +
                 "where " +
-                    "dict_id = 12 " +
+                    "dict_id = " + TypesOfActivityEnum.PROJECT.getId() + " " +
             ") " +
             "select " +
                     //TODO в дне всегда 8 рабочих часов?
@@ -347,7 +349,7 @@ public class EmployeeProjectPlanDAO {
                     "left join employee e on (e.id = ep.employee_id) " +
                     "left join workDay wd on (wd.region = e.region and ep.month = wd.month and ep.year = wd.year) " +
                 "where " +
-                    "dict_id = 12 " +
+                    "dict_id = " + TypesOfActivityEnum.PROJECT.getId() + " " +
             "), " +
             "project_data as " +
             "( " +
@@ -416,7 +418,7 @@ public class EmployeeProjectPlanDAO {
             "( " +
                 "select id, nm, month, year, val, 0 isFact from plan_data " +
                     "union all " +
-                "select coalesce(f.proj_id, 112), f.nm, f.month, f.year, f.prc, 1 isFact from fact_data f " +
+                "select coalesce(f.proj_id, "+ EmployeePlanType.NON_PROJECT.getId() + "), f.nm, f.month, f.year, f.prc, 1 isFact from fact_data f " +
             ") t " +
             "order by case sign(t.id) when -1 then 0 when 1 then 1 when 0 then 2 end, nm ");
 

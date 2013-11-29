@@ -2,15 +2,12 @@ package com.aplana.timesheet.controller;
 
 import argo.jdom.*;
 import argo.saj.InvalidSyntaxException;
-import com.aplana.timesheet.dao.*;
 import com.aplana.timesheet.dao.entity.Calendar;
 import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.dao.entity.Project;
 import com.aplana.timesheet.form.AddEmployeeForm;
 import com.aplana.timesheet.form.EmploymentPlanningForm;
-import com.aplana.timesheet.service.CalendarService;
-import com.aplana.timesheet.service.EmployeeProjectPlanService;
-import com.aplana.timesheet.service.ProjectService;
+import com.aplana.timesheet.service.*;
 import com.aplana.timesheet.system.security.SecurityService;
 import com.aplana.timesheet.util.DateTimeUtil;
 import com.aplana.timesheet.util.JsonUtil;
@@ -34,31 +31,25 @@ public class EmploymentPlanningController{
     private CalendarService calendarService;
 
     @Autowired
-    private ProjectService projectService;
-
-    @Autowired
-    private EmployeeProjectPlanDAO employeeProjectPlanDAO;
-
-    @Autowired
-    private DivisionDAO divisionDAO;
-
-    @Autowired
-    private ManagerDAO managerDAO;
-
-    @Autowired
-    private ProjectRoleDAO projectRoleDAO;
-
-    @Autowired
-    private RegionDAO regionDAO;
-
-    @Autowired
-    private EmployeeDAO employeeDAO;
-
-    @Autowired
     private EmployeeProjectPlanService employeeProjectPlanService;
 
     @Autowired
     private SecurityService securityService;
+
+    @Autowired
+    private DivisionService divisionService;
+
+    @Autowired
+    private ManagerService managerService;
+
+    @Autowired
+    private ProjectRoleService projectRoleService;
+
+    @Autowired
+    private RegionService regionService;
+
+    @Autowired
+    private EmployeeService employeeService;
 
     private List<com.aplana.timesheet.dao.entity.Calendar> getYearList() {
         return DateTimeUtil.getYearsList(calendarService);
@@ -90,7 +81,7 @@ public class EmploymentPlanningController{
     @RequestMapping(value="/employmentPlanning/getProjectPlanAsJSON", produces = "text/plain;charset=UTF-8")
     @ResponseBody
     public String showProjectPlan(@ModelAttribute(EmploymentPlanningForm.FORM) EmploymentPlanningForm form) {
-        List<Object[]> projectPlanList = employeeProjectPlanDAO.getProjectPlan(form);
+        List<Object[]> projectPlanList = employeeProjectPlanService.getProjectPlan(form);
         String projectPlanAsJSON = getProjectPlanAsJSON(projectPlanList);
 
         return projectPlanAsJSON;
@@ -103,7 +94,7 @@ public class EmploymentPlanningController{
             @ModelAttribute(EmploymentPlanningForm.FORM) EmploymentPlanningForm form,
             @RequestParam("employeeId") Integer employeeId
     ) {
-        List<Object[]> planList = employeeProjectPlanDAO.getEmployeePlan(employeeId, form.getYearBeg(), form.getMonthBeg(), form.getYearEnd(), form.getMonthEnd());
+        List<Object[]> planList = employeeProjectPlanService.getEmployeePlan(employeeId, form.getYearBeg(), form.getMonthBeg(), form.getYearEnd(), form.getMonthEnd());
 
         String employeePlanAsJSON = getEmployeePlanAsJSON(planList);
 
@@ -115,7 +106,7 @@ public class EmploymentPlanningController{
     @RequestMapping(value="/employmentPlanning/getAddEmployeeListAsJSON", produces = "text/plain;charset=UTF-8")
     @ResponseBody
     public String showAddEmployeeList(@ModelAttribute(AddEmployeeForm.ADD_FORM) AddEmployeeForm form) {
-        List<Employee> employeeList = employeeDAO.getEmployeeByDivisionManagerRoleRegion(form.getDivisionId(), form.getManagerId(), form.getProjectRoleListId(), form.getRegionListId());
+        List<Employee> employeeList = employeeService.getEmployeeByDivisionManagerRoleRegion(form.getDivisionId(), form.getManagerId(), form.getProjectRoleListId(), form.getRegionListId());
         String employeeListAsJSON = getEmployeeListAsJson(employeeList);
 
         return employeeListAsJSON;
@@ -125,7 +116,7 @@ public class EmploymentPlanningController{
     @RequestMapping(value="/employmentPlanning/getProjectByDivisionAsJSON", produces = "text/plain;charset=UTF-8")
     @ResponseBody
     public String showAddEmployeeList(@RequestParam("divisionId") String divisionId) {
-        List<Project> projectList = divisionDAO.getProjectList(Integer.parseInt(divisionId));
+        List<Project> projectList = divisionService.getProjectList(Integer.parseInt(divisionId));
         String projectListAsJson = getProjectListAsJson(projectList);
 
         return projectListAsJson;
@@ -158,7 +149,7 @@ public class EmploymentPlanningController{
             }
         }
 
-        return "ля-ля-ля";
+        return "+OK";
     }
 
 
@@ -202,7 +193,7 @@ public class EmploymentPlanningController{
             }
         }
 
-        return "бла-бла-бла";
+        return "+OK";
     }
 
     public void fillDefaultModelAndView(ModelAndView modelAndView){
@@ -211,11 +202,11 @@ public class EmploymentPlanningController{
 
         modelAndView.addObject("yearList", yearList);
         modelAndView.addObject("monthList", calendarService.getMonthList(2013));
-        modelAndView.addObject("projectList", divisionDAO.getProjectList(currentUser.getDivision().getId()));
-        modelAndView.addObject("divisionList", divisionDAO.getActiveDivisions());
-        modelAndView.addObject("managerList", managerDAO.getManagerList());
-        modelAndView.addObject("projectRoleList", projectRoleDAO.getProjectRoles());
-        modelAndView.addObject("regionList", regionDAO.getRegions());
+        modelAndView.addObject("projectList", divisionService.getProjectList(currentUser.getDivision().getId()));
+        modelAndView.addObject("divisionList", divisionService.getActiveDivisions());
+        modelAndView.addObject("managerList", managerService.getManagerList());
+        modelAndView.addObject("projectRoleList", projectRoleService.getProjectRoles());
+        modelAndView.addObject("regionList", regionService.getRegions());
         modelAndView.addObject("all", ALL);
 
         AddEmployeeForm addEmployeeForm = new AddEmployeeForm();

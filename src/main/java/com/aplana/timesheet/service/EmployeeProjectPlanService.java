@@ -59,4 +59,14 @@ public class EmployeeProjectPlanService {
     public void updateEmployeeNotProjectPlan(Integer employeeId, EmploymentPlanningForm employmentPlanningForm, Double plan){
         employeeProjectPlanDAO.updateEmployeeNotProjectPlan(employeeId, employmentPlanningForm, plan);
     }
+
+    @Transactional(readOnly = true)
+    public List<Object[]> getProjectPlan(EmploymentPlanningForm employmentPlanningForm){
+        return employeeProjectPlanDAO.getProjectPlan(employmentPlanningForm);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Object[]> getEmployeePlan(Integer employeeId, Integer yearBeg, Integer monthBeg, Integer yearEnd, Integer monthEnd){
+        return employeeProjectPlanDAO.getEmployeePlan(employeeId, yearBeg, monthBeg, yearEnd, monthEnd);
+    }
 }

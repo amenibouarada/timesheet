@@ -80,4 +80,13 @@ public class DivisionService {
         return Boolean.FALSE;
     }
 
+    @Transactional(readOnly = true)
+    public List<Project> getProjectList(Integer divisionId){
+        return divisionDAO.getProjectList(divisionId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Division> getActiveDivisions(){
+        return divisionDAO.getActiveDivisions();
+    }
 }

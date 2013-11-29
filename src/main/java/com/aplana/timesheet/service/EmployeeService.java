@@ -485,4 +485,16 @@ public class EmployeeService {
     public List<Employee> getEmployeeByRegionAndManagerAndDivision(List<Integer> regions, Integer divisionId, Integer manager) {
       return employeeDAO.getEmployeeByRegionAndManagerAndDivision(regions,divisionId, manager);
     }
+
+    /**
+     * Возвращает список сотрудников по центру, руководителю, списку должностей и списку регионов
+     * @param division - идентификатора центра
+     * @param manager - идентификатора руководителя
+     * @param projectRoleList - список идентификаторов должностей
+     * @param regionList - список идентификаторов регионов
+     * @return
+     */
+    public List<Employee> getEmployeeByDivisionManagerRoleRegion(Integer division, Integer manager, List<Integer> projectRoleList, List<Integer> regionList){
+        return employeeDAO.getEmployeeByDivisionManagerRoleRegion(division, manager, projectRoleList, regionList);
+    }
 }
