@@ -1,9 +1,6 @@
 package com.aplana.timesheet.dao;
 
-import com.aplana.timesheet.enums.OvertimeCategory;
-import com.aplana.timesheet.enums.Report07PeriodTypeEnum;
-import com.aplana.timesheet.enums.TypesOfActivityEnum;
-import com.aplana.timesheet.enums.TypesOfTimeSheetEnum;
+import com.aplana.timesheet.enums.*;
 import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.reports.*;
 import com.aplana.timesheet.util.DateTimeUtil;
@@ -263,6 +260,7 @@ public class JasperReportDAO {
                         "               empl.id=vacations.employee_id AND " +
                         "               timesheet.caldate BETWEEN vacations.begin_date AND vacations.end_date " +
                         "               AND vacations.status_id=:status " +
+                        "               AND vacations.type_id != " + VacationTypesEnum.PLANNED.getId() + " " +
                         "       LEFT OUTER JOIN dictionary_item vacation_type    ON vacation_type.id=vacations.type_id " +
                         "       LEFT OUTER JOIN illness illnesses ON " +
                         "               empl.id=illnesses.employee_id AND " +
@@ -383,6 +381,7 @@ public class JasperReportDAO {
                                 "        empl.id=vacations.employee_id AND " +
                                 "        timesheet.caldate BETWEEN vacations.begin_date AND vacations.end_date " +
                                 "        AND vacations.status_id=:status " +
+                                "        AND vacations.type_id != " + VacationTypesEnum.PLANNED.getId() + " " +
                                 "LEFT OUTER JOIN dictionary_item vacation_type    ON vacation_type.id=vacations.type_id " +
                                 "LEFT OUTER JOIN illness illnesses ON " +
                                 "        empl.id=illnesses.employee_id AND " +
@@ -538,6 +537,7 @@ public class JasperReportDAO {
                     "        empl.id=vacations.employee_id AND " +
                     "        timesheet.caldate BETWEEN vacations.begin_date AND vacations.end_date " +
                     "        AND vacations.status_id=:status " +
+                    "        AND vacations.type_id != " + VacationTypesEnum.PLANNED.getId() + " " +
                     "LEFT OUTER JOIN dictionary_item vacation_type    ON vacation_type.id=vacations.type_id " +
                     "LEFT OUTER JOIN illness illnesses ON " +
                     "        empl.id=illnesses.employee_id AND " +
@@ -660,7 +660,8 @@ public class JasperReportDAO {
                     "                employee.id=vacations.employee_id AND  " +
                     "                (calendar.caldate BETWEEN vacations.begin_date AND vacations.end_date) AND  " +
                     "                (vacations.begin_date <= :endDate AND vacations.end_date >= :beginDate) AND  " +
-                    "                (vacations.status_id = :statusId), " +
+                    "                (vacations.status_id = :statusId) " +
+                    "                AND vacations.type_id != " + VacationTypesEnum.PLANNED.getId() + ", " +
                     "        region region  " +
                     "WHERE  " +
                              ( withDivisionClause ? "        division.id=:emplDivisionId AND  " : "") +
