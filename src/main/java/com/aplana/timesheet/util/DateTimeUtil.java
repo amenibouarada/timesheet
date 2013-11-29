@@ -21,6 +21,7 @@ import static argo.jdom.JsonNodeFactories.string;
 
 public class DateTimeUtil {
     public static final long DAY_IN_MILLS = 86400000;
+    public static final long THREE_MONTHS_IN_MILLS = 90 * DAY_IN_MILLS;
     public static final String DATE_PATTERN = "yyyy-MM-dd";
     public static final String VIEW_DATE_PATTERN = "dd.MM.yyyy";
     public static final String TIME_PATTERN = "HH:mm:ss";
