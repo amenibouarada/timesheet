@@ -63,6 +63,18 @@ public class Project {
     @Column(name = "jira_project_key")
     private String jiraProjectKey;
 
+    @Column(name = "act_type")
+    private String activityType;
+
+    @Column(name = "passport")
+    private String passport;
+
+    @Column(name = "work_type")
+    private String workType;
+
+    @Column(name = "customer")
+    private String customer;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "division", nullable = true) //todo Определиться обязательно ли поле к заполнению. Пока таблица заполняется отключил.
     @ForeignKey(name = "FK_PROJECT_DIVISION")
@@ -169,16 +181,6 @@ public class Project {
         this.jiraProjectKey = jiraProjectKey;
     }
 
-    @Override
-	public String toString() {
-		return new StringBuilder()
-			.append(" id=").append(id)
-			.append(" name=").append(name)
-            .append(" manager [").append(manager).append("]")
-            .append(" projectid=").append(projectId)
-		.toString();
-	}
-
     public Set<TimeSheetDetail> getTimeSheetDetail() {
         return timeSheetDetail;
     }
@@ -209,5 +211,47 @@ public class Project {
 
     public void setFundingType(DictionaryItem fundingType) {
         this.fundingType = fundingType;
+    }
+
+    public String getActivityType() {
+        return activityType;
+    }
+
+    public void setActivityType(String activityType) {
+        this.activityType = activityType;
+    }
+
+    public String getPassport() {
+        return passport;
+    }
+
+    public void setPassport(String passport) {
+        this.passport = passport;
+    }
+
+    public String getWorkType() {
+        return workType;
+    }
+
+    public void setWorkType(String workType) {
+        this.workType = workType;
+    }
+
+    public String getCustomer() {
+        return customer;
+    }
+
+    public void setCustomer(String customer) {
+        this.customer = customer;
+    }
+
+    @Override
+    public String toString() {
+        return new StringBuilder()
+                .append(" id=").append(id)
+                .append(" name=").append(name)
+                .append(" manager [").append(manager).append("]")
+                .append(" projectid=").append(projectId)
+                .toString();
     }
 }

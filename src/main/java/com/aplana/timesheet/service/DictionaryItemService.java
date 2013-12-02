@@ -4,6 +4,7 @@ import argo.jdom.JsonArrayNodeBuilder;
 import com.aplana.timesheet.dao.DictionaryItemDAO;
 import com.aplana.timesheet.dao.entity.DictionaryItem;
 import com.aplana.timesheet.enums.DictionaryEnum;
+import com.aplana.timesheet.enums.TSEnum;
 import com.aplana.timesheet.enums.TypesOfActivityEnum;
 import com.aplana.timesheet.enums.UndertimeCausesEnum;
 import com.aplana.timesheet.util.JsonUtil;
@@ -60,6 +61,15 @@ public class DictionaryItemService {
     @Transactional(readOnly = true)
     public DictionaryItem find(Integer id) {
         return dictionaryItemDAO.find(id);
+    }
+
+    /**
+     * Получает элемент какого либо справочника
+     * @param enumItem один из элементов енума
+     * @return объект справочника
+     */
+    public DictionaryItem find(TSEnum enumItem) {
+        return dictionaryItemDAO.find(enumItem.getId());
     }
 
     @Transactional(readOnly = true)
