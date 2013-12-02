@@ -1,3 +1,12 @@
+function formatDDMMYYYY(inputDate){
+    var currentDay = inputDate.getDate();
+    var currentMonth =  1 + inputDate.getMonth();
+    var currentYear = inputDate.getFullYear();
+    var formatDate = currentDay + '.' + currentMonth + '.' + currentYear;
+    return formatDate;
+}
+
+
 function RegionEmployees(regionName, regionEmployees, holidayList){
     var region = regionName;
     var employees = new Array();
@@ -100,7 +109,7 @@ function Gantt(gDiv, holidayList, type)
                 indent += 1;
                 for (var k in vacationList) {
                     var color = getColorByType(vacationList[k].type);
-                    var tooltip = employeeList[j].getEmployee() + "\n" + vacationList[k].typeName + "\n" + vacationList[k].beginDate.toLocaleDateString() + " - " + vacationList[k].endDate.toLocaleDateString() + "\n" + vacationList[k].status;
+                    var tooltip = employeeList[j].getEmployee() + "\n" + vacationList[k].typeName + "\n" + formatDDMMYYYY(vacationList[k].beginDate) + " - " + formatDDMMYYYY(vacationList[k].endDate) + "\n" + vacationList[k].status;
                     var offSet = (Date.parse(vacationList[k].beginDate) - Date.parse(minDate)) / (24 * 60 * 60 * 1000);
                     if ((Date.parse(vacationList[k].beginDate) - Date.parse(minDate)) <= 0 && (viewType == VIEW_GRAPHIC_BY_DAY)) {
 //                        console.log("11 "+(vacationList[k].endDate));
