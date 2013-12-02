@@ -2,14 +2,18 @@ package com.aplana.timesheet.controller;
 
 import argo.jdom.JsonArrayNodeBuilder;
 import argo.jdom.JsonObjectNodeBuilder;
-import com.aplana.timesheet.dao.entity.*;
+import com.aplana.timesheet.dao.entity.Employee;
+import com.aplana.timesheet.dao.entity.TimeSheet;
+import com.aplana.timesheet.dao.entity.TimeSheetDetail;
 import com.aplana.timesheet.enums.TypesOfTimeSheetEnum;
 import com.aplana.timesheet.form.TimeSheetForm;
+import com.aplana.timesheet.form.TimeSheetTableRowForm;
 import com.aplana.timesheet.form.validator.TimeSheetFormValidator;
 import com.aplana.timesheet.service.*;
 import com.aplana.timesheet.system.security.SecurityService;
 import com.aplana.timesheet.system.security.entity.TimeSheetUser;
 import com.aplana.timesheet.util.JsonUtil;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -160,6 +164,14 @@ public class TimeSheetController {
     @RequestMapping(value = "/timesheet", method = RequestMethod.POST)
     public ModelAndView sendTimeSheet(@ModelAttribute("timeSheetForm") TimeSheetForm tsForm, BindingResult result) {
         logger.info("Processing form validation for employee {} ({}).", tsForm.getEmployeeId(), tsForm.getCalDate());
+
+        // Переделывает html-символы(&#40 и т.п.) в нормальные
+        tsForm.setPlan(StringEscapeUtils.unescapeHtml4(tsForm.getPlan()));
+        for(TimeSheetTableRowForm row : tsForm.getTimeSheetTablePart()){
+            row.setDescription(StringEscapeUtils.unescapeHtml4(row.getDescription()));
+            row.setProblem(StringEscapeUtils.unescapeHtml4(row.getProblem()));
+        }
+
         tsFormValidator.validate(tsForm, result);
         if (result.hasErrors()) {
             return getModelAndViewForTimesheet(tsForm, result);
