@@ -13,12 +13,12 @@
 <script src="<%= getResRealPath("/resources/js/employmentPlanning.js", application) %>" type="text/javascript"></script>
 <style type="text/css">
     @import "<%= DOJO_PATH %>/dojox/grid/resources/tundraGrid.css";
+    @import "<%= getResRealPath("/resources/css/employmentPlanning.css", application) %>";
     <%--Для сокрытия строк грида, выходящих за грид--%>
     div.dojoxGridRow {width: 100%;}
     .tundra .dojoxGridHeader{
         background-color: white;
     }
-    <%----%>
     .editedCell {
         color: #FF8500;
         text-align: center;
@@ -194,7 +194,9 @@ function initProjectGrid(dataJson, yearStart, monthStart, yearEnd, monthEnd){
             if (item){
                 var employeeId = item["employee_id"];
                 var employeeName = item["employee_name"];
+                globalEmployeeName = employeeName;
                 dojo.byId("spanEmployeeName").innerHTML = 'Загрузка сотрудника "'+employeeName+'" по проектам';
+                dojo.byId("spanEmployeeName").hidden = true;
                 dojo.byId("divEmployeeInfo").hidden = false;
 
                 var monthBeg  = Number(dojo.byId("monthBeg").value);
@@ -209,6 +211,8 @@ function initProjectGrid(dataJson, yearStart, monthStart, yearEnd, monthEnd){
         checkChanges(action);
     });
 }
+
+var globalEmployeeName;
 
 // Динамически перестраивает грид "проект-сотрудники"
 // yearStart, monthStart, yearEnd, monthEnd - не используется, нужны если менять структуру грида
@@ -237,11 +241,14 @@ function createLayoutEmployee(isFact, employeeId, yearStart, monthStart, yearEnd
     var grid = dijit.byId("employeeGrid");
     var cnt = monthCount(yearStart, monthStart, yearEnd, monthEnd);
 
+    var divEmployee = '<div style="text-align: left; font-size: 9px">Загрузка сотрудника: ' + globalEmployeeName + '</div>';
+    var divProject = '<div style="text-align: center; float: both;">Проект</div>';
+
     var leftView = {
         noscroll: true,
         cells: [[
             {
-                name: 'Проект',
+                name: divEmployee + '<br/>' + divProject,
                 field: 'project_name',
                 width: '200px',
                 noresize: true,
@@ -826,6 +833,7 @@ function submitSaveButton(){
             alert("Дата конца периода превышает дату начала");
         } else {
             dojo.byId("divEmployeeInfo").hidden = true;
+            dojo.byId("spanEmployeeName").hidden = false;
             dojo.byId("spanEmployeeName").innerHTML = "Выберите пользователя для показа детализации планов";
             projectDataHandler(projectId, yearBeg, monthBeg, yearEnd, monthEnd, refreshProjectGrid);
             employeeDataHandler(0, yearBeg, monthBeg, yearEnd, monthEnd, refreshEmployeeGrid);
@@ -860,15 +868,18 @@ function updateProjectList(){
 </head>
 
 <body>
-<form:form method="post" commandName="employmentPlanningForm">
-    <table>
+<form:form method="post" commandName="employmentPlanningForm" cssClass="employmentPlanningForm">
+    <table class="no_border employmentPlanningTable">
         <tr>
             <td><span class="label">Центр</span></td>
             <td colspan="2">
-                <form:select path="selectDivisionId" onchange="updateProjectList()">
+                <form:select path="selectDivisionId" onchange="updateProjectList()" cssClass="bigSelect">
                     <form:options items="${divisionList}" itemLabel="name" itemValue="id"/>
                 </form:select>
+            </td>
             <td>
+                <input style="width:150px;margin-left: 23px;" type="button" value="Показать планы" onclick="submitSaveButton();"/>
+            </td>
         </tr>
         <tr>
             <td>
@@ -883,6 +894,9 @@ function updateProjectList(){
                 <form:select path="yearBeg">
                     <form:options items="${yearList}" itemLabel="year" itemValue="year"/>
                 </form:select>
+            </td>
+            <td>
+                <input style="width:150px;margin-left: 23px;" type="button" value="Сохранить" onclick="saveProjectPlan();"/>
             </td>
         </tr>
         <tr>
@@ -899,22 +913,21 @@ function updateProjectList(){
                     <form:options items="${yearList}" itemLabel="year" itemValue="year"/>
                 </form:select>
             </td>
+            <td></td>
         </tr>
         <tr>
             <td>
                 <span class="label">Выбор проекта:</span>
             </td>
             <td colspan="2">
-                <form:select path="projectId">
+                <form:select path="projectId"  cssClass="bigSelect">
                     <form:option label="" value="${all}"/>
                     <form:options items="${projectList}" itemLabel="name" itemValue="id"/>
                 </form:select>
             </td>
+            <td></td>
         </tr>
     </table>
-
-    <input style="width:150px;margin-left: 23px;" type="button" value="Показать планы" onclick="submitSaveButton();"/>
-    <input style="width:150px;margin-left: 23px;" type="button" value="Сохранить" onclick="saveProjectPlan();"/>
 </form:form>
 
 <div class="errors_box" id="errorBox" style="display: none"></div>
@@ -924,7 +937,7 @@ function updateProjectList(){
     <span id="spanEmployeeName" class="employeeLabel">&nbsp;</span>
 
     <div id="divEmployeeInfo" hidden="true">
-        <br/><input type="checkbox" id="isFactCheckBox" onclick="hidePlan()" checked><span class="employeeLabel">Отображать фактическое значение</span></input><br/>
+        <input type="checkbox" id="isFactCheckBox" onclick="hidePlan()" checked><span class="employeeLabel">Отображать фактическое значение</span></input><br/>
         <div id="employeeGridDiv"></div>
     </div>
 </div>
@@ -932,7 +945,7 @@ function updateProjectList(){
 <div data-dojo-type="dijit/Dialog" data-dojo-id="employeeDialog" title="Добавить сотрудника">
 
     <form:form commandName="<%= ADD_FORM %>">
-        <table class="dijitDialogPaneContentArea">
+        <table class="dijitDialogPaneContentArea no_border employmentPlanningTable">
             <tr>
                 <td><label>Центр </label></td>
                 <td>
