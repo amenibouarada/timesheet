@@ -881,7 +881,11 @@ public class JasperReportDAO {
             HashMap<String, HashMap<String, Double>> periodsDuration = new HashMap<String, HashMap<String, Double>>();
             HashMap<String, Double> durations = new HashMap<String, Double>();
             Report7Period itogoPeriod = new Report7Period("Итого");
-            for (Object o : query1.getResultList()) {
+            List<Object[]> resultList = query1.getResultList();
+            if (resultList.isEmpty()){
+                return null;
+            }
+            for (Object o : resultList) {
                 Object[] projects = (Object[]) o;
                 Integer projectId = (Integer) projects[0];
                 Integer projectDivision = (Integer) projects[2];
@@ -897,7 +901,7 @@ public class JasperReportDAO {
                 Double periodByCenterOwner = 0D;
                 Double periodByCenterEtc = 0D;
                 HashMap<String, Double> periodRegions = new HashMap<String, Double>();
-                for (periodNumber = 1; periodEnd.before(end); periodNumber = periodNumber + 1) {
+                for (periodNumber = 1; periodEnd.before(end) || (periodNumber == 1 && periodEnd.equals(end)); periodNumber = periodNumber + 1) {
                     final Date maxEndOfPeriod = getMaxEndOfPeriod(end, periodStart, periodType);
 
                     periodEnd = getEndOfPeriod(periodType, periodEnd, maxEndOfPeriod);
