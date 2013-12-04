@@ -16,7 +16,7 @@ public class Permission {
     private Integer id;
 
     @Column(name = "name")
-    private String beginDate;
+    private String name;
 
     @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinTable(name = "employee_permissions",
@@ -58,12 +58,12 @@ public class Permission {
         this.id = id;
     }
 
-    public String getBeginDate() {
-        return beginDate;
+    public String getName() {
+        return name;
     }
 
-    public void setBeginDate(String beginDate) {
-        this.beginDate = beginDate;
+    public void setName(String beginDate) {
+        this.name = beginDate;
     }
 
     @Override
@@ -81,7 +81,7 @@ public class Permission {
     @Override
     public int hashCode() {
         int result = id != null ? id.hashCode() : 0;
-        result = 31 * result + (beginDate != null ? beginDate.hashCode() : 0);
+        result = 31 * result + (name != null ? name.hashCode() : 0);
         result = 31 * result + (employees != null ? employees.hashCode() : 0);
         result = 31 * result + (projectRoles != null ? projectRoles.hashCode() : 0);
         return result;

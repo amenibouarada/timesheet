@@ -18,10 +18,10 @@ public enum TypesOfActivityEnum implements TSEnum {
     PROJECT_PRESALE( 42, "Проектный пресейл", 2 ),
     PRESALE( 13, "Пресейл", 3 ),
     NON_PROJECT( 14, "Непроектная", 4 ),
-    TIME_OFF_FOR_OVERTIME( 24, "Отгул за переработки", 5 ),
+    //TIME_OFF_FOR_OVERTIME( 24, "Отгул за переработки", 5 ),
     VACATION( 16, "Отпуск", 6 ),
     ILLNESS( 17, "Болезнь", 7 ),
-    HOLIDAY( 18, "Нерабочий день", 8 ),
+    //HOLIDAY( 18, "Нерабочий день", 8 ),
     COMPENSATORY_HOLIDAY( 15, "Отгул", 9 );
 
     private int id;
@@ -109,8 +109,8 @@ public enum TypesOfActivityEnum implements TSEnum {
 
     public static boolean isNotCheckableForOvertime(TypesOfActivityEnum activityType) {
         return (
-                activityType == VACATION || activityType == ILLNESS || activityType == COMPENSATORY_HOLIDAY ||
-                activityType == TIME_OFF_FOR_OVERTIME || activityType == HOLIDAY
+                activityType == VACATION || activityType == ILLNESS || activityType == COMPENSATORY_HOLIDAY
+                //|| activityType == TIME_OFF_FOR_OVERTIME || activityType == HOLIDAY
         );
     }
     /*
