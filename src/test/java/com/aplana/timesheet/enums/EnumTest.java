@@ -29,8 +29,7 @@ public class EnumTest extends AbstractTest {
             public void handle(TSEnum tsEnum) {
                 Dictionary dictionary = dictionaryDao.find(tsEnum.getId());
                 assertNotNull(dictionary);
-                //TODO названия enum и базы разные
-                //assertEquals(dictionary.getName(), tsEnum.getName());
+                assertEquals(dictionary.getName(), ((DictionaryEnum)tsEnum).getDictName());
             }
         });
     }
@@ -43,8 +42,7 @@ public class EnumTest extends AbstractTest {
             public void handle(TSEnum tsEnum) {
                 Dictionary dictionary = dictionaryDao.find(tsEnum.getId());
                 assertNotNull(dictionary);
-                //TODO названия enum и базы разные
-                //assertEquals(dictionary.getName(), tsEnum.getName());
+                assertEquals(dictionary.getName(), ((QuickReportTypesEnum)tsEnum).getDictName());
             }
         });
     }
