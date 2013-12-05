@@ -26,12 +26,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.velocity.VelocityEngineUtils;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import javax.annotation.Nullable;
+import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.util.*;
 
 import static com.aplana.timesheet.enums.TypesOfActivityEnum.*;
+import static com.aplana.timesheet.util.ExceptionUtils.getLastCause;
 
 @Service
 public class SendMailService {
@@ -115,7 +118,8 @@ public class SendMailService {
     private ManagerRoleNameService managerRoleNameService;
     @Autowired
     private ReportService reportService;
-
+    @Autowired
+    private TSPropertyProvider tsPropertyProvider;
     /**
      * Возвращает строку с адресами линейных руководителей сотрудника
      * (непосредственного и всех вышестоящих) разделёнными запятой.
@@ -299,6 +303,57 @@ public class SendMailService {
 
     public void performIllnessDeleteMailing(Illness illness) {
         new IllnessDeleteSender(this, propertyProvider, projectService, employeeService).sendMessage(illness);
+    }
+
+    public StringBuilder buildMailException(HttpServletRequest request, Exception exception){
+        Map<String, Object> model = new HashMap<String, Object>();
+
+        // При MaxUploadSizeExceededException не нужно отправлять письмо админу
+        if (exception instanceof MaxUploadSizeExceededException) {
+            return null;
+        }
+
+        try {
+            if (!tsPropertyProvider.getExceptionsIgnoreClassNames().
+                    contains(getLastCause(exception).getClass().getName())
+                    ) {
+                model.put("errors", "Unexpected error: " + exception.getMessage());
+                // получим ФИО пользователя
+                String FIO = "<не определен>";
+                TimeSheetUser securityUser = securityService.getSecurityPrincipal();
+                if (securityUser != null) {
+                    int employeeId = securityUser.getEmployee().getId();
+                    FIO = employeeService.find(employeeId).getName();
+                }
+                // Отправим сообщение админам
+                StringBuilder sb = new StringBuilder();
+                sb.append("У пользователя ").append(FIO).append(" произошла следующая ошибка:<br>");
+                sb.append(exception.getMessage() != null ? exception.getMessage() : getLastCause(exception).getClass().getName());
+                sb.append("<br><br>");
+
+                StringBuilder sbtemp = new StringBuilder();
+                Map parameterMap = request.getParameterMap();
+                Iterator iterator = parameterMap.entrySet().iterator();
+                while (iterator.hasNext()) {
+                    Map.Entry mapEntry = (Map.Entry) iterator.next();
+                    sbtemp.append(mapEntry.getKey() + " : " + Arrays.toString((String[])mapEntry.getValue()) + "<br>");
+                }
+
+                if (sbtemp.length()>0) {
+                    sb.append("<br><br>");
+                    sb.append("Параметры запроса: ");
+                    sb.append(sbtemp.toString());
+                }
+
+                sb.append("Stack trace: <br>");
+                sb.append(Arrays.toString(exception.getStackTrace()));
+                return sb;
+            }
+        } finally {
+            // Выведем в лог
+            logger.error("Произошла неожиданная ошибка:", exception);
+        }
+        return null;
     }
 
     public String initMessageBodyForReport(TimeSheet timeSheet) {

@@ -445,7 +445,7 @@ public class TimeSheetControllerTest extends AbstractTimeSheetTest {
         when(jiraService.getDayIssues(employeeId, date, projectId)).thenReturn(expected);
 
         /* тест */
-        String actual = timeSheetController.getJiraIssuesStr(employeeId, date, projectId);
+        String actual = timeSheetController.getJiraIssuesStr(employeeId, date, projectId, request);
 
         /* проверка вызовов */
         verify(jiraService).getDayIssues(employeeId, date, projectId);

@@ -233,8 +233,19 @@ public class TimeSheetController {
     @ResponseBody
     public String getJiraIssuesStr(@RequestParam("employeeId") Integer employeeId,
                                    @RequestParam("date") String date,
-                                   @RequestParam("projectId") Integer projectId) {
-        return jiraService.getDayIssues(employeeId, date, projectId);
+                                   @RequestParam("projectId") Integer projectId,
+                                   HttpServletRequest httpServletRequest){
+
+        // Обрабатываю исключение и шлю письмо админами из-за com.aplana.timesheet.system.aspect.ResponceBodyExceptionAspect
+        try{
+            return jiraService.getDayIssues(employeeId, date, projectId);
+        } catch (Exception e){
+            StringBuilder sb = sendMailService.buildMailException(httpServletRequest, e);
+            if (sb != null){
+                sendMailService.performExceptionSender(sb.toString());
+            }
+            return "Ошибка при поиске активности в JIRA. Письмо с описанием проблемы было отправлено администраторам.";
+        }
     }
 
     @RequestMapping(value = "/employee/isDivisionLeader", headers = "Accept=application/json")

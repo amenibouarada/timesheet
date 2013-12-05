@@ -1636,7 +1636,7 @@ function getJiraInfo(rowIndex) {
                 standbyElementJira.hide();
             },
             error:function (err) {
-                dojo.byId("description_id_" + rowIndex).value = "Ошибка при поиске активности в JIRA";
+                dojo.byId("description_id_" + rowIndex).value = "Ошибка при поиске активности в JIRA("+err+")";
                 standbyElementJira.hide();
             }
         });
