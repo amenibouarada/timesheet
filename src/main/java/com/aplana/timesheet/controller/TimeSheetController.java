@@ -237,6 +237,7 @@ public class TimeSheetController {
                                    HttpServletRequest httpServletRequest){
 
         // Обрабатываю исключение и шлю письмо админами из-за com.aplana.timesheet.system.aspect.ResponceBodyExceptionAspect
+        // TODO узнать зачем com.aplana.timesheet.system.aspect.ResponceBodyExceptionAspect и выпилить его, если что
         try{
             return jiraService.getDayIssues(employeeId, date, projectId);
         } catch (Exception e){
