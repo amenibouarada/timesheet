@@ -675,10 +675,15 @@ public class JasperReportDAO {
                     "                ELSE :endDate end) AND " +
                     "        employee.not_to_sync=FALSE AND  " +
                     "        (employee.manager IS NOT NULL) AND  " +
-                    "        (calendar.caldate NOT IN  " +
-                    "                (SELECT timesheet.caldate FROM time_sheet timesheet WHERE timesheet.emp_id=employee.id AND (timesheet.ts_type_id = "+TypesOfTimeSheetEnum.REPORT.getId()+"))) AND  " +
-                    "        (calendar.caldate NOT IN   " +
-                    "                (SELECT holiday.caldate FROM holiday holiday WHERE holiday.region IS NULL OR holiday.region=employee.region)) AND  " +
+                    "( " +
+                        "( " +
+                        "        (calendar.caldate NOT IN  " +
+                        "                (SELECT timesheet.caldate FROM time_sheet timesheet WHERE timesheet.emp_id=employee.id AND (timesheet.ts_type_id = "+TypesOfTimeSheetEnum.REPORT.getId()+"))) AND  " +
+                        "        (calendar.caldate NOT IN   " +
+                        "                (SELECT holiday.caldate FROM holiday holiday WHERE holiday.region IS NULL OR holiday.region=employee.region))" +
+                        ") " +
+                    " OR exists ( select 1 from business_trip bt where bt.employee_id = employee.id and calendar.caldate BETWEEN bt.begin_date and bt.end_date)" +
+                    ") AND" +
                     "        employee.start_date<=calendar.caldate  " +
                     "ORDER BY " +
                     "        employee.name,  " +

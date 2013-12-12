@@ -69,15 +69,15 @@ public class ViewReportHelper {
             final String day = new SimpleDateFormat(DateTimeUtil.DATE_PATTERN).format(queryResult.getCalDate());
 
             Integer value = 0; //если нет отчета
-
             if ((queryResult.getId() != null) || (queryResult.getVacationDay()) || (queryResult.getIllnessDay())) {
                 value = 1;   //если есть отчет
                 if(queryResult.getStatusHaveDraft()) {
                     value = 3;
                 }
             }
-            else if (!queryResult.getWorkDay())
+            else if (!queryResult.getWorkDay() && !queryResult.getBusinessTripDay()){
                 value = 2;   //если выходной или праздничный день
+            }
 
             builder.withField(day, aStringBuilder(value.toString()));
         }

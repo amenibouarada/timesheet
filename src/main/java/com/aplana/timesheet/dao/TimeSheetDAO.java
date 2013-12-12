@@ -115,28 +115,29 @@ public class TimeSheetDAO {
 
         // Я не знаю как написать это на HQL, но на SQL пишется легко и непринужденно.
         Query query = entityManager.createNativeQuery(
-                "select " +
-                        "c.caldate caldate, " +
-                        "h.id holiday_id, " +
-                        "ts.id timesheet_id, " +
-                        "SUM(tsd.duration), " +
-                        "tsd.act_type, " +
-                        "ts.ts_type_id "
-                        + "from calendar c "
-                        + "left outer join time_sheet as ts " +
-                        "on ts.emp_id = :employeeId and ts.caldate=c.caldate "
-                        + "left outer join holiday h " +
-                        "on c.caldate=h.caldate and (h.region is null or h.region=:region) "
-                        + "left outer join time_sheet_detail as tsd " +
-                        "on ts.id=tsd.time_sheet_id "
-                        + "where c.year=:yearPar " +
-                        "and c.month=:monthPar "
-                        + "group by " +
-                        "c.caldate, " +
-                        "h.id, " +
-                        "ts.id, " +
-                        "tsd.act_type "
-                        + "order by c.calDate asc, timesheet_id asc"
+            "select " +
+                "c.caldate caldate, " +
+                "h.id holiday_id, " +
+                "ts.id timesheet_id, " +
+                "SUM(tsd.duration), " +
+                "tsd.act_type, " +
+                "ts.ts_type_id " +
+            "from calendar c " +
+                "left outer join time_sheet as ts " +
+                    "on ts.emp_id = :employeeId and ts.caldate=c.caldate " +
+                "left outer join holiday h " +
+                    "on c.caldate=h.caldate and (h.region is null or h.region=:region) " +
+                "left outer join time_sheet_detail as tsd " +
+                    "on ts.id=tsd.time_sheet_id " +
+            "where " +
+                "c.year=:yearPar and c.month=:monthPar " +
+            "group by " +
+                "c.caldate, " +
+                "h.id, " +
+                "ts.id, " +
+                "tsd.act_type " +
+            "order by " +
+                "c.calDate asc, timesheet_id asc"
         ).setParameter("yearPar", year).setParameter("monthPar", month)
                 .setParameter("region", region).setParameter("employeeId", employee.getId());
 

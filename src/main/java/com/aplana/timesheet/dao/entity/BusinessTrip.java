@@ -55,6 +55,10 @@ public class BusinessTrip implements Cloneable, Periodical, Identifiable {
         return (BusinessTrip)super.clone();
     }
 
+    public boolean contain(Date date){
+        return date.compareTo(beginDate) >= 0 && date.compareTo(endDate) <= 0;
+    }
+
     public Integer getId() {
         return id;
     }

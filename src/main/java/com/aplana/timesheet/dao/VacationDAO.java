@@ -150,7 +150,7 @@ public class VacationDAO {
     }
 
     public Vacation findVacation(Integer vacationId) {
-        final Query query = entityManager.createQuery("from Vacation v where v.id = :id").setParameter("id", vacationId);
+        final Query query = entityManager.createQuery("from Vacation v inner join fetch v.employee e inner join fetch e.region where v.id = :id").setParameter("id", vacationId);
         return (Vacation) query.getSingleResult();
     }
 

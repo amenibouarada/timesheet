@@ -1,12 +1,10 @@
 package com.aplana.timesheet.service;
 
+import com.aplana.timesheet.dao.BusinessTripDAO;
 import com.aplana.timesheet.dao.HolidayDAO;
 import com.aplana.timesheet.dao.RegionDAO;
 import com.aplana.timesheet.dao.ReportCheckDAO;
-import com.aplana.timesheet.dao.entity.Calendar;
-import com.aplana.timesheet.dao.entity.Division;
-import com.aplana.timesheet.dao.entity.Employee;
-import com.aplana.timesheet.dao.entity.ReportCheck;
+import com.aplana.timesheet.dao.entity.*;
 import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.util.DateTimeUtil;
 import org.slf4j.Logger;
@@ -18,7 +16,10 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static com.aplana.timesheet.util.DateTimeUtil.DATE_PATTERN;
@@ -32,6 +33,7 @@ public class ReportCheckService {
     private StringBuffer trace = new StringBuffer();
 
     private Boolean reportForming = false;
+    private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
     @Autowired
     private ReportCheckDAO reportCheckDAO;
@@ -65,6 +67,9 @@ public class ReportCheckService {
 
     @Autowired
     private TSPropertyProvider propertyProvider;
+
+    @Autowired
+    private BusinessTripDAO businessTripDAO;
 
     /**
      * Метод формирования оповещений используемый в таймере
@@ -128,6 +133,15 @@ public class ReportCheckService {
         return result.toArray(new String[0]);
     }
 
+    public boolean contain(List<BusinessTrip> businessTripList, Date date){
+        for(BusinessTrip businessTrip : businessTripList){
+            if (businessTrip.contain(date)){
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * Заносит в базу список проверки заполнения отчетов по подразделению за определенные дни
      *
@@ -142,20 +156,37 @@ public class ReportCheckService {
         Integer reportsNotSendNumber;
         List<ReportCheck> reportCheckList = new ArrayList<ReportCheck>();
         List<Employee> employeeList = employeeService.getEmployees(division, false);
-        List<String> dayList = DateTimeUtil
-                .splitDateRangeOnDays(firstDay, lastDay);
+        List<String> dayList = DateTimeUtil.splitDateRangeOnDays(firstDay, lastDay);
+
+        Date firstDate = null;
+        Date lastDate = null;
+        try {
+            firstDate = sdf.parse(firstDay);
+            lastDate = sdf.parse(lastDay);
+        } catch (ParseException e) {
+            new RuntimeException(e);
+        }
+
         String currentDay = DateTimeUtil.currentDay();
         for (Employee emp : employeeList) {
             logger.info("Employee {}", emp.getName());
             // если сотрудник работает и не начальник подразделения
-            
+
             if (!emp.isDisabled(null) && emp.getManager() != null) {
                 reportsNotSendNumber = 0;
                 List<String> passedDays = new ArrayList<String>();
+                List<BusinessTrip> businessTripList = businessTripDAO.getEmployeeBusinessTripsIntersectionDates(emp, firstDate, lastDate);
                 for (String day : dayList) {
+                    Date date = null;
+                    try {
+                        date = sdf.parse(day);
+                    } catch (ParseException e) {
+                        new RuntimeException(e);
+                    }
+
                     Calendar calendar = calendarService.find(day);
                     //если рабочий день
-                    if (holidayDAO.isWorkDay(day, emp.getRegion())) {
+                    if (holidayDAO.isWorkDay(day, emp.getRegion()) || contain(businessTripList, date)) {
                         //если день после устройства на работу включительно
                         if ( ! calendar.getCalDate().before( emp.getStartDate() ) ) {
                             //если сотрудник не списал рабочее время за этот день

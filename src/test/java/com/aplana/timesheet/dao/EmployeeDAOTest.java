@@ -5,9 +5,14 @@ import com.aplana.timesheet.dao.entity.Division;
 import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.dao.entity.ProjectRole;
 import com.aplana.timesheet.dao.entity.Region;
+import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import junit.framework.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
@@ -16,6 +21,7 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
@@ -208,5 +214,31 @@ public class EmployeeDAOTest extends AbstractTest {
         assertEquals(expectedEmployee.getManager2(), result.getManager2());
         assertEquals(expectedEmployee.isBillable(), result.isBillable());
         assertEquals(expectedEmployee.getJiraName(), result.getJiraName());
+    }
+
+    @Test
+    public void testFindByObjectSid() throws Exception {
+        Employee byObjectSid = employeeDAO.findByObjectSid("S-1-5-21-725345543-1454471165-1801674531-8646");
+        Assert.assertNotNull(byObjectSid);
+    }
+
+    @Test
+    public void testGetActiveEmployeesNotInList() {
+        List<Employee> employees = employeeDAO.getEmployees(null);
+
+        int limitSize = 50;
+
+        List<Integer> ids = Lists.newArrayList(Iterables.transform(
+                Iterables.limit(employees, limitSize),
+                new Function<Employee, Integer>() {
+                    @Nullable
+                    @Override
+                    public Integer apply(Employee input) {
+                        return input.getId();
+                    }
+                }));
+
+        List<Employee> activeEmployeesNotInList = employeeDAO.getActiveEmployeesNotInList(ids);
+        Assert.assertEquals(activeEmployeesNotInList.size(), employees.size() - limitSize);
     }
 }

@@ -250,7 +250,7 @@ public class SendMailService {
     }
 
     public void performVacationDeletedMailing(Vacation vacation) {
-        new VacationDeletedSender(this, propertyProvider).sendMessage(vacation);
+        new VacationDeletedSender(this, propertyProvider, projectService, employeeService).sendMessage(vacation);
     }
 
     public void performVacationApproveRequestSender(VacationApproval vacationApproval) {

@@ -2,10 +2,7 @@ package com.aplana.timesheet.enums;
 
 import com.aplana.timesheet.AbstractTest;
 import com.aplana.timesheet.dao.*;
-import com.aplana.timesheet.dao.entity.Dictionary;
-import com.aplana.timesheet.dao.entity.Permission;
-import com.aplana.timesheet.dao.entity.ProjectRole;
-import com.aplana.timesheet.dao.entity.Region;
+import com.aplana.timesheet.dao.entity.*;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -21,6 +18,25 @@ public class EnumTest extends AbstractTest {
 
     @Autowired
     DictionaryDAO dictionaryDao;
+
+    @Autowired
+    DictionaryItemDAO dictionaryItemDAO;
+
+    /**
+     * Упрощенная версия enumTest для DictionaryItem
+     * @param clazz - класс enum'а
+     * @param <E> - enum
+     */
+    public <E extends Enum<E> & TSEnum> void enumDictionaryTest(Class<E> clazz){
+        enumTest(clazz, new TSEnumHandler() {
+            @Override
+            public void handle(TSEnum tsEnum) {
+                DictionaryItem dictionaryItem = dictionaryItemDAO.find(tsEnum.getId());
+                assertNotNull(dictionaryItem);
+                assertEquals(tsEnum.getName(), dictionaryItem.getValue());
+            }
+        });
+    }
 
     @Test
     public void dictionaryEnumTest(){
@@ -94,9 +110,6 @@ public class EnumTest extends AbstractTest {
             }
         });
     }
-
-    @Autowired
-    DictionaryItemDAO dictionaryItemDAO;
 
     @Test
     public void businessTripTypesEnumTest(){

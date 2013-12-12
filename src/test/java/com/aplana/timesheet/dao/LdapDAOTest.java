@@ -1,16 +1,13 @@
 package com.aplana.timesheet.dao;
 
-import com.aplana.timesheet.controller.TimeSheetController;
+import com.aplana.timesheet.AbstractTest;
 import com.aplana.timesheet.dao.entity.ldap.EmployeeLdap;
 import junit.framework.Assert;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.List;
 import java.util.Map;
@@ -19,8 +16,8 @@ import java.util.Map;
  * @author eshangareev
  * @version 1.0
  */
-/*
-public class LdapDAOTest extends AbstractTest{
+
+public class LdapDAOTest extends AbstractTest {
     private static final Logger logger = LoggerFactory.getLogger(LdapDAOTest.class);
 
     @Autowired
@@ -29,16 +26,15 @@ public class LdapDAOTest extends AbstractTest{
 
     @Test
     public void testGetEmployee() throws Exception {
-        EmployeeLdap employee = ldapDAO.getEmployeeByEmail("Evgeniy.Sikachev@aplana.com");
+        EmployeeLdap employee = ldapDAO.getEmployeeByEmail("Dmitry.Zaitsev@aplana.com");
         Assert.assertEquals(employee.getDepartment(), "Центр заказной разработки");
-        Assert.assertEquals(employee.getDisplayName(), "Сикачёв Евгений");
-        Assert.assertEquals(employee.getCity(), "Уфа");
+        Assert.assertEquals(employee.getDisplayName(), "Зайцев Дмитрий");
+        Assert.assertEquals(employee.getCity(), "Москва");
     }
 
     @Test
     public void testGetEmployeeByName() throws Exception {
         EmployeeLdap employeeByName = ldapDAO.getEmployeeByLdapName("CN=Preobrazhensky Andrey,CN=Users,DC=aplana,DC=com");
-        System.out.println(employeeByName);
         Assert.assertNotNull(employeeByName);
     }
 
@@ -64,4 +60,4 @@ public class LdapDAOTest extends AbstractTest{
     }
 
 
-}*/
+}

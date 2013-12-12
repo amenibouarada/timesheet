@@ -250,8 +250,7 @@ public class TimeSheetService {
             emp.setRegion(region);
         }
 
-        return timeSheetDAO
-                .findDatesAndReportsForEmployee(year, month, emp.getRegion().getId(), emp);
+        return timeSheetDAO.findDatesAndReportsForEmployee(year, month, emp.getRegion().getId(), emp);
     }
 
     public TimeSheet find(Integer id) {
