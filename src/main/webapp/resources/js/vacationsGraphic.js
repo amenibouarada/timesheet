@@ -75,11 +75,6 @@ function Gantt(gDiv, holidayList, type)
      * @constructor
      */
     this.DrawVacations = function () {
-        var td = document.getElementsByClassName('GDay')[0];
-        var num = td.clientWidth - TABLE_COLUMN_WIDTH + 1;
-        if (viewType == VIEW_GRAPHIC_BY_WEEK) {
-            num = 0;
-        }
         var dateDiff = 0;
         var gStr = "";
 
@@ -89,6 +84,13 @@ function Gantt(gDiv, holidayList, type)
 
         var vacations = createFullVacationsList(regionEmployeeList);
         var minDate = findMinDate(vacations, viewType);
+        var dayOffset = getAlignOffset(minDate);
+        var td = document.getElementsByClassName('GDay')[1];
+        var num = td.clientWidth - TABLE_COLUMN_WIDTH + 1;
+        console.log(td.clientWidth);
+        if (viewType == VIEW_GRAPHIC_BY_WEEK) {
+            num = 0;
+        }
 
         var employeeCount = 0;
         for (var i in regionEmployeeList) {
@@ -100,8 +102,13 @@ function Gantt(gDiv, holidayList, type)
                 var fr = new Date();
                 var dvArr = regionEmployeeList[i].getHoliday()[hol].split('.');
                 fr.setFullYear(dvArr[2], dvArr[1] - 1, dvArr[0]);
-                var leftOffset = (((Date.parse(fr.format("yyyy-mm-dd")) - Date.parse(minDate.format("yyyy-mm-dd"))) / (24 * 60 * 60 * 1000))) * TABLE_COLUMN_WIDTH + 202 + num;
-                var heightDivision = (employeeList.length + 1) * 20 + 8; //это надо править - счетать широкие-узкие строки, чистый тык пальцем
+
+                if (Date.parse(fr.format("yyyy-mm-dd")) < Date.parse(minDate.format("yyyy-mm-dd"))){
+                    continue;
+                }
+
+                var leftOffset = ((dayOffset + (Date.parse(fr.format("yyyy-mm-dd")) - Date.parse(minDate.format("yyyy-mm-dd"))) / (24 * 60 * 60 * 1000))) * TABLE_COLUMN_WIDTH + 202 + num;
+                var heightDivision = (employeeList.length + 1) * 20 + 8; //это надо править - считать широкие-узкие строки, чистый тык пальцем
                 gStr += "<div style='position:absolute; top:" + (tableRowHeight * indent + 38 - 8) + "px; left:" + leftOffset + "px; width:" + (TABLE_COLUMN_WIDTH - 1) + "px'><div title='Региональный праздник' class='GVacation' style='float:center;padding-left:3;background-color:sandybrown; width:" + (TABLE_COLUMN_WIDTH - 1) + "px;height:" + heightDivision + "px;'></div></div>";
             }
             for (var j in employeeList) {
@@ -110,9 +117,8 @@ function Gantt(gDiv, holidayList, type)
                 for (var k in vacationList) {
                     var color = getColorByType(vacationList[k].type);
                     var tooltip = employeeList[j].getEmployee() + "\n" + vacationList[k].typeName + "\n" + formatDDMMYYYY(vacationList[k].beginDate) + " - " + formatDDMMYYYY(vacationList[k].endDate) + "\n" + vacationList[k].status;
-                    var offSet = (Date.parse(vacationList[k].beginDate) - Date.parse(minDate)) / (24 * 60 * 60 * 1000);
+                    var offSet = dayOffset + (Date.parse(vacationList[k].beginDate) - Date.parse(minDate)) / (24 * 60 * 60 * 1000);
                     if ((Date.parse(vacationList[k].beginDate) - Date.parse(minDate)) <= 0 && (viewType == VIEW_GRAPHIC_BY_DAY)) {
-//                        console.log("11 "+(vacationList[k].endDate));
                         dateDiff = (Date.parse(vacationList[k].endDate) - Date.parse(vacationList[k].beginDate)) / (24 * 60 * 60 * 1000) + 1;
                         gStr += "<div style='position:absolute; top:" + (tableRowHeight * indent + 37) + "px; left:" + (offSet * TABLE_COLUMN_WIDTH + 202 ) + "px; width:" + (TABLE_COLUMN_WIDTH * dateDiff - 1 + num) + "px'><div title='" + tooltip + "' class='GVacation' style='float:center;padding-left:3;" + "background-color:" + color + "; width:" + (TABLE_COLUMN_WIDTH * dateDiff - 1 + num) + "px;'>" + "</div></div>"; //+ vacationList[k].status
                     } else {
@@ -122,7 +128,7 @@ function Gantt(gDiv, holidayList, type)
                 }
                 gStr += "<div style='position:absolute; top:" + (tableRowHeight * indent + 38) + "px; left:5px'>" + employeeList[j].getEmployee() + "</div>";
             }
-             }
+        }
         GanttDiv.innerHTML += gStr;
     }
 
@@ -336,21 +342,29 @@ function makeMonthDivTitle(date){
         lastDay.getDate() + " " + getMonthByNumber(lastDay.getMonth() + 1);
 }
 
+function getAlignOffset(minDate){
+    var offset = 0;
+    // magic const
+    if (minDate.getDate() > 26) {
+        offset = getDaysInMonth(minDate.getMonth() + 1, minDate.getYear()) - 26;
+    }
+    return offset;
+}
+
 function fillTableHeader(viewType, minDate, maxDate, holidays, tableRowCount, tableRowHeight, tableColumnWidth){
+    var offset = getAlignOffset(minDate);
 
     var currentDate = new Date();
     currentDate.setFullYear(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
     var dTemp = new Date();
-    var firstRowStr = "";
-    var thirdRow = "";
+    var firstRowStr;
+    var thirdRow;
     var gStr = "";
-    var colSpan = 0;
-    var counter = 0;
     var tableHeight = tableRowCount * tableRowHeight + 10;
 
     // разлинуем в разный цвет четные и нечетные строки
     var dateDiff = (Date.parse(maxDate) - Date.parse(minDate)) / (24 * 60 * 60 * 1000) + 1;
-    var width = (tableColumnWidth * dateDiff + 200);
+    var width = (tableColumnWidth * (dateDiff + offset) + 200);
     var top = 38;
     for (var i = 0; i < tableRowCount; i++ ){
         if (i % 2 == 0){
@@ -373,7 +387,18 @@ function fillTableHeader(viewType, minDate, maxDate, holidays, tableRowCount, ta
     thirdRow = "<tr><td>&nbsp;</td>";
     dTemp.setFullYear(minDate.getFullYear(), minDate.getMonth(), minDate.getDate());
 
-    if (viewType == VIEW_GRAPHIC_BY_DAY){
+
+    var colSpan = offset;
+    var counter = 0;
+
+    if (viewType == VIEW_GRAPHIC_BY_DAY) {
+
+        if (offset>0){
+            var totalOffset = offset * tableColumnWidth - 1;
+            gStr += "<td class='GDay' colspan='"+offset+"' width='" + totalOffset + "px'></td>";
+            thirdRow += "<td class='GDay' colspan='"+offset+"' style='height:" + (tableHeight) + "px'>&nbsp;</td>";
+        }
+
         while(Date.parse(dTemp) <= Date.parse(maxDate)){
             var cssClass = "GDay";
             if (Date.parse(dTemp) == Date.parse(currentDate)){
