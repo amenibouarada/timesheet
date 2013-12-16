@@ -66,14 +66,18 @@ public class PlannedVacationService {
 
         for(Map.Entry<Employee, List<Project>> entry : employeeProjects.entrySet()) {
             Set<Employee> managers = new HashSet<Employee>();
+
+
+            Employee manager = entry.getKey();
+            while ((manager = manager.getManager()) != null) {
+                managers.add(manager);
+            }
+            if (entry.getKey().getManager2() != null){
+                managers.add(entry.getKey().getManager2());
+            }
+
             for (Project project:entry.getValue()) {
                 managers.addAll(employeeDAO.getProjectManagers(project));
-                
-                Employee manager = entry.getKey();
-                while ((manager = getManager(manager)) != null) {
-                    managers.add(manager);
-                }
-
             }
             employeeManagers.put(entry.getKey(), managers);
         }
@@ -150,7 +154,7 @@ public class PlannedVacationService {
     private void setupDates(){
         final Calendar calendar2 = Calendar.getInstance();
         dateCurrent = calendar2.getTime();
-        calendar2.add(Calendar.WEEK_OF_YEAR, 2);
+        calendar2.add(Calendar.WEEK_OF_YEAR, 3);
         dateAfter = calendar2.getTime();
         calendar2.add(Calendar.WEEK_OF_YEAR, -4);
         dateBefore = calendar2.getTime();
