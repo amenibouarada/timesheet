@@ -39,6 +39,8 @@ public class AuthenticationFailureListener implements ApplicationListener<Authen
         logger.info("Fialed login : "
                 + new SimpleDateFormat("dd.MM.yyyy HH:mm").format(new Date())
                 + " " + username
+                + " " + request.getRemoteAddr()
+                + " " + propertyProvider.getLoginErrorThreshold()
                 + " " + request.getRemoteAddr());
 
         if (GLOBAL_WRONG_REQUEST_COUNTER.get() % propertyProvider.getLoginErrorThreshold() == 0) {

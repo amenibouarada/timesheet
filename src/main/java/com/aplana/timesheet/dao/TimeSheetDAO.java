@@ -6,6 +6,7 @@ import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.dao.entity.TimeSheet;
 import com.aplana.timesheet.enums.TypesOfActivityEnum;
 import com.aplana.timesheet.enums.TypesOfTimeSheetEnum;
+import com.aplana.timesheet.enums.VacationStatusEnum;
 import com.aplana.timesheet.form.entity.DayTimeSheet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -355,4 +356,40 @@ public class TimeSheetDAO {
         return resultList != null && !resultList.isEmpty() ? ((Integer) resultList.get(0)) : null;
     }
 
+    public  List<Date> getOverdueTimesheet(Long employeeId, Date startDate, Date endDate){
+        Query query = entityManager.createNativeQuery(
+                "with data_employee as " +
+                "( " +
+                    "select " +
+                    "   e.* " +
+                    "from  " +
+                    "   employee e " +
+                    "where " +
+                    "   e.id = :employeeId " +
+                    "   and (e.end_date > current_date or e.end_date is NULL) " +
+                    "   and e.manager is not NULL " +
+                ") " +
+                "select " +
+                "   c.caldate " +
+                "from " +
+                "   data_employee de " +
+                "   join calendar c on (de.start_date + 1 < c.caldate) " +
+                "   left join holiday h on (c.caldate = h.caldate and (de.region = h.region or h.region is null)) " +
+                "where " +
+                    //полу-костыль: искать незаполненные отчеты в период :startDate and :endDate, но если это командировки - искать всегда
+                "   (c.calDate between :startDate and :endDate or exists(select 1 from business_trip bt where bt.employee_id = de.id and c.caldate between bt.begin_date and bt.end_date)) " +
+                "   and not exists(select 1 from time_sheet ts where ts.ts_type_id = " + TypesOfTimeSheetEnum.REPORT.getId() + " and ts.emp_id = de.id and ts.caldate = c.caldate) " +
+                "   and not exists(select 1 from vacation v where v.status_id = " + VacationStatusEnum.APPROVED.getId() + " and v.employee_id = de.id and c.caldate between v.begin_date and v.end_date) " +
+                "   and not exists(select 1 from illness i where i.employee_id = de.id and c.caldate between i.begin_date and i.end_date) " +
+                "   and (h.id is null or exists(select 1 from business_trip bt where bt.employee_id = de.id and c.caldate between bt.begin_date and bt.end_date))" +
+                "order by " +
+                "   c.calDate"
+        );
+
+        query.setParameter("employeeId", employeeId);
+        query.setParameter("startDate", startDate);
+        query.setParameter("endDate", endDate);
+        List<Date> resultList = query.getResultList();
+        return resultList;
+    }
 }

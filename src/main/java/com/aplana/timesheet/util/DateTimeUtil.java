@@ -501,4 +501,13 @@ public class DateTimeUtil {
     public static String getOnlyDate(Date date){
         return new SimpleDateFormat(VIEW_DATE_PATTERN).format(date);
     }
+
+
+    public static List<String> dateListToStringList(List<Date> dateList){
+        List<String> stringList = new ArrayList<String>(dateList.size());
+        for(Date date : dateList){
+            stringList.add(dateToString(date, DATE_PATTERN));
+        }
+        return stringList;
+    }
 }

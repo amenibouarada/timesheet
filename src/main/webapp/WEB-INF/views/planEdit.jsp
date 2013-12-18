@@ -586,7 +586,7 @@
                     <button style="margin-left: 20px;" onclick="exportTableInExcel()" type="button">Сохранить в Excel</button>
                 </td>
                 <td>
-                    <button style="margin-left: 20px;" onclick="location.href='/employmentPlanning';" type="button">Планирование занятости</button>
+                    <button style="margin-left: 20px;" onclick="location.href='/employmentPlanning';" type="button">Планирование занятости за период</button>
                 </td>
             </sec:authorize>
         </tr>

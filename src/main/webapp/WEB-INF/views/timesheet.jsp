@@ -410,6 +410,9 @@ function loadDraft() {
         width: 100%;
     }
 
+    .dijitCalendarCurrentDate {
+        background-color: #6495ED !important;
+    }
 </style>
 </head>
 <body>

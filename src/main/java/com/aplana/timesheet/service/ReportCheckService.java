@@ -1,9 +1,6 @@
 package com.aplana.timesheet.service;
 
-import com.aplana.timesheet.dao.BusinessTripDAO;
-import com.aplana.timesheet.dao.HolidayDAO;
-import com.aplana.timesheet.dao.RegionDAO;
-import com.aplana.timesheet.dao.ReportCheckDAO;
+import com.aplana.timesheet.dao.*;
 import com.aplana.timesheet.dao.entity.*;
 import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.util.DateTimeUtil;
@@ -23,7 +20,9 @@ import java.util.Date;
 import java.util.List;
 
 import static com.aplana.timesheet.util.DateTimeUtil.DATE_PATTERN;
+import static com.aplana.timesheet.util.DateTimeUtil.dateToString;
 import static com.aplana.timesheet.util.DateTimeUtil.stringToDate;
+import static com.aplana.timesheet.util.DateTimeUtil.dateListToStringList;
 
 @Service
 @Transactional(propagation = Propagation.REQUIRES_NEW, noRollbackFor = DataAccessException.class)
@@ -70,6 +69,9 @@ public class ReportCheckService {
 
     @Autowired
     private BusinessTripDAO businessTripDAO;
+
+    @Autowired
+    private TimeSheetDAO timeSheetDAO;
 
     /**
      * Метод формирования оповещений используемый в таймере
@@ -133,15 +135,6 @@ public class ReportCheckService {
         return result.toArray(new String[0]);
     }
 
-    public boolean contain(List<BusinessTrip> businessTripList, Date date){
-        for(BusinessTrip businessTrip : businessTripList){
-            if (businessTrip.contain(date)){
-                return true;
-            }
-        }
-        return false;
-    }
-
     /**
      * Заносит в базу список проверки заполнения отчетов по подразделению за определенные дни
      *
@@ -153,13 +146,14 @@ public class ReportCheckService {
     @Transactional  // Траблы с LAZY. Пусть весь метод выполняется в одной транзакции
     public void storeReportCheck(Division division, String firstDay, String lastDay, boolean sundayCheck) {
         logger.info("storeReportcheck() for division {} entered", division.getId());
-        Integer reportsNotSendNumber;
+
         List<ReportCheck> reportCheckList = new ArrayList<ReportCheck>();
         List<Employee> employeeList = employeeService.getEmployees(division, false);
-        List<String> dayList = DateTimeUtil.splitDateRangeOnDays(firstDay, lastDay);
+        String currentDay = DateTimeUtil.currentDay();
 
         Date firstDate = null;
         Date lastDate = null;
+
         try {
             firstDate = sdf.parse(firstDay);
             lastDate = sdf.parse(lastDay);
@@ -167,54 +161,23 @@ public class ReportCheckService {
             new RuntimeException(e);
         }
 
-        String currentDay = DateTimeUtil.currentDay();
         for (Employee emp : employeeList) {
             logger.info("Employee {}", emp.getName());
-            // если сотрудник работает и не начальник подразделения
+            List<Date> dateList = timeSheetDAO.getOverdueTimesheet(emp.getId().longValue(), firstDate, lastDate);
 
-            if (!emp.isDisabled(null) && emp.getManager() != null) {
-                reportsNotSendNumber = 0;
-                List<String> passedDays = new ArrayList<String>();
-                List<BusinessTrip> businessTripList = businessTripDAO.getEmployeeBusinessTripsIntersectionDates(emp, firstDate, lastDate);
-                for (String day : dayList) {
-                    Date date = null;
-                    try {
-                        date = sdf.parse(day);
-                    } catch (ParseException e) {
-                        new RuntimeException(e);
-                    }
-
-                    Calendar calendar = calendarService.find(day);
-                    //если рабочий день
-                    if (holidayDAO.isWorkDay(day, emp.getRegion()) || contain(businessTripList, date)) {
-                        //если день после устройства на работу включительно
-                        if ( ! calendar.getCalDate().before( emp.getStartDate() ) ) {
-                            //если сотрудник не списал рабочее время за этот день
-                            if (timeSheetService.findForDateAndEmployee(day, emp.getId()) == null &&
-                                !vacationService.isDayVacation(emp, stringToDate(day, DATE_PATTERN)) && // не был в отпуске
-                                !illnessService.isDayIllness(emp, stringToDate(day, DATE_PATTERN)))     // и не болел
-                            {
-                                reportsNotSendNumber++;
-                                logger.info("Passed day added");
-                                passedDays.add(day);
-                            }
-                        }
-                    }
-                }
-                // В reportCheckList попадают только те у кого есть долги
-                if (reportsNotSendNumber > 0) {
-                    ReportCheck reportCheck = new ReportCheck();
-                    reportCheck.setCheckDate(currentDay);
-                    reportCheck.setEmployee(emp);
-                    reportCheck.setDivision(division);
-                    reportCheck.setReportsNotSendNumber(reportsNotSendNumber);
-                    reportCheck.setSundayCheck(sundayCheck);
-                    reportCheck.setPassedDays(passedDays);
-                    reportCheckList.add(reportCheck);
-                }
-
+            if (dateList.size() > 0) {
+                List<String> dayList = dateListToStringList(dateList);
+                ReportCheck reportCheck = new ReportCheck();
+                reportCheck.setCheckDate(currentDay);
+                reportCheck.setEmployee(emp);
+                reportCheck.setDivision(division);
+                reportCheck.setReportsNotSendNumber(dateList.size());
+                reportCheck.setSundayCheck(sundayCheck);
+                reportCheck.setPassedDays(dayList);
+                reportCheckList.add(reportCheck);
             }
         }
+
         if (reportCheckList.size() > 0) {
             reportCheckDAO.setReportChecks(reportCheckList);
 
