@@ -36,17 +36,15 @@ public class AuthenticationFailureListener implements ApplicationListener<Authen
 
     public void onApplicationEvent(AuthenticationFailureBadCredentialsEvent ev) {
         String username = ev.getAuthentication().getName();
-        logger.info("Fialed login : "
+        logger.info("Failed login : "
                 + new SimpleDateFormat("dd.MM.yyyy HH:mm").format(new Date())
                 + " " + username
-                + " " + request.getRemoteAddr()
-                + " " + propertyProvider.getLoginErrorThreshold()
-                + " " + GLOBAL_WRONG_REQUEST_COUNTER.get());
+                + " " + request.getRemoteAddr());
 
         if (GLOBAL_WRONG_REQUEST_COUNTER.get() % propertyProvider.getLoginErrorThreshold() == 0) {
             // Отправим сообщение админам
             sendMailService.loginFailureErrorThresholdMailing();
-            GLOBAL_WRONG_REQUEST_COUNTER.set(1);
+            GLOBAL_WRONG_REQUEST_COUNTER.set(0);
         }
         GLOBAL_WRONG_REQUEST_COUNTER.getAndIncrement();
     }
