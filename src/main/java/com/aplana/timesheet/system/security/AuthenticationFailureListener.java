@@ -41,7 +41,7 @@ public class AuthenticationFailureListener implements ApplicationListener<Authen
                 + " " + username
                 + " " + request.getRemoteAddr()
                 + " " + propertyProvider.getLoginErrorThreshold()
-                + " " + request.getRemoteAddr());
+                + " " + GLOBAL_WRONG_REQUEST_COUNTER.get());
 
         if (GLOBAL_WRONG_REQUEST_COUNTER.get() % propertyProvider.getLoginErrorThreshold() == 0) {
             // Отправим сообщение админам
