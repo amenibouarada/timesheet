@@ -271,7 +271,8 @@
 </div>
 <div id="errorField"></div>
 <form:form method="post" commandName="createVacationForm" name="mainForm" cssStyle="padding-top: 5px;">
-    <form:errors path="*" cssClass="errors_box" delimiter="<br/><br/>" />
+    <%-- htmlEscape="false" для ошибки: error.createVacation.rights.notadmin --%>
+    <form:errors path="*" cssClass="errors_box" delimiter="<br/><br/>" htmlEscape="false" />
     <%--<form:hidden path="employeeId" />--%>
     <table class="without_borders">
         <colgroup>

@@ -79,11 +79,9 @@ public class CreateVacationFormValidator extends AbstractValidator {
         if (calFromDateIsNotEmpty && calToDateIsNotEmpty) {
             final Timestamp fromDate = DateTimeUtil.stringToTimestamp(calFromDate);
             final Timestamp toDate = DateTimeUtil.stringToTimestamp(calToDate);
+            final boolean isAdmin = employeeService.isEmployeeAdmin(securityService.getSecurityPrincipal().getEmployee().getId());
 
-            if (!(
-                    approved &&
-                    employeeService.isEmployeeAdmin(securityService.getSecurityPrincipal().getEmployee().getId())
-            )) {
+            if (!(approved && isAdmin)) {
                 final Date currentDate = new Date();
                 Date allowedDate = DateUtils.addDays(currentDate, createThreshold);
 
@@ -110,6 +108,15 @@ public class CreateVacationFormValidator extends AbstractValidator {
                             new Object[]{new SimpleDateFormat(DATE_FORMAT).format(allowedDate)},
                             WRONG_PLANNED_TODATE_ERROR_MESSAGE
                     );
+                }
+
+                if (!isAdmin && VacationTypesEnum.WITH_NEXT_WORKING.getId() == createVacationForm.getVacationType().intValue()){
+                    errors.rejectValue(
+                            "calToDate",
+                            "error.createVacation.rights.notadmin",
+                            "Для создания отпуска с последующей отработкой обратитесь к администратору центру"
+                    );
+
                 }
 
             }
