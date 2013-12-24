@@ -94,7 +94,6 @@ public class EmploymentPlanningController{
             @RequestParam("employeeId") Integer employeeId
     ) {
         List<ProjectPercentPlan> planList = employeeProjectPlanService.getEmployeePlan(employeeId, form.getYearBeg(), form.getMonthBeg(), form.getYearEnd(), form.getMonthEnd());
-
         String employeePlanAsJSON = getEmployeePlanAsJSON(planList);
 
         return employeePlanAsJSON;
@@ -225,12 +224,14 @@ public class EmploymentPlanningController{
         java.util.Calendar calendar = GregorianCalendar.getInstance();
         calendar.setTime(date);
 
-        Integer month = calendar.get(java.util.Calendar.MONTH);
+        Integer month = calendar.get(java.util.Calendar.MONTH) + 1;
         Integer year = calendar.get(java.util.Calendar.YEAR);
+        Integer quarter = 1 + (month-1)/3;
 
         form.setMonthBeg(month);
         form.setYearBeg(year);
-        form.setMonthEnd(12);
+        // Конец квартала
+        form.setMonthEnd(3*quarter);
         form.setYearEnd(year);
         form.setProjectId(ALL);
         form.setSelectDivisionId(currentUser.getDivision().getId());
