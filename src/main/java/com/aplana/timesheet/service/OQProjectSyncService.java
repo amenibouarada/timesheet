@@ -32,7 +32,10 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import static com.aplana.timesheet.util.ExceptionUtils.getRealLastCause;
 
@@ -165,7 +168,6 @@ public class OQProjectSyncService extends AbstractServiceWithTransactionManageme
                 // APLANATS-826 при добавлении проекта прописываем в качестве даты окончания фиксированную большую дату
                 project.setEndDate(DateTimeUtil.stringToDate("01.01.2050", DATE_FORMAT));
                 /* тип финансирования (по умолчанию) */
-                project.setFundingType(getDictionaryItem(ProjectFundingTypeEnum.getById(finsource)));
             } else {
                 // если проект уже существовал - статус менять не будем
                 // см. //APLANATS-408
@@ -178,7 +180,6 @@ public class OQProjectSyncService extends AbstractServiceWithTransactionManageme
                 }
                 project.setCqRequired(foundProject.isCqRequired());
                 project.setEndDate(foundProject.getEndDate()); // APLANATS-826
-                project.setFundingType(foundProject.getFundingType());
                 project.setJiraProjectKey(foundProject.getJiraProjectKey());
             }
 
@@ -196,6 +197,7 @@ public class OQProjectSyncService extends AbstractServiceWithTransactionManageme
             // APLANATS-826
             // project.setEndDate(DateTimeUtil.stringToDate(nodeMap.getNamedItem("ending").getNodeValue(), DATE_FORMAT));
             project.setState(state);
+            project.setFundingType(getDictionaryItem(ProjectFundingTypeEnum.getById(finsource)));
 
             if (project.isActive()) {
                 if (!setPM(project, pmLdap)) {
