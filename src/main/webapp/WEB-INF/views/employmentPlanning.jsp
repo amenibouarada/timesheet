@@ -320,6 +320,7 @@ function refreshProjectGrid(response, yearStart, monthStart, yearEnd, monthEnd){
         dojo.style(dojo.byId("errorBox"), 'display', 'none');
     } else {
         dojo.style(dojo.byId("errorBox"), 'display', '');
+        dojo.style(dojo.byId("grids"), 'display', '');
         dojo.byId("errorBox").innerHTML = 'По данному проекту отсутвует запланированная занятость сотрудников';
     }
 
