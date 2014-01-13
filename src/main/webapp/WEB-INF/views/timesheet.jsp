@@ -379,7 +379,7 @@ function loadDraft() {
                     addNewRow();
                     loadDraftRow(i, data.data);
                 }
-
+                dojo.byId('plan').innerHTML = data.plan;
                 hideShowElement("load_draft", true);
                 hideShowElement("load_draft_text", true);
             }
