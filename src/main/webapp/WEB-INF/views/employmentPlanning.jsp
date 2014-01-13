@@ -535,13 +535,11 @@ function calcTotalRow(items, yearStart, monthStart, yearEnd, monthEnd){
 }
 
 // Создает store для грида "сотрудник-проекты"
-function createStoreEmployee(dataJson, yearStart, monthStart, yearEnd, monthEnd){
+function createStoreEmployee(data_list, yearStart, monthStart, yearEnd, monthEnd){
     var data = {
         identifier: "project_id",
         items: []
     };
-
-    var data_list = dojo.fromJson(dataJson);
 
     // Добавляем итоговою строку
     var totalRowMap = calcTotalRow(data_list, yearStart, monthStart, yearEnd, monthEnd);
@@ -593,7 +591,8 @@ function createStoreEmployee(dataJson, yearStart, monthStart, yearEnd, monthEnd)
 
 // Создает грид "сотрудник-проекты"
 function initEmployeeGrid(dataJson, employeeId, yearStart, monthStart, yearEnd, monthEnd){
-    var store = createStoreEmployee(dataJson, yearStart, monthStart, yearEnd, monthEnd);
+   var data_list = dojo.fromJson(dataJson);
+    var store = createStoreEmployee(data_list, yearStart, monthStart, yearEnd, monthEnd);
 
     var isFact = dojo.byId("isFactCheckBox").checked;
     var layout = createLayoutEmployee(isFact, employeeId, yearStart, monthStart, yearEnd, monthEnd);
@@ -636,7 +635,21 @@ function initEmployeeGrid(dataJson, employeeId, yearStart, monthStart, yearEnd, 
 function refreshEmployeeGrid(response, employeeId, yearStart, monthStart, yearEnd, monthEnd){
     var isFact = dojo.byId("isFactCheckBox").checked;
     var projectId = dojo.byId("projectId").value;
-    var store = createStoreEmployee(response, yearStart, monthStart, yearEnd, monthEnd);
+    var projectName = dojo.byId("projectId").options[dojo.byId("projectId").selectedIndex].text;
+    var data_list = dojo.fromJson(response);
+    // Если не пришла информация по выбранному проекту, добавляем строку с этим проектом
+    var needAddProject = true;
+    dojo.forEach(data_list, function(project_info) {
+        if (project_info["project_id"] == projectId) {
+            needAddProject = false;
+        }
+    });
+
+    if (needAddProject) {
+        data_list.push({project_id: Number(projectId), project_name: projectName});
+    }
+
+    var store = createStoreEmployee(data_list, yearStart, monthStart, yearEnd, monthEnd);
     var layout = createLayoutEmployee(isFact, employeeId, yearStart, monthStart, yearEnd, monthEnd);
     var grid = dijit.byId("employeeGrid");
 
@@ -660,6 +673,7 @@ function refreshEmployeeGrid(response, employeeId, yearStart, monthStart, yearEn
                 recalculateTotalRow();
             }
         });
+
     }
     grid.store.fetch({query: {project_id: projectId}, onComplete: actionSelection, queryOptions: {deep:true}});
 
@@ -771,23 +785,38 @@ function cancelChange(employeeId){
 
 // Откат для изменений для строки на гриде "сотрудник-проекты"
 function cancelEmployeeChange(projectId, force){
-    var grid = dijit.byId("employeeGrid");
+    var employeeGrid = dijit.byId("employeeGrid");
+    var projectGrid = dijit.byId("projectGrid");
 
-    grid.store.fetch({query: {project_id: projectId}, queryOptions: {deep:true}, onComplete: function(items){
+    employeeGrid.store.fetch({query: {project_id: projectId}, queryOptions: {deep:true}, onComplete: function(items){
         dojo.forEach(items, function(item){
             var project = clearData[projectId];
-            for(key in project){
-                if (key!="project_id" && (key!="isChanged" || force)){
-                    grid.store.setValue(item, key, project[key]);
-                }
-            }
-            grid.store.setValue(item, 'isChanged', 0);
-            grid.store.setValue(item, 'fields', '');
-        });
-        grid.store.save();
-    }});
 
-    recalculateTotalRow();
+            iterateMonth(gYearBegin, gMonthBegin, gYearEnd, gMonthEnd, function(month, year) {
+                var keyPlan = year + "_" + month;
+                var keyFact = year + "-" + month;
+                employeeGrid.store.setValue(item, keyPlan, project[keyPlan]);
+                employeeGrid.store.setValue(item, keyFact, project[keyFact]);
+            });
+
+//            for(var key in project){
+//                /*(/\d{4}_\d{2}/.test(key) || /\d{4}-\d{2}/.test(key)) &&*/
+//                if (key!="project_id" && (key!="isChanged" || force)){
+//                    employeeGrid.store.setValue(item, key, project[key]);
+//                }
+//            }
+            employeeGrid.store.setValue(item, 'isChanged', 0);
+            employeeGrid.store.setValue(item, 'fields', '');
+        });
+        employeeGrid.store.save();
+
+        projectGrid.store.fetch({query: {employee_id: Number(gEmployeeId)}, queryOptions: {deep:true}, onComplete: function(employeeArray){
+            dojo.forEach(employeeArray, function(employee){
+                projectGrid.store.setValue(employee, 'plan', '');
+            });
+            recalculateTotalRow();
+        }});
+    }});
 }
 
 // Отправка данных на сервер для сохранения. Грид проект-сотрудники
@@ -822,6 +851,7 @@ function saveEmployeePlan(employeeId, projectId){
 
     function actionAfterSaveEmployee(result){
 //        projectDataHandler(gProjectId, gYearBegin, gMonthBegin, gYearEnd, gMonthEnd, refreshProjectGrid);
+        cancelChange(Number(gEmployeeId));
         recalculateTotalRow();
     }
 
