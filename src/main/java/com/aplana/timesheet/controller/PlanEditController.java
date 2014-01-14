@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -167,6 +168,9 @@ public class PlanEditController {
     private static final String COOKIE_SHOW_SUMMARY_FUNDING = "cookie_show_summary_funding";
     private static final String COOKIE_MONTH = "cookie_month";
     private static final String COOKIE_MANAGER = "cookie_manager";
+    public  static final String COOKIE_SELECTION_ROW = "cookie_selection_row";
+    public  static final String COOKIE_SCROLL_X = "cookie_scroll_x";
+    public  static final String COOKIE_SCROLL_Y = "cookie_scroll_y";
     public  static final int    COOKIE_MAX_AGE = 999999999;
 
     private static final String SEPARATOR = "~";
@@ -256,16 +260,27 @@ public class PlanEditController {
         response.addCookie(cookie);
     }
 
+    private static void deleteCookie(HttpServletResponse response, String name) {
+        Cookie cookieToDelete = new Cookie(name, "");
+        cookieToDelete.setMaxAge(0);
+
+        response.addCookie(cookieToDelete);
+    }
+
     @RequestMapping(PLAN_EDIT_URL)
     public ModelAndView showForm(
             @ModelAttribute(PlanEditForm.FORM) PlanEditForm form,
             BindingResult bindingResult,
             HttpServletRequest request,
-            HttpServletResponse response
+            HttpServletResponse response,
+            @ModelAttribute("selectionRowIndex") String selectionRowIndex,
+            @ModelAttribute("scrollX") String scrollX,
+            @ModelAttribute("scrollY") String scrollY
     ) {
         initForm(form, request);
 
         saveCookie(form, response);
+        deleteCookie(response);
 
         return createModelAndView(form, bindingResult);
     }
@@ -280,6 +295,7 @@ public class PlanEditController {
 
         if (!bindingResult.hasErrors()) {
             saveCookie(form, response);
+            deleteCookie(response);
         }
 
         return modelAndView;
@@ -312,7 +328,9 @@ public class PlanEditController {
     @RequestMapping(value = PLAN_SAVE_URL, method = RequestMethod.POST)
     public String save(
             @ModelAttribute(PlanEditForm.FORM) PlanEditForm form,
-            HttpServletResponse response
+            HttpServletResponse response,
+            HttpServletRequest request,
+            final RedirectAttributes redirectAttributes
     ) {
         try {
             final JsonRootNode rootNode = JsonUtil.parse(form.getJsonData());
@@ -320,12 +338,26 @@ public class PlanEditController {
             final Integer month = JsonUtil.getDecNumberValue(rootNode, JSON_DATA_MONTH);
 
             planEditService.savePlans(rootNode, year, month);
+
+            redirectAttributes.addFlashAttribute("selectionRowIndex", getCookie(request, COOKIE_SELECTION_ROW));
+            redirectAttributes.addFlashAttribute("scrollX", getCookie(request, COOKIE_SCROLL_X));
+            redirectAttributes.addFlashAttribute("scrollY", getCookie(request, COOKIE_SCROLL_Y));
         } catch (InvalidSyntaxException e) {
             LOGGER.error(e.getLocalizedMessage());
             throw new RuntimeException(e);
         }
         saveCookie(form, response);
         return "redirect:" + PLAN_EDIT_URL;
+    }
+
+    private static Object getCookie(HttpServletRequest request, String name) {
+        Cookie[] cookies = request.getCookies();
+        for (Cookie cookie : cookies) {
+            if (name.equals(cookie.getName())) {
+                return cookie.getValue();
+            }
+        }
+        return null;
     }
 
     /**
@@ -426,6 +458,12 @@ public class PlanEditController {
         addCookie(response, COOKIE_MANAGER, form.getManager());
         addCookie(response, COOKIE_SHOW_SUMMARY_PROJECTS_PRESALES, form.getShowSumProjectsPresales());
         addCookie(response, COOKIE_SHOW_SUMMARY_FUNDING, form.getShowSumFundingType());
+    }
+
+    private void  deleteCookie(HttpServletResponse response){
+        deleteCookie(response, COOKIE_SELECTION_ROW);
+        deleteCookie(response, COOKIE_SCROLL_X);
+        deleteCookie(response, COOKIE_SCROLL_Y);
     }
 
     private ModelAndView createModelAndView(PlanEditForm form, BindingResult bindingResult) {

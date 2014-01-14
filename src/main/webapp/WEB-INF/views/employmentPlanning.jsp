@@ -941,8 +941,12 @@ function hideFact(){
 // Смена списка проектов в зависимости от выбранного Подразделения
 function updateProjectList(){
     var selectDivision = dojo.byId("selectDivisionId");
-    additionProjectDataHandler(selectDivision.value, function(response){
+    var monthBegin = Number(dojo.byId("monthBeg").value);
+    var yearBegin  = Number(dojo.byId("yearBeg").value);
+
+    additionProjectDataHandler(selectDivision.value, monthBegin, yearBegin, function(response){
         clearSelectValues(dojo.byId("projectId"));
+        dojo.create("option", { value: "-1", innerHTML: ""}, dojo.byId("projectId"));
         dojo.forEach(dojo.fromJson(response), function (row) {
             dojo.create("option", { value: row["project_id"], innerHTML: row["project_name"]}, dojo.byId("projectId"));
         });
@@ -970,12 +974,12 @@ function updateProjectList(){
                 <span class="label">Месяц, год начала периода:</span>
             </td>
             <td>
-                <form:select path="monthBeg">
-                    <form:options items="${monthList}" itemLabel="monthTxt" itemValue="month"/>
+                <form:select path="monthBeg" onchange="updateProjectList()">
+                    <form:options items="${monthList}" itemLabel="monthTxt" itemValue="month" />
                 </form:select>
             </td>
             <td>
-                <form:select path="yearBeg">
+                <form:select path="yearBeg" onchange="updateProjectList()">
                     <form:options items="${yearList}" itemLabel="year" itemValue="year"/>
                 </form:select>
             </td>

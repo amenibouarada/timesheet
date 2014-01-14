@@ -3,8 +3,11 @@ package com.aplana.timesheet.controller;
 import argo.jdom.*;
 import argo.saj.InvalidSyntaxException;
 import com.aplana.timesheet.dao.entity.*;
+import com.aplana.timesheet.enums.ProjectFundingTypeEnum;
+import com.aplana.timesheet.enums.TypesOfActivityEnum;
 import com.aplana.timesheet.form.AddEmployeeForm;
 import com.aplana.timesheet.form.EmploymentPlanningForm;
+import com.aplana.timesheet.form.PlanEditForm;
 import com.aplana.timesheet.service.*;
 import com.aplana.timesheet.system.security.SecurityService;
 import com.aplana.timesheet.util.DateTimeUtil;
@@ -50,6 +53,9 @@ public class EmploymentPlanningController{
     @Autowired
     private EmployeeService employeeService;
 
+    @Autowired
+    private ProjectService projectService;
+
     private List<com.aplana.timesheet.dao.entity.Calendar> getYearList() {
         return DateTimeUtil.getYearsList(calendarService);
     }
@@ -58,7 +64,7 @@ public class EmploymentPlanningController{
     @RequestMapping("/employmentPlanning")
     public ModelAndView showForm(@ModelAttribute(EmploymentPlanningForm.FORM) EmploymentPlanningForm form) {
         final ModelAndView modelAndView = new ModelAndView("employmentPlanning");
-        fillDefaultModelAndView(modelAndView);
+        fillDefaultModelAndView(form, modelAndView);
         fillDefaultForm(form);
         modelAndView.addObject("form", form);
 
@@ -70,7 +76,7 @@ public class EmploymentPlanningController{
     @RequestMapping(value = "/employmentPlanning", method = RequestMethod.POST)
     public ModelAndView showTable( @ModelAttribute(EmploymentPlanningForm.FORM) EmploymentPlanningForm form) {
         final ModelAndView modelAndView = new ModelAndView("employmentPlanning");
-        fillDefaultModelAndView(modelAndView);
+        fillDefaultModelAndView(form, modelAndView);
         modelAndView.addObject("form", form);
 
         return modelAndView;
@@ -113,8 +119,12 @@ public class EmploymentPlanningController{
     /* Возвращает JSON для форме выбора сотрудников */
     @RequestMapping(value="/employmentPlanning/getProjectByDivisionAsJSON", produces = "text/plain;charset=UTF-8")
     @ResponseBody
-    public String showAddEmployeeList(@RequestParam("divisionId") String divisionId) {
-        List<Project> projectList = divisionService.getProjectList(Integer.parseInt(divisionId));
+    public String showAddEmployeeList(
+            @RequestParam("divisionId") String divisionId,
+            @RequestParam("monthBegin") Integer monthBegin,
+            @RequestParam("yearBegin") Integer yearBegin) {
+        Date date = DateTimeUtil.createDate(yearBegin, monthBegin);
+        List<Project> projectList = getProjects(Integer.parseInt(divisionId), date);
         String projectListAsJson = getProjectListAsJson(projectList);
 
         return projectListAsJson;
@@ -194,13 +204,20 @@ public class EmploymentPlanningController{
         return "+OK";
     }
 
-    public void fillDefaultModelAndView(ModelAndView modelAndView){
+    public void fillDefaultModelAndView(EmploymentPlanningForm form, ModelAndView modelAndView){
         final List<com.aplana.timesheet.dao.entity.Calendar> yearList = getYearList();
         Employee currentUser = securityService.getSecurityPrincipal().getEmployee();
 
+        Date date;
+        if (form.getYearBeg() != null && form.getMonthBeg() != null) {
+            date = DateTimeUtil.createDate(form.getYearBeg(), form.getMonthBeg());
+        } else {
+            date = new Date();
+        }
+
         modelAndView.addObject("yearList", yearList);
         modelAndView.addObject("monthList", calendarService.getMonthList(2013));
-        modelAndView.addObject("projectList", divisionService.getProjectList(currentUser.getDivision().getId()));
+        modelAndView.addObject("projectList", getProjects(currentUser.getDivision().getId(), date));
         modelAndView.addObject("divisionList", divisionService.getActiveDivisions());
         modelAndView.addObject("managerList", managerService.getManagerList());
         modelAndView.addObject("projectRoleList", projectRoleService.getProjectRoles());
@@ -213,6 +230,22 @@ public class EmploymentPlanningController{
         modelAndView.addObject("addEmployeeForm", addEmployeeForm);
     }
 
+    /**
+     * Возвращает списко активных проектов на дату, для конкретного подразделения
+     * @return
+     */
+    private List<Project> getProjects(Integer divisionId, Date date) {
+        final List<Integer> projectStates = Arrays.asList(
+                TypesOfActivityEnum.PROJECT.getId(),
+                TypesOfActivityEnum.PRESALE.getId()
+        );
+
+        return projectService.getProjectsByStatesForDateAndDivisionId(
+                projectStates,
+                date,
+                divisionId
+        );
+    }
     /**
      * Значения по умолчанию для формы ввода поиска сотрудников
      * @param form

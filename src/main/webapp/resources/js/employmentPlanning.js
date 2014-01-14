@@ -204,11 +204,13 @@ function additionEmployeeDataHandler(division, manager, roleList, regionList, ha
 
 // Делает ajax запрос, возвращающий проекты по центру,
 // полученны ответ в виде JSON передает в функцию handler(json_value)
-function additionProjectDataHandler(division, handler){
+function additionProjectDataHandler(division, monthBegin, yearBegin, handler){
     dojo.xhrGet({
         url: "/employmentPlanning/getProjectByDivisionAsJSON",
         content: {
-            divisionId: division
+            divisionId: division,
+            monthBegin: monthBegin,
+            yearBegin: yearBegin
         },
         handleAs: "text",
         load: function(response, ioArgs) {

@@ -8,6 +8,7 @@
 <%@ page import="static com.aplana.timesheet.util.ResourceUtils.getResRealPath" %>
 <%@ page import="com.aplana.timesheet.enums.ProjectFundingTypeEnum" %>
 <%@ page import="com.aplana.timesheet.enums.TypesOfActivityEnum" %>
+<%@ page import="com.aplana.timesheet.controller.PlanEditController" %>
 
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
@@ -88,6 +89,14 @@
     var monthMapJson = '${monthMapJson}';
     var managerMapJson = '${managerMapJson}';
 
+    var COOKIE_SELECTION_ROW = '<%=PlanEditController.COOKIE_SELECTION_ROW%>';
+    var COOKIE_SCROLL_X = '<%=PlanEditController.COOKIE_SCROLL_X%>';
+    var COOKIE_SCROLL_Y = '<%=PlanEditController.COOKIE_SCROLL_Y%>';
+
+    var selectedRowIndex = '${selectionRowIndex}';
+    var scrollX = '${scrollX}';
+    var scrollY = '${scrollY}';
+
     dojo.addOnLoad(function () {
 
         updateManagerList(dojo.byId(DIVISION_ID).value);
@@ -111,6 +120,17 @@
         }
 
         planningGrid.onApplyCellEdit = function (inValue, inRowIndex, inFieldIndex) {
+            dojo.cookie(COOKIE_SELECTION_ROW, inRowIndex, { expire: -1 });
+            dojo.cookie(COOKIE_SELECTION_ROW, inRowIndex, { expire: 999999999 });
+
+            dojo.query(".dojoxGridScrollbox").forEach(function(divs) {
+                dojo.cookie(COOKIE_SCROLL_X, divs.scrollTop, { expire: -1 });
+                dojo.cookie(COOKIE_SCROLL_X, divs.scrollTop, { expire: 999999999 });
+
+                dojo.cookie(COOKIE_SCROLL_Y, divs.scrollLeft, { expire: -1 });
+                dojo.cookie(COOKIE_SCROLL_Y, divs.scrollLeft, { expire: 999999999 });
+            });
+
             var newValue = replacePeriodsWithDots(inValue);
 
             if (!isNumber(newValue)) {
@@ -128,6 +148,13 @@
 
         setTimeout(function () {
             restoreHiddenStateFromCookie(planningGrid);
+            if (isNumber(selectedRowIndex)) {
+                planningGrid.selection.setSelected(selectedRowIndex, true);
+                dojo.query(".dojoxGridScrollbox").forEach(function(divs) {
+                    divs.scrollTop = scrollX;
+                    divs.scrollLeft = scrollY;
+                });
+            }
         }, 10);
 
         var items = normalize(modelFieldsForSave, myStoreObject.items);
