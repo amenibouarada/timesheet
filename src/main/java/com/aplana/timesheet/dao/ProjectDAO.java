@@ -260,7 +260,7 @@ public class ProjectDAO {
             );
         }
 
-        predicates.add(criteriaBuilder.isTrue(from.<Boolean>get("active")));
+//        predicates.add(criteriaBuilder.isTrue(from.<Boolean>get("active")));
 
         select.where(predicates.toArray(new Predicate[predicates.size()]));
         select.orderBy(criteriaBuilder.asc(from.get("name")));
