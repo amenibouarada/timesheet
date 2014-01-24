@@ -742,8 +742,12 @@ public class PlanEditController {
                         sumPresalesFact += duration;
                     }
 
+                    Integer projectDivisionId = project.getDivision() != null ? project.getDivision().getId() : null;
+                    Integer employeeDivisionId = employee.getDivision() != null ? employee.getDivision().getId() : null;
+                    boolean isEqual = (projectDivisionId !=null && employeeDivisionId !=null && projectDivisionId.equals(employeeDivisionId));
+
                     /* расчёт итого по инвест/комерц проектам */
-                    if (isCommercialProject(project) || !project.getDivision().getId().equals(employee.getDivision().getId())) {
+                    if (isCommercialProject(project) || !isEqual) {
                         sumCommerceFact += duration;
                     }else{
                         sumInvestFact += duration;

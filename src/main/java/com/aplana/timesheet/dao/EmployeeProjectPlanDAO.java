@@ -4,10 +4,7 @@ import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.dao.entity.EmployeePercentPlan;
 import com.aplana.timesheet.dao.entity.EmployeeProjectPlan;
 import com.aplana.timesheet.dao.entity.Project;
-import com.aplana.timesheet.enums.EmployeePlanType;
-import com.aplana.timesheet.enums.TypesOfActivityEnum;
-import com.aplana.timesheet.enums.TypesOfTimeSheetEnum;
-import com.aplana.timesheet.enums.VacationTypesEnum;
+import com.aplana.timesheet.enums.*;
 import com.aplana.timesheet.form.EmploymentPlanningForm;
 import org.springframework.stereotype.Repository;
 
@@ -380,7 +377,7 @@ public class EmployeeProjectPlanDAO {
                 "    vacation vac " +
                 "    inner join calendar c on (c.caldate between vac.begin_date and vac.end_date) " +
                 "where " +
-                    "vac.type_id in ("+ VacationTypesEnum.PLANNED.getId() + ")"+
+                    "vac.type_id != " + VacationTypesEnum.WITH_NEXT_WORKING.getId() + " " +
                     "and vac.employee_id = :employeeId " +
                     "and ( " +
                     "   (c.year = :yearStart and c.year = :yearEnd   and c.month between :monthStart and :monthEnd) " +
@@ -451,7 +448,8 @@ public class EmployeeProjectPlanDAO {
                 "    vacation vac " +
                 "    inner join calendar c on (c.caldate between vac.begin_date and vac.end_date) " +
                 "where " +
-                    "vac.type_id not in ("+ VacationTypesEnum.PLANNED.getId() + ")"+
+                    "vac.type_id != " + VacationTypesEnum.WITH_NEXT_WORKING.getId() + " " +
+                    "and vac.status_id = "+ VacationStatusEnum.APPROVED.getId() + " " +
                     "and vac.employee_id = :employeeId " +
                     "and ( " +
                     "   (c.year = :yearStart and c.year = :yearEnd   and c.month between :monthStart and :monthEnd) " +
