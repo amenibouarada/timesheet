@@ -48,12 +48,12 @@ function recalcColumns(myStoreObject, inRowIndex) {
     if (showSumFundingType){
         // Инвестиционные активности
         myStoreObject.items[inRowIndex][SUMMARY_INVESTMENT + _PLAN][0] = sumInvest +
-            myStoreObject.items[inRowIndex][OTHER_INVEST_PROJECT + _PLAN][0];
+            myStoreObject.items[inRowIndex][OTHER_INVEST_PROJECT + _PLAN][0] +
+            myStoreObject.items[inRowIndex][NON_PROJECT + _PLAN][0] * 1;
 
         // Коммерческие активности
         myStoreObject.items[inRowIndex][SUMMARY_COMMERCIAL + _PLAN][0] = sumComercial +
-            myStoreObject.items[inRowIndex][OTHER_COMERCIAL_PROJECT + _PLAN][0] +
-            myStoreObject.items[inRowIndex][NON_PROJECT + _PLAN][0] * 1;
+            myStoreObject.items[inRowIndex][OTHER_COMERCIAL_PROJECT + _PLAN][0];
     }
 
     // Итог, %
