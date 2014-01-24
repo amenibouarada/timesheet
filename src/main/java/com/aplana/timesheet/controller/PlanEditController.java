@@ -647,8 +647,12 @@ public class PlanEditController {
                     }
                 }
 
+                Integer projectDivisionId = project.getDivision() != null ? project.getDivision().getId() : null;
+                Integer employeeDivisionId = employee.getDivision() != null ? employee.getDivision().getId() : null;
+                boolean isEqual = (projectDivisionId !=null && employeeDivisionId !=null && projectDivisionId.equals(employeeDivisionId));
+
                 if ( ! projectListToShow.contains(project)){
-                    if (isCommercialProject(project) || !project.getDivision().getId().equals(employee.getDivision().getId())){
+                    if (isCommercialProject(project) || !isEqual){
                         otherComercialProjectPlan += duration;
                     }
                     else {
