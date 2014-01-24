@@ -444,7 +444,7 @@ public class EmployeeProjectPlanDAO {
             "vacation_fact_data(project_id, name, month, year, val) as " +
             "( " +
                 "select " +
-                "    -"+EmployeePlanType.VACATION.getId()+", cast('"+EmployeePlanType.VACATION.getName()+"' as text), c.month, c.year, count(1) val " +
+                "    -"+EmployeePlanType.VACATION.getId()+", cast('"+EmployeePlanType.VACATION.getName()+"' as text), c.month, c.year, count(distinct c.caldate) val " +
                 "from " +
                 "    vacation vac " +
                 "    inner join calendar c on (c.caldate between vac.begin_date and vac.end_date) " +

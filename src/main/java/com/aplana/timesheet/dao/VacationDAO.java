@@ -184,7 +184,7 @@ public class VacationDAO {
     // todo наhql
     public int getVacationsWorkdaysCount(Employee employee, Integer year, Integer month) {
         Query query = entityManager.createNativeQuery("select " +
-                "  count(1) " +
+                "  count(distinct c.caldate) " +
                 "from " +
                 "  employee e " +
                 "  inner join vacation v on (e.id = v.employee_id) " +
