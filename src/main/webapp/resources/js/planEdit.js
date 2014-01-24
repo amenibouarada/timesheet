@@ -21,7 +21,7 @@ function recalcColumns(myStoreObject, inRowIndex) {
         }
 
         var projectDivision = project.project_division;
-        // Если не указано, то это ЦЗР
+        // Если не указано, то это ЦЗР !!
         if (projectDivision == -1) {
             projectDivision = 1;
         }
