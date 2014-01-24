@@ -629,10 +629,12 @@ public class PlanEditController {
         Double otherInvestProjectPlan = 0.0;
         Double otherComercialProjectPlan = 0.0;
 
-        Double vacationPlan =
-                getPercent(vacationService.getVacationsWorkdaysCount(employee, year, month) * TimeSheetConstants.WORK_DAY_DURATION, summaryPlan);
-        Double illnessPlan  =
-                getPercent(illnessService.getIllnessWorkdaysCount(employee, year, month) * TimeSheetConstants.WORK_DAY_DURATION, summaryPlan);
+        Double vacationPlan = vacationService.getVacationsWorkdaysCount(employee, year, month) * TimeSheetConstants.WORK_DAY_DURATION;
+        Double illnessPlan  = illnessService.getIllnessWorkdaysCount(employee, year, month) * TimeSheetConstants.WORK_DAY_DURATION;
+
+
+        Double vacationPlanPercent = getPercent(vacationPlan, summaryPlan);
+        Double illnessPlanPercent  = getPercent(illnessPlan, summaryPlan);
 
         for (EmployeeProjectPlan employeeProjectPlan : employeeProjectPlanService.find(employee, year, month)) {
             final Project project = employeeProjectPlan.getProject();
@@ -677,8 +679,8 @@ public class PlanEditController {
         appendNumberField(map, OTHER_PROJECTS_AND_PRESALES_PLAN, otherProjectsPlan + otherPresalePlan);
         appendNumberField(map, OTHER_COMERCIAL_PROJECT_PLAN, otherComercialProjectPlan);
         appendNumberField(map, OTHER_INVEST_PROJECT_PLAN, otherInvestProjectPlan);
-        appendNumberField(map, ILLNESS_PLAN, illnessPlan);
-        appendNumberField(map, VACATION_PLAN, vacationPlan);
+        appendNumberField(map, ILLNESS_PLAN, illnessPlanPercent);
+        appendNumberField(map, VACATION_PLAN, vacationPlanPercent);
         appendStringField(map, MONTH_PLAN, round(summaryPlan));
 
         return map;
@@ -705,10 +707,11 @@ public class PlanEditController {
         Double sumPresalesFact    = 0.0;
         Double sumInvestFact      = 0.0;
         Double sumCommerceFact    = 0.0;
-        Double illnessFact        =
-                getPercent(illnessService.getIllnessWorkdaysCount(employee, year, month) * TimeSheetConstants.WORK_DAY_DURATION, summaryPlan) ;
-        Double vacationFact       =
-                getPercent(vacationService.getVacationsWorkdaysCount(employee, year, month, VacationStatusEnum.APPROVED) * TimeSheetConstants.WORK_DAY_DURATION, summaryPlan);
+        Double illnessFact = illnessService.getIllnessWorkdaysCount(employee, year, month) * TimeSheetConstants.WORK_DAY_DURATION;
+        Double vacationFact = vacationService.getVacationsWorkdaysCount(employee, year, month, VacationStatusEnum.APPROVED) * TimeSheetConstants.WORK_DAY_DURATION;
+
+        Double illnessFactPercent = getPercent(illnessFact, summaryPlan);
+        Double vacationFactPercent = getPercent(vacationFact, summaryPlan);
 
         for (TimeSheet timeSheet : timeSheetService.getTimeSheetsForEmployee(employee, year, month)) {
             for (TimeSheetDetail timeSheetDetail : timeSheet.getTimeSheetDetails()) {
@@ -768,6 +771,7 @@ public class PlanEditController {
         }
 
         summaryFact += vacationFact;
+        summaryFact += illnessFact;
 
         appendNumberField(map, SUMMARY_FACT, summaryPlan * summaryFact / 100);
         appendStringField(map, PERCENT_OF_CHARGE_FACT, round(summaryFact));
@@ -783,8 +787,8 @@ public class PlanEditController {
             appendNumberField(map, SUMMARY_INVESTMENT_FACT, sumInvestFact + nonProjectFact);
             appendNumberField(map, SUMMARY_COMMERCIAL_FACT, sumCommerceFact);
         }
-        appendNumberField(map, ILLNESS_FACT, illnessFact);
-        appendNumberField(map, VACATION_FACT, vacationFact);
+        appendNumberField(map, ILLNESS_FACT, illnessFactPercent);
+        appendNumberField(map, VACATION_FACT, vacationFactPercent);
 
         return map;
     }
