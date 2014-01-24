@@ -372,12 +372,13 @@ public class EmployeeProjectPlanDAO {
             "vacation_plan_data(project_id, name, month, year, val) as " +
             "( " +
                 "select " +
-                "    -"+EmployeePlanType.VACATION.getId()+", cast('"+EmployeePlanType.VACATION.getName()+"' as text), c.month, c.year, count(1) val " +
+                "    -"+EmployeePlanType.VACATION.getId()+", cast('"+EmployeePlanType.VACATION.getName()+"' as text), c.month, c.year, count(distinct c.caldate) val " +
                 "from " +
                 "    vacation vac " +
                 "    inner join calendar c on (c.caldate between vac.begin_date and vac.end_date) " +
                 "where " +
-                    "vac.type_id != " + VacationTypesEnum.WITH_NEXT_WORKING.getId() + " " +
+                    "vac.type_id in (" + VacationTypesEnum.WITH_NEXT_WORKING.getId() + ", " + VacationTypesEnum.PLANNED.getId() + ", "+ VacationTypesEnum.WITH_PAY.getId()+ ", " + VacationTypesEnum.WITHOUT_PAY.getId() +") " +
+                    "and vac.status_id in ("+ VacationStatusEnum.APPROVED.getId() + ", " + VacationStatusEnum.APPROVEMENT_WITH_LM.getId() + ", "+ VacationStatusEnum.APPROVEMENT_WITH_PM.getId()+", "+ VacationStatusEnum.APPROVED_BY_PM.getId()+")" +
                     "and vac.employee_id = :employeeId " +
                     "and ( " +
                     "   (c.year = :yearStart and c.year = :yearEnd   and c.month between :monthStart and :monthEnd) " +
@@ -448,8 +449,8 @@ public class EmployeeProjectPlanDAO {
                 "    vacation vac " +
                 "    inner join calendar c on (c.caldate between vac.begin_date and vac.end_date) " +
                 "where " +
-                    "vac.type_id != " + VacationTypesEnum.WITH_NEXT_WORKING.getId() + " " +
-                    "and vac.status_id = "+ VacationStatusEnum.APPROVED.getId() + " " +
+                    "vac.type_id in (" + VacationTypesEnum.WITH_NEXT_WORKING.getId() + ", " + VacationTypesEnum.WITH_PAY.getId()+ ", " + VacationTypesEnum.WITHOUT_PAY.getId() +") " +
+                    "and vac.status_id in ("+ VacationStatusEnum.APPROVED.getId()+")" +
                     "and vac.employee_id = :employeeId " +
                     "and ( " +
                     "   (c.year = :yearStart and c.year = :yearEnd   and c.month between :monthStart and :monthEnd) " +

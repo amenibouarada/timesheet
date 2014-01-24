@@ -179,6 +179,30 @@ public class VacationDAO {
                 .setParameter("notApprovedStatuses", VacationStatusEnum.getNotApprovedStatuses()).getResultList();
     }
 
+
+
+    // todo наhql
+    public int getVacationsWorkdaysCount(Employee employee, Integer year, Integer month) {
+        Query query = entityManager.createNativeQuery("select " +
+                "  count(1) " +
+                "from " +
+                "  employee e " +
+                "  inner join vacation v on (e.id = v.employee_id) " +
+                "  inner join calendar c on (c.caldate between v.begin_date and v.end_date) " +
+                "  left join holiday h on (h.caldate = c.caldate and (h.region = e.region or h.region is null)) " +
+                "where " +
+                "  v.employee_id = :employee_id " +
+                "  and h.id is null " +
+                "  and month = :month and year = :year " +
+                "  and status_id != "+ VacationStatusEnum.REJECTED.getId()+" ");
+
+        query.setParameter("employee_id", employee.getId()) ;
+        query.setParameter("month", month);
+        query.setParameter("year", year);
+
+        return ((Number)query.getSingleResult()).intValue();
+    }
+
     /**
      * Метод считает количество дней утвержденных отпусков в месяце без учета планируемых
      * @param employee
