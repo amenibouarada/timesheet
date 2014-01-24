@@ -20,7 +20,10 @@ function recalcColumns(myStoreObject, inRowIndex) {
             sumProjectCenter += projectPlan;
         }
 
-        if (project.project_funding_type == COMMERCIAL_PROJECT){
+        console.log("1:" + project.project_division);
+        console.log("2:" + dojo.byId(DIVISION_ID).value);
+        console.log("3:" + project.project_division == dojo.byId(DIVISION_ID).value);
+        if (project.project_funding_type == COMMERCIAL_PROJECT || project.project_division != dojo.byId(DIVISION_ID).value){
             sumComercial += projectPlan;
         }else{
             sumInvest += projectPlan;

@@ -427,6 +427,16 @@
 
                         delete item[field];
                     }
+
+                    var matchNonProject = (field == (NON_PROJECT + _PLAN));
+
+                    if (matchNonProject) {
+                        var summaryValue = myStoreObject.items[idx][SUMMARY + _PLAN][0];
+                        var monthPlan = (summaryValue.split("/"))[1];
+                        value = monthPlan * value / 100;
+
+                        item.<%=NON_PROJECT + _PLAN%> = value;
+                    }
                 }
             }
         });

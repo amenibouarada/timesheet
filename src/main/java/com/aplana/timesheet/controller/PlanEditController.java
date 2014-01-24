@@ -628,10 +628,11 @@ public class PlanEditController {
         Double otherPresalePlan  = 0.0;
         Double otherInvestProjectPlan = 0.0;
         Double otherComercialProjectPlan = 0.0;
+
         Double vacationPlan =
-                vacationService.getVacationsWorkdaysCount(employee, year, month) * TimeSheetConstants.WORK_DAY_DURATION;
+                getPercent(vacationService.getVacationsWorkdaysCount(employee, year, month) * TimeSheetConstants.WORK_DAY_DURATION, summaryPlan);
         Double illnessPlan  =
-                illnessService.getIllnessWorkdaysCount(employee, year, month) * TimeSheetConstants.WORK_DAY_DURATION;
+                getPercent(illnessService.getIllnessWorkdaysCount(employee, year, month) * TimeSheetConstants.WORK_DAY_DURATION, summaryPlan);
 
         for (EmployeeProjectPlan employeeProjectPlan : employeeProjectPlanService.find(employee, year, month)) {
             final Project project = employeeProjectPlan.getProject();
@@ -645,10 +646,12 @@ public class PlanEditController {
                         otherProjectsPlan += duration;
                     }
                 }
+
                 if ( ! projectListToShow.contains(project)){
-                    if (isCommercialProject(project)){
+                    if (isCommercialProject(project) || !project.getDivision().getId().equals(employee.getDivision().getId())){
                         otherComercialProjectPlan += duration;
-                    }else{
+                    }
+                    else {
                         otherInvestProjectPlan += duration;
                     }
                 }
@@ -658,7 +661,11 @@ public class PlanEditController {
 
         for (EmployeePlan employeePlan : employeePlanService.find(employee, year, month)) {
             Double duration = nilIfNull(employeePlan.getValue());
+            duration = getPercent(duration, summaryPlan);
             appendNumberField(map, getFieldNameForEmployeePlan(employeePlan), duration);
+            if (employeePlan.getType().getId().equals(EmployeePlanType.WORK_FOR_OTHER_DIVISIONS.getId())) {
+                otherInvestProjectPlan += duration;
+            }
         }
 
         appendNumberField(map, OTHER_PROJECT_PLAN, otherProjectsPlan);
@@ -695,9 +702,9 @@ public class PlanEditController {
         Double sumInvestFact      = 0.0;
         Double sumCommerceFact    = 0.0;
         Double illnessFact        =
-                illnessService.getIllnessWorkdaysCount(employee, year, month) * TimeSheetConstants.WORK_DAY_DURATION ;
+                getPercent(illnessService.getIllnessWorkdaysCount(employee, year, month) * TimeSheetConstants.WORK_DAY_DURATION, summaryPlan) ;
         Double vacationFact       =
-                vacationService.getVacationsWorkdaysCount(employee, year, month, VacationStatusEnum.APPROVED) * TimeSheetConstants.WORK_DAY_DURATION;
+                getPercent(vacationService.getVacationsWorkdaysCount(employee, year, month, VacationStatusEnum.APPROVED) * TimeSheetConstants.WORK_DAY_DURATION, summaryPlan);
 
         for (TimeSheet timeSheet : timeSheetService.getTimeSheetsForEmployee(employee, year, month)) {
             for (TimeSheetDetail timeSheetDetail : timeSheet.getTimeSheetDetails()) {
@@ -736,7 +743,7 @@ public class PlanEditController {
                     }
 
                     /* расчёт итого по инвест/комерц проектам */
-                    if (isCommercialProject(project)) {
+                    if (isCommercialProject(project) || !project.getDivision().getId().equals(employee.getDivision().getId())) {
                         sumCommerceFact += duration;
                     }else{
                         sumInvestFact += duration;

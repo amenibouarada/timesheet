@@ -7,6 +7,7 @@ import com.aplana.timesheet.dao.entity.Project;
 import com.aplana.timesheet.enums.EmployeePlanType;
 import com.aplana.timesheet.enums.TypesOfActivityEnum;
 import com.aplana.timesheet.enums.TypesOfTimeSheetEnum;
+import com.aplana.timesheet.enums.VacationTypesEnum;
 import com.aplana.timesheet.form.EmploymentPlanningForm;
 import org.springframework.stereotype.Repository;
 
@@ -116,7 +117,7 @@ public class EmployeeProjectPlanDAO {
                         ") " +
                     ") " +
                 "where " +
-                    "dict_id = " + TypesOfActivityEnum.PROJECT.getId() + " " +
+                    " d.id = "+EmployeePlanType.NON_PROJECT.getId() + " " +
             ") " +
             "select " +
                     //TODO в дне всегда 8 рабочих часов?
@@ -334,10 +335,10 @@ public class EmployeeProjectPlanDAO {
             "group by " +
                 "r.id, c.month, c.year " +
             "), " +
-            "no_project_data(id, nm, month, year, val) as " +
+            "no_project_data(project_id, name, month, year, val) as " +
             "( " +
                 "select " +
-                    "-d.id id, d.value nm, ep.month, ep.year, 100*ep.value/(8*wd.cnt) val " +
+                    "-d.id id, d.value nm, ep.month, ep.year, ep.value val " +
                 "from " +
                     "dictionary_item d " +
                     "left join employee_plan ep on " +
@@ -350,20 +351,53 @@ public class EmployeeProjectPlanDAO {
                         "or (ep.year > :yearStart and ep.year < :yearEnd) " +
                         ") " +
                     ") " +
-                    "left join employee e on (e.id = ep.employee_id) " +
-                    "left join workDay wd on (wd.region = e.region and ep.month = wd.month and ep.year = wd.year) " +
                 "where " +
-                    "dict_id = " + TypesOfActivityEnum.PROJECT.getId() + " " +
+                    " d.id = " + EmployeePlanType.NON_PROJECT.getId() + " " +
             "), " +
-            "project_data as " +
+            "illness_data(project_id, name, month, year, val) as " +
             "( " +
                 "select " +
-                    "epp.project_id, p.name, epp.month, epp.year, 100*epp.value/(8*wd.cnt) " +
+                "    -"+EmployeePlanType.ILLNESS.getId()+", cast('"+EmployeePlanType.ILLNESS.getName()+"' as text), c.month, c.year, count(1) val " +
+                "from " +
+                "    illness ill " +
+                "    inner join calendar c on (c.caldate between ill.begin_date and ill.end_date) " +
+                "where " +
+                    "ill.employee_id = :employeeId " +
+                    "and ( " +
+                    "   (c.year = :yearStart and c.year = :yearEnd   and c.month between :monthStart and :monthEnd) " +
+                    "or (c.year = :yearStart and c.year < :yearEnd   and c.month > :monthStart) " +
+                    "or (c.year = :yearEnd   and c.year > :yearStart and c.month < :monthEnd) " +
+                    "or (c.year > :yearStart and c.year < :yearEnd) " +
+                    ") " +
+                "group by " +
+                "    ill.employee_id, c.month, c.year " +
+            "), " +
+            "vacation_plan_data(project_id, name, month, year, val) as " +
+            "( " +
+                "select " +
+                "    -"+EmployeePlanType.VACATION.getId()+", cast('"+EmployeePlanType.VACATION.getName()+"' as text), c.month, c.year, count(1) val " +
+                "from " +
+                "    vacation vac " +
+                "    inner join calendar c on (c.caldate between vac.begin_date and vac.end_date) " +
+                "where " +
+                    "vac.type_id in ("+ VacationTypesEnum.PLANNED.getId() + ")"+
+                    "and vac.employee_id = :employeeId " +
+                    "and ( " +
+                    "   (c.year = :yearStart and c.year = :yearEnd   and c.month between :monthStart and :monthEnd) " +
+                    "or (c.year = :yearStart and c.year < :yearEnd   and c.month > :monthStart) " +
+                    "or (c.year = :yearEnd   and c.year > :yearStart and c.month < :monthEnd) " +
+                    "or (c.year > :yearStart and c.year < :yearEnd) " +
+                    ") " +
+                "group by " +
+                "    vac.employee_id, c.month, c.year " +
+            "), " +
+            "project_data(project_id, name, month, year, val) as " +
+            "( " +
+                "select " +
+                    "epp.project_id, p.name, epp.month, epp.year, epp.value " +
                 "from " +
                     "employee_project_plan epp " +
                     "inner join project p on (epp.project_id = p.id) " +
-                    "left join employee e on (e.id = epp.employee_id) " +
-                    "left join workDay wd on (wd.region = e.region and epp.month = wd.month and epp.year = wd.year) " +
                 "where " +
                     "epp.employee_id = :employeeId " +
                     "and epp.value > 0 " +
@@ -374,19 +408,64 @@ public class EmployeeProjectPlanDAO {
                     "or (epp.year > :yearStart and epp.year < :yearEnd) " +
                     ") " +
             "), " +
-            "plan_data as " +
+            "plan_data(project_id, name, month, year, val) as " +
             "( " +
                 "select " +
-                    "id, nm, month, year, val " +
+                    "project_id, name, month, year, val " +
                 "from " +
                 "( " +
-                    "select * from no_project_data union all select * from project_data " +
+                    "select " +
+                    "   npd.project_id, npd.name, npd.month, npd.year, (100*npd.val)/(8*wd.cnt) val " +
+                    "from " +
+                    "   no_project_data npd " +
+                    "   left join employee e on (e.id = :employeeId) " +
+                    "   inner join workDay wd on (wd.region = e.region and npd.month = wd.month and npd.year = wd.year) " +
+                    "union all " +
+                    "select " +
+                    "   pd.project_id, pd.name, pd.month, pd.year, (100*pd.val)/(8*wd.cnt) val " +
+                    "from " +
+                    "   project_data pd " +
+                    "   left join employee e on (e.id = :employeeId) " +
+                    "   inner join workDay wd on (wd.region = e.region and pd.month = wd.month and pd.year = wd.year) " +
+                    "union all " +
+                    "select " +
+                    "   ild.project_id, ild.name, ild.month, ild.year, (100*ild.val)/(wd.cnt) val " +
+                    "from " +
+                    "   illness_data ild " +
+                    "   left join employee e on (e.id = :employeeId) " +
+                    "   inner join workDay wd on (wd.region = e.region and ild.month = wd.month and ild.year = wd.year) " +
+                    "union all " +
+                    "select " +
+                    "   vac.project_id, vac.name, vac.month, vac.year, (100*vac.val)/(wd.cnt) val " +
+                    "from " +
+                    "   vacation_plan_data vac " +
+                    "   left join employee e on (e.id = :employeeId) " +
+                    "   inner join workDay wd on (wd.region = e.region and vac.month = wd.month and vac.year = wd.year) " +
                 ") t " +
             "), " +
-            "project_fact as " +
+            "vacation_fact_data(project_id, name, month, year, val) as " +
             "( " +
                 "select " +
-                    "c.month, c.year, tsd.proj_id, pr.name nm, sum(tsd.duration) dur " +
+                "    -"+EmployeePlanType.VACATION.getId()+", cast('"+EmployeePlanType.VACATION.getName()+"' as text), c.month, c.year, count(1) val " +
+                "from " +
+                "    vacation vac " +
+                "    inner join calendar c on (c.caldate between vac.begin_date and vac.end_date) " +
+                "where " +
+                    "vac.type_id not in ("+ VacationTypesEnum.PLANNED.getId() + ")"+
+                    "and vac.employee_id = :employeeId " +
+                    "and ( " +
+                    "   (c.year = :yearStart and c.year = :yearEnd   and c.month between :monthStart and :monthEnd) " +
+                    "or (c.year = :yearStart and c.year < :yearEnd   and c.month > :monthStart) " +
+                    "or (c.year = :yearEnd   and c.year > :yearStart and c.month < :monthEnd) " +
+                    "or (c.year > :yearStart and c.year < :yearEnd) " +
+                    ") " +
+                "group by " +
+                "    vac.employee_id, c.month, c.year " +
+            "), " +
+            "project_fact(project_id, name, month, year, val) as " +
+            "( " +
+                "select " +
+                    "tsd.proj_id, pr.name, c.month, c.year, sum(tsd.duration) " +
                 "from " +
                     "time_sheet ts, " +
                     "time_sheet_detail tsd, " +
@@ -407,24 +486,38 @@ public class EmployeeProjectPlanDAO {
                 "group by " +
                     "c.month, c.year, tsd.proj_id, pr.name " +
             "), " +
-            "fact_data as " +
+            "fact_data(project_id, name, month, year, val) as " +
             "( " +
                 "select " +
-                    "pf.month, pf.year, pf.proj_id, pf.nm, 100*dur/(8*wd.cnt) prc " +
+                    "pf.project_id, pf.name, pf.month, pf.year, 100*pf.val/(8*wd.cnt) prc " +
                 "from " +
                     "project_fact pf " +
                     "left join employee e on (e.id = :employeeId) " +
                     "left join workDay wd on (wd.region = e.region and pf.month = wd.month and pf.year = wd.year) " +
+                "union all " +
+                "select " +
+                "   ild.project_id, ild.name, ild.month, ild.year, (100*ild.val)/(wd.cnt) val " +
+                "from " +
+                "   illness_data ild " +
+                "   left join employee e on (e.id = :employeeId) " +
+                "   inner join workDay wd on (wd.region = e.region and ild.month = wd.month and ild.year = wd.year) " +
+                "union all " +
+                "select " +
+                "   vac.project_id, vac.name, vac.month, vac.year, (100*vac.val)/(wd.cnt) val " +
+                "from " +
+                "   vacation_fact_data vac " +
+                "   left join employee e on (e.id = :employeeId) " +
+                "   inner join workDay wd on (wd.region = e.region and vac.month = wd.month and vac.year = wd.year) " +
             ") " +
             "select " +
-                "id, nm, month, year, val, isFact " +
+                "project_id, name, month, year, val, isFact " +
             "from " +
             "( " +
-                "select id, nm, month, year, val, 0 isFact from plan_data " +
+                "select project_id, name, month, year, val, 0 isFact from plan_data " +
                     "union all " +
-                "select coalesce(f.proj_id, "+ EmployeePlanType.NON_PROJECT.getId() + "), f.nm, f.month, f.year, f.prc, 1 isFact from fact_data f " +
+                "select project_id, name, month, year, val, 1 isFact from fact_data f " +
             ") t " +
-            "order by case sign(t.id) when -1 then 0 when 1 then 1 when 0 then 2 end, nm ");
+            "order by case sign(t.project_id) when -1 then 0 when 1 then 1 when 0 then 2 end, name ");
 
         query.setParameter("employeeId", employeeId);
         query.setParameter("monthStart", monthBeg);
