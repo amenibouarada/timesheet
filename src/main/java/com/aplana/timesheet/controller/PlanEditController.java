@@ -654,7 +654,7 @@ public class PlanEditController {
                 boolean isEqual = (projectDivisionId !=null && employeeDivisionId !=null && projectDivisionId.equals(employeeDivisionId));
 
                 if ( ! projectListToShow.contains(project)){
-                    if (isCommercialProject(project) || !isEqual){
+                    if (isCommercialProject(project) || !isEqual || !isPresale(project)){
                         otherComercialProjectPlan += duration;
                     }
                     else {
@@ -754,7 +754,7 @@ public class PlanEditController {
                     boolean isEqual = (projectDivisionId !=null && employeeDivisionId !=null && projectDivisionId.equals(employeeDivisionId));
 
                     /* расчёт итого по инвест/комерц проектам */
-                    if (isCommercialProject(project) || !isEqual) {
+                    if (isCommercialProject(project) || !isEqual || !isPresale(project)) {
                         sumCommerceFact += duration;
                     }else{
                         sumInvestFact += duration;

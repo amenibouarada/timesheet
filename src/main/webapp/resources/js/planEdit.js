@@ -20,7 +20,7 @@ function recalcColumns(myStoreObject, inRowIndex) {
             sumProjectCenter += projectPlan;
         }
 
-        if (project.project_funding_type == COMMERCIAL_PROJECT || project.project_division != dojo.byId(DIVISION_ID).value){
+        if (project.project_division != dojo.byId(DIVISION_ID).value || project.project_funding_type == COMMERCIAL_PROJECT){
             sumComercial += projectPlan;
         }else{
             sumInvest += projectPlan;
@@ -43,12 +43,12 @@ function recalcColumns(myStoreObject, inRowIndex) {
     if (showSumFundingType){
         // Инвестиционные активности
         myStoreObject.items[inRowIndex][SUMMARY_INVESTMENT + _PLAN][0] = sumInvest +
-            myStoreObject.items[inRowIndex][OTHER_INVEST_PROJECT + _PLAN][0] +
-            myStoreObject.items[inRowIndex][NON_PROJECT + _PLAN][0] * 1;
+            myStoreObject.items[inRowIndex][OTHER_INVEST_PROJECT + _PLAN][0];
 
         // Коммерческие активности
         myStoreObject.items[inRowIndex][SUMMARY_COMMERCIAL + _PLAN][0] = sumComercial +
-            myStoreObject.items[inRowIndex][OTHER_COMERCIAL_PROJECT + _PLAN][0];
+            myStoreObject.items[inRowIndex][OTHER_COMERCIAL_PROJECT + _PLAN][0] +
+            myStoreObject.items[inRowIndex][NON_PROJECT + _PLAN][0] * 1;
     }
 
     // Итог, %
