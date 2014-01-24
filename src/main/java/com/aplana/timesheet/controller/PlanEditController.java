@@ -773,8 +773,8 @@ public class PlanEditController {
         summaryFact += vacationFact;
         summaryFact += illnessFact;
 
-        appendNumberField(map, SUMMARY_FACT, summaryPlan * summaryFact / 100);
-        appendStringField(map, PERCENT_OF_CHARGE_FACT, round(summaryFact));
+        appendNumberField(map, SUMMARY_FACT, summaryFact);
+        appendStringField(map, PERCENT_OF_CHARGE_FACT, round(100 * summaryFact / summaryPlan));
         appendNumberField(map, CENTER_PROJECTS_FACT, centerProjectsFact);
         appendNumberField(map, CENTER_PRESALES_FACT, centerPresalesFact);
         appendNumberField(map, OTHER_PROJECTS_AND_PRESALES_FACT, otherProjectsFact);
