@@ -20,7 +20,12 @@ function recalcColumns(myStoreObject, inRowIndex) {
             sumProjectCenter += projectPlan;
         }
 
-        if (project.project_division != dojo.byId(DIVISION_ID).value || project.project_funding_type == COMMERCIAL_PROJECT){
+        var projectDivision = project.project_division;
+        // Если не указано, то это ЦЗР
+        if (projectDivision == -1) {
+            projectDivision = 1;
+        }
+        if (projectDivision != dojo.byId(DIVISION_ID).value || project.project_funding_type == COMMERCIAL_PROJECT){
             sumComercial += projectPlan;
         }else{
             sumInvest += projectPlan;
