@@ -97,6 +97,18 @@
         <beans:property name="cronExpression" value="${scheduler.plannedvacationcheck}"/>
     </beans:bean>
 
+    <!--Создание бинов для запуска рассылки об удалении планируемых отпусков -->
+
+    <beans:bean id="plannedVacationDeleteRemindServiceJob" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <beans:property name="targetObject" ref="plannedVacationService"/>
+        <beans:property name="targetMethod" value="remindDeletePlannedVacation"/>
+    </beans:bean>
+
+    <beans:bean id="plannedVacationDeleteRemindServiceCronTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+        <beans:property name="jobDetail" ref="plannedVacationDeleteRemindServiceJob"/>
+        <beans:property name="cronExpression" value="${scheduler.deletevacation}"/>
+    </beans:bean>
+
     <!--Регистрация триггеров с задачами-->
     <beans:bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
         <beans:property name="jobDetails">
@@ -106,6 +118,7 @@
                 <beans:ref bean="plannedVacationServiceJob"/>
                 <beans:ref bean="employeeLdapServiceJob"/>
                 <beans:ref bean="oqProjectSyncServiceJob"/>
+                <beans:ref bean="plannedVacationDeleteRemindServiceJob"/>
             </beans:list>
         </beans:property>
         <beans:property name="triggers">
@@ -115,6 +128,7 @@
                 <beans:ref bean="plannedVacationServiceCronTrigger"/>
                 <beans:ref bean="employeeLdapServiceCronTrigger"/>
                 <beans:ref bean="oqProjectSyncServiceCronTrigger"/>
+                <beans:ref bean="plannedVacationDeleteRemindServiceCronTrigger"/>
             </beans:list>
         </beans:property>
     </beans:bean>

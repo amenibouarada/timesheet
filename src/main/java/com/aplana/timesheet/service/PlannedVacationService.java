@@ -1,10 +1,13 @@
 package com.aplana.timesheet.service;
 
-import com.aplana.timesheet.dao.*;
-import com.aplana.timesheet.dao.entity.*;
-
+import com.aplana.timesheet.dao.EmployeeDAO;
+import com.aplana.timesheet.dao.VacationDAO;
+import com.aplana.timesheet.dao.entity.DictionaryItem;
+import com.aplana.timesheet.dao.entity.Employee;
+import com.aplana.timesheet.dao.entity.Project;
+import com.aplana.timesheet.dao.entity.Vacation;
 import com.aplana.timesheet.enums.VacationStatusEnum;
-import com.aplana.timesheet.enums.VacationTypesEnum;
+import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +17,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.Calendar;
 
 /**
  * User: bsirazetdinov
@@ -41,6 +43,9 @@ public class PlannedVacationService {
 
     @Autowired
     private DictionaryItemService dictionaryItemService;
+
+    @Autowired
+    private TSPropertyProvider tsPropertyProvider;
 
     private Date dateCurrent;
     private Date dateAfter;
@@ -158,5 +163,43 @@ public class PlannedVacationService {
         dateAfter = calendar2.getTime();
         calendar2.add(Calendar.WEEK_OF_YEAR, -4);
         dateBefore = calendar2.getTime();
+    }
+
+    public void remindDeletePlannedVacation() {
+        // Напоминаем, что планируемый отпуск будет удален
+        Integer remindPeriod = tsPropertyProvider.getPlannedVacationDeleteReminderThreshold();
+        List<Vacation> remindVacationList = getVacationListByCurrentDayPeriod(remindPeriod);
+
+        for (Vacation vacation : remindVacationList) {
+            sendMailService.performPlannedRemind(vacation);
+        }
+
+        // Удаляем планируемые отпуска, о которых уже предупреждали
+        Integer deletePeriod = tsPropertyProvider.getPlannedVacationDeleteThreshold();
+        List<Vacation> deleteVacationList = getVacationListByCurrentDayPeriod(deletePeriod);
+
+        for (Vacation vacation : deleteVacationList) {
+            vacationDAO.delete(vacation);
+            sendMailService.performPlannedRemove(vacation);
+        }
+    }
+
+    private List<Vacation> getVacationListByCurrentDayPeriod(Integer period) {
+        Date currentDate = new Date();
+        Calendar calendar = Calendar.getInstance();
+        Date date;
+
+        calendar.setTime(currentDate);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+
+        calendar.add(Calendar.DATE, period);
+        date = calendar.getTime();
+
+        List<Vacation> vacationList = vacationDAO.getPlannedVacationByBeginDate(date);
+
+        return vacationList;
     }
 }

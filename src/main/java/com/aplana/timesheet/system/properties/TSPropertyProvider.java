@@ -278,4 +278,21 @@ public class TSPropertyProvider {
         }
     }
 
+    /**
+     * Количество дней перед удалением планируемого отпуска
+     * @return
+     */
+    public Integer getPlannedVacationDeleteThreshold() {
+        String str = getProperties().getProperty("planned.vacations.vacation.delete.threshold");
+        return Integer.parseInt(str);
+    }
+
+    /**
+     * Количество дней перед предупреждением, что планируемый отпуск будет удален
+     * @return
+     */
+    public Integer getPlannedVacationDeleteReminderThreshold() {
+        String str = getProperties().getProperty("planned.vacations.vacation.delete.reminder.threshold");
+        return Integer.parseInt(str);
+    }
 }

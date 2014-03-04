@@ -305,6 +305,14 @@ public class SendMailService {
         new IllnessDeleteSender(this, propertyProvider, projectService, employeeService).sendMessage(illness);
     }
 
+    public void performPlannedRemind(Vacation vacation) {
+        new PlannedVacationRemindSender(this, propertyProvider).sendMessage(vacation);
+    }
+
+    public void performPlannedRemove(Vacation vacation){
+        new PlannedVacationRemoveSender(this, propertyProvider, projectService, employeeService).sendMessage(vacation);
+    }
+
     public StringBuilder buildMailException(HttpServletRequest request, Exception exception){
         Map<String, Object> model = new HashMap<String, Object>();
 
