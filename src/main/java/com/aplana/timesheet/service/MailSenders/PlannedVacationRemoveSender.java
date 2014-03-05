@@ -6,13 +6,16 @@ import com.aplana.timesheet.dao.entity.Vacation;
 import com.aplana.timesheet.service.EmployeeService;
 import com.aplana.timesheet.service.ProjectService;
 import com.aplana.timesheet.service.SendMailService;
+import com.aplana.timesheet.system.constants.PadegConstants;
 import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import padeg.lib.Padeg;
 
+import javax.annotation.PostConstruct;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -33,6 +36,14 @@ public class PlannedVacationRemoveSender  extends  AbstractVacationSenderWithCop
         super(sendMailService, propertyProvider);
         this.projectService = projectService;
         this.employeeService = employeeService;
+    }
+
+    @PostConstruct
+    public void initPadeg() {
+        if (Padeg.setDictionary(propertyProvider.getPathLibraryPadeg())) {
+            Padeg.updateExceptions();
+        } else
+            logger.error("Cannot load exceptions for padeg module");
     }
 
     @Override
@@ -93,9 +104,11 @@ public class PlannedVacationRemoveSender  extends  AbstractVacationSenderWithCop
     private String getBody(Vacation vacation) {
         StringBuilder stringBuilder = new StringBuilder();
 
+        String employeeNameStr = Padeg.getFIOPadegFS(vacation.getEmployee().getName(), true, PadegConstants.Roditelnyy);
+
         stringBuilder.append(String.format(
                 "Информируем Вас о удалении планируемого отпуска %s из г. %s на период %s - %s.",
-                vacation.getEmployee().getName(),
+                employeeNameStr,
                 vacation.getEmployee().getRegion().getName(),
                 DateFormatUtils.format(vacation.getBeginDate(), DATE_FORMAT),
                 DateFormatUtils.format(vacation.getEndDate(), DATE_FORMAT)
