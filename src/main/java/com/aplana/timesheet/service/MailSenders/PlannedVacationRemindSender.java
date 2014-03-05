@@ -63,7 +63,7 @@ public class PlannedVacationRemindSender extends AbstractVacationSenderWithCopyT
         String deleteDate = DateFormatUtils.format(c.getTime(), DATE_FORMAT);
 
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(String.format("Информируем Вас о том, что через %d дней у Вас запланирован отпуск ", deleteReminderThreshold));
+        stringBuilder.append(String.format("Информируем Вас о том, что через %d %s у Вас запланирован отпуск ", deleteReminderThreshold, getCaseDay(deleteReminderThreshold)));
         stringBuilder.append(String.format("на период %s - %s. ", beginDateStr, endDateStr));
         stringBuilder.append("Необходимо создать заявление об отпуске! ");
         stringBuilder.append("Если заявление об отпуске уже создано или Вы не хотите идти в отпуск, то просто удалите данный планируемый отпуск. ");
@@ -81,5 +81,36 @@ public class PlannedVacationRemindSender extends AbstractVacationSenderWithCopyT
         stringBuilder.append(DateFormatUtils.format(vacation.getEndDate(), DATE_FORMAT));
 
         return stringBuilder.toString();
+    }
+
+
+
+    private static final List<Integer> singList = Arrays.asList(1);
+    private static final List<Integer> plurList = Arrays.asList(0, 5, 6, 7, 8, 9);
+    private static final List<Integer> geniList = Arrays.asList(2, 3, 4);
+
+    // если на конце 1 - то "день", если на конце 0,5,6,7,8,9 =- то "дней", если на конце "2,3,4" - "дня"
+    private String getCaseDay(Integer dayNumber) {
+
+        if (dayNumber >= 10 && dayNumber <= 20) {
+            return "дней";
+        }
+
+        int end = dayNumber % 10;
+
+        if (singList.contains(end)) {
+            return "день";
+        }
+
+        if (plurList.contains(end)) {
+            return "дней";
+        }
+
+
+        if (geniList.contains(end)) {
+            return "дня";
+        }
+
+        return "день";
     }
 }

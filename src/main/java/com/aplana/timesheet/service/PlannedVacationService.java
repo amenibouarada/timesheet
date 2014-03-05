@@ -165,6 +165,7 @@ public class PlannedVacationService {
         dateBefore = calendar2.getTime();
     }
 
+    @Transactional
     public void remindDeletePlannedVacation() {
         // Напоминаем, что планируемый отпуск будет удален
         Integer remindPeriod = tsPropertyProvider.getPlannedVacationDeleteReminderThreshold();
