@@ -67,7 +67,7 @@ public class PlannedVacationRemindSender extends AbstractVacationSenderWithCopyT
         stringBuilder.append(String.format("на период %s - %s. ", beginDateStr, endDateStr));
         stringBuilder.append("Необходимо создать заявление об отпуске! ");
         stringBuilder.append("Если заявление об отпуске уже создано или Вы не хотите идти в отпуск, то просто удалите данный планируемый отпуск. ");
-        stringBuilder.append(String.format("В течение %d дней (%s) планируемый отпуск автоматически будет удален. ", deletePeriod, deleteDate));
+        stringBuilder.append(String.format("В течение %d %s (%s) планируемый отпуск автоматически будет удален. ", deletePeriod, getCaseDay(deletePeriod), deleteDate));
 
         return stringBuilder.toString();
     }
