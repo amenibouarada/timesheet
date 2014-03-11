@@ -121,7 +121,7 @@ public class PlannedVacationRemoveSender  extends  AbstractVacationSenderWithCop
         String employeeNameStr = Padeg.getFIOPadegFS(vacation.getEmployee().getName(), true, PadegConstants.Roditelnyy);
 
         return String.format(
-                "Планируемый отпуск %s %s - %s удален",
+                "Планируемый отпуск %s за период %s - %s удален",
                 employeeNameStr,
                 DateFormatUtils.format(vacation.getBeginDate(), DATE_FORMAT),
                 DateFormatUtils.format(vacation.getEndDate(), DATE_FORMAT)

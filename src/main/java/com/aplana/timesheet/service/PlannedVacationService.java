@@ -169,7 +169,8 @@ public class PlannedVacationService {
     public void remindDeletePlannedVacation() {
         // Напоминаем, что планируемый отпуск будет удален
         Integer remindPeriod = tsPropertyProvider.getPlannedVacationDeleteReminderThreshold();
-        List<Vacation> remindVacationList = getVacationListByCurrentDayPeriod(remindPeriod);
+        Date remindDate = getDateByCurrentDayPeriod(remindPeriod);
+        List<Vacation> remindVacationList = vacationDAO.getPlannedVacationByBeginDate(remindDate);
 
         for (Vacation vacation : remindVacationList) {
             sendMailService.performPlannedRemind(vacation);
@@ -177,7 +178,8 @@ public class PlannedVacationService {
 
         // Удаляем планируемые отпуска, о которых уже предупреждали
         Integer deletePeriod = tsPropertyProvider.getPlannedVacationDeleteThreshold();
-        List<Vacation> deleteVacationList = getVacationListByCurrentDayPeriod(deletePeriod);
+        Date deleteDate = getDateByCurrentDayPeriod(deletePeriod);
+        List<Vacation> deleteVacationList = vacationDAO.getPlannedVacationByBeginDateLess(deleteDate);
 
         for (Vacation vacation : deleteVacationList) {
             vacationDAO.delete(vacation);
@@ -185,7 +187,7 @@ public class PlannedVacationService {
         }
     }
 
-    private List<Vacation> getVacationListByCurrentDayPeriod(Integer period) {
+    private Date getDateByCurrentDayPeriod(Integer period) {
         Date currentDate = new Date();
         Calendar calendar = Calendar.getInstance();
         Date date;
@@ -199,8 +201,6 @@ public class PlannedVacationService {
         calendar.add(Calendar.DATE, period);
         date = calendar.getTime();
 
-        List<Vacation> vacationList = vacationDAO.getPlannedVacationByBeginDate(date);
-
-        return vacationList;
+        return date;
     }
 }
