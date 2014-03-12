@@ -93,6 +93,7 @@ public class VacationsApprovalControllerTest extends AbstractTest{
         vacation.setType(vacationType);
         vacation.setBeginDate(new Date());
         vacation.setEndDate(new Date());
+        vacation.setRemind(false);
 
         vacationApproval = new VacationApproval();
         vacationApproval.setManager(manager.getEmployee());

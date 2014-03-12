@@ -56,7 +56,7 @@ public class Vacation implements Comparable{
     @OrderBy("requestDate, responseDate ASC")
     private Set<VacationApproval> vacationApprovals;
 
-    @Column(name = "remind")
+    @Column(name = "remind", columnDefinition = "bool not null default false")
     private Boolean remind;
 
     public Integer getId() {

@@ -227,6 +227,7 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
         vacation.setType(dictionaryItemService.find(createVacationForm.getVacationType()));
         vacation.setAuthor(curEmployee);
         vacation.setEmployee(employee);
+        vacation.setRemind(false);
 
         vacation.setStatus(dictionaryItemService.find(
                 isApprovedVacation ? VacationStatusEnum.APPROVED.getId() : VacationStatusEnum.APPROVEMENT_WITH_PM.getId()

@@ -108,6 +108,7 @@ public class PlannedVacationServiceTest extends AbstractJsonTest{
         vacation.setType(dictionaryItemService.getItemsByDictionaryId(DictionaryEnum.VACATION_TYPE.getId()).get(0));
         vacation.setStatus(dictionaryItemService.find(VacationStatusEnum.APPROVEMENT_WITH_PM.getId()));
         vacation.setEmployee(employee);
+        vacation.setRemind(false);
 
         return vacation;
     }

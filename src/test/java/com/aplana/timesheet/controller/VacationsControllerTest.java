@@ -187,6 +187,7 @@ public class VacationsControllerTest extends AbstractTest {
         vacation = new Vacation();
         vacation.setId(1);
         vacation.setEmployee(employee);
+        vacation.setRemind(false);
         vacationList = new ArrayList<Vacation>();
         vacationList.add(vacation);
 
