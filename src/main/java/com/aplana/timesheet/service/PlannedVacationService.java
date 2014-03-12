@@ -170,9 +170,10 @@ public class PlannedVacationService {
         // Напоминаем, что планируемый отпуск будет удален
         Integer remindPeriod = tsPropertyProvider.getPlannedVacationDeleteReminderThreshold();
         Date remindDate = getDateByCurrentDayPeriod(remindPeriod);
-        List<Vacation> remindVacationList = vacationDAO.getPlannedVacationByBeginDate(remindDate);
+        List<Vacation> remindVacationList = vacationDAO.getPlannedVacationByBeginDate(remindDate, false);
 
         for (Vacation vacation : remindVacationList) {
+            vacation.setRemind(true);
             sendMailService.performPlannedRemind(vacation);
         }
 

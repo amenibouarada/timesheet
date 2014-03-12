@@ -289,11 +289,13 @@ public class VacationDAO {
         return query.getResultList();
     }
 
-    public List<Vacation> getPlannedVacationByBeginDate(Date date) {
-        Query query = entityManager.createQuery("select v from Vacation v where v.type.id=:type and v.beginDate = :date");
+    public List<Vacation> getPlannedVacationByBeginDate(Date date, Boolean remind) {
+        Query query = entityManager.createQuery(
+                "select v from Vacation v where v.type.id=:type and v.beginDate <= :date and v.remind = :remind");
 
         query.setParameter("type", VacationTypesEnum.PLANNED.getId());
         query.setParameter("date", date);
+        query.setParameter("remind", remind);
 
         return query.getResultList();
     }
