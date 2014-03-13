@@ -375,12 +375,15 @@ public abstract class AbstractVacationApprovalProcessService extends AbstractSer
      * добавляем емейлы для уведомлений линейному руководителю сотрудника и всем руководителям руководителя сотрудника вплоть до РЦК включительно
      */
     private void addLineManagers(List<String> emails, Vacation vacation) throws VacationApprovalServiceException {
-        Employee manager = vacation.getEmployee().getManager();
-        String email = manager.getEmail();
-        if (!emails.contains(email)) {
-            emails.add(email);
+        Employee employee = vacation.getEmployee();
+        if (managerExists(employee)) {
+            Employee employeeManager = employee.getManager();
+            String email = employeeManager.getEmail();
+            if (!emails.contains(email)) {
+                emails.add(email);
+            }
+            addLineManagerRecursive(employeeManager, emails);
         }
-        addLineManagerRecursive(manager, emails);
     }
 
     private void addLineManagerRecursive(Employee manager, List<String> emails) throws VacationApprovalServiceException {

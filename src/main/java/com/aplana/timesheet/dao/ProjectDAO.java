@@ -174,10 +174,12 @@ public class ProjectDAO {
     public List<Project> getEmployeeProjectPlanByDates(Employee employee, HashMap<Integer, Set<Integer>> dates) {
         List<Project> projects = new ArrayList<Project>();
         for (Integer year : dates.keySet()) {
-            Query query = entityManager.createQuery("select epp.project from EmployeeProjectPlan as epp where epp.employee = :employee and epp.year = :year and epp.month in :monthList")
+            Query query = entityManager.createQuery("select epp.project from EmployeeProjectPlan as epp " +
+                    "where epp.employee = :employee and epp.year = :year and epp.month in :monthList and epp.project.active = :active")
                     .setParameter("employee", employee)
                     .setParameter("year", year)
-                    .setParameter("monthList", dates.get(year));
+                    .setParameter("monthList", dates.get(year))
+                    .setParameter("active", true);
             projects.addAll(query.getResultList());
         }
 
@@ -186,8 +188,10 @@ public class ProjectDAO {
 
     public List<Project> getEmployeeProjectsFromTimeSheetByDates(Date beginDate, Date endDate, Employee employee) {
         Query query = entityManager.createQuery("select tsd.project from TimeSheetDetail as tsd " +
-                "where tsd.timeSheet.employee = :employee and (tsd.timeSheet.type = "+ TypesOfTimeSheetEnum.REPORT.getId()+") and tsd.timeSheet.calDate.calDate between :beginDate and :endDate")
+                "where tsd.timeSheet.employee = :employee and tsd.project.active = :active " +
+                "and (tsd.timeSheet.type = "+ TypesOfTimeSheetEnum.REPORT.getId()+") and tsd.timeSheet.calDate.calDate between :beginDate and :endDate")
                 .setParameter("employee", employee)
+                .setParameter("active", true)
                 .setParameter("beginDate", beginDate)
                 .setParameter("endDate", endDate);
 
