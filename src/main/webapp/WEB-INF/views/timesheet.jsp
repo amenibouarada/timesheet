@@ -21,6 +21,7 @@
     dojo.require("dijit.layout.TabContainer");
     dojo.require("dijit.layout.ContentPane");
     dojo.require("dojox.widget.Standby");
+    dojo.require("dojox.html.entities");
     dojo.require(CALENDAR_EXT_PATH);
     dojo.require("dijit.form.ValidationTextBox");
     dojo.require("dojo.parser");
@@ -51,6 +52,9 @@
     var root = getRootEventListener();
     var month = correctLength(new Date().getMonth() + 1);
     var standByElement;
+    var dojoxDecode = dojox.html.entities.decode;
+    var decodeMap = [["\u0027", "#39"], ["\u0028", "#40"], ["\u0029", "#41"]];
+
     dojo.declare("Calendar", com.aplana.dijit.ext.Calendar, {
         getEmployeeId: function () {
             return dojo.byId("employeeId").value;
@@ -135,10 +139,10 @@
         setDefaultDate(dojo.byId("employeeId").value);
         reloadTimeSheetState();
         recalculateDuration();
-        //refreshPlans(dijit.byId('calDate').value, dojo.byId('employeeId').value);
 
         // инициализация данных по выходным и отчетам для текущей даты
         initCurrentDateInfo('${timeSheetForm.employeeId}', dijit.byId('calDate').value, '/calendar/dates');
+        refreshPlans(dijit.byId('calDate').value, dojo.byId('employeeId').value);
         //крутилка создается при после загрузки страницы,
         //т.к. если она создается в месте использования - ghb show не отображается картинка
         standByElement = new dojox.widget.Standby({target: dojo.query("body")[0], zIndex: 1000});
@@ -177,14 +181,17 @@
                         dojo.byId("plan_textarea").innerHTML = "";
                     }
 
-                    if (data.next != null) {
-                        var next = data.next;
-                        var dateString = next.dateStr;
-                        dojo.byId("lbNextPlan").innerHTML = "Планы на следующий(" + timestampStrToDisplayStr(dateString.toString()) + ") рабочий день:";
-                        dojo.byId("plan").value = next.plan;
-                    }
-                    else {
-                        dojo.byId("lbNextPlan").innerHTML = "Планы на следующий рабочий день:";
+                    if (data.isDraft != "true" && !dataDraft) {
+                        if (data.next != null) {
+                            var next = data.next;
+                            var dateString = next.dateStr;
+                            dojo.byId("lbNextPlan").innerHTML = "Планы на следующий(" + timestampStrToDisplayStr(dateString.toString()) + ") рабочий день:";
+                            dojo.byId("plan").innerHTML = next.plan;
+                        }
+                        else {
+                            dojo.byId("lbNextPlan").innerHTML = "Планы на следующий рабочий день:";
+                            dojo.byId("plan").innerHTML = "";
+                        }
                     }
 
                     if (data.isDraft != null || dataDraft) {
@@ -339,12 +346,12 @@ function loadDraftRow(i, data) {
     recalculateDuration();
 
     dojo.attr("description_id_" + i, {
-        value: data[i].description_id
+        value: dojoxDecode(dojoxDecode(data[i].description_id), decodeMap)
     });
     textareaAutoGrow(dojo.byId("description_id_" + i));
 
     dojo.attr("problem_id_" + i, {
-        value: data[i].problem_id
+        value: dojoxDecode(dojoxDecode(data[i].problem_id), decodeMap)
     });
     textareaAutoGrow(dojo.byId("problem_id_" + i));
 
