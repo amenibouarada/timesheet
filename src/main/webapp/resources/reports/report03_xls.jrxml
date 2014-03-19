@@ -258,13 +258,13 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$F{taskname}]]></textFieldExpression>
 			</textField>
-			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+			<textField pattern="dd.MM.yyyy" isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement uuid="23595751-5abf-416d-a0b5-def71dcca5eb" style="ColoredDetail" stretchType="RelativeToTallestObject" x="594" y="0" width="55" height="15"/>
 				<textElement>
 					<font fontName="SansSerif" size="8" isUnderline="false" isStrikeThrough="false"/>
 					<paragraph lineSpacing="Double"/>
 				</textElement>
-				<textFieldExpression><![CDATA[new SimpleDateFormat("dd-MM-yyyy").format($F{caldate})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{caldate}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement uuid="81480d13-2ff2-4f34-b22a-d352ca0986c8" style="ColoredDetail" stretchType="RelativeToTallestObject" x="649" y="0" width="62" height="15"/>

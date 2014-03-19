@@ -167,12 +167,12 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
 			</textField>
-			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+			<textField pattern="dd.MM.yyyy" isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement uuid="f5db1bc2-869e-4be7-85dc-50a61e39428b" style="Detail" stretchType="RelativeToTallestObject" x="0" y="0" width="60" height="13" forecolor="#000000" backcolor="#CCCCCC"/>
 				<textElement>
 					<paragraph lineSpacing="Double"/>
 				</textElement>
-				<textFieldExpression><![CDATA[new SimpleDateFormat("dd-MM-yyyy").format($F{calDate})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{calDate}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement uuid="98d30f12-e0a2-4532-90e4-7fa7178d9eeb" style="Detail" stretchType="RelativeToTallestObject" x="345" y="0" width="67" height="13"/>

@@ -84,7 +84,7 @@
 		<groupExpression><![CDATA[$V{kindOfDay}]]></groupExpression>
 	</group>
 	<group name="GroupByDate">
-		<groupExpression><![CDATA[new SimpleDateFormat("dd-MM-yyyy").format($F{caldate})]]></groupExpression>
+		<groupExpression><![CDATA[$F{caldate}]]></groupExpression>
 	</group>
 	<group name="GroupByRole">
 		<groupExpression><![CDATA[$F{project_role}]]></groupExpression>
@@ -180,9 +180,9 @@
 				<reportElement uuid="b1f611cf-8131-4840-8eb7-a6f13faf1aba" style="Detail" stretchType="RelativeToTallestObject" x="0" y="0" width="106" height="15"/>
 				<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
 			</textField>
-			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+			<textField pattern="dd.MM.yyyy" isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement uuid="e858fcad-559b-46be-9ddd-8b613567f4fb" style="Detail" stretchType="RelativeToTallestObject" x="106" y="0" width="66" height="15"/>
-				<textFieldExpression><![CDATA[new SimpleDateFormat("dd-MM-yyyy").format($F{caldate})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{caldate}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement uuid="5971c534-816b-4fff-b8c0-a8e7032f9965" style="Detail" stretchType="RelativeToTallestObject" x="172" y="0" width="90" height="15"/>
@@ -223,9 +223,9 @@
 				<reportElement uuid="3c0aefb9-174b-4fda-9595-fc361254eed8" style="Detail" stretchType="RelativeToTallestObject" x="0" y="0" width="106" height="15"/>
 				<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
 			</textField>
-			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+			<textField pattern="dd.MM.yyyy" isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement uuid="720e46af-f353-46d6-9aa1-c5a38337623c" style="Detail" stretchType="RelativeToTallestObject" x="106" y="0" width="66" height="15"/>
-				<textFieldExpression><![CDATA[new SimpleDateFormat("dd-MM-yyyy").format($F{caldate})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{caldate}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement uuid="5971c534-816b-4fff-b8c0-a8e7032f9965" style="Detail" stretchType="RelativeToTallestObject" x="172" y="0" width="90" height="15"/>
