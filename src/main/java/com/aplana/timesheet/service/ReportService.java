@@ -22,7 +22,7 @@ public class ReportService {
 
     private static final String JIRA_URL = "http://jira.aplana.com/browse/";
     private static final Pattern PATTERN_TASK = Pattern.compile("\\b[a-zA-ZА-Яа-я0-9-/?=]+\\b");
-    private static final Pattern PATTERN_APLANA_URL = Pattern.compile("(https?://)?([a-zA-ZА-Яа-я0-9-]+).aplana.com((/browse/(\\w+-\\d+))|([0-9a-zA-ZА-Яа-я-./!?=$&_%]+))?");
+    private static final Pattern PATTERN_APLANA_URL = Pattern.compile("\\b(https?://)?(([-.a-zA-ZА-Яа-я0-9]+)\\.aplana\\.com((/browse/(\\w+-\\d+))|([0-9a-zA-ZА-Яа-я-./!?=$&_%]+))?)\\b");
 
     @Autowired
     public ProjectDAO projectDAO;
@@ -123,29 +123,29 @@ public class ReportService {
         // Важен порядок
         Map<Pair<Integer, Integer>, String> replaceMap = new LinkedHashMap<Pair<Integer, Integer>, String>();
 
-        while(matcher.find()){
-            // строка "бла бла http://jira.aplana.com/browse/SBRFNK-1584 бла бла"
-            String url = matcher.group(0);      // "http://jira.aplana.com/browse/SBRFNK-1584"
-            matcher.group(1);                   // "http://"
-            String uri = matcher.group(2);      // "jira"
-            matcher.group(3);                   // "/browse/SBRFNK-1584"
-            matcher.group(4);                   // "/browse/SBRFNK-1584"
-            String task = matcher.group(5);     // "ITIASMK-398"
-            matcher.group(6);                   // null
+        while(matcher.find()) {
+            String url = matcher.group(2);
+            String subdomain = matcher.group(3);
+            String task = matcher.group(6);
 
             Integer indexStart = matcher.start();
             Integer indexEnd = matcher.end();
 
             StringBuffer word = new StringBuffer(128);
-            if (task != null){
+            if (task != null) {
                 // Для джиры
                 word.append(task);
-            } else {
-                // Для конфлуенса или других внутренних ресурсов
-                word.append("<a href='");
+            } else if (subdomain.toUpperCase().contains("WWW")){
+                word.append("<a href='http://");
                 word.append(url);
                 word.append("'>");
-                word.append(uri.toUpperCase());
+                word.append(url);
+                word.append("</a>");
+            } else {
+                word.append("<a href='http://");
+                word.append(url);
+                word.append("'>");
+                word.append(subdomain.toUpperCase());
                 word.append("</a>");
             }
 
