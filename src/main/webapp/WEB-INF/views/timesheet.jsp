@@ -334,10 +334,12 @@ function loadDraftRow(i, data) {
     dojo.attr("activity_category_id_" + i, {
         value: data[i].activity_category_id
     });
+    setActDescription(i);
 
     dojo.attr("projectTask_id_" + i, {
         value: data[i].projectTask_id
     });
+    setTaskDescription(i);
 
     dojo.attr("duration_id_" + i, {
         value: data[i].duration_id
