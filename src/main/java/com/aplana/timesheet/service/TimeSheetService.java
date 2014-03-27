@@ -299,6 +299,92 @@ public class TimeSheetService {
         return builder;
     }
 
+    /**
+     * Формирует JSON, содержащий дату и план предыдущего рабочего дня, а также таблицу работ
+     * и план для текущего дня.
+     *
+     * @param date
+     * @param employeeId
+     * @return jsonString
+     */
+    @Transactional(readOnly = true)
+    public JsonObjectNodeBuilder getDailyTimesheetJsonBuilder(String date, Integer employeeId) {
+        final JsonObjectNodeBuilder builder = anObjectBuilder();
+
+        builder.withField("previousDayData", getDailyTimesheetPreviousDayJsonBuilder(date, employeeId));
+        builder.withField("currentDayData", getDailyTimesheetCurrentDayJsonBuilder(date, employeeId));
+
+        return builder;
+    }
+
+    /**
+     * Формирует JSON, содержащий дату и план работ предыдущего рабочего дня.
+     *
+     * @param date
+     * @param employeeId
+     * @return jsonString
+     */
+    public JsonObjectNodeBuilder getDailyTimesheetPreviousDayJsonBuilder(String date, Integer employeeId) {
+        final JsonObjectNodeBuilder builder = anObjectBuilder();
+
+        final TimeSheet lastTimeSheet = timeSheetDAO.findLastTimeSheetBefore(calendarService.find(date), employeeId);
+        if (lastTimeSheet != null) {
+            builder.withField("plan", aStringBuilder(getPlan(lastTimeSheet)));
+            builder.withField("workDate", aStringBuilder(DateTimeUtil.formatDate(lastTimeSheet.getCalDate().getCalDate())));
+        }
+
+        return builder;
+    }
+
+    /**
+     * Формирует JSON, содержащий факт утверждённого списания, нагрузку, таблицу работ и план для текущего дня.
+     *
+     * @param date
+     * @param employeeId
+     * @return jsonString
+     */
+    public JsonObjectNodeBuilder getDailyTimesheetCurrentDayJsonBuilder(String date, Integer employeeId) {
+        final JsonObjectNodeBuilder builder = anObjectBuilder();
+
+        final TimeSheet currentTimeSheet = timeSheetDAO.findForDateAndEmployeeByTypes(calendarService.find(date), employeeId, Arrays.asList(TypesOfTimeSheetEnum.REPORT, TypesOfTimeSheetEnum.DRAFT));
+        final Calendar nextWorkDateCalendar = calendarService.getNextWorkDay(calendarService.find(date), employeeService.find(employeeId).getRegion());
+        builder.withField("nextWorkDate", aStringBuilder(DateTimeUtil.formatDate(nextWorkDateCalendar.getCalDate())));
+
+        if (currentTimeSheet != null) {
+            builder.withField("plan", aStringBuilder(getPlan(currentTimeSheet)));
+            builder.withField("effort", aStringBuilder(currentTimeSheet.getEffortInNextDay().getId().toString()));
+            builder.withField("isFinal", (currentTimeSheet.getType().getId() == TypesOfTimeSheetEnum.REPORT.getId()) ? aTrueBuilder() : aFalseBuilder());
+
+            Set<TimeSheetDetail> timeSheetDetailSet = currentTimeSheet.getTimeSheetDetails();
+            builder.withField("rows", aStringBuilder(String.valueOf(timeSheetDetailSet.size())));
+
+            int i = 0;
+            JsonArrayNodeBuilder detailsBuilder = anArrayBuilder();
+            if (timeSheetDetailSet != null && timeSheetDetailSet.size() != 0) {
+                for (TimeSheetDetail timeSheetDetail : timeSheetDetailSet) {
+                    detailsBuilder.withElement(
+                            anObjectBuilder().
+                                    withField("row", JsonUtil.aStringBuilder(i++)).
+                                    withField("activity_type_id", aStringBuilder(timeSheetDetail.getActType() != null ? timeSheetDetail.getActType().getId().toString() : "0")).
+                                    withField("workplace_id", aStringBuilder(timeSheetDetail.getWorkplace() != null ? timeSheetDetail.getWorkplace().getId().toString() : "0")).
+                                    withField("project_id", aStringBuilder(timeSheetDetail.getProject() != null ? timeSheetDetail.getProject().getId().toString() : "0")).
+                                    withField("project_role_id", aStringBuilder(timeSheetDetail.getProjectRole() != null ? timeSheetDetail.getProjectRole().getId().toString() : "0")).
+                                    withField("activity_category_id", aStringBuilder(timeSheetDetail.getActCat() != null ? timeSheetDetail.getActCat().getId().toString() : "0")).
+                                    withField("projectTask_id", aStringBuilder(timeSheetDetail.getProjectTask() != null ? timeSheetDetail.getProjectTask().getId().toString() : "0")).
+                                    withField("duration_id", aStringBuilder(timeSheetDetail.getDuration() != null ? timeSheetDetail.getDuration().toString() : "")).
+                                    withField("description_id", aStringBuilder(timeSheetDetail.getDescription() != null ? timeSheetDetail.getDescription() : "")).
+                                    withField("problem_id", aStringBuilder(timeSheetDetail.getProblem() != null ? timeSheetDetail.getProblem() : ""))
+                    );
+                }
+            }
+            builder.withField("data", detailsBuilder);
+        } else {
+            builder.withField("isFinal", aFalseBuilder());
+        }
+
+        return builder;
+    }
+
     private JsonObjectNodeBuilder getPlanBuilder(TimeSheet timeSheet, Boolean nextOrPrev) {
         return anObjectBuilder().
                 withField("dateStr", aStringBuilder(DateTimeUtil.formatDate(timeSheet.getCalDate().getCalDate()))).

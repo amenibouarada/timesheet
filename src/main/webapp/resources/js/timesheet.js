@@ -59,6 +59,7 @@ function addNewRow() {
     dojo.addClass(img, "pointer");
     dojo.attr(img, {
         id:"delete_button_" + newRowIndex,
+        class: "controlToHide",
         src:"resources/img/delete.png",
         alt:"Удалить",
         title:"Удалить",
@@ -209,6 +210,7 @@ function addNewRow() {
     dojo.addClass(jiraImg, "pointer");
     dojo.attr(jiraImg, {
         id:"jira_button_" + newRowIndex,
+        class:"controlToHide",
         src:"resources/img/logo-jira.png",
         alt:"Запрос из JIRA",
         title:"Запрос из JIRA",
@@ -393,6 +395,11 @@ function setDefaultDate(employeeId) {
     date_picker.set("displayedValue", employee.dateByDefault);
 }
 
+function setTimesheetDate(date) {
+    var datePicker = dijit.byId("calDate");
+    datePicker.set("displayedValue", date);
+}
+
 // возвращает первый рабочий день сотрудника
 function getFirstWorkDate(){
     var employeeId = dojo.byId("employeeId").value;
@@ -439,7 +446,7 @@ function onCalDateChange(calDateObj){
         calDateObj.constraints.max = new Date(2100, 1, 1);
     }
     validateReportDate(calDateObj.value);
-    refreshPlans(calDateObj.value, dojo.byId('employeeId').value);
+    requestAndRefreshDailyTimesheetData(calDateObj.value, dojo.byId('employeeId').value);
 }
 
 function onEmployeeChange(employeeObj){
@@ -476,7 +483,7 @@ function existsCookie(CookieName) {
 }
 
 /* Выдает значение куки с данным именем */
-function CookieValue(CookieName) {
+function cookieValue(CookieName) {
     var razrez = document.cookie.split(CookieName + '=');
     if (razrez.length > 1) { // Значит, куки с этим именем существует
         var hvost = razrez[1],
@@ -639,7 +646,7 @@ function typeActivityChange(obj) {
         var workplaceSelect = dojo.byId("workplace_id_" + rowIndex);
         if (!workplaceSelect.value || workplaceSelect.value == "" || workplaceSelect.value == "0") {
             if (existsCookie('aplanaWorkPlace')) {
-                workplaceSelect.value = CookieValue('aplanaWorkPlace');
+                workplaceSelect.value = cookieValue('aplanaWorkPlace');
             }
         }
     }
@@ -691,7 +698,7 @@ function fillProjectList(rowIndex, projectState) {
             }
         }
         if (existsCookie('aplanaProject')) {
-            projectSelect.value = CookieValue('aplanaProject');
+            projectSelect.value = cookieValue('aplanaProject');
             projectChange(projectSelect);
         }
     } else {
@@ -1083,11 +1090,8 @@ function recalculateDuration() {
 
 /* Добавляет в табличную часть отчёта указанное количество новых строк. */
 function addNewRows(rowsCount) {
-    var rows = dojo.query(".row_number");
-    if (rows.length == 0) {
-        for (var i = 0; i < rowsCount; i++) {
-            addNewRow();
-        }
+    for (var i = 0; i < rowsCount; i++) {
+        addNewRow();
     }
 }
 

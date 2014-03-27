@@ -21,6 +21,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
@@ -226,6 +227,21 @@ public class TimeSheetController {
         JsonObjectNodeBuilder jsonObjectNodeBuilder = timeSheetService.getPlansJsonBuilder(date, employeeId);
         TimeSheet timeSheet = timeSheetService.findForDateAndEmployeeByTypes(date, employeeId, Arrays.asList(TypesOfTimeSheetEnum.DRAFT));
         jsonObjectNodeBuilder.withField("isDraft", aStringBuilder(timeSheet != null && timeSheet.getId() != null ? "true" : "false"));
+        return JsonUtil.format(jsonObjectNodeBuilder);
+    }
+
+    /**
+     * Возвращает планы и дату предыдущего дня, данные таблицы списания, план и нагрузку текущего дня.
+     * @param date       (2012-11-25)
+     * @param employeeId (573)
+     * @return Json String
+     */
+    @RequestMapping(value = "/timesheet/dailyTimesheetData", headers = "Accept=application/json;Charset=UTF-8")
+    @ResponseBody
+    public String getDailyTimesheet(@RequestParam("date") String date,
+                                    @RequestParam("employeeId") Integer employeeId) {
+        JsonObjectNodeBuilder jsonObjectNodeBuilder = timeSheetService.getDailyTimesheetJsonBuilder(date, employeeId);
+
         return JsonUtil.format(jsonObjectNodeBuilder);
     }
 

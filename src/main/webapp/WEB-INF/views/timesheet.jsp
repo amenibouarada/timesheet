@@ -69,7 +69,7 @@
                     return 'classDateRedText';
                     break;
                 case "3":
-                    return 'classDateBrown';
+                    return 'classDateBrownBack';
                     break;
                 case "0":   //день без отчета
                     if (date <= getFirstWorkDate()) // день раньше начала работы
@@ -109,40 +109,18 @@
 
         timeSheetForm.employeeId.value = ${timeSheetForm.employeeId};
 
-        /* После реализации LDAP аутентификации в этом нет необходимости
-         if (existsCookie('aplanaDivision')) {
-         timeSheetForm.divisionId.value = CookieValue('aplanaDivision');
-         if (existsCookie('aplanaEmployee')) {
-         divisionChange(timeSheetForm.divisionId);
-         timeSheetForm.employeeId.value = CookieValue('aplanaEmployee');
-         dojo.removeAttr("view_reports_button", "disabled");
-         }
-         } */
-
         /*смотрим, поддерживаются ли куки и рисуем индикатор*/
         showCookieIndicator();
-        /*смотрим, сколько строк отправляли в предыдущем отчете
-         и задаем в новом отчете столько же*/
-        if (existsCookie('aplanaRowsCount')) {
-            if (CookieValue('aplanaRowsCount') > 0) {
-                /* нафига это тут так было написано --- неизвестно
-                 addNewRows(CookieValue('aplanaRowsCount') > 1 ? CookieValue('aplanaRowsCount') : 2);
-                 */
-                // Fix APLANATS-346
-                addNewRows(CookieValue('aplanaRowsCount'));
-            } else {
-                addNewRows(2);
-            }
-        } else {
-            addNewRows(2);
-        }
-        setDefaultDate(dojo.byId("employeeId").value);
-        reloadTimeSheetState();
-        recalculateDuration();
 
-        // инициализация данных по выходным и отчетам для текущей даты
+        if (selectedCalDate != "") {
+            setTimesheetDate(selectedCalDate);
+        } else {
+            setDefaultDate(dojo.byId("employeeId").value);
+        }
         initCurrentDateInfo('${timeSheetForm.employeeId}', dijit.byId('calDate').value, '/calendar/dates');
-        refreshPlans(dijit.byId('calDate').value, dojo.byId('employeeId').value);
+
+        requestAndRefreshDailyTimesheetData(dijit.byId('calDate').value, dojo.byId('employeeId').value);
+
         //крутилка создается при после загрузки страницы,
         //т.к. если она создается в месте использования - ghb show не отображается картинка
         standByElement = new dojox.widget.Standby({target: dojo.query("body")[0], zIndex: 1000});
@@ -206,6 +184,119 @@
                 if (err && ioArgs && ioArgs.args && ioArgs.args.content) {
                     dojo.byId("lbPrevPlan").innerHTML = "Ничего не запланировано.";
                     dojo.byId("plan_textarea").innerHTML = "";
+                }
+            }
+        });
+    }
+
+    /**
+     * Устанавливает видимость и активность для элементов управления, отвечающих за редактирование отчета.
+     * @param isFinal [true/false] Показатель, является ли отчёт уже отправленным.
+     */
+    function setElementsAvailability(isFinal) {
+        var controlsToHide = dojo.query(".controlToHide");
+        var controlsToHideCount = controlsToHide.length;
+
+        for (var i = 0; i < controlsToHideCount; i++) {
+            controlsToHide[i].style.visibility = (isFinal) ? "collapse" : "visible";
+        }
+
+        var controlsToDisable = dojo.query(".controlToDisable");
+        var controlsToDisableCount = controlsToDisable.length;
+
+        for (var i = 0; i < controlsToDisableCount; i++) {
+            controlsToDisable[i].disabled = isFinal;
+        }
+    }
+
+    /**
+    * Запрашивает данные timesheet и обновляет элементы страницы (план с прошлого дня, строки таблицы списания,
+    * план на следующий день) в соответствии с полученными данными.
+    * @param date Дата, для которой осуществляется запрос.
+    * @param employeeId Идентификатор сотрудника.
+    */
+    function requestAndRefreshDailyTimesheetData(date, employeeId) {
+        var month = correctLength(date.getMonth() + 1);
+        var year = date.getFullYear();
+        var day = correctLength(date.getDate());
+        var requestDate = year + "-" + month + "-" + day;
+
+        dojo.xhrGet({
+            url: "${pageContext.request.contextPath}" + "/timesheet/dailyTimesheetData",
+            handleAs: "json",
+            timeout: 10000,
+            content: {date: requestDate, employeeId: employeeId},
+            load: function (data, ioArgs) {
+                if (data && ioArgs && ioArgs.args && ioArgs.args.content) {
+                    var previous = data.previousDayData;
+                    var current  = data.currentDayData;
+
+                    // Чистка таблицы занятости.
+
+                    var timesheetRows = dojo.query(".time_sheet_row");
+                    var timesheetRowsCount = timesheetRows.length;
+                    for (var i = 0; i < timesheetRowsCount; i++) {
+                        timesheetRows[i].parentNode.removeChild(timesheetRows[i]);
+                    }
+
+                    // Заполнение поля планов, указанных в предыдущий рабочий день.
+
+                    var previousWorkDate = previous.workDate;
+                    var previousPlan = previous.plan;
+
+                    dojo.byId("lbPrevPlan").innerHTML = (previousWorkDate != null) ?
+                            "Планы предыдущего рабочего дня (" + timestampStrToDisplayStr(previousWorkDate.toString()) + "):" :
+                            "Планы предыдущего рабочего дня:";
+
+                    dojo.byId("plan_textarea").innerHTML = (previousPlan != null && previousPlan.length != 0) ?
+                            previousPlan.replace(/\n/g, '<br>') :
+                            "План предыдущего рабочего дня не был определен";
+
+                    // Заполнение строк таблицы занятости и планов работы на будущее.
+
+                    var currentTableData = current.data;
+                    var currentPlan = current.plan;
+                    var nextWorkDate = current.nextWorkDate;
+                    var nextDayEffort = current.effort;
+                    var isFinal = current.isFinal;
+
+                    if (currentTableData != null) {
+                        for (var j = 0; j < currentTableData.length; j++) {
+                            addNewRow();
+                            loadTableRow(j, currentTableData, isFinal);
+                        }
+                    } else if (existsCookie("aplanaRowsCount")) {
+                        var cookieRowsCount = cookieValue("aplanaRowsCount");
+                        addNewRows((cookieRowsCount > 0) ? cookieRowsCount : 1);
+                    } else {
+                        addNewRow();
+                    }
+
+                    recalculateDuration();
+
+                    dojo.byId("lbNextPlan").innerHTML = (nextWorkDate != null) ?
+                            "Планы на следующий рабочий день (" + timestampStrToDisplayStr(nextWorkDate.toString()) + "):" :
+                            "Планы на следующий рабочий день:";
+
+                    if (nextDayEffort != null) {
+                        dojo.byId("effortInNextDay").value = nextDayEffort;
+                    }
+
+                    dojo.byId('plan').innerHTML = (currentPlan != null && currentPlan.length != 0) ? currentPlan : "";
+
+                    dojo.attr("effortInNextDay", {
+                        disabled: isFinal
+                    });
+                    dojo.attr("plan", {
+                        readonly: isFinal
+                    });
+
+                    setElementsAvailability(isFinal);
+                }
+            },
+            error: function (err, ioArgs) {
+                if (err && ioArgs && ioArgs.args && ioArgs.args.content) {
+                    console.log(err);
                 }
             }
         });
@@ -308,55 +399,63 @@ function requiredCommentSet() {
     }
 }
 
-function loadDraftRow(i, data) {
+function loadTableRow(i, data, isFinal) {
 //            var actTypeSelect = dojo.byId("activity_type_id_" + i);
     //устанавливаем аттрибут
     dojo.attr("activity_type_id_" + i, {
-        value: data[i].activity_type_id
+        value: data[i].activity_type_id,
+        disabled: isFinal
     });
     //вызываем метод
     typeActivityChange(dojo.byId("activity_type_id_" + i));
 
     dojo.attr("workplace_id_" + i, {
-        value: data[i].workplace_id
+        value: data[i].workplace_id,
+        disabled: isFinal
     });
 
     dojo.attr("project_id_" + i, {
-        value: data[i].project_id
+        value: data[i].project_id,
+        disabled: isFinal
     });
     projectChange(dojo.byId("project_id_" + i))
 
     dojo.attr("project_role_id_" + i, {
-        value: data[i].project_role_id
+        value: data[i].project_role_id,
+        disabled: isFinal
     });
     projectRoleChange(dojo.byId("project_role_id_" + i));
 
     dojo.attr("activity_category_id_" + i, {
-        value: data[i].activity_category_id
+        value: data[i].activity_category_id,
+        disabled: isFinal
     });
     setActDescription(i);
 
     dojo.attr("projectTask_id_" + i, {
-        value: data[i].projectTask_id
+        value: data[i].projectTask_id,
+        disabled: isFinal
     });
     setTaskDescription(i);
 
     dojo.attr("duration_id_" + i, {
-        value: data[i].duration_id
+        value: data[i].duration_id,
+        readonly: isFinal
     });
     checkDuration(dojo.byId("duration_id_" + i));
     recalculateDuration();
 
     dojo.attr("description_id_" + i, {
-        value: dojoxDecode(dojoxDecode(data[i].description_id), decodeMap)
+        value: dojoxDecode(dojoxDecode(data[i].description_id), decodeMap),
+        readonly: isFinal
     });
     textareaAutoGrow(dojo.byId("description_id_" + i));
 
     dojo.attr("problem_id_" + i, {
-        value: dojoxDecode(dojoxDecode(data[i].problem_id), decodeMap)
+        value: dojoxDecode(dojoxDecode(data[i].problem_id), decodeMap),
+        readonly: isFinal
     });
     textareaAutoGrow(dojo.byId("problem_id_" + i));
-
 }
 
 /**
@@ -386,7 +485,7 @@ function loadDraft() {
                 }
                 for (var i = 0; i < data.data.length; i++) {
                     addNewRow();
-                    loadDraftRow(i, data.data);
+                    loadTableRow(i, data.data);
                 }
                 dojo.byId('plan').innerHTML = data.plan;
                 hideShowElement("load_draft", true);
@@ -413,6 +512,10 @@ function loadDraft() {
 
     .classDateRedBack {
         background-color: #f58383 !important;
+    }
+
+    .classDateBrownBack {
+        background-color: #ddb491 !important;
     }
 
     .time_sheet_row select {
@@ -498,14 +601,14 @@ function loadDraft() {
         Имеется черновик не отправленного отчета!
     </div>
     <div id="plan_textarea"
-         style="margin: 2px 0px; padding:2px;border: solid 1px silver;float:left;clear: left;width: 450px;"></div>
+         style="margin: 2px 0px; padding:2px;border: solid 1px silver;float:left;clear: left;width: 450px;"><br/></div>
     <div style="float:left;text-align: right;width: 425px;">
         <button id="load_draft" type="button" style="width:200px;display: none;" onclick="loadDraft()">
             Загрузить черновик
         </button>
     </div>
     <div style="clear: left;">
-        <button id="add_in_comments" type="button" style="width:300px" onclick="CopyPlan()">
+        <button id="add_in_comments" class="controlToDisable" type="button" style="width:300px" onclick="CopyPlan()">
             Скопировать в первый комментарий
         </button>
     </div>
@@ -539,7 +642,7 @@ function loadDraft() {
         <tr id="time_sheet_header">
             <th style="min-width: 30px">
                 <a onclick="addNewRow()">
-                    <img style="cursor: pointer;" src="<c:url value="/resources/img/add.gif"/>" width="15px"
+                    <img class="controlToHide" style="cursor: pointer;" src="<c:url value="/resources/img/add.gif"/>" width="15px"
                          title="Добавить строку"/>
                 </a>
             </th>
@@ -556,14 +659,15 @@ function loadDraft() {
             <th style="min-width: 200px">Проблемы</th>
         </tr>
 
-        <c:if test="${fn:length(timeSheetForm.timeSheetTablePart) > 0}">
+
+        <%--<c:if test="${fn:length(timeSheetForm.timeSheetTablePart) > 0}">
             <c:forEach items="${timeSheetForm.timeSheetTablePart}" varStatus="row">
                 <tr class="time_sheet_row" id="ts_row_${row.index}">
 
-                        <%--чекбоксики для кнопки удаления выбранных строк--%>
-                        <%--<td class="text_center_align"><input class="selectedRow" type="checkbox"--%>
-                        <%--name="selectedRow[${row.index}]"--%>
-                        <%--id="selected_row_id_${row.index}"/></td>--%>
+                        &lt;%&ndash;чекбоксики для кнопки удаления выбранных строк&ndash;%&gt;
+                        &lt;%&ndash;<td class="text_center_align"><input class="selectedRow" type="checkbox"&ndash;%&gt;
+                        &lt;%&ndash;name="selectedRow[${row.index}]"&ndash;%&gt;
+                        &lt;%&ndash;id="selected_row_id_${row.index}"/></td>&ndash;%&gt;
 
                     <td class="text_center_align" id="delete_button_id_${row.index}">
 
@@ -646,7 +750,8 @@ function loadDraft() {
                                                          onkeyup="somethingChanged();"/></td>
                 </tr>
             </c:forEach>
-        </c:if>
+        </c:if>--%>
+
 
         <tr style="height : 20px;" id="total_duration_row">
             <td colspan="7"/>
@@ -676,18 +781,17 @@ function loadDraft() {
     <table>
         <tr>
             <td class="no_border">
-                <button id="save_for_revision" style="margin-left:5px;width:210px" onclick="submitform('send_draft')"
+                <button id="save_for_revision" class="controlToDisable" style="margin-left:5px;width:210px" onclick="submitform('send_draft')"
                         type="button">
                     Сохранить для доработки
                 </button>
-                <button id="submit_button" style="width:210px" onclick="checkDurationThenSendForm()" type="button">
+                <button id="submit_button" class="controlToDisable" style="width:210px" onclick="checkDurationThenSendForm()" type="button">
                     Отправить отчёт
                 </button>
-
             </td>
             <td class="no_border" width="220px">
-                <button id="new_report_button" style="width:210px; display:none;" type="button"
-                        onclick="submitform('newReport')">Очистить все поля
+                <button id="new_report_button" style="width:210px; display:none;" type="button" onclick="submitform('newReport')">
+                    Очистить все поля
                 </button>
             </td>
         </tr>
