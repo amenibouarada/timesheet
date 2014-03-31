@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.annotation.Transactional;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.NodeList;
@@ -112,34 +113,25 @@ public class OQProjectSyncService extends AbstractServiceWithTransactionManageme
      *     </workgroup>
      * </project>
     */
+    @Transactional
     public void sync() {
-        final TransactionStatus transactionStatus = getNewTransaction();
+        trace.setLength(0);
         try {
-            trace.setLength(0);
-            try {
-                trace.append("Начало синхронизации\n");
-                projectDAO.setTrace(trace);
-                // получим список веток project из xml файла
-                NodeList nodes = getOQasNodeList();
-                trace.append("В файле синхронизации найдено: ").append(nodes.getLength()).append(" проектов\n");
+            trace.append("Начало синхронизации\n");
+            projectDAO.setTrace(trace);
+            // получим список веток project из xml файла
+            NodeList nodes = getOQasNodeList();
+            trace.append("В файле синхронизации найдено: ").append(nodes.getLength()).append(" проектов\n");
 
-                final DictionaryItem projectState = getDictionaryItem(TypesOfActivityEnum.PROJECT);
+            final DictionaryItem projectState = getDictionaryItem(TypesOfActivityEnum.PROJECT);
 
-                for (int i = 0; i < nodes.getLength(); i++) {
-                    createOrUpdateProject(nodes.item(i).getAttributes(), projectDAO, projectState);
-                }
-                trace.append("Синхронизация завершена\n");
-            } catch (Exception e) {
-                logger.error("oq project sync error: ", e);
-                trace.append("Синхронизация прервана из-за ошибки: ").append(getRealLastCause(e).getMessage()).append("\n");
+            for (int i = 0; i < nodes.getLength(); i++) {
+                createOrUpdateProject(nodes.item(i).getAttributes(), projectDAO, projectState);
             }
-
-            commit(transactionStatus);
-
+            trace.append("Синхронизация завершена\n");
         } catch (Exception e) {
-            if (transactionStatus != null) {
-                rollback(transactionStatus);
-            }
+            logger.error("oq project sync error: ", e);
+            trace.append("Синхронизация прервана из-за ошибки: ").append(getRealLastCause(e).getMessage()).append("\n");
         }
     }
 
@@ -199,13 +191,13 @@ public class OQProjectSyncService extends AbstractServiceWithTransactionManageme
             project.setState(state);
             project.setFundingType(getDictionaryItem(ProjectFundingTypeEnum.getById(finsource)));
 
-            if (project.isActive()) {
-                if (!setPM(project, pmLdap)) {
-                    return; //если не указан РП или его нет в БД, то проект не сохраняем, переходим к следующему
-                }
-                setLinkProjectAndDivision(project, hcLdap, foundProject);  // установим подразделения, связанные с проектом
-                setProjectDivision(project, hcLdap, pmLdap);  // установим ответственное подразделение к проекту
+            if (!setPM(project, pmLdap)) {
+                rollback(transactionStatus);
+                return; //если не указан РП или его нет в БД, то проект не сохраняем, переходим к следующему
             }
+            setLinkProjectAndDivision(project, hcLdap, foundProject);  // установим подразделения, связанные с проектом
+            setProjectDivision(project, hcLdap, pmLdap);  // установим ответственное подразделение к проекту
+
 
             dao.store(project); // запишем в БД
 
