@@ -159,7 +159,7 @@ public class PlannedVacationService {
     private void setupDates(){
         final Calendar calendar2 = Calendar.getInstance();
         dateCurrent = calendar2.getTime();
-        calendar2.add(Calendar.WEEK_OF_YEAR, 3);
+        calendar2.add(Calendar.WEEK_OF_YEAR, 2);
         dateAfter = calendar2.getTime();
         calendar2.add(Calendar.WEEK_OF_YEAR, -4);
         dateBefore = calendar2.getTime();

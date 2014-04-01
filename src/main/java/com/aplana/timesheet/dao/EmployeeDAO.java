@@ -149,7 +149,7 @@ public class EmployeeDAO {
     public List<Employee> getEmployeeWithPlannedVacation (Date begin, Date end) {
         Query query = this.entityManager.createQuery(
                 "select emp from Employee as emp where emp.id in " +
-                        "(select v.employee.id from Vacation as v where v.beginDate > :begin and v.beginDate < :end)"
+                        "(select v.employee.id from Vacation as v where v.beginDate >= :begin and v.beginDate < :end)"
         ).setParameter("begin", begin)
          .setParameter("end", end);
 
