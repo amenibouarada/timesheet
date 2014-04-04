@@ -227,7 +227,7 @@ public class BusinessTripsAndIllnessController extends AbstractController{
         List<Division> divisionList = divisionService.getDivisions();
         final boolean allFlag = (employeeId == ALL_EMPLOYEES);
         if (allFlag) {
-            employeeList = employeeService.getEmployeeByRegionAndManagerAndDivision(regions, divisionId, manager);
+            employeeList = employeeService.getEmployeeByRegionAndManagerRecursiveAndDivision(regions, divisionId, manager);
         } else {
             employeeList.add(employeeService.find(employeeId));
         }

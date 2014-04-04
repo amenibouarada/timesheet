@@ -486,6 +486,10 @@ public class EmployeeService {
       return employeeDAO.getEmployeeByRegionAndManagerAndDivision(regions,divisionId, manager);
     }
 
+    public List<Employee> getEmployeeByRegionAndManagerRecursiveAndDivision(List<Integer> regions, Integer divisionId, Integer manager) {
+        return employeeDAO.getEmployeeByRegionAndManagerRecursiveAndDivision(regions,divisionId, manager);
+    }
+
     /**
      * Возвращает список сотрудников по центру, руководителю, списку должностей и списку регионов
      * @param division - идентификатора центра

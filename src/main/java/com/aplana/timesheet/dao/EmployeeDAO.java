@@ -344,6 +344,74 @@ public class EmployeeDAO {
         return query.getResultList();
     }
 
+    /**
+     * Возвращает всех подчинённых сотрудников, являющихся руководителями.
+     * @param employee Сотрудник, для которого необходимо получить всех подчинённых сотрудников-руководителей.
+     * @return Подчиненные сотрудники-руководители.
+     */
+    public List<Employee> getAllSubordinateManagers(Employee employee) {
+        final List<Employee> allManagers = entityManager.createQuery("select distinct e.manager from Employee e where e.manager.endDate is null").getResultList();
+        final Map<Employee, HashSet<Employee>> allManagersMap = new HashMap<Employee, HashSet<Employee>>();
+
+        // Построение карты вида Старший менеджер -> Младшие менеджеры
+        for (Employee subordinate : allManagers) {
+            if (!allManagersMap.containsKey(subordinate.getManager())) {
+                allManagersMap.put(subordinate.getManager(), new HashSet<Employee>());
+            }
+
+            allManagersMap.get(subordinate.getManager()).add(subordinate);
+        }
+
+        final HashSet<Employee> subordinates = new HashSet<Employee>();
+
+        getEmployeeSubordinateManagers(employee, subordinates, allManagersMap);
+
+        return new ArrayList<Employee>(subordinates);
+    }
+
+    /**
+     * Возвращает всех подчинённых сотрудников, являющихся руководителями.
+     * @param employees Сотрудники, для которых необходимо получить всех подчинённых сотрудников-руководителей.
+     * @return Подчиненные сотрудники-руководители.
+     */
+    public List<Employee> getAllSubordinateManagers(List<Employee> employees) {
+        final List<Employee> allManagers = entityManager.createQuery("select distinct e.manager from Employee e where e.manager.endDate is null").getResultList();
+        final Map<Employee, HashSet<Employee>> allManagersMap = new HashMap<Employee, HashSet<Employee>>();
+
+        // Построение карты вида Старший менеджер -> Младшие менеджеры
+        for (Employee subordinate : allManagers) {
+            if (!allManagersMap.containsKey(subordinate.getManager())) {
+                allManagersMap.put(subordinate.getManager(), new HashSet<Employee>());
+            }
+
+            allManagersMap.get(subordinate.getManager()).add(subordinate);
+        }
+
+        final HashSet<Employee> subordinates = new HashSet<Employee>();
+
+        for (Employee employee : employees) {
+            getEmployeeSubordinateManagers(employee, subordinates, allManagersMap);
+        }
+
+        return new ArrayList<Employee>(subordinates);
+    }
+
+    /**
+     * Возвращает всех подчинённых, являющихся сотрудниками-руководителями.
+     * @param employee Сотрудник, для которого возвращаются подчинённые сотрудники-руководители.
+     * @param subordinates Заполняемый перечень сотрудников.
+     * @param allManagersMap Карта вида "Старший менеджер -> Младшие менеджеры".
+     * @return Подчинённые сотрудники-руководители.
+     */
+    public void getEmployeeSubordinateManagers(Employee employee, final HashSet<Employee> subordinates, Map<Employee, HashSet<Employee>> allManagersMap) {
+        if (allManagersMap.containsKey(employee)) {
+            subordinates.addAll(allManagersMap.get(employee));
+            for (Employee subordinateEmployee : allManagersMap.get(employee)) {
+                getEmployeeSubordinateManagers(subordinateEmployee, subordinates, allManagersMap);
+            }
+        }
+    }
+
     public Employee tryGetEmployeeFromBusinessTrip(Integer reportId) {
         try {
             return (Employee) entityManager.createQuery("select bt.employee from BusinessTrip as bt " +
@@ -463,29 +531,30 @@ public class EmployeeDAO {
         boolean hasCondition = false;
 
         if (divisions != null){ // если не все подразделения, а несколько
-            queryString.append("AND (e.division IN :divisions)");
+            queryString.append("AND (e.division IN (:divisions))");
             parameters.put("divisions", divisions);
             hasCondition = true;
         }
         if (managers != null){
             if (hasCondition) queryString.append(" AND "); hasCondition = true;
-            queryString.append("(e.manager IN :managers OR e.manager2 IN :managers)");
+            queryString.append("(e.manager IN (:managers) OR e.manager2 IN (:managers))");
+            managers.addAll(getAllSubordinateManagers(managers));
             parameters.put("managers", managers);
         }
         if (regions != null){
             if (hasCondition) queryString.append(" AND "); hasCondition = true;
-            queryString.append("(e.region IN :regions)");
+            queryString.append("(e.region IN (:regions))");
             parameters.put("regions", regions);
         }
         if (projects != null){
             if (hasCondition) queryString.append(" AND ");
             queryString.append("((e.id IN (SELECT epp.employee FROM EmployeeProjectPlan epp WHERE " +
-                    "(epp.project IN :projects) AND " +
+                    "(epp.project IN (:projects)) AND " +
                     "(epp.month <= :endDateMonth AND epp.month >= :beginDateMonth AND" +
                     " epp.year <= :endDateYear AND epp.year >= :beginDateYear)))");
             if (lookPreviousTwoWeekTimesheet){
                 queryString.append(" OR (e.id IN (SELECT ts.employee FROM TimeSheet ts WHERE ts.id IN " +
-                        "(SELECT tsd.timeSheet FROM TimeSheetDetail tsd WHERE tsd.project IN :projects) AND " +
+                        "(SELECT tsd.timeSheet FROM TimeSheetDetail tsd WHERE tsd.project IN (:projects)) AND " +
                         "ts.calDate.calDate between :twoWeekEarlyDate AND :beginDate AND ts.type = "+TypesOfTimeSheetEnum.REPORT.getId()+"))");
                 parameters.put("twoWeekEarlyDate", twoWeekEarlyDate);
                 parameters.put("beginDate", beginDate);
@@ -570,6 +639,41 @@ public class EmployeeDAO {
         Query query = entityManager.createQuery(qlString);
         if ( manager != null && manager >= 0) {
             query.setParameter("managerId", manager);
+        }
+        if (regions != null && regions.size() > 0 && !regions.get(0).equals(-1)) {
+            query.setParameter("regionId", regions);
+        }
+        if ( divisionId != null && divisionId != 0 ) {
+            query.setParameter("divisionId", divisionId);
+
+        }
+        return query.getResultList();
+    }
+
+    /**
+     * Возвращает сотрудников по списку регионов, руководителю (включая всех нижестоящих руководителей) и центру.
+     * @param regions Список регионов
+     * @param divisionId Идентификатор центра
+     * @param manager Идентификатор руководителя
+     * @return Список сотрудников
+     */
+    public List<Employee> getEmployeeByRegionAndManagerRecursiveAndDivision(List<Integer> regions, Integer divisionId, Integer manager) {
+        String qlString = "select emp from Employee as emp where emp.endDate is null";
+        if (manager != null && manager >= 0 ) {
+            qlString += " and emp.manager in (:managers) ";
+        }
+        if (regions != null && regions.size() > 0 && !regions.get(0).equals(-1)) {
+            qlString += " and emp.region.id in :regionId  ";
+        }
+        if (divisionId != null && divisionId != 0 ) {
+            qlString += " and emp.division.id = :divisionId ";
+        }
+        Query query = entityManager.createQuery(qlString);
+        if ( manager != null && manager >= 0) {
+            Employee managerEmployee = find(manager);
+            ArrayList<Employee> managers = new ArrayList<Employee>(getAllSubordinateManagers(managerEmployee));
+            managers.add(managerEmployee);
+            query.setParameter("managers", managers);
         }
         if (regions != null && regions.size() > 0 && !regions.get(0).equals(-1)) {
             query.setParameter("regionId", regions);
