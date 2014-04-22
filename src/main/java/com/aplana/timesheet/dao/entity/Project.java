@@ -43,16 +43,11 @@ public class Project {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "project", cascade = CascadeType.ALL)
     private Set<TimeSheetDetail> timeSheetDetail;
 
-	@ManyToMany(fetch = FetchType.LAZY)
-	@JoinTable(name = "division_project",
-            joinColumns = {
-                    @JoinColumn(name = "project_id", nullable = false) },
-            inverseJoinColumns = {
-                    @JoinColumn(name = "division_id", nullable = false) })
-	private Set<Division> divisions;
-
     @OneToMany(mappedBy = "project", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<EmployeeProjectBillable> employeeProjectBillables;
+
+    @OneToMany(mappedBy = "project", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Set<ProjectManager> projectManagers;
 
     @Column(name = "start_date", columnDefinition = "date")
     private Date startDate;
@@ -79,6 +74,14 @@ public class Project {
     @JoinColumn(name = "division", nullable = true) //todo Определиться обязательно ли поле к заполнению. Пока таблица заполняется отключил.
     @ForeignKey(name = "FK_PROJECT_DIVISION")
     private Division division;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "division_project",
+            joinColumns = {
+                    @JoinColumn(name = "project_id", nullable = false) },
+            inverseJoinColumns = {
+                    @JoinColumn(name = "division_id", nullable = false) })
+    private Set<Division> divisions;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "funding_type", nullable = true) //todo Определиться обязательно ли поле к заполнению. Пока таблица заполняется отключил.
@@ -243,6 +246,14 @@ public class Project {
 
     public void setCustomer(String customer) {
         this.customer = customer;
+    }
+
+    public Set<ProjectManager> getProjectManagers() {
+        return projectManagers;
+    }
+
+    public void setProjectManagers(Set<ProjectManager> projectManagers) {
+        this.projectManagers = projectManagers;
     }
 
     @Override

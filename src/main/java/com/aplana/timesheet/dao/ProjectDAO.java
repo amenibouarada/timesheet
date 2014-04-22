@@ -277,7 +277,77 @@ public class ProjectDAO {
      * @return
      */
     public List<String> getJiraKeyList(){
-        Query query = entityManager.createQuery("select distinct p.jiraProjectKey from Project p where p.jiraProjectKey is not null");
+        Query query = entityManager.createQuery(
+                "select distinct p.jiraProjectKey from Project p where p.jiraProjectKey is not null");
         return query.getResultList();
+    }
+    public List<Project> getProjectsByActive(Boolean showActiveOnly) {
+        Query query = entityManager.createQuery("select p from Project p " +
+                "where ((:activeOnly = true and p.active = true) or :activeOnly = false) and p.manager is not null " +
+                "order by p.name")
+                .setParameter("activeOnly", showActiveOnly);
+
+        return query.getResultList();
+    }
+
+    public List<Project> getProjectsByManagerAndActive(Employee manager, Boolean showActiveOnly) {
+        Query query = entityManager.createQuery("select p from Project p " +
+                "where ((:activeOnly = true and p.active = true) or :activeOnly = false) and p.manager = :manager " +
+                "order by p.name")
+                .setParameter("activeOnly", showActiveOnly)
+                .setParameter("manager", manager);
+
+        return query.getResultList();
+    }
+
+    public List<Project> getProjectsByManagersAndActive(List<Employee> managers, Boolean showActiveOnly) {
+        Query query = entityManager.createQuery("select p from Project p " +
+                "where ((:activeOnly = true and p.active = true) or :activeOnly = false) " +
+                "and p.manager in (:managers) order by p.name")
+                .setParameter("activeOnly", showActiveOnly)
+                .setParameter("managers", managers);
+
+        return query.getResultList();
+    }
+
+    public List<Project> getProjectsByDivisionAndActive(Division division, Boolean showActiveOnly) {
+        if (division == null) {
+            Query query = entityManager.createQuery("select p from Project p " +
+                    "where ((:activeOnly = true and p.active = true) or :activeOnly = false) and p.manager is not null " +
+                    "and p.division is null order by p.name")
+                    .setParameter("activeOnly", showActiveOnly);
+
+            return  query.getResultList();
+        } else {
+            Query query = entityManager.createQuery("select p from Project p " +
+                    "where ((:activeOnly = true and p.active = true) or :activeOnly = false) and p.manager is not null " +
+                    "and p.division = :division order by p.name")
+                    .setParameter("activeOnly", showActiveOnly)
+                    .setParameter("division", division);
+
+            return  query.getResultList();
+        }
+    }
+
+    public List<Project> getProjectsByDivisionAndManagerAndActive(Division division, Employee manager,
+                                                                  Boolean showActiveOnly) {
+        if (division == null) {
+            Query query = entityManager.createQuery("select p from Project p " +
+                    "where ((:activeOnly = true and p.active = true) or :activeOnly = false) and p.manager = :manager " +
+                    "and p.division is null order by p.name")
+                    .setParameter("activeOnly", showActiveOnly)
+                    .setParameter("manager", manager);
+
+            return query.getResultList();
+        } else {
+            Query query = entityManager.createQuery("select p from Project p " +
+                    "where ((:activeOnly = true and p.active = true) or :activeOnly = false) and p.manager = :manager " +
+                    "and p.division = :division order by p.name")
+                    .setParameter("activeOnly", showActiveOnly)
+                    .setParameter("manager", manager)
+                    .setParameter("division", division);
+
+            return query.getResultList();
+        }
     }
 }

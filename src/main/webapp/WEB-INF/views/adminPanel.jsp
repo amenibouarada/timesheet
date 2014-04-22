@@ -81,6 +81,7 @@
         <br/>
         <br/>
         <ul>
+            <li><a href="/admin/projects"><fmt:message key="link.editprojects"/></a> </li>
             <li><a href="admin/update/ldap"><fmt:message key="link.updateldap"/></a></li>
             <li><a href="admin/update/checkreport"><fmt:message key="link.checkemails"/></a></li>
             <li><a href="admin/update/oqsync"><fmt:message key="link.oqsync"/></a></li>

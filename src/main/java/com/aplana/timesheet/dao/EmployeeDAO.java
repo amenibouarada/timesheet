@@ -273,7 +273,8 @@ public class EmployeeDAO {
                         "where (tsd.actType.id = 14 or tsd.actType.id = 12 or tsd.actType.id = 13 or tsd.actType.id = 42) " +
                         "and (ts.calDate.calDate between :beginDate and :endDate) " +
                         "and (ts.employee = :employee) " +
-                        "and (ts.type = "+ TypesOfTimeSheetEnum.REPORT.getId()+")");
+                        "and (ts.type = " + TypesOfTimeSheetEnum.REPORT.getId() + ")"
+        );
         query.setParameter("beginDate", beginDate);
         query.setParameter("endDate", endDate);
         query.setParameter("employee", employee);
@@ -342,6 +343,23 @@ public class EmployeeDAO {
         final Query query = entityManager.createQuery("from Employee e order by e.name");
 
         return query.getResultList();
+    }
+
+    public List<Employee> getAllEmployees(Division division) {
+        Query query = entityManager.createQuery("select e from Employee e where e.division = :division")
+                .setParameter("division", division);
+
+        return query.getResultList();
+    }
+
+    public Map<Division, List<Employee>> getAllEmployees(List<Division> divisions) {
+        Map<Division, List<Employee>> resultMap = new HashMap<Division, List<Employee>>();
+
+        for (Division division : divisions) {
+            resultMap.put(division, getAllEmployees(division));
+        }
+
+        return resultMap;
     }
 
     /**
@@ -440,6 +458,39 @@ public class EmployeeDAO {
                 .setParameter("employee", employee)
                 .getSingleResult();
         return slavesCount > 0;
+    }
+
+    /**
+     * Возвращает всех главных руководителей проектов.
+     * @return Список главных руководителей
+     */
+    public List<Employee> getMainProjectManagers() {
+        Query query = entityManager.createQuery("select distinct e from Employee e " +
+                "where e in (select p.manager from Project p where p.manager is not null) order by e.name");
+
+        return query.getResultList();
+    }
+
+    /**
+     * Возвращает всех главных руководителей для проектов, принадлежащих указанному центру.
+     * @param division Центр
+     * @return Список главных руководителей
+     */
+    public List<Employee> getMainProjectManagers(Division division) {
+        if (division == null) {
+            Query query = entityManager.createQuery("select distinct e from Employee e " +
+                    "where e in (select p.manager from Project p where p.division is null " +
+                    "and p.manager is not null) order by e.name");
+
+            return query.getResultList();
+        } else {
+            Query query = entityManager.createQuery("select distinct e from Employee e " +
+                    "where e in (select p.manager from Project p where p.division in (:division) " +
+                    "and p.manager is not null) order by e.name")
+                    .setParameter("division", division);
+
+            return query.getResultList();
+        }
     }
 
     /**

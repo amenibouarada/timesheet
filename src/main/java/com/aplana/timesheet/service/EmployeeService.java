@@ -337,6 +337,133 @@ public class EmployeeService {
     }
 
     /**
+     * Возвращает JSON-строку, содержащую список всех главных руководителей проектов и связанные с ними проекты.
+     * @return Главные руководители и связанные проекты
+     */
+    public String getMainProjectManagersJSON(){
+        final JsonArrayNodeBuilder builder = anArrayBuilder();
+
+        // Заполнение списка руководителей проектов для варианта "Все подразделения"
+        JsonArrayNodeBuilder allDivisionsBuilder = anArrayBuilder();
+        for (Employee manager : employeeDAO.getMainProjectManagers()) {
+            allDivisionsBuilder.withElement(
+                    anObjectBuilder()
+                            .withField("managerId", aStringBuilder(manager.getId().toString()))
+                            .withField("name", aStringBuilder(manager.getName()))
+            );
+        }
+        builder.withElement(
+                anObjectBuilder()
+                        .withField("divisionId", aStringBuilder("-1"))
+                        .withField("managers", allDivisionsBuilder)
+        );
+
+        // Заполнение списка руководителей проектов для варианта "Не проставлен (null)"
+        JsonArrayNodeBuilder nullDivisionBuilder = anArrayBuilder();
+        for (Employee manager : employeeDAO.getMainProjectManagers(null)) {
+            nullDivisionBuilder.withElement(
+                    anObjectBuilder()
+                            .withField("managerId", aStringBuilder(manager.getId().toString()))
+                            .withField("name", aStringBuilder(manager.getName()))
+            );
+        }
+        builder.withElement(
+                anObjectBuilder()
+                        .withField("divisionId", aStringBuilder("0"))
+                        .withField("managers", nullDivisionBuilder)
+        );
+
+        // Заполнение списков руководителей проектов для подразделений
+        for (Division division : divisionService.getAllDivisions()) {
+            JsonArrayNodeBuilder divisionBuilder = anArrayBuilder();
+            for (Employee manager : employeeDAO.getMainProjectManagers(division)) {
+                divisionBuilder.withElement(
+                        anObjectBuilder()
+                                .withField("managerId", aStringBuilder(manager.getId().toString()))
+                                .withField("name", aStringBuilder(manager.getName()))
+                );
+            }
+            builder.withElement(
+                    anObjectBuilder()
+                            .withField("divisionId", aStringBuilder(division.getId().toString()))
+                            .withField("managers", divisionBuilder)
+            );
+        }
+
+        return JsonUtil.format(builder);
+    }
+
+    /**
+     * Возвращает JSON-строку, содержащую список всех подразделений и их сотрудников, включая неактивные подразделения
+     * и уволенных сотрудников.
+     * @param currentDate Дата, для которой определяется, работает ли еще сотрудник.
+     * @return Главные руководители и связанные проекты
+     */
+    public String getDivisionsEmployeesJSON(Date currentDate) {
+        final JsonArrayNodeBuilder builder = anArrayBuilder();
+
+        // Заполнение списка сотрудников для варианта "Все подразделения"
+        JsonArrayNodeBuilder allDivisionsBuilder = anArrayBuilder();
+        for (Employee employee : employeeDAO.getAllEmployees()) {
+            allDivisionsBuilder.withElement(
+                    anObjectBuilder()
+                            .withField("employeeId", aStringBuilder(employee.getId().toString()))
+                            .withField("name", aStringBuilder(employee.getName()))
+                            .withField("active",
+                                    aStringBuilder((employee.getEndDate() == null || employee.getEndDate().before(currentDate))? "true" : "false"))
+            );
+        }
+        builder.withElement(
+                anObjectBuilder()
+                        .withField("divisionId", aStringBuilder("-1"))
+                        .withField("employees", allDivisionsBuilder)
+        );
+
+        // Заполнение списков сотрудников для подразделений
+        Map<Division, List<Employee>> divisionsEmployees =
+                employeeDAO.getAllEmployees(divisionService.getActiveDivisions());
+
+        for (Division division : divisionsEmployees.keySet()) {
+            JsonArrayNodeBuilder divisionBuilder = anArrayBuilder();
+            for (Employee employee : divisionsEmployees.get(division)) {
+                divisionBuilder.withElement(
+                        anObjectBuilder()
+                                .withField("employeeId", aStringBuilder(employee.getId().toString()))
+                                .withField("name", aStringBuilder(employee.getName()))
+                                .withField("active",
+                                        aStringBuilder((employee.getEndDate() == null || employee.getEndDate().before(currentDate))? "true" : "false"))
+                );
+            }
+            builder.withElement(
+                    anObjectBuilder()
+                            .withField("divisionId", aStringBuilder(division.getId().toString()))
+                            .withField("active", aStringBuilder(String.valueOf(division.isActive())))
+                            .withField("managers", divisionBuilder)
+            );
+        }
+
+        return JsonUtil.format(builder);
+    }
+
+    public List<Employee> getMainProjectManagers() {
+        return employeeDAO.getMainProjectManagers();
+    }
+
+    public  List<Employee> getMainProjectManagers(List<Division> divisions) {
+        List<Employee> managers = new ArrayList<Employee>();
+
+        if (divisions.size() == 0) {
+            managers.addAll(employeeDAO.getMainProjectManagers(null));
+        } else {
+            for (Division division : divisions) {
+                managers.addAll(employeeDAO.getMainProjectManagers(division));
+            }
+        }
+
+        return managers;
+    }
+
+    /**
      * Получаем список менеджеров по проекту
      */
     public List<Employee> getProjectManagers(Project project) {
@@ -483,11 +610,11 @@ public class EmployeeService {
     }
 
     public List<Employee> getEmployeeByRegionAndManagerAndDivision(List<Integer> regions, Integer divisionId, Integer manager) {
-      return employeeDAO.getEmployeeByRegionAndManagerAndDivision(regions,divisionId, manager);
+      return employeeDAO.getEmployeeByRegionAndManagerAndDivision(regions, divisionId, manager);
     }
 
     public List<Employee> getEmployeeByRegionAndManagerRecursiveAndDivision(List<Integer> regions, Integer divisionId, Integer manager) {
-        return employeeDAO.getEmployeeByRegionAndManagerRecursiveAndDivision(regions,divisionId, manager);
+        return employeeDAO.getEmployeeByRegionAndManagerRecursiveAndDivision(regions, divisionId, manager);
     }
 
     /**

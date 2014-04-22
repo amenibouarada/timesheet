@@ -16,6 +16,9 @@ public class ProjectManager {
 	@Column(columnDefinition = "bool not null default true")
 	private boolean active;
 
+    @Column(columnDefinition = "bool not null default true")
+    private boolean master;
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "employee", nullable = false)
     @ForeignKey(name = "FK_EMPLOYEE")
@@ -30,6 +33,9 @@ public class ProjectManager {
 	@JoinColumn(name = "project", nullable = false)
     @ForeignKey(name = "fk_project")
 	private Project project;
+
+    @Column(name = "receiving_notifications", columnDefinition = "bool not null default true")
+    private boolean receivingNotifications;
 
 	public Integer getId() {
 		return id;
@@ -81,4 +87,20 @@ public class ProjectManager {
 			.append(" project=").append(project.toString())
 		.toString();
 	}
+
+    public boolean isMaster() {
+        return master;
+    }
+
+    public void setMaster(boolean master) {
+        this.master = master;
+    }
+
+    public boolean isReceivingNotifications() {
+        return receivingNotifications;
+    }
+
+    public void setReceivingNotifications(boolean receivingNotifications) {
+        this.receivingNotifications = receivingNotifications;
+    }
 }

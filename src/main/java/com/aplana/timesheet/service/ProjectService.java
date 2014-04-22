@@ -286,4 +286,25 @@ public class ProjectService {
     public List<Project> getProjectsForPeriod(Date fromDate, Date toDate) {
         return projectDAO.getProjectsForPeriod(fromDate, toDate);
     }
+
+    public List<Project> getProjectsByActive(Boolean showActiveOnly) {
+        return projectDAO.getProjectsByActive(showActiveOnly);
+    }
+
+    public List<Project> getProjectsByManagerAndActive(Employee manager, Boolean showActiveOnly) {
+        return projectDAO.getProjectsByManagerAndActive(manager, showActiveOnly);
+    }
+
+    public List<Project> getProjectsByManagersAndActive(List<Employee> managers, Boolean showActiveOnly) {
+        return projectDAO.getProjectsByManagersAndActive(managers, showActiveOnly);
+    }
+
+    public List<Project> getProjectsByDivisionAndActive(Division division, Boolean showActiveOnly) {
+        return projectDAO.getProjectsByDivisionAndActive(division, showActiveOnly);
+    }
+
+    public List<Project> getProjectsByDivisionAndManagerAndActive(Division division, Employee manager,
+                                                                  Boolean showActiveOnly) {
+        return projectDAO.getProjectsByDivisionAndManagerAndActive(division, manager, showActiveOnly);
+    }
 }
