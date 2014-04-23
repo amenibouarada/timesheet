@@ -17,6 +17,7 @@ public class AdminProjectManagerForm {
     private Boolean master;
     private Boolean active;
     private Boolean receivingNotifications;
+    private String toDelete;
 
     public AdminProjectManagerForm() {
     }
@@ -67,5 +68,13 @@ public class AdminProjectManagerForm {
 
     public void setReceivingNotifications(Boolean receivingNotifications) {
         this.receivingNotifications = receivingNotifications;
+    }
+
+    public String getToDelete() {
+        return toDelete;
+    }
+
+    public void setToDelete(String toDelete) {
+        this.toDelete = toDelete;
     }
 }

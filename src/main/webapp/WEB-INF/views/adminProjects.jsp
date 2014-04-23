@@ -51,8 +51,8 @@
         }
 
         /**
-        * Заполняет
-        * @param divisionId
+        * Заполняет список доступных для выбора руководителей проектов.
+        * @param divisionId Идентификатор выбранного центра
         */
         function updateManagerSelect(divisionId) {
             var managerSelect = dojo.byId("managerId");

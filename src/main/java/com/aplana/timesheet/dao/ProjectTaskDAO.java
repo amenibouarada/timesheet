@@ -34,7 +34,21 @@ public class ProjectTaskDAO {
 
         return query.getResultList();
 	}
-	
+
+    /**
+     * Возвращает все проектные задачи по указанному проекту.
+     * @param project Проект
+     * @return Список проектных задач
+     */
+    @SuppressWarnings("unchecked")
+    public List<ProjectTask> findAllByProject(Project project) {
+        Query query = entityManager.createQuery(
+                "select t from ProjectTask as t where t.project = :project order by t.sortOrder, t.id")
+                .setParameter("project", project);
+
+        return query.getResultList();
+    }
+
 	/**
 	 * Возвращает активную проектную задачу, относящуюся к указанному проекту,
 	 * либо null, если проект или код задачи null, или такой задачи нет.

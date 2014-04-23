@@ -312,6 +312,20 @@ public class EmployeeService {
         return employeeDAO.getAllEmployees();
     }
 
+    public String getAllEmployeesJSON() {
+        final JsonArrayNodeBuilder builder = anArrayBuilder();
+
+        for (Employee employee : employeeDAO.getAllEmployees()) {
+            builder.withElement(
+                    anObjectBuilder()
+                            .withField("id", aStringBuilder(employee.getId().toString()))
+                            .withField("name", aStringBuilder(employee.getName()))
+            );
+        }
+
+        return JsonUtil.format(builder);
+    }
+
     public Employee getEmployeeFromBusinessTrip(Integer reportId) {
         return employeeDAO.tryGetEmployeeFromBusinessTrip(reportId);
     }
@@ -410,7 +424,7 @@ public class EmployeeService {
                             .withField("employeeId", aStringBuilder(employee.getId().toString()))
                             .withField("name", aStringBuilder(employee.getName()))
                             .withField("active",
-                                    aStringBuilder((employee.getEndDate() == null || employee.getEndDate().before(currentDate))? "true" : "false"))
+                                    aStringBuilder((employee.getEndDate() == null || employee.getEndDate().after(currentDate))? "true" : "false"))
             );
         }
         builder.withElement(
@@ -421,7 +435,7 @@ public class EmployeeService {
 
         // Заполнение списков сотрудников для подразделений
         Map<Division, List<Employee>> divisionsEmployees =
-                employeeDAO.getAllEmployees(divisionService.getActiveDivisions());
+                employeeDAO.getAllEmployees((ArrayList<Division>)divisionService.getAllDivisions());
 
         for (Division division : divisionsEmployees.keySet()) {
             JsonArrayNodeBuilder divisionBuilder = anArrayBuilder();

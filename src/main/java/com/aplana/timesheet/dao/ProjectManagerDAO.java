@@ -44,6 +44,19 @@ public class ProjectManagerDAO {
         return query.getResultList();
     }
 
+    /**
+     * Возвращает список всех записей проектных ролей по проекту.
+     * @param project Проект
+     * @return Список записей проектных ролей
+     */
+    public List<ProjectManager> findByProject(Project project) {
+        Query query = entityManager.createQuery(
+                "select p from ProjectManager p where p.project = :project order by p.id")
+                .setParameter("project", project);
+
+        return query.getResultList();
+    }
+
     public Boolean isProjectParticipant(Project project, Employee employee){
         final Query query = entityManager.createQuery("FROM ProjectParticipant p " +
                 "WHERE p.employee = :employee AND p.project = :project").

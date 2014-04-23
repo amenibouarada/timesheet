@@ -49,6 +49,16 @@ public class ProjectManagerService {
         return false;
     }
 
+    /**
+     * Возвращает список всех записей проектных ролей по проекту.
+     * @param project Проект
+     * @return Список записей проектных ролей
+     */
+    @Transactional(readOnly = true)
+    public List<ProjectManager> findByProject(Project project) {
+        return projectManagerDAO.findByProject(project);
+    }
+
     public void deactivateEmployeesRights(List<Employee> employees) {
         for (Employee employee : employees) {
                 List<ProjectManager> empProjectManagers = projectManagerDAO.findByEmployee(employee);

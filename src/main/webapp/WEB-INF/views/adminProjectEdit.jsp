@@ -12,14 +12,75 @@
     <title></title>
     <link rel="stylesheet" type="text/css" href="<%= request.getContextPath()%>/resources/css/adminProjectEdit.css">
     <script type="text/javascript">
+
+        var divisionsEmployeesJSON = ${divisionsEmployeesJSON};
+        var employeesListJSON = ${employeesListJSON};
+        var projectRoleTypesJSON = ${projectRoleTypesJSON};
+        var managerId = ${managerId};
+        var startDateBoxes = [];
+        var endDateBoxes = [];
+
+        dojo.require("dijit.form.DateTextBox");
+        dojo.require("dojo.NodeList-traverse");
+
         dojo.declare("DateTextBox", dijit.form.DateTextBox, {
-            popupClass:"dijit.Calendar",
-            datePattern: 'dd.MM.yyyy'
+            popupClass: "dijit.Calendar"
+            //datePattern: "dd.MM.yyyy"
+        });
+
+        dojo.ready(function () {
+            window.focus();
+            updateManagerSelect(dojo.byId("managerDivisionId").value);
+            dojo.byId("managerId").value = managerId;
         });
 
         function saveProject() {
             //projectform.action = "save";
             projectform.submit();
+        }
+
+        /**
+         * Заполняет список доступных для выбора руководителей проектов.
+         * @param divisionId Идентификатор выбранного центра
+         */
+        function updateManagerSelect(divisionId) {
+            var managerSelect = dojo.byId("managerId");
+            var previousManager = managerSelect.value;
+
+            managerSelect.options.length = 0;
+
+            if (divisionsEmployeesJSON.length > 0) {
+                var divisionEmployees = divisionsEmployeesJSON;
+                dojo.forEach(dojo.filter(divisionEmployees, function (division) {
+                    return (division.divisionId == divisionId);
+                }), function (divisionData) {
+                    dojo.forEach(divisionData.managers, function(managerData) {
+                        var option = document.createElement("option");
+                        dojo.attr(option, {
+                            value:managerData.employeeId
+                        });
+                        option.title = managerData.name;
+                        if (managerData.active != "true") {
+                            option.title += " [уволен]";
+                        }
+                        option.innerHTML = managerData.name;
+                        if (managerData.active != "true") {
+                            option.innerHTML += " [уволен]";
+                        }
+                        if (managerData.employeeId == previousManager) {
+                            option.selected = "selected";
+                        }
+                        managerSelect.appendChild(option);
+                    });
+                });
+            }
+            sortSelectOptions(managerSelect);
+
+            if (managerSelect.options.length < 2){
+                dojo.byId("managerId").disabled = 'disabled';
+            } else {
+                dojo.byId("managerId").disabled = '';
+            }
         }
 
         function createTask() {
@@ -52,9 +113,9 @@
                 alt:"Удалить",
                 title:"Удалить"
             });
-            /*img.onclick = function () {
-                deleteRow(newRowIndex);
-            };*/
+            img.onclick = function () {
+                deleteTask(newTaskIndex);
+            };
             deleteCell.appendChild(img);
 
             // Наименование задачи
@@ -65,9 +126,19 @@
                 id:"taskNameInput_" + newTaskIndex,
                 name:"projectTasks[" + newTaskIndex + "].name",
                 wrap:"soft",
-                rows:"2"
+                rows:"3"
             });
             nameCell.appendChild(nameInput);
+
+            var _toDeleteInput = dojo.doc.createElement("input");
+            dojo.addClass(_toDeleteInput , "to_delete");
+            dojo.attr(_toDeleteInput , {
+                id: "projectTasks" + newTaskIndex + ".toDelete",
+                name:"projectTasks[" + newTaskIndex + "].toDelete",
+                type:"hidden",
+                value:""
+            });
+            nameCell.appendChild(_toDeleteInput);
 
             // Описание
             var descriptionCell = newTask.insertCell(2);
@@ -77,7 +148,7 @@
                 id:"taskDescriptionInput_" + newTaskIndex,
                 name:"projectTasks[" + newTaskIndex + "].description",
                 wrap:"soft",
-                rows:"2"
+                rows:"3"
             });
             descriptionCell.appendChild(descriptionInput);
 
@@ -91,6 +162,15 @@
             });
             activeCell.appendChild(activeInput);
 
+            var _activeInput = dojo.doc.createElement("input");
+            dojo.attr(_activeInput , {
+                name:"_projectTasks[" + newTaskIndex + "].active",
+                type:"hidden",
+                value:"on"
+            });
+            activeCell.appendChild(_activeInput);
+
+
             // Приоритет
             var priorityCell = newTask.insertCell(4);
             dojo.addClass(priorityCell , "multiline");
@@ -99,7 +179,7 @@
                 id:"taskPriorityInput_" + newTaskIndex,
                 name:"projectTasks[" + newTaskIndex + "].priority",
                 wrap:"soft",
-                rows:"2"
+                rows:"3"
             });
             priorityCell.appendChild(priorityInput);
         }
@@ -134,22 +214,269 @@
                 alt:"Удалить",
                 title:"Удалить"
             });
-            /*img.onclick = function () {
-             deleteRow(newRowIndex);
-             };*/
+            img.onclick = function () {
+                deleteManager(newManager);
+            };
             deleteCell.appendChild(img);
 
-            //TODO Дописать добавление новой строки менеджеров
+            /*------------------------*/
+            /*    Выбор сотрудника    */
+            /*------------------------*/
 
-            // Наименование задачи
-            var employeeCell = newManager.insertCell(1);
-            var employeeInput = dojo.doc.createElement("input");
-            dojo.attr(nameInput , {
-                id:"managerEmployeeInput_" + newManagerIndex,
-                name:"projectManagers[" + newManagerIndex + "].employee",
-                type:"text"
+            var managerCell = newManager.insertCell(1);
+            var managerSelect = dojo.doc.createElement("select");
+            dojo.attr(managerSelect, {
+                id:"projectManagers" + newManagerIndex + ".employee",
+                name:"projectManagers[" + newManagerIndex + "].employee"
             });
-            employeeCell.appendChild(employeeInput);
+            for (var i = 0; i < employeesListJSON.length; i++) {
+                var managerOption = dojo.doc.createElement("option");
+                dojo.attr(managerOption, {
+                    value: employeesListJSON[i].id,
+                    title: employeesListJSON[i].name
+                });
+
+                managerOption.innerHTML = employeesListJSON[i].name;
+                managerSelect.appendChild(managerOption);
+            }
+            managerCell.appendChild(managerSelect);
+
+            var _toDeleteInput = dojo.doc.createElement("input");
+            dojo.addClass(_toDeleteInput , "to_delete");
+            dojo.attr(_toDeleteInput , {
+                id: "projectManagers" + newManagerIndex + ".toDelete",
+                name:"projectManagers[" + newManagerIndex + "].toDelete",
+                type:"hidden",
+                value:""
+            });
+            managerCell.appendChild(_toDeleteInput);
+
+            /*------------------------*/
+            /*       Выбор роли       */
+            /*------------------------*/
+
+            var roleCell = newManager.insertCell(2);
+            var roleSelect = dojo.doc.createElement("select");
+            dojo.attr(roleSelect, {
+                id:"projectManagers" + newManagerIndex + ".projectRole",
+                name:"projectManagers[" + newManagerIndex + "].projectRole"
+            });
+            for (var i = 0; i < projectRoleTypesJSON.length; i++) {
+                var roleOption = dojo.doc.createElement("option");
+                dojo.attr(roleOption, {
+                    value: projectRoleTypesJSON[i].id,
+                    title: projectRoleTypesJSON[i].value
+                });
+
+                roleOption.innerHTML = projectRoleTypesJSON[i].value;
+                roleSelect.appendChild(roleOption);
+            }
+            roleCell.appendChild(roleSelect);
+
+            /*------------------------*/
+            /*   Чекбокс "Главный"    */
+            /*------------------------*/
+
+            var masterCell = newManager.insertCell(3);
+            var masterInput = dojo.doc.createElement("input");
+            dojo.attr(masterInput , {
+                id:"projectManagers" + newManagerIndex + ".master1",
+                name:"projectManagers[" + newManagerIndex + "].master",
+                type:"checkbox"
+            });
+            masterCell.appendChild(masterInput);
+
+            var _masterInput = dojo.doc.createElement("input");
+            dojo.attr(_masterInput , {
+                name:"_projectManagers[" + newManagerIndex + "].master",
+                type:"hidden",
+                value:"on"
+            });
+            masterCell.appendChild(_masterInput);
+
+            /*----------------------------------*/
+            /*   Чекбокс "Признак активности"   */
+            /*----------------------------------*/
+
+            var activeCell = newManager.insertCell(3);
+            var activeInput = dojo.doc.createElement("input");
+            dojo.attr(activeInput , {
+                id:"projectManagers" + newManagerIndex + ".active1",
+                name:"projectManagers[" + newManagerIndex + "].active",
+                type:"checkbox"
+            });
+            activeCell.appendChild(activeInput);
+
+            var _activeInput = dojo.doc.createElement("input");
+            dojo.attr(_activeInput , {
+                name:"_projectManagers[" + newManagerIndex + "].active",
+                type:"hidden",
+                value:"on"
+            });
+            activeCell.appendChild(_activeInput);
+
+            /*----------------------------------*/
+            /*   Чекбокс "Получение рассылки"   */
+            /*----------------------------------*/
+
+            var notifyCell = newManager.insertCell(3);
+            var notifyInput = dojo.doc.createElement("input");
+            dojo.attr(notifyInput , {
+                id:"projectManagers" + newManagerIndex + ".receivingNotifications1",
+                name:"projectManagers[" + newManagerIndex + "].receivingNotifications",
+                type:"checkbox"
+            });
+            notifyCell.appendChild(notifyInput);
+
+            var _notifyInput = dojo.doc.createElement("input");
+            dojo.attr(_notifyInput , {
+                name:"_projectManagers[" + newManagerIndex + "].receivingNotifications",
+                type:"hidden",
+                value:"on"
+            });
+            notifyCell.appendChild(_notifyInput);
+        }
+
+        function createBillable() {
+            var projectBillables = dojo.byId("projectBillables");
+            var projectBillablesRows = dojo.query(".billable_row");
+            var billablesCount = projectBillablesRows.length;
+
+            var newBillable = projectBillables.insertRow(billablesCount + 1);
+            dojo.addClass(newBillable, "billable_row");
+
+            var newBillableIndex;
+            if (billablesCount == 0) {
+                newBillableIndex = 0;
+            }
+            else {
+                var lastBillable = projectBillablesRows[billablesCount - 1];
+                var lastBillableId = dojo.attr(lastBillable, "id");
+                var lastBillableIndex = parseInt(lastBillableId.substring(lastBillableId.lastIndexOf("_") + 1, lastBillableId.length));
+                newBillableIndex = lastBillableIndex + 1;
+            }
+            dojo.attr(newBillable, {id : "projectBillable_" + newBillableIndex});
+
+            // Кнопка удаления
+            var deleteCell = newBillable.insertCell(0);
+            var img = dojo.doc.createElement("img");
+            dojo.attr(img, {
+                id:"billableDeleteButton_" + newBillableIndex,
+                class: "iconbutton",
+                src:"<%= request.getContextPath()%>/resources/img/delete.png",
+                alt:"Удалить",
+                title:"Удалить"
+            });
+            img.onclick = function () {
+                deleteBillable(newBillable);
+            };
+            deleteCell.appendChild(img);
+
+            /*------------------------*/
+            /*    Выбор сотрудника    */
+            /*------------------------*/
+
+            var employeeCell = newBillable.insertCell(1);
+            var employeeSelect = dojo.doc.createElement("select");
+            dojo.attr(employeeSelect, {
+                id:"projectBillables" + newBillableIndex + ".employee",
+                name:"projectBillables[" + newBillableIndex + "].employee"
+            });
+            for (var i = 0; i < employeesListJSON.length; i++) {
+                var employeeOption = dojo.doc.createElement("option");
+                dojo.attr(employeeOption, {
+                    value: employeesListJSON[i].id,
+                    title: employeesListJSON[i].name
+                });
+
+                employeeOption.innerHTML = employeesListJSON[i].name;
+                employeeSelect.appendChild(employeeOption);
+            }
+            employeeCell.appendChild(employeeSelect);
+
+            var _toDeleteInput = dojo.doc.createElement("input");
+            dojo.addClass(_toDeleteInput , "to_delete");
+            dojo.attr(_toDeleteInput , {
+                id: "projectBillables" + newBillableIndex + ".toDelete",
+                name:"projectBillables[" + newBillableIndex + "].toDelete",
+                type:"hidden",
+                value:""
+            });
+            employeeCell.appendChild(_toDeleteInput);
+
+            /*--------------------------------------*/
+            /*    Чекбокс "Учитывать в затратах"    */
+            /*--------------------------------------*/
+
+            var billableCell = newBillable.insertCell(2);
+            var billableInput = dojo.doc.createElement("input");
+            dojo.attr(billableInput , {
+                id:"projectBillables" + newBillableIndex + ".billable1",
+                name:"projectBillables[" + newBillableIndex + "].billable",
+                type:"checkbox"
+            });
+            billableCell.appendChild(billableInput);
+
+            var _activeInput = dojo.doc.createElement("input");
+            dojo.attr(_activeInput , {
+                name:"_projectBillables[" + newBillableIndex + "].billable",
+                type:"hidden",
+                value:"on"
+            });
+            billableCell.appendChild(_activeInput);
+
+            /*------------------------*/
+            /*         Дата с         */
+            /*------------------------*/
+
+            var startDateCell = newBillable.insertCell(3);
+            var startDateInput = dojo.doc.createElement("input");
+            dojo.attr(startDateInput , {
+                id:"projectBillables" + newBillableIndex + ".startDate",
+                name:"projectBillables[" + newBillableIndex + "].startDate",
+                type:"text",
+                "data-dojo-type": "dijit.form.DateTextBox"
+            });
+            startDateCell.appendChild(startDateInput);
+
+            /*-------------------------*/
+            /*         Дата по         */
+            /*-------------------------*/
+
+            var endDateCell = newBillable.insertCell(4);
+            var endDateInput = dojo.doc.createElement("input");
+            dojo.attr(endDateInput , {
+                id:"projectBillables" + newBillableIndex + ".endDate",
+                name:"projectBillables[" + newBillableIndex + "].endDate",
+                type:"text",
+                "data-dojo-type": "dijit.form.DateTextBox"
+            });
+            endDateCell.appendChild(endDateInput);
+            dojo.parser.parse();
+
+            /*-------------------------*/
+            /*        Основание        */
+            /*-------------------------*/
+
+            var commentCell = newBillable.insertCell(5);
+            dojo.addClass(commentCell , "multiline");
+            var commentInput = dojo.doc.createElement("textarea");
+            dojo.attr(commentInput , {
+                id:"projectBillables" + newBillableIndex + ".comment",
+                name:"projectBillables[" + newBillableIndex + "].comment",
+                wrap:"soft",
+                rows:"3"
+            });
+            commentCell.appendChild(commentInput);
+        }
+
+        function deleteTask(row) {
+            var task = dojo.byId("projectTasks" + row + ".toDelete");
+            dojo.attr(task, {
+                value: "delete"
+            });
+            var row = dojo.byId("projectTask_" + row);
+            dojo.addClass(row , "hidden_delete");
         }
     </script>
 </head>
@@ -158,7 +485,7 @@
 <br/>
 <form:form method="post" commandName="projectform" name="projectform">
     <table class="maintable" style="margin-bottom: 20px;">
-        <tr style="visibility: hidden">
+        <tr style="visibility: collapse">
             <th width="200">1</th>
             <th width="300">2</th>
             <th width="300">3</th>
@@ -177,10 +504,7 @@
                 <span class="lowspace">Центр компетенции:</span>
             </td>
             <td>
-                <form:select path="division" id="divisionId"
-                             onchange="updateManagerSelect(this.value);"
-                             onmouseover="tooltip.show(getTitle(this));"
-                             onmouseout="tooltip.hide();">
+                <form:select path="division" id="divisionId">
                     <form:option label="Не проставлено (null)" value="0"/>
                     <form:options items="${divisionsList}" itemLabel="name" itemValue="id"/>
                 </form:select>
@@ -192,9 +516,7 @@
             </td>
             <td>
                 <form:select path="managerDivision" id="managerDivisionId"
-                             onchange="updateManagerSelect(this.value);"
-                             onmouseover="tooltip.show(getTitle(this));"
-                             onmouseout="tooltip.hide();">
+                             onchange="updateManagerSelect(this.value);">
                     <form:options items="${divisionsList}" itemLabel="name" itemValue="id"/>
                 </form:select>
             </td>
@@ -204,9 +526,7 @@
                 <span class="lowspace ">Руководитель:</span>
             </td>
             <td>
-                <form:select path="manager" id="managerId"
-                             onmouseover="tooltip.show(getTitle(this));"
-                             onmouseout="tooltip.hide();">
+                <form:select path="manager" id="managerId">
                 </form:select>
             </td>
         </tr>
@@ -225,8 +545,7 @@
             <td>
                 <div class="horizontal_block">
                     <form:input path="startDate" id="startDate" class="date_picker"
-                                data-dojo-type="DateTextBox" required="true"
-                                onMouseOver="tooltip.show(getTitle(this));" onMouseOut="tooltip.hide();"/>
+                                data-dojo-type="DateTextBox" required="true"/>
                 </div>
             </td>
         </tr>
@@ -237,8 +556,7 @@
             <td>
                 <div class="horizontal_block">
                     <form:input path="endDate" id="endDate" class="date_picker"
-                                data-dojo-type="DateTextBox" required="true"
-                                onMouseOver="tooltip.show(getTitle(this));" onMouseOut="tooltip.hide();"/>
+                                data-dojo-type="DateTextBox" required="true"/>
                 </div>
             </td>
         </tr>
@@ -247,9 +565,7 @@
                 <span class="lowspace">Тип проекта:</span>
             </td>
             <td>
-                <form:select path="state" id="divisionId"
-                             onmouseover="tooltip.show(getTitle(this));"
-                             onmouseout="tooltip.hide();">
+                <form:select path="state" id="divisionId">
                     <form:options items="${projectStateTypes}" itemLabel="name" itemValue="id"/>
                 </form:select>
             </td>
@@ -259,9 +575,7 @@
                 <span class="lowspace">Тип финансирования:</span>
             </td>
             <td>
-                <form:select path="fundingType" id="divisionId"
-                             onmouseover="tooltip.show(getTitle(this));"
-                             onmouseout="tooltip.hide();">
+                <form:select path="fundingType" id="divisionId">
                     <form:options items="${projectFundingTypes}" itemLabel="name" itemValue="id"/>
                 </form:select>
             </td>
@@ -304,8 +618,8 @@
                                      onclick="createTask();"/>
                             </th>
                         </sec:authorize>
-                        <th width="200">Наименование задачи</th>
-                        <th width="200">Описание</th>
+                        <th width="207">Наименование задачи</th>
+                        <th width="207">Описание</th>
                         <th width="100">Признак активности</th>
                         <th width="100">Приоритет</th>
                     </tr>
@@ -319,16 +633,20 @@
                                 </td>
                             </sec:authorize>
                             <td class="multiline">
-                                <form:textarea path="projectTasks[${row.index}].name" cssClass="multiline"/>
+                                <form:hidden path="projectTasks[${row.index}].id"/>
+                                <form:hidden path="projectTasks[${row.index}].toDelete"/>
+                                <form:textarea path="projectTasks[${row.index}].name" cssClass="multiline" rows="3"/>
                             </td>
                             <td class="multiline">
-                                <form:textarea path="projectTasks[${row.index}].description" cssClass="multiline"/>
+                                <form:textarea path="projectTasks[${row.index}].description"
+                                               cssClass="multiline" rows="3"/>
                             </td>
                             <td>
                                 <form:checkbox path="projectTasks[${row.index}].active"/>
                             </td>
                             <td>
-                                <form:textarea path="projectTasks[${row.index}].priority" cssClass="multiline"/>
+                                <form:textarea path="projectTasks[${row.index}].priority"
+                                               cssClass="multiline"  rows="3"/>
                             </td>
                         </tr>
                     </c:forEach>
@@ -349,8 +667,8 @@
                                      onclick="createManager();"/>
                             </th>
                         </sec:authorize>
-                        <th width="150">Сотрудник</th>
-                        <th width="150">Роль</th>
+                        <th width="200">Сотрудник</th>
+                        <th width="200">Роль</th>
                         <th width="100">Главный</th>
                         <th width="100">Признак активности</th>
                         <th width="100">Получение рассылки</th>
@@ -365,13 +683,15 @@
                                 </td>
                             </sec:authorize>
                             <td>
+                                <form:hidden path="projectManagers[${row.index}].id"/>
+                                <form:hidden path="projectManagers[${row.index}].toDelete"/>
                                 <form:select path="projectManagers[${row.index}].employee">
                                     <form:options items="${employeesList}" itemLabel="name" itemValue="id"/>
                                 </form:select>
                             </td>
                             <td>
                                 <form:select path="projectManagers[${row.index}].projectRole">
-                                    <form:options items="${projectRolesList}" itemLabel="value" itemValue="id"/>
+                                    <form:options items="${projectRoleTypes}" itemLabel="name" itemValue="id"/>
                                 </form:select>
                             </td>
                             <td>
@@ -404,12 +724,12 @@
                         </sec:authorize>
                         <th width="200">Сотрудник</th>
                         <th width="100">Учитывать в затратах</th>
-                        <th width="100">Дата с</th>
-                        <th width="100">Дата по</th>
-                        <th width="100">Основание</th>
+                        <th width="150">Дата с</th>
+                        <th width="150">Дата по</th>
+                        <th width="300">Основание</th>
                     </tr>
                     <c:forEach items="${projectform.projectBillables}" varStatus="row">
-                        <tr id="projectBillable_${row.index}" class="billables_row">
+                        <tr id="projectBillable_${row.index}" class="billable_row">
                             <sec:authorize access="hasRole('ROLE_PLAN_EDIT')">
                                 <td>
                                     <img class="iconbutton" title="Удалить" id="billableDeleteButton_${row.index}"
@@ -418,6 +738,8 @@
                                 </td>
                             </sec:authorize>
                             <td>
+                                <form:hidden path="projectBillables[${row.index}].id"/>
+                                <form:hidden path="projectBillables[${row.index}].toDelete"/>
                                 <form:select path="projectBillables[${row.index}].employee">
                                     <form:options items="${employeesList}" itemLabel="name" itemValue="id"/>
                                 </form:select>
@@ -434,11 +756,39 @@
                                             data-dojo-type="DateTextBox"/>
                                 </td>
                             <td>
-                                <form:input path="projectBillables[${row.index}].comment"/>
+                                <form:textarea path="projectBillables[${row.index}].comment" rows="3"/>
                             </td>
                         </tr>
                     </c:forEach>
                 </table>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <span class="lowspace">Технологии:</span>
+            </td>
+            <td colspan="2">
+                <form:textarea path="passport" rows="3" cssClass="show_border"/>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <span class="lowspace">Центры, у которых<br/>
+                    есть возможность списывать<br/>
+                    занятость по проекту:</span>
+            </td>
+            <td>
+                <form:select multiple="multiple" path="projectDivisions" rows="3">
+                    <form:options items="${divisionsList}" itemLabel="name" itemValue="id"/>
+                </form:select>
+            </td>
+        </tr>
+        <tr style="visibility: collapse">
+            <td>
+                <span class="lowspace">Идентификатор проекта:</span>
+            </td>
+            <td colspan="2">
+                <form:input path="id"/>
             </td>
         </tr>
         <tr>

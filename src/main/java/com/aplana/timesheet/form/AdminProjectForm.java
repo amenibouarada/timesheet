@@ -12,13 +12,14 @@ import java.util.Set;
  * @version 1.0
  */
 public class AdminProjectForm {
+    private Integer id;
     private String name;
     private Integer division;
     private Integer managerDivision;
     private Integer manager;
     private String customer;
-    private Date startDate;
-    private Date endDate;
+    private String startDate;
+    private String endDate;
 
     private Integer state;
     private Integer fundingType;
@@ -30,7 +31,7 @@ public class AdminProjectForm {
     private List<AdminProjectTaskForm> projectTasks;
     private List<AdminProjectManagerForm> projectManagers;
     private List<AdminProjectBillableForm> projectBillables;
-    private List<Division> projectDivisions;
+    private List<Integer> projectDivisions;
 
     private String passport;
 
@@ -38,7 +39,7 @@ public class AdminProjectForm {
         projectTasks = new AutoPopulatingList<AdminProjectTaskForm>(AdminProjectTaskForm.class);
         projectManagers = new AutoPopulatingList<AdminProjectManagerForm>(AdminProjectManagerForm.class);
         projectBillables = new AutoPopulatingList<AdminProjectBillableForm>(AdminProjectBillableForm.class);
-        projectDivisions = new AutoPopulatingList<Division>(Division.class);
+        projectDivisions = new AutoPopulatingList<Integer>(Integer.class);
     }
 
     public String getName() {
@@ -81,19 +82,19 @@ public class AdminProjectForm {
         this.customer = customer;
     }
 
-    public Date getStartDate() {
+    public String getStartDate() {
         return startDate;
     }
 
-    public void setStartDate(Date startDate) {
+    public void setStartDate(String startDate) {
         this.startDate = startDate;
     }
 
-    public Date getEndDate() {
+    public String getEndDate() {
         return endDate;
     }
 
-    public void setEndDate(Date endDate) {
+    public void setEndDate(String endDate) {
         this.endDate = endDate;
     }
 
@@ -161,11 +162,11 @@ public class AdminProjectForm {
         this.projectBillables = projectBillables;
     }
 
-    public List<Division> getProjectDivisions() {
+    public List<Integer> getProjectDivisions() {
         return projectDivisions;
     }
 
-    public void setProjectDivisions(List<Division> projectDivisions) {
+    public void setProjectDivisions(List<Integer> projectDivisions) {
         this.projectDivisions = projectDivisions;
     }
 
@@ -175,5 +176,13 @@ public class AdminProjectForm {
 
     public void setPassport(String passport) {
         this.passport = passport;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 }

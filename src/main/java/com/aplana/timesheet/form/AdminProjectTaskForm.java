@@ -10,6 +10,7 @@ public class AdminProjectTaskForm {
     private String description;
     private Boolean active;
     private String priority;
+    private String toDelete;
 
     public AdminProjectTaskForm() {
     }
@@ -52,5 +53,13 @@ public class AdminProjectTaskForm {
 
     public void setPriority(String priority) {
         this.priority = priority;
+    }
+
+    public String getToDelete() {
+        return toDelete;
+    }
+
+    public void setToDelete(String toDelete) {
+        this.toDelete = toDelete;
     }
 }

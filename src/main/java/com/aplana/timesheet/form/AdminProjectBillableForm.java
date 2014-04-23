@@ -12,9 +12,10 @@ public class AdminProjectBillableForm {
     private Integer id;
     private Integer employee;
     private Boolean billable;
-    private Date startDate;
-    private Date endDate;
+    private String startDate;
+    private String endDate;
     private String comment;
+    private String toDelete;
 
     public AdminProjectBillableForm() {
     }
@@ -43,19 +44,19 @@ public class AdminProjectBillableForm {
         this.billable = billable;
     }
 
-    public Date getStartDate() {
+    public String getStartDate() {
         return startDate;
     }
 
-    public void setStartDate(Date startDate) {
+    public void setStartDate(String startDate) {
         this.startDate = startDate;
     }
 
-    public Date getEndDate() {
+    public String getEndDate() {
         return endDate;
     }
 
-    public void setEndDate(Date endDate) {
+    public void setEndDate(String endDate) {
         this.endDate = endDate;
     }
 
@@ -65,5 +66,13 @@ public class AdminProjectBillableForm {
 
     public void setComment(String comment) {
         this.comment = comment;
+    }
+
+    public String getToDelete() {
+        return toDelete;
+    }
+
+    public void setToDelete(String toDelete) {
+        this.toDelete = toDelete;
     }
 }
