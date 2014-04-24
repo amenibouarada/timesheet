@@ -307,4 +307,14 @@ public class ProjectService {
                                                                   Boolean showActiveOnly) {
         return projectDAO.getProjectsByDivisionAndManagerAndActive(division, manager, showActiveOnly);
     }
+
+    @Transactional
+    public void storeProject(Project project) {
+        projectDAO.store(project);
+    }
+
+    @Transactional
+    public void deleteProject(Project project) {
+        projectDAO.deleteProject(project);
+    }
 }

@@ -9,6 +9,7 @@ import com.aplana.timesheet.form.AdminProjectForm;
 import com.aplana.timesheet.form.AdminProjectManagerForm;
 import com.aplana.timesheet.form.AdminProjectTaskForm;
 import com.aplana.timesheet.service.*;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,10 +22,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.sql.Timestamp;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author dsysterov
@@ -57,6 +57,8 @@ public class AdminProjectEditController {
     @Autowired
     ProjectRoleService projectRoleService;
 
+    @Autowired
+    DictionaryItemService dictionaryItemService;
 
     @RequestMapping(value = "/admin/projects/add", method = RequestMethod.GET)
      public ModelAndView showAddForm(
@@ -64,16 +66,21 @@ public class AdminProjectEditController {
             @RequestParam(value = "managerId", required = false, defaultValue = "-1") Integer managerId
     ) {
         ModelAndView modelAndView = new ModelAndView("adminProjectEdit");
+        modelAndView.addObject("pageFunction", "add");
         modelAndView.addObject("divisionsList", divisionService.getAllDivisions());
         modelAndView.addObject("projectStateTypes", TypesOfActivityEnum.values());
         modelAndView.addObject("projectFundingTypes", ProjectFundingTypeEnum.values());
         modelAndView.addObject("divisionsEmployeesJSON", employeeService.getDivisionsEmployeesJSON(new Date()));
+        modelAndView.addObject("employeesListJSON", employeeService.getAllEmployeesJSON());
+        modelAndView.addObject("employeesList", employeeService.getAllEmployees());
+        modelAndView.addObject("projectRoleTypes", ProjectRolesEnum.values());
+        modelAndView.addObject("projectRoleTypesJSON",
+                projectRoleService.getProjectRoleListJson(projectRoleService.getProjectRoles()));
 
         AdminProjectForm form = new AdminProjectForm();
         form.setDivision(divisionId);
 
         modelAndView.addObject("projectform", form);
-
         return modelAndView;
     }
 
@@ -82,6 +89,7 @@ public class AdminProjectEditController {
             @RequestParam(value = "projectId", required = true) Integer projectId
     ) {
         ModelAndView modelAndView = new ModelAndView("adminProjectEdit");
+        modelAndView.addObject("pageFunction", "edit");
         modelAndView.addObject("divisionsList", divisionService.getAllDivisions());
         modelAndView.addObject("projectStateTypes", TypesOfActivityEnum.values());
         modelAndView.addObject("projectFundingTypes", ProjectFundingTypeEnum.values());
@@ -89,21 +97,19 @@ public class AdminProjectEditController {
         modelAndView.addObject("employeesListJSON", employeeService.getAllEmployeesJSON());
         modelAndView.addObject("employeesList", employeeService.getAllEmployees());
         modelAndView.addObject("projectRoleTypes", ProjectRolesEnum.values());
-        modelAndView.addObject("projectRoleTypesJSON", projectRoleService.getProjectRoleListJson(projectRoleService.getProjectRoles()));
+        modelAndView.addObject("projectRoleTypesJSON",
+                projectRoleService.getProjectRoleListJson(projectRoleService.getProjectRoles()));
 
         Project project = projectService.find(projectId);
 
         AdminProjectForm form = new AdminProjectForm();
         form.setId(project.getId());
         form.setName(project.getName());
-
         Division projectDivision = project.getDivision();
         form.setDivision((projectDivision != null)? projectDivision.getId() : 0);
-
         form.setManager(project.getManager().getId());
         modelAndView.addObject("managerId", project.getManager().getId());
         form.setManagerDivision(project.getManager().getDivision().getId());
-
         form.setCustomer(project.getCustomer());
         form.setStartDate(dateFormat.format(project.getStartDate()));
         form.setEndDate(dateFormat.format(project.getEndDate()));
@@ -112,14 +118,13 @@ public class AdminProjectEditController {
         form.setJiraKey(project.getJiraProjectKey());
         form.setActive(project.isActive());
         form.setCqRequired(project.isCqRequired());
-
+        form.setPassport(project.getPassport());
         ArrayList<Integer> formDivisions = new ArrayList<Integer>();
         for (Division division : project.getDivisions()) {
             formDivisions.add(division.getId());
         }
         form.setProjectDivisions(formDivisions);
 
-        form.setPassport(project.getPassport());
 
         List<ProjectTask> projectTasks = projectTaskService.findAllByProject(project);
         List<AdminProjectTaskForm> projectTaskForms = new ArrayList<AdminProjectTaskForm>();
@@ -165,24 +170,112 @@ public class AdminProjectEditController {
         form.setProjectBillables(projectBillableForms);
 
         modelAndView.addObject("projectform", form);
-
         return modelAndView;
     }
 
     @RequestMapping(value = "/admin/projects/save", method = RequestMethod.POST)
-    public ModelAndView showSaveOneForm(
+    public ModelAndView showSaveForm(
             @ModelAttribute("projectform") AdminProjectForm form
     ) {
-        ModelAndView modelAndView = new ModelAndView("adminProjectEdit");
-        return modelAndView;
-    }
+        Project project = projectService.find(form.getId());
+        if (project == null) {
+            project = new Project();
+        }
 
-    @RequestMapping(value = "/admin/projects/edit", method = RequestMethod.POST)
-    public ModelAndView showSaveTwoForm(
-            @ModelAttribute("projectform") AdminProjectForm form,
-            BindingResult bindingResult
-    ) {
-        ModelAndView modelAndView = new ModelAndView("adminProjectEdit");
+        // Заполнение проекта данными с формы
+        project.setName(StringEscapeUtils.unescapeHtml4(form.getName()));
+        project.setDivision(divisionService.find(form.getDivision()));
+        project.setManager(employeeService.find(form.getManager()));
+        project.setCustomer(StringEscapeUtils.unescapeHtml4(form.getCustomer()));
+        try {
+            project.setStartDate(dateFormat.parse(form.getStartDate()));
+            project.setEndDate(dateFormat.parse(form.getEndDate()));
+        } catch (ParseException e) {
+            logger.error("AdminProjectForm date parse error!", e);
+            e.printStackTrace();
+        }
+        project.setState(dictionaryItemService.find(form.getState()));
+        project.setFundingType(dictionaryItemService.find(form.getFundingType()));
+        project.setJiraProjectKey(StringEscapeUtils.unescapeHtml4(form.getJiraKey()));
+        project.setActive(form.getActive());
+        project.setCqRequired(form.getCqRequired());
+
+        Set<ProjectTask> projectTasks = new HashSet<ProjectTask>();
+        for (AdminProjectTaskForm taskForm : form.getProjectTasks()) {
+            if (taskForm.getToDelete().length() == 0) {
+                ProjectTask projectTask = projectTaskService.find(taskForm.getId());
+                if (projectTask == null) {
+                    projectTask = new ProjectTask();
+                }
+
+                projectTask.setTaskName(StringEscapeUtils.unescapeHtml4(taskForm.getName()));
+                projectTask.setDescription(StringEscapeUtils.unescapeHtml4(taskForm.getDescription()));
+                projectTask.setActive(taskForm.getActive());
+                projectTask.setSortOrder(StringEscapeUtils.unescapeHtml4(taskForm.getPriority()));
+                projectTask.setProject(project);
+                projectTasks.add(projectTask);
+            }
+        }
+        project.setProjectTasks(projectTasks);
+
+        Set<ProjectManager> projectManagers = new HashSet<ProjectManager>();
+        for (AdminProjectManagerForm managerForm : form.getProjectManagers()) {
+            if (managerForm.getToDelete().length() == 0) {
+                ProjectManager projectManager = projectManagerService.find(managerForm.getId());
+                if (projectManager == null) {
+                    projectManager = new ProjectManager();
+                }
+
+                projectManager.setEmployee(employeeService.find(managerForm.getEmployee()));
+                projectManager.setProjectRole(projectRoleService.find(managerForm.getProjectRole()));
+                projectManager.setMaster(managerForm.getMaster());
+                projectManager.setActive(managerForm.getActive());
+                projectManager.setReceivingNotifications(managerForm.getReceivingNotifications());
+                projectManager.setProject(project);
+                projectManagers.add(projectManager);
+            }
+        }
+        project.setProjectManagers(projectManagers);
+
+        Set<EmployeeProjectBillable> employeeProjectBillables = new HashSet<EmployeeProjectBillable>();
+        for (AdminProjectBillableForm billableForm : form.getProjectBillables()) {
+            if (billableForm.getToDelete().length() == 0) {
+                EmployeeProjectBillable projectBillable = employeeProjectBillableService.find(billableForm.getId());
+                if (projectBillable == null) {
+                    projectBillable = new EmployeeProjectBillable();
+                }
+
+                projectBillable.setEmployee(employeeService.find(billableForm.getEmployee()));
+                projectBillable.setBillable(billableForm.getBillable());
+                try {
+                    projectBillable.setStartDate(dateFormat.parse(billableForm.getStartDate()));
+                    projectBillable.setEndDate(dateFormat.parse(billableForm.getEndDate()));
+                } catch (ParseException e) {
+                    logger.error("billableForm date parse error!", e);
+                    e.printStackTrace();
+                }
+                projectBillable.setComment(StringEscapeUtils.unescapeHtml4(billableForm.getComment()));
+                projectBillable.setProject(project);
+                employeeProjectBillables.add(projectBillable);
+            } else {
+                EmployeeProjectBillable projectBillable = employeeProjectBillableService.find(billableForm.getId());
+                if (projectBillable != null) {
+                    employeeProjectBillableService.delete(projectBillable);
+                }
+            }
+        }
+        project.setEmployeeProjectBillables(employeeProjectBillables);
+
+        project.setPassport(StringEscapeUtils.unescapeHtml4(form.getPassport()));
+        Set<Division> projectDivisions = new HashSet<Division>();
+        for (Integer divisionId : form.getProjectDivisions()) {
+            projectDivisions.add(divisionService.find(divisionId));
+        }
+        project.setDivisions(projectDivisions);
+
+        projectService.storeProject(project);
+
+        ModelAndView modelAndView = new ModelAndView("adminProjectEditSave");
         return modelAndView;
     }
 }

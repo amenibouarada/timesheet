@@ -44,4 +44,12 @@ public class EmployeeProjectBillableDAO {
 
         return query.getResultList();
     }
+
+    /**
+     * Удаляет из базы запись о возможности списания занятости.
+     * @param projectBillable Запись о возможности списания занятости
+     */
+    public void delete(EmployeeProjectBillable projectBillable) {
+        entityManager.remove(projectBillable);
+    }
 }

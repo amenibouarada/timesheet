@@ -57,7 +57,7 @@ public class OQProjectSyncServiceTest extends AbstractTest {
 
                 return null;
             }})
-            .when(dao).store((Project) anyObject());
+            .when(dao).syncStore((Project) anyObject());
 
         oqProjectSyncService.createOrUpdateProject(
                 nodeList.item(checkingNode).getAttributes(), dao,

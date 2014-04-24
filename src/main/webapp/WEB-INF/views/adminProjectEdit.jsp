@@ -9,23 +9,19 @@
 
 <html>
 <head>
-    <title></title>
+    <title><fmt:message key="adminprojects.${pageFunction}"/></title>
     <link rel="stylesheet" type="text/css" href="<%= request.getContextPath()%>/resources/css/adminProjectEdit.css">
     <script type="text/javascript">
 
         var divisionsEmployeesJSON = ${divisionsEmployeesJSON};
         var employeesListJSON = ${employeesListJSON};
         var projectRoleTypesJSON = ${projectRoleTypesJSON};
-        var managerId = ${managerId};
-        var startDateBoxes = [];
-        var endDateBoxes = [];
+        var managerId = "${managerId}";
 
         dojo.require("dijit.form.DateTextBox");
-        dojo.require("dojo.NodeList-traverse");
 
         dojo.declare("DateTextBox", dijit.form.DateTextBox, {
             popupClass: "dijit.Calendar"
-            //datePattern: "dd.MM.yyyy"
         });
 
         dojo.ready(function () {
@@ -35,8 +31,14 @@
         });
 
         function saveProject() {
-            //projectform.action = "save";
-            projectform.submit();
+            var validationResult = validateForm();
+
+            if (validationResult.length == 0) {
+                projectform.action = "save";
+                projectform.submit();
+            } else {
+                alert("Следующие поля пустые или заполнены с ошибкой:\n" + validationResult + ".\n\nСохранение отменено.");
+            }
         }
 
         /**
@@ -59,17 +61,17 @@
                         dojo.attr(option, {
                             value:managerData.employeeId
                         });
+
                         option.title = managerData.name;
-                        if (managerData.active != "true") {
-                            option.title += " [уволен]";
-                        }
                         option.innerHTML = managerData.name;
-                        if (managerData.active != "true") {
-                            option.innerHTML += " [уволен]";
-                        }
-                        if (managerData.employeeId == previousManager) {
-                            option.selected = "selected";
-                        }
+
+                        /*if (managerData.active == "active") {
+                            option.title = managerData.name;
+                            option.innerHTML = managerData.name;
+                        } else {
+                            option.title = managerData.name + " (уволен)";
+                            option.innerHTML = managerData.name + " (уволен)";
+                        }*/
                         managerSelect.appendChild(option);
                     });
                 });
@@ -215,7 +217,7 @@
                 title:"Удалить"
             });
             img.onclick = function () {
-                deleteManager(newManager);
+                deleteManager(newManagerIndex);
             };
             deleteCell.appendChild(img);
 
@@ -368,7 +370,7 @@
                 title:"Удалить"
             });
             img.onclick = function () {
-                deleteBillable(newBillable);
+                deleteBillable(newBillableIndex);
             };
             deleteCell.appendChild(img);
 
@@ -430,6 +432,7 @@
             /*------------------------*/
 
             var startDateCell = newBillable.insertCell(3);
+            dojo.addClass(startDateCell , "billable_date");
             var startDateInput = dojo.doc.createElement("input");
             dojo.attr(startDateInput , {
                 id:"projectBillables" + newBillableIndex + ".startDate",
@@ -444,6 +447,7 @@
             /*-------------------------*/
 
             var endDateCell = newBillable.insertCell(4);
+            dojo.addClass(endDateCell , "billable_date");
             var endDateInput = dojo.doc.createElement("input");
             dojo.attr(endDateInput , {
                 id:"projectBillables" + newBillableIndex + ".endDate",
@@ -478,10 +482,95 @@
             var row = dojo.byId("projectTask_" + row);
             dojo.addClass(row , "hidden_delete");
         }
+
+        function deleteManager(row) {
+            var task = dojo.byId("projectManagers" + row + ".toDelete");
+            dojo.attr(task, {
+                value: "delete"
+            });
+            var row = dojo.byId("projectManager_" + row);
+            dojo.addClass(row , "hidden_delete");
+        }
+
+        function deleteBillable(row) {
+            var task = dojo.byId("projectBillables" + row + ".toDelete");
+            dojo.attr(task, {
+                value: "delete"
+            });
+            var row = dojo.byId("projectBillable_" + row);
+            dojo.addClass(row , "hidden_delete");
+        }
+
+        function validateForm() {
+            var valid = true;
+            var errors = [];
+
+            var name = dojo.byId("name");
+            if (name.value.length == 0) {
+                valid = false;
+                //name.style({"background-color" : "#FFCFCF"});
+                dojo.style(name, "background-color", "#f9f7ba");
+                errors.push("наименование проекта");
+            }
+
+            var customer = dojo.byId("customer");
+            if (customer.value.length == 0) {
+                valid = false;
+                //customer.style({"background-color" : "#FFCFCF"});
+                dojo.style(customer, "background-color", "#f9f7ba");
+                errors.push("наименование заказчика");
+            }
+
+            var startDate = dojo.byId("startDate");
+            if (startDate.getAttribute("aria-invalid") == "true") {
+                valid = false;
+                //startDate.style({"background-color" : "#FFCFCF"});
+                dojo.style(startDate, "background-color", "#f9f7ba");
+                errors.push("дата начала проекта");
+            }
+
+            var endDate = dojo.byId("endDate");
+            if (endDate.getAttribute("aria-invalid") == "true") {
+                valid = false;
+                //endDate.style({"background-color" : "#FFCFCF"});
+                dojo.style(endDate, "background-color", "#f9f7ba");
+                errors.push("дата окончания проекта");
+            }
+
+            var jiraKey = dojo.byId("jiraKey");
+            if (jiraKey.value.length == 0) {
+                valid = false;
+                //jiraKey.style({"background-color" : "#FFCFCF"});
+                dojo.style(jiraKey, "background-color", "#f9f7ba");
+                errors.push("имя в Jira");
+            }
+
+            var dates = dojo.query(".billable_date:not(> tr.hidden_delete)").query(".dijitInputInner");
+            var billableValid = true;
+            dojo.forEach(dates, function(date) {
+                if (date.getAttribute("aria-invalid") == "true") {
+                    //date.style({"background-color" : "#FFCFCF"});
+                    dojo.style(date, "background-color", "#f9f7ba");
+                    billableValid = false;
+                }
+            });
+            if (!billableValid) {
+                valid = false;
+                errors.push("дата учёта в затратах");
+            }
+
+            if (!valid) {
+                return errors.join(",\n");
+            } else {
+                return "";
+            }
+        }
     </script>
 </head>
 <body>
-<h1><fmt:message key="adminprojects"/></h1>
+<h1>
+    <fmt:message key="adminprojects.${pageFunction}"/>
+</h1>
 <br/>
 <form:form method="post" commandName="projectform" name="projectform">
     <table class="maintable" style="margin-bottom: 20px;">
@@ -565,7 +654,7 @@
                 <span class="lowspace">Тип проекта:</span>
             </td>
             <td>
-                <form:select path="state" id="divisionId">
+                <form:select path="state" id="stateId">
                     <form:options items="${projectStateTypes}" itemLabel="name" itemValue="id"/>
                 </form:select>
             </td>
@@ -575,7 +664,7 @@
                 <span class="lowspace">Тип финансирования:</span>
             </td>
             <td>
-                <form:select path="fundingType" id="divisionId">
+                <form:select path="fundingType" id="fundingTypeId">
                     <form:options items="${projectFundingTypes}" itemLabel="name" itemValue="id"/>
                 </form:select>
             </td>
@@ -627,7 +716,7 @@
                         <tr id="projectTask_${row.index}" class="task_row">
                             <sec:authorize access="hasRole('ROLE_PLAN_EDIT')">
                                 <td>
-                                    <img class="iconbutton" title="Удалить" id="taskDeleteButton_${row.index}"
+                                    <img class="iconbutton hidden_button" title="Удалить" id="taskDeleteButton_${row.index}"
                                          src="<c:url value="/resources/img/delete.png"/>"
                                          onclick="deleteTask(${row.index});"/>
                                 </td>
@@ -677,7 +766,7 @@
                         <tr id="projectManager_${row.index}" class="manager_row">
                             <sec:authorize access="hasRole('ROLE_PLAN_EDIT')">
                                 <td>
-                                    <img class="iconbutton" title="Удалить" id="managerDeleteButton_${row.index}"
+                                    <img class="iconbutton hidden_button" title="Удалить" id="managerDeleteButton_${row.index}"
                                          src="<c:url value="/resources/img/delete.png"/>"
                                          onclick="deleteManager(${row.index});"/>
                                 </td>
@@ -749,11 +838,11 @@
                             </td>
                             <td>
                                 <form:input path="projectBillables[${row.index}].startDate"
-                                            data-dojo-type="DateTextBox"/>
+                                            data-dojo-type="DateTextBox" cssClass="billable_date"/>
                             </td>
                             <td>
                                 <form:input path="projectBillables[${row.index}].endDate"
-                                            data-dojo-type="DateTextBox"/>
+                                            data-dojo-type="DateTextBox" cssClass="billable_date"/>
                                 </td>
                             <td>
                                 <form:textarea path="projectBillables[${row.index}].comment" rows="3"/>
@@ -798,7 +887,8 @@
                 </button>
             </td>
             <td>
-                <button id="cancelButton" style="width: 200px" onclick="saveProject()" type="button">
+                <button id="cancelButton" style="width: 200px"
+                        onclick="location.href='<%= request.getContextPath()%>/admin/projects'" type="button">
                     Отмена
                 </button>
             </td>

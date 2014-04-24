@@ -111,7 +111,7 @@
 <body>
 <h1><fmt:message key="adminprojects"/></h1>
 <br/>
-<form:form method="post" commandName="adminprojects" name="mainForm">
+<form:form method="post" commandName="adminprojects" name="adminprojects">
     <table class="no_border" style="margin-bottom: 20px;">
         <tr>
             <td>
@@ -158,7 +158,7 @@
         <thead>
         <tr>
             <sec:authorize access="hasRole('ROLE_PLAN_EDIT')">
-                <th>
+                <th width="26">
                     <img class="iconbutton" title="Создать"
                          src="<c:url value="/resources/img/add.gif"/>"
                          onclick="createProject();"/>
@@ -177,21 +177,18 @@
         <c:choose>
             <c:when test="${fn:length(projects) > 0}">
                 <tbody>
-                <c:forEach var="project" items="${projects}">
-                    <tr>
+                <c:forEach var="project" items="${projects}" varStatus="row">
+                    <tr id="project_${project.id}">
                         <sec:authorize access="hasRole('ROLE_PLAN_EDIT')">
-                            <td width="50">
+                            <td>
                                 <img class="iconbutton" title="Изменить"
                                      src="<c:url value="/resources/img/edit.png"/>"
                                      onclick="editProject(${project.id});"/>
-                                <img class="iconbutton" title="Удалить"
-                                     src="<c:url value="/resources/img/delete.png"/>"
-                                     onclick="deleteProject(${project.id});"/>
                             </td>
                         </sec:authorize>
                         <td class="textcenter">${project.division.name}</td>
                         <td class="textcenter">${project.manager.name}</td>
-                        <td class="textcenter">${project.name}</td>
+                        <td id="projectName_${project.id}" class="textcenter">${project.name}</td>
                         <td class="textcenter">${project.state.value}</td>
                         <td class="textcenter"><input type="checkbox" <c:if test="${project.active}">checked="checked"</c:if> disabled = "true"/></td>
                         <td class="textcenter"><fmt:formatDate value="${project.startDate}" pattern="dd.MM.yyyy"/></td>

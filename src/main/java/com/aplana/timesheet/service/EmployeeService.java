@@ -424,7 +424,7 @@ public class EmployeeService {
                             .withField("employeeId", aStringBuilder(employee.getId().toString()))
                             .withField("name", aStringBuilder(employee.getName()))
                             .withField("active",
-                                    aStringBuilder((employee.getEndDate() == null || employee.getEndDate().after(currentDate))? "true" : "false"))
+                                    aStringBuilder((employee.getEndDate() == null || employee.getEndDate().after(currentDate))? "active" : ""))
             );
         }
         builder.withElement(
@@ -445,7 +445,7 @@ public class EmployeeService {
                                 .withField("employeeId", aStringBuilder(employee.getId().toString()))
                                 .withField("name", aStringBuilder(employee.getName()))
                                 .withField("active",
-                                        aStringBuilder((employee.getEndDate() == null || employee.getEndDate().before(currentDate))? "true" : "false"))
+                                        aStringBuilder((employee.getEndDate() == null || employee.getEndDate().after(currentDate))? "active" : ""))
                 );
             }
             builder.withElement(

@@ -199,7 +199,7 @@ public class OQProjectSyncService extends AbstractServiceWithTransactionManageme
             setProjectDivision(project, hcLdap, pmLdap);  // установим ответственное подразделение к проекту
 
 
-            dao.store(project); // запишем в БД
+            dao.syncStore(project); // запишем в БД
 
             if (transactionStatus != null) {
                 commit(transactionStatus);

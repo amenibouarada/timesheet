@@ -34,11 +34,19 @@ textarea {
     width: 100%;
 }
 
+input.has_error {
+    background-color: #ffcfcf;
+}
+
 img.iconbutton {
     cursor: pointer;
     width: 16px;
     height: 16px;
     margin: 2px;
+}
+
+img.hidden_button {
+    visibility: hidden;
 }
 
 textarea.multiline {

@@ -22,6 +22,10 @@ public class ProjectManagerDAO {
 	private EntityManager entityManager;
 	
 	public ProjectManager find(Integer id) {
+        if (id == null) {
+            logger.warn("For unknown reasons, the ProjectManager ID is null.");
+            return null;
+        }
 		return entityManager.find(ProjectManager.class, id);
 	}
 

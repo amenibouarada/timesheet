@@ -130,6 +130,19 @@ public class ProjectDAO {
     }
 
     public void store(Project project) {
+        Project existingProject = findByProjectId(project.getProjectId());
+        entityManager.merge(project);
+
+        if (trace != null) {
+            if (existingProject == null) {
+                trace.append("Создан новый проект: ").append(project).append("\n");
+            } else {
+                trace.append("Обновлен проект: ").append(project).append("\n");
+            }
+        }
+    }
+
+    public void syncStore(Project project) {
         final DictionaryItem item = dictionaryItemDAO.find(TypesOfActivityEnum.PROJECT.getId()); // Проект
         final Project existingProject = findByProjectId(project.getProjectId());
 
@@ -349,5 +362,9 @@ public class ProjectDAO {
 
             return query.getResultList();
         }
+    }
+
+    public void deleteProject(Project project) {
+        entityManager.remove(project);
     }
 }

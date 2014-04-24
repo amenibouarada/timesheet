@@ -16,8 +16,8 @@ import java.util.Date;
 )
 public class EmployeeProjectBillable {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "employee_project_billable_seq")
-    @SequenceGenerator(name = "employee_project_billable_seq", sequenceName = "employee_project_billable_seq", allocationSize = 10)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "empl_prj_billable_seq")
+    @SequenceGenerator(name = "empl_prj_billable_seq", sequenceName = "empl_prj_billable_seq", allocationSize = 10)
     @Column(name = "id", columnDefinition = "integer")
     private Integer id;
 
