@@ -34,9 +34,6 @@ public class ProjectManager {
     @ForeignKey(name = "fk_project")
 	private Project project;
 
-    @Column(name = "receiving_notifications", columnDefinition = "bool not null default true")
-    private boolean receivingNotifications;
-
 	public Integer getId() {
 		return id;
 	}
@@ -94,13 +91,5 @@ public class ProjectManager {
 
     public void setMaster(boolean master) {
         this.master = master;
-    }
-
-    public boolean isReceivingNotifications() {
-        return receivingNotifications;
-    }
-
-    public void setReceivingNotifications(boolean receivingNotifications) {
-        this.receivingNotifications = receivingNotifications;
     }
 }

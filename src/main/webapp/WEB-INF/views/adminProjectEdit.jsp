@@ -124,6 +124,7 @@
             var nameCell = newTask.insertCell(1);
             dojo.addClass(nameCell , "multiline");
             var nameInput = dojo.doc.createElement("textarea");
+            dojo.addClass(nameInput , "task_name");
             dojo.attr(nameInput , {
                 id:"taskNameInput_" + newTaskIndex,
                 name:"projectTasks[" + newTaskIndex + "].name",
@@ -146,6 +147,7 @@
             var descriptionCell = newTask.insertCell(2);
             dojo.addClass(descriptionCell , "multiline");
             var descriptionInput = dojo.doc.createElement("textarea");
+            dojo.addClass(descriptionInput , "task_description");
             dojo.attr(descriptionInput , {
                 id:"taskDescriptionInput_" + newTaskIndex,
                 name:"projectTasks[" + newTaskIndex + "].description",
@@ -316,27 +318,6 @@
                 value:"on"
             });
             activeCell.appendChild(_activeInput);
-
-            /*----------------------------------*/
-            /*   Чекбокс "Получение рассылки"   */
-            /*----------------------------------*/
-
-            var notifyCell = newManager.insertCell(3);
-            var notifyInput = dojo.doc.createElement("input");
-            dojo.attr(notifyInput , {
-                id:"projectManagers" + newManagerIndex + ".receivingNotifications1",
-                name:"projectManagers[" + newManagerIndex + "].receivingNotifications",
-                type:"checkbox"
-            });
-            notifyCell.appendChild(notifyInput);
-
-            var _notifyInput = dojo.doc.createElement("input");
-            dojo.attr(_notifyInput , {
-                name:"_projectManagers[" + newManagerIndex + "].receivingNotifications",
-                type:"hidden",
-                value:"on"
-            });
-            notifyCell.appendChild(_notifyInput);
         }
 
         function createBillable() {
@@ -506,6 +487,7 @@
             var errors = [];
 
             var name = dojo.byId("name");
+            dojo.style(name, "background-color", "#ffffff");
             if (name.value.length == 0) {
                 valid = false;
                 //name.style({"background-color" : "#FFCFCF"});
@@ -514,6 +496,7 @@
             }
 
             var customer = dojo.byId("customer");
+            dojo.style(customer, "background-color", "#ffffff");
             if (customer.value.length == 0) {
                 valid = false;
                 //customer.style({"background-color" : "#FFCFCF"});
@@ -522,6 +505,7 @@
             }
 
             var startDate = dojo.byId("startDate");
+            dojo.style(startDate, "background-color", "#ffffff");
             if (startDate.getAttribute("aria-invalid") == "true") {
                 valid = false;
                 //startDate.style({"background-color" : "#FFCFCF"});
@@ -530,6 +514,7 @@
             }
 
             var endDate = dojo.byId("endDate");
+            dojo.style(endDate, "background-color", "#ffffff");
             if (endDate.getAttribute("aria-invalid") == "true") {
                 valid = false;
                 //endDate.style({"background-color" : "#FFCFCF"});
@@ -538,23 +523,59 @@
             }
 
             var jiraKey = dojo.byId("jiraKey");
+            dojo.style(jiraKey, "background-color", "#ffffff");
             if (jiraKey.value.length == 0) {
                 valid = false;
-                //jiraKey.style({"background-color" : "#FFCFCF"});
                 dojo.style(jiraKey, "background-color", "#f9f7ba");
                 errors.push("имя в Jira");
             }
 
+            var taskRequired = dojo.byId("cqRequired1");
+            if (taskRequired.checked) {
+                var tasks = dojo.query(".task_row:not(.hidden_delete)");
+                if (tasks.length == 0) {
+                    valid = false;
+                    errors.push("не указаны задачи по проекту");
+                }
+            }
+
+            var taskNames = dojo.query(".task_row:not(.hidden_delete) .task_name");
+            var namesValid = true;
+            dojo.forEach(taskNames, function(name) {
+                dojo.style(name, "background-color", "#ffffff");
+                if (name.value.length == 0) {
+                    dojo.style(name, "background-color", "#f9f7ba");
+                    namesValid = false;
+                }
+            });
+            if (!namesValid) {
+                valid = false;
+                errors.push("наименование задачи");
+            }
+
+            var taskDescriptions = dojo.query(".task_row:not(.hidden_delete) .task_description");
+            var descriptionsValid = true;
+            dojo.forEach(taskDescriptions, function(description) {
+                dojo.style(description, "background-color", "#ffffff");
+                if (description.value.length == 0) {
+                    dojo.style(description, "background-color", "#f9f7ba");
+                    descriptionsValid = false;
+                }
+            });
+            if (!descriptionsValid) {
+                valid = false;
+                errors.push("описание задачи");
+            }
+
             var dates = dojo.query(".billable_date:not(> tr.hidden_delete)").query(".dijitInputInner");
-            var billableValid = true;
+            var billablesValid = true;
             dojo.forEach(dates, function(date) {
                 if (date.getAttribute("aria-invalid") == "true") {
                     //date.style({"background-color" : "#FFCFCF"});
-                    dojo.style(date, "background-color", "#f9f7ba");
-                    billableValid = false;
+                    billablesValid = false;
                 }
             });
-            if (!billableValid) {
+            if (!billablesValid) {
                 valid = false;
                 errors.push("дата учёта в затратах");
             }
@@ -724,11 +745,11 @@
                             <td class="multiline">
                                 <form:hidden path="projectTasks[${row.index}].id"/>
                                 <form:hidden path="projectTasks[${row.index}].toDelete"/>
-                                <form:textarea path="projectTasks[${row.index}].name" cssClass="multiline" rows="3"/>
+                                <form:textarea path="projectTasks[${row.index}].name" cssClass="multiline task_name" rows="3"/>
                             </td>
                             <td class="multiline">
                                 <form:textarea path="projectTasks[${row.index}].description"
-                                               cssClass="multiline" rows="3"/>
+                                               cssClass="multiline task_description" rows="3"/>
                             </td>
                             <td>
                                 <form:checkbox path="projectTasks[${row.index}].active"/>
@@ -756,11 +777,10 @@
                                      onclick="createManager();"/>
                             </th>
                         </sec:authorize>
-                        <th width="200">Сотрудник</th>
-                        <th width="200">Роль</th>
+                        <th width="250">Сотрудник</th>
+                        <th width="250">Роль</th>
                         <th width="100">Главный</th>
                         <th width="100">Признак активности</th>
-                        <th width="100">Получение рассылки</th>
                     </tr>
                     <c:forEach items="${projectform.projectManagers}" varStatus="row">
                         <tr id="projectManager_${row.index}" class="manager_row">
@@ -788,9 +808,6 @@
                             </td>
                             <td>
                                 <form:checkbox path="projectManagers[${row.index}].active"/>
-                            </td>
-                            <td>
-                                <form:checkbox path="projectManagers[${row.index}].receivingNotifications"/>
                             </td>
                         </tr>
                     </c:forEach>

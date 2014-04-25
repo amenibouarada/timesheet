@@ -68,7 +68,8 @@ public class AdminProjectEditController {
         ModelAndView modelAndView = new ModelAndView("adminProjectEdit");
         modelAndView.addObject("pageFunction", "add");
         modelAndView.addObject("divisionsList", divisionService.getAllDivisions());
-        modelAndView.addObject("projectStateTypes", TypesOfActivityEnum.values());
+        List<TypesOfActivityEnum> projectTypesOfActivityEnums = Arrays.asList(TypesOfActivityEnum.PROJECT, TypesOfActivityEnum.PRESALE);
+        modelAndView.addObject("projectStateTypes", projectTypesOfActivityEnums);
         modelAndView.addObject("projectFundingTypes", ProjectFundingTypeEnum.values());
         modelAndView.addObject("divisionsEmployeesJSON", employeeService.getDivisionsEmployeesJSON(new Date()));
         modelAndView.addObject("employeesListJSON", employeeService.getAllEmployeesJSON());
@@ -91,7 +92,8 @@ public class AdminProjectEditController {
         ModelAndView modelAndView = new ModelAndView("adminProjectEdit");
         modelAndView.addObject("pageFunction", "edit");
         modelAndView.addObject("divisionsList", divisionService.getAllDivisions());
-        modelAndView.addObject("projectStateTypes", TypesOfActivityEnum.values());
+        List<TypesOfActivityEnum> projectTypesOfActivityEnums = Arrays.asList(TypesOfActivityEnum.PROJECT, TypesOfActivityEnum.PRESALE);
+        modelAndView.addObject("projectStateTypes", projectTypesOfActivityEnums);
         modelAndView.addObject("projectFundingTypes", ProjectFundingTypeEnum.values());
         modelAndView.addObject("divisionsEmployeesJSON", employeeService.getDivisionsEmployeesJSON(new Date()));
         modelAndView.addObject("employeesListJSON", employeeService.getAllEmployeesJSON());
@@ -149,7 +151,6 @@ public class AdminProjectEditController {
             manager.setProjectRole(projectManager.getProjectRole().getId());
             manager.setMaster(projectManager.isMaster());
             manager.setActive(projectManager.isActive());
-            manager.setReceivingNotifications(projectManager.isReceivingNotifications());
             manager.setToDelete("");
             projectManagerForms.add(manager);
         }
@@ -230,7 +231,6 @@ public class AdminProjectEditController {
                 projectManager.setProjectRole(projectRoleService.find(managerForm.getProjectRole()));
                 projectManager.setMaster(managerForm.getMaster());
                 projectManager.setActive(managerForm.getActive());
-                projectManager.setReceivingNotifications(managerForm.getReceivingNotifications());
                 projectManager.setProject(project);
                 projectManagers.add(projectManager);
             }
@@ -268,7 +268,12 @@ public class AdminProjectEditController {
 
         project.setPassport(StringEscapeUtils.unescapeHtml4(form.getPassport()));
         Set<Division> projectDivisions = new HashSet<Division>();
-        for (Integer divisionId : form.getProjectDivisions()) {
+        List<Integer> projectDivisionIDs = form.getProjectDivisions();
+        if (projectDivisionIDs == null) {
+            projectDivisionIDs = new ArrayList<Integer>();
+            projectDivisionIDs.add(form.getManagerDivision());
+        }
+        for (Integer divisionId : projectDivisionIDs) {
             projectDivisions.add(divisionService.find(divisionId));
         }
         project.setDivisions(projectDivisions);
