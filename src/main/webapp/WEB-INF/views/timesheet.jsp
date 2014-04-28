@@ -597,7 +597,6 @@ function loadDraft() {
             <div style="margin-bottom: 3px;">Тип компенсации</div>
             <select data-dojo-type="dijit.form.Select" style="width: 99%;" id="typeOfCompensation"
                     data-dojo-props="value: '${timeSheetForm.typeOfCompensation}'">
-                <option value="0"></option>
                 <c:forEach items="${typesOfCompensation}" var="t">
                     <option value="${t.id}">${t.value}</option>
                 </c:forEach>

@@ -1412,13 +1412,6 @@ function submitWithOvertimeCauseSet(){
         return;
     }
 
-    var compensation = dijit.byId("typeOfCompensation").get("value");
-
-    if (compensation == 0) {
-        tooltip.show("Необходимо указать тип компенсации!");
-        return;
-    }
-
     dojo.byId("overtimeCauseComment_hidden").value = dijit.byId("overtimeCauseComment").get('value');
     dojo.byId("overtimeCause_hidden").value = overtimeCause;
     dojo.byId("typeOfCompensation_hidden").value = dijit.byId("typeOfCompensation").get('value');
