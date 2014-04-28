@@ -48,6 +48,7 @@
     var workOnHolidayCauseList = ${workOnHolidayCauseJson};
     var defaultOvertimeCause = '${timeSheetForm.overtimeCause}';
     var dataDraft = '${data}';
+    var isErrorPage = "${isErrorPage}";
 
     var root = getRootEventListener();
     var month = correctLength(new Date().getMonth() + 1);
@@ -119,7 +120,11 @@
         }
         initCurrentDateInfo('${timeSheetForm.employeeId}', dijit.byId('calDate').value, '/calendar/dates');
 
-        requestAndRefreshDailyTimesheetData(dijit.byId('calDate').value, dojo.byId('employeeId').value);
+        if (!isErrorPage) {
+            requestAndRefreshDailyTimesheetData(dijit.byId('calDate').value, dojo.byId('employeeId').value);
+        } else {
+            requestAndRefreshPreviousDayPlans(dijit.byId('calDate').value, dojo.byId('employeeId').value);
+        }
 
         //крутилка создается при после загрузки страницы,
         //т.к. если она создается в месте использования - ghb show не отображается картинка
@@ -301,6 +306,45 @@
             }
         });
     }
+
+    function requestAndRefreshPreviousDayPlans(date, employeeId) {
+        var month = correctLength(date.getMonth() + 1);
+        var year = date.getFullYear();
+        var day = correctLength(date.getDate());
+        var requestDate = year + "-" + month + "-" + day;
+
+        dojo.xhrGet({
+            url: "${pageContext.request.contextPath}" + "/timesheet/dailyTimesheetData",
+            handleAs: "json",
+            timeout: 10000,
+            content: {date: requestDate, employeeId: employeeId},
+            load: function (data, ioArgs) {
+                if (data && ioArgs && ioArgs.args && ioArgs.args.content) {
+                    var previous = data.previousDayData;
+                    var current = data.currentDayData;
+
+                    // Заполнение поля планов, указанных в предыдущий рабочий день.
+
+                    var previousWorkDate = previous.workDate;
+                    var previousPlan = previous.plan;
+
+                    dojo.byId("lbPrevPlan").innerHTML = (previousWorkDate != null) ?
+                            "Планы предыдущего рабочего дня (" + timestampStrToDisplayStr(previousWorkDate.toString()) + "):" :
+                            "Планы предыдущего рабочего дня:";
+
+                    dojo.byId("plan_textarea").innerHTML = (previousPlan != null && previousPlan.length != 0) ?
+                            previousPlan.replace(/\n/g, '<br>') :
+                            "План предыдущего рабочего дня не был определен";
+                }
+            },
+            error: function (err, ioArgs) {
+                if (err && ioArgs && ioArgs.args && ioArgs.args.content) {
+                    console.log(err);
+                }
+            }
+        });
+    }
+
 
     function hideShowElement(id, isHide) {
         console.log(id + " " + isHide);
@@ -660,14 +704,14 @@ function loadDraft() {
         </tr>
 
 
-        <%--<c:if test="${fn:length(timeSheetForm.timeSheetTablePart) > 0}">
+        <c:if test="${isErrorPage}">
             <c:forEach items="${timeSheetForm.timeSheetTablePart}" varStatus="row">
                 <tr class="time_sheet_row" id="ts_row_${row.index}">
 
-                        &lt;%&ndash;чекбоксики для кнопки удаления выбранных строк&ndash;%&gt;
+                        <%--&lt;%&ndash;чекбоксики для кнопки удаления выбранных строк&ndash;%&gt;
                         &lt;%&ndash;<td class="text_center_align"><input class="selectedRow" type="checkbox"&ndash;%&gt;
                         &lt;%&ndash;name="selectedRow[${row.index}]"&ndash;%&gt;
-                        &lt;%&ndash;id="selected_row_id_${row.index}"/></td>&ndash;%&gt;
+                        &lt;%&ndash;id="selected_row_id_${row.index}"/></td>&ndash;%&gt;--%>
 
                     <td class="text_center_align" id="delete_button_id_${row.index}">
 
@@ -750,7 +794,7 @@ function loadDraft() {
                                                          onkeyup="somethingChanged();"/></td>
                 </tr>
             </c:forEach>
-        </c:if>--%>
+        </c:if>
 
 
         <tr style="height : 20px;" id="total_duration_row">

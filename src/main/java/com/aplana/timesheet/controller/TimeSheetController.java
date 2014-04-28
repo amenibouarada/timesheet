@@ -21,7 +21,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
@@ -329,6 +328,7 @@ public class TimeSheetController {
         logger.info("TimeSheetForm for employee {} has errors. Form not validated.", tsForm.getEmployeeId());
         ModelAndView mavWithErrors = new ModelAndView("timesheet");
         mavWithErrors.addObject("timeSheetForm", tsForm);
+        mavWithErrors.addObject("isErrorPage", true);
         mavWithErrors.addObject("errors", result.getAllErrors());
         mavWithErrors.addObject("selectedProjectsJson", timeSheetService.getSelectedProjectsJson(tsForm));
         mavWithErrors.addObject("selectedProjectRolesJson", timeSheetService.getSelectedProjectRolesJson(tsForm));

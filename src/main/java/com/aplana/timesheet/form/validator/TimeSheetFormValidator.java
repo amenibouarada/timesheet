@@ -302,20 +302,22 @@ public class TimeSheetFormValidator extends AbstractValidator {
         Integer projectId = formRow.getProjectId();
         // Не указано название проекта
         // Не указано название пресейла
-        if ((actType == TypesOfActivityEnum.PROJECT || actType == TypesOfActivityEnum.PRESALE)
-                && isNotChoosed(projectId)
-                ) {
-            errors.rejectValue("timeSheetTablePart[" + notNullRowNumber + "].projectId",
-                    actType == TypesOfActivityEnum.PRESALE
-                            ? "error.tsform.presale.required"
-                            : "error.tsform.project.required",
-                    getErrorMessageArgs(notNullRowNumber),
-                    "Необходимо указать название проекта в строке " + (notNullRowNumber + 1) + ".");
-            // Неверный проект\пресейл
-        } else if (!isProjectValid(projectId)) {
-            errors.rejectValue("timeSheetTablePart[" + notNullRowNumber + "].projectId",
-                    "error.tsform.project.presale.invalid", getErrorMessageArgs(notNullRowNumber),
-                    "Неверный проект\\пресейл в строке " + (notNullRowNumber + 1) + ".");
+        if (actType != TypesOfActivityEnum.NON_PROJECT) {
+            if ((actType == TypesOfActivityEnum.PROJECT || actType == TypesOfActivityEnum.PRESALE)
+                    && isNotChoosed(projectId)
+                    ) {
+                errors.rejectValue("timeSheetTablePart[" + notNullRowNumber + "].projectId",
+                        actType == TypesOfActivityEnum.PRESALE
+                                ? "error.tsform.presale.required"
+                                : "error.tsform.project.required",
+                        getErrorMessageArgs(notNullRowNumber),
+                        "Необходимо указать название проекта в строке " + (notNullRowNumber + 1) + ".");
+                // Неверный проект\пресейл
+            } else if (!isProjectValid(projectId)) {
+                errors.rejectValue("timeSheetTablePart[" + notNullRowNumber + "].projectId",
+                        "error.tsform.project.presale.invalid", getErrorMessageArgs(notNullRowNumber),
+                        "Неверный проект\\пресейл в строке " + (notNullRowNumber + 1) + ".");
+            }
         }
     }
 

@@ -634,6 +634,8 @@ public class TimeSheetService {
         String typesOfActivityJson = dictionaryItemService.getDictionaryItemsInJson(typesOfActivity);
         result.put("actTypeJson", typesOfActivityJson);
 
+        result.put("workplaceList", dictionaryItemService.getWorkplaces());
+
         String workplacesJson = dictionaryItemService.getDictionaryItemsInJson(dictionaryItemService.getWorkplaces());
         result.put("workplaceJson", workplacesJson);
 

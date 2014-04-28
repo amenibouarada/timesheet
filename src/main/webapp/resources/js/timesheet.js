@@ -446,7 +446,12 @@ function onCalDateChange(calDateObj){
         calDateObj.constraints.max = new Date(2100, 1, 1);
     }
     validateReportDate(calDateObj.value);
-    requestAndRefreshDailyTimesheetData(calDateObj.value, dojo.byId('employeeId').value);
+
+    if (!isErrorPage) {
+        requestAndRefreshDailyTimesheetData(calDateObj.value, dojo.byId('employeeId').value);
+    } else {
+        requestAndRefreshPreviousDayPlans(calDateObj.value, dojo.byId('employeeId').value);
+    }
 }
 
 function onEmployeeChange(employeeObj){
@@ -1403,6 +1408,13 @@ function submitWithOvertimeCauseSet(){
 
     if (overtimeCause == 0) {
         tooltip.show("Необходимо указать причину!");
+        return;
+    }
+
+    var compensation = dijit.byId("typeOfCompensation").get("value");
+
+    if (compensation == 0) {
+        tooltip.show("Необходимо указать тип компенсации!");
         return;
     }
 
