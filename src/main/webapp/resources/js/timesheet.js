@@ -451,6 +451,7 @@ function onCalDateChange(calDateObj){
         requestAndRefreshDailyTimesheetData(calDateObj.value, dojo.byId('employeeId').value);
     } else {
         requestAndRefreshPreviousDayPlans(calDateObj.value, dojo.byId('employeeId').value);
+        reloadRowsState();
     }
 }
 

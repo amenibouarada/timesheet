@@ -124,6 +124,7 @@
             requestAndRefreshDailyTimesheetData(dijit.byId('calDate').value, dojo.byId('employeeId').value);
         } else {
             requestAndRefreshPreviousDayPlans(dijit.byId('calDate').value, dojo.byId('employeeId').value);
+            reloadRowsState();
         }
 
         //крутилка создается при после загрузки страницы,
