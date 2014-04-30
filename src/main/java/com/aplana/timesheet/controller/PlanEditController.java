@@ -576,7 +576,7 @@ public class PlanEditController {
                     managerId
             );
             Employee manager = employeeService.find(managerId);
-            if (!employees.contains(manager)) {
+            if (!employees.contains(manager) && manager != null) {
                 employees.add(manager);
                 Collections.sort(employees);
             }
