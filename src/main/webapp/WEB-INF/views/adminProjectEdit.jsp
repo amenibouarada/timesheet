@@ -522,13 +522,13 @@
                 errors.push("дата окончания проекта");
             }
 
-            var jiraKey = dojo.byId("jiraKey");
+            /*var jiraKey = dojo.byId("jiraKey");
             dojo.style(jiraKey, "background-color", "#ffffff");
             if (jiraKey.value.length == 0) {
                 valid = false;
                 dojo.style(jiraKey, "background-color", "#f9f7ba");
                 errors.push("имя в Jira");
-            }
+            }*/
 
             var taskRequired = dojo.byId("cqRequired1");
             if (taskRequired.checked) {
