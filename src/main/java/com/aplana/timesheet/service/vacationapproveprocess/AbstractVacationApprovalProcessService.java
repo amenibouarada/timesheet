@@ -404,8 +404,13 @@ public abstract class AbstractVacationApprovalProcessService extends AbstractSer
         Date requestDate = new Date();
 
         for (Project project : projects) {
-            Employee manager = project.getManager();
-            tryAddNewManagerToApprovalResults(vacation, requestDate, approvals, manager, Lists.newArrayList(project));
+            Employee projectManager = project.getManager();
+            Division projectDivision = project.getDivision();
+            Employee vacationEmployee = vacation.getEmployee();
+
+            if (vacationEmployee.getDivision().equals(projectDivision)) {
+                tryAddNewManagerToApprovalResults(vacation, requestDate, approvals, projectManager, Lists.newArrayList(project));
+            }
         }
 
         return approvals;
