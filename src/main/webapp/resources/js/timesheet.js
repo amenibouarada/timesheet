@@ -1406,8 +1406,9 @@ function submitWithOvertimeCauseSet(){
     }
 
     var overtimeCause = dijit.byId("overtimeCause").get("value");
+    var overtimeRequired = dijit.byId("overtimeCause").get("required");
 
-    if (overtimeCause == 0) {
+    if (overtimeCause == 0 && overtimeRequired == true) {
         tooltip.show("Необходимо указать причину!");
         return;
     }
