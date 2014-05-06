@@ -55,6 +55,8 @@
     var standByElement;
     var dojoxDecode = dojox.html.entities.decode;
     var decodeMap = [["\u0027", "#39"], ["\u0028", "#40"], ["\u0029", "#41"]];
+    var currentDate;
+    var isFinalForm;
 
     dojo.declare("Calendar", com.aplana.dijit.ext.Calendar, {
         getEmployeeId: function () {
@@ -119,6 +121,8 @@
             setDefaultDate(dojo.byId("employeeId").value);
         }
         initCurrentDateInfo('${timeSheetForm.employeeId}', dijit.byId('calDate').value, '/calendar/dates');
+
+        currentDate = dijit.byId('calDate').value;
 
         if (!isErrorPage) {
             requestAndRefreshDailyTimesheetData(dijit.byId('calDate').value, dojo.byId('employeeId').value);
@@ -297,6 +301,7 @@
                         readonly: isFinal
                     });
 
+                    isFinalForm = isFinal;
                     setElementsAvailability(isFinal);
                 }
             },
@@ -336,6 +341,8 @@
                     dojo.byId("plan_textarea").innerHTML = (previousPlan != null && previousPlan.length != 0) ?
                             previousPlan.replace(/\n/g, '<br>') :
                             "План предыдущего рабочего дня не был определен";
+
+                    isFinalForm = false;
                 }
             },
             error: function (err, ioArgs) {

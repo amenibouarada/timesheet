@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
 public class ReportService {
 
     private static final String JIRA_URL = "http://jira.aplana.com/browse/";
-    private static final Pattern PATTERN_TASK = Pattern.compile("\\b[A-Z][A-Z]+-[A-Z0-9]+\\b");
+    private static final Pattern PATTERN_TASK = Pattern.compile("\\b([A-Z][A-Z]+)-[0-9]+\\b");
     private static final Pattern PATTERN_APLANA_URL = Pattern.compile("\\b(https?://)?(([-.a-zA-ZА-Яа-я0-9]+)\\.aplana\\.com((/browse/(\\w+-\\d+))|([0-9a-zA-ZА-Яа-я-./!?=$&_%]+))?)\\b");
 
     @Autowired
@@ -62,6 +62,7 @@ public class ReportService {
 
         while(matcher.find()){
             String word = matcher.group(0);
+            String projectKey = matcher.group(1);
 
             // Не заменять в уже существующих ссылках
             // TODO нормальную проверку на ссылки
@@ -73,7 +74,7 @@ public class ReportService {
             Integer indexEnd = matcher.end();
 
             for (String projectName : jiraKeyList){
-                if (word.contains(projectName)){
+                if (projectKey.contains(projectName)){
                     StringBuffer link = new StringBuffer(128);
 
                     link.append("<a href='");
