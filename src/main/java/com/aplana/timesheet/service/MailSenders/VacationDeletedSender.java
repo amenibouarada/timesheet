@@ -50,16 +50,6 @@ public class VacationDeletedSender extends  AbstractVacationSenderWithCopyToAuth
         final Mail mail = new TimeSheetMail();
 
         Collection<String> mailsTo = new ArrayList<String>();
-        List<Project> projects = projectService.getProjectsForVacation(vacation);
-
-        Map<Employee, List<Project>> juniorManagerProjectManagers = employeeService.getJuniorProjectManagersAndProjects(projects, vacation);
-        for (Employee manager : juniorManagerProjectManagers.keySet()) {
-            mailsTo.add(manager.getEmail());
-        }
-
-        for (Project project : projects) {
-            mailsTo.add(project.getManager().getEmail());
-        }
 
         Iterable<String> mailIterator = getToEmails(vacation);
         for(String email : mailIterator){
