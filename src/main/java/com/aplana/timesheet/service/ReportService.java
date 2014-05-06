@@ -177,7 +177,11 @@ public class ReportService {
         for(String keys : jiraKeyList){
             String[] splitKey = keys.split(",");
             for(int i=0; i<splitKey.length; ++i){
-                result.add(splitKey[i].trim());
+                String key = splitKey[i].trim();
+                if (key.length() > 0) {
+                    result.add(key);
+                }
+
             }
         }
 
