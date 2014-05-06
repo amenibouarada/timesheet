@@ -175,7 +175,7 @@ public class AdminProjectEditController {
     }
 
     @RequestMapping(value = "/admin/projects/save", method = RequestMethod.POST)
-    public ModelAndView showSaveForm(
+    public String saveProject(
             @ModelAttribute("projectform") AdminProjectForm form
     ) {
         Project project = projectService.find(form.getId());
@@ -280,7 +280,6 @@ public class AdminProjectEditController {
 
         projectService.storeProject(project);
 
-        ModelAndView modelAndView = new ModelAndView("adminProjectEditSave");
-        return modelAndView;
+        return "redirect:/admin/projects";
     }
 }
