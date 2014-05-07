@@ -122,7 +122,7 @@
         }
         initCurrentDateInfo('${timeSheetForm.employeeId}', dijit.byId('calDate').value, '/calendar/dates');
 
-        currentDate = dijit.byId('calDate').value;
+        currentDate = dijit.byId('calDate').get("value");
 
         if (!isErrorPage) {
             requestAndRefreshDailyTimesheetData(dijit.byId('calDate').value, dojo.byId('employeeId').value);
@@ -292,7 +292,7 @@
                         dojo.byId("effortInNextDay").value = nextDayEffort;
                     }
 
-                    dojo.byId('plan').innerHTML = (currentPlan != null && currentPlan.length != 0) ? currentPlan : "";
+                    dojo.byId('plan').value = (currentPlan != null && currentPlan.length != 0) ? currentPlan : "";
 
                     dojo.attr("effortInNextDay", {
                         disabled: isFinal
@@ -679,7 +679,7 @@ function loadDraft() {
 
         <%--</button>--%>
     <c:if test="${fn:length(errors) > 0}">
-        <div class="errors_box">
+        <div id="errors_box" class="errors_box">
             <c:forEach items="${errors}" var="error">
                 <fmt:message key="${error.code}">
                     <fmt:param value="${error.arguments[0]}"/>

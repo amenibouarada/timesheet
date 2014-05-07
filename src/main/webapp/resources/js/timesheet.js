@@ -447,11 +447,25 @@ function onCalDateChange(calDateObj){
     }
     validateReportDate(calDateObj.value);
 
-    if (!isErrorPage) {
-        requestAndRefreshDailyTimesheetData(calDateObj.value, dojo.byId('employeeId').value);
-    } else {
-        requestAndRefreshPreviousDayPlans(calDateObj.value, dojo.byId('employeeId').value);
-        reloadRowsState();
+    var confirmed = true;
+    var sameDateOnChangeEventFired = (currentDate.getTime() == dijit.byId('calDate').get("value").getTime());
+
+    if (!sameDateOnChangeEventFired) {
+        if (!isFinalForm && (tablePartNotEmpty() || planBoxNotEmpty())) {
+            confirmed = confirm("В отчете имеются несохраненные изменения. Продолжить без сохранения?");
+        }
+
+        if (confirmed) {
+            requestAndRefreshDailyTimesheetData(calDateObj.value, dojo.byId('employeeId').value);
+
+            if (isErrorPage) {
+                dojo.style("errors_box", {"display":"none"});
+                isErrorPage = false;
+            }
+            currentDate = dijit.byId('calDate').get("value");
+        } else {
+            dijit.byId('calDate').set("value", currentDate);
+        }
     }
 }
 
