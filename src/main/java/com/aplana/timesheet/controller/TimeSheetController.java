@@ -167,9 +167,12 @@ public class TimeSheetController {
 
         // Переделывает html-символы(&#40 и т.п.) в нормальные
         tsForm.setPlan(StringEscapeUtils.unescapeHtml4(tsForm.getPlan()));
-        for(TimeSheetTableRowForm row : tsForm.getTimeSheetTablePart()){
-            row.setDescription(StringEscapeUtils.unescapeHtml4(row.getDescription()));
-            row.setProblem(StringEscapeUtils.unescapeHtml4(row.getProblem()));
+        List<TimeSheetTableRowForm> tablePartRows = tsForm.getTimeSheetTablePart();
+        if (tablePartRows != null) {
+            for(TimeSheetTableRowForm row : tablePartRows){
+                row.setDescription(StringEscapeUtils.unescapeHtml4(row.getDescription()));
+                row.setProblem(StringEscapeUtils.unescapeHtml4(row.getProblem()));
+            }
         }
 
         tsFormValidator.validate(tsForm, result);
