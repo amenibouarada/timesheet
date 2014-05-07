@@ -36,6 +36,8 @@ public abstract class AbstractIllnessSender extends MailSender<Illness> {
 
         List<String> emails = new ArrayList<String>();
 
+        emails.add(illness.getEmployee().getEmail());
+
         Map<Employee, List<Project>> juniorProjectManagersAndProjects =
                 employeeService.getJuniorProjectManagersAndProjects(projects, illness);
         for (Map.Entry entry: juniorProjectManagersAndProjects.entrySet()) {
