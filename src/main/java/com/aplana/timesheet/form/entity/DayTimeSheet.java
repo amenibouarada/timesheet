@@ -294,7 +294,7 @@ public class DayTimeSheet implements Comparable<DayTimeSheet> {
     // является данный день командировкой
     @Transactional(readOnly = true)
     public Boolean getBusinessTripDay() {
-        return businessTripDAO.isDayBusinessTrip(emp, new Date(calDate.getTime()));
+        return businessTripDAO.isBusinessTripDay(emp, new Date(calDate.getTime()));
     }
 
 }

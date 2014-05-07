@@ -47,4 +47,8 @@ public class BusinessTripService {
     public List<BusinessTrip> getEmployeeBusinessTripsByDates(Employee employee, Date beginDate, Date endDate) {
         return businessTripDAO.getEmployeeBusinessTripsByDates(employee, beginDate, endDate);
     }
+
+    public boolean isBusinessTripDay(Employee employee, Date date) {
+        return businessTripDAO.isBusinessTripDay(employee, date);
+    }
 }

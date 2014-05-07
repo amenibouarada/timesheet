@@ -8,6 +8,7 @@ import com.aplana.timesheet.dao.TimeSheetDAO;
 import com.aplana.timesheet.dao.entity.*;
 import com.aplana.timesheet.dao.entity.Calendar;
 import com.aplana.timesheet.enums.DictionaryEnum;
+import com.aplana.timesheet.enums.OvertimeCausesEnum;
 import com.aplana.timesheet.enums.TypesOfTimeSheetEnum;
 import com.aplana.timesheet.enums.UndertimeCausesEnum;
 import com.aplana.timesheet.form.TimeSheetForm;
@@ -92,6 +93,9 @@ public class TimeSheetService {
     @Autowired
     private AvailableActivityCategoryService availableActivityCategoryService;
 
+    @Autowired
+    private BusinessTripService businessTripService;
+
     @Transactional
     public TimeSheet storeTimeSheet(TimeSheetForm tsForm, TypesOfTimeSheetEnum type) {
         TimeSheet timeSheet = new TimeSheet();
@@ -148,8 +152,16 @@ public class TimeSheetService {
             TimeSheetDetail timeSheetDetail = new TimeSheetDetail();
             timeSheetDetail.setDuration((double) 0);
             timeSheetDetail.setTimeSheet(timeSheet);
-            UndertimeCausesEnum causesEnum = EnumsUtils.getEnumById(tsForm.getOvertimeCause(), UndertimeCausesEnum.class);
-            String comment = causesEnum.getName() + ":" + tsForm.getOvertimeCauseComment();
+            String comment;
+            if (businessTripService.isBusinessTripDay(timeSheet.getEmployee(), timeSheet.getCalDate().getCalDate())) {
+                OvertimeCausesEnum overtimeCause =
+                        EnumsUtils.getEnumById(tsForm.getOvertimeCause(), OvertimeCausesEnum.class);
+                comment = overtimeCause.getName() + ":" + tsForm.getOvertimeCauseComment();
+            } else {
+                UndertimeCausesEnum undertimeCause =
+                        EnumsUtils.getEnumById(tsForm.getOvertimeCause(), UndertimeCausesEnum.class);
+                comment = undertimeCause.getName() + ":" + tsForm.getOvertimeCauseComment();
+            }
             timeSheetDetail.setDescription(comment);
             timeSheetDetails.add(timeSheetDetail);
         }
@@ -271,7 +283,7 @@ public class TimeSheetService {
      */
     @Transactional(readOnly = true)
     public String getPlansJson(String date, Integer employeeId) {
-        return JsonUtil.format(getPlansJsonBuilder(date,employeeId));
+        return JsonUtil.format(getPlansJsonBuilder(date, employeeId));
     }
 
     @Transactional(readOnly = true)

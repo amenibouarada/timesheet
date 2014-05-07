@@ -58,6 +58,8 @@ public class TimeSheetFormValidator extends AbstractValidator {
     private OvertimeCauseService overtimeCauseService;
     @Autowired
     private AvailableActivityCategoryService availableActivityCategoryService;
+    @Autowired
+    private BusinessTripService businessTripService;
 
     public boolean supports(Class<?> clazz) {
         return clazz.isAssignableFrom(TimeSheetForm.class);
@@ -515,8 +517,13 @@ public class TimeSheetFormValidator extends AbstractValidator {
                 DateTimeUtil.stringToDateForDB(tsForm.getCalDate())
         );
 
+        boolean isBusinessTrip = businessTripService.isBusinessTripDay(
+                employee,
+                DateTimeUtil.stringToDateForDB(tsForm.getCalDate())
+        );
+
         // Отчет за выходные без отработанных часов невозможен
-        if ((isHoliday || isVacation) && totalDuration == 0) {
+        if ((isHoliday || isVacation) && totalDuration == 0 && !isBusinessTrip) {
             errors.rejectValue("overtimeCause", "error.tsform.workonholiday.zeroduration");
         }
 
