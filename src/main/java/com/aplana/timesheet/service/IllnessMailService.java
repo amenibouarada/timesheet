@@ -26,10 +26,7 @@ public class IllnessMailService {
             if (illness.getEmployee().getDivision().getTrackingIllness()) {
                 Date curDate = DateTimeUtil.stringToDateForDB(DateTimeUtil.currentDay()); // кручу верчу обмануть хочу :-) (можно просто скинуть в дате время)
                 Date reportDate = illness.getBeginDate();
-                /* проверим что больничный не задним числом */
-                if (curDate.compareTo(reportDate) != 1) {
-                    sendMailService.performIllnessCreateMailing(illness);
-                }
+                sendMailService.performIllnessCreateMailing(illness);
             }
         }
     }
