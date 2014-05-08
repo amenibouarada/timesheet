@@ -135,27 +135,8 @@ public class BusinessTripsAndIllnessController extends AbstractController{
     public ModelAndView showDefaultIllnessReport(
             @PathVariable("divisionId") Integer divisionId,
             @PathVariable("employeeId") Integer employeeId,
-            @ModelAttribute("businesstripsandillness") BusinessTripsAndIllnessForm tsForm,
-            @RequestParam(value="back", required=false) String back
+            @ModelAttribute("businesstripsandillness") BusinessTripsAndIllnessForm tsForm
     ) throws BusinessTripsAndIllnessControllerException {
-
-//        savepoint("businesstripsandillness");
-        if (back != null){
-            Integer backDivisionId = (Integer)session.getAttribute("divisionId");
-            Integer backEmployeeId = (Integer)session.getAttribute("employeeId");
-            BusinessTripsAndIllnessForm backTsForm = (BusinessTripsAndIllnessForm)session.getAttribute("tsForm");
-
-            if (backDivisionId != null && backEmployeeId != null && backTsForm != null){
-                divisionId = backDivisionId;
-                employeeId = backEmployeeId;
-                tsForm = backTsForm;
-            }
-        } else {
-            session.setAttribute("divisionId", divisionId);
-            session.setAttribute("employeeId", employeeId);
-            session.setAttribute("tsForm", tsForm);
-        }
-
         Integer printtype = tsForm.getReportType();
         Integer manager = tsForm.getManager();
         List<Integer> regions = tsForm.getRegions();
@@ -274,11 +255,10 @@ public class BusinessTripsAndIllnessController extends AbstractController{
             @PathVariable("divisionId") Integer divisionId,
             @PathVariable("employeeId") Integer employeeId,
             @PathVariable("reportTypeId") Integer reportTypeId,
-            @ModelAttribute("businesstripsandillness") BusinessTripsAndIllnessForm tsForm,
-            @RequestParam(value="employeeId", required=false) String back
+            @ModelAttribute("businesstripsandillness") BusinessTripsAndIllnessForm tsForm
     ) throws BusinessTripsAndIllnessControllerException {
         tsForm.setReportType(reportTypeId);
-        return showDefaultIllnessReport(divisionId, employeeId, tsForm, back);
+        return showDefaultIllnessReport(divisionId, employeeId, tsForm);
     }
     /**
      * Удаляем больничный. Если удаление прошло нормально, то возвращаем пустую строку.
