@@ -147,7 +147,7 @@ public class CreateVacationController {
             return getModelAndView(employee);
         }
 
-        vacationService.createAndMailngVacation(createVacationForm,employee,curEmployee,isApprovedVacation);
+        vacationService.createAndMailVacation(createVacationForm, employee, curEmployee, isApprovedVacation);
 
         HttpSession session = request.getSession(false);
         session.setAttribute("employeeId", employeeId);

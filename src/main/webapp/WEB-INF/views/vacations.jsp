@@ -18,6 +18,7 @@
 <c:set var="vacationAprovementWiyhPm" value="<%=VacationStatusEnum.APPROVEMENT_WITH_PM.getId()%>"/>
 <c:set var="vacationAprovedByPm" value="<%=VacationStatusEnum.APPROVED_BY_PM.getId()%>"/>
 <c:set var="vacationRejected" value="<%=VacationStatusEnum.REJECTED.getId()%>"/>
+<c:set var="vacationCreated" value="<%=VacationStatusEnum.CREATED.getId()%>"/>
 
 <%
     VacationService vacationService = (VacationService) request.getAttribute("vacationService");
@@ -307,7 +308,10 @@
                     <td id="statusTd" class="centered">
                         <c:choose>
                         <c:when test="${vacation.status.id == vacationApproved}">
-                            <span  style="color: #00b114">
+                            <span style="color: #00b114">
+                        </c:when>
+                        <c:when test="${vacation.status.id == vacationCreated}">
+                            <span style="color: #00b114">
                         </c:when>
                         <c:when test="${vacation.status.id == vacationRejected}">
                             <span style="color: #d90002">

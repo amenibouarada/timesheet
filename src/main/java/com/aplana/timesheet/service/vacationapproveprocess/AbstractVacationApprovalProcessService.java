@@ -356,7 +356,7 @@ public abstract class AbstractVacationApprovalProcessService extends AbstractSer
 
         addLineManagers(emails, vacation);
         addSecondManager(emails, vacation);
-        vacation.setStatus(dictionaryItemService.find(VacationStatusEnum.APPROVED.getId()));     //в БД отмечаем, что отпуск утвержден
+        vacation.setStatus(dictionaryItemService.find(VacationStatusEnum.CREATED.getId()));
         vacationService.store(vacation);
         sendMailService.performPlannedVacationCreateRequestSender(vacation, emails);
     }

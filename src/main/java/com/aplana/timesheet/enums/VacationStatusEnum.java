@@ -12,7 +12,8 @@ public enum VacationStatusEnum implements TSEnum {
     APPROVED_BY_PM(58, "Согласовано РПГ"),
     APPROVEMENT_WITH_LM(59, "На согласовании ЛР"),
     APPROVED(60, "Утверждено"),
-    REJECTED(61, "Отклонено");
+    REJECTED(61, "Отклонено"),
+    CREATED(133, "Создано");
 
     private final int id;
     private final String name;

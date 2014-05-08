@@ -215,7 +215,7 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
         return vacationDAO.findVacationsNeedApproval(employeeId).size();
     }
 
-    public void createAndMailngVacation(CreateVacationForm createVacationForm, Employee employee, Employee curEmployee, boolean isApprovedVacation)
+    public void createAndMailVacation(CreateVacationForm createVacationForm, Employee employee, Employee curEmployee, boolean isApprovedVacation)
             throws VacationApprovalServiceException {
 
         final Vacation vacation = new Vacation();
