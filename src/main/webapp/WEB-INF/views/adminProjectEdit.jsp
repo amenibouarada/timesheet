@@ -105,7 +105,10 @@
             }
             dojo.attr(newTask, {id : "projectTask_" + newTaskIndex});
 
-            // Кнопка удаления
+            /*------------------------*/
+            /*    Кнопка удаления     */
+            /*------------------------*/
+
             var deleteCell = newTask.insertCell(0);
             var img = dojo.doc.createElement("img");
             dojo.attr(img, {
@@ -120,7 +123,10 @@
             };
             deleteCell.appendChild(img);
 
-            // Наименование задачи
+            /*---------------------------*/
+            /*    Наименование задачи    */
+            /*---------------------------*/
+
             var nameCell = newTask.insertCell(1);
             dojo.addClass(nameCell , "multiline");
             var nameInput = dojo.doc.createElement("textarea");
@@ -143,7 +149,10 @@
             });
             nameCell.appendChild(_toDeleteInput);
 
-            // Описание
+            /*----------------*/
+            /*    Описание    */
+            /*----------------*/
+
             var descriptionCell = newTask.insertCell(2);
             dojo.addClass(descriptionCell , "multiline");
             var descriptionInput = dojo.doc.createElement("textarea");
@@ -156,7 +165,10 @@
             });
             descriptionCell.appendChild(descriptionInput);
 
-            // Признак активности
+            /*------------------------------------*/
+            /*    Чекбокс "Признак активности"    */
+            /*------------------------------------*/
+
             var activeCell = newTask.insertCell(3);
             var activeInput = dojo.doc.createElement("input");
             dojo.attr(activeInput , {
@@ -175,7 +187,10 @@
             activeCell.appendChild(_activeInput);
 
 
-            // Приоритет
+            /*-----------------*/
+            /*    Приоритет    */
+            /*-----------------*/
+
             var priorityCell = newTask.insertCell(4);
             dojo.addClass(priorityCell , "multiline");
             var priorityInput = dojo.doc.createElement("textarea");
@@ -208,7 +223,10 @@
             }
             dojo.attr(newManager, {id : "projectManager_" + newManagerIndex});
 
-            // Кнопка удаления
+            /*------------------------*/
+            /*    Кнопка удаления     */
+            /*------------------------*/
+
             var deleteCell = newManager.insertCell(0);
             var img = dojo.doc.createElement("img");
             dojo.attr(img, {
@@ -340,7 +358,10 @@
             }
             dojo.attr(newBillable, {id : "projectBillable_" + newBillableIndex});
 
-            // Кнопка удаления
+            /*------------------------*/
+            /*    Кнопка удаления     */
+            /*------------------------*/
+
             var deleteCell = newBillable.insertCell(0);
             var img = dojo.doc.createElement("img");
             dojo.attr(img, {
@@ -495,6 +516,7 @@
                 errors.push("наименование проекта");
             }
 
+            /*
             var customer = dojo.byId("customer");
             dojo.style(customer, "background-color", "#ffffff");
             if (customer.value.length == 0) {
@@ -503,6 +525,7 @@
                 dojo.style(customer, "background-color", "#f9f7ba");
                 errors.push("наименование заказчика");
             }
+            */
 
             var startDate = dojo.byId("startDate");
             dojo.style(startDate, "background-color", "#ffffff");
@@ -522,13 +545,15 @@
                 errors.push("дата окончания проекта");
             }
 
-            /*var jiraKey = dojo.byId("jiraKey");
+            /*
+            var jiraKey = dojo.byId("jiraKey");
             dojo.style(jiraKey, "background-color", "#ffffff");
             if (jiraKey.value.length == 0) {
                 valid = false;
                 dojo.style(jiraKey, "background-color", "#f9f7ba");
                 errors.push("имя в Jira");
-            }*/
+            }
+            */
 
             var taskRequired = dojo.byId("cqRequired1");
             if (taskRequired.checked) {
