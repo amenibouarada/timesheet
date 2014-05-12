@@ -136,69 +136,6 @@
         standByElement = new dojox.widget.Standby({target: dojo.query("body")[0], zIndex: 1000});
     });
 
-    function refreshPlans(date, employeeId) {
-        var month = correctLength(date.getMonth() + 1);
-        var year = date.getFullYear();
-        var day = correctLength(date.getDate());
-
-        var corretDate = year + "-" + month + "-" + day;
-        dojo.xhrGet({
-            url: "${pageContext.request.contextPath}" + "/timesheet/daySupData",
-            handleAs: "json",
-            timeout: 10000,
-            content: {date: corretDate, employeeId: employeeId},
-            load: function (data, ioArgs) {
-                if (data && ioArgs && ioArgs.args && ioArgs.args.content) {
-
-                    if (data.prev != null) {
-                        var prev = data.prev;
-                        var dateString = prev.dateStr;
-
-                        dojo.byId("lbPrevPlan").innerHTML = "Планы предыдущего рабочего дня (" + timestampStrToDisplayStr(dateString.toString()) + "):";
-                        var planText = prev.plan;
-                        if (planText.length != 0) {
-                            var text = prev.plan;
-                            text = text.replace(/\n/g, '<br>');
-                            dojo.byId("plan_textarea").innerHTML = text;
-                        }
-                        else
-                            dojo.byId("plan_textarea").innerHTML = "План предыдущего рабочего дня не был определен";
-                    }
-                    else {
-                        dojo.byId("lbPrevPlan").innerHTML = "Ничего не запланировано.";
-                        dojo.byId("plan_textarea").innerHTML = "";
-                    }
-
-                    if (data.isDraft != "true" && !dataDraft) {
-                        if (data.next != null) {
-                            var next = data.next;
-                            var dateString = next.dateStr;
-                            dojo.byId("lbNextPlan").innerHTML = "Планы на следующий(" + timestampStrToDisplayStr(dateString.toString()) + ") рабочий день:";
-                            dojo.byId("plan").innerHTML = next.plan;
-                        }
-                        else {
-                            dojo.byId("lbNextPlan").innerHTML = "Планы на следующий рабочий день:";
-                            dojo.byId("plan").innerHTML = "";
-                        }
-                    }
-
-                    if (data.isDraft != null || dataDraft) {
-                        console.log(dataDraft);
-                        hideShowElement("load_draft", dataDraft || data.isDraft == "false");
-                        hideShowElement("load_draft_text", dataDraft || data.isDraft == "false");
-                    }
-                    dataDraft = false;
-                }
-            },
-            error: function (err, ioArgs) {
-                if (err && ioArgs && ioArgs.args && ioArgs.args.content) {
-                    dojo.byId("lbPrevPlan").innerHTML = "Ничего не запланировано.";
-                    dojo.byId("plan_textarea").innerHTML = "";
-                }
-            }
-        });
-    }
-
     /**
      * Устанавливает видимость и активность для элементов управления, отвечающих за редактирование отчета.
      * @param isFinal [true/false] Показатель, является ли отчёт уже отправленным.
@@ -240,6 +177,7 @@
                 if (data && ioArgs && ioArgs.args && ioArgs.args.content) {
                     var previous = data.previousDayData;
                     var current  = data.currentDayData;
+                    var next     = data.nextDayData;
 
                     // Чистка таблицы занятости.
 
@@ -262,12 +200,9 @@
                             previousPlan.replace(/\n/g, '<br>') :
                             "План предыдущего рабочего дня не был определен";
 
-                    // Заполнение строк таблицы занятости и планов работы на будущее.
+                    // Заполнение строк таблицы занятости.
 
                     var currentTableData = current.data;
-                    var currentPlan = current.plan;
-                    var nextWorkDate = current.nextWorkDate;
-                    var nextDayEffort = current.effort;
                     var isFinal = current.isFinal;
 
                     if (currentTableData != null) {
@@ -284,6 +219,13 @@
 
                     recalculateDuration();
 
+                    // Заполнение планов работы на будущее
+
+                    var currentPlan = current.plan;
+                    var nextWorkDate = current.nextWorkDate;
+                    var nextDayEffort = current.effort;
+                    var nextDaySummary = next.workSummary;
+
                     dojo.byId("lbNextPlan").innerHTML = (nextWorkDate != null) ?
                             "Планы на следующий рабочий день (" + timestampStrToDisplayStr(nextWorkDate.toString()) + "):" :
                             "Планы на следующий рабочий день:";
@@ -292,7 +234,9 @@
                         dojo.byId("effortInNextDay").value = nextDayEffort;
                     }
 
-                    dojo.byId('plan').value = (currentPlan != null && currentPlan.length != 0) ? currentPlan : "";
+                    dojo.byId('plan').value =
+                            (currentPlan != null && currentPlan.length != 0) ? currentPlan :
+                            (nextDaySummary != null && nextDaySummary.length != 0) ? nextDaySummary : "";
 
                     dojo.attr("effortInNextDay", {
                         disabled: isFinal

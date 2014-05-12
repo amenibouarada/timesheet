@@ -1,6 +1,7 @@
 package com.aplana.timesheet.service;
 
 import argo.jdom.JsonArrayNodeBuilder;
+import argo.jdom.JsonNodeBuilder;
 import argo.jdom.JsonObjectNodeBuilder;
 import com.aplana.timesheet.dao.AvailableActivityCategoryDAO;
 import com.aplana.timesheet.dao.EmployeeDAO;
@@ -312,8 +313,8 @@ public class TimeSheetService {
     }
 
     /**
-     * Формирует JSON, содержащий дату и план предыдущего рабочего дня, а также таблицу работ
-     * и план для текущего дня.
+     * Формирует JSON, содержащий дату и план предыдущего рабочего дня, таблицу работ
+     * и план для текущего дня, дату и сводку о выполненных работах следующего дня.
      *
      * @param date
      * @param employeeId
@@ -325,6 +326,7 @@ public class TimeSheetService {
 
         builder.withField("previousDayData", getDailyTimesheetPreviousDayJsonBuilder(date, employeeId));
         builder.withField("currentDayData", getDailyTimesheetCurrentDayJsonBuilder(date, employeeId));
+        builder.withField("nextDayData", getDailyTimesheetNextDayJsonBuilder(date, employeeId));
 
         return builder;
     }
@@ -341,8 +343,8 @@ public class TimeSheetService {
 
         final TimeSheet lastTimeSheet = timeSheetDAO.findLastTimeSheetBefore(calendarService.find(date), employeeId);
         if (lastTimeSheet != null) {
-            builder.withField("plan", aStringBuilder(getPlan(lastTimeSheet)));
             builder.withField("workDate", aStringBuilder(DateTimeUtil.formatDate(lastTimeSheet.getCalDate().getCalDate())));
+            builder.withField("plan", aStringBuilder(getPlan(lastTimeSheet)));
         }
 
         return builder;
@@ -392,6 +394,33 @@ public class TimeSheetService {
             builder.withField("data", detailsBuilder);
         } else {
             builder.withField("isFinal", aFalseBuilder());
+        }
+
+        return builder;
+    }
+
+    /**
+     * Формирует JSON, содержащий дату следующего рабочего дня и комментарии об уже списанной в этом дне занятости.
+     *
+     * @param date
+     * @param employeeId
+     * @return
+     */
+    @Transactional(readOnly = true)
+    private JsonObjectNodeBuilder getDailyTimesheetNextDayJsonBuilder(String date, Integer employeeId) {
+        final JsonObjectNodeBuilder builder = anObjectBuilder();
+
+        final Calendar nextWorkDateCalendar = calendarService.getNextWorkDay(calendarService.find(date), employeeService.find(employeeId).getRegion());
+        builder.withField("workDate", aStringBuilder(DateTimeUtil.formatDate(nextWorkDateCalendar.getCalDate())));
+
+        final TimeSheet nextTimeSheet = timeSheetDAO.findForDateAndEmployeeByTypes(nextWorkDateCalendar, employeeId, Arrays.asList(TypesOfTimeSheetEnum.REPORT));
+
+        if (nextTimeSheet != null) {
+            Set<TimeSheetDetail> nextDayDetails = nextTimeSheet.getTimeSheetDetails();
+
+            if (nextDayDetails != null && nextDayDetails.size() > 0) {
+                builder.withField("workSummary", aStringBuilder(getStringTimeSheetDetails(nextTimeSheet)));
+            }
         }
 
         return builder;
