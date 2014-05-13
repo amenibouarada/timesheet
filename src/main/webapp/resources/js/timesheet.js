@@ -447,15 +447,14 @@ function onCalDateChange(calDateObj){
     }
     validateReportDate(calDateObj.value);
 
-    var confirmed = true;
     var sameDateOnChangeEventFired = (currentDate.getTime() == dijit.byId('calDate').get("value").getTime());
 
     if (!sameDateOnChangeEventFired) {
         if (!isFinalForm && (tablePartNotEmpty() || planBoxNotEmpty())) {
-            confirmed = confirm("В отчете имеются несохраненные изменения. Продолжить без сохранения?");
-        }
-
-        if (confirmed) {
+            var dialog = dijit.byId("dialogChangeDate");
+            dojo.style(dialog.closeButtonNode,"display","none");
+            dialog.show();
+        } else {
             requestAndRefreshDailyTimesheetData(calDateObj.value, dojo.byId('employeeId').value);
 
             if (isErrorPage) {
@@ -463,10 +462,28 @@ function onCalDateChange(calDateObj){
                 isErrorPage = false;
             }
             currentDate = dijit.byId('calDate').get("value");
-        } else {
-            dijit.byId('calDate').set("value", currentDate);
         }
     }
+}
+
+function confirmCalDateChange() {
+    var dialog = dijit.byId("dialogChangeDate");
+    dialog.hide();
+
+    requestAndRefreshDailyTimesheetData(dijit.byId('calDate').value, dojo.byId('employeeId').value);
+
+    if (isErrorPage) {
+        dojo.style("errors_box", {"display":"none"});
+        isErrorPage = false;
+    }
+    currentDate = dijit.byId('calDate').get("value");
+}
+
+function cancelCalDateChange() {
+    var dialog = dijit.byId("dialogChangeDate");
+    dialog.hide();
+
+    dijit.byId('calDate').set("value", currentDate);
 }
 
 function onEmployeeChange(employeeObj){

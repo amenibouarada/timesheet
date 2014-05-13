@@ -562,6 +562,22 @@ function loadDraft() {
         </button>
     </div>
 </div>
+
+<div id="dialogChangeDate" data-dojo-type="dijit.Dialog" title="" style="display: none;">
+    <div data-dojo-type="dijit.layout.ContentPane" style="width: 270px; height: 65px;">
+        В отчете имеются несохраненные изменения.<br/>
+        Продолжить без сохранения?<br/>
+        <button id="confirmDateChange" style="margin-top: 10px; margin-left: 10px; width: 120px;"
+                onclick="confirmCalDateChange()">
+            Продолжить
+        </button>
+        <button id="cancelDateChange" style="margin-top: 10px; margin-left: 10px; width: 120px;"
+                onclick="cancelCalDateChange()">
+            Отмена
+        </button>
+    </div>
+</div>
+
 <form:form method="post" commandName="timeSheetForm" cssClass="noborder">
 
 <%-- Костыль для диалога --%>
