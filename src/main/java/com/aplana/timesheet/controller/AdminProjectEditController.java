@@ -162,8 +162,12 @@ public class AdminProjectEditController {
             AdminProjectBillableForm billable = new AdminProjectBillableForm();
             billable.setId(projectBillable.getId());
             billable.setEmployee(projectBillable.getEmployee().getId());
-            billable.setStartDate(dateFormat.format(projectBillable.getStartDate()));
-            billable.setEndDate(dateFormat.format(projectBillable.getEndDate()));
+            if (projectBillable.getStartDate() != null) {
+                billable.setStartDate(dateFormat.format(projectBillable.getStartDate()));
+            }
+            if (projectBillable.getEndDate() != null) {
+                billable.setEndDate(dateFormat.format(projectBillable.getEndDate()));
+            }
             billable.setComment(projectBillable.getComment());
             billable.setToDelete("");
             projectBillableForms.add(billable);
