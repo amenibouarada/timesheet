@@ -119,6 +119,7 @@
                 <beans:ref bean="employeeLdapServiceJob"/>
                 <beans:ref bean="oqProjectSyncServiceJob"/>
                 <beans:ref bean="plannedVacationDeleteRemindServiceJob"/>
+                <beans:ref bean="employeeAssistantServiceJob"/>
             </beans:list>
         </beans:property>
         <beans:property name="triggers">
@@ -129,6 +130,7 @@
                 <beans:ref bean="employeeLdapServiceCronTrigger"/>
                 <beans:ref bean="oqProjectSyncServiceCronTrigger"/>
                 <beans:ref bean="plannedVacationDeleteRemindServiceCronTrigger"/>
+                <beans:ref bean="employeeAssistantServiceCronTrigger"/>
             </beans:list>
         </beans:property>
     </beans:bean>
