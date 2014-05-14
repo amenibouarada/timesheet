@@ -53,7 +53,12 @@
 
         dojo.declare("DateTextBox", dijit.form.DateTextBox, {
             popupClass: "Calendar",
-            datePattern: 'dd.MM.yyyy'
+            datePattern: 'dd.MM.yyyy',
+
+            openDropDown : function() {
+                updateDateConstraints();
+                this.inherited(arguments);
+            }
         });
 
         dojo.ready(function () {
@@ -317,13 +322,17 @@
         <div class="checkboxeslabel lowspace">Дата с:</div>
         <div class="checkboxesselect lowspace">
             <form:input path="beginDate" id="beginDate" class="date_picker" cssClass="fullwidth date_picker" data-dojo-type="DateTextBox" required="true"
-                        onMouseOver="tooltip.show(getTitle(this));" onMouseOut="tooltip.hide();" onchange="updateProject(); updateDateConstraints();"/>
+                        onMouseOver="tooltip.show(getTitle(this));"
+                        onMouseOut="tooltip.hide();"
+                        onchange="updateProject(); updateDateConstraints();"/>
         </div>
 
         <div class="checkboxeslabel lowspace">Дата по:</div>
         <div class="checkboxesselect lowspace">
             <form:input path="endDate" id="endDate" class="date_picker" cssClass="fullwidth date_picker" data-dojo-type="DateTextBox" required="true"
-                        onMouseOver="tooltip.show(getTitle(this));" onMouseOut="tooltip.hide();" onchange="updateProject(); updateDateConstraints();"/>
+                        onMouseOver="tooltip.show(getTitle(this));"
+                        onMouseOut="tooltip.hide();"
+                        onchange="updateProject(); updateDateConstraints();"/>
         </div>
 
         <div id="illness" class="creationform">
