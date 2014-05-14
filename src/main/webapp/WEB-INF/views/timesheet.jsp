@@ -246,6 +246,10 @@
                     });
 
                     isFinalForm = isFinal;
+                    if (!isFinal) {
+                        reloadRowsState();
+                    }
+
                     setElementsAvailability(isFinal);
                 }
             },
@@ -522,6 +526,10 @@ function loadDraft() {
 
     .dijitCalendarCurrentDate {
         background-color: #6495ED !important;
+    }
+
+    :disabled {
+        background-color: #f0f0f0;
     }
 </style>
 </head>

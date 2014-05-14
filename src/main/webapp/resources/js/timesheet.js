@@ -78,6 +78,7 @@ function addNewRow() {
     var rowNumCell = newTsRow.insertCell(1);
     dojo.addClass(rowNumCell, "text_center_align row_number");
     rowNumCell.innerHTML = tsRowCount + 1;
+
     // Ячейка с типами активности
     var actTypeCell = newTsRow.insertCell(2);
     dojo.addClass(actTypeCell, "top_align");
@@ -99,6 +100,7 @@ function addNewRow() {
         actTypeSelect.appendChild(actTypeOption);
     }
     actTypeCell.appendChild(actTypeSelect);
+
     // Ячейка с местом работы
     var workplaceCell = newTsRow.insertCell(3);
     dojo.addClass(workplaceCell, "top_align");
