@@ -159,7 +159,7 @@ public class SendMailService {
      */
     public String getEmployeeDivision(Integer empId) {
         Division division = employeeService.find(empId).getDivision();
-        return empId == null ? null : division == null ? null : division.getDepartmentName();
+        return empId == null ? null : division == null ? null : division.getName();
     }
 
     /**
