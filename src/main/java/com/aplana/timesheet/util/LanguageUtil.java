@@ -9,16 +9,18 @@ import java.util.List;
  *      creation date: 11.03.14
  */
 public class LanguageUtil {
-    private static final List<Integer> singDayList = Arrays.asList(1);
-    private static final List<Integer> plurDayList = Arrays.asList(0, 5, 6, 7, 8, 9);
-    private static final List<Integer> geniDayList = Arrays.asList(2, 3, 4);
+    private static final List<Integer> singDayAccList = Arrays.asList(1);
+    private static final List<Integer> plurDayAccList = Arrays.asList(0, 5, 6, 7, 8, 9);
+    private static final List<Integer> geniDayAccList = Arrays.asList(2, 3, 4);
 
     /**
      * Выбор между дней/день/дня
+     * "Через 1 день", "Через 2 дня", "Через 3 дня" ...
+     *
      * @param dayNumber
      * @return
      */
-    public static String getCaseDay(Integer dayNumber) {
+    public static String getCaseDayAccusative(Integer dayNumber) {
 
         if (dayNumber >= 10 && dayNumber <= 20) {
             return "дней";
@@ -26,20 +28,43 @@ public class LanguageUtil {
 
         int end = dayNumber % 10;
 
-        if (singDayList.contains(end)) {
+        if (singDayAccList.contains(end)) {
             return "день";
         }
 
-        if (plurDayList.contains(end)) {
+        if (plurDayAccList.contains(end)) {
             return "дней";
         }
 
-
-        if (geniDayList.contains(end)) {
+        if (geniDayAccList.contains(end)) {
             return "дня";
         }
 
         return "день";
+    }
+
+    private static final List<Integer> singDayGenList = Arrays.asList(1);
+
+    /**
+     * Выбор между дней/день/дня
+     * "По истечении 1 дня", "По истечении 2 дней", "По истечении 3 дней" ...
+     *
+     * @param dayNumber
+     * @return
+     */
+    public static String getCaseDayGenetive(Integer dayNumber) {
+
+        if (dayNumber >= 10 && dayNumber <= 20) {
+            return "дней";
+        }
+
+        int end = dayNumber % 10;
+
+        if (singDayGenList.contains(end)) {
+            return "дня";
+        }
+
+        return "дней";
     }
 
     private static final List<Integer> singWeekAccList = Arrays.asList(1);

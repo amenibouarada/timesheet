@@ -81,7 +81,7 @@ public class PlannedVacationRemindSender extends AbstractVacationSenderWithCopyT
             Integer weekReminderCount = deleteReminderThreshold / 7;
             stringBuilder.append(String.format("Информируем Вас о том, что через %d %s у Вас запланирован отпуск ", weekReminderCount, LanguageUtil.getCaseWeekAccusative(weekReminderCount)));
         } else {
-            stringBuilder.append(String.format("Информируем Вас о том, что через %d %s у Вас запланирован отпуск ", deleteReminderThreshold, LanguageUtil.getCaseDay(deleteReminderThreshold)));
+            stringBuilder.append(String.format("Информируем Вас о том, что через %d %s у Вас запланирован отпуск ", deleteReminderThreshold, LanguageUtil.getCaseDayAccusative(deleteReminderThreshold)));
         }
         stringBuilder.append(String.format("на период %s - %s. ", beginDateStr, endDateStr));
         stringBuilder.append("Необходимо создать заявление об отпуске! ");
@@ -91,7 +91,7 @@ public class PlannedVacationRemindSender extends AbstractVacationSenderWithCopyT
             Integer weekDeleteCount = deletePeriod / 7;
             stringBuilder.append(String.format("По истечении %d %s (%s) планируемый отпуск автоматически будет удален. ", weekDeleteCount, LanguageUtil.getCaseWeekGenetive(weekDeleteCount), deleteDateStr));
         } else {
-            stringBuilder.append(String.format("По истечении %d %s (%s) планируемый отпуск автоматически будет удален. ", deletePeriod, LanguageUtil.getCaseDay(deletePeriod), deleteDateStr));
+            stringBuilder.append(String.format("По истечении %d %s (%s) планируемый отпуск автоматически будет удален. ", deletePeriod, LanguageUtil.getCaseDayGenetive(deletePeriod), deleteDateStr));
         }
 
         return stringBuilder.toString();
