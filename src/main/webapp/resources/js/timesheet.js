@@ -112,6 +112,7 @@ function addNewRow() {
     dojo.addClass(workplaceSelect, "workplace");
     fillWorkplaceSelect(workplaceSelect);
     workplaceCell.appendChild(workplaceSelect);
+
     // Ячейка с названиями проектов/пресейлов
     var projectNameCell = newTsRow.insertCell(4);
     dojo.addClass(projectNameCell, "top_align");
@@ -122,6 +123,7 @@ function addNewRow() {
     });
     insertEmptyOption(projectSelect);
     projectNameCell.appendChild(projectSelect);
+
     // Ячейка с проектной ролью
     var projectRoleCell = newTsRow.insertCell(5);
     dojo.addClass(projectRoleCell, "top_align");
@@ -143,6 +145,7 @@ function addNewRow() {
     }
     sortSelectOptions(projectRoleSelect);
     projectRoleCell.appendChild(projectRoleSelect);
+
     // Ячейка с категорией активности
     var actCatCell = newTsRow.insertCell(6);
     dojo.addClass(actCatCell, "top_align");
@@ -192,6 +195,7 @@ function addNewRow() {
     });
     dojo.addClass(durationInput, "text_right_align duration");
     durationCell.appendChild(durationInput);
+
     // Ячейка с комментариями
     var descriptionCell = newTsRow.insertCell(9);
     dojo.addClass(descriptionCell, "top_align");
@@ -239,6 +243,7 @@ function addNewRow() {
         style: "width: 100%"
     });
     problemCell.appendChild(problemTextarea);
+
     // Помещаем новую строку в конец таблицы
     recalculateRowNumbers();
     resetRowState(newRowIndex, true);

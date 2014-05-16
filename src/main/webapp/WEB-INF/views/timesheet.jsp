@@ -246,9 +246,6 @@
                     });
 
                     isFinalForm = isFinal;
-                    if (!isFinal) {
-                        reloadRowsState();
-                    }
 
                     setElementsAvailability(isFinal);
                 }
@@ -402,62 +399,66 @@ function requiredCommentSet() {
 }
 
 function loadTableRow(i, data, isFinal) {
-//            var actTypeSelect = dojo.byId("activity_type_id_" + i);
+    isFinal = !!isFinal;
+
     //устанавливаем аттрибут
     dojo.attr("activity_type_id_" + i, {
-        value: data[i].activity_type_id,
-        disabled: isFinal
+        value: data[i].activity_type_id
     });
     //вызываем метод
     typeActivityChange(dojo.byId("activity_type_id_" + i));
 
     dojo.attr("workplace_id_" + i, {
-        value: data[i].workplace_id,
-        disabled: isFinal
+        value: data[i].workplace_id
     });
 
     dojo.attr("project_id_" + i, {
-        value: data[i].project_id,
-        disabled: isFinal
+        value: data[i].project_id
     });
-    projectChange(dojo.byId("project_id_" + i))
+    projectChange(dojo.byId("project_id_" + i));
 
     dojo.attr("project_role_id_" + i, {
-        value: data[i].project_role_id,
-        disabled: isFinal
+        value: data[i].project_role_id
     });
     projectRoleChange(dojo.byId("project_role_id_" + i));
 
     dojo.attr("activity_category_id_" + i, {
-        value: data[i].activity_category_id,
-        disabled: isFinal
+        value: data[i].activity_category_id
     });
     setActDescription(i);
 
     dojo.attr("projectTask_id_" + i, {
-        value: data[i].projectTask_id,
-        disabled: isFinal
+        value: data[i].projectTask_id
     });
     setTaskDescription(i);
 
     dojo.attr("duration_id_" + i, {
-        value: data[i].duration_id,
-        readonly: isFinal
+        value: data[i].duration_id
     });
     checkDuration(dojo.byId("duration_id_" + i));
     recalculateDuration();
 
     dojo.attr("description_id_" + i, {
-        value: dojoxDecode(dojoxDecode(data[i].description_id), decodeMap),
-        readonly: isFinal
+        value: dojoxDecode(dojoxDecode(data[i].description_id), decodeMap)
     });
     textareaAutoGrow(dojo.byId("description_id_" + i));
 
     dojo.attr("problem_id_" + i, {
-        value: dojoxDecode(dojoxDecode(data[i].problem_id), decodeMap),
-        readonly: isFinal
+        value: dojoxDecode(dojoxDecode(data[i].problem_id), decodeMap)
     });
     textareaAutoGrow(dojo.byId("problem_id_" + i));
+
+    if (isFinal) {
+        dojo.attr("activity_type_id_" + i,     {disabled: "disabled"});
+        dojo.attr("workplace_id_" + i,         {disabled: "disabled"});
+        dojo.attr("project_id_" + i,           {disabled: "disabled"});
+        dojo.attr("project_role_id_" + i,      {disabled: "disabled"});
+        dojo.attr("activity_category_id_" + i, {disabled: "disabled"});
+        dojo.attr("projectTask_id_" + i,       {disabled: "disabled"});
+        dojo.attr("duration_id_" + i,          {readonly: true});
+        dojo.attr("description_id_" + i,       {readonly: true});
+        dojo.attr("problem_id_" + i,           {readonly: true});
+    }
 }
 
 /**
