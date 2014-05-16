@@ -103,6 +103,9 @@
         }
 
         function editProject(projectId) {
+            setCookie('adminProjects_divisionId', dojo.byId("divisionId").value, TimeAfter(7, 0, 0));
+            setCookie('adminProjects_managerId', dojo.byId("managerId").value, TimeAfter(7, 0, 0));
+            setCookie('adminProjects_showActiveOnly', dojo.byId("showActiveOnly").checked, TimeAfter(7, 0, 0));
             window.location = "<%=request.getContextPath()%>/admin/projects/edit?projectId=" + projectId;
         }
 

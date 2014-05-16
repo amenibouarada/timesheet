@@ -10,9 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.util.ArrayList;
@@ -36,13 +34,27 @@ public class AdminProjectsController extends AbstractController {
     @Autowired
     EmployeeService employeeService;
 
-    @RequestMapping(value = "/admin/projects")
-    public ModelAndView showDefault(
+    @RequestMapping(value = "/admin/projects", method = RequestMethod.GET)
+    public ModelAndView showGetPage(
+            @CookieValue(value = "adminProjects_divisionId", defaultValue = "-1") Integer divisionId,
+            @CookieValue(value = "adminProjects_managerId", defaultValue = "-1") Integer managerId,
+            @CookieValue(value = "adminProjects_showActiveOnly", defaultValue = "false") Boolean showActiveOnly,
+            @ModelAttribute("adminprojects") AdminProjectsForm form
+    ) {
+        return prepareProjectsMAV(divisionId, managerId, showActiveOnly);
+    }
+
+    @RequestMapping(value = "/admin/projects", method = RequestMethod.POST)
+    public ModelAndView showPostPage(
             @RequestParam(value = "divisionId", required = false, defaultValue = "-1") Integer divisionId,
             @RequestParam(value = "managerId", required = false, defaultValue = "-1") Integer managerId,
             @RequestParam(value = "showActiveOnly", required = false, defaultValue = "false") Boolean showActiveOnly,
             @ModelAttribute("adminprojects") AdminProjectsForm form
     ) {
+        return prepareProjectsMAV(divisionId, managerId, showActiveOnly);
+    }
+
+    private ModelAndView prepareProjectsMAV(Integer divisionId, Integer managerId, Boolean showActiveOnly) {
         ModelAndView modelAndView = new ModelAndView("adminProjects");
         modelAndView.addObject("divisionsList", divisionService.getAllDivisions());
         modelAndView.addObject("mainProjectManagersJSON", employeeService.getMainProjectManagersJSON());
