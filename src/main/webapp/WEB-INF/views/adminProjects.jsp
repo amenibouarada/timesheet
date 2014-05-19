@@ -69,7 +69,7 @@
         */
         function updateManagerSelect(divisionId) {
             var managerSelect = dojo.byId("managerId");
-            var previousManager = managerSelect.value;
+            var previousManager = (managerSelect.value)? managerSelect.value : formManagerId;
 
             var allManagersOption = dojo.doc.createElement("option");
             dojo.attr(allManagersOption, {
@@ -206,7 +206,7 @@
                         <td class="textcenter">${project.manager.name}</td>
                         <td id="projectName_${project.id}" class="textcenter">${project.name}</td>
                         <td class="textcenter">${project.state.value}</td>
-                        <td class="textcenter"><input type="checkbox" <c:if test="${project.active}">checked="checked"</c:if> disabled = "true"/></td>
+                        <td class="textcenter"><input type="checkbox" <c:if test="${project.active}">checked="checked"</c:if> disabled = "disabled"/></td>
                         <td class="textcenter"><fmt:formatDate value="${project.startDate}" pattern="dd.MM.yyyy"/></td>
                         <td class="textcenter"><fmt:formatDate value="${project.endDate}" pattern="dd.MM.yyyy"/></td>
                         <td class="textcenter">${project.customer}</td>
