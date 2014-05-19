@@ -20,8 +20,8 @@
 
         dojo.ready(function () {
             window.focus();
-            dojo.byId("divisionId").value = formDivisionId;
             addAllAndNullDivisionSelectOptions();
+            dojo.byId("divisionId").value = formDivisionId;
             updateManagerSelect(dojo.byId("divisionId").value);
             dojo.byId("managerId").value = formManagerId;
             dojo.byId("showActiveOnly").checked = formShowActiveOnly;
@@ -48,6 +48,19 @@
             allDivisionsOption.title = "Все подразделения";
             allDivisionsOption.innerHTML = "Все подразделения";
             divisionSelect.insertBefore(allDivisionsOption, divisionSelect.firstChild);
+        }
+
+        function divisionChanged(divisionId) {
+            setCookie('adminProjects_divisionId', divisionId, TimeAfter(7, 0, 0));
+            updateManagerSelect(divisionId);
+        }
+
+        function managerChanged(managerId) {
+            setCookie('adminProjects_managerId', managerId, TimeAfter(7, 0, 0));
+        }
+
+        function showActiveOnlyChanged(checked) {
+            setCookie('adminProjects_showActiveOnly', checked, TimeAfter(7, 0, 0));
         }
 
         /**
@@ -92,6 +105,8 @@
             } else {
                 dojo.byId("managerId").disabled = '';
             }
+
+            setCookie('adminProjects_managerId', managerSelect.value, TimeAfter(7, 0, 0));
         }
 
         function createProject() {
@@ -103,9 +118,6 @@
         }
 
         function editProject(projectId) {
-            setCookie('adminProjects_divisionId', dojo.byId("divisionId").value, TimeAfter(7, 0, 0));
-            setCookie('adminProjects_managerId', dojo.byId("managerId").value, TimeAfter(7, 0, 0));
-            setCookie('adminProjects_showActiveOnly', dojo.byId("showActiveOnly").checked, TimeAfter(7, 0, 0));
             window.location = "<%=request.getContextPath()%>/admin/projects/edit?projectId=" + projectId;
         }
 
@@ -122,7 +134,7 @@
             </td>
             <td>
                 <form:select path="divisionId" id="divisionId" class="without_dojo"
-                             onchange="updateManagerSelect(this.value);"
+                             onchange="divisionChanged(this.value);"
                              onmouseover="tooltip.show(getTitle(this));"
                              onmouseout="tooltip.hide();">
                     <form:options items="${divisionsList}" itemLabel="name" itemValue="id"/>
@@ -135,6 +147,7 @@
             </td>
             <td>
                 <form:select path="managerId" id="managerId" class="without_dojo"
+                             onchange="managerChanged(this.value)"
                              onmouseover="tooltip.show(getTitle(this));"
                              onmouseout="tooltip.hide();">
                 </form:select>
@@ -145,7 +158,7 @@
                 <span class="lowspace">Только активные:</span>
             </td>
             <td>
-                <form:checkbox path="showActiveOnly" id="showActiveOnly"/>
+                <form:checkbox path="showActiveOnly" id="showActiveOnly" onchange="showActiveOnlyChanged(this.checked)"/>
             </td>
             <td colspan="2">
                 <div class="floatleft lowspace">
