@@ -1,10 +1,10 @@
 package com.aplana.timesheet.service;
 
 import argo.jdom.JsonArrayNodeBuilder;
-import argo.jdom.JsonNodeBuilder;
 import argo.jdom.JsonObjectNodeBuilder;
 import com.aplana.timesheet.dao.AvailableActivityCategoryDAO;
 import com.aplana.timesheet.dao.EmployeeDAO;
+import com.aplana.timesheet.dao.HolidayDAO;
 import com.aplana.timesheet.dao.TimeSheetDAO;
 import com.aplana.timesheet.dao.entity.*;
 import com.aplana.timesheet.dao.entity.Calendar;
@@ -21,9 +21,10 @@ import com.aplana.timesheet.system.security.SecurityService;
 import com.aplana.timesheet.util.DateTimeUtil;
 import com.aplana.timesheet.util.EnumsUtils;
 import com.aplana.timesheet.util.JsonUtil;
+import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
-import org.apache.velocity.app.VelocityEngine;
+import org.apache.commons.lang.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,9 +78,6 @@ public class TimeSheetService {
     private ProjectService projectService;
 
     @Autowired
-    public VelocityEngine velocityEngine;
-
-    @Autowired
     public ProjectRoleService projectRoleService;
 
     @Autowired
@@ -96,6 +94,9 @@ public class TimeSheetService {
 
     @Autowired
     private BusinessTripService businessTripService;
+
+    @Autowired
+    private HolidayDAO holidayDAO;
 
     @Transactional
     public TimeSheet storeTimeSheet(TimeSheetForm tsForm, TypesOfTimeSheetEnum type) {
@@ -731,5 +732,31 @@ public class TimeSheetService {
         );
 
         return result;
+    }
+
+    public String getOverdueTimesheetEmployeesNames(Division division) {
+
+        // Логика выбора дат перенесена из ReportCheckService,
+        // по принципу "работает - не ломай".
+        Date currentDay = new Date();
+
+        Date startDate = DateTimeUtil.previousMonthFirstDayDate(currentDay);
+        Date currentMonthLastDay = DateTimeUtil.currentMonthLastDayDate(currentDay);
+        Date previousMonthLastDay = DateTimeUtil.previousMonthLastDayDate(currentDay);
+        Date lastSunday = DateTimeUtil.lastSundayDate(currentDay);
+
+        Date endDate = lastSunday;
+
+        if (currentMonthLastDay.after(lastSunday))
+            endDate = currentDay;
+        if (previousMonthLastDay.after(lastSunday))
+            endDate = previousMonthLastDay;
+        if (endDate.equals(currentDay))
+            endDate = DateUtils.addDays(endDate, -1);
+
+        Integer threshold = propertyProvider.getReportsOverdueThreshold();
+        List<String> names = timeSheetDAO.getOverdueTimesheetEmployeeNames(division, startDate, endDate, threshold);
+
+        return Joiner.on(", ").join(names);
     }
 }

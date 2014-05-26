@@ -2,6 +2,7 @@ package com.aplana.timesheet.controller;
 
 import argo.jdom.JsonArrayNodeBuilder;
 import argo.jdom.JsonObjectNodeBuilder;
+import com.aplana.timesheet.dao.entity.Division;
 import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.dao.entity.TimeSheet;
 import com.aplana.timesheet.dao.entity.TimeSheetDetail;
@@ -17,6 +18,7 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +27,7 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 import static argo.jdom.JsonNodeBuilders.*;
 import static argo.jdom.JsonNodeFactories.*;
@@ -57,6 +60,9 @@ public class TimeSheetController {
     private OvertimeCauseService overtimeCauseService;
     @Autowired
     private JiraService jiraService;
+
+    @Autowired
+    private MessageSource messageSource;
 
     @RequestMapping(value = "/timesheet", method = RequestMethod.GET)
     public ModelAndView showMainForm(@RequestParam(value = "date", required = false) String date,
@@ -245,6 +251,26 @@ public class TimeSheetController {
         JsonObjectNodeBuilder jsonObjectNodeBuilder = timeSheetService.getDailyTimesheetJsonBuilder(date, employeeId);
 
         return JsonUtil.format(jsonObjectNodeBuilder);
+    }
+
+    @RequestMapping(value = "/timesheet/reportOverdue", headers = "Accept=text/plain;Charset=UTF-8")
+    @ResponseBody
+    public String getReportOverdueEmployeesNames(
+            Locale locale
+    ) {
+        Employee employee = securityService.getSecurityPrincipal().getEmployee();
+        Division division = employee.getDivision();
+
+        String result = "";
+
+        if (division.getReportsRequired()) {
+            String names = timeSheetService.getOverdueTimesheetEmployeesNames(division);
+            if (names.length() > 0){
+                result = messageSource.getMessage("headerMarquee.reportsOverdue", null, locale) + " " + names;
+            }
+        }
+
+        return result;
     }
 
     @RequestMapping(value = "/timesheet/jiraIssues", headers = "Accept=application/octet-stream;Charset=UTF-8")

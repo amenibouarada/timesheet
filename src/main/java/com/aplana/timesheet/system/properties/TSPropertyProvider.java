@@ -295,4 +295,9 @@ public class TSPropertyProvider {
         String str = getProperties().getProperty("planned.vacations.vacation.delete.reminder.threshold");
         return Integer.parseInt(str);
     }
+
+    public Integer getReportsOverdueThreshold() {
+        String str = getProperties().getProperty("reports.overdue.threshold");
+        return Integer.parseInt(str);
+    }
 }

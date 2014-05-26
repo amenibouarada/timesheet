@@ -2,6 +2,7 @@ package com.aplana.timesheet.util;
 
 import argo.jdom.JsonArrayNodeBuilder;
 import com.aplana.timesheet.exception.TSRuntimeException;
+import com.aplana.timesheet.form.entity.DayTimeSheet;
 import com.aplana.timesheet.service.CalendarService;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
@@ -219,6 +220,14 @@ public class DateTimeUtil {
         return sdf.format(calendar.getTime());
     }
 
+    public static Date previousMonthFirstDayDate(Date targetDate) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(targetDate);
+        calendar.set(Calendar.MONTH, calendar.get(Calendar.MONTH) - 1);
+        calendar.set(Calendar.DAY_OF_MONTH, 1);
+        return calendar.getTime();
+    }
+
     /**
      * Возвращает текущий день
      *
@@ -247,6 +256,20 @@ public class DateTimeUtil {
         }
         logger.debug("Last Sunday " + sdf.format(calendar.getTime()));
         return sdf.format(calendar.getTime());
+    }
+
+    public static Date lastSundayDate(Date currentDate) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(currentDate);
+        while (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) {
+            if (calendar.get(Calendar.DAY_OF_YEAR) == 1) {
+                calendar.add(Calendar.YEAR, -1);
+                calendar.set(Calendar.DAY_OF_YEAR, calendar.getActualMaximum(Calendar.DAY_OF_YEAR));
+            } else
+                calendar.add(Calendar.DAY_OF_YEAR, -1);
+        }
+
+        return calendar.getTime();
     }
 
     /**
@@ -292,6 +315,20 @@ public class DateTimeUtil {
         return sdf.format(calendar.getTime());
     }
 
+    public static Date previousMonthLastDayDate(Date targetDate) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(targetDate);
+        while (calendar.get(Calendar.DAY_OF_MONTH) != calendar.getActualMaximum(Calendar.DAY_OF_MONTH)) {
+            if (calendar.get(Calendar.DAY_OF_YEAR) == 1) {
+                calendar.add(Calendar.YEAR, -1);
+                calendar.set(Calendar.DAY_OF_YEAR, calendar.getActualMaximum(Calendar.DAY_OF_YEAR));
+            } else
+                calendar.add(Calendar.DAY_OF_YEAR, -1);
+        }
+
+        return calendar.getTime();
+    }
+
     /**
      * Возвращает конец текущего месяца
      *
@@ -307,6 +344,12 @@ public class DateTimeUtil {
         return sdf.format(calendar.getTime());
     }
 
+    public static Date currentMonthLastDayDate(Date targetDate) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(targetDate);
+        calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
+        return calendar.getTime();
+    }
 
     /**
      * Возвращает название текущего месяца в виде строки
