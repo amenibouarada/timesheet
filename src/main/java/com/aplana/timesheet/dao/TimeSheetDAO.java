@@ -389,7 +389,48 @@ public class TimeSheetDAO {
         query.setParameter("employeeId", employeeId);
         query.setParameter("startDate", startDate);
         query.setParameter("endDate", endDate);
-        List<Date> resultList = query.getResultList();
-        return resultList;
+        return query.getResultList();
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<String> getOverdueTimesheetEmployeeNames(
+            Division division, Date startDate, Date endDate, Integer threshold
+    ) {
+        Query query = entityManager.createNativeQuery(
+                "select\n" +
+                "  e.name || ' (' || count(1) || ')'\n" +
+                "from\n" +
+                "  calendar c\n" +
+                "  inner join employee e\n" +
+                "    on c.caldate between e.start_date + 1 and current_date - 1\n" +
+                "      and e.division = :division  \n" +
+                "      and (e.end_date is null or e.end_date > current_date)\n" +
+                "      and e.manager is not null\n" +
+                "  left outer join region r on e.region = r.id\n" +
+                "  left outer join holiday h on c.caldate = h.caldate and (h.region = r.id or h.region is null)\n" +
+                "  left outer join time_sheet ts on c.caldate = ts.caldate and ts.emp_id = e.id\n" +
+                "where\n" +
+                "  c.caldate between :startDate and :endDate\n" +
+                "  and (ts.ts_type_id != :tsTypeReport or ts.ts_type_id is null)\n" +
+                "  and (h.caldate is null or exists( select t.id from business_trip t where c.caldate between t.begin_date and t.end_date and t.employee_id = e.id))\n" +
+                "  and not exists (\n" +
+                "      select v.id from vacation v\n" +
+                "      where c.caldate between v.begin_date and v.end_date and v.employee_id = e.id and v.status_id = :vStatusApproved\n" +
+                "  )\n" +
+                "  and not exists (\n" +
+                "      select i.id from illness i\n" +
+                "      where c.caldate between i.begin_date and i.end_date and i.employee_id = e.id\n" +
+                "  )\n" +
+                "group by e.id having count(1) > :threshold\n" +
+                "order by count(1) desc, e.id"
+        )
+                .setParameter("division", division.getId())
+                .setParameter("startDate", startDate)
+                .setParameter("endDate", endDate)
+                .setParameter("tsTypeReport", TypesOfTimeSheetEnum.REPORT.getId())
+                .setParameter("vStatusApproved", VacationStatusEnum.APPROVED.getId())
+                .setParameter("threshold", threshold);
+
+        return query.getResultList();
     }
 }

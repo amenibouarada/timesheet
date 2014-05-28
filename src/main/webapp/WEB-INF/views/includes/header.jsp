@@ -3,11 +3,14 @@
 <%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 
 <%@page contentType="text/html" pageEncoding="UTF-8" %>
-<script type="text/javascript" src="/resources/js/vacationsCountInHeader.js"></script>
+<script type="text/javascript" src="/resources/js/header.js"></script>
+<script type="text/javascript" src="/resources/js/marquee.js"></script>
 <script type="text/javascript">
     dojo.addOnLoad(function () {
         <sec:authorize access="isAuthenticated()">
         getVacationsNeedsApprovalCountString();
+        getReportOverdueEmployeesNames();
+        aplanaMarquee.init("headerMarquee", 3000, 6000);
         </sec:authorize>
     });
 </script>
@@ -17,6 +20,10 @@
 
 <div id="header_text">
     Корпоративная система списания занятости
+    <div id="headerMarquee">
+        <div id="headerMarqueeContent">
+        </div>
+    </div>
 </div>
 <sec:authorize access="isAuthenticated()">
     <div class="employee_name">
