@@ -44,7 +44,7 @@
             <div id="form_header">
                 <table class="report_params" cellspacing="3">
                     <tr>
-                        <td  style="width: 225px"><span class="label">Центр владельца проекта</span><span style="color:red">*</span></td>
+                        <td  style="width: 225px"><span class="label">Центр владельца проекта</span></td>
                         <td>
                             <form:select path="divisionOwner" class="without_dojo">
                                 <form:option label="Все" value="0"/>
@@ -53,7 +53,7 @@
                         </td>
                     </tr>
                     <tr>
-                        <td><span class="label">Центр сотрудников </span><span style="color:red">*</span></td>
+                        <td><span class="label">Центр сотрудников </span></td>
                         <td colspan="2">
                             <form:select path="divisionEmployee" class="without_dojo">
                                 <form:option value="0">Все</form:option>
@@ -62,7 +62,7 @@
                         </td>
                     </tr>
                     <tr>
-                        <td><span class="label">Отчетный период </span><span style="color:red">*</span></td>
+                        <td><span class="label">Отчетный период </span></td>
                         <td colspan="2">
                             <form:select path="periodType" class="without_dojo">
                                 <form:option value="1">Месяц</form:option>

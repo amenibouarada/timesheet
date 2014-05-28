@@ -45,7 +45,7 @@
             <div id="form_header">
                 <table class="report_params" cellspacing="3">
                     <tr>
-                        <td  style="width: 225px"><span class="label"><fmt:message key="label.r03.project.owner.center"/></span><span style="color:red">*</span></td>
+                        <td  style="width: 225px"><span class="label"><fmt:message key="label.r03.project.owner.center"/></span></td>
                         <td><form:select id="divisionId" name="divisionOwnerId" cssClass="without_dojo"
                                          onmouseover="tooltip.show(getTitle(this));"
                                          onmouseout="tooltip.hide();" path="divisionOwnerId"

@@ -39,7 +39,7 @@
     <div id="form_header">
         <table class="report_params" cellspacing="3">
             <tr>
-                <td><span class="label">Проект</span><span style="color:red">*</span></td>
+                <td><span class="label">Проект</span></td>
                 <td><form:select id="projectId" name="projectId" cssClass="without_dojo"
                                  onmouseover="tooltip.show(getTitle(this));"
                                  onmouseout="tooltip.hide();" path="projectId">

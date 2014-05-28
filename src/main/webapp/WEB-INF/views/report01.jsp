@@ -40,7 +40,7 @@
             <div id="form_header">
                 <table class="report_params" cellspacing="3">
                     <tr>
-                        <td><span class="label"><fmt:message key="label.r01.center"/></span><span style="color:red">*</span></td>
+                        <td><span class="label"><fmt:message key="label.r01.center"/></span></td>
                         <td><form:select id="divisionId" name="divisionOwnerId" cssClass="without_dojo"
                                          onmouseover="tooltip.show(getTitle(this));"
                                          onmouseout="tooltip.hide();" path="divisionOwnerId">
@@ -49,7 +49,7 @@
                         </form:select></td>
                     </tr>
                     <tr>
-                        <td><span class="label"><fmt:message key="label.r01.begin.date"/></span><span style="color:red">*</span></td>
+                        <td><span class="label"><fmt:message key="label.r01.begin.date"/></span></td>
                         <td><form:input path="beginDate" id="beginDate" name="beginDate" class="date_picker"
                                         data-dojo-id="fromDate"
                                         data-dojo-type='dijit/form/DateTextBox'
