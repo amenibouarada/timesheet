@@ -682,7 +682,7 @@ public class JasperReportDAO {
                         "        (calendar.caldate NOT IN   " +
                         "                (SELECT holiday.caldate FROM holiday holiday WHERE holiday.region IS NULL OR holiday.region=employee.region))" +
                         ") " +
-                    " OR exists ( select 1 from business_trip bt where bt.employee_id = employee.id and calendar.caldate BETWEEN bt.begin_date and bt.end_date)" +
+                  //  " OR exists ( select 1 from business_trip bt where bt.employee_id = employee.id and calendar.caldate BETWEEN bt.begin_date and bt.end_date)" +
                     ") AND" +
                     "        employee.start_date<=calendar.caldate  " +
                     "ORDER BY " +
