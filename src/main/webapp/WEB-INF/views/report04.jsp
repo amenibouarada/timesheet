@@ -18,6 +18,15 @@
         dojo.require("dijit.form.DateTextBox");
     });
 </script>
+<script>
+    setInterval(function() {
+        require(["dojo/request"], function(request){
+            request("/ping").then(
+
+            );
+        });
+    },60000);
+</script>
 
 <h1><fmt:message key="title.reportparams"/></h1>
 <h2><fmt:message key="title.report04"/></h2>
