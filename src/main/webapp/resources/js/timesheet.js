@@ -59,7 +59,6 @@ function addNewRow() {
     dojo.addClass(img, "pointer");
     dojo.attr(img, {
         id:"delete_button_" + newRowIndex,
-        class: "controlToHide",
         src:"resources/img/delete.png",
         alt:"Удалить",
         title:"Удалить",
@@ -67,8 +66,8 @@ function addNewRow() {
         height:"15",
         width:"15"
     });
-
-    //неведома ошибка исправляется для IE добавлением onclick именно через функцию
+    dojo.attr(img, "class", "controlToHide");
+    // неведома ошибка исправляется для IE добавлением onclick именно через функцию
     img.onclick = function () {
         deleteRow(newRowIndex);
     };
@@ -216,7 +215,7 @@ function addNewRow() {
     dojo.addClass(jiraImg, "pointer");
     dojo.attr(jiraImg, {
         id:"jira_button_" + newRowIndex,
-        class:"controlToHide",
+       // class:"controlToHide",
         src:"resources/img/logo-jira.png",
         alt:"Запрос из JIRA",
         title:"Запрос из JIRA",
@@ -224,6 +223,7 @@ function addNewRow() {
         height:"15",
         width:"15"
     });
+    dojo.attr(jiraImg, "class", "controlToHide");
 
     //неведома ошибка исправляется для IE добавлением onclick именно через функцию
     jiraImg.onclick = function () {
@@ -538,7 +538,7 @@ function cookieValue(CookieName) {
 }
 
 /*
- * Растягивает по высоте текстовую область, если введённый 
+ * Растягивает по высоте текстовую область, если введённый
  * в неё текст не умещается.
  */
 function textareaAutoGrow(obj) {
@@ -1495,7 +1495,7 @@ function sortSelectOptions(select) {
 
 /*
  * Превращает timestamp строку (yyyy-mm-dd) в строку для
- * displayValue DateTextBoxА (dd.mm.yyyy) 
+ * displayValue DateTextBoxА (dd.mm.yyyy)
  */
 function timestampStrToDisplayStr(str) {
     if (str != "") {
