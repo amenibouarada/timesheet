@@ -303,6 +303,10 @@ public class ProjectService {
         return projectDAO.getProjectsByDivisionAndActive(division, showActiveOnly);
     }
 
+    public List<Project> getActiveProjectsByDivisionWithoutPresales(Division division) {
+        return projectDAO.getActiveProjectsByDivisionWithoutPresales(division);
+    }
+
     public List<Project> getProjectsByDivisionAndManagerAndActive(Division division, Employee manager,
                                                                   Boolean showActiveOnly) {
         return projectDAO.getProjectsByDivisionAndManagerAndActive(division, manager, showActiveOnly);

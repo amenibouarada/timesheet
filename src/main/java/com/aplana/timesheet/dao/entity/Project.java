@@ -21,6 +21,9 @@ public class Project {
 	@Column
 	private String projectId;
 
+	@Column
+	private String description;
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "manager")
 	@ForeignKey(name = "FK_PROJECT_MANAGER")
@@ -264,5 +267,13 @@ public class Project {
                 .append(" manager [").append(manager).append("]")
                 .append(" projectid=").append(projectId)
                 .toString();
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }
