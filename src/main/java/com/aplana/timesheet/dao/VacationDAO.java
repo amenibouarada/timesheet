@@ -7,6 +7,7 @@ import com.aplana.timesheet.enums.DictionaryEnum;
 import com.aplana.timesheet.enums.VacationStatusEnum;
 import com.aplana.timesheet.enums.VacationTypesEnum;
 import com.aplana.timesheet.service.DictionaryItemService;
+import com.aplana.timesheet.system.security.SecurityService;
 import com.google.common.collect.Lists;
 import org.hibernate.Hibernate;
 import org.slf4j.Logger;
@@ -32,6 +33,9 @@ public class VacationDAO {
 
     @PersistenceContext
     private EntityManager entityManager;
+
+    @Autowired
+    private SecurityService securityService;
 
     @Autowired
     private DictionaryItemService dictionaryItemService;
@@ -305,6 +309,18 @@ public class VacationDAO {
 
         query.setParameter("type", VacationTypesEnum.PLANNED.getId());
         query.setParameter("date", date);
+
+        return query.getResultList();
+    }
+
+    public List<Vacation> getPlannedVacationsByBeginAndEndDates(Date beginDate, Date endDate) {
+        final Employee employee = securityService.getSecurityPrincipal().getEmployee();
+        Query query =
+                entityManager.createQuery("select v from Vacation v where v.type.id=:type and v.beginDate = :beginDate and v.endDate=:endDate and v.employee = :employee").
+                setParameter("type", VacationTypesEnum.PLANNED.getId())
+                .setParameter("beginDate", beginDate)
+                .setParameter("employee", employee)
+                .setParameter("endDate", endDate);
 
         return query.getResultList();
     }
