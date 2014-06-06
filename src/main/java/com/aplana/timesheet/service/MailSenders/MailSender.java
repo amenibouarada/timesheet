@@ -16,9 +16,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 public class MailSender<T> {
 
@@ -164,6 +162,20 @@ public class MailSender<T> {
         InternetAddress fromAddr = initFromAddresses(mail);
         InternetAddress[] ccAddresses = initAddresses(mail.getCcEmails());
         InternetAddress[] toAddresses = initAddresses(mail.getToEmails());
+        InternetAddress[] ccAssistantAddresses = initAddresses(getAssistantMail(mail.getToEmails()));
+        InternetAddress[] ccAddressesWithAssistant;
+        if (ccAddresses != null && ccAssistantAddresses != null) {
+            ccAddressesWithAssistant = new InternetAddress[ccAddresses.length+ccAssistantAddresses.length];
+            System.arraycopy(ccAddresses,0,ccAddressesWithAssistant,0,ccAddresses.length);
+            System.arraycopy(ccAssistantAddresses,0,ccAddressesWithAssistant,ccAddresses.length,ccAssistantAddresses.length);
+
+        } else if(ccAddresses != null){
+            ccAddressesWithAssistant = ccAddresses;
+        } else {
+            ccAddressesWithAssistant = ccAssistantAddresses;
+        }
+        logger.debug("CC AssistantAddresses: {}", Arrays.toString(ccAssistantAddresses));
+        logger.debug("CC AddressesWithAssistant: {}", Arrays.toString(ccAddressesWithAssistant));
         logger.debug("CC Addresses: {}", Arrays.toString(ccAddresses));
         logger.debug("TO Addresses: {}", Arrays.toString(toAddresses));
 
@@ -178,12 +190,21 @@ public class MailSender<T> {
 
             message.setRecipients(MimeMessage.RecipientType.TO, toAddresses);
             if (ccAddresses != null) {
-                message.setRecipients(MimeMessage.RecipientType.CC, ccAddresses);
+                message.setRecipients(MimeMessage.RecipientType.CC, ccAddressesWithAssistant);
             }
             message.setFrom(fromAddr);
         } catch (MessagingException e) {
             logger.error("Error while init message recipients.", e);
          }
+    }
+
+    private Iterable<String> getAssistantMail(Iterable<String> toEmails) {
+        Set<String> ccMailAss = new HashSet<String>();
+        for(String x : toEmails){
+            ccMailAss.add(x);
+        }
+        Iterable<String> ccMailAssistant = new SenderWithAssistants(sendMailService,propertyProvider).getAssistantEmail(ccMailAss);
+        return ccMailAssistant;
     }
 
     @VisibleForTesting
