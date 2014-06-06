@@ -367,4 +367,17 @@ public class ProjectDAO {
     public void deleteProject(Project project) {
         entityManager.remove(project);
     }
+
+    public List<Project> getActiveProjectsByDivisionWithoutPresales(Division division) {
+        DictionaryItem type = dictionaryItemDAO.find(TypesOfActivityEnum.PROJECT.getId());
+
+        Query query = entityManager.createQuery("select p from Project p " +
+                "where p.active = true and p.manager is not null " +
+                "and p.division = :division " +
+                "and p.state = :state order by p.name")
+                .setParameter("division", division)
+                .setParameter("state", type);
+
+        return  query.getResultList();
+    }
 }

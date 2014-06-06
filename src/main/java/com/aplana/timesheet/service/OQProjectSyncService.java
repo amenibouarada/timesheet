@@ -152,6 +152,7 @@ public class OQProjectSyncService extends AbstractServiceWithTransactionManageme
             String passport = nodeMap.getNamedItem("pq3").getNodeValue().trim();         // паспорт качества
             String customer = nodeMap.getNamedItem("customer").getNodeValue().trim();    // заказчик
             String finsource = nodeMap.getNamedItem("finsource").getNodeValue().trim();   // источник финансирования
+            String description = nodeMap.getNamedItem("description").getNodeValue().trim();   // источник финансирования
 
             // ищем в БД запись о проекте
             Project foundProject = dao.findByProjectId(idProject);
@@ -181,6 +182,7 @@ public class OQProjectSyncService extends AbstractServiceWithTransactionManageme
             project.setActivityType(activityType);
             project.setWorkType(workType);
             project.setCustomer(customer);
+            project.setDescription(description);
             project.setPassport(passport);
 
             project.setName(name);

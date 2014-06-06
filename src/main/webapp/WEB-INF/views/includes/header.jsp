@@ -51,6 +51,7 @@
                 <li><a href="<c:url value='/admin'/>"><fmt:message key="title.admin"/></a></li>
             </sec:authorize>
             <li><a href="<c:url value='/feedback'/>"><fmt:message key="menu.feedback"/></a></li>
+            <li><a href="<c:url value='/activeProjects'/>"><fmt:message key="menu.activeProjects"/></a></li>
         </ul>
     </div>
 </sec:authorize>

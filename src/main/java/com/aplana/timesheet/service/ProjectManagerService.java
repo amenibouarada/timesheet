@@ -70,4 +70,8 @@ public class ProjectManagerService {
                 }
         }
     }
+
+    public List<ProjectManager> getSortedListByProject(Project project) {
+        return projectManagerDAO.getSortedListByProject(project);
+    }
 }
