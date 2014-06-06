@@ -14,10 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static argo.jdom.JsonNodeBuilders.*;
 
@@ -35,7 +32,11 @@ public class ProjectService {
     @Autowired
     private TSPropertyProvider propertyProvider;
 
+    @Autowired
+    private EmployeeService employeeService;
 
+    @Autowired
+    private ProjectRoleService projectRoleService;
 
 	/**
 	 * Возвращает активные проекты без разделения по подразделениям.
@@ -320,5 +321,24 @@ public class ProjectService {
     @Transactional
     public void deleteProject(Project project) {
         projectDAO.deleteProject(project);
+    }
+
+    public HashMap<Employee, List<ProjectRole>> getEmployesWhoWasOnProjectByDates(Date beginDate, Date endDate, Project project, List<Integer> excludeIds){
+        List list = projectDAO.getEmployesWhoWasOnProjectByDates(beginDate, endDate, project, excludeIds);
+
+        HashMap<Employee, List<ProjectRole>> empRole = new HashMap<Employee, List<ProjectRole>>();
+        for (Object o : list) {
+            Employee employee = employeeService.find((Integer) ((Object[]) o)[0]);
+            ProjectRole projectRole = projectRoleService.find((Integer)((Object[]) o)[1]);
+            if (empRole.containsKey(employee)) {
+               empRole.get(employee).add(projectRole);
+            } else {
+                List<ProjectRole> projectRoles = new ArrayList<ProjectRole>();
+                projectRoles.add(projectRole);
+                empRole.put(employee,projectRoles);
+            }
+        }
+
+        return empRole;
     }
 }

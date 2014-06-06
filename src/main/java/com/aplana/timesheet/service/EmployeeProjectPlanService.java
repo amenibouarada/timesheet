@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -96,5 +97,9 @@ public class EmployeeProjectPlanService {
         }
 
         return percentPlanList;
+    }
+
+    public List<Employee> getEmployesWhoWillWorkOnProject(Project project, Date beginDate, Date endDate, List<Integer> excludeIds){
+       return employeeProjectPlanDAO.getEmployesWhoWillWorkOnProject(project, beginDate, endDate, excludeIds);
     }
 }

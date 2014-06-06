@@ -74,4 +74,8 @@ public class ProjectManagerService {
     public List<ProjectManager> getSortedListByProject(Project project) {
         return projectManagerDAO.getSortedListByProject(project);
     }
+
+    public List<ProjectManager> getListMasterManagersByRole(Integer roleId, Project project) {
+        return projectManagerDAO.getListMasterManagersByRole(roleId, project);
+    }
 }

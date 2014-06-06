@@ -380,4 +380,32 @@ public class ProjectDAO {
 
         return  query.getResultList();
     }
+
+    public List getEmployesWhoWasOnProjectByDates(Date beginDate, Date endDate, Project project, List<Integer> excludeIds) {
+        StringBuilder excludeIdsStr = new StringBuilder();
+        if (excludeIds.size() == 1) {
+            excludeIdsStr.append(excludeIds.get(0));
+        } else {
+            for (Integer id : excludeIds) {
+                excludeIdsStr.append(id).append(", ");
+            }
+            if (excludeIdsStr.length() > 0) {
+                excludeIdsStr.delete(excludeIdsStr.length() - 2, excludeIdsStr.length());
+            }
+        }
+
+        Query query = entityManager.createQuery("select ts.employee.id, pr.id from TimeSheetDetail as tsd " +
+                "left join tsd.projectRole as pr " +
+                "left join tsd.timeSheet as ts " +
+                "where tsd.project = :project " +
+                "and ts.type = " + TypesOfTimeSheetEnum.REPORT.getId() + " " +
+                "and ts.calDate.calDate between :beginDate and :endDate " +
+                (excludeIdsStr.length() > 0 ? "and ts.employee.id not in (" + excludeIdsStr + ") " : "") +
+                "group by ts.employee.id, pr.id")
+                .setParameter("project", project)
+                .setParameter("beginDate", beginDate)
+                .setParameter("endDate", endDate);
+
+        return query.getResultList();
+    }
 }

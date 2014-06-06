@@ -100,4 +100,15 @@ public class ProjectManagerDAO {
         }
         return projectManagers;
     }
+
+    public List<ProjectManager> getListMasterManagersByRole(Integer roleId, Project project) {
+        Query query = entityManager.createQuery(
+                "select p from ProjectManager p where p.projectRole.id = :roleId and " +
+                        "p.project = :project and " +
+                        "p.active = true order by p.id")
+                .setParameter("roleId", roleId)
+                .setParameter("project", project);
+
+        return query.getResultList();
+    }
 }

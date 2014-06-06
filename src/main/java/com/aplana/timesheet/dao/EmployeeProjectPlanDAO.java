@@ -6,12 +6,14 @@ import com.aplana.timesheet.dao.entity.EmployeeProjectPlan;
 import com.aplana.timesheet.dao.entity.Project;
 import com.aplana.timesheet.enums.*;
 import com.aplana.timesheet.form.EmploymentPlanningForm;
+import com.aplana.timesheet.util.DateTimeUtil;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -527,4 +529,37 @@ public class EmployeeProjectPlanDAO {
         return query.getResultList();
     }
 
+    public List<Employee> getEmployesWhoWillWorkOnProject(Project project, Date beginDate, Date endDate, List<Integer> excludeIds) {
+        Integer beginDateMonth = DateTimeUtil.getMonth(beginDate) + 1; // в БД нумерация с 1
+        Integer beginDateYear = DateTimeUtil.getYear(beginDate);
+
+        Integer endDateMonth = DateTimeUtil.getMonth(endDate) + 1; // в БД нумерация с 1
+        Integer endDateYear = DateTimeUtil.getYear(endDate);
+
+        StringBuilder excludeIdsStr = new StringBuilder();
+        if (excludeIds.size() == 1) {
+            excludeIdsStr.append(excludeIds.get(0));
+        } else {
+            for (Integer id : excludeIds) {
+                excludeIdsStr.append(id).append(", ");
+            }
+            if (excludeIdsStr.length() > 0) {
+                excludeIdsStr.delete(excludeIdsStr.length() - 2, excludeIdsStr.length());
+            }
+        }
+
+        Query query = entityManager.createQuery("SELECT epp.employee FROM EmployeeProjectPlan epp WHERE " +
+                "(epp.project IN (:project)) AND " +
+                "(epp.month <= :endDateMonth AND epp.month >= :beginDateMonth AND" +
+                " epp.year <= :endDateYear AND epp.year >= :beginDateYear)" +
+                (excludeIdsStr.length() > 0 ? "and epp.employee.id not in (" + excludeIdsStr + ") " : ""));
+
+        query.setParameter("project", project).
+                setParameter("endDateMonth", endDateMonth).
+                setParameter("endDateYear", endDateYear).
+                setParameter("beginDateMonth", beginDateMonth).
+                setParameter("beginDateYear", beginDateYear);
+
+        return query.getResultList();
+    }
 }

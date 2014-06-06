@@ -63,6 +63,22 @@
     </tr>
     <tr>
         <td>
+            <span class="lowspace ">Ведущий аналитик:</span>
+        </td>
+        <td>
+            ${masterAnalysts}
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <span class="lowspace ">Тимлидер:</span>
+        </td>
+        <td>
+            ${teamleaders}
+        </td>
+    </tr>
+    <tr>
+        <td>
             <span class="lowspace">Команда</span>
         </td>
         <td colspan="4">
@@ -70,22 +86,15 @@
                 <tr>
                     <th width="250">Сотрудник</th>
                     <th width="250">Роль</th>
-                    <th width="100">Главный</th>
-
                 </tr>
-                <c:forEach items="${projectManagers}" varStatus="row" var="manager">
+                <c:forEach items="${teamEmployees}" varStatus="row" var="emp">
                     <tr id="projectManager_${row.index}" class="manager_row">
                         <td>
-                            <c:out value="${manager.employee.name}"/>
+                            <c:out value="${emp.key}"/>
                         </td>
                         <td>
-                            <c:out value="${manager.projectRole.name}"/>
+                            <c:out value="${emp.value}"/>
                         </td>
-                        <td>
-                            <input id="managerMaster" name="managerMaster" type="checkbox"
-                                   checked="<c:out value="${manager.master}"/>" disabled="true">
-                        </td>
-
                     </tr>
                 </c:forEach>
             </table>
@@ -96,7 +105,7 @@
             <span class="lowspace">Технологии:</span>
         </td>
         <td colspan="2">
-            <textarea rows="3" class="show_border" disabled="true">${project.passport}</textarea>
+            ${project.passport}
         </td>
     </tr>
     <tr>
