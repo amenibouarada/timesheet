@@ -19,13 +19,16 @@
     });
 </script>
 <script>
-    setInterval(function() {
-        require(["dojo/request"], function(request){
-            request("/ping").then(
+    function ping() {
+        setInterval(function() {
+            require(["dojo/request"], function(request){
+                request("/ping").then(
 
-            );
-        });
-    },60000);
+                );
+            });
+        },60000);
+    }
+
 </script>
 
 <h1><fmt:message key="title.reportparams"/></h1>
@@ -112,7 +115,7 @@
 
     </div>
 
-    <button id="make_report_button" style="width:210px" type="submit" onclick="clearErrorBox('errorBoxId')">Сформировать отчет</button>
+    <button id="make_report_button" style="width:210px" type="submit" onclick="clearErrorBox('errorBoxId'); ping();">Сформировать отчет</button>
 </form:form>
 </body>
 
