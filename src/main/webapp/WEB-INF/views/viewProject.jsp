@@ -78,8 +78,8 @@
         </td>
     </tr>
     <tr>
-        <td>
-            <span class="lowspace">Команда</span>
+        <td style="vertical-align: top;">
+            <span class="lowspace">Команда:</span>
         </td>
         <td colspan="4">
             <table class="details_table" id="projectManagers">
