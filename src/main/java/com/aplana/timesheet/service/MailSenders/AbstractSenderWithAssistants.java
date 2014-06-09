@@ -29,7 +29,7 @@ public abstract class AbstractSenderWithAssistants<T> extends MailSender<T> {
     protected final Set<String> getAssistantEmail(Set<String> managersEmails) {
         final Set<String> emails = new HashSet<String>();
         final List<EmployeeAssistant> employeeAssistantList = sendMailService.getEmployeeAssistant(managersEmails);
-
+        if(employeeAssistantList == null) return null;
         for (EmployeeAssistant employeeAssistant : employeeAssistantList){
             if (employeeAssistant != null && (employeeAssistant.isActive() == null || employeeAssistant.isActive())){
                 Employee assistant = employeeAssistant.getAssistant();
