@@ -9,6 +9,8 @@ import com.aplana.timesheet.util.report.Report7Period;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.time.DateUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.util.StringUtil;
 import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,6 +66,7 @@ public class JasperReportDAO {
     private static final String PROJECT_SQL_CLAUSE  = "project.id=:projectId AND ";
     private static final String BILLABLE_CLAUSE = "(epbillable.billable = 'true' OR (epbillable.billable is null AND empl.billable = 'true')) AND ";
     private static final String HIDE_INACTIVE_PROJECTS_CLAUSE = "AND project.active = 'true' ";
+    private static final String TIMESHEET_COMMENT_CLAUSE = " timesheet_details.description like :description AND ";
 
     private static final String NOT_DRAFT_ONLY_CLAUSE = "AND ts_type.id = " + TypesOfTimeSheetEnum.REPORT.getId() + " ";
     private static final String JOIN_TIMESHEET_TO_DICTIONARY_ON_TS_TYPE = "INNER JOIN dictionary_item ts_type ON timesheet.ts_type_id=ts_type.id ";
@@ -707,7 +710,8 @@ public class JasperReportDAO {
     private List getResultList( Report05 report ) {
         boolean withRegionClause   = report.hasRegions()                && !report.isAllRegions();
         boolean withDivisionClause = report.getDivisionOwnerId() != null && report.getDivisionOwnerId() != 0;
-        boolean withEmployeeClause = report.getEmployeeId() != null && report.getEmployeeId    () != 0;
+        boolean withEmployeeClause = report.getEmployeeId() != null && report.getEmployeeId() != 0;
+        boolean withCommentClause = report.getComment() != null && StringUtils.isNotBlank(report.getComment());
 
         Query query = entityManager.createNativeQuery(
                 "select " +
@@ -757,6 +761,7 @@ public class JasperReportDAO {
                         (withDivisionClause ? DIVISION_SQL_CLAUSE : WITHOUT_CLAUSE) +
                         (withRegionClause ? REGION_SQL_CLAUSE : WITHOUT_CLAUSE) +
                         (withEmployeeClause ? EMPLOYEE_SQL_CLAUSE : WITHOUT_CLAUSE) +
+                        (withCommentClause ?  TIMESHEET_COMMENT_CLAUSE : WITHOUT_CLAUSE) +
                         "calendar.calDate between :beginDate and :endDate " +
                         NOT_DRAFT_ONLY_CLAUSE +
                 " order by calendar.calDate, empl.name ");
@@ -769,6 +774,9 @@ public class JasperReportDAO {
         }
         if (withDivisionClause) {
             query.setParameter("emplDivisionId", report.getDivisionOwnerId());
+        }
+        if (withCommentClause) {
+            query.setParameter("description", '%'+report.getComment()+'%');
         }
         query.setParameter("beginDate", DateTimeUtil.stringToTimestamp( report.getBeginDate() ));
         query.setParameter("endDate", DateTimeUtil.stringToTimestamp(report.getEndDate()));

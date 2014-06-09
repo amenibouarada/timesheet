@@ -84,6 +84,16 @@
 
             </tr>
             <tr>
+                <td>
+                    <span class="label" style="float:left">Комментарий</span>
+                </td>
+                <td>
+                    <span style="float: right">
+                    <form:input path="comment" cssStyle="width: 200px;"/>
+                        	</span>
+                </td>
+            </tr>
+            <tr>
                 <td style="width: 225px">
                     <span class="label" style="float:left">Регион</span>
 							<span style="float: right">
