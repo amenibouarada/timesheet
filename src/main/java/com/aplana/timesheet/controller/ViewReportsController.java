@@ -1,5 +1,10 @@
 package com.aplana.timesheet.controller;
 
+import com.aplana.timesheet.dao.entity.DictionaryItem;
+import com.aplana.timesheet.dao.entity.TimeSheet;
+import com.aplana.timesheet.enums.TypesOfTimeSheetEnum;
+import com.aplana.timesheet.form.ReportsViewDeleteForm;
+import com.aplana.timesheet.service.DictionaryItemService;
 import com.aplana.timesheet.system.constants.PadegConstants;
 import com.aplana.timesheet.system.constants.TimeSheetConstants;
 import com.aplana.timesheet.dao.entity.Calendar;
@@ -11,6 +16,7 @@ import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.CalendarService;
 import com.aplana.timesheet.service.EmployeeReportService;
 import com.aplana.timesheet.service.TimeSheetService;
+import com.aplana.timesheet.system.security.entity.TimeSheetUser;
 import com.aplana.timesheet.util.DateTimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -33,17 +39,21 @@ public class ViewReportsController extends AbstractControllerForEmployeeWithYear
 
     @Autowired
     ViewReportsFormValidator tsFormValidator;
+
     @Autowired
     TimeSheetService timeSheetService;
 
     @Autowired
-    private CalendarService calendarService;
+    CalendarService calendarService;
 
     @Autowired
     TSPropertyProvider propertyProvider;
 
     @Autowired
     EmployeeReportService employeeReportService;
+
+    @Autowired
+    DictionaryItemService dictionaryItemService;
 
     @RequestMapping(value = "/viewreports", method = RequestMethod.GET)
     public String sendViewReports() {
@@ -66,6 +76,7 @@ public class ViewReportsController extends AbstractControllerForEmployeeWithYear
             @PathVariable("year") Integer year, 
             @PathVariable("month") Integer month, 
             @ModelAttribute("viewReportsForm") ViewReportsForm tsForm, 
+            @ModelAttribute("deleteReportsForm") ReportsViewDeleteForm tsDeleteForm,
             BindingResult result
     ) {
         logger.info("year {}, month {}", year, month);
@@ -126,6 +137,38 @@ public class ViewReportsController extends AbstractControllerForEmployeeWithYear
         mav.addObject("reportsDetail", employeeReportService.getMonthReport(employeeId, year, month));
 
         return mav;
+    }
+
+
+    @RequestMapping(value = "/deleteReports", method = RequestMethod.POST)
+    public String deleteReports(
+            @ModelAttribute("deleteReportsForm") ReportsViewDeleteForm tsDeleteForm) {
+        TimeSheetUser securityUser = securityService.getSecurityPrincipal();
+        if (securityUser == null) {
+            throw new SecurityException("Не найден пользователь в контексте безопасности.");
+        }
+        Integer[] ids = tsDeleteForm.getIds();
+        for (Integer i = 0; i < ids.length; i++) {
+            Integer id = ids[i];
+            TimeSheet timeSheet = timeSheetService.find(id);
+            logger.info("Удаляется отчет " + timeSheet + ". Инициатор: " + securityUser.getEmployee().getName());
+            timeSheetService.delete(timeSheet);
+        }
+        return String.format("redirect:"+tsDeleteForm.getLink());
+    }
+
+
+    @RequestMapping(value = "/sendToRawReports", method = RequestMethod.POST)
+    public String sendToRawReports(
+            @ModelAttribute("deleteReportsForm") ReportsViewDeleteForm tsDeleteForm) {
+        Integer[] ids = tsDeleteForm.getIds();
+
+        for (Integer i = 0; i < ids.length; i++) {
+            Integer id = ids[i];
+            timeSheetService.setDraftTypeToTimeSheet(id);
+        }
+
+        return String.format("redirect:"+tsDeleteForm.getLink());
     }
 
 }

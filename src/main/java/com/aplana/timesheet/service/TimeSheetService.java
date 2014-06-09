@@ -759,4 +759,12 @@ public class TimeSheetService {
 
         return Joiner.on(", ").join(names);
     }
+
+    @Transactional
+    public void setDraftTypeToTimeSheet(Integer id) {
+        TimeSheet timeSheet = find(id);
+        DictionaryItem draftItem = dictionaryItemService.find(TypesOfTimeSheetEnum.DRAFT.getId());
+        timeSheet.setType(draftItem);
+        timeSheetDAO.storeTimeSheet(timeSheet);
+    }
 }

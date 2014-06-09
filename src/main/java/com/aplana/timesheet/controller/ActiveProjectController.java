@@ -72,12 +72,12 @@ public class ActiveProjectController {
         if (masterAnalystsList.size() == 1) {
             ProjectManager projectManager = masterAnalystsList.get(0);
             masterAnalysts.append(projectManager.getEmployee().getName());
-            ids.add(projectManager.getId());
+            ids.add(projectManager.getEmployee().getId());
         } else {
             for (ProjectManager projectManager : masterAnalystsList) {
                 masterAnalysts.append(projectManager.getEmployee().getName())
                         .append(", ");
-                ids.add(projectManager.getId());
+                ids.add(projectManager.getEmployee().getId());
             }
             if (masterAnalysts.length() > 0) {
                 masterAnalysts.delete(masterAnalysts.length() - 2, masterAnalysts.length());
@@ -91,7 +91,7 @@ public class ActiveProjectController {
             for (ProjectManager projectManager : teamleadersList) {
                 teamleaders.append(projectManager.getEmployee().getName())
                         .append(", ");
-                ids.add(projectManager.getId());
+                ids.add(projectManager.getEmployee().getId());
             }
             if (teamleaders.length() > 0) {
                 teamleaders.delete(teamleaders.length() - 2, teamleaders.length());
@@ -135,7 +135,6 @@ public class ActiveProjectController {
         Iterable<Division> allDivisions = divisionService.getAllDivisions();
 
         mav.addObject("projects", projects);
-
         mav.addObject("divisionsList", allDivisions);
         mav.addObject("division_id", divisionId);
     }
