@@ -21,11 +21,15 @@
             reloadViewReportsState();
             divisionChange(dojo.byId("divisionId"));
             dojo.byId("employeeId").value = ${employeeId};
-            var deleteAllCheckbox = dojo.byId("deleteAllCheckbox");
+            if (dojo.query('input[id^="delete_"]').length > 0) {
+                var deleteAllCheckbox = dojo.byId("deleteAllCheckbox");
 
-            dojo.connect(deleteAllCheckbox, "onclick", function (evt) {
-                setAllCheckBoxChecked();
-            });
+                dojo.connect(deleteAllCheckbox, "onclick", function (evt) {
+                    setAllCheckBoxChecked();
+                });
+            } else {
+                dojo.query("#deleteAllCheckbox").style("display", "none");
+            }
         });
 
         dojo.require("dijit.form.DateTextBox");
