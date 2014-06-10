@@ -154,6 +154,17 @@
                 element.checked = deleteAllCheckbox.checked;
             }
         }
+
+        function openVacation(date, emplId, divId){
+            var vacationForm = dojo.byId("vacationsForm");
+            vacationForm.action = "<%=request.getContextPath()%>/vacations";
+
+            dojo.byId("calFromDate").value = date;
+            dojo.byId("calToDate").value = date;
+            dojo.query("#vacationsForm > #employeeId")[0].value = emplId;
+            dojo.query("#vacationsForm > #divisionId")[0].value = divId;
+            vacationForm.submit();
+        }
     </script>
     <style type="text/css">
         .colortext {
@@ -359,7 +370,10 @@
 
         <td>
             <c:if test="${report.illnessDay}">Болезнь</c:if>
-            <c:if test="${report.vacationDay}">Отпуск</c:if>
+            <c:if test="${report.vacationDay}">
+                Отпуск
+                <a href="#" onclick="openVacation('<fmt:formatDate value="${report.calDate}" pattern="yyyy-MM-dd"/>', ${report.timeSheet.employee.id},  ${report.timeSheet.employee.division.id});">(Подробнее)</a>
+            </c:if>
             <c:if test="${report.businessTripDay}">Командировка</c:if>
         </td>
 
@@ -387,6 +401,22 @@
     </tr>
     </thead>
 </table>
+
+<form:form method="post" commandName="vacationsForm" name="vacationsForm">
+    <form:hidden path="year"/>
+    <form:hidden path="vacationId"/>
+    <form:hidden path="vacationType"/>
+    <form:hidden path="managerId"/>
+    <form:hidden path="regions"/>
+    <form:hidden path="approvalId"/>
+    <form:hidden path="projectId"/>
+    <form:hidden path="viewMode"/>
+    <form:hidden path="calFromDate"/>
+    <form:hidden path="calToDate"/>
+    <form:hidden path="employeeId"/>
+    <form:hidden path="divisionId"/>
+</form:form>
+
 <sec:authorize access="hasRole('ROLE_ADMIN')">
     <form:form method="post" commandName="deleteReportsForm" name="deleteReportsForm">
         <form:hidden path="ids"/>

@@ -4,6 +4,7 @@ import com.aplana.timesheet.dao.entity.DictionaryItem;
 import com.aplana.timesheet.dao.entity.TimeSheet;
 import com.aplana.timesheet.enums.TypesOfTimeSheetEnum;
 import com.aplana.timesheet.form.ReportsViewDeleteForm;
+import com.aplana.timesheet.form.VacationsForm;
 import com.aplana.timesheet.service.DictionaryItemService;
 import com.aplana.timesheet.system.constants.PadegConstants;
 import com.aplana.timesheet.system.constants.TimeSheetConstants;
@@ -30,9 +31,12 @@ import padeg.lib.Padeg;
 
 import javax.annotation.PostConstruct;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+
+import static com.aplana.timesheet.form.VacationsForm.VIEW_TABLE;
 
 @Controller
 public class ViewReportsController extends AbstractControllerForEmployeeWithYears {
@@ -135,8 +139,19 @@ public class ViewReportsController extends AbstractControllerForEmployeeWithYear
         );
 
         mav.addObject("reportsDetail", employeeReportService.getMonthReport(employeeId, year, month));
-
+        addVacationsForm(mav); //костыль, из за того что адрес для первоначальной загрузки формы отпусков и после применения фильтра один и тот же
         return mav;
+    }
+
+    private void addVacationsForm(ModelAndView modelAndView) {
+
+        VacationsForm vacationsForm = new VacationsForm();
+        vacationsForm.setVacationType(0);
+        vacationsForm.setRegions(new ArrayList<Integer>());
+        vacationsForm.getRegions().add(VacationsForm.ALL_VALUE);
+        vacationsForm.setViewMode(VIEW_TABLE);
+
+        modelAndView.addObject("vacationsForm", vacationsForm);
     }
 
 
