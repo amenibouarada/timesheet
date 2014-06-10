@@ -14,6 +14,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -58,13 +60,13 @@ public class ActiveProjectController {
 
     @RequestMapping(value = "/viewProjects/{projectId}", method = RequestMethod.GET)
     public ModelAndView viewActiveProject(
-            @PathVariable("projectId") Integer projectId) {
+            @PathVariable("projectId") Integer projectId) throws ParseException {
         ModelAndView mav = new ModelAndView("viewProject");
         fillProjectInfo(projectId, mav);
         return mav;
     }
 
-    private void fillProjectInfo(Integer projectId, ModelAndView mav) {
+    private void fillProjectInfo(Integer projectId, ModelAndView mav) throws ParseException {
         Project project = projectService.find(projectId);
         List<Integer> ids = new ArrayList<Integer>();
         List<ProjectManager> masterAnalystsList = projectManagerService.getListMasterManagersByRole(ProjectRolesEnum.ANALYST.getId(), project);
@@ -148,6 +150,7 @@ public class ActiveProjectController {
         }
 
         mav.addObject("project", project);
+        mav.addObject("infiniteDate", new SimpleDateFormat("dd.MM.yyyy").parse("31.12.2050"));
         mav.addObject("teamEmployees", sorted.size() > 0 ? sorted : null);
         mav.addObject("masterAnalysts", masterAnalysts);
         mav.addObject("teamleaders", teamleaders);

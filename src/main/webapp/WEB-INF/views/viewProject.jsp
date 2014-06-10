@@ -128,7 +128,15 @@
         </td>
         <td>
             <div class="horizontal_block">
-                <fmt:formatDate value="${project.endDate}" pattern="dd.MM.yyyy"/>
+                <fmt:formatDate value="${infiniteDate}" pattern="dd.MM.yyyy" var="infiniteDateString"/>
+                <fmt:formatDate value="${project.endDate}" pattern="dd.MM.yyyy" var="endDateString"/>
+
+                <c:if test="${endDateString eq infiniteDateString}">
+                    Не определено
+                </c:if>
+                <c:if test="${endDateString ne infiniteDateString}">
+                    <fmt:formatDate value="${project.endDate}" pattern="dd.MM.yyyy"/>
+                </c:if>
             </div>
         </td>
     </tr>
