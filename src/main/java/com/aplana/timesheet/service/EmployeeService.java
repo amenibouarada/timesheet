@@ -1,11 +1,14 @@
 package com.aplana.timesheet.service;
 
 import argo.jdom.JsonArrayNodeBuilder;
+import argo.jdom.JsonNodeBuilders;
+import argo.jdom.JsonObjectNodeBuilder;
 import com.aplana.timesheet.system.constants.TimeSheetConstants;
 import com.aplana.timesheet.dao.EmployeeDAO;
 import com.aplana.timesheet.dao.RegionDAO;
 import com.aplana.timesheet.dao.entity.*;
 import com.aplana.timesheet.enums.PermissionsEnum;
+import com.aplana.timesheet.util.DateTimeUtil;
 import com.aplana.timesheet.util.JsonUtil;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
@@ -20,6 +23,8 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Nullable;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static argo.jdom.JsonNodeBuilders.*;
@@ -45,6 +50,10 @@ public class EmployeeService {
     private ProjectService projectService;
     @Autowired
     RegionDAO regionDAO;
+    @Autowired
+    private EmployeeDAO emloyeeDAO;
+    @Autowired
+    private VacationService vacationService;
 
     /**
     * Возвращает сотрудника по идентификатору.
@@ -641,5 +650,22 @@ public class EmployeeService {
      */
     public List<Employee> getEmployeeByDivisionManagerRoleRegion(Integer division, Integer manager, List<Integer> projectRoleList, List<Integer> regionList){
         return employeeDAO.getEmployeeByDivisionManagerRoleRegion(division, manager, projectRoleList, regionList);
+    }
+
+    public String checkDayIsVacation(Integer employeeId, String reportDate) {
+        Date date = new Date();
+        try {
+            date = new SimpleDateFormat(DateTimeUtil.DATE_PATTERN).parse(reportDate);
+        } catch (ParseException e) {
+            logger.error("Сообщение об ошибке", e);
+        }
+        Employee user = emloyeeDAO.find(employeeId);
+        Boolean isVacationDay = vacationService.isDayVacationWithoutPlanned(user, date);
+        final JsonArrayNodeBuilder builder = anArrayBuilder();
+        JsonObjectNodeBuilder objectNodeBuilder = anObjectBuilder().
+                withField("isVacationDay", JsonNodeBuilders.aStringBuilder(isVacationDay.toString()));
+        builder.withElement(objectNodeBuilder);
+
+        return JsonUtil.format(builder.build());
     }
 }

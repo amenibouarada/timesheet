@@ -19,10 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import padeg.lib.Padeg;
 
@@ -410,6 +407,17 @@ public class VacationsController extends AbstractControllerForEmployee {
                 true
         );
         return employeeHelper.makeEmployeeListInJSON(employeeList);
+    }
+
+    /**
+     * Возвращает JSON список сотрудников по условиям заданным на форме
+     */
+    @RequestMapping(value = "/vacations/checkDate", method = RequestMethod.GET)
+    @ResponseBody
+    public String checkDayIsVacation(@RequestParam("employeeId") Integer employeeId,
+                                     @RequestParam("date") String date) {
+
+        return employeeService.checkDayIsVacation(employeeId,date);
     }
 
 }

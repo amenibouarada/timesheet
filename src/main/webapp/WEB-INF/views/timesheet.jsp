@@ -134,6 +134,8 @@
         //крутилка создается при после загрузки страницы,
         //т.к. если она создается в месте использования - ghb show не отображается картинка
         standByElement = new dojox.widget.Standby({target: dojo.query("body")[0], zIndex: 1000});
+
+        checkIsVacationDay();
     });
 
     /**

@@ -449,15 +449,43 @@ function convertStringToDate(stringDate){
 
 function validateReportDate(value) {
     if (value != null && dateNotBetweenMonth(value)) {
-        dojo.style("date_warning", {"display":"inline", "color":"red"});
-        if (invalidReportDate(value) > 0)
+        dojo.style("date_warning", {"display": "inline", "color": "red"});
+        if (invalidReportDate(value) > 0) {
             dojo.byId("date_warning").innerHTML = "Разница текущей и указанной дат больше 27 дней";
-        else
+            return;
+        } else {
             dojo.byId("date_warning").innerHTML = "Разница текущей и указанной дат больше 27 дней";
+            return;
+        }
     }
     else {
-        dojo.style("date_warning", {"display":"none"});
+        dojo.style("date_warning", {"display": "none"});
     }
+
+    checkIsVacationDay();
+}
+
+function checkIsVacationDay() {
+    var employeeId = dojo.byId("employeeId").value;
+    var reportDate = dijit.byId('calDate').get('value').format("yyyy-mm-dd");
+    dojo.xhrGet({
+        url: getContextPath() + "/vacations/checkDate",
+        handleAs:"text",
+        timeout:10000,
+        content:{ employeeId:employeeId, date:reportDate},
+        preventCache: true,
+        load:function (data) {
+            if (dojo.fromJson(data)[0].isVacationDay == "true") {
+                dojo.style("date_warning", {"display": "inline", "color": "red"});
+                dojo.byId("date_warning").innerHTML = "Внимание! На выбранную дату у сотрудника запланирован отпуск";
+            } else {
+                dojo.style("date_warning", {"display": "none"});
+            }
+
+        },
+        error:function (err) {
+        }
+    });
 }
 
 function onCalDateChange(calDateObj){
