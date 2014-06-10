@@ -1,6 +1,5 @@
 package com.aplana.timesheet.controller;
 
-import com.aplana.timesheet.dao.EmployeeDAO;
 import com.aplana.timesheet.dao.entity.*;
 import com.aplana.timesheet.enums.ProjectRolesEnum;
 import com.aplana.timesheet.form.ActiveProjectsForm;
@@ -27,6 +26,9 @@ public class ActiveProjectController {
 
     @Autowired
     ProjectService projectService;
+
+    @Autowired
+    ProjectRoleService projectRoleService;
 
     @Autowired
     ProjectManagerService projectManagerService;
@@ -103,7 +105,7 @@ public class ActiveProjectController {
         HashMap<Employee, List<ProjectRole>> employees = projectService.getEmployesWhoWasOnProjectByDates(DateUtils.addDays(new Date(), -30), new Date(), project, ids);
         List<Employee> employeesPlan = employeeProjectPlanService.getEmployesWhoWillWorkOnProject(project, new Date(), DateUtils.addDays(new Date(), 30), ids);
 
-        HashMap<String, String> employeesStrings = new HashMap<String, String>();
+        HashMap<HashMap<String, String>,Integer> employeesStrings = new HashMap<HashMap<String, String>,Integer>();
 
         for (Employee employee : employees.keySet()) {
             String name = employee.getName();
@@ -113,20 +115,67 @@ public class ActiveProjectController {
             }
             if (roles.length() > 0) {
                 roles.delete(roles.length()-2, roles.length());
+            } else {
+                roles.append(employee.getJob().getName());
             }
-            employeesStrings.put(name, roles.toString());
+            HashMap<String, String> map = new HashMap<String, String>();
+            map.put(name, roles.toString());
+            employeesStrings.put(map, getSortedRole(employees.get(employee)));
         }
 
         for (Employee employee : employeesPlan) {
             if (!employeesStrings.containsKey(employee.getName())) {
-                employeesStrings.put(employee.getName(), "");
+                HashMap<String, String> map = new HashMap<String, String>();
+                map.put(employee.getName(),employee.getJob().getName());
+                List<ProjectRole> projectRoles = new ArrayList<ProjectRole>();
+                projectRoles.add(employee.getJob());
+                employeesStrings.put(map, getSortedRole(projectRoles));
             }
         }
 
+        Set<Map.Entry<HashMap<String, String>,Integer>> set = employeesStrings.entrySet();
+        List<Map.Entry<HashMap<String, String>,Integer>> list = new ArrayList<Map.Entry<HashMap<String, String>,Integer>>(set);
+        Collections.sort( list, new Comparator<Map.Entry<HashMap<String, String>,Integer>>()
+        {
+            public int compare( Map.Entry<HashMap<String, String>,Integer> o1, Map.Entry<HashMap<String, String>,Integer> o2 )
+            {
+                return (o1.getValue()).compareTo(o2.getValue());
+            }
+        } );
+        LinkedHashMap<String, String> sorted = new LinkedHashMap<String, String>();
+        for (Map.Entry<HashMap<String, String>,Integer> entry : list){
+            sorted.put((String)entry.getKey().keySet().toArray()[0], entry.getKey().get((String)entry.getKey().keySet().toArray()[0]));
+        }
+
         mav.addObject("project", project);
-        mav.addObject("teamEmployees", employeesStrings);
+        mav.addObject("teamEmployees", sorted.size() > 0 ? sorted : null);
         mav.addObject("masterAnalysts", masterAnalysts);
         mav.addObject("teamleaders", teamleaders);
+    }
+
+
+    private Integer getSortedRole(List<ProjectRole> projectRoles) {
+        List<Integer> integerListRoles = new ArrayList<Integer>();
+        for (ProjectRole projectRole : projectRoles){
+            integerListRoles.add(projectRole.getId());
+        }
+
+        if (integerListRoles.contains(ProjectRolesEnum.HEAD.getId())) {
+            return 0;
+        }
+        if (integerListRoles.contains(ProjectRolesEnum.ANALYST.getId())) {
+            return 1;
+        }
+        if (integerListRoles.contains(ProjectRolesEnum.DEVELOPER.getId())) {
+            return 2;
+        }
+        if (integerListRoles.contains(ProjectRolesEnum.SYSTEM_ENGINEER.getId())) {
+            return 3;
+        }
+        if (integerListRoles.contains(ProjectRolesEnum.TESTER.getId())) {
+            return 4;
+        }
+        return 5;
     }
 
     private void fillActiveProjects(ModelAndView mav, Integer divisionId) {

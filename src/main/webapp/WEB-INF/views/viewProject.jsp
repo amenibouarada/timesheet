@@ -82,11 +82,13 @@
             <span class="lowspace">Команда:</span>
         </td>
         <td colspan="4">
+            <c:if test="${teamEmployees != null}">
             <table class="details_table" id="projectManagers">
                 <tr>
                     <th width="250">Сотрудник</th>
                     <th width="250">Роль</th>
                 </tr>
+
                 <c:forEach items="${teamEmployees}" varStatus="row" var="emp">
                     <tr id="projectManager_${row.index}" class="manager_row">
                         <td>
@@ -97,7 +99,9 @@
                         </td>
                     </tr>
                 </c:forEach>
+
             </table>
+        </c:if>
         </td>
     </tr>
     <tr>

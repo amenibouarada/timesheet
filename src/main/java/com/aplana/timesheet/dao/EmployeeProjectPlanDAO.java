@@ -549,6 +549,7 @@ public class EmployeeProjectPlanDAO {
         }
 
         Query query = entityManager.createQuery("SELECT epp.employee FROM EmployeeProjectPlan epp WHERE " +
+                "epp.employee.endDate is null AND" +
                 "(epp.project IN (:project)) AND " +
                 "(epp.month <= :endDateMonth AND epp.month >= :beginDateMonth AND" +
                 " epp.year <= :endDateYear AND epp.year >= :beginDateYear)" +

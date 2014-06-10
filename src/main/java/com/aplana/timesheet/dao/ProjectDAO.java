@@ -397,7 +397,8 @@ public class ProjectDAO {
         Query query = entityManager.createQuery("select ts.employee.id, pr.id from TimeSheetDetail as tsd " +
                 "left join tsd.projectRole as pr " +
                 "left join tsd.timeSheet as ts " +
-                "where tsd.project = :project " +
+                "where ts.employee.endDate is null " +
+                "and tsd.project = :project " +
                 "and ts.type = " + TypesOfTimeSheetEnum.REPORT.getId() + " " +
                 "and ts.calDate.calDate between :beginDate and :endDate " +
                 (excludeIdsStr.length() > 0 ? "and ts.employee.id not in (" + excludeIdsStr + ") " : "") +
