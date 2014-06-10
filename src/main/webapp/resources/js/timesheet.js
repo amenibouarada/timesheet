@@ -272,6 +272,22 @@ function addNewRow() {
     dojo.connect(durationInput, "onchange", durationInput, checkDuration);
     dojo.connect(descriptionTextarea, "onkeyup", descriptionTextarea, textareaAutoGrow);
     dojo.connect(problemTextarea, "onkeyup", problemTextarea, textareaAutoGrow);
+
+    dojo.connect(actTypeSelect, "onchange", actTypeSelect, deleteEmptyOption);
+    dojo.connect(workplaceSelect, "onchange", workplaceSelect, deleteEmptyOption);
+    dojo.connect(projectSelect, "onchange", projectSelect, deleteEmptyOption);
+    dojo.connect(projectRoleSelect, "onchange", projectRoleSelect, deleteEmptyOption);
+    dojo.connect(projectSelect, "onchange", projectSelect, deleteEmptyOption);
+    dojo.connect(actCatSelect, "onchange", actCatSelect, deleteEmptyOption);
+    dojo.connect(projectTasksSelect, "onchange", projectTasksSelect, deleteEmptyOption);
+}
+
+/* удаляет пустой option */
+function deleteEmptyOption() {
+    var selected = this.options[0];
+    if (selected.value == 0) {
+        this.remove(0);
+    }
 }
 
 function setActDescription(rowIndex){
