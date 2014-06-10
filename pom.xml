@@ -32,6 +32,7 @@
         <maven-surefire-plugin.version>2.12.4</maven-surefire-plugin.version>
         <surefire-junit4.version>2.12.4</surefire-junit4.version>
         <skipTests>true</skipTests>
+        <activiti.version>5.15.1</activiti.version>
     </properties>
 
     <repositories>
@@ -59,6 +60,10 @@
                 <enabled>true</enabled>
                 <checksumPolicy>warn</checksumPolicy>
             </releases>
+        </repository>
+        <repository>
+            <id>Alfresco Maven Repository</id>
+            <url>https://maven.alfresco.com/nexus/content/groups/public/</url>
         </repository>
     </repositories>
 
@@ -518,6 +523,14 @@
             <groupId>com.atlassian.jira</groupId>
             <artifactId>jira-rest-java-client</artifactId>
             <version>1.1-m02</version>
+        </dependency>
+
+        <!--Activiti-->
+
+        <dependency>
+            <groupId>org.activiti</groupId>
+            <artifactId>activiti-engine</artifactId>
+            <version>${activiti.version}</version>
         </dependency>
 
     </dependencies>
