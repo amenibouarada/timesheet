@@ -32,7 +32,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static argo.jdom.JsonNodeBuilders.*;
@@ -411,20 +410,11 @@ public class TimeSheetService {
     @Transactional(readOnly = true)
     private JsonObjectNodeBuilder getDailyTimesheetNextDayJsonBuilder(String date, Integer employeeId) {
         final JsonObjectNodeBuilder builder = anObjectBuilder();
-        TimeSheet nextTimeSheet;
 
-        Calendar calendarReportDate = calendarService.find(date);
+        final Calendar nextWorkDateCalendar = calendarService.getNextWorkDay(calendarService.find(date), employeeService.find(employeeId).getRegion());
+        builder.withField("workDate", aStringBuilder(DateTimeUtil.formatDate(nextWorkDateCalendar.getCalDate())));
 
-        Date nextReportDate = DateUtils.addDays(new Date(calendarReportDate.getCalDate().getTime()), 1);
-        Calendar nextReportCalendarDate = calendarService.find(new SimpleDateFormat("yyyy-MM-dd").format(nextReportDate));
-        nextTimeSheet = timeSheetDAO.findForDateAndEmployeeByTypes(nextReportCalendarDate, employeeId, Arrays.asList(TypesOfTimeSheetEnum.REPORT));
-
-        if (nextTimeSheet == null) {
-            final Calendar nextWorkDateCalendar = calendarService.getNextWorkDay(calendarReportDate, employeeService.find(employeeId).getRegion());
-            builder.withField("workDate", aStringBuilder(DateTimeUtil.formatDate(nextWorkDateCalendar.getCalDate())));
-
-            nextTimeSheet = timeSheetDAO.findForDateAndEmployeeByTypes(nextWorkDateCalendar, employeeId, Arrays.asList(TypesOfTimeSheetEnum.REPORT));
-        }
+        final TimeSheet nextTimeSheet = timeSheetDAO.findForDateAndEmployeeByTypes(nextWorkDateCalendar, employeeId, Arrays.asList(TypesOfTimeSheetEnum.REPORT));
 
         if (nextTimeSheet != null) {
             Set<TimeSheetDetail> nextDayDetails = nextTimeSheet.getTimeSheetDetails();
