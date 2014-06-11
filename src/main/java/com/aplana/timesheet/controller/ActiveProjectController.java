@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -46,22 +45,33 @@ public class ActiveProjectController {
 
     @RequestMapping(value = "/activeProjects", method = RequestMethod.GET)
     public ModelAndView showActiveProjects(
-            @ModelAttribute("activeProjectForm") ActiveProjectsForm tsForm) {
+            @ModelAttribute("activeProjectForm") ActiveProjectsForm tsForm) throws ParseException {
 
         ModelAndView mav = new ModelAndView("activeProjects");
         if (tsForm.getDivisionId() == null) {
             TimeSheetUser securityUser = securityService.getSecurityPrincipal();
             tsForm.setDivisionId(securityUser.getEmployee().getDivision().getId());
         }
-
+        mav.addObject("infiniteDate", DateUtils.addYears(new Date(), 5));
         fillActiveProjects(mav, tsForm.getDivisionId());
         return mav;
     }
 
-    @RequestMapping(value = "/viewProjects/{projectId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/activeProjects/{divisionId}", method = RequestMethod.GET)
+    public ModelAndView showActiveProjects(@PathVariable("divisionId") Integer divisionId,
+                                           @ModelAttribute("activeProjectForm") ActiveProjectsForm tsForm) throws ParseException {
+        tsForm = new ActiveProjectsForm();
+        tsForm.setDivisionId(divisionId);
+        return showActiveProjects(tsForm);
+    }
+
+    @RequestMapping(value = "/viewProjects//{divisionId}/{projectId}", method = RequestMethod.GET)
     public ModelAndView viewActiveProject(
-            @PathVariable("projectId") Integer projectId) throws ParseException {
+            @PathVariable("divisionId") Integer divisionId,
+            @PathVariable("projectId") Integer projectId
+    ) throws ParseException {
         ModelAndView mav = new ModelAndView("viewProject");
+        mav.addObject("divisionId", divisionId);
         fillProjectInfo(projectId, mav);
         return mav;
     }
@@ -150,7 +160,7 @@ public class ActiveProjectController {
         }
 
         mav.addObject("project", project);
-        mav.addObject("infiniteDate", new SimpleDateFormat("dd.MM.yyyy").parse("31.12.2050"));
+        mav.addObject("infiniteDate", DateUtils.addYears(new Date(), 5));
         mav.addObject("teamEmployees", sorted.size() > 0 ? sorted : null);
         mav.addObject("masterAnalysts", masterAnalysts);
         mav.addObject("teamleaders", teamleaders);

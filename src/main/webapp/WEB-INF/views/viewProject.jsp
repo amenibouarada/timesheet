@@ -128,18 +128,21 @@
         </td>
         <td>
             <div class="horizontal_block">
-                <fmt:formatDate value="${infiniteDate}" pattern="dd.MM.yyyy" var="infiniteDateString"/>
-                <fmt:formatDate value="${project.endDate}" pattern="dd.MM.yyyy" var="endDateString"/>
-
-                <c:if test="${endDateString eq infiniteDateString}">
+                <c:if test="${project.endDate gt infiniteDate}">
                     Не определено
                 </c:if>
-                <c:if test="${endDateString ne infiniteDateString}">
+                <c:if test="${project.endDate lt infiniteDate}">
                     <fmt:formatDate value="${project.endDate}" pattern="dd.MM.yyyy"/>
                 </c:if>
             </div>
         </td>
     </tr>
 </table>
+<button id="returnToList" onclick="openList()">Вернуться к списку</button>
+<script>
+    function openList(){
+        window.location = "<%= request.getContextPath()%>/activeProjects/${divisionId}";
+    }
+</script>
 </body>
 </html>

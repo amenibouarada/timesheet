@@ -9,7 +9,14 @@
     <link rel="stylesheet" type="text/css" href="<%= request.getContextPath()%>/resources/css/adminProjects.css">
     <script>
         function viewProject(id){
-            window.location = "<%= request.getContextPath()%>/viewProjects/"+id;
+            var divisionId = dojo.byId("divisionId").value;
+            window.location = "<%= request.getContextPath()%>/viewProjects/"+divisionId+"/"+id;
+        }
+
+        function applyFilter(){
+            var form = dojo.byId("activeProjectForm");
+            form.action = "<%= request.getContextPath()%>/activeProjects";
+            form.submit();
         }
     </script>
 </head>
@@ -29,7 +36,7 @@
             </td>
             <td colspan="2">
                 <div class="floatleft lowspace">
-                    <button id="show" class="butt block " onclick="">
+                    <button id="show" class="butt block" onclick="applyFilter()">
                         Показать
                     </button>
                 </div>
@@ -66,7 +73,14 @@
                         <td id="projectName_${project.id}" class="textcenter">${project.name}</td>
                         <td class="textcenter">${project.state.value}</td>
                         <td class="textcenter"><fmt:formatDate value="${project.startDate}" pattern="dd.MM.yyyy"/></td>
-                        <td class="textcenter"><fmt:formatDate value="${project.endDate}" pattern="dd.MM.yyyy"/></td>
+                        <td class="textcenter">
+                            <c:if test="${project.endDate gt infiniteDate}">
+                                Не определено
+                            </c:if>
+                            <c:if test="${project.endDate lt infiniteDate}">
+                                <fmt:formatDate value="${project.endDate}" pattern="dd.MM.yyyy"/>
+                            </c:if>
+                            </td>
                         <td class="textcenter">${project.customer}</td>
                     </tr>
                 </c:forEach>
