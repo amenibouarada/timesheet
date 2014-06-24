@@ -13,7 +13,7 @@
 Авторизация в системе реализована с помощью сервера OpenLDAP. Используемая СУБД - PostgresSQL 9.1.
 Рассылка уведомлений сотрудникам возможна с помощью любого внешнего smtp сервера.
 
-Ознакомиться с возможностями системы можно [здесь](http://www.softdev.it.ru/home/vendors/open-source/timesheet.html)
+Ознакомиться с возможностями системы можно [здесь](http://softdev.it.ru/home/development-areas/open-source/timesheet.html)
 
 [Ответы на часто задаваемые вопросы](https://github.com/itru/timesheet/wiki/FAQ)
 
