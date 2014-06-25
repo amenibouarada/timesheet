@@ -448,6 +448,11 @@ function convertStringToDate(stringDate){
 }
 
 function validateReportDate(value) {
+
+    if (checkIsVacationDay()) {
+        return;
+    }
+
     if (value != null && dateNotBetweenMonth(value)) {
         dojo.style("date_warning", {"display": "inline", "color": "red"});
         if (invalidReportDate(value) > 0) {
@@ -461,8 +466,6 @@ function validateReportDate(value) {
     else {
         dojo.style("date_warning", {"display": "none"});
     }
-
-    checkIsVacationDay();
 }
 
 function checkIsVacationDay() {
@@ -472,18 +475,22 @@ function checkIsVacationDay() {
         url: getContextPath() + "/vacations/checkDate",
         handleAs:"text",
         timeout:10000,
+        sync: true,
         content:{ employeeId:employeeId, date:reportDate},
         preventCache: true,
         load:function (data) {
             if (dojo.fromJson(data)[0].isVacationDay == "true") {
                 dojo.style("date_warning", {"display": "inline", "color": "red"});
                 dojo.byId("date_warning").innerHTML = "Внимание! На выбранную дату у сотрудника запланирован отпуск";
+                return true;
             } else {
                 dojo.style("date_warning", {"display": "none"});
+                return false;
             }
 
         },
         error:function (err) {
+            return false;
         }
     });
 }
