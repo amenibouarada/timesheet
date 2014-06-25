@@ -20,10 +20,10 @@
             setInterval(function() {
                 require(["dojo/request"], function(request){
                     request("/ping").then(function(){
-                        console.log("ping!");
+
                     });
                 });
-            },6000);
+            },60000);
         })()
     });
 </script>
