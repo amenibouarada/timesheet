@@ -52,7 +52,8 @@ JAVA\_HOME и M2\_HOME, содержащие соответственно пут
     C:/Developer/PostgreSQL/9.1/bin
 
 В файле pg_hba.conf для строки:
-host    all             all             127.0.0.1/32            ident
+
+    host    all             all             127.0.0.1/32            ident
 необходимо изменить метод идентификации с ident на md5.
 
 Расположения файла:
