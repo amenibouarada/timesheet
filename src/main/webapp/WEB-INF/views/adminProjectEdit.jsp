@@ -618,6 +618,13 @@
                 errors.push("дата учёта в затратах");
             }
 
+            for (var i = 0; i < dojo.query('table[id="projectManagers"]').query('tr').length-1; i++) {
+                if (!dojo.query('TR#projectManager_'+i+' > TD').query('input[name$="employee"]')[0].value) {
+                    valid = false;
+                    errors.push("пустое имя сотрудника в строке "+(i+1)+" таблицы 'Проектные роли'" );
+                }
+            }
+
             if (!valid) {
                 return errors.join(",\n");
             } else {
