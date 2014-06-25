@@ -16,19 +16,16 @@
 <script type="text/javascript">
     dojo.ready(function () {
         dojo.require("dijit.form.DateTextBox");
+        (function ping() {
+            setInterval(function() {
+                require(["dojo/request"], function(request){
+                    request("/ping").then(function(){
+                        console.log("ping!");
+                    });
+                });
+            },6000);
+        })()
     });
-</script>
-<script>
-    function ping() {
-        setInterval(function() {
-            require(["dojo/request"], function(request){
-                request("/ping").then(
-
-                );
-            });
-        },60000);
-    }
-
 </script>
 
 <h1><fmt:message key="title.reportparams"/></h1>
@@ -115,7 +112,7 @@
 
     </div>
 
-    <button id="make_report_button" style="width:210px" type="submit" onclick="clearErrorBox('errorBoxId'); ping();">Сформировать отчет</button>
+    <button id="make_report_button" style="width:210px" type="submit" onclick="clearErrorBox('errorBoxId');">Сформировать отчет</button>
 </form:form>
 </body>
 
