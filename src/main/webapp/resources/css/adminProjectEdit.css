@@ -56,3 +56,14 @@ textarea.multiline {
 .lowspace {
     font-weight: bold;
 }
+
+/*
+
+div.dijitComboBox .dijitDownArrowButton {
+    height: 18px!important;
+}
+
+input.dijitReset .dijitInputField .dijitArrowButtonInner {
+    height: 8px!important;
+}
+*/

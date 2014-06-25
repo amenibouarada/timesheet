@@ -19,6 +19,15 @@
         var managerId = "${managerId}";
 
         dojo.require("dijit.form.DateTextBox");
+        dojo.require("dijit.form.FilteringSelect");
+        dojo.require("dojo.data.ObjectStore");
+        dojo.require("dojo.store.Memory");
+
+        var managerDataStore = new dojo.data.ObjectStore({
+            objectStore: new dojo.store.Memory({
+                data: employeesListJSON
+            })
+        });
 
         dojo.declare("DateTextBox", dijit.form.DateTextBox, {
             popupClass: "dijit.Calendar"
@@ -246,22 +255,26 @@
             /*------------------------*/
 
             var managerCell = newManager.insertCell(1);
-            var managerSelect = dojo.doc.createElement("select");
-            dojo.attr(managerSelect, {
+
+            var managerDiv = dojo.doc.createElement("div");
+            dojo.attr(managerDiv, {
                 id:"projectManagers" + newManagerIndex + ".employee",
                 name:"projectManagers[" + newManagerIndex + "].employee"
             });
-            for (var i = 0; i < employeesListJSON.length; i++) {
-                var managerOption = dojo.doc.createElement("option");
-                dojo.attr(managerOption, {
-                    value: employeesListJSON[i].id,
-                    title: employeesListJSON[i].name
-                });
 
-                managerOption.innerHTML = employeesListJSON[i].name;
-                managerSelect.appendChild(managerOption);
-            }
-            managerCell.appendChild(managerSelect);
+            managerCell.appendChild(managerDiv);
+
+            var managerFilteringSelect = new dijit.form.FilteringSelect({
+                id:"projectManagers" + newManagerIndex + ".employee",
+                name:"projectManagers[" + newManagerIndex + "].employee",
+                store: managerDataStore,
+                searchAttr: 'name',
+                queryExpr: "*\${0}*",
+                ignoreCase: true,
+                autoComplete: false,
+                style: 'width:238px;',
+                required: true
+            }, "projectManagers" + newManagerIndex + ".employee").startup();
 
             var _toDeleteInput = dojo.doc.createElement("input");
             dojo.addClass(_toDeleteInput , "to_delete");
@@ -611,6 +624,32 @@
                 return "";
             }
         }
+
+        function createManagerSelect(row, idManager) {
+
+            var managerDiv = dojo.doc.createElement("div");
+            dojo.attr(managerDiv, {
+                id:"projectManagers" + row + ".employee",
+                name:"projectManagers[" + row + "].employee"
+            });
+
+            dojo.query('TR#projectManager_'+row+' > TD')[1].appendChild(managerDiv);
+
+            var managerFilteringSelect = new dijit.form.FilteringSelect({
+                id: "projectManagers" + row + ".employee",
+                name: "projectManagers[" + row + "].employee",
+                store: managerDataStore,
+                searchAttr: 'name',
+                queryExpr: "*\${0}*",
+                ignoreCase: true,
+                autoComplete: false,
+                style: 'width:238px',
+                required: true
+            }, "projectManagers" + row + ".employee").startup();
+
+            dijit.byId("projectManagers" + row + ".employee").set('value', idManager)
+        }
+
     </script>
 </head>
 <body>
@@ -807,7 +846,7 @@
                         <th width="100">Главный</th>
                         <th width="100">Признак активности</th>
                     </tr>
-                    <c:forEach items="${projectform.projectManagers}" varStatus="row">
+                    <c:forEach items="${projectform.projectManagers}" varStatus="row" var="projectManager">
                         <tr id="projectManager_${row.index}" class="manager_row">
                             <sec:authorize access="hasRole('ROLE_PLAN_EDIT')">
                                 <td>
@@ -819,9 +858,12 @@
                             <td>
                                 <form:hidden path="projectManagers[${row.index}].id"/>
                                 <form:hidden path="projectManagers[${row.index}].toDelete"/>
-                                <form:select path="projectManagers[${row.index}].employee">
-                                    <form:options items="${employeesList}" itemLabel="name" itemValue="id"/>
-                                </form:select>
+                                <script>
+                                    dojo.ready(function () {
+                                        createManagerSelect(${row.index}, ${projectManager.employee});
+                                    });
+                                </script>
+
                             </td>
                             <td>
                                 <form:select path="projectManagers[${row.index}].projectRole">
