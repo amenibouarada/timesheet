@@ -51,6 +51,15 @@ JAVA\_HOME и M2\_HOME, содержащие соответственно пут
 
     C:/Developer/PostgreSQL/9.1/bin
 
+В файле pg_hba.conf для строки:
+
+    host    all             all             127.0.0.1/32            ident
+необходимо изменить метод идентификации с ident на md5.
+
+Расположения файла:
+* linux: /var/lib/pgsql/9.1/data/pg_hba.conf
+* windows: C:\Program Files\PostgreSQL\9.1\data\pg_hba.conf
+
 Затем необходимо произвести восстановление данных из дампа, распаковав архив «timesheet\_db\_dump.zip» и запустив
 файл «restore.bat». В результате исполнения файла будет создана база данных с именем `time_sheet`, содержащяя данные
 приложения.
