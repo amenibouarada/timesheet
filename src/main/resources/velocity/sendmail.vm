@@ -1,7 +1,7 @@
 #set($first = 0)
 <ul>
 
-    <li><h2><b>Что было сделано:</b></h2></li>
+    <li><h2><b>Что было сделано ( $paramsForGenerateBody.get($first, "summDuration") ч.):</b></h2></li>
     <ol>
         #if (!$paramsForGenerateBody.column("workPlace").isEmpty())
             #foreach($key in $paramsForGenerateBody.rowKeySet())

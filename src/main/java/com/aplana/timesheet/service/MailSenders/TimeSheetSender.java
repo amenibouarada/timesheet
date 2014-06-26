@@ -1,6 +1,8 @@
 package com.aplana.timesheet.service.MailSenders;
 
 import com.aplana.timesheet.dao.entity.ProjectTask;
+import com.aplana.timesheet.dao.entity.TimeSheet;
+import com.aplana.timesheet.dao.entity.TimeSheetDetail;
 import com.aplana.timesheet.enums.*;
 import com.aplana.timesheet.form.TimeSheetForm;
 import com.aplana.timesheet.form.TimeSheetTableRowForm;
@@ -17,6 +19,7 @@ import org.springframework.ui.velocity.VelocityEngineUtils;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import java.math.BigDecimal;
 import java.util.*;
 
 import static com.aplana.timesheet.enums.DictionaryEnum.UNDERTIME_CAUSE;
@@ -41,6 +44,7 @@ public class TimeSheetSender extends MailSender<TimeSheetForm> {
     public static final String OVERTIME_CAUSE_ID = "overtimeCauseId";
     public static final String TYPE_OF_COMPENSATION = "typeOfCompensation";
     public static final String EFFORT_IN_NEXTDAY = "effortInNextDay";
+    public static final String SUMM_DURATION = "summDuration";
     private String employeeEmail;
     private ReportService reportService;
     public TimeSheetSender(SendMailService sendMailService, TSPropertyProvider propertyProvider, OvertimeCauseService overtimeCauseService, ReportService reportService) {
@@ -196,6 +200,18 @@ public class TimeSheetSender extends MailSender<TimeSheetForm> {
         putIfIsNotBlank(FIRST, result, TYPE_OF_COMPENSATION, sendMailService.getTypeOfCompensation(tsForm));
         putIfIsNotBlank(FIRST, result, EFFORT_IN_NEXTDAY, sendMailService.getEffort(tsForm));
 
+        TimeSheet timeSheet = sendMailService.findForDateAndEmployee(tsForm.getCalDate(), tsForm.getEmployeeId());
+        Iterator<TimeSheetDetail> iteratorTSD = timeSheet.getTimeSheetDetails().iterator();
+        BigDecimal summDuration = BigDecimal.ZERO;
+        while (iteratorTSD.hasNext()) {
+            Double duration = iteratorTSD.next().getDuration();
+            if (duration != null)
+                summDuration = summDuration.add(BigDecimal.valueOf(duration)); //todo переделать на bigdecimal
+        }
+
+        String duration = summDuration.setScale(isIntegerValue(summDuration) ? 0 : 1, BigDecimal.ROUND_HALF_UP).toString();
+        putIfIsNotBlank(FIRST, result, SUMM_DURATION, duration);
+
         return result;
     }
 
@@ -203,5 +219,9 @@ public class TimeSheetSender extends MailSender<TimeSheetForm> {
         if (StringUtils.isNotBlank(value)) {
             result.put(i, key, value);
         }
+    }
+
+    private boolean isIntegerValue(BigDecimal bd) {
+        return bd.signum() == 0 || bd.scale() <= 0 || bd.stripTrailingZeros().scale() <= 0;
     }
 }

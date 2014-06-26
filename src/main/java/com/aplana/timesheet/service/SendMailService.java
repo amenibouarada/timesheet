@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.velocity.VelocityEngineUtils;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
@@ -120,6 +121,10 @@ public class SendMailService {
     private ReportService reportService;
     @Autowired
     private TSPropertyProvider tsPropertyProvider;
+    @Autowired
+    private TimeSheetService timeSheetService;
+    @Autowired
+    private CalendarService calendarService;
     /**
      * Возвращает строку с адресами линейных руководителей сотрудника
      * (непосредственного и всех вышестоящих) разделёнными запятой.
@@ -549,4 +554,10 @@ public class SendMailService {
     public List<Project> getEmployeeProjectsByDates(Date beginDate, Date endDate, Employee employee) {
         return projectService.getEmployeeProjectsFromTimeSheetByDates(beginDate, endDate, employee);
     }
+
+    @Transactional(readOnly = true)
+    public TimeSheet findForDateAndEmployee(String calDate, Integer employeeId) {
+        return timeSheetService.findForDateAndEmployee(calDate, employeeId);
+    }
+
 }
