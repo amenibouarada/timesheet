@@ -471,6 +471,7 @@ function validateReportDate(value) {
 function checkIsVacationDay() {
     var employeeId = dojo.byId("employeeId").value;
     var reportDate = dijit.byId('calDate').get('value').format("yyyy-mm-dd");
+    var resp = false;
     dojo.xhrGet({
         url: getContextPath() + "/vacations/checkDate",
         handleAs:"text",
@@ -482,17 +483,18 @@ function checkIsVacationDay() {
             if (dojo.fromJson(data)[0].isVacationDay == "true") {
                 dojo.style("date_warning", {"display": "inline", "color": "red"});
                 dojo.byId("date_warning").innerHTML = "Внимание! На выбранную дату у сотрудника запланирован отпуск";
-                return true;
+                resp = true;
             } else {
                 dojo.style("date_warning", {"display": "none"});
-                return false;
+                resp = false;
             }
 
         },
         error:function (err) {
-            return false;
+            resp = false;
         }
     });
+    return resp;
 }
 
 function onCalDateChange(calDateObj){

@@ -162,6 +162,7 @@ public class AdminProjectEditController {
             AdminProjectBillableForm billable = new AdminProjectBillableForm();
             billable.setId(projectBillable.getId());
             billable.setEmployee(projectBillable.getEmployee().getId());
+            billable.setBillable(projectBillable.getBillable());
             if (projectBillable.getStartDate() != null) {
                 billable.setStartDate(dateFormat.format(projectBillable.getStartDate()));
             }

@@ -13,30 +13,60 @@
     <link rel="stylesheet" type="text/css" href="<%= request.getContextPath()%>/resources/css/adminProjectEdit.css">
     <script type="text/javascript">
 
-        var divisionsEmployeesJSON = ${divisionsEmployeesJSON};
-        var employeesListJSON = ${employeesListJSON};
-        var projectRoleTypesJSON = ${projectRoleTypesJSON};
-        var managerId = "${managerId}";
+    var divisionsEmployeesJSON = ${divisionsEmployeesJSON};
 
-        dojo.require("dijit.form.DateTextBox");
-        dojo.require("dijit.form.FilteringSelect");
-        dojo.require("dojo.data.ObjectStore");
-        dojo.require("dojo.store.Memory");
-
-        var managerDataStore = new dojo.data.ObjectStore({
-            objectStore: new dojo.store.Memory({
-                data: employeesListJSON
-            })
+    dojo.forEach(divisionsEmployeesJSON, function (divisionData) {
+        dojo.forEach(divisionData.managers, function (managerData) {
+            if (managerData.active != "active") {
+                managerData.name = managerData.name + " (уволен)";
+            }
         });
+    });
 
-        dojo.declare("DateTextBox", dijit.form.DateTextBox, {
+    var employeesListJSON = ${employeesListJSON};
+    var projectRoleTypesJSON = ${projectRoleTypesJSON};
+    var managerId = "${managerId}";
+
+    dojo.require("dijit.form.DateTextBox");
+    dojo.require("dijit.form.FilteringSelect");
+    dojo.require("dojo.data.ObjectStore");
+    dojo.require("dojo.store.Memory");
+
+    var projectRolesFieldNames = {
+        id: {
+            firstPart: "projectManagers",
+            secondPart: ".employee"
+        },
+        name:{
+            firstPart: "projectManagers[",
+            secondPart: "].employee"
+        }
+    };
+
+    var billableFieldNames = {
+        id: {
+            firstPart: "projectBillables",
+            secondPart: ".employee"
+        },
+        name:{
+            firstPart: "projectBillables[",
+            secondPart: "].employee"
+        }
+    }
+
+    var employeesDataStore = new dojo.data.ObjectStore({
+        objectStore: new dojo.store.Memory({
+            data: employeesListJSON
+        })
+    });
+
+    dojo.declare("DateTextBox", dijit.form.DateTextBox, {
             popupClass: "dijit.Calendar"
         });
 
         dojo.ready(function () {
             window.focus();
-            updateManagerSelect(dojo.byId("managerDivisionId").value);
-            dojo.byId("managerId").value = managerId;
+            updateManagerSelect(dojo.byId("managerDivisionId").value, managerId);
         });
 
         function saveProject() {
@@ -54,44 +84,49 @@
          * Заполняет список доступных для выбора руководителей проектов.
          * @param divisionId Идентификатор выбранного центра
          */
-        function updateManagerSelect(divisionId) {
-            var managerSelect = dojo.byId("managerId");
-            var previousManager = managerSelect.value;
-
-            managerSelect.options.length = 0;
-
+        function updateManagerSelect(divisionId, managerId) {
             if (divisionsEmployeesJSON.length > 0) {
                 var divisionEmployees = divisionsEmployeesJSON;
+
                 dojo.forEach(dojo.filter(divisionEmployees, function (division) {
                     return (division.divisionId == divisionId);
                 }), function (divisionData) {
-                    dojo.forEach(divisionData.managers, function(managerData) {
-                        var option = document.createElement("option");
-                        dojo.attr(option, {
-                            value:managerData.employeeId
-                        });
-
-                        option.title = managerData.name;
-                        option.innerHTML = managerData.name;
-
-                        /*if (managerData.active == "active") {
-                            option.title = managerData.name;
-                            option.innerHTML = managerData.name;
-                        } else {
-                            option.title = managerData.name + " (уволен)";
-                            option.innerHTML = managerData.name + " (уволен)";
-                        }*/
-                        managerSelect.appendChild(option);
+                    var managersArray = [];
+                    dojo.forEach(divisionData.managers, function (managerData) {
+                        managersArray.push(managerData);
                     });
+                    managersArray.sort(function (a, b) {
+                        return (a.name < b.name) ? -1 : 1;
+                    });
+
+                    var divManagerDataStore = new dojo.data.ObjectStore({
+                        objectStore: new dojo.store.Memory({
+                            data: managersArray,
+                            idProperty: 'employeeId'
+                        })
+                    });
+
+                    var divManagerFilteringSelect = dijit.byId("managerId");
+                    if (!divManagerFilteringSelect) {
+                        divManagerFilteringSelect = new dijit.form.FilteringSelect({
+                            id: "managerId",
+                            name: "manager",
+                            store: divManagerDataStore,
+                            searchAttr: 'name',
+                            queryExpr: "*\${0}*",
+                            ignoreCase: true,
+                            autoComplete: false,
+                            style: 'width:200px',
+                            required: true
+                        }, "managerId").startup();
+                    } else {
+                        divManagerFilteringSelect.set('store', divManagerDataStore);
+                        dijit.byId("managerId").set('value', null);
+                    }
                 });
             }
-            sortSelectOptions(managerSelect);
 
-            if (managerSelect.options.length < 2){
-                dojo.byId("managerId").disabled = 'disabled';
-            } else {
-                dojo.byId("managerId").disabled = '';
-            }
+            dijit.byId("managerId").set('value', managerId);
         }
 
         function createTask() {
@@ -257,24 +292,26 @@
             var managerCell = newManager.insertCell(1);
 
             var managerDiv = dojo.doc.createElement("div");
+            var managerIdText = projectRolesFieldNames.id.firstPart + newManagerIndex + projectRolesFieldNames.id.secondPart;
+            var managerNameText = projectRolesFieldNames.name.firstPart + newManagerIndex + projectRolesFieldNames.name.secondPart;
             dojo.attr(managerDiv, {
-                id:"projectManagers" + newManagerIndex + ".employee",
-                name:"projectManagers[" + newManagerIndex + "].employee"
+                id: managerIdText,
+                name: managerNameText
             });
 
             managerCell.appendChild(managerDiv);
 
             var managerFilteringSelect = new dijit.form.FilteringSelect({
-                id:"projectManagers" + newManagerIndex + ".employee",
-                name:"projectManagers[" + newManagerIndex + "].employee",
-                store: managerDataStore,
+                id:managerIdText,
+                name:managerNameText,
+                store: employeesDataStore,
                 searchAttr: 'name',
                 queryExpr: "*\${0}*",
                 ignoreCase: true,
                 autoComplete: false,
                 style: 'width:238px;',
                 required: true
-            }, "projectManagers" + newManagerIndex + ".employee").startup();
+            }, managerIdText).startup();
 
             var _toDeleteInput = dojo.doc.createElement("input");
             dojo.addClass(_toDeleteInput , "to_delete");
@@ -394,22 +431,28 @@
             /*------------------------*/
 
             var employeeCell = newBillable.insertCell(1);
-            var employeeSelect = dojo.doc.createElement("select");
-            dojo.attr(employeeSelect, {
-                id:"projectBillables" + newBillableIndex + ".employee",
-                name:"projectBillables[" + newBillableIndex + "].employee"
-            });
-            for (var i = 0; i < employeesListJSON.length; i++) {
-                var employeeOption = dojo.doc.createElement("option");
-                dojo.attr(employeeOption, {
-                    value: employeesListJSON[i].id,
-                    title: employeesListJSON[i].name
-                });
 
-                employeeOption.innerHTML = employeesListJSON[i].name;
-                employeeSelect.appendChild(employeeOption);
-            }
-            employeeCell.appendChild(employeeSelect);
+            var billableDiv = dojo.doc.createElement("div");
+            var idBillbleName = billableFieldNames.id.firstPart + newBillableIndex + billableFieldNames.id.secondPart;
+            var nameBillableName = billableFieldNames.name.firstPart + newBillableIndex + billableFieldNames.name.secondPart;
+            dojo.attr(billableDiv, {
+                id: idBillbleName,
+                name: nameBillableName
+            });
+
+            employeeCell.appendChild(billableDiv);
+
+            var billableFilteringSelect = new dijit.form.FilteringSelect({
+                id:idBillbleName,
+                name:nameBillableName,
+                store: employeesDataStore,
+                searchAttr: 'name',
+                queryExpr: "*\${0}*",
+                ignoreCase: true,
+                autoComplete: false,
+                style: 'width:238px;',
+                required: true
+            }, idBillbleName).startup();
 
             var _toDeleteInput = dojo.doc.createElement("input");
             dojo.addClass(_toDeleteInput , "to_delete");
@@ -619,7 +662,8 @@
             }
 
             for (var i = 0; i < dojo.query('table[id="projectManagers"]').query('tr').length-1; i++) {
-                if (!dojo.query('TR#projectManager_'+i+' > TD').query('input[name$="employee"]')[0].value) {
+                var isHidden = dojo.getStyle('projectManager_'+i,'display') == 'none';
+                if (!dojo.query('TR#projectManager_'+i+' > TD').query('input[name$="employee"]')[0].value && !isHidden) {
                     valid = false;
                     errors.push("пустое имя сотрудника в строке "+(i+1)+" таблицы 'Проектные роли'" );
                 }
@@ -632,29 +676,29 @@
             }
         }
 
-        function createManagerSelect(row, idManager) {
-
-            var managerDiv = dojo.doc.createElement("div");
-            dojo.attr(managerDiv, {
-                id:"projectManagers" + row + ".employee",
-                name:"projectManagers[" + row + "].employee"
+        function createFilteringSelect(row, idValue, fieldNames, rowName) {
+            var div = dojo.doc.createElement("div");
+            var idElement = fieldNames.id.firstPart + row + fieldNames.id.secondPart;
+            var nameElement =  fieldNames.name.firstPart + row + fieldNames.name.secondPart;
+            dojo.attr(div, {
+                id: idElement,
+                name: nameElement
             });
 
-            dojo.query('TR#projectManager_'+row+' > TD')[1].appendChild(managerDiv);
+            dojo.query('TR#'+rowName+row+' > TD')[1].appendChild(div);
 
             var managerFilteringSelect = new dijit.form.FilteringSelect({
-                id: "projectManagers" + row + ".employee",
-                name: "projectManagers[" + row + "].employee",
-                store: managerDataStore,
+                id: idElement,
+                name: nameElement,
+                store: employeesDataStore,
                 searchAttr: 'name',
                 queryExpr: "*\${0}*",
                 ignoreCase: true,
                 autoComplete: false,
                 style: 'width:238px',
                 required: true
-            }, "projectManagers" + row + ".employee").startup();
-
-            dijit.byId("projectManagers" + row + ".employee").set('value', idManager)
+            }, idElement).startup();
+            dijit.byId(idElement).set('value', idValue)
         }
 
     </script>
@@ -707,8 +751,7 @@
                 <span class="lowspace ">Руководитель:</span>
             </td>
             <td>
-                <form:select path="manager" id="managerId">
-                </form:select>
+                <div id="managerId" name="manager"></div>
             </td>
         </tr>
         <tr>
@@ -867,7 +910,7 @@
                                 <form:hidden path="projectManagers[${row.index}].toDelete"/>
                                 <script>
                                     dojo.ready(function () {
-                                        createManagerSelect(${row.index}, ${projectManager.employee});
+                                        createFilteringSelect(${row.index}, ${projectManager.employee}, projectRolesFieldNames, "projectManager_");
                                     });
                                 </script>
 
@@ -908,7 +951,7 @@
                         <th width="150">Дата по</th>
                         <th width="300">Основание</th>
                     </tr>
-                    <c:forEach items="${projectform.projectBillables}" varStatus="row">
+                    <c:forEach items="${projectform.projectBillables}" varStatus="row" var="projectBillable">
                         <tr id="projectBillable_${row.index}" class="billable_row">
                             <sec:authorize access="hasRole('ROLE_PLAN_EDIT')">
                                 <td>
@@ -920,9 +963,11 @@
                             <td>
                                 <form:hidden path="projectBillables[${row.index}].id"/>
                                 <form:hidden path="projectBillables[${row.index}].toDelete"/>
-                                <form:select path="projectBillables[${row.index}].employee">
-                                    <form:options items="${employeesList}" itemLabel="name" itemValue="id"/>
-                                </form:select>
+                                <script>
+                                    dojo.ready(function () {
+                                        createFilteringSelect(${row.index}, ${projectBillable.employee}, billableFieldNames, "projectBillable_");
+                                    });
+                                </script>
                             </td>
                             <td>
                                 <form:checkbox path="projectBillables[${row.index}].billable"/>
