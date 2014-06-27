@@ -245,7 +245,7 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
             if (isPlannedVacation) {
                 vacationApprovalProcessService.sendNoticeForPlannedVacaton(vacation);
             } else {
-                List<Vacation> plannedVacations = vacationDAO.getPlannedVacationsByBeginAndEndDates(vacation.getBeginDate(), vacation.getEndDate());
+                List<Vacation> plannedVacations = vacationDAO.getPlannedVacationsByBeginAndEndDates(employee, vacation.getBeginDate(), vacation.getEndDate());
                 for (Vacation plannedVacation : plannedVacations) {
                     delete(plannedVacation);
                 }

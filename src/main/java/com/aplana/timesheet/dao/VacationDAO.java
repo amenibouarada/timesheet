@@ -320,8 +320,7 @@ public class VacationDAO {
         return query.getResultList();
     }
 
-    public List<Vacation> getPlannedVacationsByBeginAndEndDates(Date beginDate, Date endDate) {
-        final Employee employee = securityService.getSecurityPrincipal().getEmployee();
+    public List<Vacation> getPlannedVacationsByBeginAndEndDates(Employee employee, Date beginDate, Date endDate) {
         Query query =
                 entityManager.createQuery("select v from Vacation v where v.type.id=:type and v.beginDate = :beginDate and v.endDate=:endDate and v.employee = :employee").
                 setParameter("type", VacationTypesEnum.PLANNED.getId())
