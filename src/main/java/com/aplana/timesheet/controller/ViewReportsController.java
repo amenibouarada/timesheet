@@ -5,7 +5,7 @@ import com.aplana.timesheet.dao.entity.TimeSheet;
 import com.aplana.timesheet.enums.TypesOfTimeSheetEnum;
 import com.aplana.timesheet.form.ReportsViewDeleteForm;
 import com.aplana.timesheet.form.VacationsForm;
-import com.aplana.timesheet.service.DictionaryItemService;
+import com.aplana.timesheet.service.*;
 import com.aplana.timesheet.system.constants.PadegConstants;
 import com.aplana.timesheet.system.constants.TimeSheetConstants;
 import com.aplana.timesheet.dao.entity.Calendar;
@@ -14,9 +14,6 @@ import com.aplana.timesheet.form.ViewReportsForm;
 import com.aplana.timesheet.form.entity.DayTimeSheet;
 import com.aplana.timesheet.form.validator.ViewReportsFormValidator;
 import com.aplana.timesheet.system.properties.TSPropertyProvider;
-import com.aplana.timesheet.service.CalendarService;
-import com.aplana.timesheet.service.EmployeeReportService;
-import com.aplana.timesheet.service.TimeSheetService;
 import com.aplana.timesheet.system.security.entity.TimeSheetUser;
 import com.aplana.timesheet.util.DateTimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +55,9 @@ public class ViewReportsController extends AbstractControllerForEmployeeWithYear
 
     @Autowired
     DictionaryItemService dictionaryItemService;
+
+    @Autowired
+    private SendMailService sendMailService;
 
     @RequestMapping(value = "/viewreports", method = RequestMethod.GET)
     public String sendViewReports() {
@@ -168,6 +168,7 @@ public class ViewReportsController extends AbstractControllerForEmployeeWithYear
             TimeSheet timeSheet = timeSheetService.find(id);
             logger.info("Удаляется отчет " + timeSheet + ". Инициатор: " + securityUser.getEmployee().getName());
             timeSheetService.delete(timeSheet);
+            sendMailService.performTimeSheetDeletedMailing(timeSheet);
         }
         return String.format("redirect:"+tsDeleteForm.getLink());
     }

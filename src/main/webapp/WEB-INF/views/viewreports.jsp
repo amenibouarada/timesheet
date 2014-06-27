@@ -117,21 +117,29 @@
             var ids = [];
             var idString = "delete_";
             var deleteIdsElements = dojo.query('input[id^="' + idString + '"]');
-
             for (var index = 0; index < deleteIdsElements.length; ++index) {
                 var element = deleteIdsElements[index];
                 if (element.checked) {
                     ids.push(element.id.substring(idString.length, element.id.length));
                 }
             }
+            if (ids.length == 0) {
+                alert('Не выделено ни одного отчета');
+                return false;
+            }
             idsField.value = ids;
+            return true;
         }
 
         function deleteSelectedReports() {
+            if (!setIdsToForm()) {
+                return;
+            }
+
             if (!confirm("Вы действительно хотите удалить выделенные отчеты")) {
                 return;
             }
-            setIdsToForm();
+
             var deleteForm = dojo.byId("deleteReportsForm");
             dojo.byId("link").value = document.URL;
             deleteForm.action = "<%=request.getContextPath()%>/deleteReports";
@@ -139,10 +147,13 @@
         }
 
         function sendToRawReports() {
+            if (!setIdsToForm()) {
+                return;
+            }
+
             if (!confirm("Вы действительно хотите отправить выделенные отчеты в черновик")) {
                 return;
             }
-            setIdsToForm();
             var deleteForm = dojo.byId("deleteReportsForm");
             dojo.byId("link").value = document.URL;
             deleteForm.action = "<%=request.getContextPath()%>/sendToRawReports";
