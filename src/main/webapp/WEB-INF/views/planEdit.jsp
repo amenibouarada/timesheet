@@ -99,6 +99,18 @@
 
     dojo.addOnLoad(function () {
 
+        require(["dijit/Tooltip", "dojo/domReady!"], function (Tooltip) {
+            new Tooltip({
+                connectId: ["calFromDateToolTip"],
+                label: "Обозначения цветов заголовков столбцов в таблице:<table class='without_borders'>" +
+                        "<tr><td><div class='blockTooltip classDateBlueBack'> </div></td><td><div style='padding: 5px;'> - проекты</div></td></tr>" +
+                        "<tr><td><div class='blockTooltip classDateRedBack'> </div></td><td> <div style='padding: 5px;'> - пресейлы</div></td></tr>" +
+                        "<tr><td><div class='blockTooltip classDateGrayBack'> </div></td><td> <div style='padding: 5px;'> - прочие</div></td></tr>" +
+                        "</table>"
+            });
+        });
+
+
         updateManagerList(dojo.byId(DIVISION_ID).value);
         //TODO костыль, так как для данного поля куки не устанавливаются автоматически при загрузке
         var prev_manager = getCookieValue("cookie_manager");
@@ -273,23 +285,37 @@
 
             secondView.groups = [];
 
+            var presalesProjects=[];
+            var projectProjects=[];
             dojo.forEach(projectList, function (project) {
-                var projectId = project.<%= PROJECT_ID %>;
-
-                secondView.groups.push({
-                    name:project.<%= PROJECT_NAME %>,
-                    field:projectId
-                });
-
-                modelFieldsForSave.push(projectId + "<%= _PLAN %>");
+                if (project.<%= PROJECT_TYPE %> == <%= TypesOfActivityEnum.PROJECT.getId() %>) {
+                    projectProjects.push(project);
+                } else if (project.<%= PROJECT_TYPE %> == <%= TypesOfActivityEnum.PRESALE.getId() %>) {
+                    presalesProjects.push(project);
+                }
             });
+            addPresalesAndProjects(projectProjects, "background: url(/resources/img/tabEnabledProject.png) #CDECFF repeat-x top;");
+            addPresalesAndProjects(presalesProjects, "background: url(/resources/img/tabEnabledPresale.png) #FFD8EE repeat-x top;");
 
+            function addPresalesAndProjects(list, style) {
+                dojo.forEach(list, function (project) {
+                    var projectId = project. <%= PROJECT_ID %>;
+                    secondView.groups.push({
+                        name: project. <%= PROJECT_NAME %>,
+                        field: projectId,
+                        headerStyles: style
+                    });
+                    modelFieldsForSave.push(projectId + "<%= _PLAN %>");
+                });
+            }
+
+            addPresalesAndProjects();
             function generateCellsAndFillModelFields(view) {
                 if (typeof view.cells == typeof undefined) {
                     view.cells = [];
                 }
 
-                function createCell(name, field, newScale) {
+                function createCell(name, field, newScale, headerStyles) {
                     var scale = 2;
                 <c:if test="${planEditForm.showPlans and planEditForm.showFacts}">
                     scale = 1;
@@ -301,7 +327,7 @@
                         name:name,
                         field:field,
                         noresize:true,
-
+                        headerStyles: headerStyles,
                         width:(29 * scale) + "px",
                         <sec:authorize access="hasRole('ROLE_PLAN_EDIT')">
                         <c:if test="${editable}">
@@ -313,6 +339,8 @@
                     };
                 }
 
+
+
                 if (view.groups && view.groups.length != 0) {
                     dojo.forEach(view.groups, function (group) {
                         <c:choose>
@@ -321,9 +349,9 @@
                                 var factField = group.field + "<%= _FACT %>";
 
                                 if (group.field == "<%= SUMMARY %>"){
-                                    view.cells.push(createCell("П", planField, 2), createCell("Ф", factField));
+                                    view.cells.push(createCell("П", planField, 2), createCell("Ф", factField, null));
                                 }else{
-                                    view.cells.push(createCell("П", planField), createCell("Ф", factField));
+                                    view.cells.push(createCell("П", planField, null), createCell("Ф", factField, null));
                                 }
                                 modelFields.push(planField, factField);
 
@@ -337,10 +365,38 @@
                                     fieldComponent = "<%= _FACT %>";
                                 </c:if>
 
+                        /**
+                         * true - project, false - presale, null - other
+                         * @param field
+                         */
+                        function isFieldProjectOrPresale(field) {
+                            var result = null;
+                            dojo.forEach(projectProjects, function (project) {
+                                if (project. <%= PROJECT_ID %> == field) {
+                                    result = true;
+
+                                }
+                            });
+                            if (result != null) {
+                                return result;
+                            }
+                            dojo.forEach(presalesProjects, function (presale) {
+                                if (presale. <%= PROJECT_ID %> == field) {
+                                    result = false;
+
+                                }
+                            });
+                            return result;
+                        }
+
                                 var field = group.field + fieldComponent;
+                                var isFieldProjectOrPresale = isFieldProjectOrPresale(group.field); //true - project, false - presale, null - other
+                                var headerStyles = isFieldProjectOrPresale != null ? (isFieldProjectOrPresale ?
+                                        "background: url(/resources/img/tabEnabledProject.png) #CDECFF repeat-x top;" :
+                                        "background: url(/resources/img/tabEnabledPresale.png) #FFD8EE repeat-x top;") : "";
 
                                 view.cells.push(
-                                    createCell(group.name, field)
+                                    createCell(group.name, field, null, headerStyles)
                                 );
                                 modelFields.push(field);
                             </c:otherwise>
@@ -603,6 +659,11 @@
     </table>
     <table>
         <tr>
+            <td style="text-align: left">
+                <div class="question-hint">
+                    <img id="calFromDateToolTip" src="<c:url value="/resources/img/question.png"/>"/>
+                </div>
+            </td>
             <td style="text-align: center">
                 <button id="show" style="width:150px;vertical-align: middle;" type="submit"
                         onclick="return validate()">Показать

@@ -117,7 +117,7 @@ function createLayout(/* Array */ headerViews) {
                 width: cell.width,
                 name: (nogroups && headerView.expand == true) ? createNameWithHideButton(cell.name, cell.field) : cell.name,
                 editable: cell.editable,
-                headerStyles: "width: " + cell.width,
+                headerStyles:  (!cell.headerStyles ? "" : cell.headerStyles) + "width: " + cell.width,
                 cellStyles: cellStyles,
                 hasBeenChanged: {},
                 formatter: function(text, rowIndex, cell) {
@@ -170,14 +170,15 @@ function createLayout(/* Array */ headerViews) {
                     childs: [],
                     isHidden: false,
                     cellsFormatter: group.cellsFormatter,
-                    updateWidth: function() {
+                    headerStylesTemp: !group.headerStyles ? "" : group.headerStyles,
+                    updateWidth: function () {
                         var width = 0;
 
-                        dojo.forEach(this.childs, function(child) {
+                        dojo.forEach(this.childs, function (child) {
                             width += parseFloat(child.width);
                         });
 
-                        this.headerStyles = "width: " + width + "px;";
+                        this.headerStyles = this.headerStylesTemp + "width: " + width + "px;";
                     }
                 };
 
