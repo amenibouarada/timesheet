@@ -113,7 +113,7 @@ public abstract class AbstractVacationApprovalProcessService extends AbstractSer
     /**
      * проверяем, есть ли у сотрудника линейный или он последний в иерархии
      */
-    protected boolean managerExists(Employee employee) {
+    protected boolean employeeHasManager(Employee employee) {
         Employee manager = employee.getManager();
 
         return ! ( manager == null || manager.getId().equals(employee.getId()) );
@@ -166,7 +166,7 @@ public abstract class AbstractVacationApprovalProcessService extends AbstractSer
      */
     private void setApprovementWithLineManagerStatusAndSendMessages(Vacation vacation) throws VacationApprovalServiceException {
 
-        if (! managerExists(vacation.getEmployee())) {      //если линейных нет или сам себе линейный - утверждаем без проверок
+        if (!employeeHasManager(vacation.getEmployee())) {      //если линейных нет или сам себе линейный - утверждаем без проверок
             setFinalStatusForVacationAndSendVacationApprovedMessages(vacation, true);
             return;
         }
@@ -228,7 +228,7 @@ public abstract class AbstractVacationApprovalProcessService extends AbstractSer
     private Employee getFirstManagerWithoutApproval(Vacation vacation, Employee employee) {
         VacationApproval vacationApproval;
         do {
-            if (! managerExists(employee)) {
+            if (! employeeHasManager(employee)) {
                 return null;
             }
             employee = employee.getManager();
@@ -376,7 +376,7 @@ public abstract class AbstractVacationApprovalProcessService extends AbstractSer
      */
     private void addLineManagers(List<String> emails, Vacation vacation) throws VacationApprovalServiceException {
         Employee employee = vacation.getEmployee();
-        if (managerExists(employee)) {
+        if (employeeHasManager(employee)) {
             Employee employeeManager = employee.getManager();
             String email = employeeManager.getEmail();
             if (!emails.contains(email)) {
@@ -451,7 +451,7 @@ public abstract class AbstractVacationApprovalProcessService extends AbstractSer
         //получаем список линейных руководителей
         List<Employee> linearManagers = employeeService.getLinearEmployees(vacation.getEmployee());
         for (Project project : projects) {
-            if(linearManagers!=null && !linearManagers.contains(manager)){
+            if((linearManagers!=null && !linearManagers.contains(manager)) && manager.getEndDate() == null){
                 VacationApproval vacationApproval = (approvals.get(manager.getEmail()) != null) ?
                         approvals.get(manager.getEmail()) : addNewVacationApproval(approvals, vacation, requestDate, manager);
 

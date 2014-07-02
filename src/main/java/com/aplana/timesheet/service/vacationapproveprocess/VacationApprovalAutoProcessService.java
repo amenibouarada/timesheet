@@ -131,12 +131,13 @@ public class VacationApprovalAutoProcessService extends AbstractVacationApproval
      */
     private Boolean getProjectManagerApproveResult(List<VacationApproval> projectManagerApprovals, Project project) throws VacationApprovalServiceException {
         if (project != null) {
-            if (project.getManager() != null) {
-                Integer projectManagerId = project.getManager().getId();
+            Employee manager = project.getManager();
+            if (manager != null) {
+                Integer projectManagerId = manager.getId();
                 for (VacationApproval approval : projectManagerApprovals) {
                     Integer managerId = approval.getManager().getId();
                     if (managerId.equals(projectManagerId)) {
-                        return approval.getResult();
+                        return (manager.getEndDate() != null  && projectManagerApprovals.size() == 1) ? true : approval.getResult();
                     }
                 }
 
@@ -159,7 +160,7 @@ public class VacationApprovalAutoProcessService extends AbstractVacationApproval
             return true;
         }
 
-        if (!managerExists(vacation.getEmployee())) {      //если линейных нет или сам себе линейный - утверждаем без проверок
+        if (!employeeHasManager(vacation.getEmployee())) {      //если линейных нет или сам себе линейный - утверждаем без проверок
             setFinalStatusForVacationAndSendVacationApprovedMessages(vacation, true);
             return true;
         }
@@ -217,7 +218,7 @@ public class VacationApprovalAutoProcessService extends AbstractVacationApproval
 
         Employee manager = vacationApproval.getManager();
 
-        if (!managerExists(manager)) {  //у линейного нет руководителя или он сам себе руководитель
+        if (!employeeHasManager(manager)) {  //у линейного нет руководителя или он сам себе руководитель
             return vacationApproval;
         }
 
