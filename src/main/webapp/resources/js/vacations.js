@@ -178,6 +178,36 @@ function deleteVacation(parentElement, vac_id) {
     vacationsForm.submit();
 }
 
+function approveVacation(vac_id, beginDate, endDate, type) {
+    if (!confirm("Вы действительно хотите окончательно согласовать отпуск типа " +
+        "\"" +type+"\" " +
+        "на период: "+beginDate+" - "+endDate+" ?")) {
+        return;
+    }
+
+    dojo.xhrGet({
+        url: contextPath + "/approveVacation",
+        handleAs:"text",
+        timeout:10000,
+        sync: true,
+        content: { vacationId: vac_id},
+        preventCache: true,
+        load:function (data) {
+            var jsonData = dojo.fromJson(data);
+            console.log(jsonData);
+            if (jsonData.isApproved) {
+                document.location = contextPath + "/vacations";
+            } else {
+                alert(jsonData.message);
+            }
+        },
+        error:function (err) {
+            console.log(err);
+            alert("Во время операции произошла ошибка");
+        }
+    });
+}
+
 function deleteApprover(apr_id) {
     if (!confirm("Удалить утверждающего?")) {
         return;

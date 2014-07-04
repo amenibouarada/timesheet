@@ -1,5 +1,6 @@
 package com.aplana.timesheet.controller;
 
+import argo.jdom.JsonNodeBuilders;
 import com.aplana.timesheet.system.constants.PadegConstants;
 import com.aplana.timesheet.dao.entity.*;
 import com.aplana.timesheet.enums.DictionaryEnum;
@@ -13,6 +14,7 @@ import com.aplana.timesheet.system.security.SecurityService;
 import com.aplana.timesheet.util.DateTimeUtil;
 import com.aplana.timesheet.util.EnumsUtils;
 import com.aplana.timesheet.system.security.entity.TimeSheetUser;
+import com.aplana.timesheet.util.JsonUtil;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,8 +29,10 @@ import javax.servlet.http.HttpSession;
 import java.util.*;
 import java.util.Calendar;
 
+import static argo.jdom.JsonNodeBuilders.anObjectBuilder;
 import static com.aplana.timesheet.form.VacationsForm.ALL_VALUE;
 import static com.aplana.timesheet.form.VacationsForm.VIEW_TABLE;
+import static com.aplana.timesheet.system.constants.RoleConstants.ROLE_ADMIN;
 
 
 /**
@@ -410,7 +414,7 @@ public class VacationsController extends AbstractControllerForEmployee {
     }
 
     /**
-     * Возвращает JSON список сотрудников по условиям заданным на форме
+     * Проверяет есть ли у сотрудника в этот день отпуск
      */
     @RequestMapping(value = "/vacations/checkDate", method = RequestMethod.GET)
     @ResponseBody
@@ -418,6 +422,20 @@ public class VacationsController extends AbstractControllerForEmployee {
                                      @RequestParam("date") String date) {
 
         return employeeService.checkDayIsVacation(employeeId,date);
+    }
+
+    @RequestMapping(value = "/approveVacation", method = RequestMethod.GET, headers = "Accept=text/plain;Charset=UTF-8")
+    @ResponseBody
+    public String approveVacation(@RequestParam("vacationId") Integer vacationId) {
+        Vacation vacation = vacationService.findVacation(vacationId);
+        Boolean canApprove = vacationService.isVacationApprovePermission(vacation);
+        if (request.isUserInRole(ROLE_ADMIN) || canApprove) {
+            return vacationService.approveVacation(vacationId);
+        } else {
+            return JsonUtil.format(anObjectBuilder().
+                    withField("isApproved", JsonNodeBuilders.aFalseBuilder())
+                    .withField("message", JsonNodeBuilders.aStringBuilder("Недостаточно прав для выполнения данной операции")));
+        }
     }
 
 }

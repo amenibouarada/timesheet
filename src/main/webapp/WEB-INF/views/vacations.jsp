@@ -6,6 +6,8 @@
 <%@ page import="com.aplana.timesheet.dao.entity.Vacation" %>
 <%@ page import="com.aplana.timesheet.enums.VacationStatusEnum" %>
 <%@ page import="com.aplana.timesheet.service.VacationService" %>
+<%@ page import="com.aplana.timesheet.util.DateTimeUtil" %>
+<%@ page import="java.text.SimpleDateFormat" %>
 
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
@@ -293,9 +295,10 @@
                 <c:forEach var="vacation" items="${vacationsList}" varStatus="lp">
                     <tr>
                         <td>
+                            <% Vacation vacation = (Vacation) pageContext.getAttribute("vacation"); %>
                             <c:set var="vacationDeletePermission"
                                    value="<%= vacationService.isVacationDeletePermission(
-                                        (Vacation) pageContext.getAttribute(\"vacation\"),
+                                        vacation,
                                         (Employee) pageContext.findAttribute(\"curEmployee\")) %>"
                                     />
                             <sec:authorize access="hasRole('ROLE_ADMIN') or ${vacationDeletePermission}">
@@ -304,6 +307,21 @@
                                          onclick="deleteVacation(this.parentElement, ${vacation.id});"/>
                                 </div>
                             </sec:authorize>
+                            <c:set var="isVacationNotApproved"
+                                   value="<%= vacationService.isVacationNotApproved(vacation)%>"/>
+                            <c:set var="vacationApprovePermission"
+                                   value="<%= vacationService.isVacationApprovePermission(vacation)%>"/>
+                            <% SimpleDateFormat simpleDateFormat = DateTimeUtil.SIMPLE_DATE_FORMAT; %>
+                            <c:set var="beginDate" value="<%= simpleDateFormat.format(vacation.getBeginDate()) %>" />
+                            <c:set var="endDate" value="<%= simpleDateFormat.format(vacation.getEndDate()) %>" />
+                            <c:if test="${isVacationNotApproved }">
+                                <sec:authorize access="hasRole('ROLE_ADMIN') or ${vacationApprovePermission}">
+                                    <div class="delete-button">
+                                        <img src="<c:url value="/resources/img/ok.png"/>" title="Утвердить"
+                                             onclick="approveVacation(${vacation.id},'${beginDate}','${endDate}','${vacation.type.value}');"/>
+                                    </div>
+                                </sec:authorize>
+                            </c:if>
                         </td>
                     <td id="statusTd" class="centered">
                         <c:choose>

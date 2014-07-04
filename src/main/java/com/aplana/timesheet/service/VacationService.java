@@ -1,6 +1,7 @@
 package com.aplana.timesheet.service;
 
 import argo.jdom.JsonArrayNodeBuilder;
+import argo.jdom.JsonNodeBuilders;
 import argo.jdom.JsonObjectNodeBuilder;
 import com.aplana.timesheet.dao.VacationDAO;
 import com.aplana.timesheet.dao.entity.*;
@@ -14,6 +15,7 @@ import com.aplana.timesheet.service.helper.ViewReportHelper;
 import com.aplana.timesheet.service.vacationapproveprocess.VacationApprovalProcessService;
 import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.system.security.SecurityService;
+import com.aplana.timesheet.system.security.entity.TimeSheetUser;
 import com.aplana.timesheet.util.DateTimeUtil;
 import com.aplana.timesheet.util.JsonUtil;
 import com.google.common.base.Predicate;
@@ -61,6 +63,9 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
 
     @Autowired
     private VacationApprovalProcessService vacationApprovalProcessService;
+
+    @Autowired
+    private VacationApprovalService vacationApprovalService;
 
     @Autowired
     private ViewReportHelper viewReportHelper;
@@ -379,6 +384,16 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
         return Boolean.FALSE;
     }
 
+    public Boolean isVacationApprovePermission(Vacation vacation) {
+        TimeSheetUser securityUser = securityService.getSecurityPrincipal();
+        Employee manager = vacation.getEmployee().getDivision().getLeaderId();
+        return securityUser.getEmployee().getId().equals(manager.getId());
+    }
+
+    public Boolean isVacationNotApproved(Vacation vacation) {
+        return !vacation.getStatus().getId().equals(dictionaryItemService.find(VacationStatusEnum.APPROVED.getId()).getId());
+    }
+
     public String getVacationListByRegionJSON(Date dateFrom, Date dateTo, List<Vacation> vacationList) {
         List<Region> regionList = regionService.getRegions();
         List<Employee> employeeList = new ArrayList<Employee>();
@@ -457,4 +472,28 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
         return JsonUtil.format(result);
     }
 
+    @Transactional
+    public String approveVacation(Integer vacationId) {
+        Vacation vacation = findVacation(vacationId);
+        Set<VacationApproval> vacationApprovals = vacation.getVacationApprovals();
+
+        Date responseDate = new Date();
+
+        vacation.setStatus(dictionaryItemService.find(VacationStatusEnum.APPROVED.getId()));
+        store(vacation);
+
+        vacationApprovalProcessService.sendBackDateVacationApproved(vacation);
+
+        if (! vacationApprovals.isEmpty()) {
+            for (VacationApproval vacationApproval : vacationApprovals) {
+                vacationApproval.setResult(true);
+                vacationApproval.setResponseDate(responseDate);
+                vacationApprovalService.store(vacationApproval);
+
+            }
+        }
+
+        return JsonUtil.format(anObjectBuilder().
+                withField("isApproved", JsonNodeBuilders.aTrueBuilder()));
+    }
 }
