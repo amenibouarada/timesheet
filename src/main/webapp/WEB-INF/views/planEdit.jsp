@@ -659,15 +659,15 @@
     </table>
     <table>
         <tr>
-            <td style="text-align: left">
-                <div class="question-hint">
-                    <img id="calFromDateToolTip" src="<c:url value="/resources/img/question.png"/>"/>
-                </div>
-            </td>
             <td style="text-align: center">
                 <button id="show" style="width:150px;vertical-align: middle;" type="submit"
                         onclick="return validate()">Показать
                 </button>
+            </td>
+            <td style="text-align: left">
+                <div class="question-hint">
+                    <img id="calFromDateToolTip" src="<c:url value="/resources/img/question.png"/>"/>
+                </div>
             </td>
             <sec:authorize access="hasRole('ROLE_PLAN_EDIT')">
                 <td style="padding-left: 300px">
