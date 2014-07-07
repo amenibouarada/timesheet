@@ -102,7 +102,7 @@
         require(["dijit/Tooltip", "dojo/domReady!"], function (Tooltip) {
             new Tooltip({
                 connectId: ["calFromDateToolTip"],
-                label: "Обозначения цветов заголовков столбцов в таблице:<table class='without_borders'>" +
+                label: "Обозначения цветов заголовков в таблице:<table class='without_borders'>" +
                         "<tr><td><div class='blockTooltip classDateBlueBack'> </div></td><td><div style='padding: 5px;'> - проекты</div></td></tr>" +
                         "<tr><td><div class='blockTooltip classDateRedBack'> </div></td><td> <div style='padding: 5px;'> - пресейлы</div></td></tr>" +
                         "<tr><td><div class='blockTooltip classDateGrayBack'> </div></td><td> <div style='padding: 5px;'> - прочие</div></td></tr>" +
