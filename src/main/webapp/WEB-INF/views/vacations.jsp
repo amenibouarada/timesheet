@@ -81,6 +81,7 @@
     });
 
     dojo.ready(function () {
+        dojo.query("#graphic_div").style("width", (document.body.offsetWidth - 30) + "px");
         window.focus();
         divisionChangeVac(dojo.byId(DIVISION_ID).value);
 
@@ -482,7 +483,7 @@
 
         </div>
         <div id="emptyMessage"></div>
-        <div style="position:relative;" class="Gantt" id="graphic_div"> </div>
+        <div style="position:relative;overflow: scroll" class="Gantt" id="graphic_div"> </div>
     </div>
 </div>
 

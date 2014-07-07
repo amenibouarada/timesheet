@@ -335,7 +335,7 @@ public class DateTimeUtil {
      *
      * @return String
      */
-    public static String endMonthDay(Timestamp day) {
+    public static String getLastDayOfMonth(Timestamp day) {
         SimpleDateFormat sdf = new SimpleDateFormat(DATE_PATTERN);
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(day);

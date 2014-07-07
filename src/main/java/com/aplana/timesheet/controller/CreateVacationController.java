@@ -1,6 +1,7 @@
 package com.aplana.timesheet.controller;
 
 import com.aplana.timesheet.dao.entity.Calendar;
+import com.aplana.timesheet.dao.entity.DictionaryItem;
 import com.aplana.timesheet.dao.entity.Division;
 import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.enums.DictionaryEnum;
@@ -25,6 +26,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.sql.Timestamp;
 import java.util.List;
+
+import static com.aplana.timesheet.system.constants.RoleConstants.ROLE_ADMIN;
 
 /**
  * @author rshamsutdinov
@@ -95,10 +98,13 @@ public class CreateVacationController {
 
         List<Division> divisionList = divisionService.getDivisions();
 
-        modelAndView.addObject(
-                "vacationTypes",
-                dictionaryItemService.getItemsByDictionaryId(DictionaryEnum.VACATION_TYPE.getId())
-        );
+        List<DictionaryItem> itemsByDictionaryId = dictionaryItemService.getItemsByDictionaryId(DictionaryEnum.VACATION_TYPE.getId());
+        if (!request.isUserInRole(ROLE_ADMIN)) {
+            itemsByDictionaryId.remove(dictionaryItemService.find(VacationTypesEnum.CHILDBEARING.getId()));
+            itemsByDictionaryId.remove(dictionaryItemService.find(VacationTypesEnum.CHILDCARE.getId()));
+        }
+        modelAndView.addObject("vacationTypes", itemsByDictionaryId);
+
         modelAndView.addObject("employee", employee);
         modelAndView.addObject("divisionId", employee.getDivision().getId());
         modelAndView.addObject("employeeId", employee.getId());

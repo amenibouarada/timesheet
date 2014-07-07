@@ -3,7 +3,6 @@ package com.aplana.timesheet.dao;
 import com.aplana.timesheet.dao.entity.Calendar;
 import com.aplana.timesheet.dao.entity.Holiday;
 import com.aplana.timesheet.dao.entity.Region;
-import com.aplana.timesheet.exception.service.CalendarServiceException;
 import com.aplana.timesheet.util.DateTimeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,10 +13,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
-import javax.persistence.criteria.*;
 import javax.validation.constraints.NotNull;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -133,7 +130,7 @@ public class CalendarDAO {
      * @return Calendar
      */
     public Calendar getLastWorkDay(Calendar day) {
-        Date monthLastDay = DateTimeUtil.stringToTimestamp(DateTimeUtil.endMonthDay(day.getCalDate()));
+        Date monthLastDay = DateTimeUtil.stringToTimestamp(DateTimeUtil.getLastDayOfMonth(day.getCalDate()));
 
         Query query = entityManager.createQuery(
                 "select max(c) from Calendar as c " +

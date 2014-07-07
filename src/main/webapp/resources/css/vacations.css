@@ -60,3 +60,7 @@ table.without_borders td {
 .trDelimeter {
     border-top: 2px solid #AAAAAA;
 }
+
+#tabContainer {
+    width: auto!important;
+}

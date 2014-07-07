@@ -19,9 +19,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static com.aplana.timesheet.util.DateTimeUtil.DATE_PATTERN;
-import static com.aplana.timesheet.util.DateTimeUtil.dateToString;
-import static com.aplana.timesheet.util.DateTimeUtil.stringToDate;
 import static com.aplana.timesheet.util.DateTimeUtil.dateListToStringList;
 
 @Service
@@ -86,21 +83,21 @@ public class ReportCheckService {
 
         // Выполняем проверки только по рабочим дням
         if (holidayDAO.isWorkDay(currentDay)) {
-            String firstDay = DateTimeUtil.previousMonthFirstDay(),
-                    endMonthDay = DateTimeUtil.endMonthDay(new Timestamp(System.currentTimeMillis())),
+            String  firstPrevMonthDay  = DateTimeUtil.previousMonthFirstDay(),
+                    endCurrentMonthDay = DateTimeUtil.getLastDayOfMonth(new Timestamp(System.currentTimeMillis())),
                     endPrevMonthDay = DateTimeUtil.endPrevMonthDay(),
-                    lastSunday = DateTimeUtil.lastSunday(),
-                    lastDay = lastSunday;
+                    lastCurrentMonthSunday = DateTimeUtil.lastSunday(),
+                    lastDay = lastCurrentMonthSunday;
             // Если конец месяца
-            if (DateTimeUtil.dayAfterDay(endMonthDay, lastSunday))
+            if (DateTimeUtil.dayAfterDay(endCurrentMonthDay, lastCurrentMonthSunday))
                 lastDay = currentDay;
             // Если новый месяц - надо взять последний день предыдущего месяца
-            if (DateTimeUtil.dayAfterDay(endPrevMonthDay, lastSunday))
+            if (DateTimeUtil.dayAfterDay(endPrevMonthDay, lastCurrentMonthSunday))
                 lastDay = endPrevMonthDay;
             // lastDay никогда не должен быть сегодняшним днем. т.к. проверка идет ночью и сегодняшний день еще только начался
             if (lastDay.equals(currentDay))
                 lastDay = DateTimeUtil.decreaseDay(lastDay);
-            storeReportCheck(firstDay, lastDay, lastSunday.equals(currentDay));
+            storeReportCheck(firstPrevMonthDay, lastDay, lastCurrentMonthSunday.equals(currentDay));
         }
 
         trace.append("Finish send mails\n");

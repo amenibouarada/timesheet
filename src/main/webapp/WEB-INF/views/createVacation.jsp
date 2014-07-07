@@ -1,4 +1,5 @@
 <%@ page import="com.aplana.timesheet.system.properties.TSPropertyProvider" %>
+<%@ page import="com.aplana.timesheet.enums.VacationTypesEnum" %>
 <%@page contentType="text/html" pageEncoding="UTF-8" %>
 
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
@@ -231,6 +232,15 @@
         function openCreateVacationRules() {
             window.open("<%=rules%>");
         }
+
+        function updateSubmitButton(){
+            if (dojo.byId('types').value == "<%= VacationTypesEnum.CHILDBEARING.getId() %>" || dojo.byId('types').value == "<%= VacationTypesEnum.CHILDCARE.getId() %>") {
+                dojo.byId('createVacationId').setAttribute("onclick", "javascript: createVacation(true)");
+            } else {
+                dojo.byId('createVacationId').setAttribute("onclick", "javascript: createVacation(false)");
+            }
+
+        }
     </script>
     <style type="text/css">
 
@@ -350,7 +360,7 @@
             </td>
             <td>
                 <form:select path="vacationType" id="types" onMouseOver="tooltip.show(getTitle(this));"
-                             onChange="updateExitToWorkAndCountVacationDay();"
+                             onChange="updateExitToWorkAndCountVacationDay();updateSubmitButton();"
                              onMouseOut="tooltip.hide();" multiple="false" size="1">
                     <form:option value="0" label="" />
                     <form:options items="${vacationTypes}" itemLabel="value" itemValue="id" />

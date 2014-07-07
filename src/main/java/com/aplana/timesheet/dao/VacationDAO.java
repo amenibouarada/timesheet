@@ -8,6 +8,7 @@ import com.aplana.timesheet.enums.VacationStatusEnum;
 import com.aplana.timesheet.enums.VacationTypesEnum;
 import com.aplana.timesheet.service.DictionaryItemService;
 import com.aplana.timesheet.system.security.SecurityService;
+import com.aplana.timesheet.util.DateTimeUtil;
 import com.google.common.collect.Lists;
 import org.hibernate.Hibernate;
 import org.slf4j.Logger;
@@ -19,6 +20,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import java.sql.Timestamp;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -76,27 +79,35 @@ public class VacationDAO {
     }
 
     public List<Vacation> findVacationsByTypes(Integer year, Integer month, Integer employeeId,  List<DictionaryItem> types) {
+        Calendar calendar = DateTimeUtil.getCalendar(year, month);
+        calendar.set(Calendar.DAY_OF_MONTH, 1);
+        Date firstDay = calendar.getTime();
+        Date lastDay = DateTimeUtil.stringToDate(DateTimeUtil.getLastDayOfMonth(new Timestamp(calendar.getTime().getTime())), DateTimeUtil.DATE_PATTERN);
+
         final Query query =
                 entityManager.createQuery("from Vacation v " +
                         "where v.employee.id = :emp_id " +
-                        "and (YEAR(v.beginDate) = :year or YEAR(v.endDate) = :year) " +
-                        "and (MONTH(v.beginDate) = :month or MONTH(v.endDate) = :month) " +
+                        "and (v.endDate >= :firstDay and v.beginDate <= :lastDay) " +
                         "and v.type in :types order by v.beginDate")
-                        .setParameter("emp_id", employeeId).setParameter("year", year).setParameter("month",month).setParameter("types",types);
+                        .setParameter("emp_id", employeeId).setParameter("firstDay", firstDay).setParameter("lastDay",lastDay).setParameter("types",types);
 
         return query.getResultList();
     }
 
     public List<Vacation> findVacationsByTypesAndStatuses(Integer year, Integer month, Integer employeeId,  List<DictionaryItem> types, List<DictionaryItem> statuses) {
+        Calendar calendar = DateTimeUtil.getCalendar(year, month);
+        calendar.set(Calendar.DAY_OF_MONTH, 1);
+        Date firstDay = calendar.getTime();
+        Date lastDay = DateTimeUtil.stringToDate(DateTimeUtil.getLastDayOfMonth(new Timestamp(calendar.getTime().getTime())), DateTimeUtil.DATE_PATTERN);
+
         final Query query =
                 entityManager.createQuery("from Vacation v " +
                         "where v.employee.id = :emp_id " +
-                        "and (YEAR(v.beginDate) = :year or YEAR(v.endDate) = :year) " +
-                        "and (MONTH(v.beginDate) = :month or MONTH(v.endDate) = :month) " +
+                        "and (v.endDate >= :firstDay and v.beginDate <= :lastDay) " +
                         "and v.type in :types " +
                         "and v.status in :statuses " +
                         "order by v.beginDate")
-                        .setParameter("emp_id", employeeId).setParameter("year", year).setParameter("month",month).setParameter("types",types).setParameter("statuses",statuses);
+                        .setParameter("emp_id", employeeId).setParameter("firstDay", firstDay).setParameter("lastDay",lastDay).setParameter("types",types).setParameter("statuses",statuses);
 
         return query.getResultList();
     }
