@@ -29,13 +29,9 @@ public class LdapDAO {
 	private static final Logger logger = LoggerFactory.getLogger(LdapDAO.class);
 
     @Autowired
-    private static TSPropertyProvider propertyProvider;
+    private TSPropertyProvider propertyProvider;
 
 	private LdapTemplate ldapTemplate;
-
-    public static final String SID = propertyProvider.getLdapFieldForSID();
-    public static final String NAME = propertyProvider.getLdapFieldForDivisionName();
-    public static final String LEADER = propertyProvider.getLdapFieldForLeader();
 
     public void setLdapTemplate(LdapTemplate ldapTemplate) {
 		this.ldapTemplate = ldapTemplate;
@@ -93,7 +89,7 @@ public class LdapDAO {
 
     public EmployeeLdap getEmployeeBySID(String sid) {
         try {
-            EqualsFilter filter = new EqualsFilter(SID, sid);
+            EqualsFilter filter = new EqualsFilter(propertyProvider.getLdapFieldForSID(), sid);
             logger.debug("LDAP Query {}", filter.encode());
             EmployeeLdap first =
                     (EmployeeLdap) Iterables.getFirst(
@@ -197,7 +193,7 @@ public class LdapDAO {
 		public Object mapFromAttributes(Attributes attributes) throws NamingException {
 			EmployeeLdap employee = new EmployeeLdap();
 
-            employee.setObjectSid   (LdapUtils.convertBinarySidToString((byte[]) attributes.get(SID).get()));
+            employee.setObjectSid   (LdapUtils.convertBinarySidToString((byte[]) attributes.get(propertyProvider.getLdapFieldForSID()).get()));
             employee.setDepartment  ( getAttributeByName( attributes, propertyProvider.getLdapFieldForDivision()));
             employee.setDisplayName ( getAttributeByName( attributes, propertyProvider.getLdapFieldForDisplayName()));
             employee.setEmail       ( getAttributeByName( attributes, propertyProvider.getLdapFieldForEmail()));

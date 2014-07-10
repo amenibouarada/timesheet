@@ -40,6 +40,8 @@ public class UpdateController {
     @Autowired
     private LdapDAO ldapDAO;
     @Autowired
+    private TSPropertyProvider propertyProvider;
+    @Autowired
     private EmployeeService employeeService;
     @Autowired
     private EmployeeAssistantService employeeAssistantService;
@@ -156,10 +158,10 @@ public class UpdateController {
                 Map map = Iterables.find(divisions, new Predicate<Map>() {
                     @Override
                     public boolean apply(@Nullable Map input) {
-                        return division.getLdapName().equalsIgnoreCase((String) input.get(LdapDAO.NAME));
+                        return division.getLdapName().equalsIgnoreCase((String) input.get(propertyProvider.getLdapFieldForDivisionName()));
                     }
                 });
-                division.setObjectSid(LdapUtils.convertBinarySidToString((byte[]) map.get(LdapDAO.SID)));
+                division.setObjectSid(LdapUtils.convertBinarySidToString((byte[]) map.get(propertyProvider.getLdapFieldForSID())));
                 divisionService.setDivision(division);
             }
         }
