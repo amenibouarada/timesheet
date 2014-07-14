@@ -4,6 +4,7 @@ import com.aplana.timesheet.dao.entity.Calendar;
 import com.aplana.timesheet.dao.entity.Division;
 import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.dao.entity.TimeSheet;
+import com.aplana.timesheet.enums.ReportSendApprovalType;
 import com.aplana.timesheet.enums.TypesOfActivityEnum;
 import com.aplana.timesheet.enums.TypesOfTimeSheetEnum;
 import com.aplana.timesheet.enums.VacationStatusEnum;
@@ -122,7 +123,10 @@ public class TimeSheetDAO {
                 "ts.id timesheet_id, " +
                 "SUM(tsd.duration), " +
                 "tsd.act_type, " +
-                "ts.ts_type_id " +
+                "ts.ts_type_id, " +
+                "ts.delete_approval_date, " +
+                "ts.delete_approval_comment, " +
+                "ts.send_approval_type " +
             "from calendar c " +
                 "left outer join time_sheet as ts " +
                     "on ts.emp_id = :employeeId and ts.caldate=c.caldate " +
@@ -136,7 +140,8 @@ public class TimeSheetDAO {
                 "c.caldate, " +
                 "h.id, " +
                 "ts.id, " +
-                "tsd.act_type " +
+                "tsd.act_type, " +
+                "ts.delete_approval_date " +
             "order by " +
                 "c.calDate asc, timesheet_id asc"
         ).setParameter("yearPar", year).setParameter("monthPar", month)
@@ -144,6 +149,10 @@ public class TimeSheetDAO {
 
         List result = query.getResultList();
 
+        return getDayTimeSheetsForEmployee(employee, result);
+    }
+
+    private List<DayTimeSheet> getDayTimeSheetsForEmployee(Employee employee, List result) {
         List<DayTimeSheet> dayTSList = new ArrayList<DayTimeSheet>();
 
         HashMap<Long, DayTimeSheet> map = new HashMap<Long, DayTimeSheet>();
@@ -163,6 +172,11 @@ public class TimeSheetDAO {
             //по этому полю определяем отчет или черновик
             Integer tsType = item[5] != null ? ((Integer) item[5]) : null;
 
+            Date deleteSendApprovalDate = item[6] != null ? ((Date) item[6]) : null;
+            String deleteSendApprovalComment = item[7] != null ? ((String) item[7]) : null;
+
+            Integer deleteSendApprovalType = item[8] != null ? ((Integer) item[8]) : null;
+            String deleteSendApprovalTypeName = deleteSendApprovalType != null ? ReportSendApprovalType.findById(deleteSendApprovalType).getName() : "" ;
             // Если нерабочая активность - сразу проставим в duration 0
             if (duration != null && actType != null && !TypesOfActivityEnum.isEfficientActivity(actType)) {
                 duration = BigDecimal.ZERO;
@@ -170,7 +184,18 @@ public class TimeSheetDAO {
 
             //если Map еще не содержит запись на эту дату
             if (!map.containsKey(calDate.getTime())) {
-                DayTimeSheet ds = new DayTimeSheet(calDate, holiday, tsId, actType, duration, employee, tsType != null && TypesOfTimeSheetEnum.DRAFT.getId() == tsType);
+                DayTimeSheet ds = new DayTimeSheet(
+                        calDate,
+                        holiday,
+                        tsId,
+                        actType,
+                        duration,
+                        employee,
+                        tsType != null && TypesOfTimeSheetEnum.DRAFT.getId() == tsType,
+                        deleteSendApprovalDate,
+                        deleteSendApprovalComment,
+                        deleteSendApprovalTypeName
+                );
                 ds.setTimeSheetDAO(this);
                 ds.setIllnessDAO(illnessDAO);
                 ds.setVacationDAO(vacationDAO);
@@ -356,7 +381,16 @@ public class TimeSheetDAO {
         return resultList != null && !resultList.isEmpty() ? ((Integer) resultList.get(0)) : null;
     }
 
-    public  List<Date> getOverdueTimesheet(Long employeeId, Date startDate, Date endDate){
+    public Date findFirstEmptyDate(Long employeeId, Date endDate) {
+        List<Date> overdueTimesheet = getOverdueTimesheet(employeeId, null, endDate, true);
+        if (overdueTimesheet.size() > 0) {
+        return overdueTimesheet.get(0);
+        } else {
+            return null;
+        }
+    }
+
+    public  List<Date> getOverdueTimesheet(Long employeeId, Date startDate, Date endDate, Boolean findFirstEmptyDate){
         Query query = entityManager.createNativeQuery(
                 "with data_employee as " +
                 "( " +
@@ -377,7 +411,8 @@ public class TimeSheetDAO {
                 "   left join holiday h on (c.caldate = h.caldate and (de.region = h.region or h.region is null)) " +
                 "where " +
                     //полу-костыль: искать незаполненные отчеты в период :startDate and :endDate, но если это командировки - искать всегда
-                "   (c.calDate between :startDate and :endDate or exists(select 1 from business_trip bt where bt.employee_id = de.id and c.caldate between bt.begin_date and bt.end_date)) " +
+                        (findFirstEmptyDate ?  "   (c.calDate < :endDate " :"   (c.calDate between :startDate and :endDate ") +
+                        "or exists(select 1 from business_trip bt where bt.employee_id = de.id and c.caldate between bt.begin_date and bt.end_date)) " +
                 "   and not exists(select 1 from time_sheet ts where ts.ts_type_id = " + TypesOfTimeSheetEnum.REPORT.getId() + " and ts.emp_id = de.id and ts.caldate = c.caldate) " +
                 "   and not exists(select 1 from vacation v where v.status_id = " + VacationStatusEnum.APPROVED.getId() + " and v.employee_id = de.id and c.caldate between v.begin_date and v.end_date) " +
                 "   and not exists(select 1 from illness i where i.employee_id = de.id and c.caldate between i.begin_date and i.end_date) " +
@@ -387,7 +422,9 @@ public class TimeSheetDAO {
         );
 
         query.setParameter("employeeId", employeeId);
-        query.setParameter("startDate", startDate);
+        if (!findFirstEmptyDate) {
+            query.setParameter("startDate", startDate);
+        }
         query.setParameter("endDate", endDate);
         return query.getResultList();
     }

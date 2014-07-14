@@ -1,5 +1,6 @@
 package com.aplana.timesheet.dao.entity;
 
+import com.aplana.timesheet.enums.ReportSendApprovalType;
 import org.hibernate.annotations.ForeignKey;
 
 import javax.persistence.*;
@@ -52,6 +53,16 @@ public class TimeSheet {
 
     @Column(name = "creation_date")
     private Date creationDate;
+
+    @Column(name = "delete_approval_date", nullable = true)
+    private Date deleteSendApprovalDate;
+
+    @Column(name = "delete_approval_comment", nullable = true)
+    private String deleteSendApprovalComment;
+
+    @Column(name = "send_approval_type", nullable = true)
+    @Enumerated(EnumType.ORDINAL)
+    private ReportSendApprovalType reportSendApprovalType;
 
     public DictionaryItem getType() {
         return type;
@@ -144,5 +155,29 @@ public class TimeSheet {
                 .append(" plan=").append(plan)
                 .append(" typeReport=").append(type)
                 .toString();
+    }
+
+    public Date getDeleteSendApprovalDate() {
+        return deleteSendApprovalDate;
+    }
+
+    public void setDeleteSendApprovalDate(Date deleteSendApprovalDate) {
+        this.deleteSendApprovalDate = deleteSendApprovalDate;
+    }
+
+    public String getDeleteSendApprovalComment() {
+        return deleteSendApprovalComment;
+    }
+
+    public void setDeleteSendApprovalComment(String deleteSendApprovalComment) {
+        this.deleteSendApprovalComment = deleteSendApprovalComment;
+    }
+
+    public ReportSendApprovalType getReportSendApprovalType() {
+        return reportSendApprovalType;
+    }
+
+    public void setReportSendApprovalType(ReportSendApprovalType reportSendApprovalType) {
+        this.reportSendApprovalType = reportSendApprovalType;
     }
 }

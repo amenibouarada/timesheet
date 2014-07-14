@@ -83,20 +83,25 @@ public class ReportCheckService {
 
         // Выполняем проверки только по рабочим дням
         if (holidayDAO.isWorkDay(currentDay)) {
-            String  firstPrevMonthDay  = DateTimeUtil.previousMonthFirstDay(),
-                    endCurrentMonthDay = DateTimeUtil.getLastDayOfMonth(new Timestamp(System.currentTimeMillis())),
-                    endPrevMonthDay = DateTimeUtil.endPrevMonthDay(),
-                    lastCurrentMonthSunday = DateTimeUtil.lastSunday(),
-                    lastDay = lastCurrentMonthSunday;
+            String firstPrevMonthDay = DateTimeUtil.previousMonthFirstDay(),
+    /*                endCurrentMonthDay = DateTimeUtil.getLastDayOfMonth(new Timestamp(System.currentTimeMillis())),
+                    endPrevMonthDay = DateTimeUtil.endPrevMonthDay(),*/
+                    lastCurrentMonthSunday = DateTimeUtil.lastSunday();
+
+            /*String lastDay = lastCurrentMonthSunday;
             // Если конец месяца
-            if (DateTimeUtil.dayAfterDay(endCurrentMonthDay, lastCurrentMonthSunday))
+            if (DateTimeUtil.dayAfterDay(endCurrentMonthDay, lastCurrentMonthSunday)) {
                 lastDay = currentDay;
+            }
             // Если новый месяц - надо взять последний день предыдущего месяца
-            if (DateTimeUtil.dayAfterDay(endPrevMonthDay, lastCurrentMonthSunday))
+            if (DateTimeUtil.dayAfterDay(endPrevMonthDay, lastCurrentMonthSunday)) {
                 lastDay = endPrevMonthDay;
+            }
             // lastDay никогда не должен быть сегодняшним днем. т.к. проверка идет ночью и сегодняшний день еще только начался
-            if (lastDay.equals(currentDay))
+            if (lastDay.equals(currentDay)) {
                 lastDay = DateTimeUtil.decreaseDay(lastDay);
+            }*/
+            String lastDay = DateTimeUtil.decreaseDay(currentDay);
             storeReportCheck(firstPrevMonthDay, lastDay, lastCurrentMonthSunday.equals(currentDay));
         }
 
@@ -160,7 +165,7 @@ public class ReportCheckService {
 
         for (Employee emp : employeeList) {
             logger.info("Employee {}", emp.getName());
-            List<Date> dateList = timeSheetDAO.getOverdueTimesheet(emp.getId().longValue(), firstDate, lastDate);
+            List<Date> dateList = timeSheetDAO.getOverdueTimesheet(emp.getId().longValue(), firstDate, lastDate, false);
 
             if (dateList.size() > 0) {
                 List<String> dayList = dateListToStringList(dateList);
@@ -189,8 +194,9 @@ public class ReportCheckService {
             Calendar workDay = calendarService.getLastWorkDay(currentCalendar);
             if (workDay.getCalDate().equals(DateTimeUtil.stringToTimestamp(currentDay, DateTimeUtil.DATE_PATTERN)))
                 sendMailService.performEndMonthMailing(reportCheckList);
-        } else
+        } else {
             logger.info("Reportchecks not found, all timesheets are filled");
+        }
     }
 
     public String getTrace() {

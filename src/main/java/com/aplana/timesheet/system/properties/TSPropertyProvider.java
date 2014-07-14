@@ -81,6 +81,10 @@ public class TSPropertyProvider {
         return getProperties().getProperty("mail.fromaddress", "timesheet@aplana.com");
     }
 
+    public String getMailAdminsAddress() {
+        return getProperties().getProperty("mail.ProblemsAndProposals.toAdminAddress");
+    }
+
     public String getMailSendEnable() {
         return getProperties().getProperty("mail.send.enable");
     }
@@ -171,6 +175,10 @@ public class TSPropertyProvider {
 
     public String getFeedbackMarker() {
         return getProperties().getProperty("mail.marker.feedback", "[TS FEEDBACK]");
+    }
+
+    public String getDeleteOrSetDraftApprovalMarker() {
+        return getProperties().getProperty("mail.marker.deleteOrSetDraft", "[TS DELETE OR SET DRAFT]");
     }
 
     public Integer getVacationApprovalErrorThreshold() {

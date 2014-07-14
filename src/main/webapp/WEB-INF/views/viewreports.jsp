@@ -21,6 +21,7 @@
         dojo.require("dijit.form.FilteringSelect");
         dojo.require("dojo.data.ObjectStore");
         dojo.require("dojo.store.Memory");
+        dojo.require("dijit.Dialog");
 
         var widgets = {
             division: undefined,
@@ -46,6 +47,10 @@
             }
 
             dojo.on(widgets.division, "change", onDivisionChange);
+
+            dojo.connect( dijit.byId('sendDeleteReportDialog').closeButtonNode, "onclick", function (evt) {
+                clearDeleteForm();
+            });
         });
 
         var monthList = ${monthList};
@@ -270,6 +275,42 @@
             dojo.query("#vacationsForm > #divisionId")[0].value = divId;
             vacationForm.submit();
         }
+
+        function sendDeleteTimeSheetApproval(reportId) {
+            dojo.byId("link").value = document.URL;
+            dojo.byId("reportId").value = reportId;
+            var dialog = dijit.byId("sendDeleteReportDialog");
+            dialog.show();
+            return;
+        }
+
+        function clearDeleteForm(){
+            dojo.byId("link").value = null;
+            dojo.byId("reportId").value = null;
+            dojo.byId("deleteRB").checked = true;
+            dojo.byId('commentApproval').value = "";
+        }
+
+        function submitDeleteApproval(){
+            var dialog = dijit.byId("sendDeleteReportDialog");
+            dialog.hide();
+            dojo.byId('comment').value =  dojo.byId('commentApproval').value;
+            var deleteForm = dojo.byId("deleteReportsForm");
+            var value = dojo.query('input[name=deleteGroup]:checked').attr('value')[0];
+            deleteForm.action = "<%=request.getContextPath()%>" + (value == "delete" ? "/sendDeleteReportApproval" : "/setDraftReportApproval");
+            deleteForm.submit();
+        }
+
+        function showApprovalDialog(comment){
+            var dialog = dijit.byId("showApprovaldialog");
+            dojo.byId('commentText').value = comment;
+            dialog.show();
+        }
+
+        function closeShowApprovalDialog(){
+            var dialog = dijit.byId("showApprovaldialog");
+            dialog.hide();
+        }
     </script>
     <style type="text/css">
         .colortext {
@@ -283,6 +324,22 @@
 
         tr.b {
             font-weight: bold;
+        }
+
+        .delete-button img {
+            vertical-align: middle;
+            width: 10px;
+            height: 10px;
+            max-height: 10px;
+            max-width: 10px;
+            margin: 3px;
+        }
+
+        .delete-button {
+            cursor: pointer;
+            vertical-align: middle;
+            padding: 0;
+            text-align: center;
         }
     </style>
 </head>
@@ -337,6 +394,9 @@
         <sec:authorize access="hasRole('ROLE_ADMIN')">
             <th width="25"><input type="checkbox" id="deleteAllCheckbox"/></th>
         </sec:authorize>
+        <sec:authorize access="!hasRole('ROLE_ADMIN')">
+            <th width="25"></th>
+        </sec:authorize>
         <th width="150">Дата</th>
         <th width="160">Статус</th>
         <th width="150">Часы</th>
@@ -345,133 +405,154 @@
     </tr>
     </thead>
     <tbody>
-    <%-- <% for(DayTimeSheet report : request.getAttribute("reports")) { %> --%>
     <c:forEach var="report" items="${reports}">
-        <c:if test="${report.statusHoliday}">
-            <tr class="statusHoliday">
-            <sec:authorize access="hasRole('ROLE_ADMIN')">
-                <td style="text-align: center;">
-                    <c:if test="${report.id != null}">
-                        <input type="checkbox" id="delete_${report.id}"/>
-                    </c:if>
-                </td>
-            </sec:authorize>
-            <td class="date"><fmt:formatDate value="${report.calDate}" pattern="dd.MM.yyyy"/></td>
+        <c:choose>
+            <c:when test="${report.statusHoliday}">
+                <tr class="statusHoliday">
+                <td style="text-align: center;"></td>
+                <td class="date"><fmt:formatDate value="${report.calDate}" pattern="dd.MM.yyyy"/></td>
 
-            <td>Выходной
-                <c:if test="${!report.isDayNotCome && !report.isCalDateLongAgo}">
-                    <a href="<%=request.getContextPath()%>/timesheet?date=<fmt:formatDate value="${report.calDate}" pattern="yyyy-MM-dd"/>&id=${employeeId}">(Создать)</a>
-                </c:if>
-            </td>
+                <td>Выходной
+                    <c:if test="${!report.isDayNotCome && !report.isCalDateLongAgo}">
+                        <a href="<%=request.getContextPath()%>/timesheet?date=<fmt:formatDate value="${report.calDate}" pattern="yyyy-MM-dd"/>&id=${employeeId}">(Создать)</a>
+                    </c:if>
+                </td>
 
-            <td></td>
-        </c:if>
-        <c:if test="${report.statusNotStart}">
-            <tr class="statusNotStart">
-            <sec:authorize access="hasRole('ROLE_ADMIN')">
-                <td style="text-align: center;">
-                    <c:if test="${report.id != null}">
-                        <input type="checkbox" id="delete_${report.id}"/>
-                    </c:if>
-                </td>
-            </sec:authorize>
-            <td class="date"><fmt:formatDate value="${report.calDate}" pattern="dd.MM.yyyy"/></td>
-            <td>Ещё не принят на работу</td>
-            <td></td>
-        </c:if>
-        <c:if test="${report.statusNormalDay}">
-            <tr class="statusNormalDay toplan">
-            <sec:authorize access="hasRole('ROLE_ADMIN')">
-                <td style="text-align: center;">
-                    <c:if test="${report.id != null}">
-                        <input type="checkbox" id="delete_${report.id}"/>
-                    </c:if>
-                </td>
-            </sec:authorize>
-            <td class="date"><fmt:formatDate value="${report.calDate}" pattern="dd.MM.yyyy"/></td>
-            <td>
-                <a target="_blank"
-                   href="<%=request.getContextPath()%>/report<fmt:formatDate value="${report.calDate}" pattern="/yyyy/MM/dd/"/>${report.timeSheet.employee.id}">Посмотреть
-                    отчёт</a>
-            </td>
-            <td class="duration">${report.duration}</td>
-        </c:if>
-        <c:if test="${report.statusWorkOnHoliday}">
-            <tr class="statusWorkOnHoliday">
-            <sec:authorize access="hasRole('ROLE_ADMIN')">
-                <td style="text-align: center;">
-                    <c:if test="${report.id != null}">
-                        <input type="checkbox" id="delete_${report.id}"/>
-                    </c:if>
-                </td>
-            </sec:authorize>
-            <td class="date"><fmt:formatDate value="${report.calDate}" pattern="dd.MM.yyyy"/></td>
-            <td>
-                Работа в выходной день <a target="_blank"
-                                          href="<%=request.getContextPath()%>/report<fmt:formatDate value="${report.calDate}" pattern="/yyyy/MM/dd/"/>${report.timeSheet.employee.id}">Посмотреть
-                отчёт</a>
-            </td>
-            <td class="duration">${report.duration}</td>
-        </c:if>
-        <c:if test="${report.statusNoReport}">
-            <tr class="statusNoReport toplan">
-            <sec:authorize access="hasRole('ROLE_ADMIN')">
-                <td style="text-align: center;">
-                    <c:if test="${report.id != null}">
-                        <input type="checkbox" id="delete_${report.id}"/>
-                    </c:if>
-                </td>
-            </sec:authorize>
-            <td class="date"><fmt:formatDate value="${report.calDate}" pattern="dd.MM.yyyy"/></td>
-            <td>Отчёта нет <a
-                    href="<%=request.getContextPath()%>/timesheet?date=<fmt:formatDate value="${report.calDate}" pattern="yyyy-MM-dd"/>&id=${employeeId}">(Создать)</a>
-            </td>
-            <c:choose>
-                <c:when test="${report.vacationDay || report.illnessDay}">
-                    <td class="duration">${report.duration}</td>
-                </c:when>
-                <c:otherwise>
-                    <td></td>
-                </c:otherwise>
-            </c:choose>
-        </c:if>
-        <c:if test="${report.statusNotCome}">
-            <tr class="statusNotCome">
-            <sec:authorize access="hasRole('ROLE_ADMIN')">
-                <td style="text-align: center;">
-                    <c:if test="${report.id != null}">
-                        <input type="checkbox" id="delete_${report.id}"/>
-                    </c:if>
-                </td>
-            </sec:authorize>
-            <td class="date"><fmt:formatDate value="${report.calDate}" pattern="dd.MM.yyyy"/></td>
-            <td></td>
-            <td></td>
-        </c:if>
+                <td></td>
+            </c:when>
 
-        <c:if test="${report.statusHaveDraft}">
-            <tr class="statusHaveDraft">
-            <sec:authorize access="hasRole('ROLE_ADMIN')">
+
+            <c:when test="${report.statusNotStart}">
+                <tr class="statusNotStart">
+                <td style="text-align: center;"></td>
+                <td class="date"><fmt:formatDate value="${report.calDate}" pattern="dd.MM.yyyy"/></td>
+                <td>Ещё не принят на работу</td>
+                <td></td>
+            </c:when>
+
+
+            <c:when test="${report.statusNormalDay}">
+                <tr class="statusNormalDay toplan">
                 <td style="text-align: center;">
                     <c:if test="${report.id != null}">
-                        <input type="checkbox" id="delete_${report.id}"/>
+                        <sec:authorize access="hasRole('ROLE_ADMIN')">
+                            <input type="checkbox" id="delete_${report.id}"/>
+                        </sec:authorize>
+                        <sec:authorize access="!hasRole('ROLE_ADMIN')">
+                            <c:if test="${report.deleteSendApprovalDate eq null}">
+                                <div class="delete-button">
+                                    <img src="/resources/img/delete.png" title="Удалить"
+                                         onclick="sendDeleteTimeSheetApproval(${report.id});">
+                                </div>
+                            </c:if>
+                        </sec:authorize>
                     </c:if>
                 </td>
-            </sec:authorize>
-            <td class="date"><fmt:formatDate value="${report.calDate}" pattern="dd.MM.yyyy"/></td>
-            <td>
-                Черновик
-                <a href="<%=request.getContextPath()%>/timesheet?date=<fmt:formatDate value="${report.calDate}" pattern="yyyy-MM-dd"/>&id=${employeeId}&type=<%=TypesOfTimeSheetEnum.DRAFT.getId()%>"
-                   onclick="">(Редактировать)
-                        <%--<img src="<c:url value="/resources/img/edit.png"/>" width="15px"--%>
-                        <%--title="Редактировать отчет"/>--%>
-                </a>
-            </td>
-            <td class="durationDraft duration">
-                <div class="durationDraftText">${report.duration}</div>
-            </td>
-        </c:if>
+                <td class="date"><fmt:formatDate value="${report.calDate}" pattern="dd.MM.yyyy"/></td>
+                <td>
+                    <a target="_blank"
+                       href="<%=request.getContextPath()%>/report<fmt:formatDate value="${report.calDate}" pattern="/yyyy/MM/dd/"/>${report.timeSheet.employee.id}">
+                        Посмотреть отчёт
+                    </a>
+                    <c:if test="${report.deleteSendApprovalDate ne null}">
+                        <sec:authorize access="hasRole('ROLE_ADMIN')">
+                            (имеется
+                            <a href="#" onclick="showApprovalDialog('${report.deleteSendApprovalComment}')">запрос</a>
+                            на ${report.deleteSendApprovalTypeName})
+                        </sec:authorize>
+                        <sec:authorize access="!hasRole('ROLE_ADMIN')">
+                            (отправлен запрос на ${report.deleteSendApprovalTypeName})
+                        </sec:authorize>
+                    </c:if>
+                </td>
+                <td class="duration">${report.duration}</td>
+            </c:when>
 
+
+            <c:when test="${report.statusWorkOnHoliday}">
+                <tr class="statusWorkOnHoliday">
+                <td style="text-align: center;">
+                    <c:if test="${report.id != null}">
+                        <sec:authorize access="hasRole('ROLE_ADMIN')">
+                            <input type="checkbox" id="delete_${report.id}"/>
+                        </sec:authorize>
+                        <sec:authorize access="!hasRole('ROLE_ADMIN')">
+                            <c:if test="${report.deleteSendApprovalDate eq null}">
+                                <div class="delete-button">
+                                    <img src="/resources/img/delete.png" title="Удалить"
+                                         onclick="sendDeleteTimeSheetApproval(${report.id});">
+                                </div>
+                            </c:if>
+                        </sec:authorize>
+                    </c:if>
+                </td>
+                <td class="date"><fmt:formatDate value="${report.calDate}" pattern="dd.MM.yyyy"/></td>
+                <td>
+                    Работа в выходной день
+                    <a target="_blank"
+                       href="<%=request.getContextPath()%>/report<fmt:formatDate value="${report.calDate}" pattern="/yyyy/MM/dd/"/>${report.timeSheet.employee.id}">
+                        Посмотреть отчёт
+                    </a>
+                    <c:if test="${report.deleteSendApprovalDate ne null}">
+                        <sec:authorize access="hasRole('ROLE_ADMIN')">
+                            (имеется
+                            <a href="#" onclick="showApprovalDialog('${report.deleteSendApprovalComment}')">запрос</a>
+                            на ${report.deleteSendApprovalTypeName})
+                        </sec:authorize>
+                        <sec:authorize access="!hasRole('ROLE_ADMIN')">
+                            (отправлен запрос на ${report.deleteSendApprovalTypeName})
+                        </sec:authorize>
+                    </c:if>
+                </td>
+                <td class="duration">${report.duration}</td>
+            </c:when>
+
+
+            <c:when test="${report.statusNoReport}">
+                <tr class="statusNoReport toplan">
+                <td style="text-align: center;"></td>
+                <td class="date"><fmt:formatDate value="${report.calDate}" pattern="dd.MM.yyyy"/></td>
+                <td>Отчёта нет <a
+                        href="<%=request.getContextPath()%>/timesheet?date=<fmt:formatDate value="${report.calDate}" pattern="yyyy-MM-dd"/>&id=${employeeId}">(Создать)</a>
+                </td>
+                <c:choose>
+                    <c:when test="${report.vacationDay || report.illnessDay}">
+                        <td class="duration">${report.duration}</td>
+                    </c:when>
+                    <c:otherwise>
+                        <td></td>
+                    </c:otherwise>
+                </c:choose>
+            </c:when>
+
+
+            <c:when test="${report.statusNotCome}">
+                <tr class="statusNotCome">
+                <td style="text-align: center;">
+                </td>
+                <td class="date"><fmt:formatDate value="${report.calDate}" pattern="dd.MM.yyyy"/></td>
+                <td></td>
+                <td></td>
+            </c:when>
+
+            <c:when test="${report.statusHaveDraft}">
+                <tr class="statusHaveDraft">
+                <td style="text-align: center;"></td>
+                <td class="date"><fmt:formatDate value="${report.calDate}" pattern="dd.MM.yyyy"/></td>
+                <td>
+                    Черновик
+                    <a href="<%=request.getContextPath()%>/timesheet?date=
+                    <fmt:formatDate value="${report.calDate}" pattern="yyyy-MM-dd"/>&id=${employeeId}&type=<%=TypesOfTimeSheetEnum.DRAFT.getId()%>"
+                       onclick="">
+                        (Редактировать)
+                    </a>
+                </td>
+                <td class="durationDraft duration">
+                    <div class="durationDraftText">${report.duration}</div>
+                </td>
+            </c:when>
+
+        </c:choose>
         <td>
             <c:if test="${report.illnessDay}">Болезнь</c:if>
             <c:if test="${report.vacationDay}">
@@ -521,18 +602,30 @@
     <form:hidden path="divisionId"/>
 </form:form>
 
-<sec:authorize access="hasRole('ROLE_ADMIN')">
-    <form:form method="post" commandName="deleteReportsForm" name="deleteReportsForm">
+
+<form:form method="post" commandName="deleteReportsForm" name="deleteReportsForm">
+
+    <sec:authorize access="hasRole('ROLE_ADMIN')">
         <form:hidden path="ids"/>
-        <form:hidden path="link"/>
+    </sec:authorize>
+
+    <form:hidden path="link"/>
+
+    <sec:authorize access="!hasRole('ROLE_ADMIN')">
+        <form:hidden path="reportId"/>
+        <form:hidden path="comment"/>
+    </sec:authorize>
+
+    <sec:authorize access="hasRole('ROLE_ADMIN')">
         <button id="deleteReportsButton" style="width:150px" style="vertical-align: middle" type="button"
                 onclick="deleteSelectedReports()">Удалить
         </button>
         <button id="sendToRawReportsButton" style="width:150px" style="vertical-align: middle" type="button"
                 onclick="sendToRawReports()">В черновик
         </button>
-    </form:form>
-</sec:authorize>
+    </sec:authorize>
+</form:form>
+
 <br>
 <table id="viewreports">
     <thead>
@@ -574,5 +667,34 @@
     </c:choose>
     </tbody>
 </table>
+
+<div id="sendDeleteReportDialog" data-dojo-type="dijit.Dialog" title="Выберите действие над отчетом:" style="display: none;">
+    <div data-dojo-type="dijit.layout.ContentPane" style="width: 300px; height: 160px;">
+        <div style="margin-bottom: 10px;">
+            <input type="radio" checked="checked" name="deleteGroup" value="delete" id="deleteRB" style="margin: 3px;">Отправить запрос на удаление
+            отчета<br>
+            <input type="radio" name="deleteGroup" value="setDraft" style="margin: 3px;">Перевести в черновик<br>
+        </div>
+        <span>Комментарий</span>
+        <textarea id="commentApproval" maxlength="600" rows="3" style="width: 97%;margin: 3px;"></textarea>
+
+        <button id="" style="margin-top: 10px; float: right;"
+                onclick="submitDeleteApproval()">
+            Отправить
+        </button>
+    </div>
+</div>
+
+<div id="showApprovaldialog" data-dojo-type="dijit.Dialog" title="Комментарий к запросу" style="display: none;">
+    <div data-dojo-type="dijit.layout.ContentPane" style="width: 300px; height: 110px;">
+        <span>Комментарий</span>
+        <textarea id="commentText" disabled maxlength="600" rows="3" style="width: 97%;margin: 3px;"></textarea>
+        <button style="margin-top: 10px; float: right;"
+                onclick="closeShowApprovalDialog()">
+            Закрыть
+        </button>
+    </div>
+</div>
+
 </body>
 </html>

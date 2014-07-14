@@ -8,10 +8,7 @@ import com.aplana.timesheet.dao.HolidayDAO;
 import com.aplana.timesheet.dao.TimeSheetDAO;
 import com.aplana.timesheet.dao.entity.*;
 import com.aplana.timesheet.dao.entity.Calendar;
-import com.aplana.timesheet.enums.DictionaryEnum;
-import com.aplana.timesheet.enums.OvertimeCausesEnum;
-import com.aplana.timesheet.enums.TypesOfTimeSheetEnum;
-import com.aplana.timesheet.enums.UndertimeCausesEnum;
+import com.aplana.timesheet.enums.*;
 import com.aplana.timesheet.form.TimeSheetForm;
 import com.aplana.timesheet.form.TimeSheetTableRowForm;
 import com.aplana.timesheet.form.entity.DayTimeSheet;
@@ -98,6 +95,9 @@ public class TimeSheetService {
 
     @Autowired
     private HolidayDAO holidayDAO;
+
+    @Autowired
+    private SendMailService sendMailService;
 
     @Transactional
     public TimeSheet storeTimeSheet(TimeSheetForm tsForm, TypesOfTimeSheetEnum type) {
@@ -776,5 +776,15 @@ public class TimeSheetService {
         DictionaryItem draftItem = dictionaryItemService.find(TypesOfTimeSheetEnum.DRAFT.getId());
         timeSheet.setType(draftItem);
         timeSheetDAO.storeTimeSheet(timeSheet);
+    }
+
+    @Transactional
+    public void setReportApprovalData(Integer timeSheetId, String comment, ReportSendApprovalType reportSendApprovalType) {
+        TimeSheet timeSheet = find(timeSheetId);
+        timeSheet.setDeleteSendApprovalDate(new Date());
+        timeSheet.setDeleteSendApprovalComment(comment);
+        timeSheet.setReportSendApprovalType(reportSendApprovalType);
+        timeSheetDAO.storeTimeSheet(timeSheet);
+        sendMailService.performDeleteOrSetDraftApproval(timeSheet);
     }
 }

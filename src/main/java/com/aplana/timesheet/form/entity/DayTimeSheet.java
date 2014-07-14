@@ -35,15 +35,32 @@ public class DayTimeSheet implements Comparable<DayTimeSheet> {
     private Boolean isLoadTimeSheet = false;
     private TimeSheet timeSheet;
     private boolean haveDraft;
+    private Date deleteSendApprovalDate;
+    private String deleteSendApprovalComment;
+    private String deleteSendApprovalTypeName;
 
-    public DayTimeSheet(Timestamp calendarDate, Boolean isHoliday, Integer timeSheetId, Integer act_type, BigDecimal dur, Employee emp, boolean haveDraft) {
+    public DayTimeSheet(
+            Timestamp calendarDate,
+            Boolean isHoliday,
+            Integer timeSheetId,
+            Integer act_type,
+            BigDecimal dur,
+            Employee emp,
+            boolean haveDraft,
+            Date deleteSendApprovalDate,
+            String deleteSendApprovalComment,
+            String deleteSendApprovalType
+    ) {
         this.setCalDate(calendarDate);
         this.setWorkDay(!isHoliday); // APLANATS-266. workday = true - выходной день, а false - рабочий!
         this.setId(timeSheetId);
         this.setAct_type(act_type);
         this.setDuration(dur);
         this.setEmp(emp);
-        this.haveDraft = haveDraft;
+        this.setHaveDraft(haveDraft);
+        this.setDeleteSendApprovalDate(deleteSendApprovalDate);
+        this.setDeleteSendApprovalComment(deleteSendApprovalComment);
+        this.setDeleteSendApprovalTypeName(deleteSendApprovalType);
     }
 
     public void setIllnessDAO(IllnessDAO illnessDAO) {
@@ -297,4 +314,31 @@ public class DayTimeSheet implements Comparable<DayTimeSheet> {
         return businessTripDAO.isBusinessTripDay(emp, new Date(calDate.getTime()));
     }
 
+    public Date getDeleteSendApprovalDate() {
+        return deleteSendApprovalDate;
+    }
+
+    public void setDeleteSendApprovalDate(Date deleteSendApprovalDate) {
+        this.deleteSendApprovalDate = deleteSendApprovalDate;
+    }
+
+    public String getDeleteSendApprovalComment() {
+        return deleteSendApprovalComment;
+    }
+
+    public void setDeleteSendApprovalComment(String deleteSendApprovalComment) {
+        this.deleteSendApprovalComment = deleteSendApprovalComment;
+    }
+
+    public void setHaveDraft(boolean haveDraft) {
+        this.haveDraft = haveDraft;
+    }
+
+    public String getDeleteSendApprovalTypeName() {
+        return deleteSendApprovalTypeName;
+    }
+
+    public void setDeleteSendApprovalTypeName(String deleteSendApprovalTypeName) {
+        this.deleteSendApprovalTypeName = deleteSendApprovalTypeName;
+    }
 }

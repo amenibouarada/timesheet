@@ -318,6 +318,10 @@ public class SendMailService {
         new PlannedVacationRemoveSender(this, propertyProvider, projectService, employeeService).sendMessage(vacation);
     }
 
+    public void performDeleteOrSetDraftApproval(TimeSheet timeSheet){
+        new DeleteOrSetDraftApprovalSender(this, propertyProvider).sendMessage(timeSheet);
+    }
+
     public StringBuilder buildMailException(HttpServletRequest request, Exception exception){
         Map<String, Object> model = new HashMap<String, Object>();
 

@@ -2,6 +2,7 @@ package com.aplana.timesheet.controller;
 
 import com.aplana.timesheet.dao.entity.DictionaryItem;
 import com.aplana.timesheet.dao.entity.TimeSheet;
+import com.aplana.timesheet.enums.ReportSendApprovalType;
 import com.aplana.timesheet.enums.TypesOfTimeSheetEnum;
 import com.aplana.timesheet.form.ReportsViewDeleteForm;
 import com.aplana.timesheet.form.VacationsForm;
@@ -34,6 +35,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import static com.aplana.timesheet.form.VacationsForm.VIEW_TABLE;
+import static com.aplana.timesheet.system.constants.RoleConstants.ROLE_ADMIN;
 
 @Controller
 public class ViewReportsController extends AbstractControllerForEmployeeWithYears {
@@ -162,6 +164,11 @@ public class ViewReportsController extends AbstractControllerForEmployeeWithYear
         if (securityUser == null) {
             throw new SecurityException("Не найден пользователь в контексте безопасности.");
         }
+
+        if (!request.isUserInRole(ROLE_ADMIN)) {
+            throw new SecurityException("Недостаточно прав для вывполнения операции");
+        }
+
         Integer[] ids = tsDeleteForm.getIds();
         for (Integer i = 0; i < ids.length; i++) {
             Integer id = ids[i];
@@ -183,6 +190,31 @@ public class ViewReportsController extends AbstractControllerForEmployeeWithYear
             Integer id = ids[i];
             timeSheetService.setDraftTypeToTimeSheet(id);
         }
+
+        return String.format("redirect:"+tsDeleteForm.getLink());
+    }
+
+    @RequestMapping(value = "/sendDeleteReportApproval", method = RequestMethod.POST)
+    public String sendDeleteReportApproval(
+            @ModelAttribute("deleteReportsForm") ReportsViewDeleteForm tsDeleteForm) {
+        TimeSheetUser securityUser = securityService.getSecurityPrincipal();
+        if (securityUser == null) {
+            throw new SecurityException("Не найден пользователь в контексте безопасности.");
+        }
+        timeSheetService.setReportApprovalData(tsDeleteForm.getReportId(), tsDeleteForm.getComment(), ReportSendApprovalType.DELETE);
+
+        return String.format("redirect:"+tsDeleteForm.getLink());
+    }
+
+
+    @RequestMapping(value = "/setDraftReportApproval", method = RequestMethod.POST)
+    public String setDraftReportApproval(
+            @ModelAttribute("deleteReportsForm") ReportsViewDeleteForm tsDeleteForm) {
+        TimeSheetUser securityUser = securityService.getSecurityPrincipal();
+        if (securityUser == null) {
+            throw new SecurityException("Не найден пользователь в контексте безопасности.");
+        }
+        timeSheetService.setReportApprovalData(tsDeleteForm.getReportId(), tsDeleteForm.getComment() ,ReportSendApprovalType.SET_DRAFT);
 
         return String.format("redirect:"+tsDeleteForm.getLink());
     }
