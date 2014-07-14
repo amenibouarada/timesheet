@@ -44,7 +44,7 @@ public class EmployeeLdapService extends AbstractServiceWithTransactionManagemen
 
     public void updateSidDisableddUsersFromLdap() {
         trace.append("Synchronization sid of disabled user with ldap started.\n\n");
-        List<EmployeeLdap> disabledEmployeesLdap = ldapDao.getDisabledEmployyes();
+        List<EmployeeLdap> disabledEmployeesLdap = ldapDao.getDisabledEmployees();
         TransactionStatus transactionStatus = null;
 
         try {
@@ -275,7 +275,7 @@ public class EmployeeLdapService extends AbstractServiceWithTransactionManagemen
         final TransactionStatus transactionStatus = getNewTransaction();
         try {
             //берем удаленных сотрудников из LDAP
-            List<EmployeeLdap> disabledEmployeesLdap = ldapDao.getDisabledEmployyes();
+            List<EmployeeLdap> disabledEmployeesLdap = ldapDao.getDisabledEmployees();
             logger.debug("disabled employees ldap size = {}", disabledEmployeesLdap.size());
 
             //берем сотрудников из БД

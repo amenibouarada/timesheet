@@ -44,7 +44,7 @@ public class TSPropertyProvider {
             } catch (IOException e) {
                 logger.error("Input-output error.");
             }
-            throw new IllegalStateException("File with system properties not founded!");
+            throw new IllegalStateException("System properties file not found!");
         } else {
             return properties;
         }
@@ -299,5 +299,144 @@ public class TSPropertyProvider {
     public Integer getReportsOverdueThreshold() {
         String str = getProperties().getProperty("reports.overdue.threshold");
         return Integer.parseInt(str);
+    }
+
+    /**
+     * Имя поля, используемого для определения параметра Department сотрудника
+     * при синхронизации с помощью LDAP.
+     */
+    public String getLdapFieldForDivision() {
+        return getProperties().getProperty("ldap.field.division", "department");
+    }
+
+    /**
+     * Имя поля, используемого для определения параметра DisplayName сотрудника
+     * при синхронизации с помощью LDAP.
+     */
+    public String getLdapFieldForDisplayName() {
+        return getProperties().getProperty("ldap.field.displayName", "displayName");
+    }
+
+    /**
+     * Имя поля, используемого для определения параметра Email сотрудника
+     * при синхронизации с помощью LDAP.
+     */
+    public String getLdapFieldForEmail() {
+        return getProperties().getProperty("ldap.field.email", "mail");
+    }
+
+    /**
+     * Имя поля, используемого для определения параметра Manager сотрудника
+     * при синхронизации с помощью LDAP.
+     */
+    public String getLdapFieldForManager() {
+        return getProperties().getProperty("ldap.field.manager", "manager");
+    }
+
+    /**
+     * Имя поля, используемого для определения параметра Title сотрудника
+     * при синхронизации с помощью LDAP.
+     */
+    public String getLdapFieldForTitle() {
+        return getProperties().getProperty("ldap.field.title", "title");
+    }
+
+    /**
+     * Имя поля, используемого для определения параметра Title сотрудника
+     * при синхронизации с помощью LDAP.
+     */
+    public String getLdapFieldForWhenCreated() {
+        return getProperties().getProperty("ldap.field.wnenCreated", "whenCreated");
+    }
+
+    /**
+     * Имя поля, используемого для определения параметра City сотрудника
+     * при синхронизации с помощью LDAP.
+     */
+    public String getLdapFieldForCity() {
+        return getProperties().getProperty("ldap.field.city", "l");
+    }
+
+    /**
+     * Имя поля, используемого для определения параметра MailNickname сотрудника
+     * при синхронизации с помощью LDAP.
+     */
+    public String getLdapFieldForMailNickname() {
+        return getProperties().getProperty("ldap.field.mailNickname", "mailNickname");
+    }
+
+    /**
+     * Имя поля, используемого для определения параметра LdapCn сотрудника
+     * при синхронизации с помощью LDAP.
+     */
+    public String getLdapFieldForLdapCn() {
+        return getProperties().getProperty("ldap.field.ldapCn", "distinguishedname");
+    }
+
+    /**
+     * Имя поля, используемого для определения класса объекта
+     * при синхронизации с помощью LDAP.
+     */
+    public String getLdapFieldForObjectClass() {
+        return getProperties().getProperty("ldap.field.objectClass", "objectClass");
+    }
+
+    /**
+     * Имя поля, используемого для определения параметра SID
+     * при синхронизации с помощью LDAP.
+     */
+    public String getLdapFieldForSID() {
+        return getProperties().getProperty("ldap.field.SID", "objectSid");
+    }
+
+    /**
+     * Имя поля, используемого для определения параметра DivisionName
+     * при синхронизации с помощью LDAP.
+     */
+    public String getLdapFieldForDivisionName() {
+        return getProperties().getProperty("ldap.field.divisionName", "description");
+    }
+
+    /**
+     * Имя поля, используемого для определения параметра Leader
+     * при синхронизации с помощью LDAP.
+     */
+    public String getLdapFieldForLeader() {
+        return getProperties().getProperty("ldap.field.leader", "managedBy");
+    }
+
+    /**
+     * Класс объекта для нахождения активных сотрудников.
+     */
+    public String getLdapObjectClassEmployee() {
+        return getProperties().getProperty("ldap.objectClass.employee", "user");
+    }
+
+    /**
+     * Класс объекта для нахождения неактивных сотрудников.
+     */
+    public String getLdapObjectClassDisabledEmployee() {
+        return getProperties().getProperty("ldap.objectClass.disabledEmployee", "person");
+    }
+
+    /**
+     * Класс объекта для нахождения неактивных сотрудников.
+     */
+    public String getLdapObjectClassDivision() {
+        return getProperties().getProperty("ldap.objectClass.division", "group");
+    }
+
+    /**
+     * Значение OU для нахождения неактивных сотрудников.
+     */
+    public String getLdapOuDisabledEmployee() {
+        return getProperties().getProperty("ldap.ou.disabledEmployee", "Disabled Users");
+    }
+
+    /**
+     * Значение CN для нахождения подразделений.
+     */
+    public String getLdapCnDivision() {
+        return getProperties().getProperty("ldap.cn.division", "_Project Center *");
     }
 }
