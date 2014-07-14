@@ -24,6 +24,9 @@
         dojo.require("dijit.form.Select");
         dojo.require("dijit.form.DateTextBox");
         dojo.require("dijit.form.TextBox");
+        dojo.require("dijit.form.FilteringSelect");
+        dojo.require("dojo.data.ObjectStore");
+        dojo.require("dojo.store.Memory");
         dojo.require(CALENDAR_EXT_PATH);
 
         var illnessReportType = 6;
@@ -36,10 +39,10 @@
 
         var errors;
 
-
         function getEmployeeId() {
-            if (dojo.byId("employeeId")) {
-                return parseInt(dojo.byId("employeeId").value);
+            var employee = dijit.byId("employeeId");
+            if (employee) {
+                return parseInt(employee.item != undefined ? employee.item.id : -1);
             } else {
                 return ${employeeId}
             }
@@ -65,7 +68,54 @@
             window.focus();
             updateView();
             updateDateConstraints();
+            initEmployeeSelect();
         });
+
+        function initEmployeeSelect() {
+
+            var employeeArray = [];
+            var empty = {id: -1, value: ""};
+            employeeArray.push(empty);
+
+            dojo.forEach(${employeeList}, function (employee) {
+                employeeArray.push(employee);
+            });
+
+            employeeArray.sort(function (a, b) {
+                return (a.value < b.value) ? -1 : 1;
+            });
+
+            var employeeDataStore = new dojo.data.ObjectStore({
+                objectStore: new dojo.store.Memory({
+                    data: employeeArray,
+                    idProperty: 'id'
+                })
+            });
+
+            var employeeFlteringSelect = new dijit.form.FilteringSelect({
+                id: "employeeId",
+                name: "employeeId",
+                store: employeeDataStore,
+                searchAttr: 'value',
+                queryExpr: "*\${0}*",
+                ignoreCase: true,
+                autoComplete: false,
+                style: 'width:200px',
+                required: true,
+                onChange: function () {
+                    setDefaultEmployeeJob(-1);
+                },
+                onMouseOver: function () {
+                    tooltip.show(getTitle(this));
+                },
+                onMouseOut: function () {
+                    tooltip.hide();
+                }
+            }, "employeeId");
+            employeeFlteringSelect.startup();
+            employeeFlteringSelect.set('value', "${employeeId}" != "" ? +"${employeeId}" : null);
+
+        }
 
         function updateView(){
             var obj = dojo.byId("reportType");
@@ -292,11 +342,7 @@
         <div class="lowspace checkboxesselect">
             <c:choose>
                 <c:when test="${reportId == null}">
-                    <form:select path="employeeId" id="employeeId" onmouseover="tooltip.show(getTitle(this));"
-                                 onmouseout="tooltip.hide();" required="true">
-                        <form:options items="${employeeList}" itemLabel="name" itemValue="id"/>
-                        <form:option value="-1" label="Выберите сотрудника"/>
-                    </form:select>
+                    <div id="employeeId" name="employeeId"></div>
                 </c:when>
                 <c:otherwise>
                     ${businesstripsandillnessadd.employee.name}

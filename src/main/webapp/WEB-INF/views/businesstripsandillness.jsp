@@ -12,6 +12,12 @@
     <link rel="stylesheet" type="text/css" href="<%= request.getContextPath()%>/resources/css/businesstripsandillness.css">
     <script type="text/javascript">
 
+        dojo.require("dijit.form.DateTextBox");
+        dojo.require("dojo.NodeList-traverse");
+        dojo.require("dijit.form.FilteringSelect");
+        dojo.require("dojo.data.ObjectStore");
+        dojo.require("dojo.store.Memory");
+
         var employeeList = ${employeeListJson};
         var forAll = ${forAll};
         var selectedAllRegion = null;
@@ -19,20 +25,20 @@
 
         dojo.ready(function () {
             window.focus();
+            dojo.connect(dojo.byId("divisionId"), "onchange", dojo.byId("divisionId"), updateManagerList);
+            dojo.connect(dojo.byId("manager"), "onchange", dojo.byId("manager"), updateEmployeeList);
+            dojo.connect(dojo.byId("regions"), "onchange", dojo.byId("regions"), updateEmployeeList);
 
             dojo.byId("divisionId").value = ${divisionId};
-            divisionChanged(dojo.byId("divisionId").value);
-            updateManagerList(dojo.byId('divisionId').value);
-            dojo.byId("employeeId").value = ${employeeId};
-            dojo.byId("manager").value = ${managerId};
 
+            updateManagerList();
             initRegionsList();
+            updateEmployeeList();
 
             if (dojo.byId("regions").value != -1) {
                 sortEmployee();
                 selectedAllRegion = false;
             } else {
-                sortEmployeeFull();
                 selectedAllRegion = true;
             }
         });
@@ -41,9 +47,6 @@
             popupClass:"dijit.Calendar",
             datePattern: 'dd.MM.yyyy'
         });
-
-        dojo.require("dijit.form.DateTextBox");
-        dojo.require("dojo.NodeList-traverse");
 
         //устанавливается значение по умолчанию "Все регионы"
         function initRegionsList(){
@@ -65,7 +68,7 @@
             var regions = dojo.byId("regions").value;
             var manager = dojo.byId("manager").value;
 
-            empId = dojo.byId("employeeId").value;
+            empId =  dijit.byId("employeeId").item != undefined ? dijit.byId("employeeId").item.id : null;
             var divisionId = dojo.byId("divisionId").value;
 
             var dateFrom = dojo.byId("dateFrom").value;
@@ -109,7 +112,7 @@
         }
 
         function createBusinessTripOrIllness() {
-            var empId = dojo.byId("employeeId").value;
+            var empId = dijit.byId("employeeId").item != undefined ? dijit.byId("employeeId").item.id : null;
 
             if (empId != null && empId != 0) {
                 <sec:authorize access="hasRole('CHANGE_ILLNESS_BUSINESS_TRIP')">
@@ -194,7 +197,8 @@
             businesstripsandillness.submit();
         }
 
-        function updateManagerList(id) {
+        function updateManagerList() {
+            var divisionId = dojo.byId("divisionId").value;
             var managersNode = dojo.byId("manager");
             var manager = managersNode.value;
 
@@ -212,7 +216,7 @@
             if (managerMapJson.length > 0) {
                 var managerMap = dojo.fromJson(managerMapJson);
                 dojo.forEach(dojo.filter(managerMap,function (m) {
-                    return (m.division == id);
+                    return (m.division == divisionId);
                 }), function (managerData) {
                     var option = document.createElement("option");
                     dojo.attr(option, {
@@ -224,35 +228,14 @@
                 });
             }
             if (managersNode.options.length == 1 && emptyOption.value == managersNode.options[0].value){
-                dojo.byId("manager").disabled = 'disabled';
+                managersNode.disabled = 'disabled';
             } else {
-                dojo.byId("manager").disabled = '';
+                managersNode.disabled = '';
             }
+            managersNode.value = "${managerId}" != "" ? +"${managerId}" : null;
         }
 
-        function updateMultipleForSelect(select) {
-            var allOptionIndex;
-            var isAllOption = dojo.some(select.options, function (option, idx) {
-                if (option.value == <%= ALL_VALUE %> && option.selected) {
-                    allOptionIndex = idx;
-                    return true;
-                }
-                return false;
-            });
-
-            if (isAllOption) {
-                select.removeAttribute("multiple");
-                select.selectedIndex = allOptionIndex;
-                selectedAllRegion = true;
-                sortEmployeeFull();
-            } else {
-                select.setAttribute("multiple", "multiple");
-                selectedAllRegion = false;
-                sortEmployee();
-            }
-        }
-
-        function getSelectedIndexes (multiselect)
+        function getSelectedIndexes(multiselect)
         {
             var arrIndexes = new Array;
             for (var i=0; i < multiselect.options.length; i++)
@@ -262,170 +245,80 @@
             return arrIndexes;
         }
 
-      function sortEmployeeFull() {
-          var manager = dojo.byId("manager").value;
-          var employeeSelect = dojo.byId("employeeId");
-          var divisionSelectValue = dojo.byId("divisionId").value;
-          var employeeOption = null;
-          employeeSelect.options.length = 0;
-          if (employeeList.length > 0) {
-              dojo.forEach(dojo.filter(employeeList,function (m) {
-                  return (m.divId == divisionSelectValue);
-              }), function (divEmps) {
-                  dojo.forEach(divEmps.divEmps, function (empData) {
-                      if (empData.manId == manager || manager == 0) {
-                          addEmployeeToList(empData, employeeOption, employeeSelect,null, divisionSelectValue);
-                      } else if (manager == -1) {
-                          employeeOption = dojo.doc.createElement("option");
-                          dojo.attr(employeeOption, {
-                              value:empData.id
-                          });
-                          employeeOption.title = empData.value;
-                          employeeOption.innerHTML = empData.value;
-                          employeeSelect.appendChild(employeeOption);
-                      }
-                  })
-              });
-          }
-          sortSelect(employeeSelect);
-          if (selectCurrentEmployee(employeeSelect)) {
-              dojo.byId("employeeId").value = empId;
-          } else {
-              dojo.byId("employeeId").value = -1;
-          }
-      }
+        function updateEmployeeList() {
+            var divisionId =  dojo.byId('divisionId').value;
+            var managerId =  dojo.byId('manager').value;
+            var cities = [];
+            var citySelect = dojo.byId('regions').options;
 
-        function managerChange(obj) {
-            var managerId = null;
-
-            if (obj.target == null) {
-                managerId = obj.value;
-            }
-            else {
-                managerId = obj.target.value;
-            }
-            if (selectedAllRegion) {
-                sortEmployeeFull();
-
-            } else {
-                sortEmployee();
-            }
-        }
-
-
-        function sortEmployee() {
-            var employeeSelect = dojo.byId("employeeId");
-            var divisionId = dojo.byId("divisionId").value;
-            var employeeOption = null;
-            var select = dojo.byId("regions");
-            var managerId = dojo.byId("manager").value;
-            var selectedRegions = [];
-            for (var i = 0; i < select.options.length; i++) {
-                var option = select.options[i];
-
-                if (option.selected) selectedRegions.push(option.value);
-            }
-            employeeSelect.options.length = 0;
-            for (var i = 0; i < employeeList.length; i++) {
-                if (divisionId == employeeList[i].divId) {
-                    for (var l = 0; l < employeeList[i].divEmps.length; l++) {
-                        if (employeeList[i].divEmps[l].id != 0) {
-                            if (managerId != 0 && ((employeeList[i].divEmps[l].manId == managerId) || (managerId == 0))) {
-                                addEmployeeToList(employeeList[i].divEmps[l], employeeOption, employeeSelect, selectedRegions,divisionId);
-                            } else if (managerId == -1 && (dojo.indexOf(selectedRegions, employeeList[i].divEmps[l].regId) != -1)) {
-                                employeeOption = dojo.doc.createElement("option");
-                                dojo.attr(employeeOption, {
-                                    value:employeeList[i].divEmps[l].id
-                                });
-                                employeeOption.title = employeeList[i].divEmps[l].value;
-                                employeeOption.innerHTML = employeeList[i].divEmps[l].value;
-                                employeeSelect.appendChild(employeeOption);
-                            }
-                        }
-                    }
-                }
-            }
-            sortSelect(employeeSelect);
-            if (selectCurrentEmployee(employeeSelect)) {
-                dojo.byId("employeeId").value = empId;
-            } else {
-                dojo.byId("employeeId").value = -1;
-            }
-        }
-
-        function addEmployeeToList(employee, employeeOption, employeeSelect, selectedRegions ,divisionSV) {
-            var addEmployee = true;
-
-            // Если есть список выбранных регионов - перед добавлением в список проверим, что данный сотрудник в этом регионе
-            if (selectedRegions) {
-                addEmployee = (dojo.indexOf(selectedRegions, employee.regId) != -1);
+            for (var i = 0; i < citySelect.length; i++) {
+                if ( citySelect[i].selected) cities.push(citySelect[i].value);
             }
 
-            if (addEmployee || selectedRegions == null) {
-                employeeOption = dojo.doc.createElement("option");
-                dojo.attr(employeeOption, {
-                    value:employee.id
-                });
-                employeeOption.title = employee.value;
-                employeeOption.innerHTML = employee.value;
-                employeeSelect.appendChild(employeeOption);
-            }
+            if (employeeList.length > 0) {
 
-            var filteredEmpMap3 =  dojo.map(employeeList,function (item) {
-                if (item.divId==divisionSV) {
-                    dojo.map(item.divEmps,function (itemm) {
-                        if (itemm.manId == employee.id) {
-                            addEmployeeToList(itemm, employeeOption, employeeSelect,selectedRegions, divisionSV);
+                dojo.forEach(dojo.filter(employeeList, function (division) {
+                    return (division.divId == divisionId);
+                }), function (divisionData) {
+
+                    var employeeArray = [];
+                    var emptyObj = {
+                        id: 0,
+                        value: ""
+                    };
+                    employeeArray.push(emptyObj);
+                    dojo.forEach(divisionData.divEmps, function (employee) {
+
+                        var manegerEquals = (managerId == -1 || employee.manId == managerId);
+                        var regionEquals = (cities.length == 1 && cities[0] == -1) || (dojo.indexOf(cities, +employee.regId) == 0) ;
+                        if (manegerEquals && regionEquals && !employee.lastWorkDate) {
+                            employeeArray.push(employee);
                         }
                     });
-                }
-            })
-        }
+                    employeeArray.sort(function (a, b) {
+                        return (a.value < b.value) ? -1 : 1;
+                    });
 
-        /* Сортирует по алфавиту содержимое выпадающих списков. */
-        function sortSelect(select) {
-            var tmpArray = [];
-            for (var i = 0; i < select.options.length; i++) {
-                tmpArray.push(select.options[i]);
+
+                    var employeeDataStore = new dojo.data.ObjectStore({
+                        objectStore: new dojo.store.Memory({
+                            data: employeeArray,
+                            idProperty: 'id'
+                        })
+                    });
+
+                    var employeeFlteringSelect = dijit.byId("employeeId");
+
+                    if (!employeeFlteringSelect) {
+                        employeeFlteringSelect = new dijit.form.FilteringSelect({
+                            id: "employeeId",
+                            name: "employeeId",
+                            labelAttr: "value",
+                            store: employeeDataStore,
+                            searchAttr: 'value',
+                            queryExpr: "*\${0}*",
+                            ignoreCase: true,
+                            autoComplete: false,
+                            style: 'width:200px',
+                            required: true,
+                            onMouseOver: function() {
+                                tooltip.show(getTitle(this));
+                            },
+                            onMouseOut: function() {
+                                tooltip.hide();
+                            }
+                        }, "employeeId");
+                        employeeFlteringSelect.startup();
+                    } else {
+                        employeeFlteringSelect.set('store', employeeDataStore);
+                        dijit.byId("employeeId").set('value', null);
+
+                    }
+                });
             }
-            tmpArray.sort(function (a, b) {
-                return (a.text < b.text) ? -1 : 1;
-            });
-            select.options.length = 0;
-            insertAllInclusiveOption(select);
-            for (var i = 0; i < tmpArray.length; i++) {
-                select.options[i + 1] = tmpArray[i];
-            }
+
+            dijit.byId("employeeId").set('value', " ${employeeId}" != "" ? +" ${employeeId}" : null);
         }
-
-        /* Добавляет в указанный select пустой option. */
-        function insertAllInclusiveOption(select) {
-            var option = dojo.doc.createElement("option");
-            dojo.attr(option, {
-                value:"-1"
-            });
-            option.innerHTML = "Все сотрудники";
-            select.appendChild(option);
-        }
-
-
-        function selectCurrentEmployee(employeeSelect) {
-            for (var i = 0; i < employeeSelect.options.length; i++) {
-                if (employeeSelect[i].value == empId) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        function divisionChanged(division) {
-            updateManagerList(division);
-            dojo.byId("manager").onchange();
-        }
-
-    function log(text){
-        console.log(text);
-    }
     </script>
 </head>
 <body>
@@ -439,7 +332,6 @@
             </td>
             <td>
                 <form:select class="without_dojo" path="divisionId" id="divisionId"
-                             onchange="divisionChanged(this.value);updateManagerList(this.value)"
                              onmouseover="tooltip.show(getTitle(this));" onmouseout="tooltip.hide();">
                     <form:options items="${divisionList}" itemLabel="name" itemValue="id"/>
                 </form:select>
@@ -449,8 +341,7 @@
             </td>
             <td rowspan="5" style="padding: 5px;vertical-align: top;">
                 <form:select path="regions" onmouseover="showTooltip(this)" size="6"
-                             onmouseout="tooltip.hide()" multiple="true"
-                             onchange="updateMultipleForSelect(this)">
+                             onmouseout="tooltip.hide()" multiple="true">
                     <form:option value="<%= ALL_VALUE %>" label="Все регионы"/>
                     <form:options items="${regionList}" itemLabel="name" itemValue="id"/>
                 </form:select>
@@ -461,10 +352,8 @@
                 <span class="lowspace">Руководитель:</span>
             </td>
             <td>
-                <form:select class="without_dojo" path="manager"
-                             onchange="managerChange(this)" onmouseover="showTooltip(this);"
+                <form:select class="without_dojo" path="manager" onmouseover="showTooltip(this);"
                              onmouseout="tooltip.hide();" multiple="false" cssStyle="margin-left: 0px">
-                    <%--<form:option label="Все руководители" value="0"/>--%>
                     <form:options items="${managerList}" itemLabel="name" itemValue="id"/>
                 </form:select>
             </td>
@@ -474,10 +363,7 @@
                 <span class="lowspace ">Сотрудник:</span>
             </td>
             <td>
-                <form:select class="without_dojo" path="employeeId" id="employeeId"
-                             onmouseover="tooltip.show(getTitle(this));"
-                             onmouseout="tooltip.hide();">
-                </form:select>
+                <div id='employeeId' name='employeeId'></div>
             </td>
         </tr>
         <tr>

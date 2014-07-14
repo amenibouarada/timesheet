@@ -40,6 +40,9 @@
     dojo.require("dojo.NodeList-traverse");
     dojo.require("dojox.html.entities");
     dojo.require("dijit.form.DateTextBox");
+    dojo.require("dijit.form.FilteringSelect");
+    dojo.require("dojo.data.ObjectStore");
+    dojo.require("dojo.store.Memory");
     dojo.require(CALENDAR_EXT_PATH);
     require(["dojo/parser", "dijit/TitlePane"]);
 
@@ -76,11 +79,11 @@
         popupClass:"dijit.Calendar"
     });
 
-    dojo.addOnLoad(function () {
-        updateMultipleForSelect(dojo.byId(REGIONS));
-    });
-
     dojo.ready(function () {
+
+        dojo.connect(dojo.byId("<%= MANAGER_ID %>"), "onchange", dojo.byId("<%= MANAGER_ID %>"), updateEmployeeSelect);
+        dojo.connect(dojo.byId("<%= PROJECT_ID %>"), "onchange", dojo.byId("<%= PROJECT_ID %>"), updateEmployeeSelect);
+
         dojo.query("#graphic_div").style("width", (document.body.offsetWidth - 30) + "px");
         window.focus();
         divisionChangeVac(dojo.byId(DIVISION_ID).value);
@@ -120,7 +123,7 @@
         }
         tabContainer.selectChild(tab);
 
-        fillEmployeeSelect();
+        updateEmployeeSelect();
         dojo.byId(EMPLOYEE_ID).value = ${employeeId};
         dojo.byId(VACATION_ID).setAttribute("disabled", "disabled");
 
@@ -177,8 +180,7 @@
                 <span class="label">Руководитель:</span>
             </td>
             <td>
-                <form:select path="<%= MANAGER_ID %>" id="<%= MANAGER_ID %>" onChange="fillEmployeeSelect()"
-                             class="without_dojo"
+                <form:select path="<%= MANAGER_ID %>" id="<%= MANAGER_ID %>" class="without_dojo"
                              onmouseover="tooltip.show(getTitle(this));" onmouseout="tooltip.hide();">
                     <form:options items="${managerList}" itemLabel="name" itemValue="id"/>
                 </form:select>
@@ -189,8 +191,7 @@
                 <span class="label">Проект</span>
             </td>
             <td>
-                <form:select id="<%= PROJECT_ID %>" path="<%= PROJECT_ID %>" onChange="fillEmployeeSelect()"
-                             cssClass="without_dojo"
+                <form:select id="<%= PROJECT_ID %>" path="<%= PROJECT_ID %>" cssClass="without_dojo"
                              onmouseover="tooltip.show(getTitle(this));"
                              onmouseout="tooltip.hide();">
                 </form:select>
@@ -204,7 +205,7 @@
                 <form:input path="<%= CAL_FROM_DATE %>" id="<%= CAL_FROM_DATE %>" class="date_picker"
                             data-dojo-type="DateTextBox" required="true"
                             onMouseOver="tooltip.show(getTitle(this));" onMouseOut="tooltip.hide();"
-                            onchange="fillEmployeeSelect()"/>
+                            onchange="updateEmployeeSelect()"/>
             </td>
             <td>
                 <span class="label">Окончание периода</span>
@@ -213,7 +214,7 @@
                 <form:input path="<%= CAL_TO_DATE %>" id="<%= CAL_TO_DATE %>" class="date_picker"
                             data-dojo-type="DateTextBox" required="true"
                             onMouseOver="tooltip.show(getTitle(this));" onMouseOut="tooltip.hide();"
-                            onchange="fillEmployeeSelect()"/>
+                            onchange="updateEmployeeSelect()"/>
             </td>
         </tr>
         <tr>
@@ -222,7 +223,7 @@
             </td>
             <td>
                 <form:select path="<%= REGIONS %>" onmouseover="showTooltip(this)" size="5"
-                             onmouseout="tooltip.hide()" multiple="true" onchange="updateMultipleForSelect(this)">
+                             onmouseout="tooltip.hide()" multiple="true" onchange="multipleOptSelectedInSelect(this)">
                     <form:option value="<%= ALL_VALUE %>" label="Все регионы"/>
                     <form:options items="${regionList}" itemLabel="name" itemValue="id"/>
                 </form:select>
@@ -231,11 +232,8 @@
                 <span class="label">Сотрудник:</span>
             </td>
             <td>
-                <form:select path="<%= EMPLOYEE_ID %>" id="<%= EMPLOYEE_ID %>" class="without_dojo"
-                             onmouseover="tooltip.show(getTitle(this));"
-                             onmouseout="tooltip.hide();" onChange="changeSelectedEmployee()">
-                    <form:option items="${employeeList}" label="" value="0"/>
-                </form:select>
+                <div id='employeeIdSelect'></div>
+                <form:hidden path="employeeId" />
             </td>
         </tr>
         <tr>

@@ -99,7 +99,7 @@ public class EmployeeHelper {
                         if (defaultDate == null)
                             defaultDate = employee.getStartDate();
 
-                        Date curDate = java.util.Calendar.getInstance().getTime();
+                        Date curDate = new Date();
                         if (defaultDate.after(curDate)){
                             defaultDate = curDate;
                         }

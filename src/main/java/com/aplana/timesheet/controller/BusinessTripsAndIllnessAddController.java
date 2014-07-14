@@ -311,7 +311,7 @@ public class BusinessTripsAndIllnessAddController extends AbstractController{
 
         ModelAndView modelAndView = new ModelAndView("businesstripsandillnessadd");
         if (employee != null) modelAndView.addObject("employeeId", employee.getId());
-        modelAndView.addObject("employeeList", employeeService.getEmployees());
+        modelAndView.addObject("employeeList", employeeHelper.makeEmployeeListInJSON(employeeService.getEmployees()));
         return modelAndView;
     }
 

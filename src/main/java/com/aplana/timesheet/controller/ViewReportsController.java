@@ -87,7 +87,7 @@ public class ViewReportsController extends AbstractControllerForEmployeeWithYear
         tsFormValidator.validate(tsForm, result);
 
         ModelAndView mav = createMAVForEmployeeWithDivision("viewreports", employeeId, divisionId);
-
+        mav.addObject("divisionsEmployeesJSON", employeeService.getDivisionsEmployeesJSON(new Date()));
         Employee employee = (Employee) mav.getModel().get(EMPLOYEE);
 
         mav.addObject("year", year);

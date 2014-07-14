@@ -25,6 +25,10 @@
     dojo.require(CALENDAR_EXT_PATH);
     dojo.require("dijit.form.ValidationTextBox");
     dojo.require("dojo.parser");
+    dojo.require("dijit.form.FilteringSelect");
+    dojo.require("dojo.data.ObjectStore");
+    dojo.require("dojo.on");
+    dojo.require("dojo.store.Memory");
 
     var unfinishedDayCauseList = ${unfinishedDayCauseJson};
     var overtimeCauseList = ${overtimeCauseJson};
@@ -98,6 +102,8 @@
 
         //dojo.connect(dojo.byId("add_row_button"), "onclick", "addNewRow");
         dojo.connect(dojo.byId("plan"), "onkeyup", dojo.byId("plan"), textareaAutoGrow);
+        dojo.connect(dojo.byId("divisionId"), "onchange", dojo.byId("divisionId"), updateEmployeeSelect);
+
 
         <sec:authorize access="!hasAnyRole('ROLE_MANAGER', 'ROLE_ADMIN')">
         // Выбор сотрудника доступен только руководителю и администратору
@@ -109,6 +115,7 @@
         timeSheetForm.divisionId.value = ${timeSheetForm.divisionId};
 
         divisionChange(timeSheetForm.divisionId);
+        updateEmployeeSelect();
 
         timeSheetForm.employeeId.value = ${timeSheetForm.employeeId};
 
@@ -137,6 +144,73 @@
 
         checkIsVacationDay();
     });
+
+    function updateEmployeeSelect() {
+        var divisionId =  timeSheetForm.divisionId.target == null ? timeSheetForm.divisionId.value : timeSheetForm.divisionId.target.value;
+
+        if (employeeList.length > 0) {
+
+            dojo.forEach(dojo.filter(employeeList, function (division) {
+                return (division.divId == divisionId);
+            }), function (divisionData) {
+                var employeeArray = [];
+                var emptyObj = {
+                    id: 0,
+                    value: ""
+                };
+                employeeArray.push(emptyObj);
+                dojo.forEach(divisionData.divEmps, function (employee) {
+                    employeeArray.push(employee);
+                });
+                employeeArray.sort(function (a, b) {
+                    return (a.value < b.value) ? -1 : 1;
+                });
+
+
+                var employeeDataStore = new dojo.data.ObjectStore({
+                    objectStore: new dojo.store.Memory({
+                        data: employeeArray,
+                        idProperty: 'id'
+                    })
+                });
+
+                var employeeFlteringSelect = dijit.byId("employeeIdSelect");
+
+                if (!employeeFlteringSelect) {
+                    employeeFlteringSelect = new dijit.form.FilteringSelect({
+                        id: "employeeIdSelect",
+                        name: "employeeIdSelect",
+                        labelAttr: "value",
+                        store: employeeDataStore,
+                        searchAttr: 'value',
+                        queryExpr: "*\${0}*",
+                        ignoreCase: true,
+                        autoComplete: false,
+                        style: 'width:200px',
+                        required: true,
+                        onMouseOver: function() {
+                            tooltip.show(getTitle(this));
+                        },
+                        onMouseOut: function() {
+                            tooltip.hide();
+                        },
+                        onChange: function() {
+                            dojo.byId('employeeId').value = this.item.id;
+                            var obj = { value:this.item.id };
+                            onEmployeeChange(obj);
+                        }
+                    }, "employeeIdSelect");
+                    employeeFlteringSelect.startup();
+                } else {
+                    employeeFlteringSelect.set('store', employeeDataStore);
+                    dijit.byId("employeeIdSelect").set('value', null);
+                    dojo.byId('employeeId').value = null;
+                }
+            });
+        }
+
+        dijit.byId("employeeIdSelect").set('value', "${timeSheetForm.employeeId}" != "" ? +"${timeSheetForm.employeeId}" : null);
+    }
 
     /**
      * Устанавливает видимость и активность для элементов управления, отвечающих за редактирование отчета.
@@ -605,10 +679,9 @@ function loadDraft() {
     </form:select>
 
     <span class="label">Отчет сотрудника</span>
-    <form:select path="employeeId" id="employeeId" class="without_dojo" onmouseover="tooltip.show(getTitle(this));"
-                 onmouseout="tooltip.hide();" onchange="onEmployeeChange(this)">
-        <form:option label="" value="0"/>
-    </form:select>
+    <div id='employeeIdSelect' name='employeeIdSelect'></div>
+    <form:hidden path="employeeId" id="employeeId"/>
+
     <span class="label">за дату</span>
     <form:input path="calDate" id="calDate" class="date_picker" data-dojo-type="DateTextBox"
                 data-dojo-id="reportDate"

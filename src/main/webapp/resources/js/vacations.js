@@ -65,23 +65,13 @@ function divisionChangeVac(division) {
     }
     fillProjectListByDivChange(divisionId);
     sortManager();
-    fillEmployeeSelect();
-}
-
-function selectCurrentEmployee(employeeSelect) {
-    for (var i = 0; i < employeeSelect.options.length; i++) {
-        if (employeeSelect[i].value == selectedEmployee) {
-            return true;
-        }
-    }
-    return false;
 }
 
 function isNilOrNull(obj) {
     return !(obj != null && obj != 0);
 }
 
-function updateMultipleForSelect(select) {
+function multipleOptSelectedInSelect(select) {
     var allOptionIndex;
 
     var isAllOption = dojo.some(select.options, function (option, idx) {
@@ -99,7 +89,7 @@ function updateMultipleForSelect(select) {
     } else {
         select.setAttribute("multiple", "multiple");
     }
-    fillEmployeeSelect();
+    updateEmployeeSelect();
 }
 
 function sortManager() {
@@ -112,7 +102,7 @@ function sortManager() {
         if (managerList[i].divId == divisionId) {
             var managerOption = dojo.doc.createElement("option");
             dojo.attr(managerOption, {
-                value:managerList[i].id
+                value: managerList[i].id
             });
             managerOption.title = managerList[i].value;
             managerOption.innerHTML = managerList[i].value;
@@ -121,43 +111,70 @@ function sortManager() {
     }
 }
 
-function fillEmployeeSelect(){
+function updateEmployeeSelect() {
     dojo.xhrGet({
         url: getContextPath() + "/vacations/getEmployeeList",
         form: "vacationsForm",
-        handleAs:"json",
-        timeout:10000,
-        load:function (employeeList) {
-            var employeeSelect = dojo.byId(EMPLOYEE_ID);
-            employeeSelect.options.length = 0;
-            for (var i in employeeList){
-                insertEmployeeToSelect(employeeSelect, employeeList[i]);
-            }
-            sortSelectOptions(employeeSelect);
-            insertEmptyOptionWithCaptionInHead(employeeSelect, "Все сотрудники");
-            if (selectCurrentEmployee(employeeSelect)) {
-                employeeSelect.value = selectedEmployee;
-            } else {
-                employeeSelect.value = 0;
-            }
+        handleAs: "json",
+        timeout: 10000,
+        load: function (employeeList) {
+            var employeeArray = [];
+            var emptyObj = {
+                id: 0,
+                value: ""
+            };
+            employeeArray.push(emptyObj);
+            dojo.forEach(employeeList, function (employee) {
+                employeeArray.push(employee);
+            });
 
+            employeeArray.sort(function (a, b) {
+                return (a.value < b.value) ? -1 : 1;
+            });
+
+            employeeArray[0].value = "Все сотрудники";
+
+            var employeeDataStore = new dojo.data.ObjectStore({
+                objectStore: new dojo.store.Memory({
+                    data: employeeArray,
+                    idProperty: 'id'
+                })
+            });
+
+            var employeeFlteringSelect = dijit.byId("employeeIdSelect");
+
+            if (!employeeFlteringSelect) {
+                employeeFlteringSelect = new dijit.form.FilteringSelect({
+                    id: "employeeIdSelect",
+                    labelAttr: "value",
+                    store: employeeDataStore,
+                    searchAttr: 'value',
+                    queryExpr: "*\${0}*",
+                    ignoreCase: true,
+                    autoComplete: false,
+                    style: 'width:200px',
+                    required: true,
+                    onMouseOver: function () {
+                        tooltip.show(getTitle(this));
+                    },
+                    onMouseOut: function () {
+                        tooltip.hide();
+                    },
+                    onChange: function () {
+                        dojo.byId('employeeId').value = this.item.id;
+                        selectedEmployee = this.item.id;
+                    }
+                }, "employeeIdSelect");
+                employeeFlteringSelect.startup();
+            } else {
+                employeeFlteringSelect.set('store', employeeDataStore);
+                dijit.byId("employeeIdSelect").set('value', null);
+                dojo.byId('employeeId').value = null;
+            }
+            dijit.byId("employeeIdSelect").set('value', selectedEmployee);
+            dojo.byId('employeeId').value = selectedEmployee;
         }
     });
-}
-
-function insertEmployeeToSelect(employeeSelect, employee){
-    var employeeOption = dojo.doc.createElement("option");
-    dojo.attr(employeeOption, {
-        value: employee.id
-    });
-    employeeOption.title = employee.value;
-    employeeOption.innerHTML = employee.value;
-    employeeSelect.appendChild(employeeOption);
-}
-
-
-function changeSelectedEmployee() {
-    selectedEmployee = dojo.byId(EMPLOYEE_ID).value;
 }
 
 function addVacation() {
@@ -180,19 +197,19 @@ function deleteVacation(parentElement, vac_id) {
 
 function approveVacation(vac_id, beginDate, endDate, type) {
     if (!confirm("Вы действительно хотите окончательно согласовать отпуск типа " +
-        "\"" +type+"\" " +
-        "на период: "+beginDate+" - "+endDate+" ?")) {
+        "\"" + type + "\" " +
+        "на период: " + beginDate + " - " + endDate + " ?")) {
         return;
     }
 
     dojo.xhrGet({
         url: contextPath + "/approveVacation",
-        handleAs:"text",
-        timeout:10000,
+        handleAs: "text",
+        timeout: 10000,
         sync: true,
         content: { vacationId: vac_id},
         preventCache: true,
-        load:function (data) {
+        load: function (data) {
             var jsonData = dojo.fromJson(data);
             console.log(jsonData);
             if (jsonData.isApproved) {
@@ -201,7 +218,7 @@ function approveVacation(vac_id, beginDate, endDate, type) {
                 alert(jsonData.message);
             }
         },
-        error:function (err) {
+        error: function (err) {
             console.log(err);
             alert("Во время операции произошла ошибка");
         }
@@ -230,7 +247,7 @@ function fillProjectListByDivChange(division) {
     for (var i = 0; i < fullProjectList.length; i++) {
         if (division == 0 || fullProjectList[i].divId == division) {
             var divProjs = fullProjectList[i].divProjs;
-            for (var j = 0; j < divProjs.length; j++){
+            for (var j = 0; j < divProjs.length; j++) {
                 projectOption = dojo.doc.createElement("option");
                 dojo.attr(projectOption, {
                     value: divProjs[j].id
@@ -249,48 +266,11 @@ function fillProjectListByDivChange(division) {
     projectSelect.value = 0;
 }
 
-function validateAndAddNewOption(hasAny, divisionId, select){
-    if (hasAny || divisionId == 0){
+function validateAndAddNewOption(hasAny, divisionId, select) {
+    if (hasAny || divisionId == 0) {
         insertEmptyOptionWithCaptionInHead(select, "Все");
-    }else{
+    } else {
         insertEmptyOptionWithCaptionInHead(select, "Пусто");
-        dojo.attr(select, {disabled:"disabled"});
+        dojo.attr(select, {disabled: "disabled"});
     }
 }
-
-/*
- * Срабатывает при смене значения в списке подразделений.
- * Управляет содержимым списка сотрудников в зависимости от выбранного
- * значения в списке подразделений.
- */
-function vacationCreate_divisionChange(obj) {
-    var divisionId = null;
-    var employeeSelect = dojo.byId("employeeId");
-    var employeeOption = null;
-
-    if (obj.target == null) {
-        divisionId = obj.value;
-    }
-    else {
-        divisionId = obj.target.value;
-    }
-    //Очищаем список сотрудников.
-    employeeSelect.options.length = 0;
-    for (var i = 0; i < employeeList.length; i++) {
-        if (divisionId == employeeList[i].divId) {
-            for (var j = 0; j < employeeList[i].divEmps.length; j++) {
-                if (employeeList[i].divEmps[j].id != 0) {
-                    employeeOption = dojo.doc.createElement("option");
-                    dojo.attr(employeeOption, {
-                        value:employeeList[i].divEmps[j].id
-                    });
-                    employeeOption.title = employeeList[i].divEmps[j].value;
-                    employeeOption.innerHTML = employeeList[i].divEmps[j].value;
-                    employeeSelect.appendChild(employeeOption);
-                }
-            }
-        }
-    }
-    sortSelectOptions(employeeSelect);
-}
-

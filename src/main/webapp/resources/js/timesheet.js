@@ -617,45 +617,12 @@ function textareaAutoGrow(obj) {
     textarea.rows = linecount;
 }
 
-/*
+/**
  * Срабатывает при смене значения в списке подразделений.
  * Управляет содержимым списка сотрудников в зависимости от выбранного
  * значения в списке подразделений.
  */
 function divisionChange(obj) {
-    var employeeSelect = dojo.byId("employeeId");
-    var divisionId =  obj.target == null ? obj.value : obj.target.value;
-
-    //Очищаем список сотрудников.
-    employeeSelect.options.length = 0;
-
-    //заполняем списк сотрудников относительно выбранного подразделения
-    if (divisionId == 0) {
-        insertEmptyOption(employeeSelect);
-        onEmployeeChange(employeeSelect)
-        employeeSelect.disabled = true;
-    } else {
-        var employeeOption = null;
-        employeeSelect.disabled = false;
-        for (var i = 0; i < employeeList.length; i++) {
-            if (divisionId == employeeList[i].divId) {
-                insertEmptyOption(employeeSelect);
-                for (var j = 0; j < employeeList[i].divEmps.length; j++) {
-                    if (employeeList[i].divEmps[j].id != 0) {
-                        employeeOption = dojo.doc.createElement("option");
-                        dojo.attr(employeeOption, {
-                            value:employeeList[i].divEmps[j].id
-                        });
-                        employeeOption.title = employeeList[i].divEmps[j].value;
-                        employeeOption.innerHTML = employeeList[i].divEmps[j].value;
-                        employeeSelect.appendChild(employeeOption);
-                    }
-                }
-            }
-        }
-        sortSelectOptions(employeeSelect);
-    }
-
     var rows = dojo.query(".row_number");
     var activityType;
     for (var i = 0; i < rows.length; i++) {
