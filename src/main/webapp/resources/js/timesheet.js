@@ -221,7 +221,8 @@ function addNewRow() {
         title:"Запрос из JIRA",
         //без px так как IE не понимает
         height:"15",
-        width:"15"
+        width:"15",
+        style:"cursor:pointer;"
     });
     dojo.attr(jiraImg, "class", "controlToHide");
 
