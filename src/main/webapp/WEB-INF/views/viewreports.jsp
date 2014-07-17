@@ -421,6 +421,44 @@
                 <td></td>
             </c:when>
 
+            <%--APLANATS-1738 теперь важен порядок условий, т.к. они перекрываются друг другом,--%>
+            <%--поэтому впереди стоит этот, который перекрывает следующие--%>
+            <c:when test="${report.statusNotStartButWorked}">
+                <tr class="statusNotStart">
+                <td style="text-align: center;">
+                    <c:if test="${report.id != null}">
+                        <sec:authorize access="hasRole('ROLE_ADMIN')">
+                            <input type="checkbox" id="delete_${report.id}"/>
+                        </sec:authorize>
+                        <sec:authorize access="!hasRole('ROLE_ADMIN')">
+                            <c:if test="${report.deleteSendApprovalDate eq null}">
+                                <div class="delete-button">
+                                    <img src="/resources/img/delete.png" title="Удалить"
+                                         onclick="sendDeleteTimeSheetApproval(${report.id});">
+                                </div>
+                            </c:if>
+                        </sec:authorize>
+                    </c:if>
+                </td>
+                <td class="date"><fmt:formatDate value="${report.calDate}" pattern="dd.MM.yyyy"/></td>
+                <td> Ещё не принят на работу, но имеется отчет
+                    <a target="_blank"
+                       href="<%=request.getContextPath()%>/report<fmt:formatDate value="${report.calDate}" pattern="/yyyy/MM/dd/"/>${report.timeSheet.employee.id}">
+                        Посмотреть отчёт
+                    </a>
+                    <c:if test="${report.deleteSendApprovalDate ne null}">
+                        <sec:authorize access="hasRole('ROLE_ADMIN')">
+                            (имеется
+                            <a href="#" onclick="showApprovalDialog('${report.deleteSendApprovalComment}')">запрос</a>
+                            на ${report.deleteSendApprovalTypeName})
+                        </sec:authorize>
+                        <sec:authorize access="!hasRole('ROLE_ADMIN')">
+                            (отправлен запрос на ${report.deleteSendApprovalTypeName})
+                        </sec:authorize>
+                    </c:if>
+                </td>
+                <td class="duration">${report.duration}</td>
+            </c:when>
 
             <c:when test="${report.statusNotStart}">
                 <tr class="statusNotStart">
@@ -429,7 +467,6 @@
                 <td>Ещё не принят на работу</td>
                 <td></td>
             </c:when>
-
 
             <c:when test="${report.statusNormalDay}">
                 <tr class="statusNormalDay toplan">

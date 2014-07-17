@@ -226,6 +226,17 @@ public class DayTimeSheet implements Comparable<DayTimeSheet> {
     }
 
     /**
+     *
+     * Еще не принят на работу, но за этот день уже есть списание
+     *
+     * @return
+     */
+    public Boolean getStatusNotStartButWorked(){
+        return this.getTimeSheet() != null && getStatusNotStart();
+    }
+
+
+    /**
      * Выходной день и человек не работал, отдых
      *
      * @return
