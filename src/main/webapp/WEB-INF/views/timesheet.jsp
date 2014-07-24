@@ -145,6 +145,7 @@
         checkIsVacationDay();
     });
 
+    // ToDo перенести все скрипты в timesheet.js
     function updateEmployeeSelect() {
         var divisionId =  timeSheetForm.divisionId.target == null ? timeSheetForm.divisionId.value : timeSheetForm.divisionId.target.value;
 

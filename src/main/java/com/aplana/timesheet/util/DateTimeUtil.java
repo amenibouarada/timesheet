@@ -43,7 +43,7 @@ public class DateTimeUtil {
     public static Date stringToDate(String date, String dateFormat) {
         SimpleDateFormat sdf = new SimpleDateFormat(dateFormat);
         Date result = new Date();
-
+        // ToDo необходимо тут генерировать исключение
         if(date==null || date.isEmpty()){
             logger.error("Error while parsing empty string into date");
             return result;

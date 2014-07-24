@@ -164,7 +164,7 @@ public class DayTimeSheet implements Comparable<DayTimeSheet> {
     }
 
     /**
-     * Сообщает что работнег ещё не приступил к исполнению обязанностей и день учитывать не стоит
+     * Сообщает что работник ещё не приступил к исполнению обязанностей и день учитывать не стоит
      *
      * @return
      */
@@ -224,17 +224,6 @@ public class DayTimeSheet implements Comparable<DayTimeSheet> {
     public Boolean getStatusWorkOnHoliday() {
         return !this.getWorkDay() && this.getTimeSheet() != null && !haveDraft;
     }
-
-    /**
-     *
-     * Еще не принят на работу, но за этот день уже есть списание
-     *
-     * @return
-     */
-    public Boolean getStatusNotStartButWorked(){
-        return this.getTimeSheet() != null && getStatusNotStart();
-    }
-
 
     /**
      * Выходной день и человек не работал, отдых

@@ -459,6 +459,11 @@ public class TimeSheetFormValidator extends AbstractValidator {
                         "error.tsform.caldate.notuniq",
                         errorMessageArgs,
                         "Вы уже списывали занятость за " + DateTimeUtil.formatDateString(selectedDate));
+                // сотрудник еще не принят на работу
+            } else if (employeeService.checkNotStartWorkByDate(selectedEmployeeId, selectedDate)){
+                errors.rejectValue("calDate",
+                        "error.tsform.caldate.notstartwork",
+                        "На выбранную дату сотрудник ещё не был принят на работу.");
             }
         }
     }

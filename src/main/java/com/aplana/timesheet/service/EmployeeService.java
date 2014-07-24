@@ -653,12 +653,7 @@ public class EmployeeService {
     }
 
     public String checkDayIsVacation(Integer employeeId, String reportDate) {
-        Date date = new Date();
-        try {
-            date = new SimpleDateFormat(DateTimeUtil.DATE_PATTERN).parse(reportDate);
-        } catch (ParseException e) {
-            logger.error("Сообщение об ошибке", e);
-        }
+        Date date = DateTimeUtil.stringToDateForDB(reportDate);
         Employee user = emloyeeDAO.find(employeeId);
         Boolean isVacationDay = vacationService.isDayVacationWithoutPlanned(user, date);
         final JsonArrayNodeBuilder builder = anArrayBuilder();
@@ -667,5 +662,19 @@ public class EmployeeService {
         builder.withElement(objectNodeBuilder);
 
         return JsonUtil.format(builder.build());
+    }
+
+    /*
+     * Проверяет, что сотрудник не начал работать на указанную дату
+     *
+     * @return true - не начал.
+     */
+    public Boolean checkNotStartWorkByDate(Integer employeeId, String reportDate){
+        Date date = DateTimeUtil.stringToDateForDB(reportDate);
+        Employee employee = emloyeeDAO.find(employeeId);
+        if (employee.getStartDate().after(date)){
+            return true;
+        }
+        return false;
     }
 }
