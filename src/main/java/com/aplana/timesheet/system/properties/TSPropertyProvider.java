@@ -354,7 +354,7 @@ public class TSPropertyProvider {
      * при синхронизации с помощью LDAP.
      */
     public String getLdapFieldForWhenCreated() {
-        return getProperties().getProperty("ldap.field.wnenCreated", "whenCreated");
+        return getProperties().getProperty("ldap.field.whenCreated", "whenCreated");
     }
 
     /**
