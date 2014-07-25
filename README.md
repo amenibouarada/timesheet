@@ -86,14 +86,38 @@ LDAP-сервер
 необходимо остановить Windows-службу «OpenLDAP Service», переместить файлы из архива «LDAP.zip» в папку установки
 OpenLDAP, затем заново запустить сервис.
 
-Для конфигурации необходимо изменить параметры в файле настроек «timesheet.properties» следующим образом:
+Необходимо сконфигурировать подключение к OpenLDAP, это следующие настройки (в файле настроек «timesheet.properties»):
 
-    ldap.userDn=cn=Manager,dc=example,dc=com
-    ldap.password=secret
-    ldap.base=dc=example,dc=com
-    ldap.url=ldap://localhost:389
-    ldap.domain=example.com
-    ldap.search.pattern=(uid={0})
+	ldap.userDn=cn=Manager,dc=example,dc=com
+	ldap.password=secret
+	ldap.base=dc=example,dc=com
+	ldap.url=ldap://localhost:389
+	ldap.domain=example.com
+	ldap.search.pattern=(uid={0})
+
+Если OpenLDAP установлен на локальном компьютере, то можно оставить конфигурацию выше без изменений.
+Так же для конфигурации необходимо раскомментировать строки с маппингом атрибутов для OpenLDAP:
+
+	#ldap.field.division=departmentNumber
+	#ldap.field.displayName=displayName
+	#ldap.field.email=mail
+	#ldap.field.manager=manager
+	#ldap.field.title=title
+	#ldap.field.whenCreated=createTimestamp
+	#ldap.field.city=l
+	#ldap.field.mailNickname=mailNickname
+	#ldap.field.ldapCn=distinguishedname
+	#
+	#ldap.field.objectClass=objectClass
+	#ldap.objectClass.employee=person
+	#ldap.objectClass.disabledEmployee=person
+	#ldap.objectClass.division=group
+	#ldap.ou.disabledEmployee=Disabled Users
+	#ldap.cn.division=_Project Center *
+	#
+	#ldap.field.SID=uid
+	#ldap.field.divisionName=description
+	#ldap.field.leader=managedBy
 
 В LDAP прописаны следующие пользователи:
 
