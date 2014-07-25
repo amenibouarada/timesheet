@@ -127,7 +127,12 @@ public class LdapDAO {
                         propertyProvider.getLdapFieldForObjectClass(),
                         propertyProvider.getLdapObjectClassEmployee()));
         logger.debug("LDAP Query {}", andFilter.encode());
-		List<EmployeeLdap> employees = ldapTemplate.search("", andFilter.encode(), new EmployeeAttributeMapper());
+        // для OpenLDAP используется вместо whenCreated поле createTimestamp, которое является скрытым
+        // чтобы его получить мы запрашиваем это поле и все остальные ("*")
+        // когда данные будут запрашиваться для AD, то будет запрашиваться whenCreated, которое и так там видно
+        // и будет получено и по "*", но это проблем не создаст и для AD тоже всё будет корректно
+		List<EmployeeLdap> employees = ldapTemplate.search("", andFilter.encode(), SearchControls.SUBTREE_SCOPE,
+                new String[]{ propertyProvider.getLdapFieldForWhenCreated(), "*" }, new EmployeeAttributeMapper());
 		logger.debug("LDAP Query finished. Employees size is {}", employees.size());
 		if(!employees.isEmpty())
             logger.debug("Employee {} City is {}", employees.get(0).getDisplayName(), employees.get(0).getCity());
@@ -193,7 +198,15 @@ public class LdapDAO {
 		public Object mapFromAttributes(Attributes attributes) throws NamingException {
 			EmployeeLdap employee = new EmployeeLdap();
 
-            employee.setObjectSid   (LdapUtils.convertBinarySidToString((byte[]) attributes.get(propertyProvider.getLdapFieldForSID()).get()));
+            // Для OpenLDAP в качестве objectSid используется uid, который приходит как строка,
+            // поэтому его нет необходимости преобразовывать из массива байт в строку.
+            // В AD используется objectSid, которое не поддерживается OpenLDAP
+            Object sid = attributes.get(propertyProvider.getLdapFieldForSID()).get();
+            if (sid instanceof String){
+                employee.setObjectSid((String)sid);
+            }else{
+                employee.setObjectSid(LdapUtils.convertBinarySidToString((byte[])sid));
+            }
             employee.setDepartment  ( getAttributeByName( attributes, propertyProvider.getLdapFieldForDivision()));
             employee.setDisplayName ( getAttributeByName( attributes, propertyProvider.getLdapFieldForDisplayName()));
             employee.setEmail       ( getAttributeByName( attributes, propertyProvider.getLdapFieldForEmail()));

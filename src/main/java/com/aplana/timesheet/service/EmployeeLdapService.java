@@ -77,6 +77,7 @@ public class EmployeeLdapService extends AbstractServiceWithTransactionManagemen
             if (transactionStatus != null) {
                 rollback(transactionStatus);
             }
+            e.printStackTrace();
         }
     }
 
@@ -397,6 +398,7 @@ public class EmployeeLdapService extends AbstractServiceWithTransactionManagemen
             if (transactionStatus != null) {
                 rollback(transactionStatus);
             }
+            e.printStackTrace();
         }
 
         return errors.toString();
@@ -439,6 +441,7 @@ public class EmployeeLdapService extends AbstractServiceWithTransactionManagemen
             if (transactionStatus != null) {
                 rollback(transactionStatus);
             }
+            e.printStackTrace();
         }
     }
 
@@ -488,6 +491,7 @@ public class EmployeeLdapService extends AbstractServiceWithTransactionManagemen
             if (transactionStatus != null) {
                 rollback(transactionStatus);
             }
+            e.printStackTrace();
         }
 
         return errors.toString();
