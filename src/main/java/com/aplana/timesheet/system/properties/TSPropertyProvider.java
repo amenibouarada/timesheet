@@ -177,6 +177,10 @@ public class TSPropertyProvider {
         return getProperties().getProperty("mail.marker.feedback", "[TS FEEDBACK]");
     }
 
+    public String getAccessMarker() {
+        return getProperties().getProperty("mail.marker.access", "[TS ACCESS]");
+    }
+
     public String getDeleteOrSetDraftApprovalMarker() {
         return getProperties().getProperty("mail.marker.deleteOrSetDraft", "[TS DELETE OR SET DRAFT]");
     }
