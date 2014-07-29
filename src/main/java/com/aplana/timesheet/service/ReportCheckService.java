@@ -83,24 +83,9 @@ public class ReportCheckService {
 
         // Выполняем проверки только по рабочим дням
         if (holidayDAO.isWorkDay(currentDay)) {
-            String firstPrevMonthDay = DateTimeUtil.previousMonthFirstDay(),
-    /*                endCurrentMonthDay = DateTimeUtil.getLastDayOfMonth(new Timestamp(System.currentTimeMillis())),
-                    endPrevMonthDay = DateTimeUtil.endPrevMonthDay(),*/
-                    lastCurrentMonthSunday = DateTimeUtil.lastSunday();
+            String firstPrevMonthDay = DateTimeUtil.previousMonthFirstDay();
+            String lastCurrentMonthSunday = DateTimeUtil.lastSunday();
 
-            /*String lastDay = lastCurrentMonthSunday;
-            // Если конец месяца
-            if (DateTimeUtil.dayAfterDay(endCurrentMonthDay, lastCurrentMonthSunday)) {
-                lastDay = currentDay;
-            }
-            // Если новый месяц - надо взять последний день предыдущего месяца
-            if (DateTimeUtil.dayAfterDay(endPrevMonthDay, lastCurrentMonthSunday)) {
-                lastDay = endPrevMonthDay;
-            }
-            // lastDay никогда не должен быть сегодняшним днем. т.к. проверка идет ночью и сегодняшний день еще только начался
-            if (lastDay.equals(currentDay)) {
-                lastDay = DateTimeUtil.decreaseDay(lastDay);
-            }*/
             String lastDay = DateTimeUtil.decreaseDay(currentDay);
             storeReportCheck(firstPrevMonthDay, lastDay, lastCurrentMonthSunday.equals(currentDay));
         }
