@@ -1,9 +1,6 @@
 #viewreports .statusHoliday{
     color: brown;
 }
-#viewreports .duration{
-    text-align: right;
-}
 #viewreports .date{
     text-align: center;
 }
@@ -16,11 +13,11 @@
 #viewreports thead{
     font-weight: bold;
 }
+#viewreports .rightAlign{
+    text-align: right;
+}
 #normainweek{
     width: 100%;
     text-align: right;
 }
 
-#durationall, #durationplan, #durationPlanToCurrDate {
-    text-align: right;
-}
