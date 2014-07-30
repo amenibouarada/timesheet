@@ -14,7 +14,7 @@ import java.util.List;
  * Date: 30.07.14
  */
 @Repository
-public class ReportExportStatusNewDAO {
+public class ReportExportStatusDAO {
     @PersistenceContext
     private EntityManager entityManager;
 
