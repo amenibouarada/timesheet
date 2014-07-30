@@ -2,7 +2,6 @@ package com.aplana.timesheet.dao;
 
 import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.dao.entity.ReportExportStatus;
-import com.aplana.timesheet.service.ReportExportStatusService;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
@@ -12,11 +11,10 @@ import java.util.List;
 
 /**
  * Created by abayanov
- * Date: 29.07.14
+ * Date: 30.07.14
  */
 @Repository
-public class ReportExportStatusDAO {
-
+public class ReportExportStatusNewDAO {
     @PersistenceContext
     private EntityManager entityManager;
 

@@ -1,6 +1,6 @@
 package com.aplana.timesheet.service;
 
-import com.aplana.timesheet.dao.ReportExportStatusDAO;
+import com.aplana.timesheet.dao.ReportExportStatusNewDAO;
 import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.dao.entity.ReportExportStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,25 +16,25 @@ import java.util.List;
 public class ReportExportStatusService {
 
     @Autowired
-    ReportExportStatusDAO reportExportStatusDAO;
+    ReportExportStatusNewDAO reportExportStatusNewDAO;
 
     public ReportExportStatus find(Employee employee, String reportName, Integer hash){
-        return reportExportStatusDAO.find(employee,reportName, hash);
+        return reportExportStatusNewDAO.find(employee,reportName, hash);
     }
 
     public ReportExportStatus find(Integer id){
-        return reportExportStatusDAO.find(id);
+        return reportExportStatusNewDAO.find(id);
     }
 
     public List<ReportExportStatus> findUserIncompleteReports(Employee employee) {
-        return reportExportStatusDAO.findUserIncompleteReports(employee);
+        return reportExportStatusNewDAO.findUserIncompleteReports(employee);
     }
 
     public void delete(ReportExportStatus reportExportStatus){
-        reportExportStatusDAO.delete(reportExportStatus);
+        reportExportStatusNewDAO.delete(reportExportStatus);
     }
 
     public void save(ReportExportStatus reportExportStatus) {
-        reportExportStatusDAO.save(reportExportStatus);
+        reportExportStatusNewDAO.save(reportExportStatus);
     }
 }
