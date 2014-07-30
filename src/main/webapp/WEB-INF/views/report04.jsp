@@ -16,16 +16,56 @@
 <script type="text/javascript">
     dojo.ready(function () {
         dojo.require("dijit.form.DateTextBox");
-        (function ping() {
-            setInterval(function() {
-                require(["dojo/request"], function(request){
-                    request("/ping").then(function(){
-
-                    });
-                });
-            },60000);
-        })()
+        dojo.connect(dojo.byId("make_report_button"), "onclick", dojo.byId("make_report_button"), submitReportForm);
     });
+
+    function submitReportForm(){
+        dojo.attr(dojo.byId("make_report_button"), "disabled", "disabled");
+        clearErrorBox('errorBoxId');
+        if (checkReportForm()) {
+            dojo.xhrPost({
+                url: '<%= request.getContextPath()%>/managertools/report/4',
+                form: dojo.byId('reportForm'),
+                handleAs: "json",
+                preventCache: false,
+                load: function (response) {
+                },
+                error: function () {
+                    console.log('submitReportForm Panic !');
+                    dojo.removeAttr("make_report_button", "disabled");
+                }
+            });
+            dojo.removeAttr("make_report_button", "disabled");
+        }
+    }
+
+    function checkReportForm() {
+        var result = false;
+        dojo.attr(dojo.byId("make_report_button"), "disabled", "disabled");
+        clearErrorBox('errorBoxId');
+        dojo.xhrPost({
+            url: '<%= request.getContextPath()%>/managertools/report/checkParamsReport04',
+            form: dojo.byId('reportForm'),
+            handleAs: "json",
+            preventCache: false,
+            sync: true,
+            load: function (response) {
+                if (response.result == "false") {
+                    result = false;
+                    alert(response.errorMessage);
+                    dojo.removeAttr("make_report_button", "disabled");
+                } else {
+                    result = true;
+                    alert("Отчет поставлен на выполнение, ожидайте письма со ссылкой для скачивания отчета");
+                }
+            },
+            error: function () {
+                console.log('submitReportForm Panic !');
+                dojo.removeAttr("make_report_button", "disabled");
+            }
+        });
+        return result;
+    }
 </script>
 
 <h1><fmt:message key="title.reportparams"/></h1>
@@ -112,7 +152,7 @@
 
     </div>
 
-    <button id="make_report_button" style="width:210px" type="submit" onclick="clearErrorBox('errorBoxId');">Сформировать отчет</button>
+    <button type="button" id="make_report_button" style="width:210px">Сформировать отчет</button>
 </form:form>
 </body>
 
