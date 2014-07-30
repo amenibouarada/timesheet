@@ -51,7 +51,7 @@ public class JasperReportController {
 
     public ModelAndView createReportMAV(Integer number, TSJasperReport form) throws JReportBuildError {
         JasperReportModelAndViewGenerator generator = factory.getJasperReportModelAndViewGeneratorById( number );
-        return generator.getModelAndViewForReport( form );
+        return generator.getModelAndViewForReport(form);
     }
 
     private ModelAndView showReport (
@@ -93,7 +93,7 @@ public class JasperReportController {
             TSJasperReport report, int numberReport, List<ObjectError> errors
     ) throws JReportBuildError {
         ModelAndView mav = createReportMAV( numberReport, report );
-        mav.addObject("errors", errors );
+        mav.addObject("errors", errors);
 
         return mav;
     }
@@ -137,14 +137,29 @@ public class JasperReportController {
     }
 
     @RequestMapping(value = "/managertools/report/4", method = RequestMethod.POST)
-    public ModelAndView showReport04(
-            @ModelAttribute("reportForm") Report04 report,
-            BindingResult result,
-            @RequestParam("printtype") Integer printtype,
-            HttpServletResponse response,
-            HttpServletRequest request
-    ) throws JReportBuildError {
-        return showReport(report, result, printtype, 4, response, request);
+    public void showReport04(@ModelAttribute("reportForm") Report04 report) throws Exception {
+        fillRegionName(report);
+        Integer formHashCode = report.hashCode();
+        report.setReportDAO(reportDAO);
+        jasperReportService.makeReport04Async(report, formHashCode);
+    }
+
+    @RequestMapping(value = "/managertools/report/checkParamsReport04", method = RequestMethod.POST, headers = "Accept=text/plain;Charset=UTF-8")
+    @ResponseBody
+    public String checkParamsReport04(@ModelAttribute("reportForm") Report04 report) throws Exception {
+        fillRegionName(report);
+        Integer formHashCode = report.hashCode();
+        return jasperReportService.checkParamsReport04(report, formHashCode);
+    }
+
+    @RequestMapping(value = "/managertools/report/download/{idReport}", method = RequestMethod.GET, headers = "Accept=text/plain;Charset=UTF-8")
+    @ResponseBody
+    public void downloadReport04(
+            @PathVariable("idReport") Integer idReport,
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) throws Exception {
+        jasperReportService.downloadReport04(idReport, request, response);
     }
 
     @RequestMapping(value = "/managertools/report/5", method = RequestMethod.POST)

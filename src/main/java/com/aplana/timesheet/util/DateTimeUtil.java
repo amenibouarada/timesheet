@@ -30,6 +30,7 @@ public class DateTimeUtil {
     public static final String MIN_DATE="1900-01-01";
     public static final String MAX_DATE="2999-12-31";
     public static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat(VIEW_DATE_PATTERN);
+    public static final SimpleDateFormat SIMPLE_DATE_FORMAT_WITH_DASH = new SimpleDateFormat(DATE_PATTERN);
 
     private static final Logger logger = LoggerFactory.getLogger(DateTimeUtil.class);
 
