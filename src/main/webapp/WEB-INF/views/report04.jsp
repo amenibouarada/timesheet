@@ -23,8 +23,19 @@
         dojo.attr(dojo.byId("make_report_button"), "disabled", "disabled");
         clearErrorBox('errorBoxId');
 
-        var beginYear = +dijit.byId('beginDate').getDisplayedValue().split(".")[2];
-        var endYear = +dijit.byId('endDate').getDisplayedValue().split(".")[2];
+        var beginDateParts = dijit.byId('beginDate').getDisplayedValue().split(".");
+        var endDateParts = dijit.byId('endDate').getDisplayedValue().split(".");
+        var beginDate = new Date(beginDateParts[2], (beginDateParts[1] - 1), beginDateParts[0]);
+        var endDate = new Date(endDateParts[2], (endDateParts[1] - 1), endDateParts[0]);
+        if (beginDate.valueOf() > endDate.valueOf()){
+            alert("Дата окончания периода меньше даты начала периода");
+            dojo.removeAttr("make_report_button", "disabled");
+            return;
+        }
+
+        //Если разница в года есть запускаем обычное формирование отчета
+        var beginYear = +beginDateParts[2];
+        var endYear = +endDateParts[2];
         if (beginYear == endYear) {
             dojo.byId('reportForm').submit();
             dojo.removeAttr("make_report_button", "disabled");
