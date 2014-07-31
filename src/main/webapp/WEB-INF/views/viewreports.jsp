@@ -313,6 +313,7 @@
             dialog.hide();
         }
     </script>
+    // TODO перенести в viewreports.css
     <style type="text/css">
         .colortext {
             color: brown;

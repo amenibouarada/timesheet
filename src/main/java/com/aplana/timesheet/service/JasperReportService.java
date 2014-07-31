@@ -194,11 +194,13 @@ public class JasperReportService {
     @Transactional(readOnly = true)
     public String checkParamsReport04(final BaseReport report, Integer formHashCode)  throws JReportBuildError, ParseException {
         report.checkParams();
+        // TODO предлагаю заменить на com.aplana.timesheet.util.DateTimeUtil.stringToDateForDB()
         Date beginDate = SIMPLE_DATE_FORMAT_WITH_DASH.parse(report.getBeginDate());
         Date endDate = SIMPLE_DATE_FORMAT_WITH_DASH.parse(report.getEndDate());
 
         String reportNameFile = String.format("%s (%s-%s)",
                 report.getJRNameFile(),
+                // TODO предлагаю заменить на com.aplana.timesheet.util.DateTimeUtil..stringToDateForView()
                 SIMPLE_DATE_FORMAT.format(beginDate),
                 SIMPLE_DATE_FORMAT.format(endDate));
 
@@ -229,11 +231,13 @@ public class JasperReportService {
         report.checkParams();
 
         final String reportName = report.getJRName();
+        // TODO предлагаю заменить на com.aplana.timesheet.util.DateTimeUtil.stringToDateForDB()
         Date beginDate = SIMPLE_DATE_FORMAT_WITH_DASH.parse(report.getBeginDate());
         Date endDate = SIMPLE_DATE_FORMAT_WITH_DASH.parse(report.getEndDate());
 
         final String reportNameFile = String.format("%s (%s-%s)",
                 report.getJRNameFile(),
+                // TODO предлагаю заменить на com.aplana.timesheet.util.DateTimeUtil..stringToDateForView()
                 SIMPLE_DATE_FORMAT.format(beginDate),
                 SIMPLE_DATE_FORMAT.format(endDate));
         final String outputFile = context.getRealPath("/WEB-INF/resources/generatedReports/" + reportNameFile + ".xls");

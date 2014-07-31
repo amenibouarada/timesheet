@@ -16,7 +16,10 @@
 <head>
 <title><fmt:message key="title.createVacation"/></title>
 <link rel="stylesheet" type="text/css" href="<%= request.getContextPath()%>/resources/css/vacations.css"/>
+
+<script type="text/javascript" src="<%= request.getContextPath()%>/resources/js/utils.js"></script>
 <script type="text/javascript" src="<%= request.getContextPath()%>/resources/js/vacations.js"></script>
+
 <script type="text/javascript">
 
 dojo.ready(function () {

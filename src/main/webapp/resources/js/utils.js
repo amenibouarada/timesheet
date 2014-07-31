@@ -16,3 +16,12 @@ function showErrors(/* Array */ errors) {
 function isNumber(n) {
     return (typeof n != typeof undefined) && !isNaN(parseFloat(n)) && isFinite(n);
 }
+
+function isNilOrNull(obj) {
+    return !(obj != null && obj != 0);
+}
+
+function isUndefinedNullNaN(value) {
+    return value == NaN || value == null || value == undefined;
+}
+
