@@ -90,8 +90,8 @@ public class VacationsController extends AbstractControllerForEmployee {
     ) {
         Integer divisionId = vacationsForm.getDivisionId();
         Integer employeeId = vacationsForm.getEmployeeId();
-        Date dateFrom = DateTimeUtil.stringToDate(vacationsForm.getCalFromDate(), DateTimeUtil.DATE_PATTERN);
-        Date dateTo = DateTimeUtil.stringToDate(vacationsForm.getCalToDate(), DateTimeUtil.DATE_PATTERN);
+        Date dateFrom = DateTimeUtil.stringToDate(vacationsForm.getCalFromDate(), DateTimeUtil.DB_DATE_PATTERN);
+        Date dateTo = DateTimeUtil.stringToDate(vacationsForm.getCalToDate(), DateTimeUtil.DB_DATE_PATTERN);
         Integer projectId = vacationsForm.getProjectId();
         Integer managerId = vacationsForm.getManagerId();
         List<Integer> regions = vacationsForm.getRegions();
@@ -406,8 +406,8 @@ public class VacationsController extends AbstractControllerForEmployee {
                 employeeService.createManagerList(vacationsForm.getManagerId()),
                 employeeService.createRegionsList(vacationsForm.getRegions()),
                 employeeService.createProjectList(vacationsForm.getProjectId()),
-                DateTimeUtil.stringToDate(vacationsForm.getCalFromDate(), DateTimeUtil.DATE_PATTERN),
-                DateTimeUtil.stringToDate(vacationsForm.getCalToDate(), DateTimeUtil.DATE_PATTERN),
+                DateTimeUtil.stringToDate(vacationsForm.getCalFromDate(), DateTimeUtil.DB_DATE_PATTERN),
+                DateTimeUtil.stringToDate(vacationsForm.getCalToDate(), DateTimeUtil.DB_DATE_PATTERN),
                 true
         );
         return employeeHelper.makeEmployeeListInJSON(employeeList);

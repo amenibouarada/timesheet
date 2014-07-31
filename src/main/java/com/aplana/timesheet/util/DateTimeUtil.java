@@ -2,7 +2,6 @@ package com.aplana.timesheet.util;
 
 import argo.jdom.JsonArrayNodeBuilder;
 import com.aplana.timesheet.exception.TSRuntimeException;
-import com.aplana.timesheet.form.entity.DayTimeSheet;
 import com.aplana.timesheet.service.CalendarService;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
@@ -23,13 +22,14 @@ import static argo.jdom.JsonNodeFactories.string;
 public class DateTimeUtil {
     public static final long DAY_IN_MILLS = 86400000;
     public static final long THREE_MONTHS_IN_MILLS = 90 * DAY_IN_MILLS;
-    public static final String DATE_PATTERN = "yyyy-MM-dd";
+    public static final String DB_DATE_PATTERN = "yyyy-MM-dd";
     public static final String VIEW_DATE_PATTERN = "dd.MM.yyyy";
     public static final String TIME_PATTERN = "HH:mm:ss";
     public static final String VIEW_DATE_TIME_PATTERN = VIEW_DATE_PATTERN.concat(" ").concat(TIME_PATTERN);
-    public static final String MIN_DATE="1900-01-01";
-    public static final String MAX_DATE="2999-12-31";
-    public static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat(VIEW_DATE_PATTERN);
+    public static final String MIN_DATE = "1900-01-01";
+    public static final String MAX_DATE = "2999-12-31";
+    private static final SimpleDateFormat VIEW_SIMPLE_DATE_FORMAT = new SimpleDateFormat(VIEW_DATE_PATTERN);
+    private static final SimpleDateFormat DB_SIMPLE_DATE_FORMAT = new SimpleDateFormat(DB_DATE_PATTERN);
 
     private static final Logger logger = LoggerFactory.getLogger(DateTimeUtil.class);
 
@@ -42,62 +42,54 @@ public class DateTimeUtil {
      */
     public static Date stringToDate(String date, String dateFormat) {
         SimpleDateFormat sdf = new SimpleDateFormat(dateFormat);
-        Date result = new Date();
-        // ToDo необходимо тут генерировать исключение
-        if(date==null || date.isEmpty()){
+        if (date == null || date.isEmpty()) {
             logger.error("Error while parsing empty string into date");
-            return result;
+            return null;
         }
         try {
-            result = sdf.parse(date);
+            return sdf.parse(date);
         } catch (ParseException e) {
             logger.error("Error while parsing date in string format.", e);
         }
-        return result;
+        return null;
     }
 
     /**
      * Преобразует строку дату формата БД
      *
-     * @param date       - строка даты.
+     * @param date - строка даты.
      * @return объект класса {@link Date}.
      */
     public static Date stringToDateForDB(String date) {
-        SimpleDateFormat sdf = new SimpleDateFormat(DATE_PATTERN);
-        Date result = new Date();
-
-        if(date==null || date.isEmpty()){
+        if (date == null || date.isEmpty()) {
             logger.error("Error while parsing empty string into date");
-            return result;
+            throw new TSRuntimeException(new Exception("Date is null"));
         }
         try {
-            result = sdf.parse(date);
+            return DB_SIMPLE_DATE_FORMAT.parse(date);
         } catch (ParseException e) {
             logger.error("Error while parsing date in string format.", e);
+            throw new TSRuntimeException(e);
         }
-        return result;
     }
 
     /**
      * Преобразует строку дату формата просмотра
      *
-     * @param date       - строка даты.
+     * @param date - строка даты.
      * @return объект класса {@link Date}.
      */
     public static Date stringToDateForView(String date) {
-        SimpleDateFormat sdf = new SimpleDateFormat(VIEW_DATE_PATTERN);
-        Date result = new Date();
-
-        if(date==null || date.isEmpty()){
+        if (date == null || date.isEmpty()) {
             logger.error("Error while parsing empty string into date");
-            return result;
+            throw new TSRuntimeException(new Exception("Date is null"));
         }
         try {
-            result = sdf.parse(date);
+            return VIEW_SIMPLE_DATE_FORMAT.parse(date);
         } catch (ParseException e) {
             logger.error("Error while parsing date in string format.", e);
+            throw new TSRuntimeException(e);
         }
-        return result;
     }
 
     /**
@@ -120,13 +112,12 @@ public class DateTimeUtil {
      */
     public static List<String> splitDateRangeOnDays(String beginDate, String endDate) {
         List<String> result = new ArrayList<String>();
-        SimpleDateFormat sdf = new SimpleDateFormat(DATE_PATTERN);
-        long begin = stringToTimestamp(beginDate, DATE_PATTERN).getTime();
-        long end = stringToTimestamp(endDate, DATE_PATTERN).getTime();
+        long begin = stringToTimestamp(beginDate, DB_DATE_PATTERN).getTime();
+        long end = stringToTimestamp(endDate, DB_DATE_PATTERN).getTime();
         Calendar calendar = Calendar.getInstance();
         while (begin <= end) {
             calendar.setTimeInMillis(begin);
-            result.add(sdf.format(calendar.getTime()));
+            result.add(DB_SIMPLE_DATE_FORMAT.format(calendar.getTime()));
             begin += DAY_IN_MILLS;
         }
         logger.debug(result.toString());
@@ -145,7 +136,7 @@ public class DateTimeUtil {
         String day = ldapDate.substring(6, 8);
         StringBuilder sb = new StringBuilder();
         sb.append(year).append("-").append(month).append("-").append(day);
-        return stringToTimestamp(sb.toString(), DATE_PATTERN);
+        return stringToTimestamp(sb.toString(), DB_DATE_PATTERN);
     }
 
     /**
@@ -171,8 +162,8 @@ public class DateTimeUtil {
      * @param Date
      * @return Timestamp
      */
-    public static Timestamp stringToTimestamp(String Date) {
-        return new Timestamp(stringToTimestamp(Date, DATE_PATTERN).getTime());
+    public static Timestamp stringToTimestamp(String date) {
+        return new Timestamp(stringToTimestamp(date, DB_DATE_PATTERN).getTime());
     }
 
     /**
@@ -198,12 +189,11 @@ public class DateTimeUtil {
      * @return String
      */
     public static String currentYearLastDay() {
-        SimpleDateFormat sdf = new SimpleDateFormat(DATE_PATTERN);
         Date curDate = new Date(System.currentTimeMillis());
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(curDate);
         calendar.set(Calendar.DAY_OF_YEAR, calendar.getActualMaximum(Calendar.DAY_OF_YEAR));
-        return sdf.format(calendar.getTime());
+        return DB_SIMPLE_DATE_FORMAT.format(calendar.getTime());
     }
 
     /**
@@ -212,13 +202,12 @@ public class DateTimeUtil {
      * @return String
      */
     public static String previousMonthFirstDay() {
-        SimpleDateFormat sdf = new SimpleDateFormat(DATE_PATTERN);
         Date curDate = new Date(System.currentTimeMillis());
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(curDate);
         calendar.set(Calendar.MONTH, calendar.get(Calendar.MONTH) - 1);
         calendar.set(Calendar.DAY_OF_MONTH, 1);
-        return sdf.format(calendar.getTime());
+        return DB_SIMPLE_DATE_FORMAT.format(calendar.getTime());
     }
 
     public static Date previousMonthFirstDayDate(Date targetDate) {
@@ -244,7 +233,6 @@ public class DateTimeUtil {
      * @return String
      */
     public static String lastSunday() {
-        SimpleDateFormat sdf = new SimpleDateFormat(DATE_PATTERN);
         Date curDate = new Date(System.currentTimeMillis());
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(curDate);
@@ -255,8 +243,9 @@ public class DateTimeUtil {
             } else
                 calendar.add(Calendar.DAY_OF_YEAR, -1);
         }
-        logger.debug("Last Sunday " + sdf.format(calendar.getTime()));
-        return sdf.format(calendar.getTime());
+        String format = DB_SIMPLE_DATE_FORMAT.format(calendar.getTime());
+        logger.debug("Last Sunday " + format);
+        return format;
     }
 
     public static Date lastSundayDate(Date currentDate) {
@@ -279,7 +268,6 @@ public class DateTimeUtil {
      * @return String
      */
     public static String endMonthCheckDay() {
-        SimpleDateFormat sdf = new SimpleDateFormat(DATE_PATTERN);
         Date curDate = new Date(System.currentTimeMillis());
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(curDate);
@@ -291,8 +279,9 @@ public class DateTimeUtil {
             } else
                 calendar.add(Calendar.DAY_OF_YEAR, -1);
         }
-        logger.debug("End month check day " + sdf.format(calendar.getTime()));
-        return sdf.format(calendar.getTime());
+        String format = DB_SIMPLE_DATE_FORMAT.format(calendar.getTime());
+        logger.debug("End month check day " + format);
+        return format;
     }
 
     /**
@@ -301,7 +290,6 @@ public class DateTimeUtil {
      * @return String
      */
     public static String endPrevMonthDay() {
-        SimpleDateFormat sdf = new SimpleDateFormat(DATE_PATTERN);
         Date curDate = new Date(System.currentTimeMillis());
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(curDate);
@@ -312,8 +300,9 @@ public class DateTimeUtil {
             } else
                 calendar.add(Calendar.DAY_OF_YEAR, -1);
         }
-        logger.debug("End prev month day " + sdf.format(calendar.getTime()));
-        return sdf.format(calendar.getTime());
+        String format = DB_SIMPLE_DATE_FORMAT.format(calendar.getTime());
+        logger.debug("End prev month day " + format);
+        return format;
     }
 
     public static Date previousMonthLastDayDate(Date targetDate) {
@@ -336,13 +325,13 @@ public class DateTimeUtil {
      * @return String
      */
     public static String getLastDayOfMonth(Timestamp day) {
-        SimpleDateFormat sdf = new SimpleDateFormat(DATE_PATTERN);
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(day);
         calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
 
-        logger.debug("End current month day " + sdf.format(calendar.getTime()));
-        return sdf.format(calendar.getTime());
+        String format = DB_SIMPLE_DATE_FORMAT.format(calendar.getTime());
+        logger.debug("End current month day " + format);
+        return format;
     }
 
     public static Date currentMonthLastDayDate(Date targetDate) {
@@ -367,10 +356,11 @@ public class DateTimeUtil {
 
     /**
      * Возвращает номер месяца в переданной дате
+     *
      * @param date
      * @return
      */
-    public static Integer getMonth(Date date){
+    public static Integer getMonth(Date date) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
         return calendar.get(Calendar.MONTH);
@@ -378,10 +368,11 @@ public class DateTimeUtil {
 
     /**
      * Возвращает год в переданной дате
+     *
      * @param date
      * @return
      */
-    public static Integer getYear(Date date){
+    public static Integer getYear(Date date) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
         return calendar.get(Calendar.YEAR);
@@ -408,11 +399,10 @@ public class DateTimeUtil {
 
     private static String addDaysToStringDate(String dateStr, int daysCount) {
         try {
-        SimpleDateFormat sdf = new SimpleDateFormat(DATE_PATTERN);
-        Date date = sdf.parse(dateStr);
-        date = DateUtils.addDays(date, daysCount);
+            Date date = DB_SIMPLE_DATE_FORMAT.parse(dateStr);
+            date = DateUtils.addDays(date, daysCount);
 
-        return sdf.format(date);
+            return DB_SIMPLE_DATE_FORMAT.format(date);
 
         } catch (ParseException ex) {
             throw new TSRuntimeException(ex);
@@ -420,15 +410,12 @@ public class DateTimeUtil {
     }
 
     public static String formatDate(Timestamp timestamp) {
-        SimpleDateFormat sdf = new SimpleDateFormat(DATE_PATTERN);
-        return sdf.format(timestamp);
+        return DB_SIMPLE_DATE_FORMAT.format(timestamp);
     }
-    
-    public static Boolean isDateValid(String date) {
-        SimpleDateFormat sdf = new SimpleDateFormat(DATE_PATTERN);
 
+    public static Boolean isDateValid(String date) {
         try {
-            sdf.parse(date);
+            DB_SIMPLE_DATE_FORMAT.parse(date);
             return true;
         } catch (ParseException e) {
             return false;
@@ -437,22 +424,18 @@ public class DateTimeUtil {
 
 
     public static Boolean isPeriodValid(String strDateBegin, String strDateEnd) {
-        boolean result;
-
-        SimpleDateFormat sdf = new SimpleDateFormat(DATE_PATTERN);
-
         try {
-            Date dateBeg = sdf.parse(strDateBegin);
-            Date dateEnd = sdf.parse(strDateEnd);
-            result = dateBeg.before(dateEnd) || dateBeg.equals(dateEnd);
+            Date dateBeg = DB_SIMPLE_DATE_FORMAT.parse(strDateBegin);
+            Date dateEnd = DB_SIMPLE_DATE_FORMAT.parse(strDateEnd);
+            return dateBeg.before(dateEnd) || dateBeg.equals(dateEnd);
         } catch (ParseException e) {
-            result = false;
+            return false;
         }
-        return result;
     }
 
     /**
      * Возвращает List годов, существующих в системе
+     *
      * @return List<Calendar>
      */
     public static List<com.aplana.timesheet.dao.entity.Calendar> getYearsList(CalendarService calendarService) {
@@ -502,11 +485,11 @@ public class DateTimeUtil {
         return JsonUtil.format(builder);
     }
 
-    public static String dateToString(Date date){
-        return new SimpleDateFormat(DATE_PATTERN).format(date);
+    public static String dateToString(Date date) {
+        return DB_SIMPLE_DATE_FORMAT.format(date);
     }
 
-    public static String dateToString(Date date, String format){
+    public static String dateToString(Date date, String format) {
         return new SimpleDateFormat(format).format(date);
     }
 
@@ -523,12 +506,11 @@ public class DateTimeUtil {
     /**
      * Возвращает количество дней за период
      */
-    public static Long getAllDaysCount(Date beginDate, Date endDate){
-        return (endDate.getTime() - beginDate.getTime())/ DAY_IN_MILLS + 1;
+    public static Long getAllDaysCount(Date beginDate, Date endDate) {
+        return (endDate.getTime() - beginDate.getTime()) / DAY_IN_MILLS + 1;
     }
 
     /**
-     *
      * @param year
      * @param month (from 1)
      * @return
@@ -542,15 +524,15 @@ public class DateTimeUtil {
         return calendar;
     }
 
-    public static String getOnlyDate(Date date){
-        return new SimpleDateFormat(VIEW_DATE_PATTERN).format(date);
+    public static String getOnlyDate(Date date) {
+        return VIEW_SIMPLE_DATE_FORMAT.format(date);
     }
 
 
-    public static List<String> dateListToStringList(List<Date> dateList){
+    public static List<String> dateListToStringList(List<Date> dateList) {
         List<String> stringList = new ArrayList<String>(dateList.size());
-        for(Date date : dateList){
-            stringList.add(dateToString(date, DATE_PATTERN));
+        for (Date date : dateList) {
+            stringList.add(dateToString(date, DB_DATE_PATTERN));
         }
         return stringList;
     }

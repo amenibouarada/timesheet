@@ -322,6 +322,10 @@ public class SendMailService {
         new DeleteOrSetDraftApprovalSender(this, propertyProvider).sendMessage(timeSheet);
     }
 
+    public void performNotificationOnExportReportComplete(ReportExportStatus reportExportStatus){
+        new ExportReportCompleteSender(this, propertyProvider).sendMessage(reportExportStatus);
+    }
+
     public StringBuilder buildMailException(HttpServletRequest request, Exception exception){
         Map<String, Object> model = new HashMap<String, Object>();
 

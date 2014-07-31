@@ -7,10 +7,6 @@ function deleteRow(id_row) {
     recalculateDuration();
 }
 
-function al() {
-    alert("!!");
-}
-
 String.prototype.trim=function(){return this.replace(/^\s+|\s+$/g, '');};
 
 function fillWorkplaceSelect(workplaceSelect) {
@@ -694,9 +690,6 @@ function typeActivityChange(obj) {
         resetRowState(rowIndex, false);
         dojo.removeAttr("duration_id_" + rowIndex, "disabled");
         dojo.removeAttr("description_id_" + rowIndex, "disabled");
-        if (rowIndex == GetFirstIdDescription()) {
-            dojo.removeAttr("add_in_comments", "disabled");
-        }
         dojo.byId("description_id_" + rowIndex).value = description;
         if (!isNaN(duration)) {
             dojo.attr("duration_id_" + rowIndex, { value:duration });
@@ -727,9 +720,6 @@ function typeActivityChange(obj) {
         dojo.removeAttr("workplace_id_" + rowIndex, "disabled");
         dojo.removeAttr("activity_category_id_" + rowIndex, "disabled");
         dojo.removeAttr("description_id_" + rowIndex, "disabled");
-        if (rowIndex == GetFirstIdDescription()) {
-            dojo.removeAttr("add_in_comments", "disabled");
-        }
         dojo.removeAttr("problem_id_" + rowIndex, "disabled");
         dojo.removeAttr("duration_id_" + rowIndex, "disabled");
         dojo.removeAttr("project_role_id_" + rowIndex, "disabled");
@@ -1075,12 +1065,6 @@ function resetRowState(rowIndex, resetActType) {
         disabled:"disabled"
     });
 
-    if (rowIndex == GetFirstIdDescription()) {
-        dojo.attr("add_in_comments", {
-            disabled:"disabled"
-        });
-    }
-
     dojo.byId("problem_id_" + rowIndex).value = "";
     dojo.attr("problem_id_" + rowIndex, {
         disabled:"disabled"
@@ -1182,40 +1166,23 @@ function delSelectedRows() {
     recalculateRowNumbers();
     recalculateDuration();
 }
-//ищет идентификатор первой строки
-function GetFirstIdDescription() {
-    var tsTable = dojo.byId("time_sheet_table");
-    var tsRows = dojo.query(".time_sheet_row");
-    var firstRow = tsRows[0];
-    var firstRowId = dojo.attr(firstRow, "id");
-    var lastRow = parseInt(firstRowId.substring(firstRowId.lastIndexOf("_") + 1, firstRowId.length));
-    return lastRow;
+
+function CopyPlan() {
+    var firstDescriptionId = "description_id_0";
+    if (dojo.attr(firstDescriptionId, "disabled")){
+        return;
+    }
+    var plan_text = dojo.byId("plan_textarea").innerHTML;
+    plan_text = plan_text.replace(/<br>/g, '\n');
+    plan_text = plan_text.replace(/&amp;/g, '&');
+    dojo.byId(firstDescriptionId).value = plan_text;
 }
 
 /* Производит пересчёт номеров строк табличной части отчёта. */
 function recalculateRowNumbers() {
     var rows = dojo.query(".row_number");
-    var amount_rows = rows.length;
     for (var i = 0; i < rows.length; i++) {
         rows[i].innerHTML = i + 1;
-    }
-
-    //дизейблим копирование в комментарий если нет в таблице строк
-    if (amount_rows == 0) {
-        dojo.attr("add_in_comments", {
-            disabled:"disabled"
-        });
-    }
-    else {
-        var lastRowIndex = GetFirstIdDescription();
-        if (dojo.attr("description_id_" + lastRowIndex, "disabled")) {
-            dojo.attr("add_in_comments", {
-                disabled:"disabled"
-            });
-        }
-        else {
-            dojo.removeAttr("add_in_comments", "disabled");
-        }
     }
 }
 

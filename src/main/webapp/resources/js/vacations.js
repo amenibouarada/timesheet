@@ -67,10 +67,6 @@ function divisionChangeVac(division) {
     sortManager();
 }
 
-function isNilOrNull(obj) {
-    return !(obj != null && obj != 0);
-}
-
 function multipleOptSelectedInSelect(select) {
     var allOptionIndex;
 

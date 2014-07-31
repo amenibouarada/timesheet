@@ -177,6 +177,10 @@ public class TSPropertyProvider {
         return getProperties().getProperty("mail.marker.feedback", "[TS FEEDBACK]");
     }
 
+    public String getAccessMarker() {
+        return getProperties().getProperty("mail.marker.access", "[TS ACCESS]");
+    }
+
     public String getDeleteOrSetDraftApprovalMarker() {
         return getProperties().getProperty("mail.marker.deleteOrSetDraft", "[TS DELETE OR SET DRAFT]");
     }
@@ -446,5 +450,12 @@ public class TSPropertyProvider {
      */
     public String getLdapCnDivision() {
         return getProperties().getProperty("ldap.cn.division", "_Project Center *");
+    }
+
+    /**
+     * Путь для сохраненных отчетов
+     */
+    public String getPathReports() {
+        return getProperties().getProperty("path.reports", "resources/generatedReports/");
     }
 }

@@ -84,11 +84,7 @@ public class JsonUtil {
      * @return "n / m"
      */
     public static JsonNodeBuilder aNumberBuilder(Double n, Double m) {
-        String s = formatDouble(n) +"/"+ formatDouble(m);
-        return argo.jdom.JsonNodeBuilders.aStringBuilder(
-                s != null ? s : "0"
-        );
-
+        return argo.jdom.JsonNodeBuilders.aStringBuilder(formatDouble(n) +"/"+ formatDouble(m));
     }
 
     public static String formatDouble(Double d){

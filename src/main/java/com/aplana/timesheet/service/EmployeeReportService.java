@@ -118,7 +118,7 @@ public class EmployeeReportService {
         /* считаем итоговую строку */
         if (result.size() != 0) {
             DictionaryItem itogoDI = new DictionaryItem();
-            itogoDI.setValue("Итого");
+            itogoDI.setValue(EmployeeMonthReportDetail.ITOGO);
             Project itogoP = new Project();
             result.add(new EmployeeMonthReportDetail(itogoDI, itogoP, sumPlanH, sumFactH, workDurationPlan, sumFactH));
         }

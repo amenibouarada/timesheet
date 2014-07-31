@@ -310,9 +310,9 @@
                                    value="<%= vacationService.isVacationNotApproved(vacation)%>"/>
                             <c:set var="vacationApprovePermission"
                                    value="<%= vacationService.isVacationApprovePermission(vacation)%>"/>
-                            <% SimpleDateFormat simpleDateFormat = DateTimeUtil.SIMPLE_DATE_FORMAT; %>
-                            <c:set var="beginDate" value="<%= simpleDateFormat.format(vacation.getBeginDate()) %>" />
-                            <c:set var="endDate" value="<%= simpleDateFormat.format(vacation.getEndDate()) %>" />
+
+                            <c:set var="beginDate" value="<%= DateTimeUtil.getOnlyDate(vacation.getBeginDate()) %>" />
+                            <c:set var="endDate" value="<%= DateTimeUtil.getOnlyDate(vacation.getEndDate()) %>" />
                             <c:if test="${isVacationNotApproved }">
                                 <sec:authorize access="hasRole('ROLE_ADMIN') or ${vacationApprovePermission}">
                                     <div class="delete-button">

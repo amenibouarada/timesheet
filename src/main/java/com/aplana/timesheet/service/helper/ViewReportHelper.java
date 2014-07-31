@@ -66,7 +66,7 @@ public class ViewReportHelper {
         final List<DayTimeSheet> calTSList = timeSheetService.findDatesAndReportsForEmployee(year, month, employeeId);
 
         for (DayTimeSheet queryResult : calTSList) {
-            final String day = new SimpleDateFormat(DateTimeUtil.DATE_PATTERN).format(queryResult.getCalDate());
+            final String day = new SimpleDateFormat(DateTimeUtil.DB_DATE_PATTERN).format(queryResult.getCalDate());
 
             Integer value = 0; //если нет отчета
             if ((queryResult.getId() != null) || (queryResult.getVacationDay()) || (queryResult.getIllnessDay())) {
@@ -158,7 +158,7 @@ public class ViewReportHelper {
         }
 
         for (Map.Entry date : vacationDates.entrySet()) {
-            final String sdate = new SimpleDateFormat(DateTimeUtil.DATE_PATTERN).format(date.getKey());
+            final String sdate = new SimpleDateFormat(DateTimeUtil.DB_DATE_PATTERN).format(date.getKey());
             builder.withField(sdate, aStringBuilder(date.getValue().toString()));
         }
 

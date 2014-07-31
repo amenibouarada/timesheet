@@ -48,13 +48,7 @@ public class ReportFormValidator implements Validator {
     }
 
     private void validateReport06(Object o, Errors errors) {
-        Report06 form = (Report06) o;
-
         ValidationUtils.rejectIfEmptyOrWhitespace(errors, "projectId", "error.reportform.noproject");
-
-        /*if (form.getProjectId() == 0) {
-            errors.rejectValue("projectId", "error.reportform.noproject");
-        }*/
     }
 
     private void validateReport07(Object o, Errors errors) {

@@ -34,7 +34,7 @@ public class CalendarService {
      */
     @Transactional(readOnly = true)
     public Calendar find(String date) {
-        return calendarDAO.find(DateTimeUtil.stringToTimestamp(date, DateTimeUtil.DATE_PATTERN));
+        return calendarDAO.find(DateTimeUtil.stringToTimestamp(date, DateTimeUtil.DB_DATE_PATTERN));
     }
 
     /**

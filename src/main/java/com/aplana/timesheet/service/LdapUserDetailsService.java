@@ -76,7 +76,10 @@ public class LdapUserDetailsService implements UserDetailsContextMapper {
                 case CHANGE_ILLNESS_BUSINESS_TRIP: {
                     list.add(new SimpleGrantedAuthority(RoleConstants.CHANGE_ILLNESS_BUSINESS_TRIP));
                     list.add(new SimpleGrantedAuthority(RoleConstants.VIEW_ILLNESS_BUSINESS_TRIP));
+                    break;
                 }
+                default:
+                    logger.error("Unknown permission");
             }
         }
     }

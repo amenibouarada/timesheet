@@ -28,7 +28,7 @@ public class BusinessTripDAO {
     }
 
     public void setBusinessTrip(BusinessTrip businessTrip){
-        BusinessTrip businessTripMerged = entityManager.merge(businessTrip);
+        entityManager.merge(businessTrip);
         entityManager.flush();
     }
 

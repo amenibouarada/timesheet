@@ -100,9 +100,8 @@ public class EmploymentPlanningController{
             @RequestParam("employeeId") Integer employeeId
     ) {
         List<ProjectPercentPlan> planList = employeeProjectPlanService.getEmployeePlan(employeeId, form.getYearBeg(), form.getMonthBeg(), form.getYearEnd(), form.getMonthEnd());
-        String employeePlanAsJSON = getEmployeePlanAsJSON(planList);
 
-        return employeePlanAsJSON;
+        return getEmployeePlanAsJSON(planList);
     }
 
 
@@ -111,9 +110,8 @@ public class EmploymentPlanningController{
     @ResponseBody
     public String showAddEmployeeList(@ModelAttribute(AddEmployeeForm.ADD_FORM) AddEmployeeForm form) {
         List<Employee> employeeList = employeeService.getEmployeeByDivisionManagerRoleRegion(form.getDivisionId(), form.getManagerId(), form.getProjectRoleListId(), form.getRegionListId());
-        String employeeListAsJSON = getEmployeeListAsJson(employeeList);
 
-        return employeeListAsJSON;
+        return getEmployeeListAsJson(employeeList);
     }
 
     /* Возвращает JSON для форме выбора сотрудников */
@@ -125,9 +123,8 @@ public class EmploymentPlanningController{
             @RequestParam("yearBegin") Integer yearBegin) {
         Date date = DateTimeUtil.createDate(yearBegin, monthBegin);
         List<Project> projectList = getProjects(Integer.parseInt(divisionId), date);
-        String projectListAsJson = getProjectListAsJson(projectList);
 
-        return projectListAsJson;
+        return getProjectListAsJson(projectList);
     }
 
     /* Сохраняем данные план по сотрудникам по проекту*/
@@ -152,7 +149,7 @@ public class EmploymentPlanningController{
                 }
                 catch(NumberFormatException nfe){
                     //TODO something
-                    new RuntimeException(nfe);
+                    throw new RuntimeException(nfe);
                 }
             }
         }

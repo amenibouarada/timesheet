@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -145,7 +144,7 @@ public class ReportCheckService {
             firstDate = sdf.parse(firstDay);
             lastDate = sdf.parse(lastDay);
         } catch (ParseException e) {
-            new RuntimeException(e);
+            throw new RuntimeException(e);
         }
 
         for (Employee emp : employeeList) {
@@ -177,7 +176,7 @@ public class ReportCheckService {
 
             // Если последний рабочий день месяца (по стране, без учета регионов)- рассылаем напоминания о заполнении отчетов для всех у кого нет долгов по отчетности
             Calendar workDay = calendarService.getLastWorkDay(currentCalendar);
-            if (workDay.getCalDate().equals(DateTimeUtil.stringToTimestamp(currentDay, DateTimeUtil.DATE_PATTERN)))
+            if (workDay.getCalDate().equals(DateTimeUtil.stringToTimestamp(currentDay, DateTimeUtil.DB_DATE_PATTERN)))
                 sendMailService.performEndMonthMailing(reportCheckList);
         } else {
             logger.info("Reportchecks not found, all timesheets are filled");

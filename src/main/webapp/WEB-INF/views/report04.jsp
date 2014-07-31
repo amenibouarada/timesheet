@@ -16,16 +16,76 @@
 <script type="text/javascript">
     dojo.ready(function () {
         dojo.require("dijit.form.DateTextBox");
-        (function ping() {
-            setInterval(function() {
-                require(["dojo/request"], function(request){
-                    request("/ping").then(function(){
-
-                    });
-                });
-            },60000);
-        })()
+        dojo.connect(dojo.byId("make_report_button"), "onclick", dojo.byId("make_report_button"), submitReportForm);
     });
+
+    function submitReportForm(){
+        dojo.attr(dojo.byId("make_report_button"), "disabled", "disabled");
+        clearErrorBox('errorBoxId');
+
+        var beginDateParts = dijit.byId('beginDate').getDisplayedValue().split(".");
+        var endDateParts = dijit.byId('endDate').getDisplayedValue().split(".");
+        var beginDate = new Date(beginDateParts[2], (beginDateParts[1] - 1), beginDateParts[0]);
+        var endDate = new Date(endDateParts[2], (endDateParts[1] - 1), endDateParts[0]);
+        if (beginDate.valueOf() > endDate.valueOf()){
+            alert("Дата окончания периода меньше даты начала периода");
+            dojo.removeAttr("make_report_button", "disabled");
+            return;
+        }
+
+        //Если разница в года есть запускаем обычное формирование отчета
+        var beginYear = +beginDateParts[2];
+        var endYear = +endDateParts[2];
+        if (beginYear == endYear) {
+            dojo.byId('reportForm').submit();
+            dojo.removeAttr("make_report_button", "disabled");
+            return;
+        }
+
+        if (checkReportForm()) {
+            dojo.xhrPost({
+                url: '<%= request.getContextPath()%>/managertools/report/make/4',
+                form: dojo.byId('reportForm'),
+                handleAs: "json",
+                preventCache: false,
+                load: function (response) {
+                },
+                error: function () {
+                    console.log('submitReportForm panic!');
+                    dojo.removeAttr("make_report_button", "disabled");
+                }
+            });
+            dojo.removeAttr("make_report_button", "disabled");
+        }
+    }
+
+    function checkReportForm() {
+        var result = false;
+        dojo.attr(dojo.byId("make_report_button"), "disabled", "disabled");
+        clearErrorBox('errorBoxId');
+        dojo.xhrPost({
+            url: '<%= request.getContextPath()%>/managertools/report/checkParamsReport04',
+            form: dojo.byId('reportForm'),
+            handleAs: "json",
+            preventCache: false,
+            sync: true,
+            load: function (response) {
+                if (response.result == "false") {
+                    result = false;
+                    alert(response.errorMessage);
+                    dojo.removeAttr("make_report_button", "disabled");
+                } else {
+                    result = true;
+                    alert("Отчет поставлен на выполнение, ожидайте письма со ссылкой для скачивания отчета");
+                }
+            },
+            error: function () {
+                console.log('submitReportForm Panic !');
+                dojo.removeAttr("make_report_button", "disabled");
+            }
+        });
+        return result;
+    }
 </script>
 
 <h1><fmt:message key="title.reportparams"/></h1>
@@ -112,7 +172,7 @@
 
     </div>
 
-    <button id="make_report_button" style="width:210px" type="submit" onclick="clearErrorBox('errorBoxId');">Сформировать отчет</button>
+    <button type="button" id="make_report_button" style="width:210px">Сформировать отчет</button>
 </form:form>
 </body>
 

@@ -69,13 +69,21 @@ public class BusinessTripsAndIllnessAddFormValidator extends AbstractValidator {
 
             if (! reports.isEmpty()) {
                 if (! isEditingReport(form.getReportId(), reports)) {
-                    errors.rejectValue("beginDate", "error.businesstripsandilnessaddform.beginDate.wrong", String.format("Выбранный период частично или полностью попадает на период %s %s!", getExistingString(reportType), getReportName(reportType)));
+                    errors.rejectValue(
+                            "beginDate",
+                            "error.businesstripsandilnessaddform.beginDate.wrong",
+                            String.format("Выбранный период частично или полностью попадает на период %s %s!", getExistingString(reportType), getReportName(reportType))
+                    );
                 }
             }
         }
 
         if (form.getBeginDate().after(form.getEndDate())){
-            errors.rejectValue("beginDate", "error.businesstripsandilnessaddform.begindate.wrong", "Дата окончания " + getReportName(reportType) + " не может быть раньше даты начала!");
+            errors.rejectValue(
+                    "beginDate",
+                    "error.businesstripsandilnessaddform.begindate.wrong",
+                    "Дата окончания " + getReportName(reportType) + " не может быть раньше даты начала!"
+            );
         }
 
         form.setComment(form.getComment().trim());

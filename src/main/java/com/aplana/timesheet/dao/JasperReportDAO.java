@@ -882,7 +882,6 @@ public class JasperReportDAO {
             ArrayList rolesSystem = this.readRolesFromString(propertyProvider.getProjectRoleSystem());
             Date start = sdf.parse(report.getBeginDate());
             Date end = sdf.parse(report.getEndDate());
-            HashMap<String, Object> itogo = new HashMap<String, Object>();
             Query query1;
             if (report.getDivisionOwner() != 0) {
                 query1 = this.getReport07Query1(start, end, report.getDivisionEmployee(), report.getDivisionOwner());

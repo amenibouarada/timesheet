@@ -62,14 +62,14 @@ public class VacationDeletedSender extends  AbstractVacationSenderWithCopyToAuth
         Employee employee = vacation.getEmployee();
 
         // оповещаем отдел кадров подразделения
-        if (employee.getDivision() != null && VacationStatusEnum.APPROVED.getId() == vacation.getStatus().getId().intValue()) {
+        if (employee.getDivision() != null && VacationStatusEnum.APPROVED.getId() == vacation.getStatus().getId()) {
             ccEmails.addAll(getAdditionalEmailsForRegion(employee.getRegion()));
         }
 
         ccEmails.addAll(getAssistantEmail(Sets.newHashSet(mail.getToEmails())));
 
         //оповещаем центр
-        if (employee!=null && employee.getDivision()!=null) {
+        if (employee != null && employee.getDivision() != null) {
             ccEmails.add(employee.getDivision().getVacationEmail());
         }
 

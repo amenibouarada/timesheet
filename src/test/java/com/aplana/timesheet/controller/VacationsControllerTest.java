@@ -207,7 +207,7 @@ public class VacationsControllerTest extends AbstractTest {
     }
 
     private Date resetHours(Date date){
-        return DateTimeUtil.stringToDate(DateTimeUtil.dateToString(date), DateTimeUtil.DATE_PATTERN);
+        return DateTimeUtil.stringToDate(DateTimeUtil.dateToString(date), DateTimeUtil.DB_DATE_PATTERN);
     }
 
     @Test

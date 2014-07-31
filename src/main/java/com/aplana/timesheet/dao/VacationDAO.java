@@ -82,7 +82,7 @@ public class VacationDAO {
         Calendar calendar = DateTimeUtil.getCalendar(year, month);
         calendar.set(Calendar.DAY_OF_MONTH, 1);
         Date firstDay = calendar.getTime();
-        Date lastDay = DateTimeUtil.stringToDate(DateTimeUtil.getLastDayOfMonth(new Timestamp(calendar.getTime().getTime())), DateTimeUtil.DATE_PATTERN);
+        Date lastDay = DateTimeUtil.stringToDate(DateTimeUtil.getLastDayOfMonth(new Timestamp(calendar.getTime().getTime())), DateTimeUtil.DB_DATE_PATTERN);
 
         final Query query =
                 entityManager.createQuery("from Vacation v " +
@@ -98,7 +98,7 @@ public class VacationDAO {
         Calendar calendar = DateTimeUtil.getCalendar(year, month);
         calendar.set(Calendar.DAY_OF_MONTH, 1);
         Date firstDay = calendar.getTime();
-        Date lastDay = DateTimeUtil.stringToDate(DateTimeUtil.getLastDayOfMonth(new Timestamp(calendar.getTime().getTime())), DateTimeUtil.DATE_PATTERN);
+        Date lastDay = DateTimeUtil.stringToDate(DateTimeUtil.getLastDayOfMonth(new Timestamp(calendar.getTime().getTime())), DateTimeUtil.DB_DATE_PATTERN);
 
         final Query query =
                 entityManager.createQuery("from Vacation v " +
