@@ -66,6 +66,18 @@
             }
 
         </script>
+
+        <style type="text/css">
+            .headerText {
+                font-size: 24px;
+                text-align: center;
+                height: 100px;
+                width: 200px;
+            }
+            .elementText {
+                padding: 10px;
+            }
+        </style>
     </head>
 
     <body>
@@ -73,26 +85,91 @@
 
         <br/>
 
-        <div id="messageBox" style="text-align: left!important; width: 90%;padding: 4px;"></div>
-        <br/>
-        <input type="checkbox" name="showAllUser" id="allUserCheckBox" onChange="updateShowUser();"
-               <c:if test="${showalluser == true}">checked="checked"</c:if>
-                > <fmt:message key="link.showalluser"/>
-        <br/>
-        <br/>
-        <ul>
-            <li><a href="/admin/projects"><fmt:message key="link.editprojects"/></a> </li>
-            <li><a href="admin/update/ldap"><fmt:message key="link.updateldap"/></a></li>
-            <li><a href="admin/update/checkreport"><fmt:message key="link.checkemails"/></a></li>
-            <li><a href="admin/update/oqsync"><fmt:message key="link.oqsync"/></a></li>
-            <li><a href="admin/update/properties" id="updateProperties"><fmt:message key="link.update.properties"/></a>
-            </li>
-            <li><a href="admin/update/siddisabledusersfromldap"><fmt:message key="link.disabledsidsync"/></a></li>
-            <li><a href="admin/update/sidallusersfromldap"><fmt:message key="link.allsidsync"/></a></li>
-            <li><a href="admin/update/jiranameallusersfromldap"><fmt:message key="link.alljiranamesync"/></a></li>
-            <li><a href="admin/update/employeeassistantactivestatus"><fmt:message key="link.employeeassistantactivestatus"/></a></li>
-            <li><a href="admin/update/schedulerplannedvacationcheck" id="schedulerplannedvacationcheck"><fmt:message key="link.schedulerplannedvacationcheck"/></a></li>
-        </ul>
+        <table>
+            <%--Уведомления--%>
+            <tr>
+                 <td class="headerText">
+                    Уведомления
+                 </td>
+                <td class="elementText">
+                    <a href="admin/update/checkreport"><fmt:message key="link.checkemails"/></a>
+                </td>
+            </tr>
 
+
+            <%--Отпуска--%>
+            <tr>
+                <td class="headerText" rowspan="2">
+                    Отпуска
+                </td>
+                <td class="elementText">
+                    <a href="admin/update/employeeassistantactivestatus"><fmt:message key="link.employeeassistantactivestatus"/></a>
+                </td>
+            <tr>
+                <td class="elementText">
+                    <a href="admin/update/schedulerplannedvacationcheck" id="schedulerplannedvacationcheck"><fmt:message key="link.schedulerplannedvacationcheck"/></a>
+                </td>
+            </tr>
+
+
+            <%--Система--%>
+            <tr>
+                <td class="headerText">
+                    Система
+                </td>
+                <td class="elementText">
+                    <a href="admin/update/properties" id="updateProperties"><fmt:message key="link.update.properties"/></a>
+                </td>
+            </tr>
+
+
+            <%--Сотрудники--%>
+            <tr>
+                <td class="headerText" rowspan="5">
+                    Сотрудники
+                </td>
+                <td class="elementText">
+                    <input type="checkbox" name="showAllUser" id="allUserCheckBox" onChange="updateShowUser();"
+                           <c:if test="${showalluser == true}">checked="checked"</c:if>
+                            > <fmt:message key="link.showalluser"/>
+                </td>
+            </tr>
+            <tr>
+                <td class="elementText">
+                    <a href="admin/update/ldap"><fmt:message key="link.updateldap"/></a>
+                </td>
+            </tr>
+            <tr>
+                <td class="elementText">
+                    <a href="admin/update/siddisabledusersfromldap"><fmt:message key="link.disabledsidsync"/></a>
+                </td>
+            </tr>
+            <tr>
+                <td class="elementText">
+                    <a href="admin/update/sidallusersfromldap"><fmt:message key="link.allsidsync"/></a>
+                </td>
+            </tr>
+            <tr>
+                <td class="elementText">
+                    <a href="admin/update/jiranameallusersfromldap"><fmt:message key="link.alljiranamesync"/></a>
+                </td>
+            </tr>
+
+            <%--Проекты--%>
+            <tr>
+                <td class="headerText" rowspan="2">
+                    Проекты
+                </td>
+                <td class="elementText">
+                    <a href="/admin/projects"><fmt:message key="link.editprojects"/></a>
+                </td>
+            </tr>
+            <tr>
+                <td class="elementText">
+                    <a href="admin/update/oqsync"><fmt:message key="link.oqsync"/></a>
+                </td>
+            </tr>
+
+        </table>
     </body>
 </html>
