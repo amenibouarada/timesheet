@@ -7,6 +7,9 @@ import java.math.BigDecimal;
 
 /* класс - строка в таблице детализации месячной работы по проектам */
 public class EmployeeMonthReportDetail implements Comparable<EmployeeMonthReportDetail> {
+
+    public static final String ITOGO = "Итого";
+
     private DictionaryItem act_type;
     private Project project;
     private BigDecimal planHours;

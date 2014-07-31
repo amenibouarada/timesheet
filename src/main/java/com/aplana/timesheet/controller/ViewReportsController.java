@@ -6,6 +6,7 @@ import com.aplana.timesheet.enums.ReportSendApprovalType;
 import com.aplana.timesheet.enums.TypesOfTimeSheetEnum;
 import com.aplana.timesheet.form.ReportsViewDeleteForm;
 import com.aplana.timesheet.form.VacationsForm;
+import com.aplana.timesheet.form.entity.EmployeeMonthReportDetail;
 import com.aplana.timesheet.service.*;
 import com.aplana.timesheet.system.constants.PadegConstants;
 import com.aplana.timesheet.system.constants.TimeSheetConstants;
@@ -140,7 +141,19 @@ public class ViewReportsController extends AbstractControllerForEmployeeWithYear
                 ).setScale(2, BigDecimal.ROUND_HALF_UP)
         );
 
-        mav.addObject("reportsDetail", employeeReportService.getMonthReport(employeeId, year, month));
+        List<EmployeeMonthReportDetail> reportDetails = employeeReportService.getMonthReport(employeeId, year, month);
+
+        int factToCurrentDate = 0;
+        for (EmployeeMonthReportDetail reportDetail : reportDetails){
+            // возьмем строку итого, чтобы получить фактическое отработанное время на текущую дату
+            if (EmployeeMonthReportDetail.ITOGO.equals(reportDetail.getAct_type().getValue())){
+                factToCurrentDate = reportDetail.getFactHours().intValue();
+            }
+        }
+
+        mav.addObject("durationFactToCurrDate", BigDecimal.valueOf(factToCurrentDate).setScale(2, BigDecimal.ROUND_HALF_UP));
+        mav.addObject("reportsDetail", reportDetails);
+
         addVacationsForm(mav); //костыль, из за того что адрес для первоначальной загрузки формы отпусков и после применения фильтра один и тот же
         return mav;
     }

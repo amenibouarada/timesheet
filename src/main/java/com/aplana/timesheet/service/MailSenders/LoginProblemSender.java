@@ -45,6 +45,7 @@ public class LoginProblemSender extends MailSender<AdminMessageForm> {
         StringBuilder bodyTxt = new StringBuilder();
 
         mail.setToEmails(Arrays.asList(propertyProvider.getMailProblemsAndProposalsCoaddress(5)));
+        mail.setSubject(propertyProvider.getAccessMarker() + " Ошибка авторизации");
 
         bodyTxt.append("Логин: ").append(params.getName()).append("\n");
         bodyTxt.append("Указаный адрес: ").append(params.getEmail()).append("\n");
