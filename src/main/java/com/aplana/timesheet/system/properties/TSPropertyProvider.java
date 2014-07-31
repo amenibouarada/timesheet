@@ -451,4 +451,11 @@ public class TSPropertyProvider {
     public String getLdapCnDivision() {
         return getProperties().getProperty("ldap.cn.division", "_Project Center *");
     }
+
+    /**
+     * Путь для сохраненных отчетов
+     */
+    public String getPathReports() {
+        return getProperties().getProperty("path.reports", "resources/generatedReports/");
+    }
 }

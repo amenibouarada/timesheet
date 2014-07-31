@@ -6,6 +6,7 @@ import com.aplana.timesheet.dao.entity.ReportExportStatus;
 import com.aplana.timesheet.exception.JReportBuildError;
 import com.aplana.timesheet.reports.BaseReport;
 import com.aplana.timesheet.reports.TSJasperReport;
+import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.system.security.SecurityService;
 import com.aplana.timesheet.util.JsonUtil;
 import net.sf.jasperreports.engine.*;
@@ -55,6 +56,9 @@ public class JasperReportService {
 
     @Autowired
     protected SecurityService securityService;
+
+    @Autowired
+    private TSPropertyProvider propertyProvider;
 
     private final HashMap<String, JasperReport> compiledReports = new HashMap<String, JasperReport>();
 
@@ -240,7 +244,7 @@ public class JasperReportService {
                 // TODO предлагаю заменить на com.aplana.timesheet.util.DateTimeUtil..stringToDateForView()
                 SIMPLE_DATE_FORMAT.format(beginDate),
                 SIMPLE_DATE_FORMAT.format(endDate));
-        final String outputFile = context.getRealPath("/WEB-INF/resources/generatedReports/" + reportNameFile + ".xls");
+        final String outputFile = propertyProvider.getPathReports() + reportNameFile + ".xls";
 
         final ReportExportStatus reportExportStatus = new ReportExportStatus();
         reportExportStatus.setComplete(false);
@@ -267,7 +271,7 @@ public class JasperReportService {
                         JRXlsExporter xlsExporter = new JRXlsExporter();
                         xlsExporter.setParameter(JRExporterParameter.JASPER_PRINT, jasperPrint);
                         xlsExporter.setParameter(JExcelApiExporterParameter.IS_DETECT_CELL_TYPE, true);
-                        xlsExporter.setParameter(JRExporterParameter.OUTPUT_FILE_NAME, outputFile);
+                        xlsExporter.setParameter(JRExporterParameter.OUTPUT_FILE_NAME, context.getRealPath(outputFile));
                         xlsExporter.exportReport();
                     }
                     Employee employee = securityService.getSecurityPrincipal().getEmployee();
@@ -291,11 +295,10 @@ public class JasperReportService {
         Employee employee = securityService.getSecurityPrincipal().getEmployee();
         List<ReportExportStatus> reportExportStatuses = reportExportStatusService.findUserIncompleteReports(employee);
         for (ReportExportStatus reportExportStatus : reportExportStatuses) {
-            if (new File(reportExportStatus.getPath()).delete()) {
+            if (new File(context.getRealPath(reportExportStatus.getPath())).delete()) {
                 reportExportStatusService.delete(reportExportStatus);
             }
         }
-
     }
 
     public String jsonResponse(Boolean result, String errorMessage) {
@@ -340,7 +343,7 @@ public class JasperReportService {
         }
 
         response.setHeader("Content-Disposition", contentDisposition);
-        InputStream is = new FileInputStream(reportExportStatus.getPath());
+        InputStream is = new FileInputStream(context.getRealPath(reportExportStatus.getPath()));
         IOUtils.copy(is, response.getOutputStream());
         response.flushBuffer();
         is.close();
