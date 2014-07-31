@@ -38,7 +38,7 @@ public abstract class AbstractController {
     @InitBinder
     public void initBinder(WebDataBinder binder) {
         binder.initDirectFieldAccess();
-        DateFormat dateFormat = new SimpleDateFormat(DateTimeUtil.DATE_PATTERN);
+        DateFormat dateFormat = new SimpleDateFormat(DateTimeUtil.DB_DATE_PATTERN);
         dateFormat.setLenient(false);
         binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, false));
     }

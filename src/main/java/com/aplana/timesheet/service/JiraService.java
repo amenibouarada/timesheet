@@ -78,7 +78,7 @@ public class JiraService {
             String onDate = "";
             String createdDate = "";
             if ( date != null ) {
-                onDate = " on " + new SimpleDateFormat(DateTimeUtil.DATE_PATTERN).format(date) + " ";
+                onDate = " on " + new SimpleDateFormat(DateTimeUtil.DB_DATE_PATTERN).format(date) + " ";
                 createdDate = " or (reporter = " + user +
                         " and created > " + DateTimeUtil.dateToString(date) +
                         " and created < " + DateTimeUtil.dateToString(DateUtils.addDays(date, 1)) + ")";
@@ -119,7 +119,7 @@ public class JiraService {
         /* берём по умолчанию текущую дату */
         Date date = new Date();
         try {
-            date = new SimpleDateFormat(DateTimeUtil.DATE_PATTERN).parse(reportDate);
+            date = new SimpleDateFormat(DateTimeUtil.DB_DATE_PATTERN).parse(reportDate);
         } catch (ParseException e) {
             logger.error("Сообщение об ошибке", e);
         }

@@ -22,16 +22,25 @@
     function submitReportForm(){
         dojo.attr(dojo.byId("make_report_button"), "disabled", "disabled");
         clearErrorBox('errorBoxId');
+
+        var beginYear = +dijit.byId('beginDate').getDisplayedValue().split(".")[2];
+        var endYear = +dijit.byId('endDate').getDisplayedValue().split(".")[2];
+        if (beginYear == endYear) {
+            dojo.byId('reportForm').submit();
+            dojo.removeAttr("make_report_button", "disabled");
+            return;
+        }
+
         if (checkReportForm()) {
             dojo.xhrPost({
-                url: '<%= request.getContextPath()%>/managertools/report/4',
+                url: '<%= request.getContextPath()%>/managertools/report/make/4',
                 form: dojo.byId('reportForm'),
                 handleAs: "json",
                 preventCache: false,
                 load: function (response) {
                 },
                 error: function () {
-                    console.log('submitReportForm Panic !');
+                    console.log('submitReportForm panic!');
                     dojo.removeAttr("make_report_button", "disabled");
                 }
             });

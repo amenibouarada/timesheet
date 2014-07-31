@@ -1,6 +1,7 @@
 package com.aplana.timesheet.controller;
 
 import com.aplana.timesheet.controller.report.JasperReportModelAndViewGeneratorsFactory;
+import com.aplana.timesheet.controller.report.Report04ModelAndViewGenerator;
 import com.aplana.timesheet.dao.JasperReportDAO;
 import com.aplana.timesheet.dao.entity.Region;
 import com.aplana.timesheet.exception.JReportBuildError;
@@ -137,7 +138,18 @@ public class JasperReportController {
     }
 
     @RequestMapping(value = "/managertools/report/4", method = RequestMethod.POST)
-    public void showReport04(@ModelAttribute("reportForm") Report04 report) throws Exception {
+    public ModelAndView showReport04(
+            @ModelAttribute("reportForm") Report04 report,
+            BindingResult result,
+            @RequestParam("printtype") Integer printtype,
+            HttpServletResponse response,
+            HttpServletRequest request
+    ) throws JReportBuildError {
+        return showReport(report, result, printtype, 4, response, request);
+    }
+
+    @RequestMapping(value = "/managertools/report/make/4", method = RequestMethod.POST)
+    public void makeReport04(@ModelAttribute("reportForm") Report04 report) throws Exception {
         fillRegionName(report);
         Integer formHashCode = report.hashCode();
         report.setReportDAO(reportDAO);
@@ -152,14 +164,23 @@ public class JasperReportController {
         return jasperReportService.checkParamsReport04(report, formHashCode);
     }
 
-    @RequestMapping(value = "/managertools/report/download/{idReport}", method = RequestMethod.GET, headers = "Accept=text/plain;Charset=UTF-8")
+    @RequestMapping(value = "/managertools/report/download/{idReport}", method = RequestMethod.GET)
     @ResponseBody
-    public void downloadReport04(
+    public ModelAndView downloadReport04(
             @PathVariable("idReport") Integer idReport,
             HttpServletRequest request,
             HttpServletResponse response
     ) throws Exception {
-        jasperReportService.downloadReport04(idReport, request, response);
+        if (!jasperReportService.downloadReport04(idReport, request, response)) {
+            ModelAndView reportNotFound = new ModelAndView("reportNotFound");
+            Report04 report = new Report04();
+            reportNotFound.addObject("errors",  Arrays.asList(
+                    new ObjectError(report.getJRName(), new String[]{"error.reportform.file.deleted"}, null, null)
+            ));
+            return reportNotFound;
+        } else {
+            return null;
+        }
     }
 
     @RequestMapping(value = "/managertools/report/5", method = RequestMethod.POST)

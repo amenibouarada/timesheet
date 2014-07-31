@@ -8,6 +8,7 @@ import com.aplana.timesheet.reports.BaseReport;
 import com.aplana.timesheet.reports.TSJasperReport;
 import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.system.security.SecurityService;
+import com.aplana.timesheet.util.DateTimeUtil;
 import com.aplana.timesheet.util.JsonUtil;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.export.*;
@@ -29,8 +30,6 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static argo.jdom.JsonNodeBuilders.anObjectBuilder;
-import static com.aplana.timesheet.util.DateTimeUtil.SIMPLE_DATE_FORMAT;
-import static com.aplana.timesheet.util.DateTimeUtil.SIMPLE_DATE_FORMAT_WITH_DASH;
 import static com.aplana.timesheet.util.JsonUtil.aStringBuilder;
 
 @Service
@@ -198,15 +197,13 @@ public class JasperReportService {
     @Transactional(readOnly = true)
     public String checkParamsReport04(final BaseReport report, Integer formHashCode)  throws JReportBuildError, ParseException {
         report.checkParams();
-        // TODO предлагаю заменить на com.aplana.timesheet.util.DateTimeUtil.stringToDateForDB()
-        Date beginDate = SIMPLE_DATE_FORMAT_WITH_DASH.parse(report.getBeginDate());
-        Date endDate = SIMPLE_DATE_FORMAT_WITH_DASH.parse(report.getEndDate());
+        Date beginDate = DateTimeUtil.stringToDateForDB(report.getBeginDate());
+        Date endDate = DateTimeUtil.stringToDateForDB(report.getEndDate());
 
         String reportNameFile = String.format("%s (%s-%s)",
                 report.getJRNameFile(),
-                // TODO предлагаю заменить на com.aplana.timesheet.util.DateTimeUtil..stringToDateForView()
-                SIMPLE_DATE_FORMAT.format(beginDate),
-                SIMPLE_DATE_FORMAT.format(endDate));
+                DateTimeUtil.getOnlyDate(beginDate),
+                DateTimeUtil.getOnlyDate(endDate));
 
         Employee employee = securityService.getSecurityPrincipal().getEmployee();
 
@@ -235,15 +232,13 @@ public class JasperReportService {
         report.checkParams();
 
         final String reportName = report.getJRName();
-        // TODO предлагаю заменить на com.aplana.timesheet.util.DateTimeUtil.stringToDateForDB()
-        Date beginDate = SIMPLE_DATE_FORMAT_WITH_DASH.parse(report.getBeginDate());
-        Date endDate = SIMPLE_DATE_FORMAT_WITH_DASH.parse(report.getEndDate());
+        Date beginDate = DateTimeUtil.stringToDateForDB(report.getBeginDate());
+        Date endDate = DateTimeUtil.stringToDateForDB(report.getEndDate());
 
         final String reportNameFile = String.format("%s (%s-%s)",
                 report.getJRNameFile(),
-                // TODO предлагаю заменить на com.aplana.timesheet.util.DateTimeUtil..stringToDateForView()
-                SIMPLE_DATE_FORMAT.format(beginDate),
-                SIMPLE_DATE_FORMAT.format(endDate));
+                DateTimeUtil.getOnlyDate(beginDate),
+                DateTimeUtil.getOnlyDate(endDate));
         final String outputFile = propertyProvider.getPathReports() + reportNameFile + ".xls";
 
         final ReportExportStatus reportExportStatus = new ReportExportStatus();
@@ -331,8 +326,14 @@ public class JasperReportService {
     }
 
     @Transactional
-    public void downloadReport04(final Integer idReport, HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public boolean downloadReport04(final Integer idReport, HttpServletRequest request, HttpServletResponse response) throws IOException {
         ReportExportStatus reportExportStatus = reportExportStatusService.find(idReport);
+        InputStream is;
+        try {
+            is = new FileInputStream(context.getRealPath(reportExportStatus.getPath()));
+        } catch (FileNotFoundException e) {
+            return false;
+        }
         String suffix = ".xls";
         response.setContentType( "application/vnd.ms-excel");
 
@@ -341,14 +342,13 @@ public class JasperReportService {
         if (agent.contains("Firefox")) {
             contentDisposition = "attachment; filename=\"" + MimeUtility.encodeText(reportExportStatus.getReportName() + suffix, "UTF8", "B") + "\"";
         }
-
         response.setHeader("Content-Disposition", contentDisposition);
-        InputStream is = new FileInputStream(context.getRealPath(reportExportStatus.getPath()));
         IOUtils.copy(is, response.getOutputStream());
         response.flushBuffer();
         is.close();
 
         reportExportStatus.setComplete(true);
         reportExportStatusService.save(reportExportStatus);
+        return true;
     }
 }

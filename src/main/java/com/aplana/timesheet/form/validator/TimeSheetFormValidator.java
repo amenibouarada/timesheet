@@ -512,19 +512,20 @@ public class TimeSheetFormValidator extends AbstractValidator {
         logger.debug("Total duration is {}", totalDuration);
         // Проверять причины недоработки будем даже если нет записей в отчете
         //if (tsTablePart != null && !tsTablePart.isEmpty()) {
+        String calDate = tsForm.getCalDate();
         boolean isHoliday = calendarService.isHoliday(
-                DateTimeUtil.stringToDateForDB(tsForm.getCalDate()),
+                DateTimeUtil.stringToDateForDB(calDate),
                 employee
         );
 
         boolean isVacation = vacationService.isDayVacationWithoutPlanned(
                 employee,
-                DateTimeUtil.stringToDateForDB(tsForm.getCalDate())
+                DateTimeUtil.stringToDateForDB(calDate)
         );
 
         boolean isBusinessTrip = businessTripService.isBusinessTripDay(
                 employee,
-                DateTimeUtil.stringToDateForDB(tsForm.getCalDate())
+                DateTimeUtil.stringToDateForDB(calDate)
         );
 
         // Отчет за выходные без отработанных часов невозможен

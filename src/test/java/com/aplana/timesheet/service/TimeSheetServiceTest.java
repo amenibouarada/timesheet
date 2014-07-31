@@ -22,7 +22,7 @@ import static com.aplana.timesheet.enums.TypesOfActivityEnum.getById;
 public class TimeSheetServiceTest extends AbstractJsonTest {
 
     private static final int EMPLOYEE_ID = 1;
-    private static final String DATE = DateFormatUtils.format(new Date(), DateTimeUtil.DATE_PATTERN);
+    private static final String DATE = DateFormatUtils.format(new Date(), DateTimeUtil.DB_DATE_PATTERN);
     private static final Random RANDOM = new Random();
 
     @Autowired

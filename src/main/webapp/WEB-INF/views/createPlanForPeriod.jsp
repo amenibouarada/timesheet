@@ -67,7 +67,7 @@
             putParamIfNotEmpty(requestContent, "<%= CreatePlanForPeriodContoller.TO_DATE_PARAM %>", toDateParam);
 
             function formatDate(date) {
-                return (date == null) ? "" : date.format("<%= DateTimeUtil.DATE_PATTERN.toLowerCase() %>");
+                return (date == null) ? "" : date.format("<%= DateTimeUtil.DB_DATE_PATTERN.toLowerCase() %>");
             }
 
             function putParamIfNotEmpty(requestContent, paramName, paramValue) {
