@@ -204,8 +204,6 @@ public class BusinessTripsAndIllnessAddController extends AbstractController{
 
         java.util.Calendar calendar = java.util.Calendar.getInstance();
         calendar.setTime(reportDate);
-        int year = calendar.get(java.util.Calendar.YEAR);
-        int month = calendar.get(java.util.Calendar.MONTH) + 1;
 
         return new ModelAndView(String.format("redirect:/businesstripsandillness/%s/%s", divisionId, employeeId));
     }

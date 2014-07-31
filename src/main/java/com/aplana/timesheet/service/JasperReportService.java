@@ -8,6 +8,7 @@ import com.aplana.timesheet.reports.BaseReport;
 import com.aplana.timesheet.reports.TSJasperReport;
 import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.system.security.SecurityService;
+import com.aplana.timesheet.system.security.entity.TimeSheetUser;
 import com.aplana.timesheet.util.DateTimeUtil;
 import com.aplana.timesheet.util.JsonUtil;
 import net.sf.jasperreports.engine.*;
@@ -16,6 +17,7 @@ import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -119,6 +121,8 @@ public class JasperReportService {
                     suffix = ".xls";
                     contentType = "application/vnd.ms-excel";
                     break;
+                default:
+                    logger.error("Unknown print type");
             }
 
             response.setContentType(contentType);
@@ -240,10 +244,10 @@ public class JasperReportService {
                 DateTimeUtil.getOnlyDate(beginDate),
                 DateTimeUtil.getOnlyDate(endDate));
         final String outputFile = propertyProvider.getPathReports() + reportNameFile + ".xls";
-
+        final Employee employee = securityService.getSecurityPrincipal().getEmployee();
         final ReportExportStatus reportExportStatus = new ReportExportStatus();
         reportExportStatus.setComplete(false);
-        reportExportStatus.setEmployee(securityService.getSecurityPrincipal().getEmployee());
+        reportExportStatus.setEmployee(employee);
         reportExportStatus.setReportName(reportNameFile);
         reportExportStatus.setHashForm(formHashCode);
         reportExportStatus.setPath(outputFile);
@@ -269,7 +273,6 @@ public class JasperReportService {
                         xlsExporter.setParameter(JRExporterParameter.OUTPUT_FILE_NAME, context.getRealPath(outputFile));
                         xlsExporter.exportReport();
                     }
-                    Employee employee = securityService.getSecurityPrincipal().getEmployee();
                     ReportExportStatus reportExportStatusFinded = reportExportStatusService.find(employee, reportNameFile, formHashCode);
                     sendMailService.performNotificationOnExportReportComplete(reportExportStatusFinded);
                 } catch (JRException e) {
@@ -280,7 +283,7 @@ public class JasperReportService {
                     logger.error(e.getMessage());
                 }
             }
-        }).run();
+        }).start();
     }
 
     /**

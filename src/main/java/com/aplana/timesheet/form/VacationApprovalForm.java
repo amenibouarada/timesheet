@@ -12,7 +12,6 @@ public class VacationApprovalForm {
     String message;
     String buttonsVisible;
     List<ApprovalResultModel> approvalList;
-    Integer size;
 
     public String getMessage() {
         return message;

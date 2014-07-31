@@ -687,7 +687,7 @@ public class PlanEditController {
     }
 
     private String round(Double value){
-        return (new Long(Math.round(value))).toString();
+        return (Long.valueOf(Math.round(value))).toString();
     }
 
     private Double getPercent(Double partValue, Double total){

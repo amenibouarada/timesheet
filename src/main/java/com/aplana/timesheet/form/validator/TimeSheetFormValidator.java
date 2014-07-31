@@ -80,10 +80,6 @@ public class TimeSheetFormValidator extends AbstractValidator {
         int notNullRowNumber = 0;
         if (tsTablePart != null && tsTablePart.size() != 0) {
             Integer selectedEmployeeId = tsForm.getEmployeeId();
-            Employee employee = employeeService.find(selectedEmployeeId);
-            ProjectRolesEnum emplJob = (employee != null)
-                    ? getByCode(employee.getJob().getCode())
-                    : NOT_DEFINED;
             checkForEffectiveActTypes(tsTablePart, tsForm.getEmployeeId(), errors);
             validateSelectedDate(tsForm, selectedEmployeeId, errors);
             for (TimeSheetTableRowForm formRow : tsTablePart) {
@@ -129,7 +125,12 @@ public class TimeSheetFormValidator extends AbstractValidator {
             validateCause(tsForm, employee, errors);
 
             // План на след. день нужен только если есть строки списания
-            final boolean planNecessary = tsTablePart != null && !tsTablePart.isEmpty() && employee != null && employee.getDivision() != null && BooleanUtils.isTrue(employee.getDivision().getPlansRequired());
+            final boolean planNecessary =
+                            tsTablePart != null &&
+                            !tsTablePart.isEmpty() &&
+                            employee != null &&
+                            employee.getDivision() != null &&
+                            BooleanUtils.isTrue(employee.getDivision().getPlansRequired());
             validatePlan(tsForm, emplJob, planNecessary, errors);
 
             if (tsTablePart != null) {

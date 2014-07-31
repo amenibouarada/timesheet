@@ -22,7 +22,10 @@ public class ReportExportStatusDAO {
         Query query = entityManager.createQuery(""
                 + "select re "
                 + "from ReportExportStatus as re " +
-                "where re.employee= :employee  and re.reportName=:reportName and re.hashForm = :hash").
+                "where re.employee= :employee " +
+                "and re.reportName=:reportName " +
+                "and re.hashForm = :hash " +
+                "and re.complete = false").
                 setParameter("employee", employee).
                 setParameter("reportName", reportName).
                 setParameter("hash", hash);

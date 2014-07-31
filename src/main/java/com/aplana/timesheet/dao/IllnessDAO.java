@@ -28,7 +28,7 @@ public class IllnessDAO {
     }
 
     public void setIllness(Illness illness) {
-        Illness illnessMerged = entityManager.merge(illness);
+        entityManager.merge(illness);
         entityManager.flush();
     }
 

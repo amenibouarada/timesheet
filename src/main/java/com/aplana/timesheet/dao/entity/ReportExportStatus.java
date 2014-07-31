@@ -17,7 +17,7 @@ public class ReportExportStatus {
     @Column(columnDefinition = "integer not null")
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "emp_id", nullable = false)
     @ForeignKey(name = "FK_EMPLOYEE")
     private Employee employee;

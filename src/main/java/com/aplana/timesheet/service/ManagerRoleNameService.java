@@ -43,9 +43,9 @@ public class ManagerRoleNameService {
                 return String.format(PROJECT_LEADER, project.getName());
             }
         }
-        if(projectList!=null && !projectList.isEmpty()){
+        if (projectList != null && !projectList.isEmpty()) {
             Project project = projectList.get(0);
-            if (vacationApproval.getManager().getJob().getId().equals(ProjectRolesEnum.ANALYST)){
+            if (vacationApproval.getManager().getJob().getId().equals(ProjectRolesEnum.ANALYST.getId())){
                 return String.format(SENIOR_ANALYST, project.getName());
             }
             return String.format(TEAM_LEADER, project.getName());

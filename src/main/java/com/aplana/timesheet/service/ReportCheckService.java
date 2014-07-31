@@ -144,7 +144,7 @@ public class ReportCheckService {
             firstDate = sdf.parse(firstDay);
             lastDate = sdf.parse(lastDay);
         } catch (ParseException e) {
-            new RuntimeException(e);
+            throw new RuntimeException(e);
         }
 
         for (Employee emp : employeeList) {
