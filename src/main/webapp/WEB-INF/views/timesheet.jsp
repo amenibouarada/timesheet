@@ -453,13 +453,6 @@ function submitform(s) {
     }
 }
 
-function CopyPlan() {
-    var plan_text = dojo.byId("plan_textarea").innerHTML;
-    plan_text = plan_text.replace(/<br>/g, '\n');
-    plan_text = plan_text.replace(/&amp;/g, '&');
-    dojo.byId("description_id_" + GetFirstIdDescription()).value = plan_text;
-}
-
 function requiredCommentSet() {
     var overtimeCause = dijit.byId("overtimeCause").get("value");
     var undertimeExp = (overtimeCause ==<%= UndertimeCausesEnum.OTHER.getId() %>);
