@@ -65,6 +65,7 @@ function divisionChangeVac(division) {
     }
     fillProjectListByDivChange(divisionId);
     sortManager();
+    updateEmployeeSelect();
 }
 
 function multipleOptSelectedInSelect(select) {

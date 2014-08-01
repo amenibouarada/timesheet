@@ -313,7 +313,7 @@
             dialog.hide();
         }
     </script>
-    // TODO перенести в viewreports.css
+    <%-- TODO перенести в viewreports.css--%>
     <style type="text/css">
         .colortext {
             color: brown;
@@ -690,7 +690,7 @@
 </div>
 
 <div id="showApprovaldialog" data-dojo-type="dijit.Dialog" title="Комментарий к запросу" style="display: none;">
-    <div data-dojo-type="dijit.layout.ContentPane" style="width: 300px; height: 110px;">
+    <div data-dojo-type="dijit.layout.ContentPane" style="width: 310px; height: 110px;">
         <span>Комментарий</span>
         <textarea id="commentText" disabled maxlength="600" rows="3" style="width: 97%;margin: 3px;"></textarea>
         <button style="margin-top: 10px; float: right;"

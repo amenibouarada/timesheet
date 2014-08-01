@@ -233,6 +233,7 @@
                 managersNode.disabled = '';
             }
             managersNode.value = "${managerId}" != "" ? +"${managerId}" : null;
+            updateEmployeeList();
         }
 
         function getSelectedIndexes(multiselect)
