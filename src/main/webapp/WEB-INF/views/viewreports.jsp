@@ -149,6 +149,39 @@
             widgets.employee.set('value', "${employeeId}" != "" ? +"${employeeId}" : null);
         }
 
+        function incMonth(){
+            var month = widgets.month.value;
+            if (month < 12) {
+                month++;
+                widgets.month.value = month;
+            }
+        }
+
+        function decMonth() {
+            var month = widgets.month.value;
+            if (month > 1) {
+                month--;
+            }
+            widgets.month.value = month;
+        }
+
+        function incYear(){
+            var length = widgets.year.options.length;
+            var year = widgets.year.value;
+            if (year < widgets.year.options.item(length - 1).value) {
+                year++;
+                widgets.year.value = year;
+            }
+        }
+
+        function decYear(){
+            var year = widgets.year.value;
+            if (year > widgets.year.options.item(0).value) {
+                year--;
+                widgets.year.value = year;
+            }
+        }
+
         function showDates() {
             var empId =  widgets.employee.value;
             var year = widgets.year.value;
@@ -190,7 +223,6 @@
             monthSelect.options.length = 0;
             for (var i = 0; i < monthList.length; i++) {
                 if (year == monthList[i].year) {
-                    insertEmptyOption(monthSelect);
                     for (var j = 0; j < monthList[i].months.length; j++) {
                         if (monthList[i].months[j].number != 0 && monthList[i].months[j].number != 27) {
                             monthOption = dojo.doc.createElement("option");
@@ -375,16 +407,18 @@
     <br><br>
 
     Год:
+    <div data-dojo-type="dijit/form/ToggleButton" onclick="decYear()"><</div>
     <form:select path="year" id="year" class="without_dojo" onchange="yearChange(this)"
                  onmouseover="tooltip.show(getTitle(this));" onmouseout="tooltip.hide();">
-        <form:option label="" value="0"/>
         <form:options items="${yearsList}" itemLabel="year" itemValue="year"/>
     </form:select>
+    <div data-dojo-type="dijit/form/ToggleButton" onclick="incYear()">></div>
     Месяц:
+    <div data-dojo-type="dijit/form/ToggleButton" onclick="decMonth()"><</div>
     <form:select path="month" id="month" class="without_dojo" onmouseover="tooltip.show(getTitle(this));"
                  onmouseout="tooltip.hide();">
-        <form:option label="" value="0"/>
     </form:select>
+    <div data-dojo-type="dijit/form/ToggleButton" onclick="incMonth()">></div>
     <button id="show" style="width:150px" style="vertical-align: middle" type="button" onclick="showDates()">Показать
     </button>
     <p/>
