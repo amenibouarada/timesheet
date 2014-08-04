@@ -37,7 +37,6 @@ var billableFieldNames = {
     }
 };
 
-console.log(divisionsEmployeesJSON);
 dojo.forEach(divisionsEmployeesJSON, function (divisionData) {
     dojo.forEach(divisionData.managers, function (managerData) {
         if (managerData.active != "active") {
