@@ -158,8 +158,9 @@ function updateEmployeeSelect() {
                         tooltip.hide();
                     },
                     onChange: function () {
-                        dojo.byId('employeeId').value = this.item.id;
-                        selectedEmployee = this.item.id;
+                        var selectedEmployee2 = this.item ? this.item.id : null;
+                        dojo.byId('employeeId').value = selectedEmployee2;
+                        selectedEmployee = selectedEmployee2;
                     }
                 }, "employeeIdSelect");
                 employeeFlteringSelect.startup();
@@ -176,7 +177,10 @@ function updateEmployeeSelect() {
 
 function addVacation() {
     var empId = dojo.byId(EMPLOYEE_ID).value;
-
+    if (!empId || empId == "null") {
+        alert("Не выбрано значение в поле \"Сотрудник\"");
+        return;
+    }
     vacationsForm.action = contextPath + "/createVacation/" + empId;
     vacationsForm.submit();
 }
