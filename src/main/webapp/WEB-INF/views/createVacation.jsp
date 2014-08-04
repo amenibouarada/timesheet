@@ -294,7 +294,8 @@ function updateEmployeeSelect() {
                     tooltip.hide();
                 },
                 onChange: function () {
-                    dojo.byId('employeeId').value = this.item.id;
+                    var value = this.item ? this.item.id : null;
+                    dojo.byId('employeeId').value = value;
                     dateInfoHolder = [];
                     updateExitToWorkAndCountVacationDay();
                 }

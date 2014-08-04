@@ -821,10 +821,12 @@ function projectChange(obj) {
 
 /* Выставляет должность сотрудника (проектная роль по умолчанию) */
 function setDefaultEmployeeJob(rowIndex) {
+    if (!document.employeeList || !dojo.byId("divisionId")) {
+        return;
+    }
     var selectedEmployeeId = dojo.byId("employeeId").value;
     var divisionId = dojo.byId("divisionId").value;
     var defaultEmployeeJobId = 0;
-
     for (var i = 0; i < employeeList.length; i++) {
         if (divisionId == employeeList[i].divId) {
             for (var j = 0; j < employeeList[i].divEmps.length; j++) {

@@ -196,8 +196,9 @@
                             tooltip.hide();
                         },
                         onChange: function() {
-                            dojo.byId('employeeId').value = this.item.id;
-                            var obj = { value:this.item.id };
+                            var value = this.item ? this.item.id : null;
+                            dojo.byId('employeeId').value = value;
+                            var obj = { value:value };
                             onEmployeeChange(obj);
                         }
                     }, "employeeIdSelect");
