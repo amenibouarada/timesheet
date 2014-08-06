@@ -1087,8 +1087,6 @@ public class JasperReportDAO {
             }
             String[] fields = {"period", "name", "group", "type", "value"};
             return new HibernateQueryResultDataSource(dataSource, fields);
-        } catch (ParseException e) {
-            e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
         }

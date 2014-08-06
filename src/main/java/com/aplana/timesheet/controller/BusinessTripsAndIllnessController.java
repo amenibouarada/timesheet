@@ -8,6 +8,7 @@ import com.aplana.timesheet.dao.entity.*;
 import com.aplana.timesheet.enums.PermissionsEnum;
 import com.aplana.timesheet.enums.QuickReportTypesEnum;
 import com.aplana.timesheet.enums.RegionsEnum;
+import com.aplana.timesheet.exception.TSRuntimeException;
 import com.aplana.timesheet.exception.controller.BusinessTripsAndIllnessControllerException;
 import com.aplana.timesheet.form.BusinessTripsAndIllnessForm;
 import com.aplana.timesheet.service.*;
@@ -410,11 +411,14 @@ public class BusinessTripsAndIllnessController extends AbstractController{
      * Год нужно уменьшить.
      */
     private Date generateYearBeginDate(DateNumbers dateNumbers, Integer month, Integer year) throws BusinessTripsAndIllnessControllerException {
-            if (month < dateNumbers.getDatabaseMonth()) {
-                year -= 1;
-            }
-
+        if (month < dateNumbers.getDatabaseMonth()) {
+            year -= 1;
+        }
+        try {
             return DateTimeUtil.parseStringToDateForView(String.format("%s.%s.%s", dateNumbers.getDay(), dateNumbers.getDatabaseMonth(), year));
+        } catch (TSRuntimeException e) {
+            throw new BusinessTripsAndIllnessControllerException("Formatting error", e);
+        }
     }
 
     /**
