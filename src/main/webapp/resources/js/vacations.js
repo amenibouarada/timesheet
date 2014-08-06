@@ -26,15 +26,15 @@ function showGraphic(type) {
             type = VIEW_GRAPHIC_BY_WEEK;
         }
     }
-    var g = new Gantt(dojo.byId("graphic_div"), holidayList, type);
+    var g = new Gantt(dojo.byId("graphic_div"), holidayList, type, dojo.byId(CAL_FROM_DATE).value, dojo.byId(CAL_TO_DATE).value);
 
-    for (var i = 0; i < vacationListJSON.length; i++) {
+    for (var i in vacationListJSON) {
         var vacation = new RegionEmployees(vacationListJSON[i].region_name, vacationListJSON[i].employeeList, vacationListJSON[i].holidays);
         g.AddRegionEmployeeList(vacation);
     }
 
     //отрисовка только самой таблицы
-    g.DrawTable();
+    g.Draw();
 
     // растянем контейнер вкладок
     var tableGraphicWidth = dojo.byId("tableGraphic").clientWidth * 1.1;
@@ -44,12 +44,6 @@ function showGraphic(type) {
             style: "width: " + tableGraphicWidth + "px"
         });
     }
-
-    /*
-     т.к. размер колонки формируется уже после отрисовки таблицы
-     "содержимое" таблицы отрисовывается сейчас
-     */
-    g.DrawVacations();
 }
 
 function showVacations() {

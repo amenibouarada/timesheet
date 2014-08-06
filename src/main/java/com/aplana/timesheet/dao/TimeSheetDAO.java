@@ -94,14 +94,6 @@ public class TimeSheetDAO {
     @SuppressWarnings("unchecked")
     public TimeSheet findForDateAndEmployee(Calendar date, Integer employeeId) {
         return findForDateAndEmployeeByTypes(date, employeeId, Arrays.asList(TypesOfTimeSheetEnum.REPORT));
-
-//        Query query = entityManager.createQuery(
-//                "select ts from TimeSheet as ts where ts.calDate = :calDate and ts.employee.id = :employeeId AND (ts.type = 0)"
-//        ).setParameter("calDate", date).setParameter("employeeId", employeeId);
-//
-//        List<TimeSheet> result = query.getResultList();
-//
-//        return result.isEmpty() ? null : result.get(0);
     }
 
     /**
