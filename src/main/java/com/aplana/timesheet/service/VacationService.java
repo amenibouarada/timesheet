@@ -121,12 +121,7 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
     }
 
     public List<Vacation> findVacations(List<Employee> employees, Date beginDate, Date endDate, DictionaryItem typeId) {
-        List<Vacation> vacations = new ArrayList<Vacation>();
-        for (Employee employee : employees) {
-            List<Vacation> empVacation = findVacations(employee.getId(), beginDate, endDate, typeId);
-            vacations.addAll(empVacation);
-        }
-        return vacations;
+        return vacationDAO.findVacations(employees, beginDate, endDate, typeId);
     }
 
     public List<Vacation> findVacationsByTypes(Integer year, Integer month, Integer employeeId, List<DictionaryItem> types) {
@@ -188,16 +183,8 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
         return vacationsWorkdaysCount;
     }
 
-    // ToDo удалить exception
     public Double getVacationsWorkdaysCount(Employee employee, Integer year, Integer month) {
-//        try {
             return (double)vacationDAO.getVacationsWorkdaysCount(employee, year, month);
-//            return viewReportHelper.getCountVacationAndPlannedVacationDays(year, month, employee.getId()).doubleValue();
-//        } catch (NotDataForYearInCalendarException e) {
-//            final Logger LOGGER = LoggerFactory.getLogger(VacationService.class);
-//            LOGGER.error("Error in com.aplana.timesheet.controller.VacationService.getVacationsWorkdaysCount : " + e.getMessage());
-//        }
-//        return null;
     }
 
     public Map<DictionaryItem, List<Vacation>> splitVacationByTypes(List<Vacation> vacations) {
@@ -423,19 +410,17 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
                                 withField("region_id", aStringBuilder(region.getId().toString())).
                                 withField("region_name", aStringBuilder(region.getName())).
                                 withField("employeeList", employeeNode).
-                                withField("holidays", getHolidayInRegion(dateFrom, dateTo, region.getId()))
+                                withField("holidays", getHolidayInRegion(dateFrom, dateTo, region))
                 );
             }
         }
         return JsonUtil.format(result);
     }
 
-    private JsonArrayNodeBuilder getHolidayInRegion(Date begin, Date end, Integer region_id) {
+    private JsonArrayNodeBuilder getHolidayInRegion(Date begin, Date end, Region region) {
         JsonArrayNodeBuilder builder = anArrayBuilder();
-        //todo плохо
-        Region region = regionService.find(region_id);
-        List<Holiday> s = calendarService.getHolidaysOnlyForRegion(DateUtils.addDays(begin, -30), DateUtils.addDays(end, 30), region);
-        for (Holiday holiday : s) {
+        List<Holiday> holidays = calendarService.getHolidaysOnlyForRegion(begin, end, region);
+        for (Holiday holiday : holidays) {
             builder.withElement(aStringBuilder(dateToString(holiday.getCalDate().getCalDate(), VIEW_DATE_PATTERN)));
         }
         return builder;
