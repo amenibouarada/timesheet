@@ -161,20 +161,24 @@ public class JiraService {
         if (employeeId != null && user != null) {
             JiraRestClient jiraRestClient = getRestClient();
 
-            List<Issue> issueList = jiraDAO.getIssues(jiraRestClient,  genJqlQueryInProgress(user.getJiraName()));
+            List<Issue> issueList = jiraDAO.getIssues(jiraRestClient, genJqlQueryInProgress(user.getJiraName()));
+            logger.debug("issueList.size="+Integer.toString(issueList.size()));
                     /* формируем строку с краткими данными */
             for (Issue item : issueList) {
-                 if (projects.get(item.getKey()) != null) {
-                     projects.get(item.getKey()).add(item.getSummary());
-                 } else {
-                     List<String> list = projects.put(item.getKey(), new LinkedList<String>());
-                     list.add(item.getSummary());
-                 }
+                logger.debug(item.getKey() + " - " + item.getSummary());
+                if (projects.get(item.getKey()) != null) {
+                    projects.get(item.getKey()).add(item.getSummary());
+                } else {
+                    projects.put(item.getKey(), new LinkedList<String>());
+                    projects.get(item.getKey()).add(item.getSummary());
+                }
             }
-
-            for (Map.Entry<String, List<String>> entry : projects.entrySet()){
+            logger.debug("projects.size="+Integer.toString(projects.size()));
+            for (Map.Entry<String, List<String>> entry : projects.entrySet()) {
+                logger.debug(entry.getKey());
                 stringBuilder.append("\r\n").append(entry.getKey()).append(" : ");
                 for (String summary : projects.get(entry.getKey())) {
+                    logger.debug(summary);
                     stringBuilder.append("\r\n").append(summary);
                 }
             }
