@@ -7,6 +7,7 @@ import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.EmployeeService;
 import com.aplana.timesheet.service.ProjectService;
 import com.aplana.timesheet.service.SendMailService;
+import com.aplana.timesheet.util.DateTimeUtil;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import org.apache.commons.lang.WordUtils;
@@ -101,8 +102,8 @@ public class PlannedVacationDeletedSender extends  AbstractVacationSenderWithCop
                 String.format(
                         " на %s за период с %s по %s",
                         WordUtils.uncapitalize(params.getType().getValue()),
-                        DateFormatUtils.format(params.getBeginDate(), DATE_FORMAT),
-                        DateFormatUtils.format(params.getEndDate(), DATE_FORMAT)
+                        DateTimeUtil.formatDateIntoViewFormat(params.getBeginDate()),
+                        DateTimeUtil.formatDateIntoViewFormat(params.getEndDate())
                 )
         );
 

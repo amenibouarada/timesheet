@@ -515,18 +515,18 @@ public class TimeSheetFormValidator extends AbstractValidator {
         //if (tsTablePart != null && !tsTablePart.isEmpty()) {
         String calDate = tsForm.getCalDate();
         boolean isHoliday = calendarService.isHoliday(
-                DateTimeUtil.stringToDateForDB(calDate),
+                DateTimeUtil.parseStringToDateForDB(calDate),
                 employee
         );
 
         boolean isVacation = vacationService.isDayVacationWithoutPlanned(
                 employee,
-                DateTimeUtil.stringToDateForDB(calDate)
+                DateTimeUtil.parseStringToDateForDB(calDate)
         );
 
         boolean isBusinessTrip = businessTripService.isBusinessTripDay(
                 employee,
-                DateTimeUtil.stringToDateForDB(calDate)
+                DateTimeUtil.parseStringToDateForDB(calDate)
         );
 
         // Отчет за выходные без отработанных часов невозможен
@@ -649,8 +649,8 @@ public class TimeSheetFormValidator extends AbstractValidator {
         /* РЦК может всё (трудяга!) */
         if (!employeeService.isEmployeeDivisionLeader(employee.getId())) {
         /* проверим работу в выходные/праздничные дни */
-            if (calendarService.isHoliday(DateTimeUtil.stringToDateForDB(tsForm.getCalDate()), employee)
-                    || vacationService.isDayVacationWithoutPlanned(employee, DateTimeUtil.stringToDateForDB(tsForm.getCalDate()))) {
+            if (calendarService.isHoliday(DateTimeUtil.parseStringToDateForDB(tsForm.getCalDate()), employee)
+                    || vacationService.isDayVacationWithoutPlanned(employee, DateTimeUtil.parseStringToDateForDB(tsForm.getCalDate()))) {
                 checkCause(tsForm, "работы в праздничный/выходной день", DictionaryEnum.WORK_ON_HOLIDAY_CAUSE, errors);
                 checkTypeOfCompensation(tsForm, errors);
             } else {

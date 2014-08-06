@@ -9,21 +9,19 @@ import com.aplana.timesheet.form.AdminProjectForm;
 import com.aplana.timesheet.form.AdminProjectManagerForm;
 import com.aplana.timesheet.form.AdminProjectTaskForm;
 import com.aplana.timesheet.service.*;
+import com.aplana.timesheet.util.DateTimeUtil;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
-import java.sql.Timestamp;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -34,7 +32,6 @@ import java.util.*;
 public class AdminProjectEditController {
 
     private static final Logger logger = LoggerFactory.getLogger(AdminProjectsController.class);
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
     @Autowired
     ProjectService projectService;
@@ -113,8 +110,8 @@ public class AdminProjectEditController {
         modelAndView.addObject("managerId", project.getManager().getId());
         form.setManagerDivision(project.getManager().getDivision().getId());
         form.setCustomer(project.getCustomer());
-        form.setStartDate(dateFormat.format(project.getStartDate()));
-        form.setEndDate(dateFormat.format(project.getEndDate()));
+        form.setStartDate(DateTimeUtil.formatDateIntoDBFormat(project.getStartDate()));
+        form.setEndDate(DateTimeUtil.formatDateIntoDBFormat(project.getEndDate()));
         form.setState(project.getState().getId());
         form.setFundingType(project.getFundingType().getId());
         form.setJiraKey(project.getJiraProjectKey());
@@ -164,10 +161,10 @@ public class AdminProjectEditController {
             billable.setEmployee(projectBillable.getEmployee().getId());
             billable.setBillable(projectBillable.getBillable());
             if (projectBillable.getStartDate() != null) {
-                billable.setStartDate(dateFormat.format(projectBillable.getStartDate()));
+                billable.setStartDate(DateTimeUtil.formatDateIntoDBFormat(projectBillable.getStartDate()));
             }
             if (projectBillable.getEndDate() != null) {
-                billable.setEndDate(dateFormat.format(projectBillable.getEndDate()));
+                billable.setEndDate(DateTimeUtil.formatDateIntoDBFormat(projectBillable.getEndDate()));
             }
             billable.setComment(projectBillable.getComment());
             billable.setToDelete("");
@@ -193,13 +190,8 @@ public class AdminProjectEditController {
         project.setDivision(divisionService.find(form.getDivision()));
         project.setManager(employeeService.find(form.getManager()));
         project.setCustomer(StringEscapeUtils.unescapeHtml4(form.getCustomer()));
-        try {
-            project.setStartDate(dateFormat.parse(form.getStartDate()));
-            project.setEndDate(dateFormat.parse(form.getEndDate()));
-        } catch (ParseException e) {
-            logger.error("AdminProjectForm date parse error!", e);
-            e.printStackTrace();
-        }
+        project.setStartDate(DateTimeUtil.parseStringToDateForDB(form.getStartDate()));
+        project.setEndDate(DateTimeUtil.parseStringToDateForDB(form.getEndDate()));
         project.setState(dictionaryItemService.find(form.getState()));
         project.setFundingType(dictionaryItemService.find(form.getFundingType()));
         project.setJiraProjectKey(StringEscapeUtils.unescapeHtml4(form.getJiraKey()));
@@ -252,13 +244,8 @@ public class AdminProjectEditController {
 
                 projectBillable.setEmployee(employeeService.find(billableForm.getEmployee()));
                 projectBillable.setBillable(billableForm.getBillable());
-                try {
-                    projectBillable.setStartDate(dateFormat.parse(billableForm.getStartDate()));
-                    projectBillable.setEndDate(dateFormat.parse(billableForm.getEndDate()));
-                } catch (ParseException e) {
-                    logger.error("billableForm date parse error!", e);
-                    e.printStackTrace();
-                }
+                projectBillable.setStartDate(DateTimeUtil.parseStringToDateForDB(billableForm.getStartDate()));
+                projectBillable.setEndDate(DateTimeUtil.parseStringToDateForDB(billableForm.getEndDate()));
                 projectBillable.setComment(StringEscapeUtils.unescapeHtml4(billableForm.getComment()));
                 projectBillable.setProject(project);
                 employeeProjectBillables.add(projectBillable);

@@ -8,6 +8,7 @@ import com.aplana.timesheet.service.ProjectService;
 import com.aplana.timesheet.service.SendMailService;
 import com.aplana.timesheet.system.constants.PadegConstants;
 import com.aplana.timesheet.system.properties.TSPropertyProvider;
+import com.aplana.timesheet.util.DateTimeUtil;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import org.apache.commons.lang.time.DateFormatUtils;
@@ -110,8 +111,8 @@ public class PlannedVacationRemoveSender  extends  AbstractVacationSenderWithCop
                 "Информируем Вас о удалении планируемого отпуска %s из г. %s на период %s - %s.",
                 employeeNameStr,
                 vacation.getEmployee().getRegion().getName(),
-                DateFormatUtils.format(vacation.getBeginDate(), DATE_FORMAT),
-                DateFormatUtils.format(vacation.getEndDate(), DATE_FORMAT)
+                DateTimeUtil.formatDateIntoViewFormat(vacation.getBeginDate()),
+                DateTimeUtil.formatDateIntoViewFormat(vacation.getEndDate())
         ));
 
         return stringBuilder.toString();
@@ -123,8 +124,8 @@ public class PlannedVacationRemoveSender  extends  AbstractVacationSenderWithCop
         return String.format(
                 "Планируемый отпуск %s за период %s - %s удален",
                 employeeNameStr,
-                DateFormatUtils.format(vacation.getBeginDate(), DATE_FORMAT),
-                DateFormatUtils.format(vacation.getEndDate(), DATE_FORMAT)
+                DateTimeUtil.formatDateIntoViewFormat(vacation.getBeginDate()),
+                DateTimeUtil.formatDateIntoViewFormat(vacation.getEndDate())
         );
     }
 }

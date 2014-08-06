@@ -228,8 +228,8 @@ public class CalendarDAO {
 
     public int getWorkDaysCountForRegion(Region region, Integer year, Integer month, @Nullable Date fromDate,
                                          @Nullable Date toDate) {
-        final Date qFromDate = (fromDate != null) ? fromDate : DateTimeUtil.stringToDateForDB(DateTimeUtil.MIN_DATE);
-        final Date qToDate = (toDate != null) ? toDate : DateTimeUtil.stringToDateForDB(DateTimeUtil.MAX_DATE);
+        final Date qFromDate = (fromDate != null) ? fromDate : DateTimeUtil.parseStringToDateForDB(DateTimeUtil.MIN_DATE);
+        final Date qToDate = (toDate != null) ? toDate : DateTimeUtil.parseStringToDateForDB(DateTimeUtil.MAX_DATE);
 
         final Query query = entityManager.createQuery(
                         " select count(c)-count(h)" +
@@ -244,58 +244,6 @@ public class CalendarDAO {
                 .setParameter("dateEnd", qToDate);
 
         return ((Long) query.getSingleResult()).intValue();
-
-/*  проблемы вставки условий в секцию left join on (xxx = 1 and yyy = 2) */
-/*        final CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        final CriteriaQuery<Object> criteriaQuery = criteriaBuilder.createQuery();
-        final Root<Calendar> from = criteriaQuery.from(Calendar.class);
-        final Join<Object, Object> join = from.join("holidays", JoinType.LEFT);
-        final CriteriaQuery<Object> select = criteriaQuery.select(criteriaBuilder.diff(
-                criteriaBuilder.count(from),
-                criteriaBuilder.count(join)
-        ));
-        final List<Predicate> predicates = new ArrayList<Predicate>();
-        final Path<Date> calDatePath = from.get("calDate");
-        final Path<Region> regionPath = join.get("region");
-
-        predicates.add(
-                criteriaBuilder.and(
-                        criteriaBuilder.equal(
-                                criteriaBuilder.function("YEAR", Integer.class, calDatePath),
-                                year
-                        ),
-                        criteriaBuilder.equal(
-                                criteriaBuilder.function("MONTH", Integer.class, calDatePath),
-                                month
-                        ),
-                        criteriaBuilder.or(
-                                criteriaBuilder.isNull(regionPath),
-                                criteriaBuilder.equal(regionPath, region)
-                        )
-                )
-        );
-
-        if (fromDate != null) {
-            predicates.add(
-                    criteriaBuilder.greaterThanOrEqualTo(
-                            calDatePath,
-                            fromDate
-                    )
-            );
-        }
-
-        if (toDate != null) {
-            predicates.add(
-                    criteriaBuilder.lessThanOrEqualTo(
-                            calDatePath,
-                            toDate
-                    )
-            );
-        }
-
-        select.where(predicates.toArray(new Predicate[predicates.size()]));
-
-        return ((Long) entityManager.createQuery(select).getSingleResult()).intValue();*/
     }
 
     public Date tryGetMaxDateMonth(Integer year, Integer month) {

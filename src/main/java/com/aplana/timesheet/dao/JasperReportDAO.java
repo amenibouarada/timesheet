@@ -10,7 +10,6 @@ import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.util.StringUtil;
 import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +22,6 @@ import javax.persistence.Query;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static com.aplana.timesheet.enums.TypesOfActivityEnum.getProjectPresaleNonProjectActivityId;
@@ -861,8 +859,8 @@ public class JasperReportDAO {
         if (!withDatesClause) {
             Map<String, Timestamp> dates= (Map<String, Timestamp>) datesQuery.getSingleResult();
             if(dates!=null){
-                report.setBeginDate(DateTimeUtil.formatDate(dates.get("minDate")));
-                report.setEndDate(DateTimeUtil.formatDate(dates.get("maxDate")));
+                report.setBeginDate(DateTimeUtil.formatDateIntoDBFormat(dates.get("minDate")));
+                report.setEndDate(DateTimeUtil.formatDateIntoDBFormat(dates.get("maxDate")));
             }
         }
 
@@ -870,7 +868,6 @@ public class JasperReportDAO {
     }
 
     public HibernateQueryResultDataSource getReport07Data(Report07 report) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         try {
             final Report07PeriodTypeEnum periodType =
                     Report07PeriodTypeEnum.getByMonthsCount(report.getPeriodType());
@@ -880,8 +877,8 @@ public class JasperReportDAO {
             ArrayList rolesTest = this.readRolesFromString(propertyProvider.getProjectRoleTest());
             ArrayList rolesAnalyst = this.readRolesFromString(propertyProvider.getProjectRoleAnalyst());
             ArrayList rolesSystem = this.readRolesFromString(propertyProvider.getProjectRoleSystem());
-            Date start = sdf.parse(report.getBeginDate());
-            Date end = sdf.parse(report.getEndDate());
+            Date start = DateTimeUtil.parseStringToDateForDB(report.getBeginDate());
+            Date end = DateTimeUtil.parseStringToDateForDB(report.getEndDate());
             Query query1;
             if (report.getDivisionOwner() != 0) {
                 query1 = this.getReport07Query1(start, end, report.getDivisionEmployee(), report.getDivisionOwner());

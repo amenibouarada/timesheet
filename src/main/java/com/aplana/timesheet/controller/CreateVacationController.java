@@ -86,8 +86,8 @@ public class CreateVacationController {
                 employeeService.find(employee.getId()).getRegion()).getCalDate(); //При выборе текущего сотрудника, поле Регион незаполнено
 
         createVacationForm.setDivisionId(employee.getDivision().getId());
-        createVacationForm.setCalFromDate(DateTimeUtil.formatDate(nextWorkDay));
-        createVacationForm.setCalToDate(DateTimeUtil.formatDate(nextWorkDay));
+        createVacationForm.setCalFromDate(DateTimeUtil.formatDateIntoDBFormat(nextWorkDay));
+        createVacationForm.setCalToDate(DateTimeUtil.formatDateIntoDBFormat(nextWorkDay));
         createVacationForm.setEmployeeId(employee.getId());
 
         return getModelAndView(employee);

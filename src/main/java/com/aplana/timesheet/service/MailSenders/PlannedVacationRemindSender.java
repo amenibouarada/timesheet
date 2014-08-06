@@ -3,6 +3,7 @@ package com.aplana.timesheet.service.MailSenders;
 import com.aplana.timesheet.dao.entity.Vacation;
 import com.aplana.timesheet.service.SendMailService;
 import com.aplana.timesheet.system.properties.TSPropertyProvider;
+import com.aplana.timesheet.util.DateTimeUtil;
 import com.aplana.timesheet.util.LanguageUtil;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
@@ -51,8 +52,8 @@ public class PlannedVacationRemindSender extends AbstractVacationSenderWithCopyT
     }
 
     private String getBody(Vacation vacation) {
-        String beginDateStr = DateFormatUtils.format(vacation.getBeginDate(), DATE_FORMAT);
-        String endDateStr = DateFormatUtils.format(vacation.getEndDate(), DATE_FORMAT);
+        String beginDateStr = DateTimeUtil.formatDateIntoViewFormat(vacation.getBeginDate());
+        String endDateStr =DateTimeUtil.formatDateIntoViewFormat(vacation.getEndDate());
 
         // Количество дней от момента удаления до планируемого начала отпуска
         Integer deleteThreshold = propertyProvider.getPlannedVacationDeleteThreshold();
@@ -62,7 +63,7 @@ public class PlannedVacationRemindSender extends AbstractVacationSenderWithCopyT
         c.setTime(vacation.getBeginDate());
         c.add(Calendar.DATE, -deleteThreshold);
         Date deleteDate = c.getTime();
-        String deleteDateStr = DateFormatUtils.format(deleteDate, DATE_FORMAT);
+        String deleteDateStr = DateTimeUtil.formatDateIntoViewFormat(deleteDate);
 
         // Количество дней от текущего дня до начала планируемого отпуска
         c.setTime(new Date());
@@ -101,9 +102,9 @@ public class PlannedVacationRemindSender extends AbstractVacationSenderWithCopyT
         StringBuilder stringBuilder = new StringBuilder();
 
         stringBuilder.append("Планируемый отпуск за период: ");
-        stringBuilder.append(DateFormatUtils.format(vacation.getBeginDate(), DATE_FORMAT));
+        stringBuilder.append(DateTimeUtil.formatDateIntoViewFormat(vacation.getBeginDate()));
         stringBuilder.append(" - ");
-        stringBuilder.append(DateFormatUtils.format(vacation.getEndDate(), DATE_FORMAT));
+        stringBuilder.append(DateTimeUtil.formatDateIntoViewFormat(vacation.getEndDate()));
 
         return stringBuilder.toString();
     }

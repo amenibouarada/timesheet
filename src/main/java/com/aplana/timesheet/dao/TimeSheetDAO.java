@@ -291,7 +291,8 @@ public class TimeSheetDAO {
           При желании можно переписать на Criteria
          */
 
-        final Query query = entityManager.createNativeQuery("SELECT tscal.empid, MIN(calnext.calDate)" +
+        final Query query = entityManager.createNativeQuery(
+                " SELECT tscal.empid, MIN(calnext.calDate)" +
                 " FROM (SELECT emp.id empid, MAX(cal.calDate) maxcaldate" +
                 "       FROM calendar cal" +
                 "       INNER JOIN time_sheet ts on cal.caldate=ts.caldate" +
@@ -306,17 +307,19 @@ public class TimeSheetDAO {
                 " AND NOT EXISTS (" +
                 "       SELECT i.employee_id,cal.caldate from calendar cal " +
                 "       RIGHT JOIN illness i on cal.caldate between i.begin_date and i.end_date where " +
-                "       calnext.caldate = cal.caldate and emp1.id= i.employee_id) AND " +
-                " NOT EXISTS (" +
+                "       calnext.caldate = cal.caldate and emp1.id= i.employee_id) " +
+                " AND NOT EXISTS (" +
                 "       SELECT v.employee_id,calv.caldate from calendar calv " +
                 "       RIGHT JOIN vacation v on calv.caldate between v.begin_date and v.end_date " +
                 "       WHERE calv.caldate = calnext.caldate AND v.employee_id = emp1.id AND v.status_id = :statusId AND v.type_id <> :typePlanned) " +
-                " AND " +
-                " NOT EXISTS (" +
+                " AND NOT EXISTS (" +
                 "       SELECT h.caldate from holiday h " +
                 "       WHERE h.calDate=calnext.calDate and (h.region=r.id or h.region is null) )" +
                 " GROUP BY 1" +
-                " ORDER BY 1").setParameter("division", division).setParameter("statusId", APPROVED.getId()).setParameter("typePlanned", PLANNED.getId());
+                " ORDER BY 1").
+                setParameter("division", division).
+                setParameter("statusId", APPROVED.getId()).
+                setParameter("typePlanned", PLANNED.getId());
 
         final List resultList = query.getResultList();
         final Map<Integer, Date> resultMap = new HashMap<Integer, Date>(resultList.size());

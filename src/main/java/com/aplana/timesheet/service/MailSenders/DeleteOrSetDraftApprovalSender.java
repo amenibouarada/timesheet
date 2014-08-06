@@ -4,13 +4,13 @@ import com.aplana.timesheet.dao.entity.TimeSheet;
 import com.aplana.timesheet.service.SendMailService;
 import com.aplana.timesheet.system.constants.PadegConstants;
 import com.aplana.timesheet.system.properties.TSPropertyProvider;
+import com.aplana.timesheet.util.DateTimeUtil;
 import padeg.lib.Padeg;
 
 import javax.mail.Multipart;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.List;
 
@@ -43,7 +43,7 @@ public class DeleteOrSetDraftApprovalSender extends MailSender<TimeSheet> {
 
         String employeeName = timeSheet.getEmployee().getName();
         String employeeEmail = timeSheet.getEmployee().getEmail();
-        String date = new SimpleDateFormat("dd.MM.yyyy").format(timeSheet.getCalDate().getCalDate());
+        String date = DateTimeUtil.formatDateIntoViewFormat(timeSheet.getCalDate().getCalDate());
         String fio = Padeg.getOfficePadeg(employeeName, PadegConstants.Roditelnyy);
 
         mail.setToEmails(Arrays.asList(propertyProvider.getMailAdminsAddress()));

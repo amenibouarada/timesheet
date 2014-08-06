@@ -16,6 +16,7 @@ import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.system.security.SecurityService;
 import com.aplana.timesheet.system.security.entity.TimeSheetUser;
 import com.aplana.timesheet.util.DateNumbers;
+import com.aplana.timesheet.util.DateTimeUtil;
 import com.aplana.timesheet.util.EnumsUtils;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
@@ -30,8 +31,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.annotation.Nullable;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static com.aplana.timesheet.enums.PermissionsEnum.CHANGE_ILLNESS_BUSINESS_TRIP;
@@ -63,7 +62,6 @@ public class BusinessTripsAndIllnessController extends AbstractController{
 
     private static final Logger logger = LoggerFactory.getLogger(BusinessTripsAndIllnessController.class);
 
-    private static final SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy");
     public static final int ALL_EMPLOYEES = -1;
     public static final String ERROR_BUSINESS_TRIP_DELETE = "Ошибка при удалении командировки из БД!";
     public static final String ERROR_ILLNESS_DELETE = "Ошибка при удалении больничного из БД!";
@@ -227,8 +225,8 @@ public class BusinessTripsAndIllnessController extends AbstractController{
         }
 
         ModelAndView modelAndView = new ModelAndView("businesstripsandillness");
-        modelAndView.addObject("dateFrom", format.format(dateFrom));
-        modelAndView.addObject("dateTo", format.format(dateTo));
+        modelAndView.addObject("dateFrom", DateTimeUtil.formatDateIntoViewFormat(dateFrom));
+        modelAndView.addObject("dateTo", DateTimeUtil.formatDateIntoViewFormat(dateTo));
         modelAndView.addObject("divisionId", divisionId);
         modelAndView.addObject("employeeId", employeeId);
         modelAndView.addObject("managerId", manager == null ? -1 : manager);
@@ -398,17 +396,6 @@ public class BusinessTripsAndIllnessController extends AbstractController{
     }
 
     /**
-     * возвращает дату (первое число по указанным месяцу и году)
-     */
-    private Date getMonthBeginDate(Integer month, Integer year) throws BusinessTripsAndIllnessControllerException {
-        try {
-            return format.parse(String.format("01.%s.%s", month, year));
-        } catch (ParseException ex) {
-            throw new BusinessTripsAndIllnessControllerException(INVALID_MOUNTH_BEGIN_DATE_ERROR_MESSAGE);
-        }
-    }
-
-    /**
      * Возвращает дату начала ОТЧЕТНОГО года, в который входит выбранный месяц выбранного КАЛЕНДАРНОГО года.
      * даты начала/конца ОТЧЕТНЫХ годов берутся либо из дефолтных значений, либо из файла настроек таймшита
      */
@@ -423,15 +410,11 @@ public class BusinessTripsAndIllnessController extends AbstractController{
      * Год нужно уменьшить.
      */
     private Date generateYearBeginDate(DateNumbers dateNumbers, Integer month, Integer year) throws BusinessTripsAndIllnessControllerException {
-        try {
             if (month < dateNumbers.getDatabaseMonth()) {
                 year -= 1;
             }
 
-            return format.parse(String.format("%s.%s.%s", dateNumbers.getDay(), dateNumbers.getDatabaseMonth(), year));
-        } catch (ParseException e) {
-            throw new BusinessTripsAndIllnessControllerException(INVALID_DATES_IN_SETTINGS_EXCEPTION_MESSAGE);
-        }
+            return DateTimeUtil.parseStringToDateForView(String.format("%s.%s.%s", dateNumbers.getDay(), dateNumbers.getDatabaseMonth(), year));
     }
 
     /**
