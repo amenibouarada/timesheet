@@ -1684,6 +1684,36 @@ function getJiraInfo(rowIndex) {
     }
 }
 
+function getJiraPlans(){
+    var employeeId = dojo.byId("employeeId").value;
+
+    if (employeeId) {
+        var jiraCell = dojo.byId("plan").parentNode;
+        var standbyElementJira = new dojox.widget.Standby({target:jiraCell, zIndex:1000});
+        jiraCell.appendChild(standbyElementJira.domNode);
+        standbyElementJira.startup();
+        standbyElementJira.show();
+        dojo.xhrGet({
+            url: getContextPath() + "/timesheet/jiraIssuesPlanned",
+            handleAs:"text",
+            timeout:10000,
+            content:{employeeId:employeeId},
+            preventCache: true,
+            load:function (data) {
+                if (data.length != 0)
+                    dojo.byId("plan").value = data;
+                else
+                    dojo.byId("plan").value = "Активности по задачам не найдено";
+                standbyElementJira.hide();
+            },
+            error:function (err) {
+                dojo.byId("plan").value = "Ошибка при поиске активности в JIRA("+err+")";
+                standbyElementJira.hide();
+            }
+        });
+    }
+}
+
 function clearErrorBox(divId) {
     var target = dojo.byId(divId);
     if (target != null) {
