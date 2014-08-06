@@ -162,24 +162,23 @@ public class JiraService {
             JiraRestClient jiraRestClient = getRestClient();
 
             List<Issue> issueList = jiraDAO.getIssues(jiraRestClient, genJqlQueryInProgress(user.getJiraName()));
-            logger.debug("issueList.size="+Integer.toString(issueList.size()));
-                    /* формируем строку с краткими данными */
+
             for (Issue item : issueList) {
                 String key = item.getProject().getKey();
-                logger.debug(key + " - " + item.getSummary());
+                String format = String.format("%s - %s", item.getKey(), item.getSummary());
                 if (projects.get(key) != null) {
-                    projects.get(key).add(item.getSummary());
+                    projects.get(key).add(format);
                 } else {
                     projects.put(key, new LinkedList<String>());
-                    projects.get(key).add(item.getSummary());
+                    projects.get(key).add(format);
                 }
             }
-            logger.debug("projects.size="+Integer.toString(projects.size()));
+
             for (Map.Entry<String, List<String>> entry : projects.entrySet()) {
-                logger.debug(entry.getKey());
+
                 stringBuilder.append("\r\n").append(entry.getKey()).append(" : ");
                 for (String summary : projects.get(entry.getKey())) {
-                    logger.debug(summary);
+
                     stringBuilder.append("\r\n").append(summary);
                 }
             }
