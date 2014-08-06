@@ -244,58 +244,6 @@ public class CalendarDAO {
                 .setParameter("dateEnd", qToDate);
 
         return ((Long) query.getSingleResult()).intValue();
-
-/*  проблемы вставки условий в секцию left join on (xxx = 1 and yyy = 2) */
-/*        final CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        final CriteriaQuery<Object> criteriaQuery = criteriaBuilder.createQuery();
-        final Root<Calendar> from = criteriaQuery.from(Calendar.class);
-        final Join<Object, Object> join = from.join("holidays", JoinType.LEFT);
-        final CriteriaQuery<Object> select = criteriaQuery.select(criteriaBuilder.diff(
-                criteriaBuilder.count(from),
-                criteriaBuilder.count(join)
-        ));
-        final List<Predicate> predicates = new ArrayList<Predicate>();
-        final Path<Date> calDatePath = from.get("calDate");
-        final Path<Region> regionPath = join.get("region");
-
-        predicates.add(
-                criteriaBuilder.and(
-                        criteriaBuilder.equal(
-                                criteriaBuilder.function("YEAR", Integer.class, calDatePath),
-                                year
-                        ),
-                        criteriaBuilder.equal(
-                                criteriaBuilder.function("MONTH", Integer.class, calDatePath),
-                                month
-                        ),
-                        criteriaBuilder.or(
-                                criteriaBuilder.isNull(regionPath),
-                                criteriaBuilder.equal(regionPath, region)
-                        )
-                )
-        );
-
-        if (fromDate != null) {
-            predicates.add(
-                    criteriaBuilder.greaterThanOrEqualTo(
-                            calDatePath,
-                            fromDate
-                    )
-            );
-        }
-
-        if (toDate != null) {
-            predicates.add(
-                    criteriaBuilder.lessThanOrEqualTo(
-                            calDatePath,
-                            toDate
-                    )
-            );
-        }
-
-        select.where(predicates.toArray(new Predicate[predicates.size()]));
-
-        return ((Long) entityManager.createQuery(select).getSingleResult()).intValue();*/
     }
 
     public Date tryGetMaxDateMonth(Integer year, Integer month) {
