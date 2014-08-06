@@ -165,12 +165,13 @@ public class JiraService {
             logger.debug("issueList.size="+Integer.toString(issueList.size()));
                     /* формируем строку с краткими данными */
             for (Issue item : issueList) {
-                logger.debug(item.getKey() + " - " + item.getSummary());
-                if (projects.get(item.getKey()) != null) {
-                    projects.get(item.getKey()).add(item.getSummary());
+                String key = item.getProject().getKey();
+                logger.debug(key + " - " + item.getSummary());
+                if (projects.get(key) != null) {
+                    projects.get(key).add(item.getSummary());
                 } else {
-                    projects.put(item.getKey(), new LinkedList<String>());
-                    projects.get(item.getKey()).add(item.getSummary());
+                    projects.put(key, new LinkedList<String>());
+                    projects.get(key).add(item.getSummary());
                 }
             }
             logger.debug("projects.size="+Integer.toString(projects.size()));
