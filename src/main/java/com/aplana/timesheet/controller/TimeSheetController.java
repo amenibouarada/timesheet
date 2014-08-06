@@ -293,6 +293,24 @@ public class TimeSheetController {
         }
     }
 
+    @RequestMapping(value = "/timesheet/jiraIssuesPlanned", headers = "Accept=application/octet-stream;Charset=UTF-8")
+    @ResponseBody
+    public String getJiraIssuesPlannedStr(@RequestParam("employeeId") Integer employeeId,
+                                   HttpServletRequest httpServletRequest){
+
+        // Обрабатываю исключение и шлю письмо админами из-за com.aplana.timesheet.system.aspect.ResponceBodyExceptionAspect
+        // TODO узнать зачем com.aplana.timesheet.system.aspect.ResponceBodyExceptionAspect и выпилить его, если что
+        try{
+            return jiraService.getPlannedIssues(employeeId);
+        } catch (Exception e){
+            StringBuilder sb = sendMailService.buildMailException(httpServletRequest, e);
+            if (sb != null){
+                sendMailService.performExceptionSender(sb.toString());
+            }
+            return "Ошибка при поиске активности в JIRA. Письмо с описанием проблемы было отправлено администраторам.";
+        }
+    }
+
     @RequestMapping(value = "/employee/isDivisionLeader", headers = "Accept=application/json")
     @ResponseBody
     public String isDivisionLeader(@RequestParam("employeeId") Integer employeeId) {

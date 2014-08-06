@@ -4,6 +4,7 @@ import com.aplana.timesheet.system.constants.PadegConstants;
 import com.aplana.timesheet.dao.entity.Vacation;
 import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.SendMailService;
+import com.aplana.timesheet.util.DateTimeUtil;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import org.apache.commons.lang.StringUtils;
@@ -65,9 +66,9 @@ public class PlannedVacationCreateSender extends AbstractVacationSenderWithCopyT
     private String getBody(Vacation vacation) {
         String employeeNameStr = Padeg.getFIOPadegFS(vacation.getEmployee().getName(), true, PadegConstants.Roditelnyy);
         String regionNameStr = vacation.getEmployee().getRegion().getName();
-        String beginDateStr = DateFormatUtils.format(vacation.getBeginDate(), DATE_FORMAT);
-        String endDateStr = DateFormatUtils.format(vacation.getEndDate(), DATE_FORMAT);
-        String creationDate = DateFormatUtils.format(vacation.getCreationDate(), DATE_FORMAT);
+        String beginDateStr = DateTimeUtil.formatDateIntoViewFormat(vacation.getBeginDate());
+        String endDateStr = DateTimeUtil.formatDateIntoViewFormat(vacation.getEndDate());
+        String creationDate = DateTimeUtil.formatDateIntoViewFormat(vacation.getCreationDate());
         String authorVacation = Padeg.getFIOPadegFS(vacation.getAuthor().getName(), true, PadegConstants.Tvoritelnyy);
         String commentStr = StringUtils.EMPTY;
         if (StringUtils.isNotBlank(vacation.getComment())) {

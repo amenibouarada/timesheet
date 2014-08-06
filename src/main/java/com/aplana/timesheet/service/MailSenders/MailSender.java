@@ -21,7 +21,6 @@ import java.util.*;
 public class MailSender<T> {
 
     protected static final Logger logger = LoggerFactory.getLogger(MailSender.class);
-    protected static final String DATE_FORMAT = "dd.MM.yyyy";
     protected static final String MAIL_BODY = "mail_body";
     protected static final int FIRST = 0;
 

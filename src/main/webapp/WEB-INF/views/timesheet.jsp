@@ -100,7 +100,7 @@
 
     dojo.ready(function () {
 
-        //dojo.connect(dojo.byId("add_row_button"), "onclick", "addNewRow");
+        dojo.connect(dojo.byId("jira_get_plans_button"), "click", dojo.byId("jira_get_plans_button"), getJiraPlans);
         dojo.connect(dojo.byId("plan"), "onkeyup", dojo.byId("plan"), textareaAutoGrow);
         dojo.connect(dojo.byId("divisionId"), "onchange", dojo.byId("divisionId"), updateEmployeeSelect);
 
@@ -708,15 +708,6 @@ function loadDraft() {
 </div>
 
 <div id="marg_buttons" style="margin-top:15px;">
-
-        <%--перенесен в шапку таблицы как картинка--%>
-        <%--<button id="add_row_button" style="width:150px" type="button">Добавить строку</button>--%>
-
-        <%--убрано, но есть отдельная кнопка для каждой строки таблицы--%>
-        <%--<button id="del_row_button" style="width:210px" type="button" onclick="delSelectedRows()">Удалить выбранные--%>
-        <%--строки--%>
-
-        <%--</button>--%>
     <c:if test="${fn:length(errors) > 0}">
         <div id="errors_box" class="errors_box">
             <c:forEach items="${errors}" var="error">
@@ -756,12 +747,6 @@ function loadDraft() {
         <c:if test="${isErrorPage}">
             <c:forEach items="${timeSheetForm.timeSheetTablePart}" varStatus="row">
                 <tr class="time_sheet_row" id="ts_row_${row.index}">
-
-                        <%--&lt;%&ndash;чекбоксики для кнопки удаления выбранных строк&ndash;%&gt;
-                        &lt;%&ndash;<td class="text_center_align"><input class="selectedRow" type="checkbox"&ndash;%&gt;
-                        &lt;%&ndash;name="selectedRow[${row.index}]"&ndash;%&gt;
-                        &lt;%&ndash;id="selected_row_id_${row.index}"/></td>&ndash;%&gt;--%>
-
                     <td class="text_center_align" id="delete_button_id_${row.index}">
 
                     </td>
@@ -859,8 +844,14 @@ function loadDraft() {
     <span id="lbNextPlan" class="label">Планы на следующий рабочий день:</span>
 
     <div id="box_margin" style="margin-top :6px; margin-bottom: 8px;">
-        <form:textarea wrap="soft" path="plan" id="plan" rows="7" cols="92"/>
+        <div style="border: #AAA solid 1px;width: 785px;">
+        <form:textarea wrap="soft" path="plan" id="plan" rows="7" cols="92" cssStyle="border: none"/>
+        <img id="jira_get_plans_button" src="resources/img/logo-jira.png"
+             alt="Запрос из JIRA" title="Запрос из JIRA" height="25" width="25"
+             style="cursor: pointer; visibility: visible; position: absolute; margin-top: 8px;">
+        </div>
         <br/>
+
     </div>
 </div>
 <div id="effort_box">

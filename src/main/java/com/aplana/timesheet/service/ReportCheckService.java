@@ -2,7 +2,6 @@ package com.aplana.timesheet.service;
 
 import com.aplana.timesheet.dao.*;
 import com.aplana.timesheet.dao.entity.*;
-import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.util.DateTimeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,8 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -26,9 +23,6 @@ public class ReportCheckService {
     private static final Logger logger = LoggerFactory.getLogger(ReportCheckService.class);
 
     private StringBuffer trace = new StringBuffer();
-
-    private Boolean reportForming = false;
-    private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
     @Autowired
     private ReportCheckDAO reportCheckDAO;
@@ -43,28 +37,10 @@ public class ReportCheckService {
     private EmployeeService employeeService;
 
     @Autowired
-    private TimeSheetService timeSheetService;
-
-    @Autowired
     private SendMailService sendMailService;
 
     @Autowired
     private HolidayDAO holidayDAO;
-
-    @Autowired
-    private IllnessService illnessService;
-
-    @Autowired
-    private VacationService vacationService;
-
-    @Autowired
-    private RegionDAO regionDAO;
-
-    @Autowired
-    private TSPropertyProvider propertyProvider;
-
-    @Autowired
-    private BusinessTripDAO businessTripDAO;
 
     @Autowired
     private TimeSheetDAO timeSheetDAO;
@@ -104,7 +80,6 @@ public class ReportCheckService {
             String firstDay, String lastDay, boolean sundayCheck
     ) {
         String[] divisionsSendMail = getDivisionSendMail();
-        //logger.info("divisionlist is {}", mailConfig.getProperty("mail.divisions"));
 
         for (String divisionId : divisionsSendMail) {
             logger.info("division id is {}", Integer.parseInt(divisionId));
@@ -137,15 +112,8 @@ public class ReportCheckService {
         List<Employee> employeeList = employeeService.getEmployees(division, false);
         String currentDay = DateTimeUtil.currentDay();
 
-        Date firstDate = null;
-        Date lastDate = null;
-
-        try {
-            firstDate = sdf.parse(firstDay);
-            lastDate = sdf.parse(lastDay);
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
+        Date firstDate = DateTimeUtil.parseStringToDateForDB(firstDay);
+        Date lastDate = DateTimeUtil.parseStringToDateForDB(lastDay);
 
         for (Employee emp : employeeList) {
             logger.info("Employee {}", emp.getName());

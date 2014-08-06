@@ -50,7 +50,7 @@ public class TimeSheetDeletedSender extends AbstractSenderWithAssistants<TimeShe
         mail.setToEmails(getToEmails(params));
         mail.setCcEmails(getAssistantEmail(Sets.newHashSet(mail.getToEmails())));
         mail.setEmployeeList(Arrays.asList(employee));
-        String date = DateTimeUtil.formatDate(params.getCalDate().getCalDate());
+        String date = DateTimeUtil.formatDateIntoDBFormat(params.getCalDate().getCalDate());
         mail.setDate(date);
         mail.setSubject(getSubject(employee, date ));
         //APLANATS-574 дополняем бэкапом

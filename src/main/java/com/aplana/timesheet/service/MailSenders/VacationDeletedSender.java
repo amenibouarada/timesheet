@@ -9,6 +9,7 @@ import com.aplana.timesheet.service.EmployeeService;
 import com.aplana.timesheet.service.ProjectService;
 import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.SendMailService;
+import com.aplana.timesheet.util.DateTimeUtil;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
@@ -119,8 +120,8 @@ public class VacationDeletedSender extends  AbstractVacationSenderWithCopyToAuth
                 String.format(
                         " на %s за период с %s по %s",
                         WordUtils.uncapitalize(params.getType().getValue()),
-                        DateFormatUtils.format(params.getBeginDate(), DATE_FORMAT),
-                        DateFormatUtils.format(params.getEndDate(), DATE_FORMAT)
+                        DateTimeUtil.formatDateIntoViewFormat(params.getBeginDate()),
+                        DateTimeUtil.formatDateIntoViewFormat(params.getEndDate())
                 )
         );
 

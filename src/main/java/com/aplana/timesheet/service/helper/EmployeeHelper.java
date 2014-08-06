@@ -6,7 +6,6 @@ import argo.jdom.JsonObjectNodeBuilder;
 import com.aplana.timesheet.dao.entity.Division;
 import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.service.EmployeeService;
-import com.aplana.timesheet.service.RegionService;
 import com.aplana.timesheet.service.TimeSheetService;
 import com.aplana.timesheet.util.DateTimeUtil;
 import com.aplana.timesheet.util.JsonUtil;
@@ -53,9 +52,6 @@ public class EmployeeHelper {
 
     @Autowired
     private TimeSheetService timeSheetService;
-
-    @Autowired
-    private RegionService regionService;
 
     @Transactional(readOnly = true)
     public String getEmployeeListWithLastWorkdayJson(List<Division> divisions, Boolean filterFired) {
@@ -200,7 +196,7 @@ public class EmployeeHelper {
             *  если есть то добавим день чтоб учесть последий рабочий день */
             Date endDate = (employee.getEndDate() != null) ?
                     DateUtils.addDays(employee.getEndDate(), 1) :
-                    DateTimeUtil.stringToDateForDB(MAX_DATE);
+                    DateTimeUtil.parseStringToDateForDB(MAX_DATE);
             if (curDate.after(beginDate) && curDate.before(endDate)) {
                 return Boolean.TRUE;
             }

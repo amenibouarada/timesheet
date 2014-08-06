@@ -228,8 +228,8 @@ public class CalendarDAO {
 
     public int getWorkDaysCountForRegion(Region region, Integer year, Integer month, @Nullable Date fromDate,
                                          @Nullable Date toDate) {
-        final Date qFromDate = (fromDate != null) ? fromDate : DateTimeUtil.stringToDateForDB(DateTimeUtil.MIN_DATE);
-        final Date qToDate = (toDate != null) ? toDate : DateTimeUtil.stringToDateForDB(DateTimeUtil.MAX_DATE);
+        final Date qFromDate = (fromDate != null) ? fromDate : DateTimeUtil.parseStringToDateForDB(DateTimeUtil.MIN_DATE);
+        final Date qToDate = (toDate != null) ? toDate : DateTimeUtil.parseStringToDateForDB(DateTimeUtil.MAX_DATE);
 
         final Query query = entityManager.createQuery(
                         " select count(c)-count(h)" +

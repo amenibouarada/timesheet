@@ -60,7 +60,7 @@ public class DateTimeUtil {
      * @param date - строка даты.
      * @return объект класса {@link Date}.
      */
-    public static Date stringToDateForDB(String date) {
+    public static Date parseStringToDateForDB(String date) {
         if (date == null || date.isEmpty()) {
             logger.error("Error while parsing empty string into date");
             throw new TSRuntimeException(new Exception("Date is null"));
@@ -79,7 +79,7 @@ public class DateTimeUtil {
      * @param date - строка даты.
      * @return объект класса {@link Date}.
      */
-    public static Date stringToDateForView(String date) {
+    public static Date parseStringToDateForView(String date) {
         if (date == null || date.isEmpty()) {
             logger.error("Error while parsing empty string into date");
             throw new TSRuntimeException(new Exception("Date is null"));
@@ -90,6 +90,24 @@ public class DateTimeUtil {
             logger.error("Error while parsing date in string format.", e);
             throw new TSRuntimeException(e);
         }
+    }
+
+
+
+    public static String formatDateIntoDBFormat(Timestamp timestamp) {
+        return DB_SIMPLE_DATE_FORMAT.format(timestamp);
+    }
+
+    public static String formatDateIntoDBFormat(Date date) {
+        return DB_SIMPLE_DATE_FORMAT.format(date);
+    }
+
+    public static String formatDateIntoViewFormat(Timestamp timestamp) {
+        return VIEW_SIMPLE_DATE_FORMAT.format(timestamp);
+    }
+
+    public static String formatDateIntoViewFormat(Date date) {
+        return VIEW_SIMPLE_DATE_FORMAT.format(date);
     }
 
     /**
@@ -407,10 +425,6 @@ public class DateTimeUtil {
         } catch (ParseException ex) {
             throw new TSRuntimeException(ex);
         }
-    }
-
-    public static String formatDate(Timestamp timestamp) {
-        return DB_SIMPLE_DATE_FORMAT.format(timestamp);
     }
 
     public static Boolean isDateValid(String date) {

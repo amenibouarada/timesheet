@@ -8,7 +8,6 @@ import com.aplana.timesheet.reports.BaseReport;
 import com.aplana.timesheet.reports.TSJasperReport;
 import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.system.security.SecurityService;
-import com.aplana.timesheet.system.security.entity.TimeSheetUser;
 import com.aplana.timesheet.util.DateTimeUtil;
 import com.aplana.timesheet.util.JsonUtil;
 import net.sf.jasperreports.engine.*;
@@ -17,7 +16,6 @@ import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +26,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static argo.jdom.JsonNodeBuilders.anObjectBuilder;
@@ -38,8 +35,6 @@ import static com.aplana.timesheet.util.JsonUtil.aStringBuilder;
 public class JasperReportService {
 
     private static final Logger logger = LoggerFactory.getLogger(JasperReportService.class);
-
-    private static final Properties propertiesFile = new Properties();
 
     public static final int REPORT_PRINTTYPE_HTML = 1;
     public static final int REPORT_PRINTTYPE_XLS = 2;
@@ -72,10 +67,10 @@ public class JasperReportService {
             } else {
                 byte[] b;
                 b = Character.toString(c).getBytes("utf-8");
-                for ( byte aB : b ) {
+                for (byte aB : b) {
                     int k = aB;
-                    if ( k < 0 ) k += 256;
-                    sb.append( "%" ).append( Integer.toHexString( k ).toUpperCase() );
+                    if (k < 0) k += 256;
+                    sb.append("%").append(Integer.toHexString(k).toUpperCase());
                 }
             }
         }
@@ -88,10 +83,10 @@ public class JasperReportService {
         report.checkParams();
 
         String reportName = report.getJRName();
-        Calendar calendar=new GregorianCalendar();
-        String dateNorm=new SimpleDateFormat("dd.MM.yyyy").format(calendar.getTime());
+        Calendar calendar = new GregorianCalendar();
+        String dateNorm = DateTimeUtil.formatDateIntoViewFormat(calendar.getTime());
 
-        String reportNameFile=report.getJRNameFile()+" "+dateNorm;
+        String reportNameFile = report.getJRNameFile() + " " + dateNorm;
         try {
             JasperReport jasperReport = getReport(reportName + (printtype == REPORT_PRINTTYPE_XLS ? "_xls" : ""));
 
@@ -101,9 +96,9 @@ public class JasperReportService {
 
             JRDataSource jrDataSource = report.prepareDataSource();
             if (jrDataSource == null) {
-            	return false;
+                return false;
             }
-			JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, params, jrDataSource);
+            JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, params, jrDataSource);
 
             String suffix = "";
             String contentType = "application/octet-stream";
@@ -126,24 +121,22 @@ public class JasperReportService {
             }
 
             response.setContentType(contentType);
-            if (printtype != REPORT_PRINTTYPE_HTML)
-            {
+            if (printtype != REPORT_PRINTTYPE_HTML) {
                 String agent = httpServletRequest.getHeader("user-agent");
-                String contentDisposition = "attachment; filename=\"" + toUTF8String(reportNameFile+suffix) + "\"";
-                if ( agent.contains( "Firefox" ) ) {
-                    contentDisposition = "attachment; filename=\"" + MimeUtility.encodeText( reportNameFile + suffix, "UTF8", "B" ) + "\"";
+                String contentDisposition = "attachment; filename=\"" + toUTF8String(reportNameFile + suffix) + "\"";
+                if (agent.contains("Firefox")) {
+                    contentDisposition = "attachment; filename=\"" + MimeUtility.encodeText(reportNameFile + suffix, "UTF8", "B") + "\"";
                 }
 
-                response.setHeader("Content-Disposition",contentDisposition);
-            }
-            else {
+                response.setHeader("Content-Disposition", contentDisposition);
+            } else {
                 String agent = httpServletRequest.getHeader("user-agent");
-                String contentDisposition = "filename=\"" + toUTF8String(reportNameFile+suffix) + "\"";
-                if ( agent.contains( "Firefox" ) ) {
-                    contentDisposition = "filename=\"" + MimeUtility.encodeText( reportNameFile + suffix, "UTF8", "B" ) + "\"";
+                String contentDisposition = "filename=\"" + toUTF8String(reportNameFile + suffix) + "\"";
+                if (agent.contains("Firefox")) {
+                    contentDisposition = "filename=\"" + MimeUtility.encodeText(reportNameFile + suffix, "UTF8", "B") + "\"";
                 }
 
-                response.setHeader("Content-Disposition",contentDisposition);
+                response.setHeader("Content-Disposition", contentDisposition);
             }
             OutputStream outputStream = response.getOutputStream();
 
@@ -199,10 +192,10 @@ public class JasperReportService {
     }
 
     @Transactional(readOnly = true)
-    public String checkParamsReport04(final BaseReport report, Integer formHashCode)  throws JReportBuildError, ParseException {
+    public String checkParamsReport04(final BaseReport report, Integer formHashCode) throws JReportBuildError, ParseException {
         report.checkParams();
-        Date beginDate = DateTimeUtil.stringToDateForDB(report.getBeginDate());
-        Date endDate = DateTimeUtil.stringToDateForDB(report.getEndDate());
+        Date beginDate = DateTimeUtil.parseStringToDateForDB(report.getBeginDate());
+        Date endDate = DateTimeUtil.parseStringToDateForDB(report.getEndDate());
 
         String reportNameFile = String.format("%s (%s-%s)",
                 report.getJRNameFile(),
@@ -225,6 +218,7 @@ public class JasperReportService {
 
     /**
      * Метод асинхронно запускает задачу создания XLS отчета, затем посылает письмо со ссылкой для скачивания
+     *
      * @param report - Отчет №4. Сотрудники, не отправившие отчет
      * @return
      * @throws JReportBuildError
@@ -236,8 +230,8 @@ public class JasperReportService {
         report.checkParams();
 
         final String reportName = report.getJRName();
-        Date beginDate = DateTimeUtil.stringToDateForDB(report.getBeginDate());
-        Date endDate = DateTimeUtil.stringToDateForDB(report.getEndDate());
+        Date beginDate = DateTimeUtil.parseStringToDateForDB(report.getBeginDate());
+        Date endDate = DateTimeUtil.parseStringToDateForDB(report.getEndDate());
 
         final String reportNameFile = String.format("%s (%s-%s)",
                 report.getJRNameFile(),
@@ -338,7 +332,7 @@ public class JasperReportService {
             return false;
         }
         String suffix = ".xls";
-        response.setContentType( "application/vnd.ms-excel");
+        response.setContentType("application/vnd.ms-excel");
 
         String agent = request.getHeader("user-agent");
         String contentDisposition = "attachment; filename=\"" + toUTF8String(reportExportStatus.getReportName() + suffix) + "\"";
