@@ -19,6 +19,11 @@ public class TimeSheetDeletedSender extends AbstractSenderWithAssistants<TimeShe
 
     public TimeSheetDeletedSender(SendMailService sendMailService, TSPropertyProvider propertyProvider) {
         super(sendMailService, propertyProvider);
+        logger.info("Run sending message for: {}", getName());
+    }
+
+    String getName() {
+        return String.format(" Оповещение о удалении отчета о списании (%s)", this.getClass().getSimpleName());
     }
 
     @Override

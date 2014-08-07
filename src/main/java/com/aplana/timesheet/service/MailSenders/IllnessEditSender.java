@@ -14,6 +14,11 @@ import padeg.lib.Padeg;
 public class IllnessEditSender extends AbstractIllnessSender{
     public IllnessEditSender(SendMailService sendMailService, TSPropertyProvider propertyProvider, ProjectService projectService, EmployeeService employeeService) {
         super(sendMailService, propertyProvider, projectService, employeeService);
+        logger.info("Run sending message for: {}", getName());
+    }
+
+    String getName() {
+        return String.format(" Оповещения о редактировании больничного (%s)", this.getClass().getSimpleName());
     }
 
     @Override

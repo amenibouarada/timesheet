@@ -50,6 +50,11 @@ public class TimeSheetSender extends MailSender<TimeSheetForm> {
     public TimeSheetSender(SendMailService sendMailService, TSPropertyProvider propertyProvider, OvertimeCauseService overtimeCauseService, ReportService reportService) {
         super(sendMailService, propertyProvider, overtimeCauseService);
         this.reportService = reportService;
+        logger.info("Run sending message for: {}", getName());
+    }
+
+    String getName() {
+        return String.format(" Оповещение о новом отчете о списании занятости (%s)", this.getClass().getSimpleName());
     }
 
     @Override

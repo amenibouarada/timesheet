@@ -28,6 +28,11 @@ public class VacationApprovalAcceptanceSender extends AbstractSenderWithCcAddres
         super(sendMailService, propertyProvider);
     }
 
+
+    String getName() {
+        return String.format("Оповещение о новом отчете (%s)", this.getClass().getSimpleName());
+    }
+
     @Override
     public List<Mail> getMainMailList(VacationApproval vacationApproval) {
         Mail mail = new TimeSheetMail();

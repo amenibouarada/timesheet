@@ -20,6 +20,11 @@ public class LoginProblemSender extends MailSender<AdminMessageForm> {
 
     public LoginProblemSender(SendMailService sendMailService, TSPropertyProvider propertyProvider) {
         super(sendMailService, propertyProvider);
+        logger.info("Run sending message for: {}", getName());
+    }
+
+    String getName() {
+        return String.format(" Оповещения об ошибке аутентификации (%s)", this.getClass().getSimpleName());
     }
 
     @Override

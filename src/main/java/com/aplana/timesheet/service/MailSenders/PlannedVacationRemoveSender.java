@@ -37,6 +37,11 @@ public class PlannedVacationRemoveSender  extends  AbstractVacationSenderWithCop
         super(sendMailService, propertyProvider);
         this.projectService = projectService;
         this.employeeService = employeeService;
+        logger.info("Run sending message for: {}", getName());
+    }
+
+    String getName() {
+        return String.format(" Оповещение о удалении планирумого отпуска (%s)", this.getClass().getSimpleName());
     }
 
     @PostConstruct

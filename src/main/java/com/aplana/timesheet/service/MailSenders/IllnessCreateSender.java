@@ -15,6 +15,11 @@ public class IllnessCreateSender extends AbstractIllnessSender {
 
     public IllnessCreateSender(SendMailService sendMailService, TSPropertyProvider propertyProvider, ProjectService projectService, EmployeeService employeeService) {
         super(sendMailService, propertyProvider, projectService, employeeService);
+        logger.info("Run sending message for: {}", getName());
+    }
+
+    String getName() {
+        return String.format(" Оповещения о создании больничного (%s)", this.getClass().getSimpleName());
     }
 
     @Override

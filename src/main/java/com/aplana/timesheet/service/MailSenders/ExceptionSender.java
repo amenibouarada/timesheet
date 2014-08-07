@@ -18,6 +18,11 @@ public class ExceptionSender extends MailSender<String> {
 
     public ExceptionSender(SendMailService sendMailService, TSPropertyProvider propertyProvider) {
         super(sendMailService, propertyProvider);
+        logger.info("Run sending message for: {}", getName());
+    }
+
+    String getName() {
+        return String.format("Оповещения об ошибке (%s)", this.getClass().getSimpleName());
     }
 
     @Override

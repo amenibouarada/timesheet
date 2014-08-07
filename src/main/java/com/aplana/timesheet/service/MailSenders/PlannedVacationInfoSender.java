@@ -38,6 +38,11 @@ public class PlannedVacationInfoSender extends AbstractSenderWithAssistants<Map 
 
     public PlannedVacationInfoSender(SendMailService sendMailService, TSPropertyProvider propertyProvider) {
         super(sendMailService, propertyProvider);
+        logger.info("Run sending message for: {}", getName());
+    }
+
+    String getName() {
+        return String.format("Оповещение о планируемых отпусках подчиненных (%s)", this.getClass().getSimpleName());
     }
 
     private Table<Integer, String, String> getBody(Set<Vacation> managerEmployeesVacation) {

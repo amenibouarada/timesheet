@@ -28,6 +28,11 @@ public class VacationApproveRequestSender extends AbstractVacationSender<Vacatio
     public VacationApproveRequestSender(SendMailService sendMailService, TSPropertyProvider propertyProvider,
                                         VacationApprovalService vacationApprovalService, ManagerRoleNameService managerRoleNameService) {
         super(sendMailService, propertyProvider, vacationApprovalService, managerRoleNameService);
+        logger.info("Run sending message for: {}", getName());
+    }
+
+    String getName() {
+        return String.format(" Оповещение о подтвержении отпуска подчиненного (%s)", this.getClass().getSimpleName());
     }
 
     @Override

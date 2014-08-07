@@ -32,6 +32,11 @@ public class PlannedVacationCreateSender extends AbstractVacationSenderWithCopyT
                                        List<String> emails) {
         super(sendMailService, propertyProvider);
         this.emails = emails;
+        logger.info("Run sending message for: {}", getName());
+    }
+
+    String getName() {
+        return String.format(" Оповещение о планируемом отпуске (%s) ", this.getClass().getSimpleName());
     }
 
     @PostConstruct

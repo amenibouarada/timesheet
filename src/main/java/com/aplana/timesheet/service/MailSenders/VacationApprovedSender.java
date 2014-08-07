@@ -39,6 +39,14 @@ public class VacationApprovedSender extends AbstractVacationSenderWithCopyToAuth
         this.emails = emails;
     }
 
+    {
+        logger.info("Run sending message for: {}", getName());
+    }
+
+    String getName() {
+        return String.format(" Оповещение о согласовании отпуска (%s)", this.getClass().getSimpleName());
+    }
+
     @Override
     public List<Mail> getMainMailList (Vacation vacation) {
         final Mail mail = new TimeSheetMail();

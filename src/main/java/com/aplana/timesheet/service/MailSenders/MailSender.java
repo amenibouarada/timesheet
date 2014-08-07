@@ -78,7 +78,7 @@ public class MailSender<T> {
                 }
 
                 initMessageBody(mail, message);
-
+                debugSendToMail(message);
                 logger.info("Sending message.");
                 if (Boolean.parseBoolean(propertyProvider.getMailSendEnable())) {
                     transport.sendMessage(message, message.getAllRecipients());
@@ -106,6 +106,14 @@ public class MailSender<T> {
                 logger.error("Error while closing transport.", e);
             }
         }
+    }
+
+    private void debugSendToMail(Message message) throws MessagingException {
+        logger.info("Mail will be sent from: {}", Arrays.toString(message.getFrom()));
+        logger.info("Mail will be sent to: {}", Arrays.toString(message.getRecipients(MimeMessage.RecipientType.TO)));
+        logger.info("Copy mail will be sent to: {}", message.getRecipients(MimeMessage.RecipientType.CC) != null ?
+                Arrays.toString(message.getRecipients(MimeMessage.RecipientType.CC)) :
+                "");
     }
 
     private String getDebugInfo(Message message){

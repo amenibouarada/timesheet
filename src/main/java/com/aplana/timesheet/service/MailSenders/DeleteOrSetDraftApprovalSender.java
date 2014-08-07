@@ -21,6 +21,11 @@ import java.util.List;
 public class DeleteOrSetDraftApprovalSender extends MailSender<TimeSheet> {
     public DeleteOrSetDraftApprovalSender(SendMailService sendMailService, TSPropertyProvider propertyProvider) {
         super(sendMailService, propertyProvider);
+        logger.info("Run sending message for: {}", getName());
+    }
+
+    String getName() {
+        return String.format("Оповещение о просьбе для удалении или отправки в черновик отчета (%s)", this.getClass().getSimpleName());
     }
 
     @Override

@@ -16,6 +16,11 @@ import java.util.Date;
 public class IllnessDeleteSender extends AbstractIllnessSender {
     public IllnessDeleteSender(SendMailService sendMailService, TSPropertyProvider propertyProvider, ProjectService projectService, EmployeeService employeeService) {
         super(sendMailService, propertyProvider, projectService, employeeService);
+        logger.info("Run sending message for: {}", getName());
+    }
+
+    String getName() {
+        return String.format(" Оповещения об удалении больничного (%s)", this.getClass().getSimpleName());
     }
 
     @Override

@@ -37,6 +37,11 @@ public class VacationDeletedSender extends  AbstractVacationSenderWithCopyToAuth
         super(sendMailService, propertyProvider);
         this.projectService = projectService;
         this.employeeService = employeeService;
+        logger.info("Run sending message for: {}", getName());
+    }
+
+    String getName() {
+        return String.format(" Оповещение об удалении отпуска (%s)", this.getClass().getSimpleName());
     }
 
 

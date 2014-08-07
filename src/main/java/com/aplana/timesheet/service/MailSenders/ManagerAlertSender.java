@@ -20,6 +20,11 @@ public class ManagerAlertSender extends AbstractSenderWithAssistants<List<Report
 
     public ManagerAlertSender(SendMailService sendMailService, TSPropertyProvider propertyProvider) {
         super(sendMailService, propertyProvider);
+        logger.info("Run sending message for: {}", getName());
+    }
+
+    String getName() {
+        return String.format(" Оповещение о несписанной занятости подчиненных (%s)", this.getClass().getSimpleName());
     }
 
      @Override
