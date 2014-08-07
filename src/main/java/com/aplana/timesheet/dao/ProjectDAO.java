@@ -65,6 +65,18 @@ public class ProjectDAO {
     }
 
     /**
+     * Возвращает объект класса Project по указанному коду jira
+     */
+    public Project findByJiraKey(String jiraKey) {
+        Query query = entityManager.createQuery(
+                "from Project as p where p.jiraProjectKey=:jiraKey"
+        ).setParameter("jiraKey", jiraKey);
+
+        List<Project> resultList = query.getResultList();
+        return resultList.size() == 1 ? resultList.get(0) : null;
+    }
+
+    /**
      * Возвращает объект класса Project по указанному идентификатору,
      * соответсвующий активному проекту, либо null.
      */

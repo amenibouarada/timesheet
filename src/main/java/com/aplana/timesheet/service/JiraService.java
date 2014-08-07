@@ -164,7 +164,8 @@ public class JiraService {
             List<Issue> issueList = jiraDAO.getIssues(jiraRestClient, genJqlQueryInProgress(user.getJiraName()));
 
             for (Issue item : issueList) {
-                String key = item.getProject().getKey();
+                Project project = projectDAO.findByJiraKey(item.getProject().getKey());
+                String key = project != null ? project.getName() : "Проект неопределен";
                 String format = String.format("%s - %s", item.getKey(), item.getSummary());
                 if (projects.get(key) != null) {
                     projects.get(key).add(format);
@@ -176,7 +177,7 @@ public class JiraService {
 
             for (Map.Entry<String, List<String>> entry : projects.entrySet()) {
 
-                stringBuilder.append("\r\n").append(entry.getKey()).append(" : ");
+                stringBuilder.append("\r\n").append(entry.getKey());
                 for (String summary : projects.get(entry.getKey())) {
 
                     stringBuilder.append("\r\n").append(summary);

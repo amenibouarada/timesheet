@@ -844,14 +844,22 @@ function loadDraft() {
     <span id="lbNextPlan" class="label">Планы на следующий рабочий день:</span>
 
     <div id="box_margin" style="margin-top :6px; margin-bottom: 8px;">
-        <div style="border: #AAA solid 1px;width: 785px;">
-        <form:textarea wrap="soft" path="plan" id="plan" rows="7" cols="92" cssStyle="border: none"/>
-        <img id="jira_get_plans_button" src="resources/img/logo-jira.png"
-             alt="Запрос из JIRA" title="Запрос из JIRA" height="25" width="25"
-             style="cursor: pointer; visibility: visible; position: absolute; margin-top: 8px;">
+        <div id='box_textArea' style="border: #AAA solid 1px;width: 775px;">
+
+            <form:textarea wrap="soft" path="plan" id="plan" rows="7" cols="92"
+                           cssStyle="border: none; outline: none;overflow:auto;"/>
+            <img id="jira_get_plans_button" src="resources/img/logo-jira.png"
+                 alt="Запрос из JIRA" title="Запрос из JIRA" height="15" width="15"
+                 style="cursor: pointer; visibility: visible; position: absolute; margin-top: 4px; margin-left: 3px;">
         </div>
         <br/>
-
+        <script>
+            dojo.ready(function () {
+                if (dojo.isIE <= 8) {
+                    dojo.setStyle('box_textArea', 'width', '777px');
+                }
+            });
+        </script>
     </div>
 </div>
 <div id="effort_box">
