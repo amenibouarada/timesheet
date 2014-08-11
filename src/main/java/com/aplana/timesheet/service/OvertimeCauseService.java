@@ -78,26 +78,6 @@ public class OvertimeCauseService {
         return dictionaryItemService.find(overtimeCauseId).getValue();
     }
 
-    public boolean isOvertimeCauseNeeded(TimeSheetForm tsForm, BigDecimal totalDuration) {
-        for (TimeSheetTableRowForm rowForm : tsForm.getTimeSheetTablePart()) {
-            if (
-                    TypesOfActivityEnum.isNotCheckableForOvertime(
-                        EnumsUtils.tryFindById(
-                                rowForm.getActivityTypeId(),
-                                TypesOfActivityEnum.class
-                        )
-                    )
-            ) {
-                return false;
-            }
-        }
-
-        return totalDuration.subtract(BigDecimal.valueOf(WORK_DAY_DURATION)).compareTo(
-                    BigDecimal.valueOf(propertyProvider.getOvertimeThreshold())) > 0
-                && BigDecimal.valueOf(WORK_DAY_DURATION).subtract(totalDuration).compareTo(
-                    BigDecimal.valueOf(propertyProvider.getUndertimeThreshold())) > 0;
-    }
-
     public boolean isOvertimeDuration(TimeSheetForm tsForm) {
         final List<TimeSheetTableRowForm> tsTableRowList = tsForm.getTimeSheetTablePart();
         if (tsTableRowList != null && tsTableRowList.size() != 0) {

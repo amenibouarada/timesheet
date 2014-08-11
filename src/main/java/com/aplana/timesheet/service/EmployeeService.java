@@ -176,11 +176,6 @@ public class EmployeeService {
         return result;
     }
 
-    @Transactional(readOnly = true)
-    public List<Employee> getAllEmployeesDivision(Division division) {
-        return employeeDAO.getAllEmployeesDivision(division);
-    }
-
     /**
      * Возвращает список доступных для синхронизации с ldap сотрудников.
      * @param division Если null, то поиск осуществляется без учета подразделения,
@@ -254,15 +249,6 @@ public class EmployeeService {
             empDb = employeeDAO.save(employee);
         }
         return empDb;
-    }
-
-    @Transactional(readOnly = true)
-    public List<Employee> getRegionManager(Integer employeeId) {
-        return this.employeeDAO.getRegionManager(employeeId);
-    }
-
-    public List<Employee> getRegionManager(Integer regionId, Integer divisionId) {
-        return employeeDAO.getRegionManager(regionId, divisionId);
     }
 
     public Double getWorkDaysOnIllnessWorked(Employee employee, Date beginDate, Date endDate){
@@ -464,31 +450,6 @@ public class EmployeeService {
         }
 
         return JsonUtil.format(builder);
-    }
-
-    public List<Employee> getMainProjectManagers() {
-        return employeeDAO.getMainProjectManagers();
-    }
-
-    public  List<Employee> getMainProjectManagers(List<Division> divisions) {
-        List<Employee> managers = new ArrayList<Employee>();
-
-        if (divisions.size() == 0) {
-            managers.addAll(employeeDAO.getMainProjectManagers(null));
-        } else {
-            for (Division division : divisions) {
-                managers.addAll(employeeDAO.getMainProjectManagers(division));
-            }
-        }
-
-        return managers;
-    }
-
-    /**
-     * Получаем список менеджеров по проекту
-     */
-    public List<Employee> getProjectManagers(Project project) {
-        return employeeDAO.getProjectManagers(project);
     }
 
     /**

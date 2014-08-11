@@ -248,17 +248,6 @@ public class EmployeeHelper {
         return JsonUtil.format(builder.build());
     }
 
-    /* возвращает список всех активных сотрудников с минимальными данными */
-    // ToDo убрать неиспользуемый метод
-    public String getEmployeesJson() {
-        List<Employee> employees = employeeService.getEmployees();
-        if (employees!= null && !employees.isEmpty()) {
-            return makeEmployeeListInJSON(employees);
-        } else {
-            return StringUtils.EMPTY;
-        }
-    }
-
     @Transactional(readOnly = true)
     public String getManagerListJson(){
         final JsonArrayNodeBuilder builder = anArrayBuilder();
@@ -273,22 +262,6 @@ public class EmployeeHelper {
         return JsonUtil.format(builder.build());
     }
 
-
-    private List<Employee> getManagerList(List<Employee> employees){
-        List<Employee> managerList = new ArrayList<Employee>();
-        for (Employee emp : employees){
-            Boolean isAdded = false;
-            for (Employee man : managerList){
-                if ((emp.getManager() != null) && (man.getId().equals(emp.getManager().getId()))){
-                    isAdded = true;
-                }
-            }
-            if (!isAdded && emp.getManager() != null ){
-                managerList.add(emp.getManager());
-            }
-        }
-        return managerList;
-    }
 
     private String getValue(Employee employee) {
         final StringBuilder sb = new StringBuilder(employee.getName());

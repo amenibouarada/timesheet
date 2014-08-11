@@ -230,7 +230,7 @@
                 <span class="label">Регионы:</span>
             </td>
             <td>
-                <form:select path="<%= REGIONS %>" onmouseover="showTooltip(this)" size="5"
+                <form:select path="<%= REGIONS %>" onmouseover="showTooltip(this)" size="5" cssStyle="width: 200px;"
                              onmouseout="tooltip.hide()" multiple="true" onchange="multipleOptSelectedInSelect(this)">
                     <form:option value="<%= ALL_VALUE %>" label="Все регионы"/>
                     <form:options items="${regionList}" itemLabel="name" itemValue="id"/>
@@ -249,7 +249,7 @@
                 <span class="label">Тип отпуска:</span>
             </td>
             <td>
-                <form:select path="<%= VACATION_TYPE %>" id="<%= VACATION_TYPE %>"
+                <form:select path="<%= VACATION_TYPE %>" id="<%= VACATION_TYPE %>" cssStyle="width: 200px;"
                              onMouseOver="tooltip.show(getTitle(this));"
                              onMouseOut="tooltip.hide();" multiple="false" size="1">
                     <form:option value="0" label="Все"/>

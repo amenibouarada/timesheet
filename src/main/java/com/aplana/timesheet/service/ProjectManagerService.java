@@ -29,14 +29,6 @@ public class ProjectManagerService {
 	}
 
     /**
-     * Возвращает объект класса ProjectManager, если найдено совпадение по паре employee/project
-     */
-    @Transactional(readOnly = true)
-    public Boolean isProjectManager(Employee employee, Project project){
-        return projectManagerDAO.isProjectManager(employee, project);
-    }
-
-    /**
      * Определяет есть ли активные Project Manager у сотрудника
      */
     @Transactional(readOnly = true)
@@ -69,10 +61,6 @@ public class ProjectManagerService {
                     }
                 }
         }
-    }
-
-    public List<ProjectManager> getSortedListByProject(Project project) {
-        return projectManagerDAO.getSortedListByProject(project);
     }
 
     public List<ProjectManager> getListMasterManagersByRole(Integer roleId, Project project) {

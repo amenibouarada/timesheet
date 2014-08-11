@@ -113,11 +113,6 @@ public class PlannedVacationService {
         return managerEmployees;
     }
 
-
-    private Employee getManager(Employee e) {
-        return e.getManager();
-    }
-
     /**
     * Получаем руководителей чьи "близкие" подчиненые планируют отпуска в ближайшие 2 недели
     */

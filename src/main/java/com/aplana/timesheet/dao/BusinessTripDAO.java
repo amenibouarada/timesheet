@@ -60,26 +60,6 @@ public class BusinessTripDAO {
                 .getResultList();
     }
 
-    /**
-     * Командировки, которые имеют пересечения с периодом
-     * @param employee
-     * @param beginDate - начало периода
-     * @param endDate - окончание периода
-     * @return
-     */
-    public List<BusinessTrip> getEmployeeBusinessTripsIntersectionDates(Employee employee, Date beginDate, Date endDate) {
-        return entityManager.createQuery(
-                "from BusinessTrip as bt " +
-                "where bt.employee = :employee and" +
-                        "(bt.beginDate >= :beginDate and bt.beginDate <= :endDate " +
-                        "or " +
-                        ":beginDate >= bt.beginDate and :beginDate <= bt.endDate)")
-                .setParameter("employee", employee)
-                .setParameter("beginDate", beginDate)
-                .setParameter("endDate", endDate)
-                .getResultList();
-    }
-
 
     public Boolean isBusinessTripDay(Employee employee, Date date){
         Query query = entityManager.createQuery(

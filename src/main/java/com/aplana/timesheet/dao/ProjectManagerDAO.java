@@ -63,14 +63,6 @@ public class ProjectManagerDAO {
         return query.getResultList();
     }
 
-    public Boolean isProjectParticipant(Project project, Employee employee){
-        final Query query = entityManager.createQuery("FROM ProjectParticipant p " +
-                "WHERE p.employee = :employee AND p.project = :project").
-                setParameter("employee", employee).
-                setParameter("project", project);
-        return query.getResultList().size() > 0;
-    }
-
     public List<ProjectManager> getSortedListByProject(Project project) {
         Query query = entityManager.createQuery(
                 "select case " +

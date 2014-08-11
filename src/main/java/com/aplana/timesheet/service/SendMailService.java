@@ -222,10 +222,6 @@ public class SendMailService {
                 , ",");
     }
 
-    public List<Employee> getEmployeesList(Division division) {
-        return employeeService.getEmployees(division, false);
-    }
-
     public void performMailing(TimeSheetForm form) {
         new TimeSheetSender(this, propertyProvider, overtimeCauseService, reportService).sendMessage(form);
     }
@@ -421,10 +417,6 @@ public class SendMailService {
         return vacationApprovalService.getVacationApprovalEmailList(vacationId);
     }
 
-    public Map<Employee, List<Project>> getJuniorProjectManagersAndProjects(Project project, Vacation vacation) {
-        return employeeService.getJuniorProjectManagersAndProjects(Arrays.asList(project), vacation);
-    }
-
     public List<EmployeeAssistant> getEmployeeAssistant(Set<String> managersEmails) {
         return employeeAssistantService.tryFind(managersEmails);
     }
@@ -554,13 +546,6 @@ public class SendMailService {
                 };
             }
         });
-    }
-
-    /**
-     * получаем проекты, по которым сотрудник списывал отчеты, по датам отчетов
-     */
-    public List<Project> getEmployeeProjectsByDates(Date beginDate, Date endDate, Employee employee) {
-        return projectService.getEmployeeProjectsFromTimeSheetByDates(beginDate, endDate, employee);
     }
 
     @Transactional(readOnly = true)

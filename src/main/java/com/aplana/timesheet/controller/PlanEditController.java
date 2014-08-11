@@ -793,10 +793,6 @@ public class PlanEditController {
         return map;
     }
 
-    private String formatSummaryPlan(double sumPlan, double monthPlan) {
-        return String.format("%d/%d", Math.round(sumPlan), Math.round(monthPlan));
-    }
-
     private String getFieldNameForEmployeePlan(EmployeePlan employeePlan) {
         for (Map.Entry<JsonStringNode, TSEnum> entry : PLAN_TYPE_MAP.entrySet()) {
             if (entry.getValue() == EnumsUtils.getEnumById(employeePlan.getType(), EmployeePlanType.class)) {
