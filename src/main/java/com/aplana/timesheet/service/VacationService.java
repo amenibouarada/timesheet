@@ -11,6 +11,7 @@ import com.aplana.timesheet.exception.service.DeleteVacationException;
 import com.aplana.timesheet.exception.service.NotDataForYearInCalendarException;
 import com.aplana.timesheet.exception.service.VacationApprovalServiceException;
 import com.aplana.timesheet.form.CreateVacationForm;
+import com.aplana.timesheet.form.VacationsForm;
 import com.aplana.timesheet.service.helper.ViewReportHelper;
 import com.aplana.timesheet.service.vacationapproveprocess.VacationApprovalProcessService;
 import com.aplana.timesheet.system.properties.TSPropertyProvider;
@@ -20,7 +21,6 @@ import com.aplana.timesheet.util.DateTimeUtil;
 import com.aplana.timesheet.util.JsonUtil;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.slf4j.Logger;
@@ -29,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.BindingResult;
 
 import javax.annotation.Nullable;
 import java.sql.Timestamp;
@@ -36,6 +37,7 @@ import java.util.*;
 import java.util.Calendar;
 
 import static argo.jdom.JsonNodeBuilders.*;
+import static com.aplana.timesheet.form.VacationsForm.ALL_VALUE;
 import static com.aplana.timesheet.util.DateTimeUtil.VIEW_DATE_PATTERN;
 import static com.aplana.timesheet.util.DateTimeUtil.dateToString;
 
@@ -48,34 +50,24 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
 
     @Autowired
     private VacationDAO vacationDAO;
-
     @Autowired
     private SendMailService sendMailService;
-
     @Autowired
     private SecurityService securityService;
-
     @Autowired
     private EmployeeService employeeService;
-
     @Autowired
     private DictionaryItemService dictionaryItemService;
-
     @Autowired
     private VacationApprovalProcessService vacationApprovalProcessService;
-
     @Autowired
     private VacationApprovalService vacationApprovalService;
-
     @Autowired
     private ViewReportHelper viewReportHelper;
-
     @Autowired
     protected CalendarService calendarService;
-
     @Autowired
     private RegionService regionService;
-
     @Autowired
     private TSPropertyProvider propertyProvider;
 
@@ -137,6 +129,11 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
     }
 
     @Transactional
+    public Vacation findVacation(Integer vacationId) {
+        return vacationDAO.findVacation(vacationId);
+    }
+
+    @Transactional
     public Vacation tryFindVacation(Integer vacationId) {
         return vacationDAO.tryFindVacation(vacationId);
     }
@@ -172,12 +169,6 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
         }
     }
 
-    @Transactional
-    public Vacation findVacation(Integer vacationId) {
-        return vacationDAO.findVacation(vacationId);
-    }
-
-
     public int getVacationsWorkdaysCount(Employee employee, Integer year, Integer month, VacationStatusEnum status) {
         int vacationsWorkdaysCount = vacationDAO.getVacationsWorkdaysCount(employee, year, month, VacationStatusEnum.APPROVED, null, true);
         return vacationsWorkdaysCount;
@@ -187,16 +178,23 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
             return (double)vacationDAO.getVacationsWorkdaysCount(employee, year, month);
     }
 
-    public Map<DictionaryItem, List<Vacation>> splitVacationByTypes(List<Vacation> vacations) {
-        Map<DictionaryItem, List<Vacation>> map = new HashMap<DictionaryItem, List<Vacation>>();
-        for (Vacation vac : vacations) {
-            if (map.keySet().contains(vac.getType())) {
-                map.get(vac.getType()).add(vac);
-            } else {
-                map.put(vac.getType(), Lists.newArrayList(vac));
+    public List<DictionaryItem> getVacationTypes(List<Vacation> vacations) {
+        List<DictionaryItem> result = new ArrayList<DictionaryItem>();
+        for (Vacation vacation : vacations) {
+            if (!result.contains(vacation.getType())){
+                result.add(vacation.getType());
             }
         }
-        return map;
+        // отсортируем
+        Collections.sort(result, new Comparator() {
+            @Override
+            public int compare(Object type1, Object type2) {
+                Integer typeId1 = ((DictionaryItem)type1).getId();
+                Integer typeId2 = ((DictionaryItem)type2).getId();
+                return typeId1.compareTo(typeId2);
+            }
+        });
+        return result;
     }
 
     public List<Vacation> findVacationsNeedsApproval(Integer employeeId) {
@@ -331,6 +329,28 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
                 return (
                         calDate.compareTo(beginDate) == 0 || calDate.compareTo(endDate) == 0 ||
                                 calDate.after(beginDate) && calDate.before(endDate)
+                );
+            }
+        }));
+    }
+
+    /**
+     * Вычисление кол-ва выходных дней в заданном периоде для конкретного региона
+     *
+     * @param holidays
+     * @param region
+     * @param beginDate
+     * @param endDate
+     * @return кол-ва выходных дней в заданном периоде
+     */
+    public int getHolidaysCount(List<Holiday> holidays, final Region region, final Date beginDate, final Date endDate) {
+        return Iterables.size(Iterables.filter(holidays, new Predicate<Holiday>() {
+            @Override
+            public boolean apply(@Nullable Holiday holiday) {
+                final Timestamp calDate = holiday.getCalDate().getCalDate();
+                return (
+                        (calDate.compareTo(beginDate) >= 0 && calDate.compareTo(endDate) <= 0) &&
+                        (holiday.getRegion() == null || holiday.getRegion().getId() == region.getId())
                 );
             }
         }));
@@ -481,4 +501,155 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
         return JsonUtil.format(anObjectBuilder().
                 withField("isApproved", JsonNodeBuilders.aTrueBuilder()));
     }
+
+    public void deleteVacationOrApproval(BindingResult result, VacationsForm vacationsForm){
+        Integer vacationId = vacationsForm.getVacationId();
+        Integer approvalId = vacationsForm.getApprovalId();
+        // если передан айдишник отпуска, то удаляем отпуск
+        if (vacationId != null) {
+            try {
+                deleteVacation(vacationId);
+                vacationsForm.setVacationId(null);
+            } catch (DeleteVacationException ex) {
+                result.rejectValue("vacationId", "error.vacations.deletevacation.failed", ex.getLocalizedMessage());
+            }
+        }
+        // если согласование, то удаляем согласование
+        if (vacationId == null && approvalId != null) {
+            try {
+                vacationApprovalService.deleteVacationApprovalByIdAndCheckIsApproved(approvalId);
+                vacationsForm.setApprovalId(null);
+            } catch (VacationApprovalServiceException e) {
+                result.rejectValue("approvalID", "error.vacations.deletevacation.failed", e.getLocalizedMessage());
+            }
+        }
+    }
+
+    public Map<Vacation,Integer> getCalDays(List<Vacation> vacations){
+        Map<Vacation,Integer> calDays = new HashMap<Vacation, Integer>(vacations.size());
+        for (Vacation vacation : vacations){
+            Integer diffInDays = DateTimeUtil.getDiffInDays(vacation.getBeginDate(), vacation.getEndDate());
+            calDays.put(vacation, diffInDays);
+        }
+        return calDays;
+    }
+
+    public Map<Vacation,Integer> getWorkDays(Map<Vacation,Integer> calDays, List<Holiday> holidays){
+        Map<Vacation,Integer> workDays = new HashMap<Vacation, Integer>(calDays.size());
+
+        for(Map.Entry<Vacation, Integer> entry : calDays.entrySet()) {
+            Vacation vacation = entry.getKey();
+            Integer calDaysInVacation = entry.getValue();
+            Region emplRegion = vacation.getEmployee().getRegion();
+            final int holidaysCount = getHolidaysCount(holidays, emplRegion, vacation.getBeginDate(), vacation.getEndDate());
+            final int workDaysCount = calDaysInVacation - holidaysCount;
+            workDays.put(vacation,workDaysCount);
+        }
+
+        return workDays;
+    }
+
+    /* определяет по дате началу отпуска принадлежность году */
+    private Boolean vacationStatusInThisYear(Vacation vacation, int year) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(vacation.getBeginDate());
+        return cal.get(Calendar.YEAR) == year;
+    }
+
+    // возвращает список отпусков за год определенного типа с указанием количества календарных или рабочих дней
+    // в зависимости от того, какой список был передан
+    private Map<Vacation,Integer> getDaysForYearByType(Map<Vacation,Integer> days, int year, DictionaryItem type){
+        Map<Vacation,Integer> daysForYearByType = new HashMap<Vacation, Integer>();
+        for(Map.Entry<Vacation, Integer> entry : days.entrySet()) {
+            Vacation vacation = entry.getKey();
+            Integer calDaysInVacation = entry.getValue();
+
+            if (vacationStatusInThisYear(vacation, year) &&
+                    type.getId().equals(vacation.getType().getId()))
+            {
+                daysForYearByType.put(vacation, calDaysInVacation);
+            }
+        }
+        return daysForYearByType;
+    }
+
+    // возвращает количество дней в списке отпусков (в зависимости от того какой список был передан)
+    private int getSummaryDaysCount(Map<Vacation, Integer> days){
+        int summaryDays  = 0;
+        for(Map.Entry<Vacation, Integer> entry : days.entrySet()) {
+            Vacation vacation = entry.getKey();
+            Integer daysInVacation = entry.getValue();
+            if (VacationStatusEnum.APPROVED.getId() == vacation.getStatus().getId()){
+                summaryDays += daysInVacation;
+            }
+        }
+        return summaryDays;
+    }
+
+    public List<VacationInYear> getSummaryDaysCountByYearAndType(List<DictionaryItem> vacationTypes,
+                                                                  int firstYear, int lastYear,
+                                                                  Map<Vacation,Integer> calDays,
+                                                                  Map<Vacation,Integer> workDays){
+        List<VacationInYear> result = new ArrayList<VacationInYear>();
+        for(DictionaryItem vacationType : vacationTypes){
+            for (int year  = firstYear; year <= lastYear; year++){
+                Map<Vacation,Integer> calDaysForYearByType  = getDaysForYearByType(calDays, year, vacationType);
+                Map<Vacation,Integer> workDaysForYearByType = getDaysForYearByType(workDays, year, vacationType);
+                int summaryCalDays = getSummaryDaysCount(calDaysForYearByType);
+                int summaryWorkDays = getSummaryDaysCount(workDaysForYearByType);
+                result.add(new VacationInYear(vacationType.getValue(), year, summaryCalDays, summaryWorkDays));
+            }
+        }
+        return result;
+    }
+
+    // сортирует список отпусков по ФИО сотрудников, а внутри группы по сотруднику - по типу отпусков
+    private void sortVacations(List<Vacation> vacations){
+        Collections.sort(vacations, new Comparator() {
+            @Override
+            public int compare(Object v1, Object v2) {
+                String employeeName1 = ((Vacation)v1).getEmployee().getName();
+                String employeeName2 = ((Vacation)v2).getEmployee().getName();
+                int compareRes = employeeName2.compareTo(employeeName1);
+                if (compareRes == 0){
+                    Integer typeId1 = ((Vacation)v1).getType().getId();
+                    Integer typeId2 = ((Vacation)v2).getType().getId();
+                    return typeId1.compareTo(typeId2);
+                }
+                return employeeName1.compareTo(employeeName2);
+            }
+        });
+    }
+
+    public List<Vacation> getVacationList(VacationsForm vacationsForm){
+        Integer divisionId      = vacationsForm.getDivisionId();
+        Integer employeeId      = vacationsForm.getEmployeeId();
+        Date dateFrom           = DateTimeUtil.parseStringToDateForDB(vacationsForm.getCalFromDate());
+        Date dateTo             = DateTimeUtil.parseStringToDateForDB(vacationsForm.getCalToDate());
+        Integer projectId       = vacationsForm.getProjectId();
+        Integer managerId       = vacationsForm.getManagerId();
+        List<Integer> regions   = vacationsForm.getRegions();
+        DictionaryItem vacationType = vacationsForm.getVacationType() != 0 ?
+                dictionaryItemService.find(vacationsForm.getVacationType()) : null;
+
+        List<Vacation> vacations = new ArrayList<Vacation>();
+        if (employeeId != null && employeeId != ALL_VALUE){
+            vacations.addAll(findVacations(employeeId, dateFrom, dateTo, vacationType));
+        } else {
+            List<Employee> employees = employeeService.getEmployees(
+                    employeeService.createDivisionList(divisionId),
+                    employeeService.createManagerList(managerId),
+                    employeeService.createRegionsList(regions),
+                    employeeService.createProjectList(projectId),
+                    dateFrom,
+                    dateTo,
+                    true
+            );
+            vacations.addAll(findVacations(employees, dateFrom, dateTo, vacationType));
+        }
+        sortVacations(vacations);
+        return vacations;
+    }
+
 }
+

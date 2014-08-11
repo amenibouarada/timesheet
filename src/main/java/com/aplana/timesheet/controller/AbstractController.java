@@ -43,37 +43,4 @@ public abstract class AbstractController {
         binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, false));
     }
 
-    /**
-     * Сохраняет в сессии: URI и параметы GET/POST запроса.
-     * !!! Не работает на нашем томкате :(.
-     * @param uniqueSavepointName - уникальное значение для идентификации
-     */
-    public void savepoint(String uniqueSavepointName){
-        Map<String, Object> parameterMap = request.getParameterMap();
-        Pair<String, Map> link = new Pair(request.getRequestURI(), parameterMap);
-        session.setAttribute(uniqueSavepointName, link);
-
-        logger.debug("savepoint["+uniqueSavepointName+"]" + link);
-    }
-
-    /**
-     * Возвращает ModelAndView с редиректом на ранее сохраненную точку.
-     * !!! Не работает на нашем томкате :(.
-     * @param uniqueSavepointName - уникальное значение для идентификации
-     * @return - ModelAndView
-     */
-    public ModelAndView redirectTo(String uniqueSavepointName){
-        Pair<String, Map> link = (Pair<String, Map>)session.getAttribute(uniqueSavepointName);
-        String uri = link.getFirst();
-        Map<String, Object> params = link.getSecond();
-
-        ModelAndView modelAndView = new ModelAndView("redirect:" + uri);
-        if (params!=null){
-            modelAndView.addAllObjects(params);
-        }
-
-        logger.debug("redirectTo["+uniqueSavepointName+"]" + link);
-
-        return modelAndView;
-    }
 }

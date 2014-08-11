@@ -13,7 +13,7 @@ function showGraphic(type) {
     var selectedTabInput = dojo.byId(VIEW_MODE);
     selectedTabInput.value = type;
 
-    if (vacationListJSON.length == 0) { // если нет данных для отображения
+    if (vacationListJSON == null || vacationListJSON.length == 0) { // если нет данных для отображения
         dojo.byId("emptyMessage").innerHTML = "Нет данных для отображения";
         return;
     }

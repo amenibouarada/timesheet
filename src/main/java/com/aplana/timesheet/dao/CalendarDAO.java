@@ -211,6 +211,16 @@ public class CalendarDAO {
         return query.getResultList();
     }
 
+    // возвращает все выходные дни без региональных
+    public List<Holiday> getAllHolidaysInInterval(Date beginDate, Date endDate){
+        Query query = entityManager.createQuery(
+                "select h from Holiday as h where h.calDate.calDate between :beginDate AND :endDate")
+                .setParameter("beginDate", beginDate)
+                .setParameter("endDate", endDate);
+
+        return query.getResultList();
+    }
+
     public int getWorkDaysCountForRegion(Region region, Integer year, Integer month, @NotNull Date fromDate) {
         final Query query = entityManager.createQuery(
                 "select count(c) - count(h)" +

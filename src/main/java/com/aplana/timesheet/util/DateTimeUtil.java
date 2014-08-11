@@ -550,4 +550,9 @@ public class DateTimeUtil {
         }
         return stringList;
     }
+
+
+    public static int getDiffInDays(Date beginDate, Date endDate) {
+        return (int) ((endDate.getTime() - beginDate.getTime()) / (24 * 3600 * 1000) + 1);
+    }
 }
