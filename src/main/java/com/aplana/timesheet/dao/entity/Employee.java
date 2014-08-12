@@ -328,10 +328,10 @@ public class Employee implements Identifiable, Comparable{
         if (getPatronymic() == null) {
             return true;
         }
-        String lastChar = getPatronymic().substring(getPatronymic().length(),getPatronymic().length());
-        if ("ч".equals(lastChar)) {
+        String lastChar = getPatronymic().substring(getPatronymic().length()-2,getPatronymic().length());
+        if ("ич".equals(lastChar) || "лы".equals(lastChar)) {
             return true;
-        } else if ("а".equals(lastChar)) {
+        } else if ("на".equals(lastChar) || "зы".equals(lastChar) || "ва".equals(lastChar)) {
             return false;
         } else {
             return true;
