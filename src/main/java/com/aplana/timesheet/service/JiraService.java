@@ -10,6 +10,7 @@ import com.aplana.timesheet.util.DateTimeUtil;
 import com.atlassian.jira.rest.client.JiraRestClient;
 import com.atlassian.jira.rest.client.domain.Issue;
 import com.atlassian.jira.rest.client.internal.jersey.JerseyJiraRestClientFactory;
+import com.google.common.base.Joiner;
 import org.apache.commons.lang.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -176,12 +177,8 @@ public class JiraService {
             }
 
             for (Map.Entry<String, List<String>> entry : projects.entrySet()) {
-
-                stringBuilder.append("\r\n").append(entry.getKey());
-                for (String summary : projects.get(entry.getKey())) {
-
-                    stringBuilder.append("\r\n").append(summary);
-                }
+                stringBuilder.append("\r\n").append(entry.getKey()).append(":");
+                stringBuilder.append(Joiner.on("\r\n").join(projects.get(entry.getKey())));
             }
                     /* подрезаем первый перенос строки */
             if (stringBuilder.length() > 0) {

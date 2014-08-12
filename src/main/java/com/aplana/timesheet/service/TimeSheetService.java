@@ -93,9 +93,6 @@ public class TimeSheetService {
     private BusinessTripService businessTripService;
 
     @Autowired
-    private HolidayDAO holidayDAO;
-
-    @Autowired
     private SendMailService sendMailService;
 
     @Transactional
