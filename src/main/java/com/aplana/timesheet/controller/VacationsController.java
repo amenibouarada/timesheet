@@ -89,8 +89,7 @@ public class VacationsController extends AbstractControllerForEmployee {
     @RequestMapping(value = "/vacations", method = RequestMethod.POST)
     public ModelAndView showVacations(
             @ModelAttribute(VACATION_FORM) VacationsForm vacationsForm,
-            BindingResult result,
-            Locale locale
+            BindingResult result
     ) {
         Date dateFrom = DateTimeUtil.parseStringToDateForDB(vacationsForm.getCalFromDate());
         Date dateTo = DateTimeUtil.parseStringToDateForDB(vacationsForm.getCalToDate());

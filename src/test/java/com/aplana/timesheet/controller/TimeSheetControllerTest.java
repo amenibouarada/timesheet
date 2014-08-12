@@ -1,6 +1,6 @@
 package com.aplana.timesheet.controller;
 
-import com.aplana.timesheet.AbstractTimeSheetTest;
+import com.aplana.timesheet.AbstractTest;
 import com.aplana.timesheet.dao.entity.*;
 import com.aplana.timesheet.enums.DictionaryEnum;
 import com.aplana.timesheet.enums.TypesOfTimeSheetEnum;
@@ -37,7 +37,7 @@ import static org.mockito.Mockito.*;
 
 /* Получился модульный тест, все запросы 'налево' (в сторонние сервисы) возвращают нужные значения */
 @RunWith(MockitoJUnitRunner.class)
-public class TimeSheetControllerTest extends AbstractTimeSheetTest {
+public class TimeSheetControllerTest extends AbstractTest {
 
     @Mock
     SecurityService securityService;

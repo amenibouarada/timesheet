@@ -1,5 +1,11 @@
 package com.aplana.timesheet.enums;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
+
+import javax.annotation.Nullable;
+import java.util.Arrays;
+
 /**
  * @author rshamsutdinov
  * @version 1.0
@@ -29,5 +35,15 @@ public enum VacationTypesEnum implements TSEnum {
     @Override
     public String getName() {
         return name;
+    }
+
+    public static VacationTypesEnum getById( final Integer id ) {
+        if (id == null) {return null;}
+        return Iterables.tryFind(Arrays.asList(VacationTypesEnum.values()), new Predicate<VacationTypesEnum>() {
+            @Override
+            public boolean apply(@Nullable VacationTypesEnum input) {
+                return input.getId() == id;
+            }
+        }).orNull();
     }
 }
