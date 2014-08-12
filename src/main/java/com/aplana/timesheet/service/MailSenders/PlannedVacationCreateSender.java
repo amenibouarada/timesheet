@@ -69,12 +69,12 @@ public class PlannedVacationCreateSender extends AbstractVacationSenderWithCopyT
     }
 
     private String getBody(Vacation vacation) {
-        String employeeNameStr = Padeg.getFIOPadegFS(vacation.getEmployee().getName(), true, PadegConstants.Roditelnyy);
+        String employeeNameStr = Padeg.getFIOPadegFS(vacation.getEmployee().getName(), vacation.getEmployee().getSex(), PadegConstants.Roditelnyy);
         String regionNameStr = vacation.getEmployee().getRegion().getName();
         String beginDateStr = DateTimeUtil.formatDateIntoViewFormat(vacation.getBeginDate());
         String endDateStr = DateTimeUtil.formatDateIntoViewFormat(vacation.getEndDate());
         String creationDate = DateTimeUtil.formatDateIntoViewFormat(vacation.getCreationDate());
-        String authorVacation = Padeg.getFIOPadegFS(vacation.getAuthor().getName(), true, PadegConstants.Tvoritelnyy);
+        String authorVacation = Padeg.getFIOPadegFS(vacation.getAuthor().getName(), vacation.getAuthor().getSex(), PadegConstants.Tvoritelnyy);
         String commentStr = StringUtils.EMPTY;
         if (StringUtils.isNotBlank(vacation.getComment())) {
             commentStr = String.format("Комментарий: %s. ", vacation.getComment());
@@ -93,6 +93,6 @@ public class PlannedVacationCreateSender extends AbstractVacationSenderWithCopyT
 
     private String getSubject(Vacation vacation) {
         return  propertyProvider.getPlannedVacationCreateMailMarker()+
-                String.format(" Планируемый отпуск %s", Padeg.getFIOPadegFS(vacation.getEmployee().getName(), true, PadegConstants.Roditelnyy));
+                String.format(" Планируемый отпуск %s", Padeg.getFIOPadegFS(vacation.getEmployee().getName(), vacation.getEmployee().getSex(), PadegConstants.Roditelnyy));
     }
 }

@@ -110,7 +110,7 @@ public class PlannedVacationRemoveSender  extends  AbstractVacationSenderWithCop
     private String getBody(Vacation vacation) {
         StringBuilder stringBuilder = new StringBuilder();
 
-        String employeeNameStr = Padeg.getFIOPadegFS(vacation.getEmployee().getName(), true, PadegConstants.Roditelnyy);
+        String employeeNameStr = Padeg.getFIOPadegFS(vacation.getEmployee().getName(), vacation.getEmployee().getSex(), PadegConstants.Roditelnyy);
 
         stringBuilder.append(String.format(
                 "Информируем Вас о удалении планируемого отпуска %s из г. %s на период %s - %s.",
@@ -124,7 +124,7 @@ public class PlannedVacationRemoveSender  extends  AbstractVacationSenderWithCop
     }
 
     private String getSubject(Vacation vacation) {
-        String employeeNameStr = Padeg.getFIOPadegFS(vacation.getEmployee().getName(), true, PadegConstants.Roditelnyy);
+        String employeeNameStr = Padeg.getFIOPadegFS(vacation.getEmployee().getName(), vacation.getEmployee().getSex(), PadegConstants.Roditelnyy);
 
         return String.format(
                 "Планируемый отпуск %s за период %s - %s удален",

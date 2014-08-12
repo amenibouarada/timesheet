@@ -24,17 +24,17 @@ public class IllnessEditSender extends AbstractIllnessSender{
     @Override
     protected String getSubject(Illness illness) {
         return propertyProvider.getIllnessMailMarker() +
-                String.format(" Отредактирован больничный %s", Padeg.getFIOPadegFS(illness.getEmployee().getName(), true, PadegConstants.Roditelnyy));
+                String.format(" Отредактирован больничный %s", Padeg.getFIOPadegFS(illness.getEmployee().getName(), illness.getEmployee().getSex(), PadegConstants.Roditelnyy));
     }
 
     @Override
     protected String getBody(Illness illness) {
-        String employeeNameStr = Padeg.getFIOPadegFS(illness.getEmployee().getName(), true, PadegConstants.Roditelnyy);
+        String employeeNameStr = Padeg.getFIOPadegFS(illness.getEmployee().getName(), illness.getEmployee().getSex(), PadegConstants.Roditelnyy);
         String regionNameStr = illness.getEmployee().getRegion().getName();
         String beginDateStr = DateTimeUtil.formatDateIntoViewFormat(illness.getBeginDate());
         String endDateStr = DateTimeUtil.formatDateIntoViewFormat(illness.getEndDate());
         String editionDate = DateTimeUtil.formatDateIntoViewFormat(illness.getEditionDate());
-        String authorVacation = Padeg.getFIOPadegFS(illness.getAuthor().getName(), true, PadegConstants.Tvoritelnyy);
+        String authorVacation = Padeg.getFIOPadegFS(illness.getAuthor().getName(), illness.getAuthor().getSex(), PadegConstants.Tvoritelnyy);
         String commentStr = StringUtils.EMPTY;
         if (StringUtils.isNotBlank(illness.getComment())) {
             commentStr = String.format("Комментарий: %s. ", illness.getComment());

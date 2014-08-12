@@ -39,11 +39,9 @@ public abstract class AbstractControllerForEmployee extends AbstractController{
     @Autowired
     protected SecurityService securityService;
 
-    protected List<Division> divisionList;
-
     private ModelAndView getCommonModelAndView(String viewName, Integer employeeId, Integer divisionId) {
+        List<Division> divisionList = divisionService.getDivisions();
         final ModelAndView modelAndView = new ModelAndView(viewName);
-        divisionList = divisionService.getDivisions();
         modelAndView.addObject("divisionId", divisionId);
         modelAndView.addObject("employeeId", employeeId);
         modelAndView.addObject("divisionList", divisionList);
@@ -55,6 +53,7 @@ public abstract class AbstractControllerForEmployee extends AbstractController{
 
 
     protected ModelAndView createModelAndViewForEmployee(String viewName, Integer employeeId, Integer divisionId) {
+        List<Division> divisionList = divisionService.getDivisions();
         final ModelAndView modelAndView = getCommonModelAndView(viewName, employeeId, divisionId);
         modelAndView.addObject(EMPLOYEE, employeeService.find(employeeId));
         modelAndView.addObject("employeeListJson",
@@ -64,6 +63,7 @@ public abstract class AbstractControllerForEmployee extends AbstractController{
     }
 
     protected ModelAndView createMAVForEmployeeWithDivisionAndManagerAndRegion(String viewName, Integer employeeId, Integer divisionId) {
+        List<Division> divisionList = divisionService.getDivisions();
         final ModelAndView modelAndView = getCommonModelAndView(viewName, employeeId, divisionId);
         modelAndView.addObject("employeeListJson",
                 employeeHelper.getEmployeeListWithDivisionAndManagerAndRegionJson(divisionList, employeeService.isShowAll(request)));
@@ -72,10 +72,11 @@ public abstract class AbstractControllerForEmployee extends AbstractController{
     }
 
     protected ModelAndView createMAVForEmployeeWithDivision(String viewName, Integer employeeId, Integer divisionId) {
+        List<Division> divisionList = divisionService.getDivisions();
         final ModelAndView modelAndView = new ModelAndView(viewName);
         modelAndView.addObject("employeeId", employeeId);
-        modelAndView.addObject(EMPLOYEE, employeeService.find(employeeId));
         modelAndView.addObject("divisionList", divisionService.getDivisions());
+        modelAndView.addObject(EMPLOYEE, employeeService.find(employeeId));
         modelAndView.addObject("employeeListJson",
                 employeeHelper.getEmployeeListWithDivisionJson(divisionList, employeeService.isShowAll(request)));
 

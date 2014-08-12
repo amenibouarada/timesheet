@@ -1,5 +1,6 @@
 package com.aplana.timesheet.service.MailSenders;
 
+import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.dao.entity.TimeSheet;
 import com.aplana.timesheet.service.SendMailService;
 import com.aplana.timesheet.system.constants.PadegConstants;
@@ -46,10 +47,11 @@ public class DeleteOrSetDraftApprovalSender extends MailSender<TimeSheet> {
     protected List<Mail> getMailList(TimeSheet timeSheet) {
         Mail mail = new TimeSheetMail();
 
-        String employeeName = timeSheet.getEmployee().getName();
-        String employeeEmail = timeSheet.getEmployee().getEmail();
+        Employee employee = timeSheet.getEmployee();
+        String employeeName = employee.getName();
+        String employeeEmail = employee.getEmail();
         String date = DateTimeUtil.formatDateIntoViewFormat(timeSheet.getCalDate().getCalDate());
-        String fio = Padeg.getOfficePadeg(employeeName, PadegConstants.Roditelnyy);
+        String fio = Padeg.getFIOPadegFS(employeeName, employee.getSex(), PadegConstants.Roditelnyy);
 
         mail.setToEmails(Arrays.asList(propertyProvider.getMailAdminsAddress()));
         mail.setCcEmails(Arrays.asList(employeeEmail));
@@ -61,8 +63,7 @@ public class DeleteOrSetDraftApprovalSender extends MailSender<TimeSheet> {
 
         mail.setSubject(propertyProvider.getDeleteOrSetDraftApprovalMarker() + subject);
 
-        String body = String.format("Необходимо выполнить %s отчета за %s сотрудника %s \r\n " +
-                "Комментарий: %s",
+        String body = String.format("Необходимо выполнить %s отчета за %s сотрудника %s \r\n. Комментарий: %s",
                 timeSheet.getReportSendApprovalType().getName(),
                 date,
                 fio,

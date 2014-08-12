@@ -7,7 +7,6 @@ import com.aplana.timesheet.util.DateTimeUtil;
 import com.aplana.timesheet.util.LanguageUtil;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
-import org.apache.commons.lang.time.DateFormatUtils;
 import padeg.lib.Padeg;
 
 import javax.annotation.PostConstruct;

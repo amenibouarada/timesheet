@@ -246,7 +246,7 @@ public class VacationsControllerTest extends AbstractTest {
         vacationsForm.setRegions(regionListIntegers);
         vacationsForm.setVacationType(1);
 
-        ModelAndView result = vacationsController.showVacations(vacationsForm, errors);
+        ModelAndView result = vacationsController.showVacations(vacationsForm, errors, Locale.ROOT);
 
         // проверка
         assertNotNull(result);
