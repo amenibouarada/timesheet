@@ -215,7 +215,7 @@ public class EmploymentPlanningController{
         modelAndView.addObject("yearList", yearList);
         modelAndView.addObject("monthList", calendarService.getMonthList(2013));
         modelAndView.addObject("projectList", getProjects(currentUser.getDivision().getId(), date));
-        modelAndView.addObject("divisionList", divisionService.getActiveDivisions());
+        modelAndView.addObject("divisionList", divisionService.getDivisions());
         modelAndView.addObject("managerList", managerService.getManagerList());
         modelAndView.addObject("projectRoleList", projectRoleService.getProjectRoles());
         modelAndView.addObject("regionList", regionService.getRegions());

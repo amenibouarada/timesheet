@@ -35,7 +35,6 @@
             window.focus();
             initWidgets();
             reloadViewReportsState();
-            initEmployeeData();
 
             if (dojo.query('input[id^="delete_"]').length > 0) {
                 var deleteAllCheckbox = dojo.byId("deleteAllCheckbox");
@@ -64,16 +63,6 @@
             onDivisionChange();
         }
 
-        function initEmployeeData(){
-            dojo.forEach(divisionsEmployeesJSON, function (divisionData) {
-                dojo.forEach(divisionData.managers, function (managerData) {
-                    if (managerData.active != "active") {
-                        managerData.name = managerData.name + " (уволен)";
-                    }
-                });
-            });
-        }
-
         /* По умолчанию отображается текущий год и месяц. */
         function reloadViewReportsState() {
             var temp_date = new Date();
@@ -94,30 +83,28 @@
         function onDivisionChange(){
             var divisionId = widgets.division.value;
             if (divisionsEmployeesJSON.length > 0) {
-                var divisionEmployees = divisionsEmployeesJSON;
-
-                dojo.forEach(dojo.filter(divisionEmployees, function (division) {
+                dojo.forEach(dojo.filter(divisionsEmployeesJSON, function (division) {
                     return (division.divisionId == divisionId);
                 }), function (divisionData) {
-                    var managersArray = [];
-                    dojo.forEach(divisionData.managers, function (managerData) {
-                        managersArray.push(managerData);
+                    var employeesArray = [];
+                    dojo.forEach(divisionData.employees, function (employeeData) {
+                        employeesArray.push(employeeData);
                     });
-                    managersArray.sort(function (a, b) {
+                    employeesArray.sort(function (a, b) {
                         return (a.name < b.name) ? -1 : 1;
                     });
 
                     var employeeDataStore = new dojo.data.ObjectStore({
                         objectStore: new dojo.store.Memory({
-                            data: managersArray,
+                            data: employeesArray,
                             idProperty: 'employeeId'
                         })
                     });
 
-                    var employeeFlteringSelect = dijit.byId("employeeId");
+                    var employeeFilteringSelect = dijit.byId("employeeId");
 
-                    if (!employeeFlteringSelect) {
-                        employeeFlteringSelect = new dijit.form.FilteringSelect({
+                    if (!employeeFilteringSelect) {
+                        employeeFilteringSelect = new dijit.form.FilteringSelect({
                             id: "employeeId",
                             name: "employeeId",
                             store: employeeDataStore,
@@ -127,8 +114,8 @@
                             autoComplete: false,
                             style: 'width:200px',
                             required: true,
-                            onChange: function () {
-                                setDefaultEmployeeJob(-1);
+                            onChange: function (){
+                                onChangeEmployee(this.value);
                             },
                             onMouseOver: function () {
                                 tooltip.show(getTitle(this));
@@ -137,16 +124,21 @@
                                 tooltip.hide();
                             }
                         }, "employeeId");
-                        employeeFlteringSelect.startup();
-                        widgets.employee = employeeFlteringSelect;
+                        employeeFilteringSelect.startup();
+                        widgets.employee = employeeFilteringSelect;
                     } else {
-                        employeeFlteringSelect.set('store', employeeDataStore);
+                        employeeFilteringSelect.set('store', employeeDataStore);
                         widgets.employee.set('value', null);
                     }
                 });
             }
 
             widgets.employee.set('value', "${employeeId}" != "" ? +"${employeeId}" : null);
+        }
+
+        function onChangeEmployee(empId){
+            dojo.byId('employeeBirthday').innerHTML = widgets.employee.item.birthday;
+            setDefaultEmployeeJob(-1);
         }
 
         function incMonth(){
@@ -403,6 +395,8 @@
     <span class="label">Отчет сотрудника</span>
 
     <div id="employeeId" name="employeeId"></div>
+    <span class="label">День рождения:</span>
+    <span id="employeeBirthday" class="label"></span>
 
     <br><br>
 

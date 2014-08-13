@@ -111,10 +111,7 @@
 
         function createProject() {
             var divisionId = dojo.byId("divisionId").value;
-            var managerId = dojo.byId("managerId").value;
-
-            window.location = "<%=request.getContextPath()%>/admin/projects/add?divisionId=" + divisionId +
-                    "&managerId=" + managerId;
+            window.location = "<%=request.getContextPath()%>/admin/projects/add?divisionId=" + divisionId;
         }
 
         function editProject(projectId) {

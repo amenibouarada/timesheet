@@ -156,7 +156,7 @@ public class DateTimeUtil {
     /**
      * Преобразует дату из строки в Timestamp
      *
-     * @param Date
+     * @param date
      * @return Timestamp
      */
     public static Timestamp stringToTimestamp(String date) {
@@ -490,5 +490,19 @@ public class DateTimeUtil {
 
     public static int getDiffInDays(Date beginDate, Date endDate) {
         return (int) ((endDate.getTime() - beginDate.getTime()) / (24 * 3600 * 1000) + 1);
+    }
+
+    private static String[] months = new String[] {"января", "февраля", "марта", "апреля", "мая", "июня", "июля",
+            "августа", "сентября", "октября", "ноября", "декабря"};
+
+    /**
+     * Возвращает дату в виде дня и месяца (пример: 1 октября)
+     * @param timestamp
+     * @return String
+     */
+    public static String getDayMonthFromDate(Timestamp timestamp){
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(timestamp);
+        return calendar.get(Calendar.DATE) + " " + months[calendar.get(Calendar.MONTH)];
     }
 }

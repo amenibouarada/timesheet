@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 import javax.persistence.*;
 import java.sql.Timestamp;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Set;
 
 @Entity
@@ -30,6 +31,9 @@ public class Employee implements Identifiable, Comparable{
 
     @Column(name = "start_date", columnDefinition = "date not null")
     private Timestamp startDate;
+
+    @Column(name = "birthday")
+    private Timestamp birthday;
 
 	@Column
 	private String ldap;
@@ -320,6 +324,14 @@ public class Employee implements Identifiable, Comparable{
         this.patronymic = patronymic;
     }
 
+    public Timestamp getBirthday() {
+        return birthday;
+    }
+
+    public void setBirthday(Timestamp birthday) {
+        this.birthday = birthday;
+    }
+
     /**
      *
      * @return true if male, false if female
@@ -336,5 +348,12 @@ public class Employee implements Identifiable, Comparable{
         } else {
             return true;
         }
+    }
+
+    public Boolean isActive(){
+        if (getEndDate() == null || getEndDate().after(new Date())){
+            return true;
+        }
+        return false;
     }
 }

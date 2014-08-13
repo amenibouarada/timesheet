@@ -35,53 +35,48 @@ public class AdminProjectEditController {
 
     @Autowired
     AdminProjectEditService adminProjectEditService;
-
     @Autowired
     ProjectService projectService;
-
     @Autowired
     DivisionService divisionService;
-
     @Autowired
     EmployeeService employeeService;
-
     @Autowired
     ProjectTaskService projectTaskService;
-
     @Autowired
     ProjectManagerService projectManagerService;
-
     @Autowired
     EmployeeProjectBillableService employeeProjectBillableService;
-
     @Autowired
     ProjectRoleService projectRoleService;
-
     @Autowired
     DictionaryItemService dictionaryItemService;
 
-    @RequestMapping(value = "/admin/projects/add", method = RequestMethod.GET)
-     public ModelAndView showAddForm(
-            @RequestParam(value = "divisionId", required = false, defaultValue = "-1") Integer divisionId,
-            @RequestParam(value = "managerId", required = false, defaultValue = "-1") Integer managerId
-    ) {
+    private ModelAndView getCommonMAV(final AdminProjectForm form){
         ModelAndView modelAndView = new ModelAndView("adminProjectEdit");
-        modelAndView.addObject("pageFunction", "add");
         modelAndView.addObject("divisionsList", divisionService.getAllDivisions());
-        List<TypesOfActivityEnum> projectTypesOfActivityEnums = Arrays.asList(TypesOfActivityEnum.PROJECT, TypesOfActivityEnum.PRESALE);
-        modelAndView.addObject("projectStateTypes", projectTypesOfActivityEnums);
+        modelAndView.addObject("projectStateTypes", Arrays.asList(TypesOfActivityEnum.PROJECT, TypesOfActivityEnum.PRESALE));
         modelAndView.addObject("projectFundingTypes", ProjectFundingTypeEnum.values());
-        modelAndView.addObject("divisionsEmployeesJSON", employeeService.getDivisionsEmployeesJSON(new Date()));
+        // TODO iziyangirov не слишком ли много раз получается список сотрудников?
+        modelAndView.addObject("divisionsEmployeesJSON", employeeService.getDivisionsEmployeesJSON());
         modelAndView.addObject("employeesListJSON", employeeService.getAllEmployeesJSON());
         modelAndView.addObject("employeesList", employeeService.getAllEmployees());
+        //////////////////////////////////////////////////////////////////////////
         modelAndView.addObject("projectRoleTypes", ProjectRolesEnum.values());
         modelAndView.addObject("projectRoleTypesJSON",
                 projectRoleService.getProjectRoleListJson(projectRoleService.getProjectRoles()));
-
-        AdminProjectForm form = new AdminProjectForm();
-        form.setDivision(divisionId);
-
         modelAndView.addObject("projectform", form);
+        return modelAndView;
+    }
+
+    @RequestMapping(value = "/admin/projects/add", method = RequestMethod.GET)
+     public ModelAndView showAddForm(
+            @RequestParam(value = "divisionId", required = false, defaultValue = "-1") Integer divisionId
+    ) {
+        final AdminProjectForm form = new AdminProjectForm();
+        form.setDivision(divisionId);
+        ModelAndView modelAndView = getCommonMAV(form);
+        modelAndView.addObject("pageFunction", "add");
         return modelAndView;
     }
 
@@ -89,24 +84,11 @@ public class AdminProjectEditController {
     public ModelAndView showEditForm(
             @RequestParam(value = "projectId", required = true) Integer projectId
     ) {
-        ModelAndView modelAndView = new ModelAndView("adminProjectEdit");
-        modelAndView.addObject("pageFunction", "edit");
-        modelAndView.addObject("divisionsList", divisionService.getAllDivisions());
-        List<TypesOfActivityEnum> projectTypesOfActivityEnums = Arrays.asList(TypesOfActivityEnum.PROJECT, TypesOfActivityEnum.PRESALE);
-        modelAndView.addObject("projectStateTypes", projectTypesOfActivityEnums);
-        modelAndView.addObject("projectFundingTypes", ProjectFundingTypeEnum.values());
-        modelAndView.addObject("divisionsEmployeesJSON", employeeService.getDivisionsEmployeesJSON(new Date()));
-        modelAndView.addObject("employeesListJSON", employeeService.getAllEmployeesJSON());
-        modelAndView.addObject("employeesList", employeeService.getAllEmployees());
-        modelAndView.addObject("projectRoleTypes", ProjectRolesEnum.values());
-        modelAndView.addObject("projectRoleTypesJSON",
-                projectRoleService.getProjectRoleListJson(projectRoleService.getProjectRoles()));
-
         Project project = projectService.find(projectId);
+        final AdminProjectForm form = adminProjectEditService.getAdminProjectForm(project);
+        ModelAndView modelAndView = getCommonMAV(form);
         modelAndView.addObject("managerId", project.getManager().getId());
-        AdminProjectForm form = adminProjectEditService.getAdminProjectForm(project);
-
-        modelAndView.addObject("projectform", form);
+        modelAndView.addObject("pageFunction", "edit");
         return modelAndView;
     }
 

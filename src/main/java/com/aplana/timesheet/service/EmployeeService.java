@@ -1,6 +1,7 @@
 package com.aplana.timesheet.service;
 
 import argo.jdom.JsonArrayNodeBuilder;
+import argo.jdom.JsonNodeBuilder;
 import argo.jdom.JsonNodeBuilders;
 import argo.jdom.JsonObjectNodeBuilder;
 import com.aplana.timesheet.system.constants.TimeSheetConstants;
@@ -400,30 +401,39 @@ public class EmployeeService {
         return JsonUtil.format(builder);
     }
 
-    /**
-     * Возвращает JSON-строку, содержащую список всех подразделений и их сотрудников, включая неактивные подразделения
-     * и уволенных сотрудников.
-     * @param currentDate Дата, для которой определяется, работает ли еще сотрудник.
-     * @return Главные руководители и связанные проекты
-     */
-    public String getDivisionsEmployeesJSON(Date currentDate) {
-        final JsonArrayNodeBuilder builder = anArrayBuilder();
+    private String getEmployeeNameByActiveStatus(Employee employee){
+        if (employee.isActive()){
+            return employee.getName();
+        }
+        return employee.getName() + " (уволен)";
+    }
 
-        // Заполнение списка сотрудников для варианта "Все подразделения"
-        JsonArrayNodeBuilder allDivisionsBuilder = anArrayBuilder();
-        for (Employee employee : employeeDAO.getAllEmployees()) {
-            allDivisionsBuilder.withElement(
+    private JsonNodeBuilder getEmployeesBuilder(List<Employee> employees){
+        JsonArrayNodeBuilder employeesBuilder = anArrayBuilder();
+        for (Employee employee :employees) {
+            employeesBuilder.withElement(
                     anObjectBuilder()
                             .withField("employeeId", aStringBuilder(employee.getId().toString()))
                             .withField("name", aStringBuilder(employee.getName()))
-                            .withField("active",
-                                    aStringBuilder((employee.getEndDate() == null || employee.getEndDate().after(currentDate))? "active" : ""))
+                            .withField("birthday", aStringBuilder(DateTimeUtil.getDayMonthFromDate(employee.getBirthday())))
             );
         }
+        return employeesBuilder;
+    }
+
+    /**
+     * Возвращает JSON-строку, содержащую список всех подразделений и их сотрудников, включая неактивные подразделения
+     * и уволенных сотрудников.
+     * @return Главные руководители и связанные проекты
+     */
+    public String getDivisionsEmployeesJSON() {
+        final JsonArrayNodeBuilder builder = anArrayBuilder();
+
+        // Заполнение списка сотрудников для варианта "Все подразделения"
         builder.withElement(
                 anObjectBuilder()
                         .withField("divisionId", aStringBuilder("-1"))
-                        .withField("employees", allDivisionsBuilder)
+                        .withField("employees", getEmployeesBuilder(employeeDAO.getAllEmployees()))
         );
 
         // Заполнение списков сотрудников для подразделений
@@ -431,21 +441,11 @@ public class EmployeeService {
                 employeeDAO.getAllEmployees((ArrayList<Division>) divisionService.getAllDivisions());
 
         for (Division division : divisionsEmployees.keySet()) {
-            JsonArrayNodeBuilder divisionBuilder = anArrayBuilder();
-            for (Employee employee : divisionsEmployees.get(division)) {
-                divisionBuilder.withElement(
-                        anObjectBuilder()
-                                .withField("employeeId", aStringBuilder(employee.getId().toString()))
-                                .withField("name", aStringBuilder(employee.getName()))
-                                .withField("active",
-                                        aStringBuilder((employee.getEndDate() == null || employee.getEndDate().after(currentDate))? "active" : ""))
-                );
-            }
             builder.withElement(
                     anObjectBuilder()
                             .withField("divisionId", aStringBuilder(division.getId().toString()))
                             .withField("active", aStringBuilder(String.valueOf(division.isActive())))
-                            .withField("managers", divisionBuilder)
+                            .withField("employees", getEmployeesBuilder(divisionsEmployees.get(division)))
             );
         }
 

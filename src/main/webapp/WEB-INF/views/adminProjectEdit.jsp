@@ -37,14 +37,6 @@ var billableFieldNames = {
     }
 };
 
-dojo.forEach(divisionsEmployeesJSON, function (divisionData) {
-    dojo.forEach(divisionData.managers, function (managerData) {
-        if (managerData.active != "active") {
-            managerData.name = managerData.name + " (уволен)";
-        }
-    });
-});
-
 var employeesListJSON = ${employeesListJSON};
 var projectRoleTypesJSON = ${projectRoleTypesJSON};
 var managerId = "${managerId}";
@@ -87,22 +79,20 @@ function saveProject() {
  */
 function updateManagerSelect(divisionId, managerId) {
     if (divisionsEmployeesJSON.length > 0) {
-        var divisionEmployees = divisionsEmployeesJSON;
-
-        dojo.forEach(dojo.filter(divisionEmployees, function (division) {
+        dojo.forEach(dojo.filter(divisionsEmployeesJSON, function (division) {
             return (division.divisionId == divisionId);
         }), function (divisionData) {
-            var managersArray = [];
-            dojo.forEach(divisionData.managers, function (managerData) {
-                managersArray.push(managerData);
+            var employeeArray = [];
+            dojo.forEach(divisionData.employees, function (employeeData) {
+                employeeArray.push(employeeData);
             });
-            managersArray.sort(function (a, b) {
+            employeeArray.sort(function (a, b) {
                 return (a.name < b.name) ? -1 : 1;
             });
 
             var divManagerDataStore = new dojo.data.ObjectStore({
                 objectStore: new dojo.store.Memory({
-                    data: managersArray,
+                    data: employeeArray,
                     idProperty: 'employeeId'
                 })
             });

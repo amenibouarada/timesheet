@@ -116,10 +116,4 @@ public class DivisionDAO {
 
         return builder.toString();
     }
-
-    public List<Project> getProjectList(Integer divisionId){
-        Query query = entityManager.createQuery("select p from Project p where p.active = true and :divisionId = any elements(p.divisions) order by p.name");
-        query.setParameter("divisionId", divisionId);
-        return query.getResultList();
-    }
 }
