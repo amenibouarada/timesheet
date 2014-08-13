@@ -6,8 +6,8 @@ import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.EmployeeService;
 import com.aplana.timesheet.service.ProjectService;
 import com.aplana.timesheet.service.SendMailService;
+import com.aplana.timesheet.util.DateTimeUtil;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.time.DateFormatUtils;
 import padeg.lib.Padeg;
 
 import java.util.Date;
@@ -15,22 +15,27 @@ import java.util.Date;
 public class IllnessDeleteSender extends AbstractIllnessSender {
     public IllnessDeleteSender(SendMailService sendMailService, TSPropertyProvider propertyProvider, ProjectService projectService, EmployeeService employeeService) {
         super(sendMailService, propertyProvider, projectService, employeeService);
+        logger.info("Run sending message for: {}", getName());
+    }
+
+    final String getName() {
+        return String.format(" Оповещения об удалении больничного (%s)", this.getClass().getSimpleName());
     }
 
     @Override
     protected String getSubject(Illness illness) {
         return propertyProvider.getIllnessMailMarker() +
-                String.format(" Удален больничный %s", Padeg.getFIOPadegFS(illness.getEmployee().getName(), true, PadegConstants.Roditelnyy));
+                String.format(" Удален больничный %s", Padeg.getFIOPadegFS(illness.getEmployee().getName(), illness.getEmployee().getSex(), PadegConstants.Roditelnyy));
     }
 
     @Override
     protected String getBody(Illness illness) {
-        String employeeNameStr = Padeg.getFIOPadegFS(illness.getEmployee().getName(), true, PadegConstants.Roditelnyy);
+        String employeeNameStr = Padeg.getFIOPadegFS(illness.getEmployee().getName(), illness.getEmployee().getSex(), PadegConstants.Roditelnyy);
         String regionNameStr = illness.getEmployee().getRegion().getName();
-        String beginDateStr = DateFormatUtils.format(illness.getBeginDate(), DATE_FORMAT);
-        String endDateStr = DateFormatUtils.format(illness.getEndDate(), DATE_FORMAT);
-        String deletedDate = DateFormatUtils.format(new Date(), DATE_FORMAT);
-        String authorVacation = Padeg.getFIOPadegFS(illness.getAuthor().getName(), true, PadegConstants.Tvoritelnyy);
+        String beginDateStr = DateTimeUtil.formatDateIntoViewFormat(illness.getBeginDate());
+        String endDateStr = DateTimeUtil.formatDateIntoViewFormat(illness.getEndDate());
+        String deletedDate = DateTimeUtil.formatDateIntoViewFormat(new Date());
+        String authorVacation = Padeg.getFIOPadegFS(illness.getAuthor().getName(), illness.getAuthor().getSex(), PadegConstants.Tvoritelnyy);
         String commentStr = StringUtils.EMPTY;
         if (StringUtils.isNotBlank(illness.getComment())) {
             commentStr = String.format("Комментарий: %s. ", illness.getComment());

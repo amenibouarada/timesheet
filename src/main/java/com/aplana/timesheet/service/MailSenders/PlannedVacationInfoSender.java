@@ -5,6 +5,7 @@ import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.dao.entity.Vacation;
 import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.SendMailService;
+import com.aplana.timesheet.util.DateTimeUtil;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -37,18 +38,22 @@ public class PlannedVacationInfoSender extends AbstractSenderWithAssistants<Map 
 
     public PlannedVacationInfoSender(SendMailService sendMailService, TSPropertyProvider propertyProvider) {
         super(sendMailService, propertyProvider);
+        logger.info("Run sending message for: {}", getName());
+    }
+
+    final String getName() {
+        return String.format("Оповещение о планируемых отпусках подчиненных (%s)", this.getClass().getSimpleName());
     }
 
     private Table<Integer, String, String> getBody(Set<Vacation> managerEmployeesVacation) {
         Table<Integer, String, String> result = HashBasedTable.create();
 
-            SimpleDateFormat format = new SimpleDateFormat(super.DATE_FORMAT);
             Integer i = 0;
             for(Vacation vacation:managerEmployeesVacation) {
                 result.put(i, EMPLOYEE_NAME,  vacation.getEmployee().getName());
                 result.put(i, EMPLOYEE_JOB,vacation.getEmployee().getJob().getName());
-                result.put(i, BEGIN_DATE,  format.format(vacation.getBeginDate()));
-                result.put(i, END_DATE, format.format(vacation.getEndDate()));
+                result.put(i, BEGIN_DATE, DateTimeUtil.formatDateIntoViewFormat(vacation.getBeginDate()));
+                result.put(i, END_DATE, DateTimeUtil.formatDateIntoViewFormat(vacation.getEndDate()));
                 result.put(i, VACATION_TYPE, vacation.getType().getValue());
                 i++;
             }
@@ -75,7 +80,6 @@ public class PlannedVacationInfoSender extends AbstractSenderWithAssistants<Map 
     protected void initMessageBody(Mail mail, MimeMessage message) throws MessagingException {
         Map model = new HashMap();
         Calendar calendar = Calendar.getInstance();
-        //SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy HH:mm");
         SimpleDateFormat format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
         model.put("forDate", format.format(calendar.getTime()));
         model.put("paramsForGenerateBody", mail.getParamsForGenerateBody());

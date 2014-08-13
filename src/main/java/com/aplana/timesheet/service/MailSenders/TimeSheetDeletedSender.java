@@ -19,6 +19,11 @@ public class TimeSheetDeletedSender extends AbstractSenderWithAssistants<TimeShe
 
     public TimeSheetDeletedSender(SendMailService sendMailService, TSPropertyProvider propertyProvider) {
         super(sendMailService, propertyProvider);
+        logger.info("Run sending message for: {}", getName());
+    }
+
+    final String getName() {
+        return String.format(" Оповещение о удалении отчета о списании (%s)", this.getClass().getSimpleName());
     }
 
     @Override
@@ -50,15 +55,15 @@ public class TimeSheetDeletedSender extends AbstractSenderWithAssistants<TimeShe
         mail.setToEmails(getToEmails(params));
         mail.setCcEmails(getAssistantEmail(Sets.newHashSet(mail.getToEmails())));
         mail.setEmployeeList(Arrays.asList(employee));
-        String date = DateTimeUtil.formatDate(params.getCalDate().getCalDate());
+        String date = DateTimeUtil.formatDateIntoDBFormat(params.getCalDate().getCalDate());
         mail.setDate(date);
-        mail.setSubject(getSubject(employee, date ));
+        mail.setSubject(getSubject(date ));
         //APLANATS-574 дополняем бэкапом
         mail.setPreconstructedMessageBody(sendMailService.initMessageBodyForReport(params));
         return Arrays.asList(mail);
     }
 
-    private String getSubject(Employee employee, String date) {
+    private String getSubject(String date) {
         return  propertyProvider.getTimesheetMailMarker() + // APLANATS-571
                 String.format(" Удален отчет за %s", date);
     }

@@ -6,11 +6,11 @@ import com.aplana.timesheet.dao.entity.Vacation;
 import com.aplana.timesheet.enums.VacationStatusEnum;
 import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.SendMailService;
+import com.aplana.timesheet.util.DateTimeUtil;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.time.DateFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +36,14 @@ public class VacationApprovedSender extends AbstractVacationSenderWithCopyToAuth
                                   List<String> emails) {
         super(sendMailService, propertyProvider);
         this.emails = emails;
+    }
+
+    {
+        logger.info("Run sending message for: {}", getName());
+    }
+
+    final String getName() {
+        return String.format(" Оповещение о согласовании отпуска (%s)", this.getClass().getSimpleName());
     }
 
     @Override
@@ -82,8 +90,8 @@ public class VacationApprovedSender extends AbstractVacationSenderWithCopyToAuth
     }
 
     private Table<Integer, String, String> getRejectedBody(Vacation vacation) {
-        String beginDateStr = DateFormatUtils.format(vacation.getBeginDate(), DATE_FORMAT);
-        String endDateStr = DateFormatUtils.format(vacation.getEndDate(), DATE_FORMAT);
+        String beginDateStr = DateTimeUtil.formatDateIntoViewFormat(vacation.getBeginDate());
+        String endDateStr = DateTimeUtil.formatDateIntoViewFormat(vacation.getEndDate());
 
         String messageBody = String.format("Отклонен %s сотрудника %s из г. %s на период с %s по %s",
                 vacation.getType().getValue(), vacation.getEmployee().getName(), vacation.getEmployee().getRegion().getName(), beginDateStr, endDateStr);
@@ -103,8 +111,8 @@ public class VacationApprovedSender extends AbstractVacationSenderWithCopyToAuth
     }
 
     private Table<Integer, String, String> getApprovedBody(Vacation vacation) {
-        String beginDateStr = DateFormatUtils.format(vacation.getBeginDate(), DATE_FORMAT);
-        String endDateStr = DateFormatUtils.format(vacation.getEndDate(), DATE_FORMAT);
+        String beginDateStr = DateTimeUtil.formatDateIntoViewFormat(vacation.getBeginDate());
+        String endDateStr = DateTimeUtil.formatDateIntoViewFormat(vacation.getEndDate());
 
         String messageBody = String.format("Успешно согласован %s сотрудника %s из г. %s на период с %s по %s",
                 vacation.getType().getValue(), vacation.getEmployee().getName(), vacation.getEmployee().getRegion().getName(), beginDateStr, endDateStr);
@@ -120,8 +128,8 @@ public class VacationApprovedSender extends AbstractVacationSenderWithCopyToAuth
     }
 
     private String getSubject(Vacation vacation, Boolean accepted) {
-        String beginDateStr = DateFormatUtils.format(vacation.getBeginDate(), DATE_FORMAT);
-        String endDateStr = DateFormatUtils.format(vacation.getEndDate(), DATE_FORMAT);
+        String beginDateStr = DateTimeUtil.formatDateIntoViewFormat(vacation.getBeginDate());
+        String endDateStr = DateTimeUtil.formatDateIntoViewFormat(vacation.getEndDate());
         return  String.format(accepted?MAIL_ACCEPT_SUBJECT:MAIL_REFUSE_SUBJECT, beginDateStr, endDateStr);
     }
 

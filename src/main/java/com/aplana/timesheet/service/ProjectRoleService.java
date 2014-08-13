@@ -50,10 +50,6 @@ public class ProjectRoleService {
         return projectRoleDAO.findByCode("ND");
 	}
 
-    public ProjectRole getSysRole(Integer roleId) {
-        return projectRoleDAO.getSysRole(roleId);
-    }
-
     public String getProjectRoleListJson(Iterable<ProjectRole> projectRoleList) {
         final JsonArrayNodeBuilder builder = anArrayBuilder();
 

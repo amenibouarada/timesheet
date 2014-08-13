@@ -24,6 +24,7 @@ import org.apache.velocity.app.VelocityEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.velocity.VelocityEngineUtils;
@@ -41,6 +42,36 @@ import static com.aplana.timesheet.util.ExceptionUtils.getLastCause;
 public class SendMailService {
     private static final Logger logger = LoggerFactory.getLogger(SendMailService.class);
 
+    @Autowired
+    public VelocityEngine velocityEngine;
+    @Autowired
+    private EmployeeService employeeService;
+    @Autowired
+    private ProjectService projectService;
+    @Autowired
+    private DictionaryItemService dictionaryItemService;
+    @Autowired
+    private SecurityService securityService;
+    @Autowired
+    private TSPropertyProvider propertyProvider;
+    @Autowired
+    private OvertimeCauseService overtimeCauseService;
+    @Autowired
+    private VacationApprovalService vacationApprovalService;
+    @Qualifier("employeeAssistantService")
+    @Autowired
+    private EmployeeAssistantService employeeAssistantService;
+    @Autowired
+    private ProjectTaskService projectTaskService;
+    @Autowired
+    private ManagerRoleNameService managerRoleNameService;
+    @Autowired
+    private ReportService reportService;
+    @Autowired
+    private TSPropertyProvider tsPropertyProvider;
+    @Autowired
+    private TimeSheetService timeSheetService;
+
     private final Predicate<ProjectActivityInfo> LEAVE_PRESALE_AND_PROJECTS_ONLY =
             Predicates.and(Predicates.notNull(), new Predicate<ProjectActivityInfo>() {
                 @Override
@@ -49,6 +80,7 @@ public class SendMailService {
                     return actType == PROJECT || actType == PRESALE || actType == PROJECT_PRESALE;
                 }
             });
+
     private final Function<ProjectManager, String> GET_EMAIL_FROM_MANAGER
             = new Function<ProjectManager, String>() {
         @Nullable
@@ -58,7 +90,7 @@ public class SendMailService {
         }
     };
 
-    private Function<ProjectActivityInfo, String> GET_EMAILS_OF_INTERESTED_MANAGERS_FROM_PROJECT_FOR_CURRENT_ROLE
+    private final Function<ProjectActivityInfo, String> GET_EMAILS_OF_INTERESTED_MANAGERS_FROM_PROJECT_FOR_CURRENT_ROLE
             = new Function<ProjectActivityInfo, String>() {
         @Nullable
         @Override
@@ -93,38 +125,6 @@ public class SendMailService {
         }
     };
 
-    @Autowired
-    public VelocityEngine velocityEngine;
-    @Autowired
-    private EmployeeService employeeService;
-    @Autowired
-    private ProjectService projectService;
-    @Autowired
-    private DictionaryItemService dictionaryItemService;
-    @Autowired
-    private SecurityService securityService;
-    @Autowired
-    private TSPropertyProvider propertyProvider;
-    @Autowired
-    private OvertimeCauseService overtimeCauseService;
-    @Autowired
-    private VacationApprovalService vacationApprovalService;
-    @Autowired
-    private ProjectManagerService projectManagerService;
-    @Autowired
-    private EmployeeAssistantService employeeAssistantService;
-    @Autowired
-    private ProjectTaskService projectTaskService;
-    @Autowired
-    private ManagerRoleNameService managerRoleNameService;
-    @Autowired
-    private ReportService reportService;
-    @Autowired
-    private TSPropertyProvider tsPropertyProvider;
-    @Autowired
-    private TimeSheetService timeSheetService;
-    @Autowired
-    private CalendarService calendarService;
     /**
      * Возвращает строку с адресами линейных руководителей сотрудника
      * (непосредственного и всех вышестоящих) разделёнными запятой.
@@ -220,10 +220,6 @@ public class SendMailService {
                         Iterables.filter(details, LEAVE_PRESALE_AND_PROJECTS_ONLY),
                         GET_EMAILS_OF_INTERESTED_MANAGERS_FROM_PROJECT_FOR_CURRENT_ROLE))
                 , ",");
-    }
-
-    public List<Employee> getEmployeesList(Division division) {
-        return employeeService.getEmployees(division, false);
     }
 
     public void performMailing(TimeSheetForm form) {
@@ -421,10 +417,6 @@ public class SendMailService {
         return vacationApprovalService.getVacationApprovalEmailList(vacationId);
     }
 
-    public Map<Employee, List<Project>> getJuniorProjectManagersAndProjects(Project project, Vacation vacation) {
-        return employeeService.getJuniorProjectManagersAndProjects(Arrays.asList(project), vacation);
-    }
-
     public List<EmployeeAssistant> getEmployeeAssistant(Set<String> managersEmails) {
         return employeeAssistantService.tryFind(managersEmails);
     }
@@ -554,13 +546,6 @@ public class SendMailService {
                 };
             }
         });
-    }
-
-    /**
-     * получаем проекты, по которым сотрудник списывал отчеты, по датам отчетов
-     */
-    public List<Project> getEmployeeProjectsByDates(Date beginDate, Date endDate, Employee employee) {
-        return projectService.getEmployeeProjectsFromTimeSheetByDates(beginDate, endDate, employee);
     }
 
     @Transactional(readOnly = true)

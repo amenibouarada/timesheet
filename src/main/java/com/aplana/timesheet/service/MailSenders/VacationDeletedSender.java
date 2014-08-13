@@ -1,7 +1,6 @@
 package com.aplana.timesheet.service.MailSenders;
 
 import com.aplana.timesheet.dao.entity.Employee;
-import com.aplana.timesheet.dao.entity.Project;
 import com.aplana.timesheet.dao.entity.Region;
 import com.aplana.timesheet.dao.entity.Vacation;
 import com.aplana.timesheet.enums.VacationStatusEnum;
@@ -9,12 +8,12 @@ import com.aplana.timesheet.service.EmployeeService;
 import com.aplana.timesheet.service.ProjectService;
 import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.SendMailService;
+import com.aplana.timesheet.util.DateTimeUtil;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
-import org.apache.commons.lang.time.DateFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +35,11 @@ public class VacationDeletedSender extends  AbstractVacationSenderWithCopyToAuth
         super(sendMailService, propertyProvider);
         this.projectService = projectService;
         this.employeeService = employeeService;
+        logger.info("Run sending message for: {}", getName());
+    }
+
+    final String getName() {
+        return String.format(" Оповещение об удалении отпуска (%s)", this.getClass().getSimpleName());
     }
 
 
@@ -119,8 +123,8 @@ public class VacationDeletedSender extends  AbstractVacationSenderWithCopyToAuth
                 String.format(
                         " на %s за период с %s по %s",
                         WordUtils.uncapitalize(params.getType().getValue()),
-                        DateFormatUtils.format(params.getBeginDate(), DATE_FORMAT),
-                        DateFormatUtils.format(params.getEndDate(), DATE_FORMAT)
+                        DateTimeUtil.formatDateIntoViewFormat(params.getBeginDate()),
+                        DateTimeUtil.formatDateIntoViewFormat(params.getEndDate())
                 )
         );
 

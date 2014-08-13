@@ -7,7 +7,6 @@ import com.aplana.timesheet.enums.DictionaryEnum;
 import com.aplana.timesheet.enums.VacationStatusEnum;
 import com.aplana.timesheet.enums.VacationTypesEnum;
 import com.aplana.timesheet.service.DictionaryItemService;
-import com.aplana.timesheet.system.security.SecurityService;
 import com.aplana.timesheet.util.DateTimeUtil;
 import com.google.common.collect.Lists;
 import org.hibernate.Hibernate;
@@ -38,23 +37,37 @@ public class VacationDAO {
     private EntityManager entityManager;
 
     @Autowired
-    private SecurityService securityService;
-
-    @Autowired
     private DictionaryItemService dictionaryItemService;
 
     private static final Logger logger = LoggerFactory.getLogger(VacationDAO.class);
 
+    private static final String VACATIONS_ORDER = " order by v.beginDate";
+    private static final String VACATIONS_FOR_EMPLOYEES =
+            "from Vacation v where v.employee.id = :emp_id and v.beginDate <= :endDate and v.endDate >= :beginDate ";
+    private static final String VACATIONS_FOR_EMPLOYEES_WITH_TYPE = VACATIONS_FOR_EMPLOYEES + " and v.type = :typeId ";
+    private static final String VACATIONS_FOR_EMPLOYEES_WITH_STATUS = VACATIONS_FOR_EMPLOYEES + " and v.status = :status ";
+
     public List<Vacation> findVacations(Integer employeeId, Date beginDate, Date endDate, DictionaryItem typeId){
-        final Query query = typeId != null ?
-                entityManager.createQuery("from Vacation v where v.employee.id = :emp_id and v.beginDate <= :endDate " +
-                        "and v.endDate >= :beginDate and v.type = :typeId order by v.beginDate")
-                        .setParameter("emp_id", employeeId).setParameter("beginDate", beginDate)
-                        .setParameter("endDate", endDate).setParameter("typeId", typeId) :
-                entityManager.createQuery("from Vacation v where v.employee.id = :emp_id and v.beginDate <= :endDate " +
-                        "and v.endDate >= :beginDate order by v.beginDate")
+        String queryString = typeId != null ? VACATIONS_FOR_EMPLOYEES_WITH_TYPE : VACATIONS_FOR_EMPLOYEES;
+        queryString = queryString + VACATIONS_ORDER;
+        final Query query = entityManager.createQuery(queryString)
                         .setParameter("emp_id", employeeId).setParameter("beginDate", beginDate)
                         .setParameter("endDate", endDate);
+        if (typeId != null) query.setParameter("typeId", typeId);
+
+        return query.getResultList();
+    }
+
+    public List<Vacation> findVacations(List<Employee> employees, Date beginDate, Date endDate, DictionaryItem typeId){
+        String queryString = "from Vacation v where v.employee in :employees and v.beginDate <= :endDate " +
+                        "and v.endDate >= :beginDate ";
+        queryString = queryString + (typeId != null ? " and v.type = :typeId " : "");
+        queryString = queryString + VACATIONS_ORDER;
+        final Query query = entityManager.createQuery(queryString)
+                        .setParameter("employees", employees)
+                        .setParameter("beginDate", beginDate)
+                        .setParameter("endDate", endDate);
+        if (typeId != null) query.setParameter("typeId", typeId);
         return query.getResultList();
     }
 
@@ -68,10 +81,8 @@ public class VacationDAO {
      * @return Список утверженных отпусков
      */
     public List<Vacation> findVacationsByStatus(Integer employeeId, Date beginDate, Date endDate, DictionaryItem status){
-        final Query query = entityManager.createQuery(
-                "from Vacation v where v.employee.id = :emp_id and v.beginDate <= :endDate " +
-                        "and v.endDate >= :beginDate and v.status = :status order by v.beginDate"
-        )       .setParameter("emp_id", employeeId)
+        final Query query = entityManager.createQuery(VACATIONS_FOR_EMPLOYEES_WITH_STATUS + VACATIONS_ORDER)
+                .setParameter("emp_id", employeeId)
                 .setParameter("beginDate", beginDate)
                 .setParameter("endDate", endDate)
                 .setParameter("status", status);
@@ -89,7 +100,10 @@ public class VacationDAO {
                         "where v.employee.id = :emp_id " +
                         "and (v.endDate >= :firstDay and v.beginDate <= :lastDay) " +
                         "and v.type in :types order by v.beginDate")
-                        .setParameter("emp_id", employeeId).setParameter("firstDay", firstDay).setParameter("lastDay",lastDay).setParameter("types",types);
+                        .setParameter("emp_id", employeeId).
+                        setParameter("firstDay", firstDay).
+                        setParameter("lastDay",lastDay).
+                        setParameter("types",types);
 
         return query.getResultList();
     }
@@ -107,7 +121,11 @@ public class VacationDAO {
                         "and v.type in :types " +
                         "and v.status in :statuses " +
                         "order by v.beginDate")
-                        .setParameter("emp_id", employeeId).setParameter("firstDay", firstDay).setParameter("lastDay",lastDay).setParameter("types",types).setParameter("statuses",statuses);
+                        .setParameter("emp_id", employeeId).
+                        setParameter("firstDay", firstDay).
+                        setParameter("lastDay",lastDay).
+                        setParameter("types",types).
+                        setParameter("statuses",statuses);
 
         return query.getResultList();
     }
@@ -119,7 +137,10 @@ public class VacationDAO {
                         "and (YEAR(v.beginDate) = :year or YEAR(v.endDate) = :year) " +
                         "and (MONTH(v.beginDate) = :month or MONTH(v.endDate) = :month) " +
                         "and v.type = :type order by v.beginDate")
-                        .setParameter("emp_id", employeeId).setParameter("year", year).setParameter("month",month).setParameter("type",type);
+                        .setParameter("emp_id", employeeId).
+                        setParameter("year", year).
+                        setParameter("month",month).
+                        setParameter("type",type);
 
         return query.getResultList();
     }
@@ -145,7 +166,9 @@ public class VacationDAO {
                         "where di.id = :status_id and ((:from_date between v.beginDate and v.endDate) or (:to_date between v.beginDate and v.endDate) or (v.beginDate between :from_date and :to_date))" +
                         " and not v.status = di and v.employee.id = :emp_id and v.type <> :type"
         ).setParameter("from_date", fromDate).setParameter("to_date", toDate).
-                setParameter("status_id", VacationStatusEnum.REJECTED.getId()).setParameter("emp_id", employeeId).setParameter("type",typeVacation);
+                setParameter("status_id", VacationStatusEnum.REJECTED.getId()).
+                setParameter("emp_id", employeeId).
+                setParameter("type",typeVacation);
 
         return (Long) query.getSingleResult();
     }
@@ -159,7 +182,9 @@ public class VacationDAO {
                         "(v.beginDate between :from_date and :to_date))" +
                         " and not v.status = di and v.employee.id = :emp_id and v.type = :type"
         ).setParameter("from_date", fromDate).setParameter("to_date", toDate).
-                setParameter("status_id", VacationStatusEnum.REJECTED.getId()).setParameter("emp_id", employeeId).setParameter("type",typeVacation);
+                setParameter("status_id", VacationStatusEnum.REJECTED.getId()).
+                setParameter("emp_id", employeeId).
+                setParameter("type",typeVacation);
 
         return (Long) query.getSingleResult();
     }
@@ -279,7 +304,6 @@ public class VacationDAO {
             List<DictionaryItem> typesVac = dictionaryItemService.getItemsByDictionaryId(DictionaryEnum.VACATION_TYPE.getId());
 
             typesVac.remove(dictionaryItemService.find(VacationTypesEnum.PLANNED.getId()));
-            //typesVac.remove(dictionaryItemService.find(VacationTypesEnum.WITH_NEXT_WORKING.getId()));
 
             query.setParameter("types_id", typesVac) ;
         }

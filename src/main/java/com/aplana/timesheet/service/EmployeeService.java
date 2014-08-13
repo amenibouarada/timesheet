@@ -23,8 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Nullable;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static argo.jdom.JsonNodeBuilders.*;
@@ -178,11 +176,6 @@ public class EmployeeService {
         return result;
     }
 
-    @Transactional(readOnly = true)
-    public List<Employee> getAllEmployeesDivision(Division division) {
-        return employeeDAO.getAllEmployeesDivision(division);
-    }
-
     /**
      * Возвращает список доступных для синхронизации с ldap сотрудников.
      * @param division Если null, то поиск осуществляется без учета подразделения,
@@ -256,15 +249,6 @@ public class EmployeeService {
             empDb = employeeDAO.save(employee);
         }
         return empDb;
-    }
-
-    @Transactional(readOnly = true)
-    public List<Employee> getRegionManager(Integer employeeId) {
-        return this.employeeDAO.getRegionManager(employeeId);
-    }
-
-    public List<Employee> getRegionManager(Integer regionId, Integer divisionId) {
-        return employeeDAO.getRegionManager(regionId, divisionId);
     }
 
     public Double getWorkDaysOnIllnessWorked(Employee employee, Date beginDate, Date endDate){
@@ -444,7 +428,7 @@ public class EmployeeService {
 
         // Заполнение списков сотрудников для подразделений
         Map<Division, List<Employee>> divisionsEmployees =
-                employeeDAO.getAllEmployees((ArrayList<Division>)divisionService.getAllDivisions());
+                employeeDAO.getAllEmployees((ArrayList<Division>) divisionService.getAllDivisions());
 
         for (Division division : divisionsEmployees.keySet()) {
             JsonArrayNodeBuilder divisionBuilder = anArrayBuilder();
@@ -466,31 +450,6 @@ public class EmployeeService {
         }
 
         return JsonUtil.format(builder);
-    }
-
-    public List<Employee> getMainProjectManagers() {
-        return employeeDAO.getMainProjectManagers();
-    }
-
-    public  List<Employee> getMainProjectManagers(List<Division> divisions) {
-        List<Employee> managers = new ArrayList<Employee>();
-
-        if (divisions.size() == 0) {
-            managers.addAll(employeeDAO.getMainProjectManagers(null));
-        } else {
-            for (Division division : divisions) {
-                managers.addAll(employeeDAO.getMainProjectManagers(division));
-            }
-        }
-
-        return managers;
-    }
-
-    /**
-     * Получаем список менеджеров по проекту
-     */
-    public List<Employee> getProjectManagers(Project project) {
-        return employeeDAO.getProjectManagers(project);
     }
 
     /**
@@ -585,18 +544,6 @@ public class EmployeeService {
         return JsonUtil.format(builder);
     }
 
-    public List<Integer> getEmployeesIdByDivisionManagerRegion(Integer divisionId, Integer managerId, Integer regionId){
-        return employeeDAO.getEmployeesIdByDivisionManagerRegion(divisionId, managerId, regionId);
-    }
-
-    public List<Integer> getEmployeesIdByDivisionRegion(Integer divisionId, Integer regionId){
-        return employeeDAO.getEmployeesIdByDivisionRegion(divisionId, regionId);
-    }
-
-    public List<Integer> getEmployeesIdByDivisionManager(Integer divisionId, Integer managerId){
-        return employeeDAO.getEmployeesIdByDivisionManager(divisionId, managerId);
-    }
-
     /**
      * Получаем список линейных руководителей
      * @param employee
@@ -609,12 +556,6 @@ public class EmployeeService {
             employees.add(manager);
             employees.addAll(getLinearEmployees(manager));
         }
-        /* APLANATS-865
-        Employee manager2 = employee.getManager2();
-        if(manager2 !=null){
-            employees.add(manager2);
-            employees.addAll(getLinearEmployees(manager2));
-        }*/
         return employees;
     }
 
@@ -630,10 +571,6 @@ public class EmployeeService {
      */
     public Employee findByLdapSID(String LdapCN) {
         return employeeDAO.findByLdapSID(LdapCN);
-    }
-
-    public List<Employee> getEmployeeByRegionAndManagerAndDivision(List<Integer> regions, Integer divisionId, Integer manager) {
-      return employeeDAO.getEmployeeByRegionAndManagerAndDivision(regions, divisionId, manager);
     }
 
     public List<Employee> getEmployeeByRegionAndManagerRecursiveAndDivision(List<Integer> regions, Integer divisionId, Integer manager) {
@@ -653,7 +590,7 @@ public class EmployeeService {
     }
 
     public String checkDayIsVacation(Integer employeeId, String reportDate) {
-        Date date = DateTimeUtil.stringToDateForDB(reportDate);
+        Date date = DateTimeUtil.parseStringToDateForDB(reportDate);
         Employee user = emloyeeDAO.find(employeeId);
         Boolean isVacationDay = vacationService.isDayVacationWithoutPlanned(user, date);
         final JsonArrayNodeBuilder builder = anArrayBuilder();
@@ -670,7 +607,7 @@ public class EmployeeService {
      * @return true - не начал.
      */
     public Boolean checkNotStartWorkByDate(Integer employeeId, String reportDate){
-        Date date = DateTimeUtil.stringToDateForDB(reportDate);
+        Date date = DateTimeUtil.parseStringToDateForDB(reportDate);
         Employee employee = emloyeeDAO.find(employeeId);
         if (employee.getStartDate().after(date)){
             return true;

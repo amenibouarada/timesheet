@@ -22,6 +22,9 @@ public class Employee implements Identifiable, Comparable{
     @Column(nullable = false)
     private String name;
 
+    @Column(nullable = false)
+    private String patronymic;
+
     @Column(nullable = false, length = 50)
     private String email;
 
@@ -307,5 +310,31 @@ public class Employee implements Identifiable, Comparable{
             return 0;
         else
             return getName().compareTo(((Employee) o).getName());
+    }
+
+    public String getPatronymic() {
+        return patronymic;
+    }
+
+    public void setPatronymic(String patronymic) {
+        this.patronymic = patronymic;
+    }
+
+    /**
+     *
+     * @return true if male, false if female
+     */
+    public Boolean getSex(){
+        if (getPatronymic() == null) {
+            return true;
+        }
+        String lastChar = getPatronymic().substring(getPatronymic().length()-2,getPatronymic().length());
+        if ("ич".equals(lastChar) || "лы".equals(lastChar)) {
+            return true;
+        } else if ("на".equals(lastChar) || "зы".equals(lastChar) || "ва".equals(lastChar)) {
+            return false;
+        } else {
+            return true;
+        }
     }
 }

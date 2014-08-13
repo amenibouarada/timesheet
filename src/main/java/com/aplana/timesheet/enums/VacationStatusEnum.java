@@ -1,5 +1,9 @@
 package com.aplana.timesheet.enums;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
+
+import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.List;
 
@@ -44,4 +48,13 @@ public enum VacationStatusEnum implements TSEnum {
         return Arrays.asList(APPROVED_BY_PM, APPROVEMENT_WITH_LM, APPROVEMENT_WITH_PM);
     }
 
+    public static VacationStatusEnum getById( final Integer id ) {
+        if (id == null) {return null;}
+        return Iterables.tryFind(Arrays.asList(VacationStatusEnum.values()), new Predicate<VacationStatusEnum>() {
+            @Override
+            public boolean apply(@Nullable VacationStatusEnum input) {
+                return input.getId() == id;
+            }
+        }).orNull();
+    }
 }

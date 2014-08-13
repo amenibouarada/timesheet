@@ -51,8 +51,6 @@ public class TimeSheetFormValidator extends AbstractValidator {
     @Autowired
     private ProjectTaskService projectTaskService;
     @Autowired
-    private TSPropertyProvider propertyProvider;
-    @Autowired
     private VacationService vacationService;
     @Autowired
     private OvertimeCauseService overtimeCauseService;
@@ -155,19 +153,7 @@ public class TimeSheetFormValidator extends AbstractValidator {
 
                     notNullRowNumber++;
                 }
-
-            /*
-            Отчет может быть без записей
-            if (tsTablePart.isEmpty()) {
-                errors.reject("error.tsform.tablepart.required",
-                        "В отчёте должны быть записи.");
-            }*/
-            } /*
-        Отчет может быть без записей
-        else {
-            errors.reject("error.tsform.tablepart.required", "В отчёте должны быть записи.");
-        }*/
-
+            }
         } else {
             errors.reject("error.tsform.isnull",
                     "Не удалось получить параметры формы");
@@ -269,8 +255,14 @@ public class TimeSheetFormValidator extends AbstractValidator {
         Integer typeActCatId = formRow.getActivityTypeId();
 
         // Не указана категория активности
-        if ((isNotChoosed(actCatId) && (emplJob != HEAD))
-                || (typeActCatId != TypesOfActivityEnum.NON_PROJECT.getId() && isNotChoosed(projectId) && isNotChoosed(actCatId))) {
+        if ((
+                isNotChoosed(actCatId) &&
+                        (emplJob != HEAD)
+        ) || (
+                typeActCatId != TypesOfActivityEnum.NON_PROJECT.getId() &&
+                        isNotChoosed(projectId) &&
+                        isNotChoosed(actCatId)
+        )) {
             errors.rejectValue("timeSheetTablePart[" + notNullRowNumber + "].activityCategoryId",
                     "error.tsform.activity.category.required", getErrorMessageArgs(notNullRowNumber),
                     "Необходимо указать категорию активности в строке " + (notNullRowNumber + 1) + ".");
@@ -511,22 +503,20 @@ public class TimeSheetFormValidator extends AbstractValidator {
         }
 
         logger.debug("Total duration is {}", totalDuration);
-        // Проверять причины недоработки будем даже если нет записей в отчете
-        //if (tsTablePart != null && !tsTablePart.isEmpty()) {
         String calDate = tsForm.getCalDate();
         boolean isHoliday = calendarService.isHoliday(
-                DateTimeUtil.stringToDateForDB(calDate),
+                DateTimeUtil.parseStringToDateForDB(calDate),
                 employee
         );
 
         boolean isVacation = vacationService.isDayVacationWithoutPlanned(
                 employee,
-                DateTimeUtil.stringToDateForDB(calDate)
+                DateTimeUtil.parseStringToDateForDB(calDate)
         );
 
         boolean isBusinessTrip = businessTripService.isBusinessTripDay(
                 employee,
-                DateTimeUtil.stringToDateForDB(calDate)
+                DateTimeUtil.parseStringToDateForDB(calDate)
         );
 
         // Отчет за выходные без отработанных часов невозможен
@@ -649,8 +639,8 @@ public class TimeSheetFormValidator extends AbstractValidator {
         /* РЦК может всё (трудяга!) */
         if (!employeeService.isEmployeeDivisionLeader(employee.getId())) {
         /* проверим работу в выходные/праздничные дни */
-            if (calendarService.isHoliday(DateTimeUtil.stringToDateForDB(tsForm.getCalDate()), employee)
-                    || vacationService.isDayVacationWithoutPlanned(employee, DateTimeUtil.stringToDateForDB(tsForm.getCalDate()))) {
+            if (calendarService.isHoliday(DateTimeUtil.parseStringToDateForDB(tsForm.getCalDate()), employee)
+                    || vacationService.isDayVacationWithoutPlanned(employee, DateTimeUtil.parseStringToDateForDB(tsForm.getCalDate()))) {
                 checkCause(tsForm, "работы в праздничный/выходной день", DictionaryEnum.WORK_ON_HOLIDAY_CAUSE, errors);
                 checkTypeOfCompensation(tsForm, errors);
             } else {

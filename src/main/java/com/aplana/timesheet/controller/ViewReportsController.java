@@ -1,9 +1,7 @@
 package com.aplana.timesheet.controller;
 
-import com.aplana.timesheet.dao.entity.DictionaryItem;
 import com.aplana.timesheet.dao.entity.TimeSheet;
 import com.aplana.timesheet.enums.ReportSendApprovalType;
-import com.aplana.timesheet.enums.TypesOfTimeSheetEnum;
 import com.aplana.timesheet.form.ReportsViewDeleteForm;
 import com.aplana.timesheet.form.VacationsForm;
 import com.aplana.timesheet.form.entity.EmployeeMonthReportDetail;
@@ -98,7 +96,7 @@ public class ViewReportsController extends AbstractControllerForEmployeeWithYear
         mav.addObject("monthList", DateTimeUtil.getMonthListJson((List<Calendar>) mav.getModel().get(YEARS_LIST), calendarService));
         List<DayTimeSheet> dayTimeSheets = timeSheetService.findDatesAndReportsForEmployee(employee, year, month);
         mav.addObject("reports", dayTimeSheets);
-        mav.addObject("employeeName",Padeg.getFIOPadegFS(employee.getName(),true,PadegConstants.Roditelnyy));
+        mav.addObject("employeeName",Padeg.getFIOPadegFS(employee.getName(),employee.getSex(),PadegConstants.Roditelnyy));
         BigDecimal durationFact = BigDecimal.ZERO;
         for (Iterator<DayTimeSheet> iterator = dayTimeSheets.iterator(); iterator.hasNext(); ) {
             DayTimeSheet next = iterator.next();

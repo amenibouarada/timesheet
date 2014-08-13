@@ -110,7 +110,7 @@ public class TimeSheetServiceTest extends AbstractJsonTest {
         if (lastTimeSheet != null) {
             json.append("\"prev\":{");
             json.append("\"dateStr\":");
-            json.append("\"").append(DateTimeUtil.formatDate(lastTimeSheet.getCalDate().getCalDate()))
+            json.append("\"").append(DateTimeUtil.formatDateIntoDBFormat(lastTimeSheet.getCalDate().getCalDate()))
                     .append("\",");   //преобразование к  yyyy-MM-dd
             json.append("\"plan\":\"");
             String lastPlan = lastTimeSheet.getPlan();
@@ -128,7 +128,7 @@ public class TimeSheetServiceTest extends AbstractJsonTest {
                                 nextTimeSheet.getTimeSheetDetails()).get(0).getActType().getId()))) { // <APLANATS-458>
             json.append("\"next\":{")
                     .append("\"dateStr\":").append("\"")
-                    .append(DateTimeUtil.formatDate(nextTimeSheet.getCalDate().getCalDate()))
+                    .append(DateTimeUtil.formatDateIntoDBFormat(nextTimeSheet.getCalDate().getCalDate()))
                     .append("\",")   //преобразование к  yyyy-MM-dd
                     .append("\"plan\":\"");
             String nextPlan = timeSheetService.getStringTimeSheetDetails(nextTimeSheet);

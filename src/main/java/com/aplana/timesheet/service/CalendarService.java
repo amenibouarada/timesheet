@@ -140,6 +140,10 @@ public class CalendarService {
         return calendarDAO.getHolidaysCountForRegion(beginDate, endDate, region);
     }
 
+    public List<Holiday> getAllHolidaysInInterval(Date beginDate, Date endDate){
+        return calendarDAO.getAllHolidaysInInterval(beginDate, endDate);
+    }
+
     /**
      * получаем мапу для периода
      * ключ - год в периоде
@@ -176,11 +180,6 @@ public class CalendarService {
         }
 
         return result;
-    }
-
-
-    public int getWorkDaysCountForRegion(Region region, Integer year, Integer month, @NotNull Date fromDate) {
-        return calendarDAO.getWorkDaysCountForRegion(region, year, month, fromDate);
     }
 
     public int getWorkDaysCountForRegion(Region region, Integer year, Integer month,

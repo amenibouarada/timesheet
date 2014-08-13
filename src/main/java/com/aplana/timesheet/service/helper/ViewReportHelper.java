@@ -21,7 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -66,7 +65,7 @@ public class ViewReportHelper {
         final List<DayTimeSheet> calTSList = timeSheetService.findDatesAndReportsForEmployee(year, month, employeeId);
 
         for (DayTimeSheet queryResult : calTSList) {
-            final String day = new SimpleDateFormat(DateTimeUtil.DB_DATE_PATTERN).format(queryResult.getCalDate());
+            final String day = DateTimeUtil.formatDateIntoDBFormat(queryResult.getCalDate());
 
             Integer value = 0; //если нет отчета
             if ((queryResult.getId() != null) || (queryResult.getVacationDay()) || (queryResult.getIllnessDay())) {
@@ -158,12 +157,11 @@ public class ViewReportHelper {
         }
 
         for (Map.Entry date : vacationDates.entrySet()) {
-            final String sdate = new SimpleDateFormat(DateTimeUtil.DB_DATE_PATTERN).format(date.getKey());
+            final String sdate = DateTimeUtil.formatDateIntoDBFormat((Date)date.getKey());
             builder.withField(sdate, aStringBuilder(date.getValue().toString()));
         }
 
-        String format = JsonUtil.format(builder.build());
-        return format;
+        return JsonUtil.format(builder.build());
     }
 
     /**
@@ -212,25 +210,6 @@ public class ViewReportHelper {
     }
 
     /**
-     * Возвращает количество дней утвержденных отпусков (+плановых), без учета отпусков с отработкой
-     *
-     * @param year
-     * @param month
-     * @param employeeId
-     * @return количество дней утвержденных отпусков (+плановых), без учета отпусков с отработкой
-     */
-    public Integer getCountVacationAndPlannedVacationDays(Integer year, Integer month, Integer employeeId) throws NotDataForYearInCalendarException {
-        Integer count = 0;
-        Map<Date, Integer> vacationDates = getVacationWithPlannedMap(year, month, employeeId, true);
-        for (Map.Entry date : vacationDates.entrySet()) {
-            if (date.getValue() == PLANNED_VACATION_MARK || date.getValue() == VACATION_MARK || date.getValue() == CROSS_VACATION_MARK) {
-                count++;
-            }
-        }
-        return count;
-    }
-
-    /**
      * Рекурсивный поиск даты выхода на работу
      * @param dayEndVacation дата окончания отпуска
      * @param employeeId
@@ -249,10 +228,10 @@ public class ViewReportHelper {
         mycal.setTime(nextDay);
         Integer nextMonth = mycal.get(java.util.Calendar.MONTH) + 1;
         if (inVacationDates.size() > 0) {
-            if (inVacationDates.get(nextDay) != null && (inVacationDates.get(nextDay) == TYPICAL_DAY_MARK || inVacationDates.get(nextDay) == PREVIOUS_DAY_MARK)) {
+            if (inVacationDates.get(nextDay) != null && (inVacationDates.get(nextDay).equals(TYPICAL_DAY_MARK) || inVacationDates.get(nextDay).equals(PREVIOUS_DAY_MARK))) {
                 return nextDay;
             } else {
-                return getNextWorkDay(nextDay, employeeId, nextMonth != month ? null : inVacationDates);
+                return getNextWorkDay(nextDay, employeeId, !nextMonth.equals(month) ? null : inVacationDates);
             }
         } else {
             return null;

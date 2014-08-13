@@ -17,9 +17,6 @@ import java.sql.Timestamp;
 @Service
 public class VacationsFormValidator extends AbstractValidator {
 
-    @Autowired
-    private CalendarService calendarService;
-
     private static final String WRONG_YEAR_ERROR_MESSAGE = "Календарь на %i год еще не заполнен, " +
             "оформите заявление позже или обратитесь в службу поддержки системы";
 

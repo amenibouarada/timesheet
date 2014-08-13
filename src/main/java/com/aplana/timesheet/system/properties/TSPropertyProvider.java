@@ -72,7 +72,7 @@ public class TSPropertyProvider {
     }
 
     public String getMailProblemsAndProposalsCoaddress(Integer feedbackType) {
-        return feedbackType < 6
+        return feedbackType < 6 // 6 - magic number!
                 ? getProperties().getProperty("mail.ProblemsAndProposals.toaddress")
                 : getProperties().getProperty("mail.ProblemsAndProposals.toAdminAddress");
     }

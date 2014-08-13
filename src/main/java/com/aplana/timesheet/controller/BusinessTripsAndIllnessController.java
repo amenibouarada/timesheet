@@ -8,6 +8,7 @@ import com.aplana.timesheet.dao.entity.*;
 import com.aplana.timesheet.enums.PermissionsEnum;
 import com.aplana.timesheet.enums.QuickReportTypesEnum;
 import com.aplana.timesheet.enums.RegionsEnum;
+import com.aplana.timesheet.exception.TSRuntimeException;
 import com.aplana.timesheet.exception.controller.BusinessTripsAndIllnessControllerException;
 import com.aplana.timesheet.form.BusinessTripsAndIllnessForm;
 import com.aplana.timesheet.service.*;
@@ -16,6 +17,7 @@ import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.system.security.SecurityService;
 import com.aplana.timesheet.system.security.entity.TimeSheetUser;
 import com.aplana.timesheet.util.DateNumbers;
+import com.aplana.timesheet.util.DateTimeUtil;
 import com.aplana.timesheet.util.EnumsUtils;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
@@ -30,8 +32,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.annotation.Nullable;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static com.aplana.timesheet.enums.PermissionsEnum.CHANGE_ILLNESS_BUSINESS_TRIP;
@@ -48,12 +48,8 @@ public class BusinessTripsAndIllnessController extends AbstractController{
 
     private static final String UNCNOWN_PRINTTYPE_ERROR_MESSAGE = "Ошибка: запрашивается неизвестный тип отчета!";
     private static final String INVALID_YEAR_BEGIN_DATE_ERROR_MESSAGE = "Ошибка: в настройках указана неверная дата начала отчетного года! Установлен год по умолчанию.";
-    private static final String INVALID_MOUNTH_BEGIN_DATE_ERROR_MESSAGE = "Ошибка: не удается определить отчетный месяц!";
     private static final String NO_PRINTTYPE_FINDED_ERROR_MESSAGE = "Ошибка: не удалось получить тип отчета!";
-    private static final String ACCESS_ERROR_MESSAGE = "Не удается считать права на формирование отчетов!";
-    private static final String ACCESS_DENIED_ERROR_MESSAGE = "У Вас недостаточно прав для просмотра отчетов других сотрудников!";
     private static final String UNCNOWN_REGION_EXCEPTION_MESSAGE = "Сотрудник имеет неизвестный регион!";
-    private static final String INVALID_DATES_IN_SETTINGS_EXCEPTION_MESSAGE = "В файле настроек указаны неверные даты для региона!";
 
     //дефолтные дни начала года для регионов и Москвы
     private static final int DEFAULT_MOSCOW_YEAR_BEGIN_MONTH = java.util.Calendar.APRIL;
@@ -63,7 +59,6 @@ public class BusinessTripsAndIllnessController extends AbstractController{
 
     private static final Logger logger = LoggerFactory.getLogger(BusinessTripsAndIllnessController.class);
 
-    private static final SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy");
     public static final int ALL_EMPLOYEES = -1;
     public static final String ERROR_BUSINESS_TRIP_DELETE = "Ошибка при удалении командировки из БД!";
     public static final String ERROR_ILLNESS_DELETE = "Ошибка при удалении больничного из БД!";
@@ -195,12 +190,15 @@ public class BusinessTripsAndIllnessController extends AbstractController{
         return getBusinessTripsOrIllnessReport(employee.getDivision().getId(), regions, employee.getId(), employee.getManager().getId(), dateFrom, dateTo, printType, null);
     }
 
-    private ModelAndView getBusinessTripsOrIllnessReport(Integer divisionId, List<Integer> regions, Integer employeeId, Integer manager,
+    private ModelAndView getBusinessTripsOrIllnessReport(Integer divisionId,
+                                                         List<Integer> regions,
+                                                         Integer employeeId,
+                                                         Integer manager,
                                                          Date dateFrom,
                                                          Date dateTo,
                                                          Integer printtype,
-                                                         BusinessTripsAndIllnessForm tsForm)
-            throws BusinessTripsAndIllnessControllerException {
+                                                         BusinessTripsAndIllnessForm tsForm      // so much parameters
+    ) throws BusinessTripsAndIllnessControllerException {
         boolean hasAnyEmployee = false;
         boolean hasAnyReports = false;
         List<Employee> employeeList = new ArrayList<Employee>();
@@ -227,8 +225,8 @@ public class BusinessTripsAndIllnessController extends AbstractController{
         }
 
         ModelAndView modelAndView = new ModelAndView("businesstripsandillness");
-        modelAndView.addObject("dateFrom", format.format(dateFrom));
-        modelAndView.addObject("dateTo", format.format(dateTo));
+        modelAndView.addObject("dateFrom", DateTimeUtil.formatDateIntoViewFormat(dateFrom));
+        modelAndView.addObject("dateTo", DateTimeUtil.formatDateIntoViewFormat(dateTo));
         modelAndView.addObject("divisionId", divisionId);
         modelAndView.addObject("employeeId", employeeId);
         modelAndView.addObject("managerId", manager == null ? -1 : manager);
@@ -287,74 +285,6 @@ public class BusinessTripsAndIllnessController extends AbstractController{
         }
     }
 
-    /**
-     * Получаем права сотрудника для просмотреа отчетов. Если у сотрудника прав несколько, то возвращается разрешение с
-     * наивысшим приоритетом.
-     */
-    private PermissionsEnum getRecipientPermission(Employee employee) throws BusinessTripsAndIllnessControllerException {
-        Employee reportRecipient = getTimeSheetUser();
-        Set<Permission> recipientPermissions = reportRecipient.getPermissions();
-        if (recipientCanChangeReports(recipientPermissions)) {
-            return CHANGE_ILLNESS_BUSINESS_TRIP;
-        } else if (recipientRequiresOwnReports(employee, reportRecipient) || recipientCanViewAllReports(recipientPermissions)) {
-            return VIEW_ILLNESS_BUSINESS_TRIP;
-        } else {
-            logger.error(ACCESS_DENIED_ERROR_MESSAGE, new BusinessTripsAndIllnessControllerException(ACCESS_DENIED_ERROR_MESSAGE));
-            return null;
-        }
-    }
-
-    /**
-     * Получаем пользователя из спринга
-     */
-    private Employee getTimeSheetUser() throws BusinessTripsAndIllnessControllerException {
-        TimeSheetUser securityUser = securityService.getSecurityPrincipal();
-        if (securityUser == null) {
-            throw new BusinessTripsAndIllnessControllerException(ACCESS_ERROR_MESSAGE);
-        }
-        Employee employee = employeeService.find(securityUser.getEmployee().getId());  //из-за lazy loading приходится занова получать сотрудника для начала транзакции
-
-        return employee;
-    }
-
-    /**
-     * проверяем, может ли получатель редактировать отчеты
-     */
-    private boolean recipientCanChangeReports(Set<Permission> recipientPermissions) {
-        return checkRecipientForPermission(recipientPermissions, CHANGE_ILLNESS_BUSINESS_TRIP);
-    }
-
-    /**
-     * проверяем, может ли получатель видеть отчеты всех сотрудников
-     */
-    private boolean recipientCanViewAllReports(Set<Permission> recipientPermissions) {
-        return checkRecipientForPermission(recipientPermissions, VIEW_ILLNESS_BUSINESS_TRIP);
-    }
-
-    /**
-     * проверяем, не хочет ли сотрудник посмотреть свой собственный отчет
-     */
-    private boolean recipientRequiresOwnReports(Employee employee, Employee reportRecipient) {
-        return reportRecipient.getId().equals(employee.getId());
-    }
-
-    /**
-     * находим среди разрешений сотрудника нужное
-     */
-    private boolean checkRecipientForPermission(Set<Permission> recipientPermissions, final PermissionsEnum permission) {
-        try {
-            Iterables.find(recipientPermissions, new Predicate<Permission>() {
-                @Override
-                public boolean apply(@Nullable Permission perm) {
-                    return perm.getId().equals(permission.getId());
-                }
-            });
-            return true;
-        } catch (NoSuchElementException ex) {
-            return false;
-        }
-    }
-
     private List<Integer> getDefaultSelectRegion(List<Integer> regionIds) {
         if (regionIds == null || regionIds.size() == 0) {
             regionIds = new ArrayList<Integer>();
@@ -398,17 +328,6 @@ public class BusinessTripsAndIllnessController extends AbstractController{
     }
 
     /**
-     * возвращает дату (первое число по указанным месяцу и году)
-     */
-    private Date getMonthBeginDate(Integer month, Integer year) throws BusinessTripsAndIllnessControllerException {
-        try {
-            return format.parse(String.format("01.%s.%s", month, year));
-        } catch (ParseException ex) {
-            throw new BusinessTripsAndIllnessControllerException(INVALID_MOUNTH_BEGIN_DATE_ERROR_MESSAGE);
-        }
-    }
-
-    /**
      * Возвращает дату начала ОТЧЕТНОГО года, в который входит выбранный месяц выбранного КАЛЕНДАРНОГО года.
      * даты начала/конца ОТЧЕТНЫХ годов берутся либо из дефолтных значений, либо из файла настроек таймшита
      */
@@ -423,14 +342,13 @@ public class BusinessTripsAndIllnessController extends AbstractController{
      * Год нужно уменьшить.
      */
     private Date generateYearBeginDate(DateNumbers dateNumbers, Integer month, Integer year) throws BusinessTripsAndIllnessControllerException {
+        if (month < dateNumbers.getDatabaseMonth()) {
+            year -= 1;
+        }
         try {
-            if (month < dateNumbers.getDatabaseMonth()) {
-                year -= 1;
-            }
-
-            return format.parse(String.format("%s.%s.%s", dateNumbers.getDay(), dateNumbers.getDatabaseMonth(), year));
-        } catch (ParseException e) {
-            throw new BusinessTripsAndIllnessControllerException(INVALID_DATES_IN_SETTINGS_EXCEPTION_MESSAGE);
+            return DateTimeUtil.parseStringToDateForView(String.format("%s.%s.%s", dateNumbers.getDay(), dateNumbers.getDatabaseMonth(), year));
+        } catch (TSRuntimeException e) {
+            throw new BusinessTripsAndIllnessControllerException("Formatting error", e);
         }
     }
 

@@ -21,6 +21,11 @@ public class EndMonthAlertSender extends MailSender<List<ReportCheck>> {
 
     public EndMonthAlertSender(SendMailService sendMailService, TSPropertyProvider propertyProvider) {
         super(sendMailService, propertyProvider);
+        logger.info("Run sending message for: {}", getName());
+    }
+
+    final String getName() {
+        return String.format("Напоминание о списании занятости (%s)", this.getClass().getSimpleName());
     }
 
     @Override

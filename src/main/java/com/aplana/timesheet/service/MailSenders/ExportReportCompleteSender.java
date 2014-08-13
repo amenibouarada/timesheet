@@ -19,6 +19,11 @@ public class ExportReportCompleteSender extends MailSender<ReportExportStatus> {
 
     public ExportReportCompleteSender(SendMailService sendMailService, TSPropertyProvider propertyProvider) {
         super(sendMailService, propertyProvider);
+        logger.info("Run sending message for: {}", getName());
+    }
+
+    final String getName() {
+        return String.format(" Оповещения о готовности отчета (%s)", this.getClass().getSimpleName());
     }
 
     @Override

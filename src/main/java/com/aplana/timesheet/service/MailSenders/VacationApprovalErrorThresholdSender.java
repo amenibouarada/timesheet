@@ -14,6 +14,11 @@ public class VacationApprovalErrorThresholdSender extends MailSender<String> {
 
     public VacationApprovalErrorThresholdSender(SendMailService sendMailService, TSPropertyProvider propertyProvider) {
         super(sendMailService, propertyProvider);
+        logger.info("Run sending message for: {}", getName());
+    }
+
+    final String getName() {
+        return String.format(" Оповещение о попытке подбора guid (%s)", this.getClass().getSimpleName());
     }
 
     @Override

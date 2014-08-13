@@ -176,24 +176,8 @@ public abstract class AbstractVacationApprovalProcessService extends AbstractSer
 
         VacationApproval lineManagerApproval = getTopLineManagerApproval(vacation);   //проверяем, посылалось ли письмо линейным руководителям
         if (lineManagerApproval == null) {      //если не посылалось, посылаем
-            /* APLANATS-865
-            VacationApproval lineManager2VacationApproval = null;
-            if (vacation.getEmployee().getManager2() != null) {
-                lineManager2VacationApproval = vacationApprovalService.tryGetManagerApproval(vacation, vacation.getEmployee().getManager2());
-                if (lineManager2VacationApproval != null && lineManager2VacationApproval.getResult() != null) {
-                    setFinalStatusForVacationAndSendVacationApprovedMessages(vacation, lineManager2VacationApproval.getResult());
-                }
-                if (lineManager2VacationApproval == null) {
-                    lineManager2VacationApproval = createNewVacationApproval(vacation, new Date(), vacation.getEmployee().getManager2());
-                    lineManager2VacationApproval = vacationApprovalService.store(lineManager2VacationApproval);
-                }
-            }*/
-
             lineManagerApproval = prepareApproveLetterForLineManagerOfEmployee(vacation, vacation.getEmployee());
             sendMailService.performVacationApproveRequestSender(lineManagerApproval);
-            /*if (lineManager2VacationApproval != null) {
-                sendMailService.performVacationApproveRequestSender(lineManager2VacationApproval);
-            }*/
         }
     }
 
@@ -500,20 +484,6 @@ public abstract class AbstractVacationApprovalProcessService extends AbstractSer
 
         return false;
     }
-
-    /**
-     * Получаем результат второго линейного
-     */
-    /* APLANATS-865
-    protected Boolean getManager2Result(Vacation vacation) {
-        if (vacation.getEmployee().getManager2() == null) {
-            return null;
-        }
-
-        VacationApproval lineManager2Approval = vacationApprovalService.tryGetManagerApproval(vacation, vacation.getEmployee().getManager2());
-
-        return (lineManager2Approval != null) ? lineManager2Approval.getResult() : null;
-    }*/
 
     /**
      * получаем мексимальное количество дней, за которое линейный руководитель должен утвердить заявление на отпуск

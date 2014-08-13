@@ -1,5 +1,11 @@
 package com.aplana.timesheet.enums;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
+
+import javax.annotation.Nullable;
+import java.util.Arrays;
+
 /**
  * Вид списания
  * @see com.aplana.timesheet.enums.DictionaryEnum#TIMESHEET_TYPE
@@ -33,5 +39,15 @@ public enum TypesOfTimeSheetEnum implements TSEnum {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public static TypesOfTimeSheetEnum getById( final Integer id ) {
+        if (id == null) {return null;}
+        return Iterables.tryFind(Arrays.asList(TypesOfTimeSheetEnum.values()), new Predicate<TypesOfTimeSheetEnum>() {
+            @Override
+            public boolean apply(@Nullable TypesOfTimeSheetEnum input) {
+                return input.getId() == id;
+            }
+        }).orNull();
     }
 }

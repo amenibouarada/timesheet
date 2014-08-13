@@ -46,11 +46,20 @@
     dojo.require(CALENDAR_EXT_PATH);
     require(["dojo/parser", "dijit/TitlePane"]);
 
+    // список отпусков для построения графика отпусков, если не пустой, то получим от контроллера
+    var vacationListJSON =  null;
+    <c:if test="${vacationListByRegionJSON != null}">
+        vacationListJSON = ${vacationListByRegionJSON};
+    </c:if>
+    // список праздников для построения графика отпусков, если не пустой, то получим от контроллера
+    var holidayList = null;
+    <c:if test="${vacationListByRegionJSON != null}">
+        holidayList = ${holidayList};
+    </c:if>
+
     var managerList = ${managerListJson};
     var selectedEmployee = ${employeeId};
-    var vacationListJSON =  ${vacationListByRegionJSON};
     var fullProjectList = ${fullProjectListJsonWithDivisionId};
-    var holidayList = ${holidayList};
 
     var PROJECT_ID = "<%= PROJECT_ID %>";
     var CAL_FROM_DATE = "<%= CAL_FROM_DATE %>";
@@ -143,19 +152,18 @@
 <br/>
 <a target="_blank" href="<c:url value='/vacations_needs_approval'/>"><fmt:message key="link.vacation.approval"/></a>
 <br/>
-<a style="color: blue"><fmt:message key="title.approval.waiting">
+<a style="color: blue">
     <c:choose>
-        <c:when test="${vacationNeedsApprovalCount!=1}">
-            <fmt:message key="title.waiting.parts" var="waitingPart"/>
+        <c:when test="${vacationNeedsApprovalCount == 0}">
+            <fmt:message key="title.approval.waiting.nothing"/>
         </c:when>
         <c:otherwise>
-            <fmt:message key="title.waiting.part" var="waitingPart"/>
+            <fmt:message key="title.approval.waiting">
+                <fmt:param value="${vacationNeedsApprovalCount}"/>
+            </fmt:message>
         </c:otherwise>
     </c:choose>
-    <fmt:param value="${waitingPart}"/>
-    <fmt:param value="${vacationNeedsApprovalCount}"/>
-    <fmt:param value="${approvalPart}"/>
-</fmt:message></a>
+</a>
 <br/>
 <form:form method="post" commandName="vacationsForm" name="mainForm">
     <form:hidden path="<%= VACATION_ID%>"/>
@@ -222,7 +230,7 @@
                 <span class="label">Регионы:</span>
             </td>
             <td>
-                <form:select path="<%= REGIONS %>" onmouseover="showTooltip(this)" size="5"
+                <form:select path="<%= REGIONS %>" onmouseover="showTooltip(this)" size="5" cssStyle="width: 200px;"
                              onmouseout="tooltip.hide()" multiple="true" onchange="multipleOptSelectedInSelect(this)">
                     <form:option value="<%= ALL_VALUE %>" label="Все регионы"/>
                     <form:options items="${regionList}" itemLabel="name" itemValue="id"/>
@@ -241,7 +249,7 @@
                 <span class="label">Тип отпуска:</span>
             </td>
             <td>
-                <form:select path="<%= VACATION_TYPE %>" id="<%= VACATION_TYPE %>"
+                <form:select path="<%= VACATION_TYPE %>" id="<%= VACATION_TYPE %>" cssStyle="width: 200px;"
                              onMouseOver="tooltip.show(getTitle(this));"
                              onMouseOut="tooltip.hide();" multiple="false" size="1">
                     <form:option value="0" label="Все"/>
@@ -442,19 +450,19 @@
                                         <tbody>
                                         <c:forEach var="cal" items="${calDaysCount}" varStatus="status">
 
-                                        <c:if test="${(status.count-1)%years == 0 && years!=1}">
-                                            <c:if test="${(status.count==1)}"><tr></c:if>
-                                            <c:if test="${(status.count!=1)}"><tr class="trDelimeter"></c:if>
-                                            <td rowspan="${years}">${cal.vacationType}</td>
-                                        </c:if>
+                                            <c:if test="${(status.count-1)%years == 0 && years!=1}">
+                                                <c:if test="${(status.count==1)}"><tr></c:if>
+                                                <c:if test="${(status.count!=1)}"><tr class="trDelimeter"></c:if>
+                                                <td rowspan="${years}">${cal.vacationType}</td>
+                                            </c:if>
                                             <c:if test="${years==1}">
-                                            <c:if test="${(status.count==1)}"><tr></c:if>
-                                            <c:if test="${(status.count!=1)}"><tr class="trDelimeter"></c:if>
-                                            <td>${cal.vacationType}</td>
-                                        </c:if>
-                                                <td>${cal.year}</td>
-                                                <td>${cal.summaryCalDays}</td>
-                                                <td>${cal.summaryWorkDays}</td>
+                                                <c:if test="${(status.count==1)}"><tr></c:if>
+                                                <c:if test="${(status.count!=1)}"><tr class="trDelimeter"></c:if>
+                                                <td>${cal.vacationType}</td>
+                                            </c:if>
+                                            <td>${cal.year}</td>
+                                            <td>${cal.summaryCalDays}</td>
+                                            <td>${cal.summaryWorkDays}</td>
                                             </tr>
 
                                         </c:forEach>

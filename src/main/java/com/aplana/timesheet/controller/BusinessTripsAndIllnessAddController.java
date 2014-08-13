@@ -60,8 +60,6 @@ public class BusinessTripsAndIllnessAddController extends AbstractController{
     @Autowired
     private IllnessMailService illnessMailService;
 
-    public static final String DATE_FORMAT = "dd.MM.yyyy";
-
     private static final Logger logger = LoggerFactory.getLogger(BusinessTripsAndIllnessController.class);
 
     /**
@@ -174,11 +172,7 @@ public class BusinessTripsAndIllnessAddController extends AbstractController{
     public String getProjects(@PathVariable("employeeId") Integer employeeId,
                               @PathVariable("beginDate") String beginDateStr,
                               @PathVariable("endDate") String endDateStr){
-        //final Timestamp beginDate = DateTimeUtil.stringToTimestamp(beginDateStr, DATE_FORMAT);
-        //final Timestamp endDate = DateTimeUtil.stringToTimestamp(endDateStr, DATE_FORMAT);
-        //final Employee employee = employeeService.find(employeeId);  //скорее всего, проекты надо для конкретного сотрудника брать будет. пока не надо.
-
-        List<Project> projects = projectService.getAllProjects();
+         List<Project> projects = projectService.getAllProjects();
 
         return projectService.getProjectListAsJson(projects);
     }

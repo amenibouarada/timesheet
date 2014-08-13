@@ -73,11 +73,9 @@ public class TimeSheetDAO {
             }
             stringBuilder.append(")");
         }
-        //logger.debug(stringBuilder.toString());
         Query query = entityManager.createQuery(
                 "select ts from TimeSheet as ts where ts.calDate = :calDate and ts.employee.id = :employeeId " + stringBuilder.toString()
         ).setParameter("calDate", date).setParameter("employeeId", employeeId);
-        //logger.debug(query.toString());
         List<TimeSheet> result = query.getResultList();
 
         return result.isEmpty() ? null : result.get(0);
@@ -94,14 +92,6 @@ public class TimeSheetDAO {
     @SuppressWarnings("unchecked")
     public TimeSheet findForDateAndEmployee(Calendar date, Integer employeeId) {
         return findForDateAndEmployeeByTypes(date, employeeId, Arrays.asList(TypesOfTimeSheetEnum.REPORT));
-
-//        Query query = entityManager.createQuery(
-//                "select ts from TimeSheet as ts where ts.calDate = :calDate and ts.employee.id = :employeeId AND (ts.type = 0)"
-//        ).setParameter("calDate", date).setParameter("employeeId", employeeId);
-//
-//        List<TimeSheet> result = query.getResultList();
-//
-//        return result.isEmpty() ? null : result.get(0);
     }
 
     /**
@@ -201,7 +191,6 @@ public class TimeSheetDAO {
                 ds.setVacationDAO(vacationDAO);
                 ds.setBusinessTripDAO(businessTripDAO);
                 map.put(calDate.getTime(), ds);
-                //logger.debug("put " + calDate + " " + calDate.getTime());
             } else {
                 //если есть еще запись со списанным временем
                 DayTimeSheet dts = map.get(calDate.getTime());
@@ -291,7 +280,8 @@ public class TimeSheetDAO {
           При желании можно переписать на Criteria
          */
 
-        final Query query = entityManager.createNativeQuery("SELECT tscal.empid, MIN(calnext.calDate)" +
+        final Query query = entityManager.createNativeQuery(
+                " SELECT tscal.empid, MIN(calnext.calDate)" +
                 " FROM (SELECT emp.id empid, MAX(cal.calDate) maxcaldate" +
                 "       FROM calendar cal" +
                 "       INNER JOIN time_sheet ts on cal.caldate=ts.caldate" +
@@ -306,17 +296,19 @@ public class TimeSheetDAO {
                 " AND NOT EXISTS (" +
                 "       SELECT i.employee_id,cal.caldate from calendar cal " +
                 "       RIGHT JOIN illness i on cal.caldate between i.begin_date and i.end_date where " +
-                "       calnext.caldate = cal.caldate and emp1.id= i.employee_id) AND " +
-                " NOT EXISTS (" +
+                "       calnext.caldate = cal.caldate and emp1.id= i.employee_id) " +
+                " AND NOT EXISTS (" +
                 "       SELECT v.employee_id,calv.caldate from calendar calv " +
                 "       RIGHT JOIN vacation v on calv.caldate between v.begin_date and v.end_date " +
                 "       WHERE calv.caldate = calnext.caldate AND v.employee_id = emp1.id AND v.status_id = :statusId AND v.type_id <> :typePlanned) " +
-                " AND " +
-                " NOT EXISTS (" +
+                " AND NOT EXISTS (" +
                 "       SELECT h.caldate from holiday h " +
                 "       WHERE h.calDate=calnext.calDate and (h.region=r.id or h.region is null) )" +
                 " GROUP BY 1" +
-                " ORDER BY 1").setParameter("division", division).setParameter("statusId", APPROVED.getId()).setParameter("typePlanned", PLANNED.getId());
+                " ORDER BY 1").
+                setParameter("division", division).
+                setParameter("statusId", APPROVED.getId()).
+                setParameter("typePlanned", PLANNED.getId());
 
         final List resultList = query.getResultList();
         final Map<Integer, Date> resultMap = new HashMap<Integer, Date>(resultList.size());
@@ -379,15 +371,6 @@ public class TimeSheetDAO {
 
         List resultList = query.getResultList();
         return resultList != null && !resultList.isEmpty() ? ((Integer) resultList.get(0)) : null;
-    }
-
-    public Date findFirstEmptyDate(Long employeeId, Date endDate) {
-        List<Date> overdueTimesheet = getOverdueTimesheet(employeeId, null, endDate, true);
-        if (overdueTimesheet.size() > 0) {
-        return overdueTimesheet.get(0);
-        } else {
-            return null;
-        }
     }
 
     public  List<Date> getOverdueTimesheet(Long employeeId, Date startDate, Date endDate, Boolean findFirstEmptyDate){

@@ -90,21 +90,6 @@ public class ProjectService {
     public List<ProjectManager> getManagers(Project project) {
 		return projectDAO.getManagers(project);
 	}
-	
-	/**
-	 *Возвращает для указанного сотрудника список проектных ролей в проекте 
-	 *@param project проект
-	 *@param employee сотрудник
-	 *@return List<ProjectRole> список проектных ролей
-	 */
-    @Transactional(readOnly = true)
-    public List<ProjectManager> getEmployeeProjectRoles(Project project, Employee employee){
-		return projectDAO.getEmployeeProjectRoles(project, employee);
-	}
-
-    public List<Project> getProjectsByDates(Date beginDate, Date endDate){
-        return projectDAO.getProjectsByDates(beginDate, endDate);
-    }
 
     /**
      * Возвращает абсолютно все проекты
@@ -294,10 +279,6 @@ public class ProjectService {
 
     public List<Project> getProjectsByManagerAndActive(Employee manager, Boolean showActiveOnly) {
         return projectDAO.getProjectsByManagerAndActive(manager, showActiveOnly);
-    }
-
-    public List<Project> getProjectsByManagersAndActive(List<Employee> managers, Boolean showActiveOnly) {
-        return projectDAO.getProjectsByManagersAndActive(managers, showActiveOnly);
     }
 
     public List<Project> getProjectsByDivisionAndActive(Division division, Boolean showActiveOnly) {

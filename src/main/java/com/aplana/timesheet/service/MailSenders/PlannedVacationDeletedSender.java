@@ -7,10 +7,10 @@ import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.EmployeeService;
 import com.aplana.timesheet.service.ProjectService;
 import com.aplana.timesheet.service.SendMailService;
+import com.aplana.timesheet.util.DateTimeUtil;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import org.apache.commons.lang.WordUtils;
-import org.apache.commons.lang.time.DateFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,6 +31,11 @@ public class PlannedVacationDeletedSender extends  AbstractVacationSenderWithCop
         super(sendMailService, propertyProvider);
         this.employeeService = employeeService;
         this.projectService = projectService;
+        logger.info("Run sending message for: {}", getName());
+    }
+
+    final String getName() {
+        return String.format(" Оповещение об удаленном отпуске сотрудника (%s)", this.getClass().getSimpleName());
     }
 
     @Override
@@ -55,7 +60,6 @@ public class PlannedVacationDeletedSender extends  AbstractVacationSenderWithCop
         if (manager2 != null) {
             emails.add(manager2.getEmail());
         }
-
         /* оповещаем отпускника и удалителя */
         if (!emails.contains(vacation.getEmployee().getEmail())) {
             ccEmails.add(vacation.getEmployee().getEmail());
@@ -101,8 +105,8 @@ public class PlannedVacationDeletedSender extends  AbstractVacationSenderWithCop
                 String.format(
                         " на %s за период с %s по %s",
                         WordUtils.uncapitalize(params.getType().getValue()),
-                        DateFormatUtils.format(params.getBeginDate(), DATE_FORMAT),
-                        DateFormatUtils.format(params.getEndDate(), DATE_FORMAT)
+                        DateTimeUtil.formatDateIntoViewFormat(params.getBeginDate()),
+                        DateTimeUtil.formatDateIntoViewFormat(params.getEndDate())
                 )
         );
 

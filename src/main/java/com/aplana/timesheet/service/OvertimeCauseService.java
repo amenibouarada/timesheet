@@ -39,8 +39,6 @@ public class OvertimeCauseService {
 
     @Transactional
     public void store(TimeSheet timeSheet, TimeSheetForm tsForm) {
-        //if (!isOvertimeCauseNeeeded(tsForm, calculateTotalDuration(tsForm))) return; Непонятно зачем тут то проверять? Уже прислали - значит надо записать
-
         if (tsForm.getOvertimeCause() == null) return;
 
         OvertimeCause overtimeCause = new OvertimeCause();
@@ -76,26 +74,6 @@ public class OvertimeCauseService {
         final Integer overtimeCauseId = tsForm.getOvertimeCause();
         if (overtimeCauseId == null) return null;
         return dictionaryItemService.find(overtimeCauseId).getValue();
-    }
-
-    public boolean isOvertimeCauseNeeded(TimeSheetForm tsForm, BigDecimal totalDuration) {
-        for (TimeSheetTableRowForm rowForm : tsForm.getTimeSheetTablePart()) {
-            if (
-                    TypesOfActivityEnum.isNotCheckableForOvertime(
-                        EnumsUtils.tryFindById(
-                                rowForm.getActivityTypeId(),
-                                TypesOfActivityEnum.class
-                        )
-                    )
-            ) {
-                return false;
-            }
-        }
-
-        return totalDuration.subtract(BigDecimal.valueOf(WORK_DAY_DURATION)).compareTo(
-                    BigDecimal.valueOf(propertyProvider.getOvertimeThreshold())) > 0
-                && BigDecimal.valueOf(WORK_DAY_DURATION).subtract(totalDuration).compareTo(
-                    BigDecimal.valueOf(propertyProvider.getUndertimeThreshold())) > 0;
     }
 
     public boolean isOvertimeDuration(TimeSheetForm tsForm) {

@@ -21,7 +21,6 @@ import java.util.*;
 public class MailSender<T> {
 
     protected static final Logger logger = LoggerFactory.getLogger(MailSender.class);
-    protected static final String DATE_FORMAT = "dd.MM.yyyy";
     protected static final String MAIL_BODY = "mail_body";
     protected static final int FIRST = 0;
 
@@ -79,7 +78,7 @@ public class MailSender<T> {
                 }
 
                 initMessageBody(mail, message);
-
+                debugSendToMail(message);
                 logger.info("Sending message.");
                 if (Boolean.parseBoolean(propertyProvider.getMailSendEnable())) {
                     transport.sendMessage(message, message.getAllRecipients());
@@ -109,6 +108,14 @@ public class MailSender<T> {
         }
     }
 
+    private void debugSendToMail(Message message) throws MessagingException {
+        logger.info("Mail will be sent from: {}", Arrays.toString(message.getFrom()));
+        logger.info("Mail will be sent to: {}", Arrays.toString(message.getRecipients(MimeMessage.RecipientType.TO)));
+        logger.info("Copy mail will be sent to: {}", message.getRecipients(MimeMessage.RecipientType.CC) != null ?
+                Arrays.toString(message.getRecipients(MimeMessage.RecipientType.CC)) :
+                "");
+    }
+
     private String getDebugInfo(Message message){
         StringBuilder additionalMessageBody = new StringBuilder();
         try{
@@ -131,7 +138,8 @@ public class MailSender<T> {
     private void addDebugInfoAndChangeReceiver(MimeMessage message, String mailDebugAddress){
         try{
             String debugInfo = getDebugInfo(message);
-            message.setSubject("[TSDEBUG] " + message.getSubject(), "UTF-8");
+            String charset = "UTF-8";
+            message.setSubject("[TSDEBUG] " + message.getSubject(), charset);
             message.setRecipients(MimeMessage.RecipientType.TO, InternetAddress.parse(mailDebugAddress));
             message.setRecipients(MimeMessage.RecipientType.CC, "");
             if (message.getContent() instanceof MimeMultipart){   // если это сложное письмо (напр, с вл. файлами)
@@ -147,9 +155,9 @@ public class MailSender<T> {
                     }
                 }
 
-                message.setText(builder.toString(), "UTF-8", "html");
+                message.setText(builder.toString(), charset, "html");
             } else{                                               // обычный текст
-                message.setText(debugInfo + message.getContent(), "UTF-8", "html");
+                message.setText(debugInfo + message.getContent(), charset, "html");
             }
         }catch (MessagingException ex){
             logger.error("Error while init message recipients.", ex);

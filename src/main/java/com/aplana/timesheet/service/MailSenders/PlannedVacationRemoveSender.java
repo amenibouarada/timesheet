@@ -8,9 +8,9 @@ import com.aplana.timesheet.service.ProjectService;
 import com.aplana.timesheet.service.SendMailService;
 import com.aplana.timesheet.system.constants.PadegConstants;
 import com.aplana.timesheet.system.properties.TSPropertyProvider;
+import com.aplana.timesheet.util.DateTimeUtil;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
-import org.apache.commons.lang.time.DateFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import padeg.lib.Padeg;
@@ -36,6 +36,11 @@ public class PlannedVacationRemoveSender  extends  AbstractVacationSenderWithCop
         super(sendMailService, propertyProvider);
         this.projectService = projectService;
         this.employeeService = employeeService;
+        logger.info("Run sending message for: {}", getName());
+    }
+
+    final String getName() {
+        return String.format(" Оповещение о удалении планирумого отпуска (%s)", this.getClass().getSimpleName());
     }
 
     @PostConstruct
@@ -48,7 +53,6 @@ public class PlannedVacationRemoveSender  extends  AbstractVacationSenderWithCop
 
     @Override
     public List<Mail> getMainMailList(Vacation vacation) {
-
         final Mail mail = new TimeSheetMail();
         final Set<String> emails = new HashSet<String>();
         final Set<String> ccEmails = new HashSet<String>();
@@ -59,18 +63,17 @@ public class PlannedVacationRemoveSender  extends  AbstractVacationSenderWithCop
         for (Project project : projects) {
             emails.add(project.getManager().getEmail());
         }
-
         /* делаем список линейных рук для оповещения */
         final List<Employee> linearEmployees = employeeService.getLinearEmployees(employee);
         for (Employee item : linearEmployees) {
             emails.add(item.getEmail());
         }
-
         /* добавляем доп руководителя */
         Employee manager2 = vacation.getEmployee().getManager2();
         if (manager2 != null) {
             emails.add(manager2.getEmail());
         }
+
 
         /* оповещаем отпускника и удалителя */
         if (!emails.contains(vacation.getEmployee().getEmail())) {
@@ -104,27 +107,27 @@ public class PlannedVacationRemoveSender  extends  AbstractVacationSenderWithCop
     private String getBody(Vacation vacation) {
         StringBuilder stringBuilder = new StringBuilder();
 
-        String employeeNameStr = Padeg.getFIOPadegFS(vacation.getEmployee().getName(), true, PadegConstants.Roditelnyy);
+        String employeeNameStr = Padeg.getFIOPadegFS(vacation.getEmployee().getName(), vacation.getEmployee().getSex(), PadegConstants.Roditelnyy);
 
         stringBuilder.append(String.format(
                 "Информируем Вас о удалении планируемого отпуска %s из г. %s на период %s - %s.",
                 employeeNameStr,
                 vacation.getEmployee().getRegion().getName(),
-                DateFormatUtils.format(vacation.getBeginDate(), DATE_FORMAT),
-                DateFormatUtils.format(vacation.getEndDate(), DATE_FORMAT)
+                DateTimeUtil.formatDateIntoViewFormat(vacation.getBeginDate()),
+                DateTimeUtil.formatDateIntoViewFormat(vacation.getEndDate())
         ));
 
         return stringBuilder.toString();
     }
 
     private String getSubject(Vacation vacation) {
-        String employeeNameStr = Padeg.getFIOPadegFS(vacation.getEmployee().getName(), true, PadegConstants.Roditelnyy);
+        String employeeNameStr = Padeg.getFIOPadegFS(vacation.getEmployee().getName(), vacation.getEmployee().getSex(), PadegConstants.Roditelnyy);
 
         return String.format(
                 "Планируемый отпуск %s за период %s - %s удален",
                 employeeNameStr,
-                DateFormatUtils.format(vacation.getBeginDate(), DATE_FORMAT),
-                DateFormatUtils.format(vacation.getEndDate(), DATE_FORMAT)
+                DateTimeUtil.formatDateIntoViewFormat(vacation.getBeginDate()),
+                DateTimeUtil.formatDateIntoViewFormat(vacation.getEndDate())
         );
     }
 }

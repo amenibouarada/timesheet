@@ -20,6 +20,11 @@ public class PersonalAlertSender extends AbstractSenderWithAssistants<List<Repor
 
     public PersonalAlertSender(SendMailService sendMailService, TSPropertyProvider propertyProvider) {
         super(sendMailService, propertyProvider);
+        logger.info("Run sending message for: {}", getName());
+    }
+
+    final String getName() {
+        return String.format(" Оповещение о несписанной занятости (%s)", this.getClass().getSimpleName());
     }
 
     @Override
@@ -59,7 +64,7 @@ public class PersonalAlertSender extends AbstractSenderWithAssistants<List<Repor
     }
 
     private String getSubject(ReportCheck currentReportCheck) {
-        return  propertyProvider.getTimesheetMailMarker() + // APLANATS-571
+        return  propertyProvider.getTimesheetMailMarker() +
                 " Отчитаться за " + Joiner.on(", ").join(
                 Sets.newHashSet(Iterables.transform(currentReportCheck.getPassedDays(), new Function<String, String>() {
                     @Nullable @Override

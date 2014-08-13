@@ -7,6 +7,7 @@
 	<property name="LOGS_PATH" value="logs/TimeSheet" />
 
 	<appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="com.aplana.timesheet.util.LoggingFilter" />
 		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
 			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{45} - %msg%n</pattern>
 		</encoder>
@@ -14,6 +15,7 @@
 	
 	<appender name="timesheet" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOGS_PATH}/timesheet.log</file>
+        <filter class="com.aplana.timesheet.util.LoggingFilter" />
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 			<fileNamePattern>${LOGS_PATH}/timesheet.%d{yyyy-MM-dd}.log</fileNamePattern>
 			<maxHistory>10</maxHistory>

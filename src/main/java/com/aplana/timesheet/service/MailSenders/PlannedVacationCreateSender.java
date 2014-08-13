@@ -4,10 +4,10 @@ import com.aplana.timesheet.system.constants.PadegConstants;
 import com.aplana.timesheet.dao.entity.Vacation;
 import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.SendMailService;
+import com.aplana.timesheet.util.DateTimeUtil;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.time.DateFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import padeg.lib.Padeg;
@@ -31,6 +31,11 @@ public class PlannedVacationCreateSender extends AbstractVacationSenderWithCopyT
                                        List<String> emails) {
         super(sendMailService, propertyProvider);
         this.emails = emails;
+        logger.info("Run sending message for: {}", getName());
+    }
+
+    final String getName() {
+        return String.format(" Оповещение о планируемом отпуске (%s) ", this.getClass().getSimpleName());
     }
 
     @PostConstruct
@@ -63,12 +68,12 @@ public class PlannedVacationCreateSender extends AbstractVacationSenderWithCopyT
     }
 
     private String getBody(Vacation vacation) {
-        String employeeNameStr = Padeg.getFIOPadegFS(vacation.getEmployee().getName(), true, PadegConstants.Roditelnyy);
+        String employeeNameStr = Padeg.getFIOPadegFS(vacation.getEmployee().getName(), vacation.getEmployee().getSex(), PadegConstants.Roditelnyy);
         String regionNameStr = vacation.getEmployee().getRegion().getName();
-        String beginDateStr = DateFormatUtils.format(vacation.getBeginDate(), DATE_FORMAT);
-        String endDateStr = DateFormatUtils.format(vacation.getEndDate(), DATE_FORMAT);
-        String creationDate = DateFormatUtils.format(vacation.getCreationDate(), DATE_FORMAT);
-        String authorVacation = Padeg.getFIOPadegFS(vacation.getAuthor().getName(), true, PadegConstants.Tvoritelnyy);
+        String beginDateStr = DateTimeUtil.formatDateIntoViewFormat(vacation.getBeginDate());
+        String endDateStr = DateTimeUtil.formatDateIntoViewFormat(vacation.getEndDate());
+        String creationDate = DateTimeUtil.formatDateIntoViewFormat(vacation.getCreationDate());
+        String authorVacation = Padeg.getFIOPadegFS(vacation.getAuthor().getName(), vacation.getAuthor().getSex(), PadegConstants.Tvoritelnyy);
         String commentStr = StringUtils.EMPTY;
         if (StringUtils.isNotBlank(vacation.getComment())) {
             commentStr = String.format("Комментарий: %s. ", vacation.getComment());
@@ -87,6 +92,6 @@ public class PlannedVacationCreateSender extends AbstractVacationSenderWithCopyT
 
     private String getSubject(Vacation vacation) {
         return  propertyProvider.getPlannedVacationCreateMailMarker()+
-                String.format(" Планируемый отпуск %s", Padeg.getFIOPadegFS(vacation.getEmployee().getName(), true, PadegConstants.Roditelnyy));
+                String.format(" Планируемый отпуск %s", Padeg.getFIOPadegFS(vacation.getEmployee().getName(), vacation.getEmployee().getSex(), PadegConstants.Roditelnyy));
     }
 }

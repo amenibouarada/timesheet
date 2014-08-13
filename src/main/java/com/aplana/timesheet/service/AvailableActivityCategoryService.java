@@ -41,23 +41,6 @@ public class AvailableActivityCategoryService {
 														DictionaryItem actType, ProjectRole projectRole) {
 		return availableActivityCategoryDAO.getAvailableActivityCategories(actType, projectRole);
 	}
-	
-	/**
-	 * Возвращает доступные категории активности
-	 * @param actType
-	 * 			Тип активности.
-	 * @param project
-	 * 			Проект\Пресейл.
-	 * @param projectRole
-	 * 			Проектная роль.
-	 * @return List<AvailableActivityCategory>
-	 * 			Список доступных категорий активности.
-	 */
-    @Transactional(readOnly = true)
-    public List<AvailableActivityCategory> getAvailableActivityCategories(
-										DictionaryItem actType, Project project, ProjectRole projectRole) {
-		return availableActivityCategoryDAO.getAvailableActivityCategories(actType, project, projectRole);
-	}
 
     @Transactional(readOnly = true)
     public String getAvailableActCategoriesJson() {

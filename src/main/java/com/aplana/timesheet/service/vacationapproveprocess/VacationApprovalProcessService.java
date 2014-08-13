@@ -65,13 +65,6 @@ public class VacationApprovalProcessService extends AbstractVacationApprovalProc
             return lineManagerApproval.getResult();
         }
 
-        /* APLANATS-865
-        Boolean manager2VacationApproval = getManager2Result(vacation);     //проверяем результат второго линейного
-        if (manager2VacationApproval != null) {
-            setFinalStatusForVacationAndSendVacationApprovedMessages(vacation, manager2VacationApproval);
-            return manager2VacationApproval;
-        }*/
-
         return null;
     }
 

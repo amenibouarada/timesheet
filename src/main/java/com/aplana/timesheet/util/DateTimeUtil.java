@@ -60,7 +60,7 @@ public class DateTimeUtil {
      * @param date - строка даты.
      * @return объект класса {@link Date}.
      */
-    public static Date stringToDateForDB(String date) {
+    public static Date parseStringToDateForDB(String date) {
         if (date == null || date.isEmpty()) {
             logger.error("Error while parsing empty string into date");
             throw new TSRuntimeException(new Exception("Date is null"));
@@ -79,7 +79,7 @@ public class DateTimeUtil {
      * @param date - строка даты.
      * @return объект класса {@link Date}.
      */
-    public static Date stringToDateForView(String date) {
+    public static Date parseStringToDateForView(String date) {
         if (date == null || date.isEmpty()) {
             logger.error("Error while parsing empty string into date");
             throw new TSRuntimeException(new Exception("Date is null"));
@@ -92,6 +92,24 @@ public class DateTimeUtil {
         }
     }
 
+
+
+    public static String formatDateIntoDBFormat(Timestamp timestamp) {
+        return DB_SIMPLE_DATE_FORMAT.format(timestamp);
+    }
+
+    public static String formatDateIntoDBFormat(Date date) {
+        return DB_SIMPLE_DATE_FORMAT.format(date);
+    }
+
+    public static String formatDateIntoViewFormat(Timestamp timestamp) {
+        return VIEW_SIMPLE_DATE_FORMAT.format(timestamp);
+    }
+
+    public static String formatDateIntoViewFormat(Date date) {
+        return VIEW_SIMPLE_DATE_FORMAT.format(date);
+    }
+
     /**
      * Преобразует строку даты в указанном формате в объект класса {@link Timestamp}.
      *
@@ -101,27 +119,6 @@ public class DateTimeUtil {
      */
     public static Timestamp stringToTimestamp(String date, String dateFormat) {
         return new Timestamp(stringToDate(date, dateFormat).getTime());
-    }
-
-    /**
-     * Разбивает указанный диапазон дат на отдельные даты и возвращает их в виде списка Timestamp
-     *
-     * @param String beginDate начальная дата.
-     * @param String endDate конечная дата.
-     * @return список дат из диапазона.
-     */
-    public static List<String> splitDateRangeOnDays(String beginDate, String endDate) {
-        List<String> result = new ArrayList<String>();
-        long begin = stringToTimestamp(beginDate, DB_DATE_PATTERN).getTime();
-        long end = stringToTimestamp(endDate, DB_DATE_PATTERN).getTime();
-        Calendar calendar = Calendar.getInstance();
-        while (begin <= end) {
-            calendar.setTimeInMillis(begin);
-            result.add(DB_SIMPLE_DATE_FORMAT.format(calendar.getTime()));
-            begin += DAY_IN_MILLS;
-        }
-        logger.debug(result.toString());
-        return result;
     }
 
     /**
@@ -262,49 +259,6 @@ public class DateTimeUtil {
         return calendar.getTime();
     }
 
-    /**
-     * Возвращает день за два дня до последнего рабочего дня месяца
-     *
-     * @return String
-     */
-    public static String endMonthCheckDay() {
-        Date curDate = new Date(System.currentTimeMillis());
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(curDate);
-
-        while (calendar.get(Calendar.DAY_OF_MONTH) != calendar.getActualMaximum(Calendar.DAY_OF_MONTH) - 2) {
-            if (calendar.get(Calendar.DAY_OF_YEAR) == 1) {
-                calendar.add(Calendar.YEAR, -1);
-                calendar.set(Calendar.DAY_OF_YEAR, calendar.getActualMaximum(Calendar.DAY_OF_YEAR));
-            } else
-                calendar.add(Calendar.DAY_OF_YEAR, -1);
-        }
-        String format = DB_SIMPLE_DATE_FORMAT.format(calendar.getTime());
-        logger.debug("End month check day " + format);
-        return format;
-    }
-
-    /**
-     * Возвращает конец прошлого месяца
-     *
-     * @return String
-     */
-    public static String endPrevMonthDay() {
-        Date curDate = new Date(System.currentTimeMillis());
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(curDate);
-        while (calendar.get(Calendar.DAY_OF_MONTH) != calendar.getActualMaximum(Calendar.DAY_OF_MONTH)) {
-            if (calendar.get(Calendar.DAY_OF_YEAR) == 1) {
-                calendar.add(Calendar.YEAR, -1);
-                calendar.set(Calendar.DAY_OF_YEAR, calendar.getActualMaximum(Calendar.DAY_OF_YEAR));
-            } else
-                calendar.add(Calendar.DAY_OF_YEAR, -1);
-        }
-        String format = DB_SIMPLE_DATE_FORMAT.format(calendar.getTime());
-        logger.debug("End prev month day " + format);
-        return format;
-    }
-
     public static Date previousMonthLastDayDate(Date targetDate) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(targetDate);
@@ -407,10 +361,6 @@ public class DateTimeUtil {
         } catch (ParseException ex) {
             throw new TSRuntimeException(ex);
         }
-    }
-
-    public static String formatDate(Timestamp timestamp) {
-        return DB_SIMPLE_DATE_FORMAT.format(timestamp);
     }
 
     public static Boolean isDateValid(String date) {
@@ -535,5 +485,10 @@ public class DateTimeUtil {
             stringList.add(dateToString(date, DB_DATE_PATTERN));
         }
         return stringList;
+    }
+
+
+    public static int getDiffInDays(Date beginDate, Date endDate) {
+        return (int) ((endDate.getTime() - beginDate.getTime()) / (24 * 3600 * 1000) + 1);
     }
 }

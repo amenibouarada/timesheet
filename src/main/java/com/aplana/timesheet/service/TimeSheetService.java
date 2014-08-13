@@ -29,7 +29,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static argo.jdom.JsonNodeBuilders.*;
@@ -92,9 +91,6 @@ public class TimeSheetService {
 
     @Autowired
     private BusinessTripService businessTripService;
-
-    @Autowired
-    private HolidayDAO holidayDAO;
 
     @Autowired
     private SendMailService sendMailService;
@@ -345,7 +341,7 @@ public class TimeSheetService {
 
         final TimeSheet lastTimeSheet = timeSheetDAO.findLastTimeSheetBefore(calendarService.find(date), employeeId);
         if (lastTimeSheet != null) {
-            builder.withField("workDate", aStringBuilder(DateTimeUtil.formatDate(lastTimeSheet.getCalDate().getCalDate())));
+            builder.withField("workDate", aStringBuilder(DateTimeUtil.formatDateIntoDBFormat(lastTimeSheet.getCalDate().getCalDate())));
             builder.withField("plan", aStringBuilder(getPlan(lastTimeSheet)));
         }
 
@@ -364,7 +360,7 @@ public class TimeSheetService {
 
         final TimeSheet currentTimeSheet = timeSheetDAO.findForDateAndEmployeeByTypes(calendarService.find(date), employeeId, Arrays.asList(TypesOfTimeSheetEnum.REPORT, TypesOfTimeSheetEnum.DRAFT));
         final Calendar nextWorkDateCalendar = calendarService.getNextWorkDay(calendarService.find(date), employeeService.find(employeeId).getRegion());
-        builder.withField("nextWorkDate", aStringBuilder(DateTimeUtil.formatDate(nextWorkDateCalendar.getCalDate())));
+        builder.withField("nextWorkDate", aStringBuilder(DateTimeUtil.formatDateIntoDBFormat(nextWorkDateCalendar.getCalDate())));
 
         if (currentTimeSheet != null) {
             builder.withField("plan", aStringBuilder(getPlan(currentTimeSheet)));
@@ -416,12 +412,12 @@ public class TimeSheetService {
         Calendar calendarReportDate = calendarService.find(date);
 
         Date nextReportDate = DateUtils.addDays(new Date(calendarReportDate.getCalDate().getTime()), 1);
-        Calendar nextReportCalendarDate = calendarService.find(new SimpleDateFormat("yyyy-MM-dd").format(nextReportDate));
+        Calendar nextReportCalendarDate = calendarService.find(DateTimeUtil.formatDateIntoDBFormat(nextReportDate));
         nextTimeSheet = timeSheetDAO.findForDateAndEmployeeByTypes(nextReportCalendarDate, employeeId, Arrays.asList(TypesOfTimeSheetEnum.REPORT));
 
         if (nextTimeSheet == null) {
             final Calendar nextWorkDateCalendar = calendarService.getNextWorkDay(calendarReportDate, employeeService.find(employeeId).getRegion());
-            builder.withField("workDate", aStringBuilder(DateTimeUtil.formatDate(nextWorkDateCalendar.getCalDate())));
+            builder.withField("workDate", aStringBuilder(DateTimeUtil.formatDateIntoDBFormat(nextWorkDateCalendar.getCalDate())));
 
             nextTimeSheet = timeSheetDAO.findForDateAndEmployeeByTypes(nextWorkDateCalendar, employeeId, Arrays.asList(TypesOfTimeSheetEnum.REPORT));
         }
@@ -439,7 +435,7 @@ public class TimeSheetService {
 
     private JsonObjectNodeBuilder getPlanBuilder(TimeSheet timeSheet, Boolean nextOrPrev) {
         return anObjectBuilder().
-                withField("dateStr", aStringBuilder(DateTimeUtil.formatDate(timeSheet.getCalDate().getCalDate()))).
+                withField("dateStr", aStringBuilder(DateTimeUtil.formatDateIntoDBFormat(timeSheet.getCalDate().getCalDate()))).
                 withField("plan", aStringBuilder(nextOrPrev ? getPlan(timeSheet) : getStringTimeSheetDetails(timeSheet)));
     }
 
