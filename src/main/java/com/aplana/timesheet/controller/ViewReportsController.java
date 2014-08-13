@@ -37,7 +37,7 @@ import static com.aplana.timesheet.form.VacationsForm.VIEW_TABLE;
 import static com.aplana.timesheet.system.constants.RoleConstants.ROLE_ADMIN;
 
 @Controller
-public class ViewReportsController extends AbstractControllerForEmployeeWithYears {
+public class ViewReportsController extends AbstractControllerForEmployee {
 
     @Autowired
     ViewReportsFormValidator tsFormValidator;
@@ -87,7 +87,7 @@ public class ViewReportsController extends AbstractControllerForEmployeeWithYear
         logger.info("year {}, month {}", year, month);
         tsFormValidator.validate(tsForm, result);
 
-        ModelAndView mav = createMAVForEmployeeWithDivision("viewreports", employeeId, divisionId);
+        ModelAndView mav = createMAVForEmployeeWithDivisionWithYears("viewreports", employeeId, divisionId);
         mav.addObject("divisionsEmployeesJSON", employeeService.getDivisionsEmployeesJSON());
         Employee employee = (Employee) mav.getModel().get(EMPLOYEE);
 

@@ -614,4 +614,16 @@ public class EmployeeService {
         }
         return false;
     }
+
+    /*
+     * Возвращает список сотрудников выбранного подразделения, у которых день рождения в указанный месяц
+     *
+     * @param division
+     * @param birthdayMonth - месяц на который ищутся дни рождения (нумерация с 0)
+     *
+     * @return List<Employee>
+     */
+    public List<Employee> getEmployeesForDivisionWithBirthdayMonth(Division division, Integer birthdayMonth){
+        return employeeDAO.getEmployeesForDivisionWithBirthdayMonth(division, birthdayMonth);
+    }
 }

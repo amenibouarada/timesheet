@@ -781,4 +781,12 @@ public class EmployeeDAO {
 
         return query.getResultList();
     }
+
+    public List<Employee> getEmployeesForDivisionWithBirthdayMonth(Division division, Integer birthdayMonth){
+        Query query = entityManager.createQuery(
+                "from Employee where division = :division AND month(birthday) = :birthdayMonth AND endDate is null");
+        query.setParameter("division", division);
+        query.setParameter("birthdayMonth", birthdayMonth);
+        return query.getResultList();
+    }
 }

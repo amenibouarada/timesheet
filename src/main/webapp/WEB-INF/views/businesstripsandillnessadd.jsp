@@ -10,10 +10,10 @@
     <title>
         <c:choose>
                 <c:when test="${reportId == null}">
-                    <fmt:message key="businesstripsandillnessadd"/>
+                    <fmt:message key="title.businesstripsandillnessadd"/>
                 </c:when>
             <c:when test="${reportId != null}">
-                <fmt:message key="businesstripsandillnessedit"/>
+                <fmt:message key="title.businesstripsandillnessedit"/>
             </c:when>
         </c:choose>
 

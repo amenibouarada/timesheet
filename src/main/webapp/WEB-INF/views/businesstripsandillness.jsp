@@ -8,7 +8,7 @@
 <%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 <html>
 <head>
-    <title><fmt:message key="businesstripsandillness"/></title>
+    <title><fmt:message key="title.businesstripsandillness"/></title>
     <link rel="stylesheet" type="text/css" href="<%= request.getContextPath()%>/resources/css/businesstripsandillness.css">
     <script type="text/javascript">
 
@@ -323,7 +323,7 @@
     </script>
 </head>
 <body>
-    <h1><fmt:message key="businesstripsandillness"/></h1>
+    <h1><fmt:message key="title.businesstripsandillness"/></h1>
     <br>
     <form:form method="post" commandName="businesstripsandillness" name="mainForm">
     <table class="no_border" style="margin-bottom: 20px;">

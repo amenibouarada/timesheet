@@ -36,22 +36,30 @@
     <div id="cssmenu">
         <ul>
             <li><a href="<c:url value='/'/>"><fmt:message key="menu.main"/></a></li>
-            <li><a href="<c:url value='/viewreports'/>"><fmt:message key="title.viewreports"/></a></li>
+
+            <li><a href="<c:url value='/viewreports'/>"><fmt:message key="menu.viewreports"/></a></li>
+
             <sec:authorize access="hasAnyRole('ROLE_PLAN_EDIT', 'ROLE_PLAN_VIEW')">
-                <li><a href="<c:url value='/planEdit'/>"><fmt:message key="title.planEdit"/></a></li>
+                <li><a href="<c:url value='/planEdit'/>"><fmt:message key="menu.planEdit"/></a></li>
             </sec:authorize>
-            <li><a href="<c:url value='/businesstripsandillness'/>"><fmt:message
-                    key="title.businesstripsandillness"/></a></li>
-            <li><a href="<c:url value='/vacations'/>"><fmt:message key="title.vacations"/><span
-                    id="vacationCount"></span></a></li>
+
+            <li><a href="<c:url value='/businesstripsandillness'/>"><fmt:message key="menu.businesstripsandillness"/></a></li>
+
+            <li><a href="<c:url value='/vacations'/>"><fmt:message key="menu.vacations"/><span id="vacationCount"></span></a></li>
+
             <sec:authorize access="hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')">
-                <li><a href="<c:url value='/managertools'/>"><fmt:message key="title.manager"/></a></li>
+                <li><a href="<c:url value='/managertools'/>"><fmt:message key="menu.manager"/></a></li>
             </sec:authorize>
+
             <sec:authorize access="hasRole('ROLE_ADMIN')">
-                <li><a href="<c:url value='/admin'/>"><fmt:message key="title.admin"/></a></li>
+                <li><a href="<c:url value='/admin'/>"><fmt:message key="menu.admin"/></a></li>
             </sec:authorize>
+
             <li><a href="<c:url value='/feedback'/>"><fmt:message key="menu.feedback"/></a></li>
+
             <li><a href="<c:url value='/activeProjects'/>"><fmt:message key="menu.activeProjects"/></a></li>
+
+            <li><a href="<c:url value='/birthdays'/>"><fmt:message key="menu.birthdays"/></a></li>
         </ul>
     </div>
 </sec:authorize>

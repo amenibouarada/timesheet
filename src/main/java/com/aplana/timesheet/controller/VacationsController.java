@@ -53,12 +53,6 @@ public class VacationsController extends AbstractControllerForEmployee {
     @Autowired
     private DictionaryItemService dictionaryItemService;
 
-    private Employee getCurrentUser(){
-        return session.getAttribute("employeeId") != null
-                ? employeeService.find((Integer)session.getAttribute("employeeId"))
-                : securityService.getSecurityPrincipal().getEmployee();
-    }
-
     private ModelAndView getMavForDefaultView(VacationsForm vacationsForm){
         final ModelAndView modelAndView = createMAVForEmployeeWithDivisionAndManagerAndRegion(
                 "vacations", vacationsForm.getEmployeeId(), vacationsForm.getDivisionId());
