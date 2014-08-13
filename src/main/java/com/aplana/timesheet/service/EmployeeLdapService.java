@@ -520,7 +520,6 @@ public class EmployeeLdapService extends AbstractServiceWithTransactionManagemen
         findAndFillDivisionField(employeeLdap, employee, errors);
 
         // Роли из БД по умолчанию ставятся только для новых сотрудников
-        //if ((employee.getJob() != null) && (employeeType.equals(EmployeeType.NEW_EMPLOYEE))) {
         if (!employeeDAO.isNotToSync(employee)){
             setEmployeePermission(employee);
         } else {
@@ -636,8 +635,6 @@ public class EmployeeLdapService extends AbstractServiceWithTransactionManagemen
             employee.setJob(job);
         } else {
             employee.setJob(projectRoleService.getUndefinedRole());
-            // TODO fix?
-//            errors.append("job not found for employee " + employeeLdap.getDisplayName());
         }
     }
 

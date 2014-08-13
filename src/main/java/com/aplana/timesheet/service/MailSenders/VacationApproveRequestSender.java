@@ -31,7 +31,7 @@ public class VacationApproveRequestSender extends AbstractVacationSender<Vacatio
         logger.info("Run sending message for: {}", getName());
     }
 
-    String getName() {
+    final String getName() {
         return String.format(" Оповещение о подтвержении отпуска подчиненного (%s)", this.getClass().getSimpleName());
     }
 

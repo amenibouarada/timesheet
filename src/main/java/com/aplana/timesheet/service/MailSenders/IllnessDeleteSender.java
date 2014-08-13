@@ -8,7 +8,6 @@ import com.aplana.timesheet.service.ProjectService;
 import com.aplana.timesheet.service.SendMailService;
 import com.aplana.timesheet.util.DateTimeUtil;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.time.DateFormatUtils;
 import padeg.lib.Padeg;
 
 import java.util.Date;
@@ -19,7 +18,7 @@ public class IllnessDeleteSender extends AbstractIllnessSender {
         logger.info("Run sending message for: {}", getName());
     }
 
-    String getName() {
+    final String getName() {
         return String.format(" Оповещения об удалении больничного (%s)", this.getClass().getSimpleName());
     }
 

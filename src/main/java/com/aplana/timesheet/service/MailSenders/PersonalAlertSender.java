@@ -23,7 +23,7 @@ public class PersonalAlertSender extends AbstractSenderWithAssistants<List<Repor
         logger.info("Run sending message for: {}", getName());
     }
 
-    String getName() {
+    final String getName() {
         return String.format(" Оповещение о несписанной занятости (%s)", this.getClass().getSimpleName());
     }
 

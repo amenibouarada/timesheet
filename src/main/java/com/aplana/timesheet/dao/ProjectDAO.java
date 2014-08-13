@@ -118,20 +118,6 @@ public class ProjectDAO {
         return query.getResultList();
     }
 
-    /**
-     * Возвращает список всех проектных ролей указанного сотруднка.
-     *
-     * @param project, employee
-     * @return
-     */
-    public List<ProjectManager> getEmployeeProjectRoles(Project project, Employee employee) {
-        Query query = entityManager.createQuery(
-                "from ProjectManager as pm where pm.active=:active and pm.project=:project and pm.employee=:employee"
-        ).setParameter( "active", true ).setParameter("project", project).setParameter( "employee", employee );
-
-        return query.getResultList();
-    }
-
     public Project findByProjectId(String projectId) {
         Query query = entityManager.createQuery(
                 "select p from Project p where p.projectId=:projectId"
@@ -176,14 +162,6 @@ public class ProjectDAO {
                 trace.append("Создан новый проект: ").append(project).append("\n");
             }
         }
-    }
-
-    public List<Project> getProjectsByDates(Date beginDate, Date endDate) {
-        Query query = entityManager.createQuery("from Project p where p.startDate <= :endDate and p.endDate >= :startDate");
-        query.setParameter("startDate", beginDate);
-        query.setParameter("endDate", endDate);
-
-        return query.getResultList();
     }
 
     /**
@@ -289,8 +267,6 @@ public class ProjectDAO {
             );
         }
 
-//        predicates.add(criteriaBuilder.isTrue(from.<Boolean>get("active")));
-
         select.where(predicates.toArray(new Predicate[predicates.size()]));
         select.orderBy(criteriaBuilder.asc(from.get("name")));
 
@@ -321,16 +297,6 @@ public class ProjectDAO {
                 "order by p.name")
                 .setParameter("activeOnly", showActiveOnly)
                 .setParameter("manager", manager);
-
-        return query.getResultList();
-    }
-
-    public List<Project> getProjectsByManagersAndActive(List<Employee> managers, Boolean showActiveOnly) {
-        Query query = entityManager.createQuery("select p from Project p " +
-                "where ((:activeOnly = true and p.active = true) or :activeOnly = false) " +
-                "and p.manager in (:managers) order by p.name")
-                .setParameter("activeOnly", showActiveOnly)
-                .setParameter("managers", managers);
 
         return query.getResultList();
     }

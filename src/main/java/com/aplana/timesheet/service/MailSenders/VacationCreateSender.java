@@ -12,7 +12,6 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.time.DateFormatUtils;
 import org.springframework.ui.velocity.VelocityEngineUtils;
 
 import java.util.*;
@@ -28,7 +27,7 @@ public class VacationCreateSender extends AbstractVacationSender<Vacation> {
         logger.info("Run sending message for: {}", getName());
     }
 
-    String getName() {
+    final String getName() {
         return String.format(" Оповещение о создании отпуска (%s)", this.getClass().getSimpleName());
     }
 

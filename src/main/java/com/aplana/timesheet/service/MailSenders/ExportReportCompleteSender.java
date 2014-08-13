@@ -22,7 +22,7 @@ public class ExportReportCompleteSender extends MailSender<ReportExportStatus> {
         logger.info("Run sending message for: {}", getName());
     }
 
-    String getName() {
+    final String getName() {
         return String.format(" Оповещения о готовности отчета (%s)", this.getClass().getSimpleName());
     }
 

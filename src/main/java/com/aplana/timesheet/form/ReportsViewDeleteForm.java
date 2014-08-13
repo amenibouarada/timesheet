@@ -1,6 +1,8 @@
 package com.aplana.timesheet.form;
 
 
+import java.util.Arrays;
+
 /**
  * Created by abayanov
  * Date: 06.06.14
@@ -17,7 +19,11 @@ public class ReportsViewDeleteForm {
     }
 
     public void setIds(Integer[] ids) {
-        this.ids = ids;
+        if(ids == null) {
+            this.ids = new Integer[0];
+        } else {
+            this.ids = Arrays.copyOf(ids, ids.length);
+        }
     }
 
     public String getLink() {

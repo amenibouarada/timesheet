@@ -41,7 +41,7 @@ public class PlannedVacationInfoSender extends AbstractSenderWithAssistants<Map 
         logger.info("Run sending message for: {}", getName());
     }
 
-    String getName() {
+    final String getName() {
         return String.format("Оповещение о планируемых отпусках подчиненных (%s)", this.getClass().getSimpleName());
     }
 

@@ -209,10 +209,6 @@ public class PlanEditController {
         return (EnumsUtils.getEnumById(project.getFundingType().getId(), ProjectFundingTypeEnum.class) == ProjectFundingTypeEnum.COMMERCIAL_PROJECT);
     }
 
-    private static boolean isInvestmentProject(Project project) {
-        return (EnumsUtils.getEnumById(project.getFundingType().getId(), ProjectFundingTypeEnum.class) == ProjectFundingTypeEnum.INVESTMENT_PROJECT);
-    }
-
     private static <T> T defaultValue(T value, T defaultValue) {
         return (value == null) ? defaultValue : value;
     }

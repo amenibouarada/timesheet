@@ -29,7 +29,7 @@ public class VacationApprovalAcceptanceSender extends AbstractSenderWithCcAddres
     }
 
 
-    String getName() {
+    final String getName() {
         return String.format("Оповещение о новом отчете (%s)", this.getClass().getSimpleName());
     }
 
@@ -61,7 +61,7 @@ public class VacationApprovalAcceptanceSender extends AbstractSenderWithCcAddres
     }
 
     @Override
-    final public String getCcEmail(VacationApproval vacationApproval) {
+    public final String getCcEmail(VacationApproval vacationApproval) {
         Vacation vacation = vacationApproval.getVacation();
         return (vacation.getEmployee().getId().equals(vacation.getAuthor().getId())) ? StringUtils.EMPTY : vacation.getAuthor().getEmail();
     }

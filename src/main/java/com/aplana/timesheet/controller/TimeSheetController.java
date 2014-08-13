@@ -337,9 +337,7 @@ public class TimeSheetController {
 
         final JsonArrayNodeBuilder builder = anArrayBuilder();
         final JsonObjectNodeBuilder builderNode = anObjectBuilder();
-//        TimeSheetDetail timeSheetDetail=timeSheet.getTimeSheetDetails();
         if (timeSheet != null && timeSheet.getTimeSheetDetails() != null && timeSheet.getTimeSheetDetails().size() != 0) {
-//            final JsonObjectNodeBuilder builder = anObjectBuilder();
             int i = 0;
             builderNode.withField("plan", aStringBuilder(timeSheet.getPlan()));
             builderNode.withField("rows", aStringBuilder(String.valueOf(timeSheet.getTimeSheetDetails().size())));

@@ -21,7 +21,7 @@ public class ExceptionSender extends MailSender<String> {
         logger.info("Run sending message for: {}", getName());
     }
 
-    String getName() {
+    final  String getName() {
         return String.format("Оповещения об ошибке (%s)", this.getClass().getSimpleName());
     }
 

@@ -24,7 +24,7 @@ public class EndMonthAlertSender extends MailSender<List<ReportCheck>> {
         logger.info("Run sending message for: {}", getName());
     }
 
-    String getName() {
+    final String getName() {
         return String.format("Напоминание о списании занятости (%s)", this.getClass().getSimpleName());
     }
 

@@ -17,7 +17,7 @@ public class VacationApprovalErrorThresholdSender extends MailSender<String> {
         logger.info("Run sending message for: {}", getName());
     }
 
-    String getName() {
+    final String getName() {
         return String.format(" Оповещение о попытке подбора guid (%s)", this.getClass().getSimpleName());
     }
 

@@ -1,7 +1,6 @@
 package com.aplana.timesheet.service.MailSenders;
 
 import com.aplana.timesheet.dao.entity.Employee;
-import com.aplana.timesheet.dao.entity.Project;
 import com.aplana.timesheet.dao.entity.Region;
 import com.aplana.timesheet.dao.entity.Vacation;
 import com.aplana.timesheet.enums.VacationStatusEnum;
@@ -15,7 +14,6 @@ import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
-import org.apache.commons.lang.time.DateFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +38,7 @@ public class VacationDeletedSender extends  AbstractVacationSenderWithCopyToAuth
         logger.info("Run sending message for: {}", getName());
     }
 
-    String getName() {
+    final String getName() {
         return String.format(" Оповещение об удалении отпуска (%s)", this.getClass().getSimpleName());
     }
 

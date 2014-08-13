@@ -27,7 +27,7 @@ public abstract class AbstractVacationSender<T> extends AbstractSenderWithAssist
     }
 
     @Override
-    final protected void initMessageBody(Mail mail, MimeMessage message) throws MessagingException {
+    protected final void initMessageBody(Mail mail, MimeMessage message) throws MessagingException {
         try {
             if (mail.getParamsForGenerateBody() != null) {
                 message.setText(mail.getParamsForGenerateBody().get(FIRST, MAIL_BODY), "UTF-8", "html");

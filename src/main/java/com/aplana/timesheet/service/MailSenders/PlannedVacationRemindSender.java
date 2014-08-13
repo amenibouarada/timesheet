@@ -25,7 +25,7 @@ public class PlannedVacationRemindSender extends AbstractVacationSenderWithCopyT
         logger.info("Run sending message for: {}", getName());
     }
 
-    String getName() {
+    final String getName() {
         return String.format("Оповещение о запланированном отпуске сотрудника (%s)", this.getClass().getSimpleName());
     }
 
@@ -75,7 +75,11 @@ public class PlannedVacationRemindSender extends AbstractVacationSenderWithCopyT
         c.set(Calendar.MINUTE, 0);
         c.set(Calendar.SECOND, 0);
         c.set(Calendar.MILLISECOND, 0);
-        int deleteReminderThreshold = ((int)(vacation.getBeginDate().getTime() - c.getTime().getTime()))/(24*60*60*1000);
+        int hoursInDay = 24;
+        int minInHour = 60;
+        int secInHour = 60;
+        int millisec = 1000;
+        int deleteReminderThreshold = ((int)(vacation.getBeginDate().getTime() - c.getTime().getTime()))/(hoursInDay * minInHour * secInHour * millisec);
 
         // Количество дней от текущего дня до удаления
         Integer deletePeriod = deleteReminderThreshold - deleteThreshold;
@@ -83,8 +87,9 @@ public class PlannedVacationRemindSender extends AbstractVacationSenderWithCopyT
         StringBuilder stringBuilder = new StringBuilder();
 
         String format = "Информируем Вас о том, что через %d %s у Вас запланирован отпуск ";
-        if (deleteReminderThreshold % 7 == 0) {
-            Integer weekReminderCount = deleteReminderThreshold / 7;
+        int weekDayCount = 7;
+        if (deleteReminderThreshold % weekDayCount == 0) {
+            Integer weekReminderCount = deleteReminderThreshold / weekDayCount;
             stringBuilder.append(String.format(format, weekReminderCount, LanguageUtil.getCaseWeekAccusative(weekReminderCount)));
         } else {
             stringBuilder.append(String.format(format, deleteReminderThreshold, LanguageUtil.getCaseDayAccusative(deleteReminderThreshold)));
@@ -94,8 +99,8 @@ public class PlannedVacationRemindSender extends AbstractVacationSenderWithCopyT
         stringBuilder.append("Если заявление об отпуске уже создано или Вы не хотите идти в отпуск, то просто удалите данный планируемый отпуск. ");
 
         String format1 = "По истечении %d %s (%s) планируемый отпуск автоматически будет удален. ";
-        if (deletePeriod % 7 == 0) {
-            Integer weekDeleteCount = deletePeriod / 7;
+        if (deletePeriod % weekDayCount == 0) {
+            Integer weekDeleteCount = deletePeriod / weekDayCount;
             stringBuilder.append(String.format(format1, weekDeleteCount, LanguageUtil.getCaseWeekGenetive(weekDeleteCount), deleteDateStr));
         } else {
             stringBuilder.append(String.format(format1, deletePeriod, LanguageUtil.getCaseDayGenetive(deletePeriod), deleteDateStr));

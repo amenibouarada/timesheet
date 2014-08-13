@@ -22,7 +22,7 @@ public class FeedbackSender extends MailSender<FeedbackForm> {
         logger.info("Run sending message for: {}", getName());
     }
 
-    String getName() {
+    final String getName() {
         return String.format(" Оповещения о фидбэке (%s)", this.getClass().getSimpleName());
     }
 

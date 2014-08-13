@@ -35,9 +35,6 @@ public class TimeSheetSender extends MailSender<TimeSheetForm> {
     public static final String DESCRIPTION_STRINGS = "descriptionStrings";
     public static final String PROBLEM_STRINGS = "problemStrings";
     public static final String PLAN_STRINGS = "planStrings";
-    public static final String REASON = "reason";
-    public static final String BEGIN_LONG_DATE = "beginLongDate";
-    public static final String END_LONG_DATE = "endLongDate";
     public static final String SENDER_NAME = "senderName";
     public static final String OVERTIME_CAUSE = "overtimeCause";
     public static final String OVERTIME_COMMENT = "overtimeComment";
@@ -53,7 +50,7 @@ public class TimeSheetSender extends MailSender<TimeSheetForm> {
         logger.info("Run sending message for: {}", getName());
     }
 
-    String getName() {
+    final String getName() {
         return String.format(" Оповещение о новом отчете о списании занятости (%s)", this.getClass().getSimpleName());
     }
 
@@ -133,16 +130,6 @@ public class TimeSheetSender extends MailSender<TimeSheetForm> {
     private Collection<String> getToEmails(TimeSheetForm params) {
         final Integer employeeId = params.getEmployeeId();
 
-        /*Set<String> toEmails = Sets.newHashSet(Iterables.transform(
-                sendMailService.getRegionManagerList(employeeId),
-                new Function<Employee, String>() {
-                    @Nullable
-                    @Override
-                    public String apply(@Nullable Employee params) {
-                        return params.getEmail();
-                    }
-                }));*/
-
         Set<String> toEmails = new HashSet<String>();
 
         employeeEmail = sendMailService.getEmployeeEmail(employeeId);
@@ -155,7 +142,7 @@ public class TimeSheetSender extends MailSender<TimeSheetForm> {
 
         return toEmails;
     }
-
+    // todo сложный метод, можно упростить
     private Table<Integer, String, String> getBody(TimeSheetForm tsForm) {
         Table<Integer, String, String> result = HashBasedTable.create();
         int FIRST = 0;
@@ -174,13 +161,12 @@ public class TimeSheetSender extends MailSender<TimeSheetForm> {
                 Integer actTypeId = tsRow.getActivityTypeId();
                 result.put(i, ACT_TYPE, TypesOfActivityEnum.getById(actTypeId).getName());
 
-                String projectName = null;
                 if ((actTypeId.equals(TypesOfActivityEnum.PROJECT.getId()))
                         ||(actTypeId.equals(TypesOfActivityEnum.PROJECT_PRESALE.getId()))
                         ||(actTypeId.equals(TypesOfActivityEnum.PRESALE.getId()))){
                     Integer projectId = tsRow.getProjectId();
                     if (projectId != null) {
-                        result.put(i, PROJECT_NAME, (projectName = sendMailService.getProjectName(projectId)));
+                        result.put(i, PROJECT_NAME,  sendMailService.getProjectName(projectId));
                     }
                 }
                 Integer actCatId = tsRow.getActivityCategoryId();
@@ -210,8 +196,9 @@ public class TimeSheetSender extends MailSender<TimeSheetForm> {
         BigDecimal summDuration = BigDecimal.ZERO;
         while (iteratorTSD.hasNext()) {
             Double duration = iteratorTSD.next().getDuration();
-            if (duration != null)
-                summDuration = summDuration.add(BigDecimal.valueOf(duration)); //todo переделать на bigdecimal
+            if (duration != null) {
+                summDuration = summDuration.add(BigDecimal.valueOf(duration));
+            }
         }
 
         String duration = summDuration.setScale(isIntegerValue(summDuration) ? 0 : 1, BigDecimal.ROUND_HALF_UP).toString();

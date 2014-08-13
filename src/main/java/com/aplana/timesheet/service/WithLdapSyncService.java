@@ -110,7 +110,8 @@ public class WithLdapSyncService {
                 logger.info("According division not founded in DB.");
                 logger.info("Creating new division in DB started...");
                 //Если не удалось найти отдел - добавить новый отдел
-                dao.save(dbDivision = createNewDivision(division));
+                dbDivision = createNewDivision(division);
+                dao.save(dbDivision);
 
                 setLeaderIfNeed(division, dbDivision);
                 logger.info("…created division saved.");
@@ -147,9 +148,9 @@ public class WithLdapSyncService {
 
     private void setLeaderIfNeed(Map division, Division dbDivision) {
         if (dbDivision.getLeaderId() == null) {
-            Employee leader;
             String employeeLdap = (String) division.get(propertyProvider.getLdapFieldForLeader());
-            if ((leader = employeeDAO.findByLdapName(employeeLdap)) == null) {
+            Employee leader = employeeDAO.findByLdapName(employeeLdap);
+            if (leader == null) {
                 leader = employeeService.save(createUser(ldapDAO.getEmployeeByLdapName(employeeLdap), true));
             }
 

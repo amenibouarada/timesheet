@@ -17,7 +17,7 @@ public class LoginFailureErrorThresholdSender extends MailSender<String> {
         logger.info("Run sending message for: {}", getName());
     }
 
-    String getName() {
+    final String getName() {
         return String.format(" Оповещения о попытки подбора пароля (%s)", this.getClass().getSimpleName());
     }
 
