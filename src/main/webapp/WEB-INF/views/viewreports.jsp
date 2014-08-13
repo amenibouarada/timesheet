@@ -146,6 +146,7 @@
             if (month < 12) {
                 month++;
                 widgets.month.value = month;
+                showDates()
             }
         }
 
@@ -153,8 +154,9 @@
             var month = widgets.month.value;
             if (month > 1) {
                 month--;
+                widgets.month.value = month;
+                showDates()
             }
-            widgets.month.value = month;
         }
 
         function incYear(){
@@ -163,6 +165,7 @@
             if (year < widgets.year.options.item(length - 1).value) {
                 year++;
                 widgets.year.value = year;
+                showDates()
             }
         }
 
@@ -171,6 +174,7 @@
             if (year > widgets.year.options.item(0).value) {
                 year--;
                 widgets.year.value = year;
+                showDates()
             }
         }
 
