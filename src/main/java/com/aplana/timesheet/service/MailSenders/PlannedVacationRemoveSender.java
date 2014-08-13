@@ -11,7 +11,6 @@ import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.util.DateTimeUtil;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
-import org.apache.commons.lang.time.DateFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import padeg.lib.Padeg;
@@ -40,7 +39,7 @@ public class PlannedVacationRemoveSender  extends  AbstractVacationSenderWithCop
         logger.info("Run sending message for: {}", getName());
     }
 
-    String getName() {
+    final String getName() {
         return String.format(" Оповещение о удалении планирумого отпуска (%s)", this.getClass().getSimpleName());
     }
 
@@ -54,7 +53,6 @@ public class PlannedVacationRemoveSender  extends  AbstractVacationSenderWithCop
 
     @Override
     public List<Mail> getMainMailList(Vacation vacation) {
-
         final Mail mail = new TimeSheetMail();
         final Set<String> emails = new HashSet<String>();
         final Set<String> ccEmails = new HashSet<String>();
@@ -65,18 +63,17 @@ public class PlannedVacationRemoveSender  extends  AbstractVacationSenderWithCop
         for (Project project : projects) {
             emails.add(project.getManager().getEmail());
         }
-
         /* делаем список линейных рук для оповещения */
         final List<Employee> linearEmployees = employeeService.getLinearEmployees(employee);
         for (Employee item : linearEmployees) {
             emails.add(item.getEmail());
         }
-
         /* добавляем доп руководителя */
         Employee manager2 = vacation.getEmployee().getManager2();
         if (manager2 != null) {
             emails.add(manager2.getEmail());
         }
+
 
         /* оповещаем отпускника и удалителя */
         if (!emails.contains(vacation.getEmployee().getEmail())) {

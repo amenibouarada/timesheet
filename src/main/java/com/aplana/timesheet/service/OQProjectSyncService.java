@@ -188,8 +188,6 @@ public class OQProjectSyncService extends AbstractServiceWithTransactionManageme
             project.setName(name);
             project.setProjectId(idProject);
             project.setStartDate(DateTimeUtil.stringToDate(nodeMap.getNamedItem("begining").getNodeValue(), DATE_FORMAT));
-            // APLANATS-826
-            // project.setEndDate(DateTimeUtil.stringToDate(nodeMap.getNamedItem("ending").getNodeValue(), DATE_FORMAT));
             project.setState(state);
             project.setFundingType(getDictionaryItem(ProjectFundingTypeEnum.getById(finsource)));
 
@@ -213,10 +211,6 @@ public class OQProjectSyncService extends AbstractServiceWithTransactionManageme
                 rollback(transactionStatus);
             }
         }
-    }
-
-    private DictionaryItem getProjectState() {
-        return dictionaryItemService.find(TypesOfActivityEnum.PROJECT.getId());
     }
 
     private DictionaryItem getDictionaryItem(TSEnum enumItem) {

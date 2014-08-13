@@ -11,7 +11,6 @@ import com.aplana.timesheet.util.DateTimeUtil;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import org.apache.commons.lang.WordUtils;
-import org.apache.commons.lang.time.DateFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +34,7 @@ public class PlannedVacationDeletedSender extends  AbstractVacationSenderWithCop
         logger.info("Run sending message for: {}", getName());
     }
 
-    String getName() {
+    final String getName() {
         return String.format(" Оповещение об удаленном отпуске сотрудника (%s)", this.getClass().getSimpleName());
     }
 
@@ -61,7 +60,6 @@ public class PlannedVacationDeletedSender extends  AbstractVacationSenderWithCop
         if (manager2 != null) {
             emails.add(manager2.getEmail());
         }
-
         /* оповещаем отпускника и удалителя */
         if (!emails.contains(vacation.getEmployee().getEmail())) {
             ccEmails.add(vacation.getEmployee().getEmail());

@@ -101,7 +101,6 @@ public class RememberService implements RememberMeServices, InitializingBean, Lo
 
     private Cookie getCookie(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
-        String key = null;
         if (cookies == null || cookies.length == 0) {
             return null;
         }

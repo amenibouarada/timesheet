@@ -102,7 +102,7 @@ public class LdapUserDetailsService implements UserDetailsContextMapper {
                 logger.warn("Employee add in DB {}", email);
                 String errors = employeeLdapService.synchronizeOneEmployee(email);
                 if (errors != null) {
-                    if ( ! errors.equals( "" ) ) {
+                    if ( !errors.equals( "" ) ) {
                         final int endIndex = errors.lastIndexOf(',');
 
                         String errorsSub = (endIndex < 0) ? errors : errors.substring(0, endIndex);
@@ -111,8 +111,9 @@ public class LdapUserDetailsService implements UserDetailsContextMapper {
                     } else {
                         throw new BadCredentialsException("Авторизация выполнена успешно, пользователь добавлен в БД<br> Авторизуйтесь еще раз");
                     }
-                } else
+                } else {
                     throw new BadCredentialsException("В LDAP что-то изменилось. попробуйте еще раз");
+                }
             }
 
             return new TimeSheetUser(employee, list);

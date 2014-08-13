@@ -170,18 +170,17 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
     }
 
     public int getVacationsWorkdaysCount(Employee employee, Integer year, Integer month, VacationStatusEnum status) {
-        int vacationsWorkdaysCount = vacationDAO.getVacationsWorkdaysCount(employee, year, month, VacationStatusEnum.APPROVED, null, true);
-        return vacationsWorkdaysCount;
+        return vacationDAO.getVacationsWorkdaysCount(employee, year, month, VacationStatusEnum.APPROVED, null, true);
     }
 
     public Double getVacationsWorkdaysCount(Employee employee, Integer year, Integer month) {
-            return (double)vacationDAO.getVacationsWorkdaysCount(employee, year, month);
+        return (double) vacationDAO.getVacationsWorkdaysCount(employee, year, month);
     }
 
     public List<DictionaryItem> getVacationTypes(List<Vacation> vacations) {
         List<DictionaryItem> result = new ArrayList<DictionaryItem>();
         for (Vacation vacation : vacations) {
-            if (!result.contains(vacation.getType())){
+            if (!result.contains(vacation.getType())) {
                 result.add(vacation.getType());
             }
         }
@@ -189,8 +188,8 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
         Collections.sort(result, new Comparator() {
             @Override
             public int compare(Object type1, Object type2) {
-                Integer typeId1 = ((DictionaryItem)type1).getId();
-                Integer typeId2 = ((DictionaryItem)type2).getId();
+                Integer typeId1 = ((DictionaryItem) type1).getId();
+                Integer typeId2 = ((DictionaryItem) type2).getId();
                 return typeId1.compareTo(typeId2);
             }
         });
@@ -274,8 +273,7 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
                 String message = e.getMessage();
                 logger.error("Error in getExitToWorkAndCountVacationDayJson : " + message);
                 builder.withField("error", aStringBuilder(message));
-                String outString = JsonUtil.format(builder);
-                return outString;
+                return JsonUtil.format(builder);
             }
             String format = DateFormatUtils.format(nextWorkDay, CreateVacationForm.DATE_FORMAT);
             builder.withField("exitDate", aStringBuilder(format));
@@ -305,8 +303,7 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
                     builder.withField("vacationFridayInform", aStringBuilder("true"));
             }
 
-            String outString = JsonUtil.format(builder);
-            return outString;
+            return JsonUtil.format(builder);
         } catch (Exception th) {
             logger.error(CANT_GET_EXIT_TO_WORK_EXCEPTION_MESSAGE, th);
             return CANT_GET_EXIT_TO_WORK_EXCEPTION_MESSAGE;
@@ -347,10 +344,11 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
         return Iterables.size(Iterables.filter(holidays, new Predicate<Holiday>() {
             @Override
             public boolean apply(@Nullable Holiday holiday) {
-                final Timestamp calDate = holiday.getCalDate().getCalDate();
+                final Timestamp calDate = holiday != null && holiday.getCalDate() != null ? holiday.getCalDate().getCalDate() : null;
+                assert calDate != null;
                 return (
                         (calDate.compareTo(beginDate) >= 0 && calDate.compareTo(endDate) <= 0) &&
-                        (holiday.getRegion() == null || holiday.getRegion().getId() == region.getId())
+                                (holiday.getRegion() == null || holiday.getRegion().getId().equals(region.getId()))
                 );
             }
         }));
@@ -358,8 +356,7 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
 
     @Transactional
     public Boolean isDayVacationWithoutPlanned(Employee employee, Date date) {
-        Boolean dayVacationWithoutPlanned = vacationDAO.isDayVacationWithoutPlanned(employee, date);
-        return dayVacationWithoutPlanned;
+        return vacationDAO.isDayVacationWithoutPlanned(employee, date);
     }
 
     /* функция возвращает можно ли удалить планируемый отпуск в таблице заявлений на отпуск */
@@ -489,7 +486,7 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
 
         vacationApprovalProcessService.sendBackDateVacationApproved(vacation);
 
-        if (! vacationApprovals.isEmpty()) {
+        if (!vacationApprovals.isEmpty()) {
             for (VacationApproval vacationApproval : vacationApprovals) {
                 vacationApproval.setResult(true);
                 vacationApproval.setResponseDate(responseDate);
@@ -502,7 +499,7 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
                 withField("isApproved", JsonNodeBuilders.aTrueBuilder()));
     }
 
-    public void deleteVacationOrApproval(BindingResult result, VacationsForm vacationsForm){
+    public void deleteVacationOrApproval(BindingResult result, VacationsForm vacationsForm) {
         Integer vacationId = vacationsForm.getVacationId();
         Integer approvalId = vacationsForm.getApprovalId();
         // если передан айдишник отпуска, то удаляем отпуск
@@ -525,25 +522,25 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
         }
     }
 
-    public Map<Vacation,Integer> getCalDays(List<Vacation> vacations){
-        Map<Vacation,Integer> calDays = new HashMap<Vacation, Integer>(vacations.size());
-        for (Vacation vacation : vacations){
+    public Map<Vacation, Integer> getCalDays(List<Vacation> vacations) {
+        Map<Vacation, Integer> calDays = new HashMap<Vacation, Integer>(vacations.size());
+        for (Vacation vacation : vacations) {
             Integer diffInDays = DateTimeUtil.getDiffInDays(vacation.getBeginDate(), vacation.getEndDate());
             calDays.put(vacation, diffInDays);
         }
         return calDays;
     }
 
-    public Map<Vacation,Integer> getWorkDays(Map<Vacation,Integer> calDays, List<Holiday> holidays){
-        Map<Vacation,Integer> workDays = new HashMap<Vacation, Integer>(calDays.size());
+    public Map<Vacation, Integer> getWorkDays(Map<Vacation, Integer> calDays, List<Holiday> holidays) {
+        Map<Vacation, Integer> workDays = new HashMap<Vacation, Integer>(calDays.size());
 
-        for(Map.Entry<Vacation, Integer> entry : calDays.entrySet()) {
+        for (Map.Entry<Vacation, Integer> entry : calDays.entrySet()) {
             Vacation vacation = entry.getKey();
             Integer calDaysInVacation = entry.getValue();
             Region emplRegion = vacation.getEmployee().getRegion();
             final int holidaysCount = getHolidaysCount(holidays, emplRegion, vacation.getBeginDate(), vacation.getEndDate());
             final int workDaysCount = calDaysInVacation - holidaysCount;
-            workDays.put(vacation,workDaysCount);
+            workDays.put(vacation, workDaysCount);
         }
 
         return workDays;
@@ -558,15 +555,14 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
 
     // возвращает список отпусков за год определенного типа с указанием количества календарных или рабочих дней
     // в зависимости от того, какой список был передан
-    private Map<Vacation,Integer> getDaysForYearByType(Map<Vacation,Integer> days, int year, DictionaryItem type){
-        Map<Vacation,Integer> daysForYearByType = new HashMap<Vacation, Integer>();
-        for(Map.Entry<Vacation, Integer> entry : days.entrySet()) {
+    private Map<Vacation, Integer> getDaysForYearByType(Map<Vacation, Integer> days, int year, DictionaryItem type) {
+        Map<Vacation, Integer> daysForYearByType = new HashMap<Vacation, Integer>();
+        for (Map.Entry<Vacation, Integer> entry : days.entrySet()) {
             Vacation vacation = entry.getKey();
             Integer calDaysInVacation = entry.getValue();
 
             if (vacationStatusInThisYear(vacation, year) &&
-                    type.getId().equals(vacation.getType().getId()))
-            {
+                    type.getId().equals(vacation.getType().getId())) {
                 daysForYearByType.put(vacation, calDaysInVacation);
             }
         }
@@ -574,12 +570,12 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
     }
 
     // возвращает количество дней в списке отпусков (в зависимости от того какой список был передан)
-    private int getSummaryDaysCount(Map<Vacation, Integer> days){
-        int summaryDays  = 0;
-        for(Map.Entry<Vacation, Integer> entry : days.entrySet()) {
+    private int getSummaryDaysCount(Map<Vacation, Integer> days) {
+        int summaryDays = 0;
+        for (Map.Entry<Vacation, Integer> entry : days.entrySet()) {
             Vacation vacation = entry.getKey();
             Integer daysInVacation = entry.getValue();
-            if (VacationStatusEnum.APPROVED.getId() == vacation.getStatus().getId()){
+            if (VacationStatusEnum.APPROVED.getId() == vacation.getStatus().getId()) {
                 summaryDays += daysInVacation;
             }
         }
@@ -587,14 +583,14 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
     }
 
     public List<VacationInYear> getSummaryDaysCountByYearAndType(List<DictionaryItem> vacationTypes,
-                                                                  int firstYear, int lastYear,
-                                                                  Map<Vacation,Integer> calDays,
-                                                                  Map<Vacation,Integer> workDays){
+                                                                 int firstYear, int lastYear,
+                                                                 Map<Vacation, Integer> calDays,
+                                                                 Map<Vacation, Integer> workDays) {
         List<VacationInYear> result = new ArrayList<VacationInYear>();
-        for(DictionaryItem vacationType : vacationTypes){
-            for (int year  = firstYear; year <= lastYear; year++){
-                Map<Vacation,Integer> calDaysForYearByType  = getDaysForYearByType(calDays, year, vacationType);
-                Map<Vacation,Integer> workDaysForYearByType = getDaysForYearByType(workDays, year, vacationType);
+        for (DictionaryItem vacationType : vacationTypes) {
+            for (int year = firstYear; year <= lastYear; year++) {
+                Map<Vacation, Integer> calDaysForYearByType = getDaysForYearByType(calDays, year, vacationType);
+                Map<Vacation, Integer> workDaysForYearByType = getDaysForYearByType(workDays, year, vacationType);
                 int summaryCalDays = getSummaryDaysCount(calDaysForYearByType);
                 int summaryWorkDays = getSummaryDaysCount(workDaysForYearByType);
                 result.add(new VacationInYear(vacationType.getValue(), year, summaryCalDays, summaryWorkDays));
@@ -604,16 +600,16 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
     }
 
     // сортирует список отпусков по ФИО сотрудников, а внутри группы по сотруднику - по типу отпусков
-    private void sortVacations(List<Vacation> vacations){
+    private void sortVacations(List<Vacation> vacations) {
         Collections.sort(vacations, new Comparator() {
             @Override
             public int compare(Object v1, Object v2) {
-                String employeeName1 = ((Vacation)v1).getEmployee().getName();
-                String employeeName2 = ((Vacation)v2).getEmployee().getName();
+                String employeeName1 = ((Vacation) v1).getEmployee().getName();
+                String employeeName2 = ((Vacation) v2).getEmployee().getName();
                 int compareRes = employeeName2.compareTo(employeeName1);
-                if (compareRes == 0){
-                    Integer typeId1 = ((Vacation)v1).getType().getId();
-                    Integer typeId2 = ((Vacation)v2).getType().getId();
+                if (compareRes == 0) {
+                    Integer typeId1 = ((Vacation) v1).getType().getId();
+                    Integer typeId2 = ((Vacation) v2).getType().getId();
                     return typeId1.compareTo(typeId2);
                 }
                 return employeeName1.compareTo(employeeName2);
@@ -621,19 +617,19 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
         });
     }
 
-    public List<Vacation> getVacationList(VacationsForm vacationsForm){
-        Integer divisionId      = vacationsForm.getDivisionId();
-        Integer employeeId      = vacationsForm.getEmployeeId();
-        Date dateFrom           = DateTimeUtil.parseStringToDateForDB(vacationsForm.getCalFromDate());
-        Date dateTo             = DateTimeUtil.parseStringToDateForDB(vacationsForm.getCalToDate());
-        Integer projectId       = vacationsForm.getProjectId();
-        Integer managerId       = vacationsForm.getManagerId();
-        List<Integer> regions   = vacationsForm.getRegions();
+    public List<Vacation> getVacationList(VacationsForm vacationsForm) {
+        Integer divisionId = vacationsForm.getDivisionId();
+        Integer employeeId = vacationsForm.getEmployeeId();
+        Date dateFrom = DateTimeUtil.parseStringToDateForDB(vacationsForm.getCalFromDate());
+        Date dateTo = DateTimeUtil.parseStringToDateForDB(vacationsForm.getCalToDate());
+        Integer projectId = vacationsForm.getProjectId();
+        Integer managerId = vacationsForm.getManagerId();
+        List<Integer> regions = vacationsForm.getRegions();
         DictionaryItem vacationType = vacationsForm.getVacationType() != 0 ?
                 dictionaryItemService.find(vacationsForm.getVacationType()) : null;
 
         List<Vacation> vacations = new ArrayList<Vacation>();
-        if (employeeId != null && employeeId != ALL_VALUE){
+        if (employeeId != null && employeeId != ALL_VALUE) {
             vacations.addAll(findVacations(employeeId, dateFrom, dateTo, vacationType));
         } else {
             List<Employee> employees = employeeService.getEmployees(

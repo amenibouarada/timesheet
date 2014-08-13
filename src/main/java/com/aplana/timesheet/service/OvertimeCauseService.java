@@ -39,8 +39,6 @@ public class OvertimeCauseService {
 
     @Transactional
     public void store(TimeSheet timeSheet, TimeSheetForm tsForm) {
-        //if (!isOvertimeCauseNeeeded(tsForm, calculateTotalDuration(tsForm))) return; Непонятно зачем тут то проверять? Уже прислали - значит надо записать
-
         if (tsForm.getOvertimeCause() == null) return;
 
         OvertimeCause overtimeCause = new OvertimeCause();

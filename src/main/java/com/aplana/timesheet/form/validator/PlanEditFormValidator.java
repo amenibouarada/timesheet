@@ -19,9 +19,6 @@ public class PlanEditFormValidator extends AbstractValidator {
 
     private static final String ERROR_PLANEDIT_FORM = "error.planedit.form.";
 
-    @Autowired
-    private ProjectRoleDAO projectRoleDAO;
-
     @Override
     public boolean supports(Class<?> clazz) {
         return (clazz.isAssignableFrom(PlanEditForm.class));

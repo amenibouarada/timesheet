@@ -73,11 +73,9 @@ public class TimeSheetDAO {
             }
             stringBuilder.append(")");
         }
-        //logger.debug(stringBuilder.toString());
         Query query = entityManager.createQuery(
                 "select ts from TimeSheet as ts where ts.calDate = :calDate and ts.employee.id = :employeeId " + stringBuilder.toString()
         ).setParameter("calDate", date).setParameter("employeeId", employeeId);
-        //logger.debug(query.toString());
         List<TimeSheet> result = query.getResultList();
 
         return result.isEmpty() ? null : result.get(0);
@@ -193,7 +191,6 @@ public class TimeSheetDAO {
                 ds.setVacationDAO(vacationDAO);
                 ds.setBusinessTripDAO(businessTripDAO);
                 map.put(calDate.getTime(), ds);
-                //logger.debug("put " + calDate + " " + calDate.getTime());
             } else {
                 //если есть еще запись со списанным временем
                 DayTimeSheet dts = map.get(calDate.getTime());
@@ -374,15 +371,6 @@ public class TimeSheetDAO {
 
         List resultList = query.getResultList();
         return resultList != null && !resultList.isEmpty() ? ((Integer) resultList.get(0)) : null;
-    }
-
-    public Date findFirstEmptyDate(Long employeeId, Date endDate) {
-        List<Date> overdueTimesheet = getOverdueTimesheet(employeeId, null, endDate, true);
-        if (overdueTimesheet.size() > 0) {
-        return overdueTimesheet.get(0);
-        } else {
-            return null;
-        }
     }
 
     public  List<Date> getOverdueTimesheet(Long employeeId, Date startDate, Date endDate, Boolean findFirstEmptyDate){

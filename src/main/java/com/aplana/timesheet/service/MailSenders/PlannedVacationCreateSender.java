@@ -8,7 +8,6 @@ import com.aplana.timesheet.util.DateTimeUtil;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.time.DateFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import padeg.lib.Padeg;
@@ -35,7 +34,7 @@ public class PlannedVacationCreateSender extends AbstractVacationSenderWithCopyT
         logger.info("Run sending message for: {}", getName());
     }
 
-    String getName() {
+    final String getName() {
         return String.format(" Оповещение о планируемом отпуске (%s) ", this.getClass().getSimpleName());
     }
 

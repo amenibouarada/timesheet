@@ -25,7 +25,7 @@ public class DeleteOrSetDraftApprovalSender extends MailSender<TimeSheet> {
         logger.info("Run sending message for: {}", getName());
     }
 
-    String getName() {
+    final String getName() {
         return String.format("Оповещение о просьбе для удалении или отправки в черновик отчета (%s)", this.getClass().getSimpleName());
     }
 

@@ -51,8 +51,6 @@ public class TimeSheetFormValidator extends AbstractValidator {
     @Autowired
     private ProjectTaskService projectTaskService;
     @Autowired
-    private TSPropertyProvider propertyProvider;
-    @Autowired
     private VacationService vacationService;
     @Autowired
     private OvertimeCauseService overtimeCauseService;
@@ -155,19 +153,7 @@ public class TimeSheetFormValidator extends AbstractValidator {
 
                     notNullRowNumber++;
                 }
-
-            /*
-            Отчет может быть без записей
-            if (tsTablePart.isEmpty()) {
-                errors.reject("error.tsform.tablepart.required",
-                        "В отчёте должны быть записи.");
-            }*/
-            } /*
-        Отчет может быть без записей
-        else {
-            errors.reject("error.tsform.tablepart.required", "В отчёте должны быть записи.");
-        }*/
-
+            }
         } else {
             errors.reject("error.tsform.isnull",
                     "Не удалось получить параметры формы");
@@ -269,8 +255,14 @@ public class TimeSheetFormValidator extends AbstractValidator {
         Integer typeActCatId = formRow.getActivityTypeId();
 
         // Не указана категория активности
-        if ((isNotChoosed(actCatId) && (emplJob != HEAD))
-                || (typeActCatId != TypesOfActivityEnum.NON_PROJECT.getId() && isNotChoosed(projectId) && isNotChoosed(actCatId))) {
+        if ((
+                isNotChoosed(actCatId) &&
+                        (emplJob != HEAD)
+        ) || (
+                typeActCatId != TypesOfActivityEnum.NON_PROJECT.getId() &&
+                        isNotChoosed(projectId) &&
+                        isNotChoosed(actCatId)
+        )) {
             errors.rejectValue("timeSheetTablePart[" + notNullRowNumber + "].activityCategoryId",
                     "error.tsform.activity.category.required", getErrorMessageArgs(notNullRowNumber),
                     "Необходимо указать категорию активности в строке " + (notNullRowNumber + 1) + ".");
@@ -511,8 +503,6 @@ public class TimeSheetFormValidator extends AbstractValidator {
         }
 
         logger.debug("Total duration is {}", totalDuration);
-        // Проверять причины недоработки будем даже если нет записей в отчете
-        //if (tsTablePart != null && !tsTablePart.isEmpty()) {
         String calDate = tsForm.getCalDate();
         boolean isHoliday = calendarService.isHoliday(
                 DateTimeUtil.parseStringToDateForDB(calDate),

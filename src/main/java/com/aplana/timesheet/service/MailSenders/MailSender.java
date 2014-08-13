@@ -138,7 +138,8 @@ public class MailSender<T> {
     private void addDebugInfoAndChangeReceiver(MimeMessage message, String mailDebugAddress){
         try{
             String debugInfo = getDebugInfo(message);
-            message.setSubject("[TSDEBUG] " + message.getSubject(), "UTF-8");
+            String charset = "UTF-8";
+            message.setSubject("[TSDEBUG] " + message.getSubject(), charset);
             message.setRecipients(MimeMessage.RecipientType.TO, InternetAddress.parse(mailDebugAddress));
             message.setRecipients(MimeMessage.RecipientType.CC, "");
             if (message.getContent() instanceof MimeMultipart){   // если это сложное письмо (напр, с вл. файлами)
@@ -154,9 +155,9 @@ public class MailSender<T> {
                     }
                 }
 
-                message.setText(builder.toString(), "UTF-8", "html");
+                message.setText(builder.toString(), charset, "html");
             } else{                                               // обычный текст
-                message.setText(debugInfo + message.getContent(), "UTF-8", "html");
+                message.setText(debugInfo + message.getContent(), charset, "html");
             }
         }catch (MessagingException ex){
             logger.error("Error while init message recipients.", ex);

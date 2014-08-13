@@ -23,7 +23,7 @@ public class ManagerAlertSender extends AbstractSenderWithAssistants<List<Report
         logger.info("Run sending message for: {}", getName());
     }
 
-    String getName() {
+    final String getName() {
         return String.format(" Оповещение о несписанной занятости подчиненных (%s)", this.getClass().getSimpleName());
     }
 

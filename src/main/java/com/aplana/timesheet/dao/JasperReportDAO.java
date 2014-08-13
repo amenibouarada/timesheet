@@ -872,11 +872,11 @@ public class JasperReportDAO {
             final Report07PeriodTypeEnum periodType =
                     Report07PeriodTypeEnum.getByMonthsCount(report.getPeriodType());
 
-            ArrayList rolesDev = this.readRolesFromString(propertyProvider.getProjectRoleDeveloper());
-            ArrayList rolesRp = this.readRolesFromString(propertyProvider.getProjectRoleRp());
-            ArrayList rolesTest = this.readRolesFromString(propertyProvider.getProjectRoleTest());
-            ArrayList rolesAnalyst = this.readRolesFromString(propertyProvider.getProjectRoleAnalyst());
-            ArrayList rolesSystem = this.readRolesFromString(propertyProvider.getProjectRoleSystem());
+            List rolesDev = this.readRolesFromString(propertyProvider.getProjectRoleDeveloper());
+            List rolesRp = this.readRolesFromString(propertyProvider.getProjectRoleRp());
+            List rolesTest = this.readRolesFromString(propertyProvider.getProjectRoleTest());
+            List rolesAnalyst = this.readRolesFromString(propertyProvider.getProjectRoleAnalyst());
+            List rolesSystem = this.readRolesFromString(propertyProvider.getProjectRoleSystem());
             Date start = DateTimeUtil.parseStringToDateForDB(report.getBeginDate());
             Date end = DateTimeUtil.parseStringToDateForDB(report.getEndDate());
             Query query1;
@@ -886,7 +886,7 @@ public class JasperReportDAO {
                 query1 = this.getReport07Query1(start, end, report.getDivisionEmployee());
             }
             List dataSource = new ArrayList();
-            Double temp = null;
+            Double temp;
             HashMap<String, HashMap<String, Double>> periodsDuration = new HashMap<String, HashMap<String, Double>>();
             HashMap<String, Double> durations = new HashMap<String, Double>();
             Report7Period itogoPeriod = new Report7Period("Итого");
@@ -1025,7 +1025,6 @@ public class JasperReportDAO {
                         regions.clear();
                     }
 
-                    //durations.put(projectName, Double.valueOf(0));
                     if (periodEnd.equals(maxEndOfPeriod)) {
                         periodEnd = DateUtils.addDays(periodEnd, 1);
                     }
@@ -1133,7 +1132,7 @@ public class JasperReportDAO {
         return list.toArray();
     }
 
-    private ArrayList readRolesFromString(String s) {
+    private List readRolesFromString(String s) {
         String[] roles = s.split(",");
         ArrayList role = new ArrayList();
         for (String role1 : roles) {

@@ -12,12 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 public class FeedbackFormValidator extends AbstractValidator {
 	
-	@Autowired
-	private DivisionService divisionService;
-	@Autowired
-	private EmployeeService employeeService;
-	
-	private Long SUM_FILE_SIZE = 8388608L;//8 мегабайт
+	private final Long SUM_FILE_SIZE = 8388608L;//8 мегабайт
 	
 	public boolean supports(Class<?> clazz) {
 		return clazz.isAssignableFrom(FeedbackForm.class);
