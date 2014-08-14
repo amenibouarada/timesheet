@@ -501,8 +501,11 @@ public class DateTimeUtil {
      * @return String
      */
     public static String getDayMonthFromDate(Timestamp timestamp){
+        if (timestamp == null) {
+            return "";
+        }
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(timestamp);
-        return calendar.get(Calendar.DATE) + " " + months[calendar.get(Calendar.MONTH)];
+        return String.format("%s %s",calendar.get(Calendar.DATE), months[calendar.get(Calendar.MONTH)]);
     }
 }

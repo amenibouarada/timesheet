@@ -7,7 +7,6 @@
 <%@ page import="com.aplana.timesheet.enums.VacationStatusEnum" %>
 <%@ page import="com.aplana.timesheet.service.VacationService" %>
 <%@ page import="com.aplana.timesheet.util.DateTimeUtil" %>
-<%@ page import="java.text.SimpleDateFormat" %>
 
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
