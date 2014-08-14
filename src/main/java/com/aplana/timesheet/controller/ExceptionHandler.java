@@ -1,9 +1,7 @@
 package com.aplana.timesheet.controller;
 
-import com.aplana.timesheet.service.EmployeeService;
 import com.aplana.timesheet.service.SendMailService;
 import com.aplana.timesheet.system.properties.TSPropertyProvider;
-import com.aplana.timesheet.system.security.SecurityService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,10 +22,6 @@ public class ExceptionHandler implements HandlerExceptionResolver {
 
     @Autowired
     private SendMailService sendMailService;
-    @Autowired
-    private SecurityService securityService;
-    @Autowired
-    private EmployeeService employeeService;
 
     @Autowired
     private TSPropertyProvider tsPropertyProvider;

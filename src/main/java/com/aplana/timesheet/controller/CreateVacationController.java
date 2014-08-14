@@ -93,37 +93,6 @@ public class CreateVacationController {
         return getModelAndView(employee);
     }
 
-    private ModelAndView getModelAndView(Employee employee) {
-        final ModelAndView modelAndView = new ModelAndView("createVacation");
-
-        List<Division> divisionList = divisionService.getDivisions();
-
-        List<DictionaryItem> itemsByDictionaryId = dictionaryItemService.getItemsByDictionaryId(DictionaryEnum.VACATION_TYPE.getId());
-        if (!request.isUserInRole(ROLE_ADMIN)) {
-            itemsByDictionaryId.remove(dictionaryItemService.find(VacationTypesEnum.CHILDBEARING.getId()));
-            itemsByDictionaryId.remove(dictionaryItemService.find(VacationTypesEnum.CHILDCARE.getId()));
-        }
-        modelAndView.addObject("vacationTypes", itemsByDictionaryId);
-
-        modelAndView.addObject("employee", employee);
-        modelAndView.addObject("divisionId", employee.getDivision().getId());
-        modelAndView.addObject("employeeId", employee.getId());
-        modelAndView.addObject("divisionList", divisionList);
-        modelAndView.addObject("employeeListJson", employeeHelper.getEmployeeListWithDivisionJson(divisionList, employeeService.isShowAll(request)));
-        modelAndView.addObject("typeWithRequiredComment", CreateVacationFormValidator.TYPE_WITH_REQUIRED_COMMENT);
-        modelAndView.addObject("typeVacationPlanned", VacationTypesEnum.PLANNED.getId());
-
-        return modelAndView;
-    }
-
-    private Calendar getCalendar(Timestamp date) {
-        final Calendar calendar = new Calendar();
-
-        calendar.setCalDate(date);
-
-        return calendar;
-    }
-
     @RequestMapping(value = "/getExitToWorkAndCountVacationDay",  produces = "text/plain;Charset=UTF-8")
     @ResponseBody
     public String getExitToWorkAndCountVacationDay(
@@ -168,5 +137,37 @@ public class CreateVacationController {
     public String validateAndCreateVacation(
     ) {
         return "redirect:/vacations";
+    }
+
+
+    private ModelAndView getModelAndView(Employee employee) {
+        final ModelAndView modelAndView = new ModelAndView("createVacation");
+
+        List<Division> divisionList = divisionService.getDivisions();
+
+        List<DictionaryItem> itemsByDictionaryId = dictionaryItemService.getItemsByDictionaryId(DictionaryEnum.VACATION_TYPE.getId());
+        if (!request.isUserInRole(ROLE_ADMIN)) {
+            itemsByDictionaryId.remove(dictionaryItemService.find(VacationTypesEnum.CHILDBEARING.getId()));
+            itemsByDictionaryId.remove(dictionaryItemService.find(VacationTypesEnum.CHILDCARE.getId()));
+        }
+        modelAndView.addObject("vacationTypes", itemsByDictionaryId);
+
+        modelAndView.addObject("employee", employee);
+        modelAndView.addObject("divisionId", employee.getDivision().getId());
+        modelAndView.addObject("employeeId", employee.getId());
+        modelAndView.addObject("divisionList", divisionList);
+        modelAndView.addObject("employeeListJson", employeeHelper.getEmployeeListWithDivisionJson(divisionList, employeeService.isShowAll(request)));
+        modelAndView.addObject("typeWithRequiredComment", CreateVacationFormValidator.TYPE_WITH_REQUIRED_COMMENT);
+        modelAndView.addObject("typeVacationPlanned", VacationTypesEnum.PLANNED.getId());
+
+        return modelAndView;
+    }
+
+    private Calendar getCalendar(Timestamp date) {
+        final Calendar calendar = new Calendar();
+
+        calendar.setCalDate(date);
+
+        return calendar;
     }
 }

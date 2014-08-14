@@ -1,99 +1,66 @@
 package com.aplana.timesheet.controller;
 
-import com.aplana.timesheet.controller.quickreport.BusinessTripsQuickReport;
-import com.aplana.timesheet.controller.quickreport.IllnessesQuickReport;
-import com.aplana.timesheet.controller.quickreport.QuickReport;
-import com.aplana.timesheet.controller.quickreport.QuickReportGenerator;
-import com.aplana.timesheet.dao.entity.*;
-import com.aplana.timesheet.enums.PermissionsEnum;
+import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.enums.QuickReportTypesEnum;
-import com.aplana.timesheet.enums.RegionsEnum;
-import com.aplana.timesheet.exception.TSRuntimeException;
 import com.aplana.timesheet.exception.controller.BusinessTripsAndIllnessControllerException;
 import com.aplana.timesheet.form.BusinessTripsAndIllnessForm;
 import com.aplana.timesheet.service.*;
 import com.aplana.timesheet.service.helper.EmployeeHelper;
-import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.system.security.SecurityService;
-import com.aplana.timesheet.system.security.entity.TimeSheetUser;
-import com.aplana.timesheet.util.DateNumbers;
-import com.aplana.timesheet.util.DateTimeUtil;
 import com.aplana.timesheet.util.EnumsUtils;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
-import javax.annotation.Nullable;
-import java.util.*;
-
-import static com.aplana.timesheet.enums.PermissionsEnum.CHANGE_ILLNESS_BUSINESS_TRIP;
-import static com.aplana.timesheet.enums.PermissionsEnum.VIEW_ILLNESS_BUSINESS_TRIP;
+import java.util.Date;
+import java.util.List;
+import java.util.NoSuchElementException;
 
 /**
  * User: vsergeev
  * Date: 17.01.13
  */
 @Controller
-public class BusinessTripsAndIllnessController extends AbstractController{
-
-    public static final int ALL_VALUE = -1;
-
-    private static final String UNCNOWN_PRINTTYPE_ERROR_MESSAGE = "Ошибка: запрашивается неизвестный тип отчета!";
-    private static final String INVALID_YEAR_BEGIN_DATE_ERROR_MESSAGE = "Ошибка: в настройках указана неверная дата начала отчетного года! Установлен год по умолчанию.";
-    private static final String NO_PRINTTYPE_FINDED_ERROR_MESSAGE = "Ошибка: не удалось получить тип отчета!";
-    private static final String UNCNOWN_REGION_EXCEPTION_MESSAGE = "Сотрудник имеет неизвестный регион!";
-
-    //дефолтные дни начала года для регионов и Москвы
-    private static final int DEFAULT_MOSCOW_YEAR_BEGIN_MONTH = java.util.Calendar.APRIL;
-    private static final int DEFAULT_MOSCOW_YEAR_BEGIN_DAY = 1;
-    private static final Integer DEFAULT_REGION_YEAR_BEGIN_MONTH = java.util.Calendar.SEPTEMBER;
-    private static final Integer DEFAULT_REGION_YEAR_BEGIN_DAY = 1;
+public class BusinessTripsAndIllnessController extends AbstractController {
 
     private static final Logger logger = LoggerFactory.getLogger(BusinessTripsAndIllnessController.class);
 
-    public static final int ALL_EMPLOYEES = -1;
-    public static final String ERROR_BUSINESS_TRIP_DELETE = "Ошибка при удалении командировки из БД!";
-    public static final String ERROR_ILLNESS_DELETE = "Ошибка при удалении больничного из БД!";
-
     @Autowired
     SecurityService securityService;
-    @Autowired
-    EmployeeService employeeService;
-    @Autowired
-    EmployeeHelper employeeHelper;
-    @Autowired
-    DivisionService divisionService;
-    @Autowired
-    TimeSheetService timeSheetService;
-    @Autowired
-    CalendarService calendarService;
-    @Autowired
-    DictionaryItemService dictionaryItemService;
-    @Autowired
-    BusinessTripService businessTripService;
-    @Autowired
-    IllnessService illnessService;
-    @Autowired
-    private RegionService regionregionService;
-    @Autowired
-    private IllnessMailService illnessMailService;
 
     @Autowired
-    @Qualifier("illnessesQuickReportGenerator")
-    QuickReportGenerator<IllnessesQuickReport> illnessesQuickReportGenerator;
+    EmployeeService employeeService;
+
     @Autowired
-    @Qualifier("businessTripsQuickReportGenerator")
-    QuickReportGenerator<BusinessTripsQuickReport> businessTripsQuickReportGenerator;
+    EmployeeHelper employeeHelper;
+
     @Autowired
-    TSPropertyProvider propertyProvider;
+    DivisionService divisionService;
+
+    @Autowired
+    TimeSheetService timeSheetService;
+
+    @Autowired
+    CalendarService calendarService;
+
+    @Autowired
+    DictionaryItemService dictionaryItemService;
+
+    @Autowired
+    BusinessTripService businessTripService;
+
+    @Autowired
+    IllnessService illnessService;
+
+    @Autowired
+    BusinessTripsAndIllnessService businessTripsAndIllnessService;
 
     @RequestMapping(value = "/businesstripsandillness/delete/{reportId}/{reportType}", produces = "text/plain;charset=UTF-8")
     @ResponseBody
@@ -103,9 +70,9 @@ public class BusinessTripsAndIllnessController extends AbstractController{
             final QuickReportTypesEnum reportTypeAsEnum = EnumsUtils.getEnumById(reportType, QuickReportTypesEnum.class);
             switch (reportTypeAsEnum) {
                 case BUSINESS_TRIP:
-                    return deleteBusinessTrip(reportId);
+                    return businessTripsAndIllnessService.deleteBusinessTrip(reportId);
                 case ILLNESS:
-                    return deleteIllness(reportId);
+                    return businessTripsAndIllnessService.deleteIllness(reportId);
                 default:
                     return "Удаление такого типа отчетов еще не реализовано!";
             }
@@ -145,7 +112,7 @@ public class BusinessTripsAndIllnessController extends AbstractController{
             dateFrom = calendarService.getMinDateMonth(year,month);
             tsForm.setDateFrom(dateFrom);
         }
-        return getBusinessTripsOrIllnessReport(divisionId, regions, employeeId, manager, dateFrom, dateTo, printtype, tsForm);
+        return businessTripsAndIllnessService.getBusinessTripsOrIllnessReport(divisionId, regions, employeeId, manager, dateFrom, dateTo, printtype, tsForm, employeeService.isShowAll(request));
     }
 
     @RequestMapping(value = "/businesstripsandillness/businesstrip/{employeeId}")
@@ -161,7 +128,7 @@ public class BusinessTripsAndIllnessController extends AbstractController{
             dateTo = DateUtils.addMonths(dateFrom, 1);
             businessTripsAndIllnessForm.setDateTo(dateTo);
         }
-        return getBusinessTripsOrIllnessReport(employeeId, QuickReportTypesEnum.BUSINESS_TRIP.getId());
+        return businessTripsAndIllnessService.getBusinessTripsOrIllnessReport(employeeId, QuickReportTypesEnum.BUSINESS_TRIP.getId(), employeeService.isShowAll(request));
     }
 
     @RequestMapping(value = "/businesstripsandillness/illness/{employeeId}")
@@ -177,75 +144,7 @@ public class BusinessTripsAndIllnessController extends AbstractController{
             dateTo = DateUtils.addMonths(dateFrom, 1);
             businessTripsAndIllnessForm.setDateTo(dateTo);
         }
-        return getBusinessTripsOrIllnessReport(employeeId, QuickReportTypesEnum.ILLNESS.getId());
-    }
-
-    private ModelAndView getBusinessTripsOrIllnessReport(Integer employeeId, Integer printType) throws BusinessTripsAndIllnessControllerException {
-        Employee employee = employeeService.find(employeeId);
-        Date dateFrom = new Date();
-        Date dateTo = DateUtils.addMonths(dateFrom, 1);
-        List<Integer> regions = new ArrayList<Integer>();
-        regions.add(employee.getRegion().getId());
-
-        return getBusinessTripsOrIllnessReport(employee.getDivision().getId(), regions, employee.getId(), employee.getManager().getId(), dateFrom, dateTo, printType, null);
-    }
-
-    private ModelAndView getBusinessTripsOrIllnessReport(Integer divisionId,
-                                                         List<Integer> regions,
-                                                         Integer employeeId,
-                                                         Integer manager,
-                                                         Date dateFrom,
-                                                         Date dateTo,
-                                                         Integer printtype,
-                                                         BusinessTripsAndIllnessForm tsForm      // so much parameters
-    ) throws BusinessTripsAndIllnessControllerException {
-        boolean hasAnyEmployee = false;
-        boolean hasAnyReports = false;
-        List<Employee> employeeList = new ArrayList<Employee>();
-        HashMap<Employee, QuickReport> reports = new HashMap<Employee, QuickReport>();
-        List<Division> divisionList = divisionService.getDivisions();
-        final boolean allFlag = (employeeId == ALL_EMPLOYEES);
-        if (allFlag) {
-            employeeList = employeeService.getEmployeeByRegionAndManagerRecursiveAndDivision(regions, divisionId, manager);
-        } else {
-            employeeList.add(employeeService.find(employeeId));
-        }
-        if (employeeList != null && employeeList.size() != 0 ) {
-            hasAnyEmployee = true;
-            for (Employee employee : employeeList) {
-                QuickReport report = getReport(printtype, employee, dateFrom, dateTo);
-                if (report.getPeriodicalsList().size() > 0){
-                    hasAnyReports = true;
-                }
-                reports.put(employee, report);
-            }
-        }
-        for (QuickReport report : reports.values()) {
-            report.setPeriodicalsList(clearDuplicatePeriodicals(report.getPeriodicalsList()));
-        }
-
-        ModelAndView modelAndView = new ModelAndView("businesstripsandillness");
-        modelAndView.addObject("dateFrom", DateTimeUtil.formatDateIntoViewFormat(dateFrom));
-        modelAndView.addObject("dateTo", DateTimeUtil.formatDateIntoViewFormat(dateTo));
-        modelAndView.addObject("divisionId", divisionId);
-        modelAndView.addObject("employeeId", employeeId);
-        modelAndView.addObject("managerId", manager == null ? -1 : manager);
-        modelAndView.addObject("divisionList", divisionList);
-        modelAndView.addObject("employeeListJson", employeeHelper.getEmployeeListWithLastWorkdayJson(divisionList, employeeService.isShowAll(request), true));
-        modelAndView.addObject("regionIds", getDefaultSelectRegion(regions));
-        modelAndView.addObject("regionList", getRegionList());
-        modelAndView.addObject("managerList", getManagerList());
-        modelAndView.addObject("managerMapJson", getManagerListJson());
-        modelAndView.addObject("reportsMap", reports);
-        modelAndView.addObject("reportFormed", printtype);
-        modelAndView.addObject("forAll", allFlag);
-        modelAndView.addObject("hasAnyEmployee", hasAnyEmployee); // найден ли хотя бы один сотрудник
-        modelAndView.addObject("hasAnyReports", hasAnyReports);   // найден ли хотя бы один отчет
-        if (tsForm != null){
-            modelAndView.addObject("businesstripsandillness", tsForm);
-        }
-
-        return modelAndView;
+        return businessTripsAndIllnessService.getBusinessTripsOrIllnessReport(employeeId, QuickReportTypesEnum.ILLNESS.getId(), employeeService.isShowAll(request));
     }
 
     @RequestMapping(value = "/businesstripsandillness/{divisionId}/{employeeId}/{reportTypeId}")
@@ -258,205 +157,5 @@ public class BusinessTripsAndIllnessController extends AbstractController{
         tsForm.setReportType(reportTypeId);
         return showDefaultIllnessReport(divisionId, employeeId, tsForm);
     }
-    /**
-     * Удаляем больничный. Если удаление прошло нормально, то возвращаем пустую строку.
-     */
-    private String deleteIllness(Integer reportId) throws BusinessTripsAndIllnessControllerException {
-        try {
-            illnessMailService.sendDeleteMail(reportId);
-            illnessService.deleteIllnessById(reportId);
-            return StringUtils.EMPTY;
-        } catch (Exception e) {
-            logger.error(ERROR_ILLNESS_DELETE, e);
-            throw new BusinessTripsAndIllnessControllerException(ERROR_ILLNESS_DELETE, e);
-        }
-    }
 
-    /**
-     * Удаляем командировку. Если удаление прошло нормально, то возвращаем пустую строку.
-     */
-    private String deleteBusinessTrip(Integer reportId) throws BusinessTripsAndIllnessControllerException {
-        try {
-            businessTripService.deleteBusinessTripById(reportId);
-            return StringUtils.EMPTY;
-        } catch (Exception e) {
-            logger.error(ERROR_BUSINESS_TRIP_DELETE, e);
-            throw new BusinessTripsAndIllnessControllerException(ERROR_BUSINESS_TRIP_DELETE, e);
-        }
-    }
-
-    private List<Integer> getDefaultSelectRegion(List<Integer> regionIds) {
-        if (regionIds == null || regionIds.size() == 0) {
-            regionIds = new ArrayList<Integer>();
-            regionIds.add(-1);
-        }
-        return regionIds;
-    }
-
-    private List<Periodical> clearDuplicatePeriodicals(List<Periodical> periodicalList){
-        List<Periodical> cleanPeriodicalList = new ArrayList<Periodical>();
-        for (Periodical p : periodicalList){
-            Boolean isAdded = false;
-            for (Periodical cp : cleanPeriodicalList){
-                if (p.getBeginDate().equals(cp.getBeginDate())){
-                    cp.setWorkingDays(cp.getWorkingDays() + p.getWorkingDays());
-                    cp.setCalendarDays(cp.getCalendarDays() + p.getCalendarDays());
-                    isAdded = true;
-                }
-            }
-            if (!isAdded){
-                cleanPeriodicalList.add(p);
-            }
-        }
-        return cleanPeriodicalList;
-    }
-
-    /**
-     * В зависимости от типа запрашиваемого отчета, формируем сам отчет
-     */
-    private QuickReport getReport(Integer printtype, Employee employee, Date periodBeginDate, Date periodEndDate) throws BusinessTripsAndIllnessControllerException {
-
-        Date yearBeginDate = getYearBeginDate(employee, calendarService.getMonthFromDate(periodBeginDate), calendarService.getYearFromDate(periodBeginDate));
-        Date yearToDate = getYearBeginDate(employee, calendarService.getMonthFromDate(periodEndDate), calendarService.getYearFromDate(periodEndDate));
-        Date yearEndDate = DateUtils.addDays(DateUtils.addYears(yearToDate, 1), -1);
-        if (printtype == null) {
-            throw new BusinessTripsAndIllnessControllerException(NO_PRINTTYPE_FINDED_ERROR_MESSAGE);
-        }
-        QuickReportGenerator generator = getQuickReportGenerator(printtype);
-
-        return generator.generate(employee, periodBeginDate, periodEndDate, yearBeginDate, yearEndDate);
-    }
-
-    /**
-     * Возвращает дату начала ОТЧЕТНОГО года, в который входит выбранный месяц выбранного КАЛЕНДАРНОГО года.
-     * даты начала/конца ОТЧЕТНЫХ годов берутся либо из дефолтных значений, либо из файла настроек таймшита
-     */
-    private Date getYearBeginDate(Employee employee, Integer month, Integer year) throws BusinessTripsAndIllnessControllerException {
-        DateNumbers dateNumbers = getYearPeriodForEmployyesRegion(employee);
-        return generateYearBeginDate(dateNumbers, month, year);
-    }
-
-    /**
-     * Превращаем DateNumbers в Date попутно проверяя, в какой год попадает отчетный месяц.
-     * Если отчетный месяц меньше месяца начала периода - значит период начался в предыдущем году относительно года отчетного месяца.
-     * Год нужно уменьшить.
-     */
-    private Date generateYearBeginDate(DateNumbers dateNumbers, Integer month, Integer year) throws BusinessTripsAndIllnessControllerException {
-        if (month < dateNumbers.getDatabaseMonth()) {
-            year -= 1;
-        }
-        try {
-            return DateTimeUtil.parseStringToDateForView(String.format("%s.%s.%s", dateNumbers.getDay(), dateNumbers.getDatabaseMonth(), year));
-        } catch (TSRuntimeException e) {
-            throw new BusinessTripsAndIllnessControllerException("Formatting error", e);
-        }
-    }
-
-    /**
-     * Получаем начало ОТЧЕТНОГО года для региона, в котором работает данный сотрудник.
-     * Дата начала либо считывается из файла настроек таймшита, либо выставляется по умолчанию
-     * (1.04 для Москвы или 1.09 для регионов)
-     */
-    private DateNumbers getYearPeriodForEmployyesRegion(Employee employee) throws BusinessTripsAndIllnessControllerException {
-        RegionsEnum regionEnum = EnumsUtils.getEnumById(employee.getRegion().getId(), RegionsEnum.class);
-        switch (regionEnum) {
-            case MOSCOW: {
-                try {
-                    return getMoskowYearBeginDates();
-                } catch (NumberFormatException ex) {
-                    logger.error(INVALID_YEAR_BEGIN_DATE_ERROR_MESSAGE);
-                    return getDefaultMoskowYearBeginDates();
-                } catch (NullPointerException ex) {
-                    return getDefaultMoskowYearBeginDates();
-                }
-            }
-            case OTHERS:
-            case UFA:
-            case NIJNIY_NOVGOROD:
-            case PERM: {
-                try {
-                    return getRegionsYearBeginDates();
-                } catch (NumberFormatException ex) {
-                    logger.error(INVALID_YEAR_BEGIN_DATE_ERROR_MESSAGE);
-                    return getDefaultRegionsYearBeginDates();
-                } catch (NullPointerException ex) {
-                    return getDefaultMoskowYearBeginDates();
-                }
-            }
-            default:
-                throw new BusinessTripsAndIllnessControllerException(UNCNOWN_REGION_EXCEPTION_MESSAGE);
-        }
-    }
-
-    /**
-     * возвращает даты начала ОТЧЕТНОГО года для Москвы
-     */
-    private DateNumbers getMoskowYearBeginDates() {
-        DateNumbers dateNumbers = new DateNumbers();
-        dateNumbers.setDay(propertyProvider.getQuickreportMoskowBeginDay());
-        dateNumbers.setMonth(propertyProvider.getQuickreportMoskowBeginMonth());
-
-        return dateNumbers;
-    }
-
-
-    /**
-     * возвращает даты начала ОТЧЕТНОГО года для регионов
-     */
-    private DateNumbers getRegionsYearBeginDates() {
-        DateNumbers dateNumbers = new DateNumbers();
-        dateNumbers.setDay(propertyProvider.getQuickreportRegionsBeginDay());
-        dateNumbers.setMonth(propertyProvider.getQuickreportRegionsBeginMonth());
-
-        return dateNumbers;
-    }
-
-    /**
-     * Возвращает дефолтные даты начала ОТЧЕТНОГО года для регионов
-     */
-    private DateNumbers getDefaultRegionsYearBeginDates() {
-        DateNumbers dateNumbers = new DateNumbers();
-        dateNumbers.setMonth(DEFAULT_REGION_YEAR_BEGIN_MONTH);
-        dateNumbers.setDay(DEFAULT_REGION_YEAR_BEGIN_DAY);
-
-        return dateNumbers;
-    }
-
-    /**
-     * возвращает дефолтные даты начала ОТЧЕТНОГО года для Москвы
-     */
-    private DateNumbers getDefaultMoskowYearBeginDates() {
-        DateNumbers dateNumbers = new DateNumbers();
-        dateNumbers.setMonth(DEFAULT_MOSCOW_YEAR_BEGIN_MONTH);
-        dateNumbers.setDay(DEFAULT_MOSCOW_YEAR_BEGIN_DAY);
-
-        return dateNumbers;
-    }
-
-    /**
-     * В зависимости от типа отчета ввозвращает нужный генератор
-     */
-    private QuickReportGenerator getQuickReportGenerator(Integer printtype) throws BusinessTripsAndIllnessControllerException {
-        QuickReportTypesEnum quickReportType = EnumsUtils.getEnumById(printtype, QuickReportTypesEnum.class);
-        switch (quickReportType) {
-            case ILLNESS:
-                return illnessesQuickReportGenerator;
-            case BUSINESS_TRIP:
-                return businessTripsQuickReportGenerator;
-            default:
-                throw new BusinessTripsAndIllnessControllerException(UNCNOWN_PRINTTYPE_ERROR_MESSAGE);
-        }
-    }
-
-    private List<Region> getRegionList() {
-        return regionregionService.getRegions();
-    }
-
-    private List<Employee> getManagerList() {
-        return employeeService.getManagerListForAllEmployee();
-    }
-
-    private String getManagerListJson() {
-        return employeeService.getManagerListJson();
-    }
 }

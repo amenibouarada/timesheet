@@ -1,5 +1,10 @@
 package com.aplana.timesheet.service;
 
+import argo.jdom.JdomParser;
+import argo.jdom.JsonField;
+import argo.jdom.JsonNode;
+import argo.jdom.JsonRootNode;
+import argo.saj.InvalidSyntaxException;
 import com.aplana.timesheet.dao.EmployeeProjectPlanDAO;
 import com.aplana.timesheet.dao.entity.*;
 import com.aplana.timesheet.form.EmploymentPlanningForm;
@@ -101,5 +106,43 @@ public class EmployeeProjectPlanService {
 
     public List<Employee> getEmployesWhoWillWorkOnProject(Project project, Date beginDate, Date endDate, List<Integer> excludeIds){
        return employeeProjectPlanDAO.getEmployesWhoWillWorkOnProject(project, beginDate, endDate, excludeIds);
+    }
+
+    public void saveProjectData(String jsonData, Integer employeeId) throws InvalidSyntaxException {
+        JdomParser jdomParser = new JdomParser();
+        JsonRootNode rootNode = jdomParser.parse(jsonData);
+        List<JsonField> jsonFieldList = rootNode.getFieldList();
+        JsonField jsonField = jsonFieldList.get(0);
+        JsonNode jsonNode = jsonField.getValue();
+        List<JsonNode> jsonNodes = jsonNode.getElements();
+
+        for(JsonNode node : jsonNodes){
+            Integer projectId = Integer.parseInt(node.getNumberValue("project_id"));
+            String fields = node.getStringValue("fields");
+            if (fields!=null && !"".equals(fields)){
+                String[] yearMonthArray = fields.split(";");
+                for(String key : yearMonthArray){
+                    String[] yearMonth = key.split("_");
+                    Double value = Double.parseDouble(node.getNumberValue(key));
+                    Integer year = Integer.parseInt(yearMonth[0]);
+                    Integer month = Integer.parseInt(yearMonth[1]);
+
+                    EmploymentPlanningForm employmentPlanningForm = new EmploymentPlanningForm();
+                    employmentPlanningForm.setMonthBeg(month);
+                    employmentPlanningForm.setMonthEnd(month);
+                    employmentPlanningForm.setYearBeg(year);
+                    employmentPlanningForm.setYearEnd(year);
+
+                    if (projectId > 0){
+                        employmentPlanningForm.setProjectId(projectId);
+                        updateEmployeeProjectPlan(employeeId, employmentPlanningForm, value);
+                    } else {
+                        employmentPlanningForm.setProjectId(-projectId);
+                        updateEmployeeNotProjectPlan(employeeId, employmentPlanningForm, value);
+                    }
+                }
+            }
+        }
+
     }
 }
