@@ -23,7 +23,6 @@
         var hasReportId = ${reportId == null};
         var reportId = "${reportId}";
         var hasProjectId = ${businesstripsandillnessadd.projectId != null};
-        var contextPath = "<%= request.getContextPath()%>";
         var projectId = ${(businesstripsandillnessadd.projectId != null) ? businesstripsandillnessadd.projectId : 0};
         var loadingImageUrl = "<img src=\"<c:url value="/resources/img/loading_small.gif"/>\"/>";
         var employeeIdJsp = "${employeeId}";

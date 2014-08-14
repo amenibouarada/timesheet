@@ -14,13 +14,13 @@ import java.util.List;
  */
 public enum TypesOfActivityEnum implements TSEnum {
 
-    PROJECT(12, "Проект", 1),
-    PROJECT_PRESALE(42, "Проектный пресейл", 2),
-    PRESALE(13, "Пресейл", 3),
-    NON_PROJECT(14, "Непроектная", 4),
-    VACATION(16, "Отпуск", 6),
-    ILLNESS(17, "Болезнь", 7),
-    COMPENSATORY_HOLIDAY(15, "Отгул", 9);
+    PROJECT(                12, "Проект",              1),
+    PROJECT_PRESALE(        42, "Проектный пресейл",   2),
+    PRESALE(                13, "Пресейл",             3),
+    NON_PROJECT(            14, "Непроектная",         4),
+    VACATION(               16, "Отпуск",              6),
+    ILLNESS(                17, "Болезнь",             7),
+    COMPENSATORY_HOLIDAY(   15, "Отгул",               9);
 
     private int id;
     private String name;

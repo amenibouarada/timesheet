@@ -1,7 +1,6 @@
 <%@ page import="java.io.File" %>
 <%@ page import="com.aplana.timesheet.enums.EffortInNextDayEnum" %>
 <%@ page import="com.aplana.timesheet.enums.TypesOfTimeSheetEnum" %>
-<%@ page import="com.aplana.timesheet.form.entity.EmployeeMonthReportDetail" %>
 <%@page contentType="text/html" pageEncoding="UTF-8" %>
 
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
@@ -16,362 +15,13 @@
     <link rel="stylesheet" type="text/css"
           href="<%= request.getContextPath()%>/resources/css/viewreports.css?modified=<%= new File(application.getRealPath("/resources/css/viewreports.css")).lastModified()%>">
     <script type="text/javascript">
-        dojo.require("dojo.cookie");
-        dojo.require("dojo.on");
-        dojo.require("dijit.form.DateTextBox");
-        dojo.require("dijit.form.FilteringSelect");
-        dojo.require("dojo.data.ObjectStore");
-        dojo.require("dojo.store.Memory");
-        dojo.require("dijit.Dialog");
-
-        var widgets = {
-            division: undefined,
-            month: undefined,
-            year: undefined,
-            employee: undefined
-        };
-
-        dojo.ready(function () {
-            window.focus();
-            initWidgets();
-            reloadViewReportsState();
-
-            if (dojo.query('input[id^="delete_"]').length > 0) {
-                var deleteAllCheckbox = dojo.byId("deleteAllCheckbox");
-
-                dojo.connect(deleteAllCheckbox, "onclick", function (evt) {
-                    setAllCheckBoxChecked();
-                });
-            } else {
-                dojo.query("#deleteAllCheckbox").style("display", "none");
-            }
-
-            dojo.on(widgets.division, "change", onDivisionChange);
-
-            dojo.connect( dijit.byId('sendDeleteReportDialog').closeButtonNode, "onclick", function (evt) {
-                clearDeleteForm();
-            });
-        });
-
         var monthList = ${monthList};
         var divisionsEmployeesJSON = ${divisionsEmployeesJSON};
-
-        function initWidgets() {
-            widgets.division = dojo.byId('divisionId');
-            widgets.month = dojo.byId('month');
-            widgets.year = dojo.byId('year');
-            onDivisionChange();
-        }
-
-        /* По умолчанию отображается текущий год и месяц. */
-        function reloadViewReportsState() {
-            var temp_date = new Date();
-            var lastYear = ${year};
-            var lastMonth = ${month};
-            if (lastYear == 0 && lastMonth == 0) {
-                widgets.year.value = temp_date.getFullYear();
-                widgets.year.onchange();
-                widgets.month.value = temp_date.getMonth() + 1;
-            }
-            else {
-                widgets.year.value = lastYear;
-                widgets.year.onchange();
-                widgets.month.value = lastMonth;
-            }
-        }
-
-        function onDivisionChange(){
-            var divisionId = widgets.division.value;
-            if (divisionsEmployeesJSON.length > 0) {
-                dojo.forEach(dojo.filter(divisionsEmployeesJSON, function (division) {
-                    return (division.divisionId == divisionId);
-                }), function (divisionData) {
-                    var employeesArray = [];
-                    dojo.forEach(divisionData.employees, function (employeeData) {
-                        employeesArray.push(employeeData);
-                    });
-                    employeesArray.sort(function (a, b) {
-                        return (a.name < b.name) ? -1 : 1;
-                    });
-
-                    var employeeDataStore = new dojo.data.ObjectStore({
-                        objectStore: new dojo.store.Memory({
-                            data: employeesArray,
-                            idProperty: 'employeeId'
-                        })
-                    });
-
-                    var employeeFilteringSelect = dijit.byId("employeeId");
-
-                    if (!employeeFilteringSelect) {
-                        employeeFilteringSelect = new dijit.form.FilteringSelect({
-                            id: "employeeId",
-                            name: "employeeId",
-                            store: employeeDataStore,
-                            searchAttr: 'name',
-                            queryExpr: "*\${0}*",
-                            ignoreCase: true,
-                            autoComplete: false,
-                            style: 'width:200px',
-                            required: true,
-                            onChange: function (){
-                                onChangeEmployee(this.value);
-                            },
-                            onMouseOver: function () {
-                                tooltip.show(getTitle(this));
-                            },
-                            onMouseOut: function () {
-                                tooltip.hide();
-                            }
-                        }, "employeeId");
-                        employeeFilteringSelect.startup();
-                        widgets.employee = employeeFilteringSelect;
-                    } else {
-                        employeeFilteringSelect.set('store', employeeDataStore);
-                        widgets.employee.set('value', null);
-                    }
-                });
-            }
-
-            widgets.employee.set('value', "${employeeId}" != "" ? +"${employeeId}" : null);
-        }
-
-        function onChangeEmployee(empId){
-            dojo.byId('employeeBirthday').innerHTML = widgets.employee.item.birthday;
-            setDefaultEmployeeJob(-1);
-        }
-
-        function incMonth(){
-            var month = widgets.month.value;
-            if (month < 12) {
-                month++;
-                widgets.month.value = month;
-                showDates()
-            }
-        }
-
-        function decMonth() {
-            var month = widgets.month.value;
-            if (month > 1) {
-                month--;
-                widgets.month.value = month;
-                showDates()
-            }
-        }
-
-        function incYear(){
-            var length = widgets.year.options.length;
-            var year = widgets.year.value;
-            if (year < widgets.year.options.item(length - 1).value) {
-                year++;
-                widgets.year.value = year;
-                showDates()
-            }
-        }
-
-        function decYear(){
-            var year = widgets.year.value;
-            if (year > widgets.year.options.item(0).value) {
-                year--;
-                widgets.year.value = year;
-                showDates()
-            }
-        }
-
-        function showDates() {
-            var empId =  widgets.employee.value;
-            var year = widgets.year.value;
-            var divisionId = dojo.byId("divisionId").value;
-            var month = widgets.month.value;
-            if (year != null && year != 0 && month != null && month != 0 && divisionId != null && divisionId != 0 && empId != null && empId != 0) {
-                viewReportsForm.action = "<%=request.getContextPath()%>/viewreports/" + divisionId + "/" + empId + "/" + year + "/" + month;
-                viewReportsForm.submit();
-            } else {
-                var error = "";
-                if (year == 0 || year == null) {
-                    error += ("Необходимо выбрать год и месяц!\n");
-                }
-                else if (month == 0 || month == null) {
-                    error += ("Необходимо выбрать месяц!\n");
-                }
-                if (divisionId == 0 || divisionId == null) {
-                    error += ("Необходимо выбрать подразделение и сотрудника!\n");
-                }
-                else if (empId == 0 || empId == null) {
-                    error += ("Необходимо выбрать сотрудника!\n");
-                }
-                alert(error);
-            }
-        }
-
-        function yearChange(obj) {
-            var year = null;
-            var monthSelect = widgets.month;
-            var monthValue = monthSelect.value;
-            var monthOption = null;
-            if (obj.target == null) {
-                year = obj.value;
-            }
-            else {
-                year = obj.target.value;
-            }
-            //Очищаем список месяцев.
-            monthSelect.options.length = 0;
-            for (var i = 0; i < monthList.length; i++) {
-                if (year == monthList[i].year) {
-                    for (var j = 0; j < monthList[i].months.length; j++) {
-                        if (monthList[i].months[j].number != 0 && monthList[i].months[j].number != 27) {
-                            monthOption = dojo.doc.createElement("option");
-                            dojo.attr(monthOption, {value: monthList[i].months[j].number});
-                            monthOption.title = monthList[i].months[j].name;
-                            monthOption.innerHTML = monthList[i].months[j].name;
-                            monthSelect.appendChild(monthOption);
-                        }
-                    }
-                }
-            }
-            monthSelect.value = monthValue;
-            if (year == 0) {
-                insertEmptyOption(monthSelect);
-            }
-        }
-
-        function setIdsToForm() {
-            var idsField = dojo.byId("ids");
-            var ids = [];
-            var idString = "delete_";
-            var deleteIdsElements = dojo.query('input[id^="' + idString + '"]');
-            for (var index = 0; index < deleteIdsElements.length; ++index) {
-                var element = deleteIdsElements[index];
-                if (element.checked) {
-                    ids.push(element.id.substring(idString.length, element.id.length));
-                }
-            }
-            if (ids.length == 0) {
-                alert('Не выделено ни одного отчета');
-                return false;
-            }
-            idsField.value = ids;
-            return true;
-        }
-
-        function deleteSelectedReports() {
-            if (!setIdsToForm()) {
-                return;
-            }
-
-            if (!confirm("Вы действительно хотите удалить выделенные отчеты")) {
-                return;
-            }
-
-            var deleteForm = dojo.byId("deleteReportsForm");
-            dojo.byId("link").value = document.URL;
-            deleteForm.action = "<%=request.getContextPath()%>/deleteReports";
-            deleteForm.submit();
-        }
-
-        function sendToRawReports() {
-            if (!setIdsToForm()) {
-                return;
-            }
-
-            if (!confirm("Вы действительно хотите отправить выделенные отчеты в черновик")) {
-                return;
-            }
-            var deleteForm = dojo.byId("deleteReportsForm");
-            dojo.byId("link").value = document.URL;
-            deleteForm.action = "<%=request.getContextPath()%>/sendToRawReports";
-            deleteForm.submit();
-        }
-
-        function setAllCheckBoxChecked() {
-            var idString = "delete_";
-            var deleteIdsElements = dojo.query('input[id^="' + idString + '"]');
-            var deleteAllCheckbox = dojo.byId("deleteAllCheckbox");
-            for (var index = 0; index < deleteIdsElements.length; ++index) {
-                var element = deleteIdsElements[index];
-                element.checked = deleteAllCheckbox.checked;
-            }
-        }
-
-        function openVacation(date, emplId, divId){
-            var vacationForm = dojo.byId("vacationsForm");
-            vacationForm.action = "<%=request.getContextPath()%>/vacations";
-
-            dojo.byId("calFromDate").value = date;
-            dojo.byId("calToDate").value = date;
-            dojo.query("#vacationsForm > #employeeId")[0].value = emplId;
-            dojo.query("#vacationsForm > #divisionId")[0].value = divId;
-            vacationForm.submit();
-        }
-
-        function sendDeleteTimeSheetApproval(reportId) {
-            dojo.byId("link").value = document.URL;
-            dojo.byId("reportId").value = reportId;
-            var dialog = dijit.byId("sendDeleteReportDialog");
-            dialog.show();
-            return;
-        }
-
-        function clearDeleteForm(){
-            dojo.byId("link").value = null;
-            dojo.byId("reportId").value = null;
-            dojo.byId("deleteRB").checked = true;
-            dojo.byId('commentApproval').value = "";
-        }
-
-        function submitDeleteApproval(){
-            var dialog = dijit.byId("sendDeleteReportDialog");
-            dialog.hide();
-            dojo.byId('comment').value =  dojo.byId('commentApproval').value;
-            var deleteForm = dojo.byId("deleteReportsForm");
-            var value = dojo.query('input[name=deleteGroup]:checked').attr('value')[0];
-            deleteForm.action = "<%=request.getContextPath()%>" + (value == "delete" ? "/sendDeleteReportApproval" : "/setDraftReportApproval");
-            deleteForm.submit();
-        }
-
-        function showApprovalDialog(comment){
-            var dialog = dijit.byId("showApprovaldialog");
-            dojo.byId('commentText').value = comment;
-            dialog.show();
-        }
-
-        function closeShowApprovalDialog(){
-            var dialog = dijit.byId("showApprovaldialog");
-            dialog.hide();
-        }
+        var lastYear = ${year};
+        var lastMonth = ${month};
+        var employeeIdJsp = "${employeeId}" != "" ? +"${employeeId}" : null;
     </script>
-    <%-- TODO перенести в viewreports.css--%>
-    <style type="text/css">
-        .colortext {
-            color: brown;
-        }
-
-        .center {
-            text-align: center;
-            text-valign: middle;
-        }
-
-        tr.b {
-            font-weight: bold;
-        }
-
-        .delete-button img {
-            vertical-align: middle;
-            width: 10px;
-            height: 10px;
-            max-height: 10px;
-            max-width: 10px;
-            margin: 3px;
-        }
-
-        .delete-button {
-            cursor: pointer;
-            vertical-align: middle;
-            padding: 0;
-            text-align: center;
-        }
-    </style>
+    <script type="text/javascript" src="<%= request.getContextPath()%>/resources/js/viewreports.js"></script>
 </head>
 <body>
 <c:set var="defEffort" value="<%=EffortInNextDayEnum.NORMAL.getName()%>"/>
@@ -424,202 +74,203 @@
 </form:form>
 <table id="viewreports">
     <thead>
-        <tr>
-            <sec:authorize access="hasRole('ROLE_ADMIN')">
-                <th width="25"><input type="checkbox" id="deleteAllCheckbox"/></th>
-            </sec:authorize>
-            <sec:authorize access="!hasRole('ROLE_ADMIN')">
-                <th width="25"></th>
-            </sec:authorize>
-            <th width="150">Дата</th>
-            <th width="160">Статус</th>
-            <th width="150">Часы</th>
-            <th width="150">Отсутствие</th>
-            <th width="160">Проблемы</th>
-        </tr>
+    <tr>
+        <sec:authorize access="hasRole('ROLE_ADMIN')">
+            <th width="25"><input type="checkbox" id="deleteAllCheckbox"/></th>
+        </sec:authorize>
+        <sec:authorize access="!hasRole('ROLE_ADMIN')">
+            <th width="25"></th>
+        </sec:authorize>
+        <th width="150">Дата</th>
+        <th width="160">Статус</th>
+        <th width="150">Часы</th>
+        <th width="150">Отсутствие</th>
+        <th width="160">Проблемы</th>
+    </tr>
     </thead>
     <tbody>
-        <c:forEach var="report" items="${reports}">
-            <c:choose>
-                <c:when test="${report.statusHoliday}">
-                    <tr class="statusHoliday">
-                    <td style="text-align: center;"></td>
-                    <td class="date"><fmt:formatDate value="${report.calDate}" pattern="dd.MM.yyyy"/></td>
+    <c:forEach var="report" items="${reports}">
+        <c:choose>
+            <c:when test="${report.statusHoliday}">
+                <tr class="statusHoliday">
+                <td style="text-align: center;"></td>
+                <td class="date"><fmt:formatDate value="${report.calDate}" pattern="dd.MM.yyyy"/></td>
 
-                    <td>Выходной
-                        <c:if test="${!report.isDayNotCome && !report.isCalDateLongAgo && !report.statusNotStart}">
-                            <a href="<%=request.getContextPath()%>/timesheet?date=<fmt:formatDate value="${report.calDate}" pattern="yyyy-MM-dd"/>&id=${employeeId}">(Создать)</a>
-                        </c:if>
-                    </td>
+                <td>Выходной
+                    <c:if test="${!report.isDayNotCome && !report.isCalDateLongAgo && !report.statusNotStart}">
+                        <a href="<%=request.getContextPath()%>/timesheet?date=<fmt:formatDate value="${report.calDate}" pattern="yyyy-MM-dd"/>&id=${employeeId}">(Создать)</a>
+                    </c:if>
+                </td>
 
-                    <td></td>
-                </c:when>
+                <td></td>
+            </c:when>
 
-                <c:when test="${report.statusNotStart}">
-                    <tr class="statusNotStart">
-                    <td style="text-align: center;"></td>
-                    <td class="date"><fmt:formatDate value="${report.calDate}" pattern="dd.MM.yyyy"/></td>
-                    <td>Ещё не принят на работу</td>
-                    <td></td>
-                </c:when>
+            <c:when test="${report.statusNotStart}">
+                <tr class="statusNotStart">
+                <td style="text-align: center;"></td>
+                <td class="date"><fmt:formatDate value="${report.calDate}" pattern="dd.MM.yyyy"/></td>
+                <td>Ещё не принят на работу</td>
+                <td></td>
+            </c:when>
 
-                <c:when test="${report.statusNormalDay}">
-                    <tr class="statusNormalDay toplan">
-                    <td style="text-align: center;">
-                        <c:if test="${report.id != null}">
-                            <sec:authorize access="hasRole('ROLE_ADMIN')">
-                                <input type="checkbox" id="delete_${report.id}"/>
-                            </sec:authorize>
-                            <sec:authorize access="!hasRole('ROLE_ADMIN')">
-                                <c:if test="${report.deleteSendApprovalDate eq null}">
-                                    <div class="delete-button">
-                                        <img src="/resources/img/delete.png" title="Удалить"
-                                             onclick="sendDeleteTimeSheetApproval(${report.id});">
-                                    </div>
-                                </c:if>
-                            </sec:authorize>
-                        </c:if>
-                    </td>
-                    <td class="date"><fmt:formatDate value="${report.calDate}" pattern="dd.MM.yyyy"/></td>
-                    <td>
-                        <a target="_blank"
-                           href="<%=request.getContextPath()%>/report<fmt:formatDate value="${report.calDate}" pattern="/yyyy/MM/dd/"/>${report.timeSheet.employee.id}">
-                            Посмотреть отчёт
-                        </a>
-                        <c:if test="${report.deleteSendApprovalDate ne null}">
-                            <sec:authorize access="hasRole('ROLE_ADMIN')">
-                                (имеется
-                                <a href="#" onclick="showApprovalDialog('${report.deleteSendApprovalComment}')">запрос</a>
-                                на ${report.deleteSendApprovalTypeName})
-                            </sec:authorize>
-                            <sec:authorize access="!hasRole('ROLE_ADMIN')">
-                                (отправлен запрос на ${report.deleteSendApprovalTypeName})
-                            </sec:authorize>
-                        </c:if>
-                    </td>
-                    <td class="rightAlign">${report.duration}</td>
-                </c:when>
-
-
-                <c:when test="${report.statusWorkOnHoliday}">
-                    <tr class="statusWorkOnHoliday">
-                    <td style="text-align: center;">
-                        <c:if test="${report.id != null}">
-                            <sec:authorize access="hasRole('ROLE_ADMIN')">
-                                <input type="checkbox" id="delete_${report.id}"/>
-                            </sec:authorize>
-                            <sec:authorize access="!hasRole('ROLE_ADMIN')">
-                                <c:if test="${report.deleteSendApprovalDate eq null}">
-                                    <div class="delete-button">
-                                        <img src="/resources/img/delete.png" title="Удалить"
-                                             onclick="sendDeleteTimeSheetApproval(${report.id});">
-                                    </div>
-                                </c:if>
-                            </sec:authorize>
-                        </c:if>
-                    </td>
-                    <td class="date"><fmt:formatDate value="${report.calDate}" pattern="dd.MM.yyyy"/></td>
-                    <td>
-                        Работа в выходной день
-                        <a target="_blank"
-                           href="<%=request.getContextPath()%>/report<fmt:formatDate value="${report.calDate}" pattern="/yyyy/MM/dd/"/>${report.timeSheet.employee.id}">
-                            Посмотреть отчёт
-                        </a>
-                        <c:if test="${report.deleteSendApprovalDate ne null}">
-                            <sec:authorize access="hasRole('ROLE_ADMIN')">
-                                (имеется
-                                <a href="#" onclick="showApprovalDialog('${report.deleteSendApprovalComment}')">запрос</a>
-                                на ${report.deleteSendApprovalTypeName})
-                            </sec:authorize>
-                            <sec:authorize access="!hasRole('ROLE_ADMIN')">
-                                (отправлен запрос на ${report.deleteSendApprovalTypeName})
-                            </sec:authorize>
-                        </c:if>
-                    </td>
-                    <td class="rightAlign">${report.duration}</td>
-                </c:when>
+            <c:when test="${report.statusNormalDay}">
+                <tr class="statusNormalDay toplan">
+                <td style="text-align: center;">
+                    <c:if test="${report.id != null}">
+                        <sec:authorize access="hasRole('ROLE_ADMIN')">
+                            <input type="checkbox" id="delete_${report.id}"/>
+                        </sec:authorize>
+                        <sec:authorize access="!hasRole('ROLE_ADMIN')">
+                            <c:if test="${report.deleteSendApprovalDate eq null}">
+                                <div class="delete-button">
+                                    <img src="/resources/img/delete.png" title="Удалить"
+                                         onclick="sendDeleteTimeSheetApproval(${report.id});">
+                                </div>
+                            </c:if>
+                        </sec:authorize>
+                    </c:if>
+                </td>
+                <td class="date"><fmt:formatDate value="${report.calDate}" pattern="dd.MM.yyyy"/></td>
+                <td>
+                    <a target="_blank"
+                       href="<%=request.getContextPath()%>/report<fmt:formatDate value="${report.calDate}" pattern="/yyyy/MM/dd/"/>${report.timeSheet.employee.id}">
+                        Посмотреть отчёт
+                    </a>
+                    <c:if test="${report.deleteSendApprovalDate ne null}">
+                        <sec:authorize access="hasRole('ROLE_ADMIN')">
+                            (имеется
+                            <a href="#" onclick="showApprovalDialog('${report.deleteSendApprovalComment}')">запрос</a>
+                            на ${report.deleteSendApprovalTypeName})
+                        </sec:authorize>
+                        <sec:authorize access="!hasRole('ROLE_ADMIN')">
+                            (отправлен запрос на ${report.deleteSendApprovalTypeName})
+                        </sec:authorize>
+                    </c:if>
+                </td>
+                <td class="rightAlign">${report.duration}</td>
+            </c:when>
 
 
-                <c:when test="${report.statusNoReport}">
-                    <tr class="statusNoReport toplan">
-                    <td style="text-align: center;"></td>
-                    <td class="date"><fmt:formatDate value="${report.calDate}" pattern="dd.MM.yyyy"/></td>
-                    <td>Отчёта нет <a
-                            href="<%=request.getContextPath()%>/timesheet?date=<fmt:formatDate value="${report.calDate}" pattern="yyyy-MM-dd"/>&id=${employeeId}">(Создать)</a>
-                    </td>
-                    <c:choose>
-                        <c:when test="${report.vacationDay || report.illnessDay}">
-                            <td class="rightAlign">${report.duration}</td>
-                        </c:when>
-                        <c:otherwise>
-                            <td></td>
-                        </c:otherwise>
-                    </c:choose>
-                </c:when>
+            <c:when test="${report.statusWorkOnHoliday}">
+                <tr class="statusWorkOnHoliday">
+                <td style="text-align: center;">
+                    <c:if test="${report.id != null}">
+                        <sec:authorize access="hasRole('ROLE_ADMIN')">
+                            <input type="checkbox" id="delete_${report.id}"/>
+                        </sec:authorize>
+                        <sec:authorize access="!hasRole('ROLE_ADMIN')">
+                            <c:if test="${report.deleteSendApprovalDate eq null}">
+                                <div class="delete-button">
+                                    <img src="/resources/img/delete.png" title="Удалить"
+                                         onclick="sendDeleteTimeSheetApproval(${report.id});">
+                                </div>
+                            </c:if>
+                        </sec:authorize>
+                    </c:if>
+                </td>
+                <td class="date"><fmt:formatDate value="${report.calDate}" pattern="dd.MM.yyyy"/></td>
+                <td>
+                    Работа в выходной день
+                    <a target="_blank"
+                       href="<%=request.getContextPath()%>/report<fmt:formatDate value="${report.calDate}" pattern="/yyyy/MM/dd/"/>${report.timeSheet.employee.id}">
+                        Посмотреть отчёт
+                    </a>
+                    <c:if test="${report.deleteSendApprovalDate ne null}">
+                        <sec:authorize access="hasRole('ROLE_ADMIN')">
+                            (имеется
+                            <a href="#" onclick="showApprovalDialog('${report.deleteSendApprovalComment}')">запрос</a>
+                            на ${report.deleteSendApprovalTypeName})
+                        </sec:authorize>
+                        <sec:authorize access="!hasRole('ROLE_ADMIN')">
+                            (отправлен запрос на ${report.deleteSendApprovalTypeName})
+                        </sec:authorize>
+                    </c:if>
+                </td>
+                <td class="rightAlign">${report.duration}</td>
+            </c:when>
 
 
-                <c:when test="${report.statusNotCome}">
-                    <tr class="statusNotCome">
-                    <td style="text-align: center;">
-                    </td>
-                    <td class="date"><fmt:formatDate value="${report.calDate}" pattern="dd.MM.yyyy"/></td>
-                    <td></td>
-                    <td></td>
-                </c:when>
+            <c:when test="${report.statusNoReport}">
+                <tr class="statusNoReport toplan">
+                <td style="text-align: center;"></td>
+                <td class="date"><fmt:formatDate value="${report.calDate}" pattern="dd.MM.yyyy"/></td>
+                <td>Отчёта нет <a
+                        href="<%=request.getContextPath()%>/timesheet?date=<fmt:formatDate value="${report.calDate}" pattern="yyyy-MM-dd"/>&id=${employeeId}">(Создать)</a>
+                </td>
+                <c:choose>
+                    <c:when test="${report.vacationDay || report.illnessDay}">
+                        <td class="rightAlign">${report.duration}</td>
+                    </c:when>
+                    <c:otherwise>
+                        <td></td>
+                    </c:otherwise>
+                </c:choose>
+            </c:when>
 
-                <c:when test="${report.statusHaveDraft}">
-                    <tr class="statusHaveDraft">
-                    <td style="text-align: center;"></td>
-                    <td class="date"><fmt:formatDate value="${report.calDate}" pattern="dd.MM.yyyy"/></td>
-                    <td>
-                        Черновик
-                        <a href="<%=request.getContextPath()%>/timesheet?date=
+
+            <c:when test="${report.statusNotCome}">
+                <tr class="statusNotCome">
+                <td style="text-align: center;">
+                </td>
+                <td class="date"><fmt:formatDate value="${report.calDate}" pattern="dd.MM.yyyy"/></td>
+                <td></td>
+                <td></td>
+            </c:when>
+
+            <c:when test="${report.statusHaveDraft}">
+                <tr class="statusHaveDraft">
+                <td style="text-align: center;"></td>
+                <td class="date"><fmt:formatDate value="${report.calDate}" pattern="dd.MM.yyyy"/></td>
+                <td>
+                    Черновик
+                    <a href="<%=request.getContextPath()%>/timesheet?date=
                         <fmt:formatDate value="${report.calDate}" pattern="yyyy-MM-dd"/>&id=${employeeId}&type=<%=TypesOfTimeSheetEnum.DRAFT.getId()%>"
-                           onclick="">
-                            (Редактировать)
-                        </a>
-                    </td>
-                    <td class="durationDraft rightAlign">
-                        <div class="durationDraftText">${report.duration}</div>
-                    </td>
-                </c:when>
+                       onclick="">
+                        (Редактировать)
+                    </a>
+                </td>
+                <td class="durationDraft rightAlign">
+                    <div class="durationDraftText">${report.duration}</div>
+                </td>
+            </c:when>
 
-            </c:choose>
-            <td>
-                <c:if test="${report.illnessDay}">Болезнь</c:if>
-                <c:if test="${report.vacationDay}">
-                    Отпуск
-                    <a href="#" onclick="openVacation('<fmt:formatDate value="${report.calDate}" pattern="yyyy-MM-dd"/>', ${report.emp.id},  ${report.emp.division.id});">(Подробнее)</a>
-                </c:if>
-                <c:if test="${report.businessTripDay}">Командировка</c:if>
-            </td>
+        </c:choose>
+        <td>
+            <c:if test="${report.illnessDay}">Болезнь</c:if>
+            <c:if test="${report.vacationDay}">
+                Отпуск
+                <a href="#" onclick="openVacation('<fmt:formatDate value="${report.calDate}"
+                                                                   pattern="yyyy-MM-dd"/>', ${report.emp.id},  ${report.emp.division.id});">(Подробнее)</a>
+            </c:if>
+            <c:if test="${report.businessTripDay}">Командировка</c:if>
+        </td>
 
-            <td>
-                <c:if test="${report.trouble}">Проблема</c:if>
-                <c:if test="${report.effort != defEffort}">${report.effort}</c:if>
-            </td>
+        <td>
+            <c:if test="${report.trouble}">Проблема</c:if>
+            <c:if test="${report.effort != defEffort}">${report.effort}</c:if>
+        </td>
 
-            </tr>
+        </tr>
 
-        </c:forEach>
+    </c:forEach>
     </tbody>
     <thead>
-        <tr>
-            <td colspan="3">Всего к текущему времени(план):</td>
-            <td class="rightAlign" id="durationPlanToCurrDate">${durationPlanToCurrDate}</td>
-        </tr>
-        <tr>
-            <td colspan="3">Всего к текущему времени(факт):</td>
-            <td class="rightAlign" id="durationFactToCurrDate">${durationFactToCurrDate}</td>
-        </tr>
-        <tr>
-            <td colspan="3">Всего(план):</td>
-            <td class="rightAlign" id="durationplan">${durationPlan}</td>
-        </tr>
-        <tr>
-            <td colspan="3">Всего(факт):</td>
-            <td class="rightAlign" id="durationall">${durationFact}</td>
-        </tr>
+    <tr>
+        <td colspan="3">Всего к текущему времени(план):</td>
+        <td class="rightAlign" id="durationPlanToCurrDate">${durationPlanToCurrDate}</td>
+    </tr>
+    <tr>
+        <td colspan="3">Всего к текущему времени(факт):</td>
+        <td class="rightAlign" id="durationFactToCurrDate">${durationFactToCurrDate}</td>
+    </tr>
+    <tr>
+        <td colspan="3">Всего(план):</td>
+        <td class="rightAlign" id="durationplan">${durationPlan}</td>
+    </tr>
+    <tr>
+        <td colspan="3">Всего(факт):</td>
+        <td class="rightAlign" id="durationall">${durationFact}</td>
+    </tr>
     </thead>
 </table>
 
@@ -704,10 +355,12 @@
     </tbody>
 </table>
 
-<div id="sendDeleteReportDialog" data-dojo-type="dijit.Dialog" title="Выберите действие над отчетом:" style="display: none;">
+<div id="sendDeleteReportDialog" data-dojo-type="dijit.Dialog" title="Выберите действие над отчетом:"
+     style="display: none;">
     <div data-dojo-type="dijit.layout.ContentPane" style="width: 300px; height: 160px;">
         <div style="margin-bottom: 10px;">
-            <input type="radio" checked="checked" name="deleteGroup" value="delete" id="deleteRB" style="margin: 3px;">Отправить запрос на удаление
+            <input type="radio" checked="checked" name="deleteGroup" value="delete" id="deleteRB" style="margin: 3px;">Отправить
+            запрос на удаление
             отчета<br>
             <input type="radio" name="deleteGroup" value="setDraft" style="margin: 3px;">Перевести в черновик<br>
         </div>

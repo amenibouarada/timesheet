@@ -20,4 +20,32 @@
     width: 100%;
     text-align: right;
 }
+.colortext {
+    color: brown;
+}
+
+.center {
+    text-align: center;
+    text-valign: middle;
+}
+
+tr.b {
+    font-weight: bold;
+}
+
+.delete-button img {
+    vertical-align: middle;
+    width: 10px;
+    height: 10px;
+    max-height: 10px;
+    max-width: 10px;
+    margin: 3px;
+}
+
+.delete-button {
+    cursor: pointer;
+    vertical-align: middle;
+    padding: 0;
+    text-align: center;
+}
 

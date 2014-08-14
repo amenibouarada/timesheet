@@ -59,7 +59,6 @@ public class PlanEditController {
 
     public static final String JSON_DATA_YEAR = "year";
     public static final String JSON_DATA_MONTH = "month";
-    public static final String JSON_DATA_ITEMS = "items";
 
     public static final String PLAN_SAVE_URL = "/planSave";
     public static final String PLAN_EDIT_URL = "/planEdit";

@@ -4,7 +4,7 @@
 <%@ page import="static com.aplana.timesheet.system.constants.TimeSheetConstants.DOJO_PATH" %>
 <%@ page import="static com.aplana.timesheet.controller.PlanEditController.*" %>
 <%@ page import="static com.aplana.timesheet.form.PlanEditForm.*" %>
-<%@ page import="static com.aplana.timesheet.controller.PlanEditController.PERCENT_OF_CHARGE" %>
+<%@ page import="static com.aplana.timesheet.service.PlanEditService.*" %>
 <%@ page import="static com.aplana.timesheet.util.ResourceUtils.getResRealPath" %>
 <%@ page import="com.aplana.timesheet.enums.ProjectFundingTypeEnum" %>
 <%@ page import="com.aplana.timesheet.enums.TypesOfActivityEnum" %>

@@ -35,7 +35,7 @@ dojo.declare("DateTextBox", dijit.form.DateTextBox, {
     popupClass: "Calendar",
     datePattern: 'dd.MM.yyyy',
 
-    openDropDown : function() {
+    openDropDown: function () {
         updateDateConstraints();
         this.inherited(arguments);
     }
@@ -94,7 +94,7 @@ function initEmployeeSelect() {
 
 }
 
-function updateView(){
+function updateView() {
     var obj = dojo.byId("reportType");
     var willBeDisplayedId = null;
     if (obj.target == null) {
@@ -104,11 +104,11 @@ function updateView(){
         willBeDisplayedId = obj.target.value;
     }
 
-    if (willBeDisplayedId == businessTripReportType){
+    if (willBeDisplayedId == businessTripReportType) {
         showBusinessTrips();
         updateProject();
     }
-    else if (willBeDisplayedId == illnessReportType){
+    else if (willBeDisplayedId == illnessReportType) {
         showIllnesses();
     }
     document.getElementById("headerName").innerHTML = getHeader(willBeDisplayedId);
@@ -122,40 +122,40 @@ function getHeader(willBeDisplayedId) {
     }
 }
 
-function showBusinessTrips(){
+function showBusinessTrips() {
     document.getElementById("illness").className = 'off';
     document.getElementById("businesstrip").className = 'creationform';
 }
 
-function showIllnesses(){
+function showIllnesses() {
     document.getElementById("illness").className = 'creationform';
     document.getElementById("businesstrip").className = 'off';
 }
 
-function submitform(){
+function submitform() {
     dojo.byId("create").disabled = true;
-    if (validate()){
-        if (hasReportId){
+    if (validate()) {
+        if (hasReportId) {
             var employeeId = getEmployeeId();
-            mainForm.action = contextPath+"/businesstripsandillnessadd/tryAdd/" + employeeId;
+            mainForm.action = getContextPath() + "/businesstripsandillnessadd/tryAdd/" + employeeId;
         } else {
-            mainForm.action = contextPath+"/businesstripsandillnessadd/trySave/" + +reportId;
+            mainForm.action = getContextPath() + "/businesstripsandillnessadd/trySave/" + +reportId;
         }
         mainForm.submit();
-    }else{
+    } else {
         dojo.byId("create").disabled = false;
     }
 }
 
-function cancelform(){
-    mainForm.action = contextPath+"/businesstripsandillness/";
+function cancelform() {
+    mainForm.action = getContextPath() + "/businesstripsandillness/";
     mainForm.submit();
 }
 
-function validate(){
+function validate() {
     delete errors;
     errors = new Array();
-    if (checkRequired() && checkDates()){
+    if (checkRequired() && checkDates()) {
         return true;
     } else {
         showErrors();
@@ -163,7 +163,7 @@ function validate(){
     }
 }
 
-function showErrors(){
+function showErrors() {
     document.getElementById("errorboxdiv").className = 'fullwidth onblock errorbox';
     var errortext = "";
     for (var errorindex in errors) {
@@ -172,11 +172,11 @@ function showErrors(){
     document.getElementById("errorboxdiv").firstChild.nodeValue = errortext;
 }
 
-function checkRequired(){
-    if (checkCommon()){
-        if (document.getElementById("reportType").value == illnessReportType){
+function checkRequired() {
+    if (checkCommon()) {
+        if (document.getElementById("reportType").value == illnessReportType) {
             return checkIllness();
-        } else if (document.getElementById("reportType").value == businessTripReportType){
+        } else if (document.getElementById("reportType").value == businessTripReportType) {
             return checkBusinessTrip();
         } else {
             errors.push("Выбран неизвестный тип отчета!");
@@ -188,12 +188,12 @@ function checkRequired(){
     }
 }
 
-function checkBusinessTrip(){
+function checkBusinessTrip() {
     var businessTripType = document.getElementById("businessTripType").value;
-    if (businessTripType != null){
-        if (businessTripType == businesstrip_project){
+    if (businessTripType != null) {
+        if (businessTripType == businesstrip_project) {
             var projectId = document.getElementById("projectId").value;
-            if (projectId == null || projectId == projectUndefined || projectId == "0"){
+            if (projectId == null || projectId == projectUndefined || projectId == "0") {
                 errors.push("Для проектной командировки необходимо выбрать проект!");
                 return false;
             } else {
@@ -208,20 +208,20 @@ function checkBusinessTrip(){
     }
 }
 
-function checkIllness(){
+function checkIllness() {
     return document.getElementById("reason").value != null;
 }
 
-function checkCommon(){
+function checkCommon() {
     return (document.getElementById("reportType").value != null && document.getElementById("beginDate").value != null &&
         document.getElementById("endDate").value != null);
 }
 
-function checkDates(){
+function checkDates() {
     var beginDate = parseDate(document.getElementById("beginDate").value);
     var endDate = parseDate(document.getElementById("endDate").value);
 
-    if (endDate >= beginDate){
+    if (endDate >= beginDate) {
         return true;
     } else {
         var reportName = getReportName();
@@ -231,24 +231,27 @@ function checkDates(){
 
 }
 
-function getReportName(){
+function getReportName() {
     var reportType = dojo.byId("reportType").value;
     reportType = parseInt(reportType);
     switch (reportType) {
-        case illnessReportType: return"больничного";
-        case businessTripReportType : return "командировки";
-        default: return "";
+        case illnessReportType:
+            return"больничного";
+        case businessTripReportType :
+            return "командировки";
+        default:
+            return "";
     }
 }
 
-function parseDate(dateString){
+function parseDate(dateString) {
     var dateParts = dateString.split(".");
     return new Date(dateParts[2], (dateParts[1] - 1), dateParts[0]);
 }
 
 function updateProject() {
     var businessTripType = dojo.byId("businessTripType").value;
-    if (businessTripType == businesstrip_notproject){
+    if (businessTripType == businesstrip_notproject) {
         document.getElementById("businesstripproject").className = 'off';
         document.getElementById("projectId").disabled = true;
     }
@@ -262,14 +265,14 @@ function updateProject() {
         projectIdElement.innerHTML = loadingImageUrl;
 
         dojo.xhrGet({
-            url: contextPath+"/businesstripsandillnessadd/getprojects/" + employeeId +"/"+ beginDate + "/" + endDate + "/",
+            url: getContextPath() + "/businesstripsandillnessadd/getprojects/" + employeeId + "/" + beginDate + "/" + endDate + "/",
             handleAs: "json",
 
-            load: function(data) {
+            load: function (data) {
                 updateProjectList(data);
             },
 
-            error: function(error) {
+            error: function (error) {
                 projectIdElement.setAttribute("class", "error");
                 projectIdElement.innerHTML = error;
             }
@@ -277,13 +280,13 @@ function updateProject() {
     }
 }
 
-function updateProjectList(obj){
+function updateProjectList(obj) {
     var projectIdElement = dojo.byId("projectId");
 
     for (var projectindex in obj) {
         var projectOption = dojo.doc.createElement("option");
         dojo.attr(projectOption, {
-            value:obj[projectindex].id
+            value: obj[projectindex].id
         });
         projectOption.title = obj[projectindex].value;
 

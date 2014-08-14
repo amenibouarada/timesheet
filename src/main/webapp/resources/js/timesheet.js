@@ -656,11 +656,20 @@ function typeActivityChange(obj) {
     }
     var selectId = dojo.attr(select, "id");
     var rowIndex = selectId.substring(selectId.lastIndexOf("_") + 1, selectId.length);
+    var workPlaceIdEl = "workplace_id_" + rowIndex;
+    var projectIdEl = "project_id_" + rowIndex;
+    var projectRoleIdEl = "project_role_id_" + rowIndex;
+    var durationIdEl = "duration_id_" + rowIndex;
+    var descIdEl = "description_id_" + rowIndex;
+
     // Проект или Пресейл
-    if ((select.value == "12") || (select.value == "13") || (select.value == "42")) {
-        dojo.removeAttr("workplace_id_" + rowIndex, "disabled");
-        dojo.removeAttr("project_id_" + rowIndex, "disabled");
-        dojo.removeAttr("project_role_id_" + rowIndex, "disabled");
+
+    if ((select.value == EnumConstants.TypesOfActivityEnum.PROJECT) ||
+        (select.value == EnumConstants.TypesOfActivityEnum.PRESALE) ||
+        (select.value == EnumConstants.TypesOfActivityEnum.PROJECT_PRESALE)) {
+        dojo.removeAttr(workPlaceIdEl, "disabled");
+        dojo.removeAttr(projectIdEl, "disabled");
+        dojo.removeAttr(projectRoleIdEl, "disabled");
         if (select.value == "13"){
             fillProjectList(rowIndex, select.value);
         }else{
@@ -669,39 +678,39 @@ function typeActivityChange(obj) {
     }
 
     // Внепроектная активность
-    else if (select.value == "14") {
-        dojo.removeAttr("workplace_id_" + rowIndex, "disabled");
-        dojo.attr("project_id_" + rowIndex, {
+    else if (select.value == EnumConstants.TypesOfActivityEnum.NON_PROJECT) {
+        dojo.removeAttr(workPlaceIdEl, "disabled");
+        dojo.attr(projectIdEl, {
             disabled:"disabled",
             value:"0"
         });
     } else if (select.value == "0") {
         resetRowState(rowIndex, true);
-    } else if (select.value == "17") { //Болезнь
-        var duration = parseFloat(dojo.attr("duration_id_" + rowIndex, "value"));
+    } else if (select.value == EnumConstants.TypesOfActivityEnum.ILLNESS) { //Болезнь
+        var duration = parseFloat(dojo.attr(durationIdEl, "value"));
         resetRowState(rowIndex, false);
-        dojo.removeAttr("duration_id_" + rowIndex, "disabled");
+        dojo.removeAttr(durationIdEl, "disabled");
         if (!isNaN(duration)) {
-            dojo.attr("duration_id_" + rowIndex, { value:duration });
+            dojo.attr(durationIdEl, { value:duration });
         }
-    } else if ((select.value == "15") || (select.value == "24")) { //Отгулы
-        var duration = parseFloat(dojo.attr("duration_id_" + rowIndex, "value"));
-        var description = dojo.byId("description_id_" + rowIndex).value;
+    } else if ((select.value == EnumConstants.TypesOfActivityEnum.COMPENSATORY_HOLIDAY) || (select.value == "24")) { //Отгулы  TODO 24 - видимо неактуально
+        var duration = parseFloat(dojo.attr(durationIdEl, "value"));
+        var description = dojo.byId(descIdEl).value;
         resetRowState(rowIndex, false);
-        dojo.removeAttr("duration_id_" + rowIndex, "disabled");
-        dojo.removeAttr("description_id_" + rowIndex, "disabled");
-        dojo.byId("description_id_" + rowIndex).value = description;
+        dojo.removeAttr(durationIdEl, "disabled");
+        dojo.removeAttr(descIdEl, "disabled");
+        dojo.byId(descIdEl).value = description;
         if (!isNaN(duration)) {
-            dojo.attr("duration_id_" + rowIndex, { value:duration });
+            dojo.attr(durationIdEl, { value:duration });
         }
-    } else if (select.value == "16") { //Отпуск
+    } else if (select.value == EnumConstants.TypesOfActivityEnum.VACATION) { //Отпуск
         resetRowState(rowIndex, false);
-    } else if (select.value == "18") { //Не рабочий день
+    } else if (select.value == "18") { //Не рабочий день TODO 18 - видимо неактуально
         resetRowState(rowIndex, false);
     }
 
     if (select.value && select.value != "0") {
-        var workplaceSelect = dojo.byId("workplace_id_" + rowIndex);
+        var workplaceSelect = dojo.byId(workPlaceIdEl);
         if (!workplaceSelect.value || workplaceSelect.value == "" || workplaceSelect.value == "0") {
             if (existsCookie('aplanaWorkPlace')) {
                 workplaceSelect.value = cookieValue('aplanaWorkPlace');
@@ -716,13 +725,16 @@ function typeActivityChange(obj) {
         });
     }
 
-    if ((select.value == "12") || (select.value == "13") || (select.value == "14") || (select.value == "42")) {
-        dojo.removeAttr("workplace_id_" + rowIndex, "disabled");
+    if ((select.value == EnumConstants.TypesOfActivityEnum.PROJECT)
+        || (select.value == EnumConstants.TypesOfActivityEnum.PRESALE)
+        || (select.value == EnumConstants.TypesOfActivityEnum.NON_PROJECT)
+        || (select.value == EnumConstants.TypesOfActivityEnum.PROJECT_PRESALE)) {
+        dojo.removeAttr(workPlaceIdEl, "disabled");
         dojo.removeAttr("activity_category_id_" + rowIndex, "disabled");
-        dojo.removeAttr("description_id_" + rowIndex, "disabled");
+        dojo.removeAttr(descIdEl, "disabled");
         dojo.removeAttr("problem_id_" + rowIndex, "disabled");
-        dojo.removeAttr("duration_id_" + rowIndex, "disabled");
-        dojo.removeAttr("project_role_id_" + rowIndex, "disabled");
+        dojo.removeAttr(durationIdEl, "disabled");
+        dojo.removeAttr(projectRoleIdEl, "disabled");
         setDefaultEmployeeJob(rowIndex);
         fillAvailableActivityCategoryList(rowIndex);
     }
@@ -848,14 +860,16 @@ function setDefaultEmployeeJob(rowIndex) {
         var listId = dojo.attr(actTypeLists[j], "id");
         var row = listId.substring(listId.lastIndexOf("_") + 1, listId.length);
         // Проект Пресейл
-        if ((actTypeLists[j].value == "12") || (actTypeLists[j].value == "13")) {
-            var projectRoleList = dojo.byId("project_role_id_" + row);
+        var projectRoleIdText = "project_role_id_" + row;
+        if (    (actTypeLists[j].value == EnumConstants.TypesOfActivityEnum.PROJECT)
+            ||  (actTypeLists[j].value == EnumConstants.TypesOfActivityEnum.PRESALE)) {
+            var projectRoleList = dojo.byId(projectRoleIdText);
             dojo.attr(projectRoleList, { value:defaultEmployeeJobId });
             fillAvailableActivityCategoryList(row);
         }
         // Внепроектная активность
         else if (actTypeLists[j].value == "14") {
-            var projectRoleList = dojo.byId("project_role_id_" + row);
+            var projectRoleList = dojo.byId(projectRoleIdText);
             dojo.attr(projectRoleList, { value:defaultEmployeeJobId });
             fillAvailableActivityCategoryList(row);
         }
@@ -1038,42 +1052,43 @@ function resetRowState(rowIndex, resetActType) {
         });
     }
 
+    var disabledText = "disabled";
     dojo.attr("workplace_id_" + rowIndex, {
-        disabled:"disabled",
+        disabled: disabledText,
         value:"0"
     });
 
     dojo.attr("project_id_" + rowIndex, {
-        disabled:"disabled",
+        disabled:disabledText,
         value:"0"
     });
     dojo.attr("project_role_id_" + rowIndex, {
-        disabled:"disabled",
+        disabled:disabledText,
         value:"0"
     });
     dojo.attr("activity_category_id_" + rowIndex, {
-        disabled:"disabled",
+        disabled:disabledText,
         value:"0"
     });
     var labelDescription = dojo.byId("act_description_" + rowIndex);
     labelDescription.innerHtml = "";
     setActDescription(rowIndex);
     dojo.attr("projectTask_id_" + rowIndex, {
-        disabled:"disabled",
+        disabled:disabledText,
         value:"0"
     });
     dojo.byId("description_id_" + rowIndex).value = "";
     dojo.attr("description_id_" + rowIndex, {
-        disabled:"disabled"
+        disabled:disabledText
     });
 
     dojo.byId("problem_id_" + rowIndex).value = "";
     dojo.attr("problem_id_" + rowIndex, {
-        disabled:"disabled"
+        disabled:disabledText
     });
 
     dojo.attr("duration_id_" + rowIndex, {
-        disabled:"disabled",
+        disabled:disabledText,
         value:""
     });
     recalculateDuration();
@@ -1146,29 +1161,6 @@ function addNewRows(rowsCount) {
     }
 }
 
-/* Удаляет из табличной части отчёта выделенные строки. */
-function delSelectedRows() {
-    var allCheckboxes = dojo.query(".selectedRow");
-    var checkedCnt = 0;
-    // то что внутри table->tbody
-    for (var i = 0; i < allCheckboxes.length; i++) {
-        if (allCheckboxes[i].checked == true) {
-            checkedCnt++;
-            // Получаем индекс удаляемой строки.
-            var selectedCheckboxId = allCheckboxes[i].id;
-            var selectedRowIndex = parseInt(selectedCheckboxId.substring(
-                selectedCheckboxId.lastIndexOf("_") + 1,
-                selectedCheckboxId.length));
-            var tsRow = document.getElementById("ts_row_" + selectedRowIndex);
-            if (tsRow !== null) {
-                tsRow.parentNode.removeChild(tsRow);
-            }
-        }
-    }
-    recalculateRowNumbers();
-    recalculateDuration();
-}
-
 function CopyPlan() {
     var firstDescriptionId = "description_id_0";
     if (dojo.attr(firstDescriptionId, "disabled")){
@@ -1190,8 +1182,6 @@ function recalculateRowNumbers() {
 
 /* Отображает диалог подтверждения отправки отчёта. */
 function confirmSendReport() {
-    var totalDuration = recalculateDuration();
-    var actTypes = dojo.query(".activityType");
     var reportDate = dijit.byId("calDate").value;
 
     if (reportDate !== null) {
@@ -1264,14 +1254,10 @@ function overtimeCauseChange(obj){
     var select = obj.target === null || obj.target === undefined ? obj : obj.target;
     var selectId = dijit.byId(select.id).get('value');
     defaultOvertimeCause = selectId;
-    //Комментарий всегда можно вводить
-    //dijit.byId("overtimeCauseComment").set('disabled', !(selectId == 105 || selectId == 110 || selectId == 122));
 }
 
 function checkDurationThenSendForm(){
     var totalDuration = recalculateDuration();
-    var actTypes = dojo.query(".activityType");
-
     var isHoliday = false;
     var isVacation = false;
     var isDivisionLeader = false;
@@ -1378,16 +1364,6 @@ function checkDurationThenSendForm(){
               isVacation
             );
         if (check) {
-            var comment = dijit.byId("overtimeCauseComment");
-
-            /*comment.on("mouseover", function() {
-             tooltip.show(this.tooltip);
-             });
-
-             comment.on("mouseout", function() {
-             tooltip.hide();
-             });*/
-
             var select_box = dijit.byId("overtimeCause");
 
             select_box.removeOption(select_box.getOptions());
@@ -1527,11 +1503,6 @@ function confirmClearWindow() {
 function confirmTimeSheetCloseWindow() {
     if (tablePartNotEmpty() || planBoxNotEmpty())
         return "Отчет не был отправлен.";
-    /*else
-     {
-     event.returnValue = false;
-     return false;
-     } */
 }
 
 function openViewReportsWindow() {
@@ -1543,13 +1514,6 @@ function openViewReportsWindow() {
     }
 }
 
-function openBusinessTripsAndIllnessWindow() {
-    var employeeId = dojo.byId("employeeId").value;
-    var divisionId = dojo.byId("divisionId").value;
-    if (employeeId != 0) {
-        window.open('businesstripsandillness/');
-    }
-}
 /*
 Запускаем Standby widget на весь экран
  */

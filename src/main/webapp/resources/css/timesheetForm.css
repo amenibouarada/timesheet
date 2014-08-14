@@ -1,0 +1,28 @@
+#date_warning {
+    display: none;
+    padding-left: 15px;
+}
+
+.classDateGreen {
+    background-color: #97e68d !important;
+}
+
+.classDateRedBack {
+    background-color: #f58383 !important;
+}
+
+.classDateBrownBack {
+    background-color: #ddb491 !important;
+}
+
+.time_sheet_row select {
+    width: 100%;
+}
+
+.dijitCalendarCurrentDate {
+    background-color: #6495ED !important;
+}
+
+:disabled {
+    background-color: #f0f0f0;
+}
