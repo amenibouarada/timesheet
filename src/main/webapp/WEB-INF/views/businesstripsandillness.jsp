@@ -68,7 +68,7 @@
             var regions = dojo.byId("regions").value;
             var manager = dojo.byId("manager").value;
 
-            empId =  dijit.byId("employeeId").item != undefined ? dijit.byId("employeeId").item.id : null;
+            empId =  getEmployeeId();
             var divisionId = dojo.byId("divisionId").value;
 
             var dateFrom = dojo.byId("dateFrom").value;
@@ -111,8 +111,12 @@
             }
         }
 
+        function getEmployeeId() {
+            return dijit.byId("employeeIdDiv").item != undefined ? dijit.byId("employeeIdDiv").item.id : null;
+        }
+
         function createBusinessTripOrIllness() {
-            var empId = dijit.byId("employeeId").item != undefined ? dijit.byId("employeeId").item.id : null;
+            var empId = getEmployeeId();
 
             if (empId != null && empId != 0) {
                 <sec:authorize access="hasRole('CHANGE_ILLNESS_BUSINESS_TRIP')">
@@ -288,12 +292,12 @@
                         })
                     });
 
-                    var employeeFlteringSelect = dijit.byId("employeeId");
+                    var employeeFlteringSelect = dijit.byId("employeeIdDiv");
 
                     if (!employeeFlteringSelect) {
                         employeeFlteringSelect = new dijit.form.FilteringSelect({
-                            id: "employeeId",
-                            name: "employeeId",
+                            id: "employeeIdDiv",
+                            name: "employeeIdDiv",
                             labelAttr: "value",
                             store: employeeDataStore,
                             searchAttr: 'value',
@@ -302,23 +306,28 @@
                             autoComplete: false,
                             style: 'width:200px',
                             required: true,
+                            onChange: function () {
+                                var selectedEmploye2 = this.item ? this.item.id : null;
+                                dojo.byId('employeeId').value = selectedEmploye2;
+
+                            },
                             onMouseOver: function() {
                                 tooltip.show(getTitle(this));
                             },
                             onMouseOut: function() {
                                 tooltip.hide();
                             }
-                        }, "employeeId");
+                        }, "employeeIdDiv");
                         employeeFlteringSelect.startup();
                     } else {
                         employeeFlteringSelect.set('store', employeeDataStore);
-                        dijit.byId("employeeId").set('value', null);
-
+                        dijit.byId("employeeIdDiv").set('value', null);
+                        dojo.byId('employeeId').value = null;
                     }
                 });
             }
 
-            dijit.byId("employeeId").set('value', " ${employeeId}" != "" ? +" ${employeeId}" : null);
+            dijit.byId("employeeIdDiv").set('value', " ${employeeId}" != "" ? +" ${employeeId}" : null);
         }
     </script>
 </head>
@@ -364,7 +373,8 @@
                 <span class="lowspace ">Сотрудник:</span>
             </td>
             <td>
-                <div id='employeeId' name='employeeId'></div>
+                <div id='employeeIdDiv' name='employeeIdDiv'></div>
+                <form:hidden path="employeeId" id="employeeId"/>
             </td>
         </tr>
         <tr>
