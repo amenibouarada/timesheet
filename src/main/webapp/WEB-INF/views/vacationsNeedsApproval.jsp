@@ -20,7 +20,7 @@
 
 <html>
 <head>
-    <title><fmt:message key="title.vacations"/></title>
+    <title><fmt:message key="title.vacations.approvals"/></title>
     <link rel="stylesheet" type="text/css" href="<%= getResRealPath("/resources/css/vacations.css", application) %>" />
     <script src="<%= getResRealPath("/resources/js/vacations.js", application) %>" type="text/javascript"></script>
     <script type="text/javascript">

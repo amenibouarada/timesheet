@@ -18,7 +18,7 @@
 
 <html>
 <head>
-<title><fmt:message key="title.planEdit"/></title>
+<title><fmt:message key="menu.planEdit"/></title>
 <script src="<%= getResRealPath("/resources/js/DataGrid.ext.js", application) %>" type="text/javascript"></script>
 <script src="<%= getResRealPath("/resources/js/utils.js", application) %>" type="text/javascript"></script>
 <script src="<%= getResRealPath("/resources/js/planEdit.js", application) %>" type="text/javascript"></script>

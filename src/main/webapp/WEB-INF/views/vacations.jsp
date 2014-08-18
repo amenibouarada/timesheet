@@ -27,7 +27,7 @@
 
 <html>
 <head>
-<title><fmt:message key="title.vacations"/></title>
+<title><fmt:message key="menu.vacations"/></title>
 
 <link rel="stylesheet" type="text/css" href="<%= getResRealPath("/resources/css/vacations.css", application) %>"/>
 <link rel="stylesheet" type="text/css" href="<%= getResRealPath("/resources/css/vacationsGraphic.css", application) %>"/>
@@ -147,7 +147,7 @@
 </head>
 <body>
 
-<h1><fmt:message key="title.vacations"/></h1>
+<h1><fmt:message key="menu.vacations"/></h1>
 <br/>
 <a target="_blank" href="<c:url value='/vacations_needs_approval'/>"><fmt:message key="link.vacation.approval"/></a>
 <br/>

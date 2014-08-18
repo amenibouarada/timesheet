@@ -7,7 +7,7 @@
 
 <html>
 <head>
-    <title><fmt:message key="title.manager"/></title>
+    <title><fmt:message key="menu.manager"/></title>
     <script>
         function openUrl(link) {
             if (dojo.isIE <= 8) {
