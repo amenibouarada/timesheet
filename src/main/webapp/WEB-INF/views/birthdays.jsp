@@ -18,7 +18,7 @@
 
         function getBirthdays() {
             var divisionId = dojo.byId("divisionId").value;
-            var month = dojo.byId("month").value - 1;
+            var month = dojo.byId("month").value;
             window.location = "<%=request.getContextPath()%>/birthdays/" + divisionId + "/" + month;
         }
     </script>
