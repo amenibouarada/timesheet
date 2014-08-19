@@ -47,13 +47,7 @@ public class TimeSheetDetail {
     @JoinColumn(name = "task_id")
     private ProjectTask projectTask;
 
-	@Column(name = "name")
-    /**
-     * @deprecated
-     */
-	private String taskName;
-
-	@Column(columnDefinition = "text null")
+    @Column(columnDefinition = "text null")
 	private String description;
 
 	@Column(columnDefinition = "decimal(4,2) null")
@@ -98,14 +92,7 @@ public class TimeSheetDetail {
 		return duration;
 	}
 
-    /**
-     * @deprecated
-     */
-	public String getTaskName() {
-		return taskName;
-	}
-
-	public String getDescription() {
+    public String getDescription() {
 		return description;
 	}
 
@@ -125,14 +112,7 @@ public class TimeSheetDetail {
 		this.duration = duration;
 	}
 
-    /**
-     * @deprecated
-     */
-	public void setTaskName(String taskName) {
-		this.taskName = taskName;
-	}
-
-	public void setDescription(String description) {
+    public void setDescription(String description) {
 		this.description = description;
 	}
 
@@ -172,7 +152,6 @@ public class TimeSheetDetail {
 			.append(" actType [").append(actType).append("]")
 			.append(" actCat [").append(actCat).append("]")
 			.append(" project [").append(project).append("]")
-			.append(" taskName=").append(taskName)
 			.append(" description=").append(description)
 			.append(" duration=").append(duration)
 			.append(" problem=").append(problem)
