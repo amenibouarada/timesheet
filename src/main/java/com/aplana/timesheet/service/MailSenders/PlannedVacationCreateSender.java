@@ -49,13 +49,9 @@ public class PlannedVacationCreateSender extends AbstractVacationSenderWithCopyT
     @Override
     public List<Mail> getMainMailList(Vacation vacation) {
         final Mail mail = new TimeSheetMail();
-
         mail.setToEmails(emails);
-
         mail.setSubject(getSubject(vacation));
-
         mail.setParamsForGenerateBody(getParamsForGenerateBody(vacation));
-
         return Arrays.asList(mail);
     }
 

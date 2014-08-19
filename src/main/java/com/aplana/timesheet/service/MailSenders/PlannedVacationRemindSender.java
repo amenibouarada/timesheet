@@ -40,11 +40,9 @@ public class PlannedVacationRemindSender extends AbstractVacationSenderWithCopyT
     @Override
     public List<Mail> getMainMailList(Vacation vacation) {
         Mail mail = new TimeSheetMail();
-
         mail.setToEmails(Arrays.asList(vacation.getEmployee().getEmail()));
         mail.setSubject(getSubject(vacation));
         mail.setParamsForGenerateBody(getParamsForGenerateBody(vacation));
-
         return Arrays.asList(mail);
     }
 

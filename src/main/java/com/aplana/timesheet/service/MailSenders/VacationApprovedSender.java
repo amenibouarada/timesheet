@@ -104,12 +104,6 @@ public class VacationApprovedSender extends AbstractVacationSenderWithCopyToAuth
         mail.setParamsForGenerateBody(getApprovedBody(vacation));
     }
 
-    private Collection<String> getAdditionalEmailsForRegion(Region region) {
-        String additionalEmails = region.getAdditionalEmails();
-
-        return  (StringUtils.isNotBlank(additionalEmails)) ? Arrays.asList(additionalEmails.split("\\s*,\\s*")) : Arrays.asList(StringUtils.EMPTY);
-    }
-
     private Table<Integer, String, String> getApprovedBody(Vacation vacation) {
         String beginDateStr = DateTimeUtil.formatDateIntoViewFormat(vacation.getBeginDate());
         String endDateStr = DateTimeUtil.formatDateIntoViewFormat(vacation.getEndDate());

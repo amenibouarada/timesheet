@@ -42,13 +42,6 @@ public class VacationDeletedSender extends  AbstractVacationSenderWithCopyToAuth
         return String.format(" Оповещение об удалении отпуска (%s)", this.getClass().getSimpleName());
     }
 
-
-    //TODO копипаста из VacationApproveSender
-    private Collection<String> getAdditionalEmailsForRegion(Region region) {
-        String additionalEmails = region.getAdditionalEmails();
-        return  (StringUtils.isNotBlank(additionalEmails)) ? Arrays.asList(additionalEmails.split("\\s*,\\s*")) : Arrays.asList(StringUtils.EMPTY);
-    }
-
     @Override
     public List<Mail> getMainMailList(Vacation vacation) {
         final Mail mail = new TimeSheetMail();
