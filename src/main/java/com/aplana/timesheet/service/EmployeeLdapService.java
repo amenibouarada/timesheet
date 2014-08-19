@@ -25,10 +25,13 @@ public class EmployeeLdapService extends AbstractServiceWithTransactionManagemen
 
     @Autowired
     private DivisionService divisionService;
+
     @Autowired
     private EmployeeService employeeService;
+
     @Autowired
     private ProjectRoleService projectRoleService;
+
     @Autowired
     private ProjectManagerService projectManagerService;
 
@@ -41,8 +44,13 @@ public class EmployeeLdapService extends AbstractServiceWithTransactionManagemen
     @Autowired
     private ProjectRolePermissionsDAO projectRolePermissionsDAO;
 
+    private enum EmployeeType {
+        EMPLOYEE,
+        DIVISION_MANAGER,
+        NEW_EMPLOYEE
+    }
 
-    public void updateSidDisableddUsersFromLdap() {
+    public void updateSidDisabledUsersFromLdap() {
         trace.append("Synchronization sid of disabled user with ldap started.\n\n");
         List<EmployeeLdap> disabledEmployeesLdap = ldapDao.getDisabledEmployees();
         TransactionStatus transactionStatus = null;
@@ -73,7 +81,7 @@ public class EmployeeLdapService extends AbstractServiceWithTransactionManagemen
             }
             trace.append("\n Synchronization sid of disabled user with ldap finished.\n\n");
         } catch (Exception e) {
-            logger.error(" Exception in updateSidDisableddUsersFromLdap : {}", e.getMessage());
+            logger.error(" Exception in updateSidDisabledUsersFromLdap : {}", e.getMessage());
             if (transactionStatus != null) {
                 rollback(transactionStatus);
             }
@@ -176,9 +184,7 @@ public class EmployeeLdapService extends AbstractServiceWithTransactionManagemen
         }
     }
 
-    private enum EmployeeType {
-        EMPLOYEE, DIVISION_MANAGER, NEW_EMPLOYEE
-    }
+
 
     /**
      * Отображение ProjectRole --> роль в системе списания занятости.
