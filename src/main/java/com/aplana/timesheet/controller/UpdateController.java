@@ -72,7 +72,7 @@ public class UpdateController {
 
     @RequestMapping(value = "/update/siddisabledusersfromldap")
     public String updateSidDeletedUsersFromLdap(Model model) {
-        this.employeeLdapService.updateSidDisableddUsersFromLdap();
+        this.employeeLdapService.updateSidDisabledUsersFromLdap();
         model.addAttribute("trace", this.employeeLdapService.getTrace().replaceAll("\n", "<br/>"));
         return "updateLDAP";
     }

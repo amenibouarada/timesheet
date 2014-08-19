@@ -126,11 +126,7 @@ public class CreateVacationController {
 
         HttpSession session = request.getSession(false);
         session.setAttribute("employeeId", employeeId);
-        return new ModelAndView(
-                String.format(
-                        "redirect:../../vacations"
-                )
-        );
+        return new ModelAndView("redirect:../../vacations");
     }
 
     @RequestMapping(value = "/validateAndCreateVacation", method = RequestMethod.GET)
