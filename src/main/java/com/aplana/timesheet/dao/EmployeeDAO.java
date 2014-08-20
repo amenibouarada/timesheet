@@ -250,20 +250,8 @@ public class EmployeeDAO {
     }
 
     public boolean isNotToSync(Employee employee) {
-        final String email = employee.getEmail();
-
-        if (email == null) {
-            return true;
-        }
-
-        Query query;
-        query = entityManager.createQuery(
-                "FROM Employee AS e WHERE e.email=:email"
-        ).setParameter("email", email.trim());
-
-        List<Employee> result = query.getResultList();
-
-        return result != null &&  ! result.isEmpty() && result.get( 0 ).isNotToSync();
+        Employee result = findByObjectSid(employee.getObjectSid());
+        return result != null && result.isNotToSync();
     }
 
     public Double getWorkDaysOnIllnessWorked(Employee employee, Date beginDate, Date endDate) {
