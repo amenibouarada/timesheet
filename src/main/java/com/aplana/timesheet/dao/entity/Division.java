@@ -53,6 +53,9 @@ public class Division implements Identifiable, Comparable<Division> {
     @Column(length = 255, name = "department_name")
     private String departmentName;
 
+    @Column(name = "sync_employee")
+    private Boolean syncEmployee;
+
     @Column(name = "email", length = 255)
     private String email;
 
@@ -161,6 +164,14 @@ public class Division implements Identifiable, Comparable<Division> {
 
     public void setDepartmentName(String departmentName) {
         this.departmentName = departmentName;
+    }
+
+    public Boolean getSyncEmployee() {
+        return syncEmployee;
+    }
+
+    public void setSyncEmployee(Boolean syncEmployee) {
+        this.syncEmployee = syncEmployee;
     }
 
     public boolean isCheck() {
