@@ -114,9 +114,9 @@ public class TimeSheetDAO {
                 "SUM(tsd.duration), " +
                 "tsd.act_type, " +
                 "ts.ts_type_id, " +
-                "ts.delete_approval_date, " +
-                "ts.delete_approval_comment, " +
-                "ts.send_approval_type " +
+                "dta.delete_approval_date, " +
+                "dta.delete_approval_comment, " +
+                "dta.send_approval_type " +
             "from calendar c " +
                 "left outer join time_sheet as ts " +
                     "on ts.emp_id = :employeeId and ts.caldate=c.caldate " +
@@ -124,6 +124,8 @@ public class TimeSheetDAO {
                     "on c.caldate=h.caldate and (h.region is null or h.region=:region) " +
                 "left outer join time_sheet_detail as tsd " +
                     "on ts.id=tsd.time_sheet_id " +
+                "left outer join delete_timesheet_approval as dta " +
+                    "on ts.id=dta.timesheet_id " +
             "where " +
                 "c.year=:yearPar and c.month=:monthPar " +
             "group by " +
@@ -131,7 +133,9 @@ public class TimeSheetDAO {
                 "h.id, " +
                 "ts.id, " +
                 "tsd.act_type, " +
-                "ts.delete_approval_date " +
+                "dta.delete_approval_date, " +
+                "dta.delete_approval_comment, " +
+                "dta.send_approval_type " +
             "order by " +
                 "c.calDate asc, timesheet_id asc"
         ).setParameter("yearPar", year).setParameter("monthPar", month)

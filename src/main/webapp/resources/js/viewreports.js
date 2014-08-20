@@ -306,7 +306,7 @@ function submitDeleteApproval() {
     dojo.byId('comment').value = dojo.byId('commentApproval').value;
     var deleteForm = dojo.byId("deleteReportsForm");
     var value = dojo.query('input[name=deleteGroup]:checked').attr('value')[0];
-    deleteForm.action = getContextPath()+ + (value == "delete" ? "/sendDeleteReportApproval" : "/setDraftReportApproval");
+    deleteForm.action = getContextPath()+(value == "delete" ? "/sendDeleteReportApproval" : "/setDraftReportApproval");
     deleteForm.submit();
 }
 

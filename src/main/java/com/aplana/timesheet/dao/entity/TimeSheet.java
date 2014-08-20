@@ -54,15 +54,8 @@ public class TimeSheet {
     @Column(name = "creation_date")
     private Date creationDate;
 
-    @Column(name = "delete_approval_date", nullable = true)
-    private Date deleteSendApprovalDate;
-
-    @Column(name = "delete_approval_comment", nullable = true)
-    private String deleteSendApprovalComment;
-
-    @Column(name = "send_approval_type", nullable = true)
-    @Enumerated(EnumType.ORDINAL)
-    private ReportSendApprovalType reportSendApprovalType;
+    @OneToOne(mappedBy = "timeSheet", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private DeleteTimeSheetApproval deleteTimeSheetApproval;
 
     public DictionaryItem getType() {
         return type;
@@ -157,27 +150,12 @@ public class TimeSheet {
                 .toString();
     }
 
-    public Date getDeleteSendApprovalDate() {
-        return deleteSendApprovalDate;
+
+    public DeleteTimeSheetApproval getDeleteTimeSheetApproval() {
+        return deleteTimeSheetApproval;
     }
 
-    public void setDeleteSendApprovalDate(Date deleteSendApprovalDate) {
-        this.deleteSendApprovalDate = deleteSendApprovalDate;
-    }
-
-    public String getDeleteSendApprovalComment() {
-        return deleteSendApprovalComment;
-    }
-
-    public void setDeleteSendApprovalComment(String deleteSendApprovalComment) {
-        this.deleteSendApprovalComment = deleteSendApprovalComment;
-    }
-
-    public ReportSendApprovalType getReportSendApprovalType() {
-        return reportSendApprovalType;
-    }
-
-    public void setReportSendApprovalType(ReportSendApprovalType reportSendApprovalType) {
-        this.reportSendApprovalType = reportSendApprovalType;
+    public void setDeleteTimeSheetApproval(DeleteTimeSheetApproval deleteTimeSheetApproval) {
+        this.deleteTimeSheetApproval = deleteTimeSheetApproval;
     }
 }
