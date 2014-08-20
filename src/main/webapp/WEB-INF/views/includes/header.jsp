@@ -49,6 +49,8 @@
 
             <li><a href="<c:url value='/activeProjects'/>"><fmt:message key="menu.activeProjects"/></a></li>
 
+            <li><a href="<c:url value='/birthdays'/>"><fmt:message key="menu.birthdays"/></a></li>
+
             <sec:authorize access="hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')">
                 <li><a href="<c:url value='/managertools'/>"><fmt:message key="menu.manager"/></a></li>
             </sec:authorize>
@@ -59,7 +61,6 @@
 
             <li><a href="<c:url value='/feedback'/>"><fmt:message key="menu.feedback"/></a></li>
 
-            <li><a href="<c:url value='/birthdays'/>"><fmt:message key="menu.birthdays"/></a></li>
         </ul>
     </div>
 </sec:authorize>
