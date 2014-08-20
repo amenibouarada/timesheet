@@ -1,5 +1,6 @@
 package com.aplana.timesheet.service.MailSenders;
 
+import com.aplana.timesheet.dao.entity.DeleteTimeSheetApproval;
 import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.dao.entity.TimeSheet;
 import com.aplana.timesheet.service.SendMailService;
@@ -56,18 +57,20 @@ public class DeleteOrSetDraftApprovalSender extends MailSender<TimeSheet> {
         mail.setToEmails(Arrays.asList(propertyProvider.getMailAdminsAddress()));
         mail.setCcEmails(Arrays.asList(employeeEmail));
 
+        DeleteTimeSheetApproval deleteTimeSheetApproval = timeSheet.getDeleteTimeSheetApproval();
+
         String subject = String.format(" Запрос на %s отчета за %s от %s",
-                timeSheet.getReportSendApprovalType().getName(),
+                deleteTimeSheetApproval.getReportSendApprovalType().getName(),
                 date,
                 fio);
 
         mail.setSubject(propertyProvider.getDeleteOrSetDraftApprovalMarker() + subject);
 
         String body = String.format("Необходимо выполнить %s отчета за %s сотрудника %s \r\n. Комментарий: %s",
-                timeSheet.getReportSendApprovalType().getName(),
+                deleteTimeSheetApproval.getReportSendApprovalType().getName(),
                 date,
                 fio,
-                timeSheet.getDeleteSendApprovalComment());
+                deleteTimeSheetApproval.getDeleteSendApprovalComment());
 
         mail.setPreconstructedMessageBody(body);
 

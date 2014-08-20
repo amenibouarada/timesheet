@@ -93,6 +93,9 @@ public class TimeSheetService {
     private BusinessTripService businessTripService;
 
     @Autowired
+    private DeleteTimeSheetApprovalService deleteTimeSheetApprovalService;
+
+    @Autowired
     private SendMailService sendMailService;
 
     @Transactional
@@ -777,10 +780,53 @@ public class TimeSheetService {
     @Transactional
     public void setReportApprovalData(Integer timeSheetId, String comment, ReportSendApprovalType reportSendApprovalType) {
         TimeSheet timeSheet = find(timeSheetId);
-        timeSheet.setDeleteSendApprovalDate(new Date());
-        timeSheet.setDeleteSendApprovalComment(comment);
-        timeSheet.setReportSendApprovalType(reportSendApprovalType);
+        DeleteTimeSheetApproval deleteTimeSheetApproval = new DeleteTimeSheetApproval();
+        deleteTimeSheetApproval.setDeleteSendApprovalDate(new Date());
+        deleteTimeSheetApproval.setDeleteSendApprovalComment(comment);
+        deleteTimeSheetApproval.setReportSendApprovalType(reportSendApprovalType);
+        deleteTimeSheetApproval.setTimeSheet(timeSheet);
+        deleteTimeSheetApproval = deleteTimeSheetApprovalService.storeDeleteTimeSheetApproval(deleteTimeSheetApproval);
+        timeSheet.setDeleteTimeSheetApproval(deleteTimeSheetApproval);
         timeSheetDAO.storeTimeSheet(timeSheet);
         sendMailService.performDeleteOrSetDraftApproval(timeSheet);
     }
+
+    /**
+     * Возвращает {@link JsonObjectNodeBuilder} в котором находится сохраненный черновик
+     * на дату и для пользователя
+     *
+     * @param date       - дата отчета
+     * @param employeeId - идентификатор пользователя чей отчет прогружаем в @link JsonObjectNodeBuilder}
+     * @param types      - типы отчета, один из которых может быть возращен на указанныую дату
+     * @return {@link JsonObjectNodeBuilder}
+     */
+    public JsonObjectNodeBuilder getJsonObjectNodeBuilderForReport(String date, Integer employeeId, List<TypesOfTimeSheetEnum> types) {
+        TimeSheet timeSheet = findForDateAndEmployeeByTypes(date, employeeId, types);
+
+        final JsonArrayNodeBuilder builder = anArrayBuilder();
+        final JsonObjectNodeBuilder builderNode = anObjectBuilder();
+        if (timeSheet != null && timeSheet.getTimeSheetDetails() != null && timeSheet.getTimeSheetDetails().size() != 0) {
+            int i = 0;
+            builderNode.withField("plan", aStringBuilder(timeSheet.getPlan()));
+            builderNode.withField("rows", aStringBuilder(String.valueOf(timeSheet.getTimeSheetDetails().size())));
+
+            for (TimeSheetDetail timeSheetDetail : timeSheet.getTimeSheetDetails())
+                builder.withElement(
+                        anObjectBuilder().
+                                withField("row", JsonUtil.aStringBuilder(i++)).
+                                withField("activity_type_id", aStringBuilder(timeSheetDetail.getActType() != null ? timeSheetDetail.getActType().getId().toString() : "0")).
+                                withField("workplace_id", aStringBuilder(timeSheetDetail.getWorkplace() != null ? timeSheetDetail.getWorkplace().getId().toString() : "0")).
+                                withField("project_id", aStringBuilder(timeSheetDetail.getProject() != null ? timeSheetDetail.getProject().getId().toString() : "0")).
+                                withField("project_role_id", aStringBuilder(timeSheetDetail.getProjectRole() != null ? timeSheetDetail.getProjectRole().getId().toString() : "0")).
+                                withField("activity_category_id", aStringBuilder(timeSheetDetail.getActCat() != null ? timeSheetDetail.getActCat().getId().toString() : "0")).
+                                withField("projectTask_id", aStringBuilder(timeSheetDetail.getProjectTask() != null ? timeSheetDetail.getProjectTask().getId().toString() : "0")).
+                                withField("duration_id", aStringBuilder(timeSheetDetail.getDuration() != null ? timeSheetDetail.getDuration().toString() : "")).
+                                withField("description_id", aStringBuilder(timeSheetDetail.getDescription() != null ? timeSheetDetail.getDescription() : "")).
+                                withField("problem_id", aStringBuilder(timeSheetDetail.getProblem() != null ? timeSheetDetail.getProblem() : ""))
+                );
+            builderNode.withField("data", builder);
+        }
+        return builderNode;
+    }
+
 }
