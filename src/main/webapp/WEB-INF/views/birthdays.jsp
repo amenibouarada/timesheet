@@ -3,6 +3,7 @@
 <%@ page import="com.aplana.timesheet.dao.entity.Employee" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
 
 <html>
@@ -58,22 +59,27 @@
 
     <br><br>
 
-    <table>
-        <thead>
-        <tr>
-            <th width="200" height="30">Сотрудник</th>
-            <th>День рождения</th>
-        </tr>
-        </thead>
-        <tbody>
-            <c:forEach items="${employeesForSelectedMonth}" var="employee">
-                <tr height="30">
-                    <td>${employee.name}</td>
-                    <td><%=getDayMonthFromDate(((Employee)(pageContext.getAttribute("employee"))).getBirthday())%>
-                    </td>
-                </tr>
-            </c:forEach>
-        </tbody>
-    </table>
+    <c:if test="${ fn:length(employeesForSelectedMonth) == 0}">
+        По заданным параметрам записи отсутствуют
+    </c:if>
+    <c:if test="${ fn:length(employeesForSelectedMonth) > 0}">
+        <table>
+            <thead>
+            <tr>
+                <th width="200" height="30">Сотрудник</th>
+                <th>День рождения</th>
+            </tr>
+            </thead>
+            <tbody>
+                <c:forEach items="${employeesForSelectedMonth}" var="employee">
+                    <tr height="30">
+                        <td>${employee.name}</td>
+                        <td><%=getDayMonthFromDate(((Employee)(pageContext.getAttribute("employee"))).getBirthday())%>
+                        </td>
+                    </tr>
+                </c:forEach>
+            </tbody>
+        </table>
+    </c:if>
 </body>
 </html>
