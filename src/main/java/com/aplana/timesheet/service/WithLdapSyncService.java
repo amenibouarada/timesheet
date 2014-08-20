@@ -83,7 +83,7 @@ public class WithLdapSyncService {
         logger.info("Starting synchronization other division …");
         Iterable<Division> divisions = Iterables.filter(dao.getAllDivisions(), new Predicate<Division>() {
             @Override public boolean apply(@Nullable Division input) {
-                return input.getNotToSyncWithLdap() && input.getSyncEmployye();
+                return input.getNotToSyncWithLdap() && input.getSyncEmployee();
             } });
         logger.info("Count division for sync — {}", Iterables.size(divisions));
         for (Division division : divisions) {
@@ -350,7 +350,7 @@ public class WithLdapSyncService {
         logger.info("In field objectSid set \"()\" value.", dbDivision.getObjectSid());
         dbDivision.setActive(true);
         dbDivision.setNotToSyncWithLdap(false);
-        dbDivision.setSyncEmployye(true);
+        dbDivision.setSyncEmployee(true);
         dbDivision.setLdapName((String) division.get(propertyProvider.getLdapFieldForDivisionName()));
         logger.info("In field ldapName set \"()\" value.", dbDivision.getLdapName());
 
