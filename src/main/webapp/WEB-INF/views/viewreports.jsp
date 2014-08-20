@@ -49,7 +49,7 @@
     <span class="label">Отчет сотрудника</span>
 
     <div id="employeeId" name="employeeId"></div>
-    <span class="label">День рождения:</span>
+    <span id="employeeBirthdayLabel" class="label">День рождения:</span>
     <span id="employeeBirthday" class="label"></span>
 
     <br><br>

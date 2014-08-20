@@ -117,7 +117,15 @@ function onDivisionChange() {
 }
 
 function onChangeEmployee(empId) {
-    dojo.byId('employeeBirthday').innerHTML = widgets.employee.item.birthday;
+    var birthday = widgets.employee.item.birthday;
+    if (!isUndefinedNullNaN(birthday) && birthday != ''){
+        dojo.byId('employeeBirthday').innerHTML = birthday;
+        dojo.byId('employeeBirthday').hidden = false;
+        dojo.byId('employeeBirthdayLabel').hidden = false;
+    }else{
+        dojo.byId('employeeBirthday').hidden = true;
+        dojo.byId('employeeBirthdayLabel').hidden = true;
+    }
     setDefaultEmployeeJob(-1);
 }
 

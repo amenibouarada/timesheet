@@ -24,6 +24,7 @@
 
 <script type="text/javascript" src="<%= getResRealPath("/resources/js/timesheet.js", application) %>"></script>
 <script type="text/javascript" src="<%= getResRealPath("/resources/js/dformat.js", application) %>"></script>
+<script type="text/javascript" src="<%= getResRealPath("/resources/js/utils.js", application) %>"></script>
 
 <script type="text/javascript" src="<%= getResRealPath(CALENDAR_EXT_RES_PATH, application) %>"></script>
 <script type="text/javascript" src="<%= getResRealPath(DATE_TEXT_BOX_EXT_JS_PATH, application) %>"></script>
