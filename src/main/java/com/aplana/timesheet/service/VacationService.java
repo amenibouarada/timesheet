@@ -575,7 +575,9 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
         for (Map.Entry<Vacation, Integer> entry : days.entrySet()) {
             Vacation vacation = entry.getKey();
             Integer daysInVacation = entry.getValue();
-            if (VacationStatusEnum.APPROVED.getId() == vacation.getStatus().getId()) {
+            if (VacationStatusEnum.APPROVED.getId() == vacation.getStatus().getId() ||
+                    VacationTypesEnum.PLANNED.getId() == vacation.getType().getId()
+            ) {
                 summaryDays += daysInVacation;
             }
         }
