@@ -17,12 +17,10 @@
         TypesOfActivityEnum : {<%for (TypesOfActivityEnum name: TypesOfActivityEnum.values()) {
                 out.print(String.format("%s : %s,\n", name.name(), name.getId()));}%>}
     }
-
 </script>
 
 <script type="text/javascript" src="<%=request.getContextPath()%><%= DOJO_PATH %>/dojo/dojo.js"></script>
 
-<script type="text/javascript" src="<%= getResRealPath("/resources/js/timesheet.js", application) %>"></script>
 <script type="text/javascript" src="<%= getResRealPath("/resources/js/dformat.js", application) %>"></script>
 <script type="text/javascript" src="<%= getResRealPath("/resources/js/utils.js", application) %>"></script>
 

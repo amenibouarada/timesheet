@@ -65,17 +65,6 @@ public abstract class AbstractControllerForEmployee extends AbstractController{
         return modelAndView;
     }
 
-
-    protected ModelAndView createModelAndViewForEmployee(String viewName, Integer employeeId, Integer divisionId) {
-        List<Division> divisionList = divisionService.getDivisions();
-        final ModelAndView modelAndView = getCommonModelAndView(viewName, employeeId, divisionId);
-        modelAndView.addObject(EMPLOYEE, employeeService.find(employeeId));
-        modelAndView.addObject("employeeListJson",
-                employeeHelper.getEmployeeListWithLastWorkdayJson(divisionList, employeeService.isShowAll(request)));
-
-        return modelAndView;
-    }
-
     protected ModelAndView createMAVForEmployeeWithDivisionAndManagerAndRegion(String viewName, Integer employeeId, Integer divisionId) {
         List<Division> divisionList = divisionService.getDivisions();
         final ModelAndView modelAndView = getCommonModelAndView(viewName, employeeId, divisionId);
@@ -92,7 +81,7 @@ public abstract class AbstractControllerForEmployee extends AbstractController{
         modelAndView.addObject("divisionList", divisionService.getDivisions());
         modelAndView.addObject(EMPLOYEE, employeeService.find(employeeId));
         modelAndView.addObject("employeeListJson",
-                employeeHelper.getEmployeeListWithDivisionJson(divisionList, employeeService.isShowAll(request)));
+                employeeHelper.getEmployeeListWithDivisionAndManagerAndRegionJson(divisionList, employeeService.isShowAll(request)));
 
         return modelAndView;
     }

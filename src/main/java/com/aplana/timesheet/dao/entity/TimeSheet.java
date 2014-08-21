@@ -1,6 +1,5 @@
 package com.aplana.timesheet.dao.entity;
 
-import com.aplana.timesheet.enums.ReportSendApprovalType;
 import org.hibernate.annotations.ForeignKey;
 
 import javax.persistence.*;

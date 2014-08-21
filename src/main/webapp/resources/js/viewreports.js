@@ -117,8 +117,7 @@ function onDivisionChange() {
 }
 
 function onChangeEmployee(empId) {
-    var birthday = widgets.employee.item.birthday;
-    if (!isUndefinedNullNaN(birthday) && birthday != ''){
+    if (widgets.employee.item && !isUndefinedNullNaN(widgets.employee.item.birthday) && widgets.employee.item.birthday != ''){
         dojo.byId('employeeBirthday').innerHTML = birthday;
         dojo.byId('employeeBirthday').hidden = false;
         dojo.byId('employeeBirthdayLabel').hidden = false;

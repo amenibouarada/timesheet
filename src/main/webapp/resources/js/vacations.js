@@ -1,12 +1,3 @@
-/**
- * Created with IntelliJ IDEA.
- * User: rshamsutdinov
- * Date: 22.01.13
- * Time: 14:32
- * To change this template use File | Settings | File Templates.
- */
-
-
 function showGraphic(type) {
 
     // запомним режим просмотра
@@ -108,65 +99,71 @@ function updateEmployeeSelect() {
         form: "vacationsForm",
         handleAs: "json",
         timeout: 10000,
-        load: function (employeeList) {
-            var employeeArray = [];
-            var emptyObj = {
-                id: 0,
-                value: ""
-            };
-            employeeArray.push(emptyObj);
-            dojo.forEach(employeeList, function (employee) {
-                employeeArray.push(employee);
-            });
-
-            employeeArray.sort(function (a, b) {
-                return (a.value < b.value) ? -1 : 1;
-            });
-
-            employeeArray[0].value = "Все сотрудники";
-
-            var employeeDataStore = new dojo.data.ObjectStore({
-                objectStore: new dojo.store.Memory({
-                    data: employeeArray,
-                    idProperty: 'id'
-                })
-            });
-
-            var employeeFlteringSelect = dijit.byId("employeeIdSelect");
-
-            if (!employeeFlteringSelect) {
-                employeeFlteringSelect = new dijit.form.FilteringSelect({
-                    id: "employeeIdSelect",
-                    labelAttr: "value",
-                    store: employeeDataStore,
-                    searchAttr: 'value',
-                    queryExpr: "*\${0}*",
-                    ignoreCase: true,
-                    autoComplete: false,
-                    style: 'width:200px',
-                    required: true,
-                    onMouseOver: function () {
-                        tooltip.show(getTitle(this));
-                    },
-                    onMouseOut: function () {
-                        tooltip.hide();
-                    },
-                    onChange: function () {
-                        var selectedEmployee2 = this.item ? this.item.id : null;
-                        dojo.byId('employeeId').value = selectedEmployee2;
-                        selectedEmployee = selectedEmployee2;
-                    }
-                }, "employeeIdSelect");
-                employeeFlteringSelect.startup();
-            } else {
-                employeeFlteringSelect.set('store', employeeDataStore);
-                dijit.byId("employeeIdSelect").set('value', null);
-                dojo.byId('employeeId').value = null;
-            }
-            dijit.byId("employeeIdSelect").set('value', selectedEmployee);
-            dojo.byId('employeeId').value = selectedEmployee;
+        load: function (employeeListJson) {
+            employeeList = employeeListJson
+            updateEmployeeSelectAfterLoad(employeeList);
         }
     });
+}
+
+
+function updateEmployeeSelectAfterLoad(employeeList) {
+    var employeeArray = [];
+    var emptyObj = {
+        id: 0,
+        value: ""
+    };
+    employeeArray.push(emptyObj);
+    dojo.forEach(employeeList, function (employee) {
+        employeeArray.push(employee);
+    });
+
+    employeeArray.sort(function (a, b) {
+        return (a.value < b.value) ? -1 : 1;
+    });
+
+    employeeArray[0].value = "Все сотрудники";
+
+    var employeeDataStore = new dojo.data.ObjectStore({
+        objectStore: new dojo.store.Memory({
+            data: employeeArray,
+            idProperty: 'id'
+        })
+    });
+
+    var employeeFlteringSelect = dijit.byId("employeeIdSelect");
+
+    if (!employeeFlteringSelect) {
+        employeeFlteringSelect = new dijit.form.FilteringSelect({
+            id: "employeeIdSelect",
+            labelAttr: "value",
+            store: employeeDataStore,
+            searchAttr: 'value',
+            queryExpr: "*\${0}*",
+            ignoreCase: true,
+            autoComplete: false,
+            style: 'width:200px',
+            required: true,
+            onMouseOver: function () {
+                tooltip.show(getTitle(this));
+            },
+            onMouseOut: function () {
+                tooltip.hide();
+            },
+            onChange: function () {
+                var selectedEmployee2 = this.item ? this.item.id : null;
+                dojo.byId('employeeId').value = selectedEmployee2;
+                selectedEmployee = selectedEmployee2;
+            }
+        }, "employeeIdSelect");
+        employeeFlteringSelect.startup();
+    } else {
+        employeeFlteringSelect.set('store', employeeDataStore);
+        dijit.byId("employeeIdSelect").set('value', null);
+        dojo.byId('employeeId').value = null;
+    }
+    dijit.byId("employeeIdSelect").set('value', selectedEmployee);
+    dojo.byId('employeeId').value = selectedEmployee;
 }
 
 function addVacation() {

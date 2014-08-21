@@ -84,9 +84,6 @@ public class TimeSheetService {
     public SecurityService securityService;
 
     @Autowired
-    private EmployeeHelper employeeHelper;
-
-    @Autowired
     private AvailableActivityCategoryService availableActivityCategoryService;
 
     @Autowired
@@ -700,9 +697,6 @@ public class TimeSheetService {
 
         List<Division> divisions = divisionService.getDivisions();
         result.put("divisionList", divisions);
-
-        String employeeListJson = employeeHelper.getEmployeeListWithLastWorkdayJson(divisions, employeeService.isShowAll(request), true);
-        result.put("employeeListJson", employeeListJson);
 
         List<DictionaryItem> categoryOfActivity = dictionaryItemService.getCategoryOfActivity();
         result.put("actCategoryList", categoryOfActivity);

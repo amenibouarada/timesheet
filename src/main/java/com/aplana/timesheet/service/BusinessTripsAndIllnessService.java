@@ -356,7 +356,6 @@ public class BusinessTripsAndIllnessService {
         modelAndView.addObject("employeeId", employeeId);
         modelAndView.addObject("managerId", manager == null ? -1 : manager);
         modelAndView.addObject("divisionList", divisionList);
-        modelAndView.addObject("employeeListJson", employeeHelper.getEmployeeListWithLastWorkdayJson(divisionList, showAll, true));
         modelAndView.addObject("regionIds", getDefaultSelectRegion(regions));
         modelAndView.addObject("regionList", getRegionList());
         modelAndView.addObject("managerList", getManagerList());

@@ -11,9 +11,9 @@
 <head>
     <title><fmt:message key="title.businesstripsandillness"/></title>
     <link rel="stylesheet" type="text/css" href="<%= request.getContextPath()%>/resources/css/businesstripsandillness.css">
-    <script type="text/javascript" src="<%= getResRealPath("/resources/js/businesstripandillness.js", application) %>"></script>
+    <script type="text/javascript" src="<%= request.getContextPath()%>/resources/js/businesstripandillness.js"></script>
     <script type="text/javascript">
-        var employeeList = ${employeeListJson};
+
         var forAll = ${forAll};
         var empId = ${employeeId};
         var managerIdJsp = "${managerId}" != "" ? +"${managerId}" : null;
@@ -26,10 +26,10 @@
         var allValue = <%= ALL_VALUE %>;
         var loadImg = "<img src=\"<c:url value="/resources/img/loading_small.gif"/>\"/>";
 
-        function saveForm(){
+        function saveForm() {
             <sec:authorize access="hasRole('CHANGE_ILLNESS_BUSINESS_TRIP')">
-            businesstripsandillness.action = getContextPath() + "/businesstripsandillnessadd/" + empId;
-            businesstripsandillness.submit();
+                businesstripsandillness.action = getContextPath() + "/businesstripsandillnessadd/" + empId;
+                businesstripsandillness.submit();
             </sec:authorize>
         }
     </script>

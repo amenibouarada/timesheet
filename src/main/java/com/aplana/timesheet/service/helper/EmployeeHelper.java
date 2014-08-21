@@ -5,6 +5,7 @@ import argo.jdom.JsonNodeBuilders;
 import argo.jdom.JsonObjectNodeBuilder;
 import com.aplana.timesheet.dao.entity.Division;
 import com.aplana.timesheet.dao.entity.Employee;
+import com.aplana.timesheet.service.DivisionService;
 import com.aplana.timesheet.service.EmployeeService;
 import com.aplana.timesheet.service.TimeSheetService;
 import com.aplana.timesheet.util.DateTimeUtil;
@@ -36,14 +37,11 @@ public class EmployeeHelper {
     private static final String DIVISION_ID = "divId";
     private static final String REGION_ID = "regId";
     private static final String MANAGER_ID = "manId";
-    private static final String PROJECTS = "projects";
-    private static final String PROJECT_ID = "projectId";
     private static final String JOB_ID = "jobId";
     private static final String DIVISION_EMPLOYEES = "divEmps";
     private static final String DATE_BY_DEFAULT = "dateByDefault";
     private static final String FIRST_WORK_DATE = "firstWorkDate";
     private static final String LAST_WORK_DATE = "lastWorkDate";
-    private static final String DEFAULT_MANAGER = "-1";
     private static final String DATE_FORMAT = "dd.MM.yyyy";
     private static final String ACTIVE_FLAG = "active";
 
@@ -53,72 +51,69 @@ public class EmployeeHelper {
     @Autowired
     private TimeSheetService timeSheetService;
 
+    @Autowired
+    DivisionService divisionService;
+
     @Transactional(readOnly = true)
-    public String getEmployeeListWithLastWorkdayJson(List<Division> divisions, Boolean filterFired) {
-        return getEmployeeListWithLastWorkdayJson(divisions, filterFired, false);
+    public String getEmployeeListWithLastWorkdayForDivisionJson(Integer divisionId, Boolean filterFired, Boolean addDetails) {
+        Division division = divisionService.find(divisionId);
+        final List<Employee> employees = employeeService.getEmployees(division, filterFired);
+        Map<Integer, Date> lastWorkdays = new HashMap<Integer, Date>();
+        if (addDetails) {
+            lastWorkdays = timeSheetService.getLastWorkdayWithoutTimesheetMap(division);
+        }
+
+        final JsonArrayNodeBuilder employeesBuilder = anArrayBuilder();
+
+        if (employees.isEmpty()) {
+            employeesBuilder.withElement(
+                    anObjectBuilder().
+                            withField(ID, aStringBuilder(0)).
+                            withField(VALUE, JsonNodeBuilders.aStringBuilder(StringUtils.EMPTY))
+            );
+        } else {
+            for (Employee employee : employees) {
+                JsonObjectNodeBuilder objectNodeBuilder = getEmployeeDetailsJsonObjectNode(addDetails, lastWorkdays, employee);
+                employeesBuilder.withElement(objectNodeBuilder);
+            }
+        }
+
+
+        return JsonUtil.format(employeesBuilder.build());
     }
 
-    /* !!! медленная функция, ниже написаны ужатые функции */
-    // ToDo разобраться почему функция медленная
-    @Transactional(readOnly = true)
-    public String getEmployeeListWithLastWorkdayJson(List<Division> divisions, Boolean filterFired, Boolean addDetails) {
-        final JsonArrayNodeBuilder builder = anArrayBuilder();
+    private JsonObjectNodeBuilder getEmployeeDetailsJsonObjectNode(Boolean addDetails, Map<Integer, Date> lastWorkdays, Employee employee) {
+        JsonObjectNodeBuilder objectNodeBuilder = anObjectBuilder().
+                withField(ID, aStringBuilder(employee.getId())).
+                withField(VALUE, JsonNodeBuilders.aStringBuilder(getValue(employee))).
+                //добавил два поля из за того что на форме "командировки/болезни" все заточено под другую структуру данных
+                        withField(MANAGER_ID, aStringBuilder(employee.getManager() == null ? null : employee.getManager().getId())).
+                withField(REGION_ID, aStringBuilder(employee.getRegion().getId()));
+        if (addDetails) {
 
-        for (Division division : divisions) {
-            final List<Employee> employees = employeeService.getEmployees(division, filterFired);
-            Map<Integer, Date> lastWorkdays = new HashMap<Integer, Date>();
-            if (addDetails) {
-                lastWorkdays = timeSheetService.getLastWorkdayWithoutTimesheetMap(division);
+            Date defaultDate = lastWorkdays.get(employee.getId());
+            if (defaultDate == null)
+                defaultDate = employee.getStartDate();
+
+            Date curDate = new Date();
+            if (defaultDate.after(curDate)) {
+                defaultDate = curDate;
             }
-            final JsonObjectNodeBuilder nodeBuilder = anObjectBuilder();
-            final JsonArrayNodeBuilder employeesBuilder = anArrayBuilder();
 
-            nodeBuilder.withField(DIVISION_ID, aStringBuilder(division.getId()));
-
-            if (employees.isEmpty()) {
-                employeesBuilder.withElement(
-                        anObjectBuilder().
-                                withField(ID, aStringBuilder(0)).
-                                withField(VALUE, JsonNodeBuilders.aStringBuilder(StringUtils.EMPTY))
-                );
-            } else {
-                for (Employee employee : employees) {
-                    JsonObjectNodeBuilder objectNodeBuilder = anObjectBuilder().
-                            withField(ID, aStringBuilder(employee.getId())).
-                            withField(VALUE, JsonNodeBuilders.aStringBuilder(getValue(employee))).
-                            //добавил два поля из за того что на форме "командировки/болезни" все заточено под другую структуру данных
-                            withField(MANAGER_ID, aStringBuilder(employee.getManager() == null ? null : employee.getManager().getId())).
-                            withField(REGION_ID, aStringBuilder(employee.getRegion().getId()));
-                    if (addDetails) {
-
-                        Date defaultDate = lastWorkdays.get(employee.getId());
-                        if (defaultDate == null)
-                            defaultDate = employee.getStartDate();
-
-                        Date curDate = new Date();
-                        if (defaultDate.after(curDate)){
-                            defaultDate = curDate;
-                        }
-
-                        if ((employee.getEndDate() != null && defaultDate.after(employee.getEndDate()))){
-                            defaultDate = employee.getEndDate();
-                        }
-
-                        objectNodeBuilder.withField(JOB_ID, aStringBuilder(employee.getJob().getId())).
-                                withField(DATE_BY_DEFAULT, JsonNodeBuilders.aStringBuilder(
-                                        dateToString(defaultDate, DATE_FORMAT))).
-                                withField(FIRST_WORK_DATE, JsonNodeBuilders.aStringBuilder(
-                                        dateToString(employee.getStartDate(), DATE_FORMAT))).
-                                withField(LAST_WORK_DATE, JsonNodeBuilders.aStringBuilder(
-                                        employee.getEndDate() != null ? dateToString(employee.getEndDate(), DATE_FORMAT) : ""
-                                ));
-                    }
-                    employeesBuilder.withElement(objectNodeBuilder);
-                }
+            if ((employee.getEndDate() != null && defaultDate.after(employee.getEndDate()))) {
+                defaultDate = employee.getEndDate();
             }
-            builder.withElement(nodeBuilder.withField(DIVISION_EMPLOYEES, employeesBuilder));
+
+            objectNodeBuilder.withField(JOB_ID, aStringBuilder(employee.getJob().getId())).
+                    withField(DATE_BY_DEFAULT, JsonNodeBuilders.aStringBuilder(
+                            dateToString(defaultDate, DATE_FORMAT))).
+                    withField(FIRST_WORK_DATE, JsonNodeBuilders.aStringBuilder(
+                            dateToString(employee.getStartDate(), DATE_FORMAT))).
+                    withField(LAST_WORK_DATE, JsonNodeBuilders.aStringBuilder(
+                            employee.getEndDate() != null ? dateToString(employee.getEndDate(), DATE_FORMAT) : ""
+                    ));
         }
-        return JsonUtil.format(builder.build());
+        return objectNodeBuilder;
     }
 
     @Transactional(readOnly = true)
@@ -144,41 +139,8 @@ public class EmployeeHelper {
                             withField(ID, aStringBuilder(employee.getId())).
                             withField(VALUE, JsonNodeBuilders.aStringBuilder(getValue(employee))).
                             withField(MANAGER_ID, aStringBuilder(employee.getManager() == null ? null : employee.getManager().getId())).
-                            withField(REGION_ID, aStringBuilder(employee.getRegion().getId()));
-                    employeesBuilder.withElement(objectNodeBuilder);
-                }
-            }
-            builder.withElement(nodeBuilder.withField(DIVISION_EMPLOYEES, employeesBuilder));
-        }
-        return JsonUtil.format(builder.build());
-    }
-
-    // ToDo удалить и внести в предыдущий метод, убрать копипасту
-    @Transactional(readOnly = true)
-    public String getEmployeeListWithDivisionAndRegionAndActiveFlagJson(List<Division> divisions, Date reportDate) {
-        final JsonArrayNodeBuilder builder = anArrayBuilder();
-
-        for (Division division : divisions) {
-            final List<Employee> employees = employeeService.getEmployees(division, true);
-            final JsonObjectNodeBuilder nodeBuilder = anObjectBuilder();
-            final JsonArrayNodeBuilder employeesBuilder = anArrayBuilder();
-
-            nodeBuilder.withField(DIVISION_ID, aStringBuilder(division.getId()));
-
-            if (employees.isEmpty()) {
-                employeesBuilder.withElement(
-                        anObjectBuilder().
-                                withField(ID, aStringBuilder(0)).
-                                withField(VALUE, JsonNodeBuilders.aStringBuilder(StringUtils.EMPTY))
-                );
-            } else {
-                for (Employee employee : employees) {
-                    JsonObjectNodeBuilder objectNodeBuilder = anObjectBuilder().
-                            withField(ID, aStringBuilder(employee.getId())).
-                            withField(VALUE, JsonNodeBuilders.aStringBuilder(getValue(employee))).
                             withField(REGION_ID, aStringBuilder(employee.getRegion().getId())).
-                            withField(ACTIVE_FLAG, aStringBuilder(isEmployeeActive(employee, reportDate)));
-
+                            withField(ACTIVE_FLAG, aStringBuilder(isEmployeeActive(employee)));
                     employeesBuilder.withElement(objectNodeBuilder);
                 }
             }
@@ -187,10 +149,10 @@ public class EmployeeHelper {
         return JsonUtil.format(builder.build());
     }
 
-    public Boolean isEmployeeActive(Employee employee, Date date) {
+    public Boolean isEmployeeActive(Employee employee) {
         if (employee != null) {
             Date beginDate = employee.getStartDate();
-            Date curDate = (date != null) ? date : new Date();
+            Date curDate = new Date();
             /* определим дату окончания работы
             *  если её нет то считаем бесконечно большой
             *  если есть то добавим день чтоб учесть последий рабочий день */
@@ -204,39 +166,8 @@ public class EmployeeHelper {
         return Boolean.FALSE;
     }
 
-    // ToDo эту копипасту тоже убрать
-    @Transactional(readOnly = true)
-    public String getEmployeeListWithDivisionJson(List<Division> divisions, Boolean filterFired) {
-        final JsonArrayNodeBuilder builder = anArrayBuilder();
-
-        for (Division division : divisions) {
-            final List<Employee> employees = employeeService.getEmployees(division, filterFired);
-            final JsonObjectNodeBuilder nodeBuilder = anObjectBuilder();
-            final JsonArrayNodeBuilder employeesBuilder = anArrayBuilder();
-
-            nodeBuilder.withField(DIVISION_ID, aStringBuilder(division.getId()));
-
-            if (employees.isEmpty()) {
-                employeesBuilder.withElement(
-                        anObjectBuilder().
-                                withField(ID, aStringBuilder(0)).
-                                withField(VALUE, JsonNodeBuilders.aStringBuilder(StringUtils.EMPTY))
-                );
-            } else {
-                for (Employee employee : employees) {
-                    JsonObjectNodeBuilder objectNodeBuilder = anObjectBuilder().
-                            withField(ID, aStringBuilder(employee.getId())).
-                            withField(VALUE, JsonNodeBuilders.aStringBuilder(getValue(employee)));
-                    employeesBuilder.withElement(objectNodeBuilder);
-                }
-            }
-            builder.withElement(nodeBuilder.withField(DIVISION_EMPLOYEES, employeesBuilder));
-        }
-        return JsonUtil.format(builder.build());
-    }
-
     // преобразует список сотрудников в JSON
-    public String makeEmployeeListInJSON(List<Employee> employees){
+    public String makeEmployeeListInJSON(List<Employee> employees) {
         final JsonArrayNodeBuilder builder = anArrayBuilder();
 
         for (Employee employee : employees) {
@@ -249,10 +180,10 @@ public class EmployeeHelper {
     }
 
     @Transactional(readOnly = true)
-    public String getManagerListJson(){
+    public String getManagerListJson() {
         final JsonArrayNodeBuilder builder = anArrayBuilder();
         List<Employee> managerList = employeeService.getManagerListForAllEmployee();
-        for (Employee e : managerList){
+        for (Employee e : managerList) {
             JsonObjectNodeBuilder nodeBuilder = anObjectBuilder();
             nodeBuilder.withField(ID, aStringBuilder(e.getId()));
             nodeBuilder.withField(VALUE, JsonNodeBuilders.aStringBuilder(e.getName()));
@@ -265,7 +196,7 @@ public class EmployeeHelper {
 
     private String getValue(Employee employee) {
         final StringBuilder sb = new StringBuilder(employee.getName());
-        Timestamp endDate =  employee.getEndDate();
+        Timestamp endDate = employee.getEndDate();
 
         if (null != endDate) {
             if (DateUtils.truncatedCompareTo(endDate, new Date(), Calendar.DAY_OF_MONTH) < 0) {

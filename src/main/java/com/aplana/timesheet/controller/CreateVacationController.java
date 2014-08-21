@@ -152,7 +152,8 @@ public class CreateVacationController {
         modelAndView.addObject("divisionId", employee.getDivision().getId());
         modelAndView.addObject("employeeId", employee.getId());
         modelAndView.addObject("divisionList", divisionList);
-        modelAndView.addObject("employeeListJson", employeeHelper.getEmployeeListWithDivisionJson(divisionList, employeeService.isShowAll(request)));
+        modelAndView.addObject("employeeListJson",
+                employeeHelper.getEmployeeListWithDivisionAndManagerAndRegionJson(divisionList, employeeService.isShowAll(request)));
         modelAndView.addObject("typeWithRequiredComment", CreateVacationFormValidator.TYPE_WITH_REQUIRED_COMMENT);
         modelAndView.addObject("typeVacationPlanned", VacationTypesEnum.PLANNED.getId());
 

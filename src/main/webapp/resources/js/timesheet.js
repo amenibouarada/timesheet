@@ -1,3 +1,554 @@
+dojo.require("dijit.form.DateTextBox");
+dojo.require("dijit.Dialog");
+dojo.require("dijit.form.Textarea");
+dojo.require("dijit.form.Select");
+dojo.require("dijit.layout.TabContainer");
+dojo.require("dijit.layout.ContentPane");
+dojo.require("dojox.widget.Standby");
+dojo.require("dojox.html.entities");
+dojo.require("dijit.form.ValidationTextBox");
+dojo.require("dojo.parser");
+dojo.require("dijit.form.FilteringSelect");
+dojo.require("dojo.data.ObjectStore");
+dojo.require("dojo.on");
+dojo.require("dojo.store.Memory");
+dojo.require(CALENDAR_EXT_PATH);
+
+dojo.declare("Calendar", com.aplana.dijit.ext.Calendar, {
+    getEmployeeId: function () {
+        return dojo.byId("employeeId").value;
+    },
+
+    getClassForDateInfo: function (dateInfo, date) {
+        switch (dateInfo) {
+            case "1":// в этот день имеется отчет
+                return 'classDateGreen';
+                break;
+            case "2":   //выходной или праздничный день
+                return 'classDateRedText';
+                break;
+            case "3":
+                return 'classDateBrownBack';
+                break;
+            case "0":   //день без отчета
+                if (date <= getFirstWorkDate()) // день раньше начала работы
+                    return '';
+                var lastWorkDate = getLastWorkDate();
+                if (lastWorkDate != null && lastWorkDate != "" && date > lastWorkDate) // день после увольнения
+                    return '';
+                if (date <= new Date())
+                    return 'classDateRedBack';
+                else return '';
+            default: // Никаких классов не назначаем, если нет информации
+                return '';
+                break;
+        }
+    }
+});
+
+dojo.declare("DateTextBox", dijit.form.DateTextBox, {
+    popupClass: "Calendar"
+});
+
+var month = correctLength(new Date().getMonth() + 1);
+var root = getRootEventListener();
+var standByElement;
+var dojoxDecode = dojox.html.entities.decode;
+var decodeMap = [
+    ["\u0027", "#39"],
+    ["\u0028", "#40"],
+    ["\u0029", "#41"]
+];
+var currentDate;
+var isFinalForm;
+
+function initTimeSheetForm() {
+    dojo.connect(dojo.byId("jira_get_plans_button"), "click", dojo.byId("jira_get_plans_button"), getJiraPlans);
+    dojo.connect(dojo.byId("plan"), "onkeyup", dojo.byId("plan"), textareaAutoGrow);
+    dojo.connect(dojo.byId("divisionId"), "onchange", dojo.byId("divisionId"), updateEmployeeSelect);
+    dojo.connect(dojo.byId("employeeId"), "onchange", dojo.byId("employeeId"), checkIsVacationDay);
+
+    if (timeSheetForm) {
+        timeSheetForm.divisionId.value = divIdJsp;
+    }
+
+    divisionChange(timeSheetForm.divisionId);
+    updateEmployeeSelect();
+
+    timeSheetForm.employeeId.value = employeeIdJsp;
+
+    /*смотрим, поддерживаются ли куки и рисуем индикатор*/
+    showCookieIndicator();
+
+    if (selectedCalDate != "") {
+        setTimesheetDate(selectedCalDate);
+    } else {
+        setDefaultDate(dojo.byId("employeeId").value);
+    }
+
+    initCurrentDateInfo(employeeIdJsp, dijit.byId('calDate').value, '/calendar/dates');
+
+    currentDate = dijit.byId('calDate').get("value");
+
+    if (!isErrorPage) {
+        requestAndRefreshDailyTimesheetData(dijit.byId('calDate').value, dojo.byId('employeeId').value);
+    } else {
+        requestAndRefreshPreviousDayPlans(dijit.byId('calDate').value, dojo.byId('employeeId').value);
+        reloadRowsState();
+    }
+
+    //крутилка создается при после загрузки страницы,
+    //т.к. если она создается в месте использования - ghb show не отображается картинка
+    standByElement = new dojox.widget.Standby({target: dojo.query("body")[0], zIndex: 1000});
+}
+
+// переопределение метода из timesheet.js, не удалять
+function getEmployeeData(){
+    return dijit.byId("employeeIdSelect").item;
+}
+
+function updateEmployeeSelect() {
+    var divisionId = timeSheetForm.divisionId.target == null ? timeSheetForm.divisionId.value : timeSheetForm.divisionId.target.value;
+    if (!divisionId || +divisionId == 0) {
+        refreshEmployeeSelect([]);
+        checkIsVacationDay();
+    } else {
+        dojo.xhrGet({
+            url: getContextPath() + "/employee/employeeListWithLastWorkday/" + divisionId,
+            handleAs: "json",
+            timeout: 10000,
+            sync: true,
+            preventCache: false,
+            headers: {  'Content-Type': 'application/json;Charset=UTF-8',
+                "Accept": "application/json;Charset=UTF-8"},
+            load: function (data) {
+                refreshEmployeeSelect(data);
+                checkIsVacationDay();
+            },
+
+            error: function (error) {
+                console.log(error);
+                handleError(error.message);
+            }
+        });
+    }
+}
+
+function refreshEmployeeSelect(employeeList) {
+    employeeList.unshift({
+        id: 0,
+        value: ""
+    });
+
+    employeeList.sort(function (a, b) {
+        return (a.value < b.value) ? -1 : 1;
+    });
+
+    var employeeDataStore = new dojo.data.ObjectStore({
+        objectStore: new dojo.store.Memory({
+            data: employeeList,
+            idProperty: 'id'
+        })
+    });
+
+    var employeeFlteringSelect = dijit.byId("employeeIdSelect");
+
+    if (!employeeFlteringSelect) {
+        employeeFlteringSelect = new dijit.form.FilteringSelect({
+            id: "employeeIdSelect",
+            name: "employeeIdSelect",
+            labelAttr: "value",
+            store: employeeDataStore,
+            searchAttr: 'value',
+            queryExpr: "*\${0}*",
+            ignoreCase: true,
+            autoComplete: false,
+            style: 'width:200px',
+            required: true,
+            onMouseOver: function () {
+                tooltip.show(getTitle(this));
+            },
+            onMouseOut: function () {
+                tooltip.hide();
+            },
+            onChange: function () {
+                var value = this.item ? this.item.id : null;
+                dojo.byId('employeeId').value = value;
+                var obj = { value: value };
+                onEmployeeChange(obj);
+            }
+        }, "employeeIdSelect");
+        employeeFlteringSelect.startup();
+    } else {
+        employeeFlteringSelect.set('store', employeeDataStore);
+        dijit.byId("employeeIdSelect").set('value', null);
+        dojo.byId('employeeId').value = null;
+    }
+
+
+    dijit.byId("employeeIdSelect").set('value', employeeIdJsp);
+}
+
+/**
+ * Устанавливает видимость и активность для элементов управления, отвечающих за редактирование отчета.
+ * @param isFinal [true/false] Показатель, является ли отчёт уже отправленным.
+ */
+function setElementsAvailability(isFinal) {
+    var controlsToHide = dojo.query(".controlToHide");
+    var controlsToHideCount = controlsToHide.length;
+
+    for (var i = 0; i < controlsToHideCount; i++) {
+        controlsToHide[i].style.visibility = (isFinal) ? "collapse" : "visible";
+    }
+
+    var controlsToDisable = dojo.query(".controlToDisable");
+    var controlsToDisableCount = controlsToDisable.length;
+
+    for (var i = 0; i < controlsToDisableCount; i++) {
+        controlsToDisable[i].disabled = isFinal;
+    }
+}
+
+/**
+ * Запрашивает данные timesheet и обновляет элементы страницы (план с прошлого дня, строки таблицы списания,
+ * план на следующий день) в соответствии с полученными данными.
+ * @param date Дата, для которой осуществляется запрос.
+ * @param employeeId Идентификатор сотрудника.
+ */
+function requestAndRefreshDailyTimesheetData(date, employeeId) {
+    var month = correctLength(date.getMonth() + 1);
+    var year = date.getFullYear();
+    var day = correctLength(date.getDate());
+    var requestDate = year + "-" + month + "-" + day;
+
+    dojo.xhrGet({
+        url: getContextPath() + "/timesheet/dailyTimesheetData",
+        handleAs: "json",
+        timeout: 10000,
+        content: {date: requestDate, employeeId: employeeId},
+        load: function (data, ioArgs) {
+            refreshDailyTimesheetData(data, ioArgs);
+        },
+        error: function (err, ioArgs) {
+            if (err && ioArgs && ioArgs.args && ioArgs.args.content) {
+                console.log(err);
+            }
+        }
+    });
+}
+
+function refreshDailyTimesheetData(data, ioArgs) {
+    if (data && ioArgs && ioArgs.args && ioArgs.args.content) {
+        var previous = data.previousDayData;
+        var current = data.currentDayData;
+        var next = data.nextDayData;
+
+        // Чистка таблицы занятости.
+
+        var timesheetRows = dojo.query(".time_sheet_row");
+        var timesheetRowsCount = timesheetRows.length;
+        for (var i = 0; i < timesheetRowsCount; i++) {
+            timesheetRows[i].parentNode.removeChild(timesheetRows[i]);
+        }
+
+        // Заполнение поля планов, указанных в предыдущий рабочий день.
+
+        var previousWorkDate = previous.workDate;
+        var previousPlan = previous.plan;
+
+        dojo.byId("lbPrevPlan").innerHTML = (previousWorkDate != null) ?
+            "Планы предыдущего рабочего дня (" + timestampStrToDisplayStr(previousWorkDate.toString()) + "):" :
+            "Планы предыдущего рабочего дня:";
+
+        dojo.byId("plan_textarea").innerHTML = (previousPlan != null && previousPlan.length != 0) ?
+            previousPlan.replace(/\n/g, '<br>') :
+            "План предыдущего рабочего дня не был определен";
+
+        // Заполнение строк таблицы занятости.
+
+        var currentTableData = current.data;
+        var isFinal = current.isFinal;
+
+        if (currentTableData != null) {
+            for (var j = 0; j < currentTableData.length; j++) {
+                addNewRow();
+                loadTableRow(j, currentTableData, isFinal);
+            }
+        } else if (existsCookie("aplanaRowsCount")) {
+            var cookieRowsCount = cookieValue("aplanaRowsCount");
+            addNewRows((cookieRowsCount > 0) ? cookieRowsCount : 1);
+        } else {
+            addNewRow();
+        }
+
+        recalculateDuration();
+
+        // Заполнение планов работы на будущее
+
+        var currentPlan = current.plan;
+        var nextWorkDate = current.nextWorkDate;
+        var nextDayEffort = current.effort;
+        var nextDaySummary = next.workSummary;
+
+        dojo.byId("lbNextPlan").innerHTML = (nextWorkDate != null) ?
+            "Планы на следующий рабочий день (" + timestampStrToDisplayStr(nextWorkDate.toString()) + "):" :
+            "Планы на следующий рабочий день:";
+
+        if (nextDayEffort != null) {
+            dojo.byId("effortInNextDay").value = nextDayEffort;
+        }
+
+        dojo.byId('plan').value =
+            (currentPlan != null && currentPlan.length != 0) ? currentPlan :
+                (nextDaySummary != null && nextDaySummary.length != 0) ? nextDaySummary : "";
+
+        dojo.attr("effortInNextDay", {
+            disabled: isFinal
+        });
+        dojo.attr("plan", {
+            readonly: isFinal
+        });
+
+        isFinalForm = isFinal;
+
+        setElementsAvailability(isFinal);
+    }
+}
+
+function requestAndRefreshPreviousDayPlans(date, employeeId) {
+    var month = correctLength(date.getMonth() + 1);
+    var year = date.getFullYear();
+    var day = correctLength(date.getDate());
+    var requestDate = year + "-" + month + "-" + day;
+
+    dojo.xhrGet({
+        url: getContextPath() + "/timesheet/dailyTimesheetData",
+        handleAs: "json",
+        timeout: 10000,
+        content: {date: requestDate, employeeId: employeeId},
+        load: function (data, ioArgs) {
+            refreshPreviousDayPlans(data, ioArgs);
+        },
+        error: function (err, ioArgs) {
+            if (err && ioArgs && ioArgs.args && ioArgs.args.content) {
+                console.log(err);
+            }
+        }
+    });
+}
+
+function refreshPreviousDayPlans(data, ioArgs) {
+    if (data && ioArgs && ioArgs.args && ioArgs.args.content) {
+        var previous = data.previousDayData;
+        var current = data.currentDayData;
+
+        // Заполнение поля планов, указанных в предыдущий рабочий день.
+
+        var previousWorkDate = previous.workDate;
+        var previousPlan = previous.plan;
+
+        dojo.byId("lbPrevPlan").innerHTML = (previousWorkDate != null) ?
+            "Планы предыдущего рабочего дня (" + timestampStrToDisplayStr(previousWorkDate.toString()) + "):" :
+            "Планы предыдущего рабочего дня:";
+
+        dojo.byId("plan_textarea").innerHTML = (previousPlan != null && previousPlan.length != 0) ?
+            previousPlan.replace(/\n/g, '<br>') :
+            "План предыдущего рабочего дня не был определен";
+
+        isFinalForm = false;
+    }
+}
+
+function hideShowElement(id, isHide) {
+    console.log(id + " " + isHide);
+    dojo.setStyle(id, {"display": isHide ? "none" : ""});
+}
+
+function submitform(s) {
+    if (typeof(root.onbeforeunload) != "undefined") {
+        root.onbeforeunload = null;
+    }
+
+    if ((s == 'send' && confirmSendReport()) || s == 'send_draft') {
+        var division = dojo.byId('divisionId');
+        var employee = dojo.byId('employeeId');
+        var rowsCount = dojo.query(".time_sheet_row").length;
+        var projectId;
+        var projectComponent;
+        var workPlaceId;
+        var workPlaceComponent;
+        var diffProjects = false;
+        var diffWorkPlaces = false;
+        for (var i = 0; i < rowsCount; i++) {
+            projectComponent = dojo.query("#project_id_" + i);
+            if (!diffProjects && projectComponent.length > 0)
+                if (projectComponent[0].value) {
+                    if (projectId && (projectId != projectComponent[0].value)) {
+                        if (projectComponent[0].value != 0)
+                            diffProjects = true;
+                    }
+                    else
+                        projectId = projectComponent[0].value;
+                }
+
+            workPlaceComponent = dojo.query("#workplace_id_" + i)
+            if (!diffWorkPlaces && workPlaceComponent.length > 0)
+                if (workPlaceComponent[0].value) {
+                    if (workPlaceId && (workPlaceId != workPlaceComponent[0].value)) {
+                        if (workPlaceComponent[0].value != 0)
+                            diffWorkPlaces = true;
+                    }
+                    else
+                        workPlaceId = workPlaceComponent[0].value;
+                }
+        }
+        setCookie('aplanaDivision', division.value, TimeAfter(7, 0, 0));
+        setCookie('aplanaEmployee', employee.value, TimeAfter(7, 0, 0));
+        setCookie('aplanaRowsCount', rowsCount, TimeAfter(7, 0, 0));
+        if (diffProjects)
+            deleteCookie("aplanaProject");
+        else
+            setCookie('aplanaProject', projectId, TimeAfter(7, 0, 0));
+        if (diffWorkPlaces)
+            deleteCookie("aplanaWorkPlace");
+        else
+            setCookie('aplanaWorkPlace', workPlaceId, TimeAfter(7, 0, 0));
+        if (s == 'send') {
+            timeSheetForm.action = "timesheet";
+        } else if (s == 'send_draft') {
+            timeSheetForm.action = "sendDraft";
+        }
+
+        processing();
+        // disabled не включается в submit. поэтому снимем аттрибут.
+        dojo.removeAttr("divisionId", "disabled");
+        dojo.removeAttr("employeeId", "disabled");
+        timeSheetForm.submit();
+
+    }
+    else if (s == 'newReport' && confirmCreateNewReport()) {
+        timeSheetForm.action = "newReport";
+        timeSheetForm.submit();
+    }
+}
+
+function requiredCommentSet() {
+    var overtimeCause = dijit.byId("overtimeCause").get("value");
+    var undertimeExp = (overtimeCause == undertimeOtherJsp);
+    var workOnHolidayExp = (overtimeCause == workHolidayOtherJsp);
+    var overtimeExp = (overtimeCause == overtimeOtherJsp);
+
+    if (undertimeExp || overtimeExp || workOnHolidayExp) {
+        dijit.byId("overtimeCauseComment").attr("required", true);
+        dijit.byId("typeOfCompensation").attr("required", true);
+    } else {
+        dijit.byId("overtimeCauseComment").attr("required", false);
+        dijit.byId("typeOfCompensation").attr("required", false);
+    }
+}
+
+function loadTableRow(i, data, isFinal) {
+    isFinal = !!isFinal;
+
+    dojo.attr("activity_type_id_" + i, {
+        value: data[i].activity_type_id
+    });
+
+    typeActivityChange(dojo.byId("activity_type_id_" + i));
+
+    dojo.attr("workplace_id_" + i, {
+        value: data[i].workplace_id
+    });
+
+    dojo.attr("project_id_" + i, {
+        value: data[i].project_id
+    });
+    projectChange(dojo.byId("project_id_" + i));
+
+    dojo.attr("project_role_id_" + i, {
+        value: data[i].project_role_id
+    });
+    projectRoleChange(dojo.byId("project_role_id_" + i));
+
+    dojo.attr("activity_category_id_" + i, {
+        value: data[i].activity_category_id
+    });
+    setActDescription(i);
+
+    dojo.attr("projectTask_id_" + i, {
+        value: data[i].projectTask_id
+    });
+    setTaskDescription(i);
+
+    dojo.attr("duration_id_" + i, {
+        value: data[i].duration_id
+    });
+    checkDuration(dojo.byId("duration_id_" + i));
+    recalculateDuration();
+
+    dojo.attr("description_id_" + i, {
+        value: dojoxDecode(dojoxDecode(data[i].description_id), decodeMap)
+    });
+    textareaAutoGrow(dojo.byId("description_id_" + i));
+
+    dojo.attr("problem_id_" + i, {
+        value: dojoxDecode(dojoxDecode(data[i].problem_id), decodeMap)
+    });
+    textareaAutoGrow(dojo.byId("problem_id_" + i));
+
+    if (isFinal) {
+        dojo.attr("activity_type_id_" + i, {disabled: "disabled"});
+        dojo.attr("workplace_id_" + i, {disabled: "disabled"});
+        dojo.attr("project_id_" + i, {disabled: "disabled"});
+        dojo.attr("project_role_id_" + i, {disabled: "disabled"});
+        dojo.attr("activity_category_id_" + i, {disabled: "disabled"});
+        dojo.attr("projectTask_id_" + i, {disabled: "disabled"});
+        dojo.attr("duration_id_" + i, {readonly: true});
+        dojo.attr("description_id_" + i, {readonly: true});
+        dojo.attr("problem_id_" + i, {readonly: true});
+    }
+}
+
+/**
+ Загрузка черновика
+ **/
+function loadDraft() {
+    var date = dijit.byId('calDate').value;
+
+    var currentDate = date.getFullYear() + "-" +
+        correctLength(date.getMonth() + 1) + "-" +
+        correctLength(date.getDate());
+    var employeeId = dojo.byId('employeeId').value;
+    var rowsCount;
+
+    dojo.xhrGet({
+        url: getContextPath() + "/timesheet/loadDraft",
+        handleAs: "json",
+        timeout: 10000,
+        content: {date: currentDate, employeeId: employeeId},
+        load: function (data, ioArgs) {
+            if (data && ioArgs && ioArgs.args && ioArgs.args.content) {
+                var div = dojo.byId('time_sheet_table');
+                var tr = document.querySelectorAll('.time_sheet_row');
+                rowsCount = tr.length;
+                for (var j = 0; j < rowsCount; j++) {
+                    tr[j].parentNode.removeChild(tr[j]);
+                }
+                for (var i = 0; i < data.data.length; i++) {
+                    addNewRow();
+                    loadTableRow(i, data.data);
+                }
+                dojo.byId('plan').innerHTML = data.plan;
+                hideShowElement("load_draft", true);
+                hideShowElement("load_draft_text", true);
+            }
+        },
+        error: function (err, ioArgs) {
+            console.log("error");
+        }
+    });
+}
+
 function deleteRow(id_row) {
     var tsRow = document.getElementById("ts_row_" + id_row);
     if (tsRow !== null) {
@@ -211,7 +762,7 @@ function addNewRow() {
     dojo.addClass(jiraImg, "pointer");
     dojo.attr(jiraImg, {
         id:"jira_button_" + newRowIndex,
-       // class:"controlToHide",
+        // class:"controlToHide",
         src:"resources/img/logo-jira.png",
         alt:"Запрос из JIRA",
         title:"Запрос из JIRA",
@@ -336,13 +887,6 @@ function setDefaultSelectEvents(obj) {
     dojo.connect(obj, "onkeyup", obj, somethingChanged);
 }
 
-function showTooltip(obj) {
-    tooltip.show(getTitle(obj));
-}
-
-function hideTooltip(obj) {
-    tooltip.hide();
-}
 
 /* Проверяет, включены ли куки в браузере
  * если нет индикатор серый, если да-синий*/
@@ -389,22 +933,9 @@ function planBoxNotEmpty() {
     else return !!planBox.value;
 }
 
-function findEmployeeById(employeeId){
-    if (!employeeId){
-        return;
-    }
-    for (var i = 0; i < employeeList.length; i++){
-        for (var j = 0; j < employeeList[i].divEmps.length ; j++){
-            if (employeeList[i].divEmps[j].id == employeeId){
-                return employeeList[i].divEmps[j];
-            }
-        }
-    }
-}
-
 /* Устанавливает компоненту calDate дату по умолчанию. */
-function setDefaultDate(employeeId) {
-    var employee = findEmployeeById(employeeId);
+function setDefaultDate() {
+    var employee = getEmployeeData();
     var date_picker = dijit.byId("calDate");
     if (!employee) {
         date_picker.set('disabled', true);
@@ -420,28 +951,11 @@ function setTimesheetDate(date) {
     datePicker.set("displayedValue", date);
 }
 
-// возвращает первый рабочий день сотрудника
-function getFirstWorkDate(){
-    var employeeId = dojo.byId("employeeId").value;
-    var employee = findEmployeeById(employeeId);
-    return convertStringToDate(employee.firstWorkDate);
-}
-
 // возващает последний рабочий день сотрудника
 function getLastWorkDate(){
     var employeeId = dojo.byId("employeeId").value;
-    var employee = findEmployeeById(employeeId);
+    var employee = getEmployeeData();
     return convertStringToDate(employee.lastWorkDate);
-}
-
-// ковертирует дату в тип дата из строки (разделитель ".")
-function convertStringToDate(stringDate){
-    if (stringDate != null && stringDate != "") {
-        var date = stringDate.split('.');
-        return new Date(date[2], date[1]-1, date[0]);
-    }else{
-        return null;
-    }
 }
 
 function validateReportDate(value) {
@@ -467,6 +981,10 @@ function validateReportDate(value) {
 
 function checkIsVacationDay() {
     var employeeId = dojo.byId("employeeId").value;
+    if (!employeeId || employeeId == undefined || !dijit.byId('calDate').get('value')) {
+        dojo.style("date_warning", {"display": "none"});
+        return false;
+    }
     var reportDate = dijit.byId('calDate').get('value').format("yyyy-mm-dd");
     var resp = false;
     dojo.xhrGet({
@@ -546,45 +1064,6 @@ function cancelCalDateChange() {
 function onEmployeeChange(employeeObj){
     setDefaultEmployeeJob(-1);
     setDefaultDate(employeeObj.value)
-}
-
-/* Создает cookie с указанными параметрами */
-function setCookie(name, value, exp, pth, dmn, sec) {
-    document.cookie = name + '=' + escape(value)
-        + ((exp) ? '; expires=' + exp : '')
-        + ((pth) ? '; path=' + pth : '')
-        + ((dmn) ? '; domain=' + dmn : '')
-        + ((sec) ? '; secure' : '');
-}
-
-/* Выдает время через d дней h часов m минут */
-function TimeAfter(d, h, m) {
-    var now = new Date(), // объект класса Data
-        nowMS = now.getTime(), // в миллисекундах (мс)
-        newMS = ((d * 24 + h) * 60 + m) * 60 * 1000 + nowMS;
-    now.setTime(newMS);    // новое время в мс
-    return now.toGMTString();
-}
-
-/* Удаляет куки с данным именем */
-function deleteCookie(CookieName) {
-    setCookie(CookieName, '', TimeAfter(-1, 0, 0));
-}
-
-/* Узнает, имеется ли куки с данным именем */
-function existsCookie(CookieName) {
-    return (document.cookie.split(CookieName + '=').length > 1);
-}
-
-/* Выдает значение куки с данным именем */
-function cookieValue(CookieName) {
-    var razrez = document.cookie.split(CookieName + '=');
-    if (razrez.length > 1) { // Значит, куки с этим именем существует
-        var hvost = razrez[1],
-            tzpt = hvost.indexOf(';'),
-            EndOfValue = (tzpt > -1) ? tzpt : hvost.length;
-        return unescape(hvost.substring(0, EndOfValue));
-    }
 }
 
 /*
@@ -742,58 +1221,131 @@ function typeActivityChange(obj) {
     setTaskDescription(rowIndex);
 }
 
-/* Заполняет список доступных проектов/пресейлов */
-function fillProjectList(rowIndex, projectState) {
-    var projectSelect = dojo.byId("project_id_" + rowIndex);
-    var division = dojo.byId("divisionId").value;
-    if (division != 0) {
-        for (var i = 0; i < projectList.length; i++) {
-            if (division == projectList[i].divId) {
-                projectSelect.options.length = 0;
-                insertEmptyOption(projectSelect);
-                for (var j = 0; j < projectList[i].divProjs.length; j++) {
-                    if ((projectList[i].divProjs[j].state == projectState) && (projectList[i].divProjs[j].active == 'true')) {
-                        projectOption = dojo.doc.createElement("option");
-                        dojo.attr(projectOption, {
-                            value:projectList[i].divProjs[j].id
-                        });
-                        projectOption.title = projectList[i].divProjs[j].value;
-                        projectOption.innerHTML = projectList[i].divProjs[j].value;
-                        projectSelect.appendChild(projectOption);
-                    }
-                }
+
+function getJiraPlans(){
+    var employeeId = dojo.byId("employeeId").value;
+
+    if (employeeId) {
+        var jiraCell = dojo.byId("plan").parentNode;
+        var standbyElementJira = new dojox.widget.Standby({target:jiraCell, zIndex:1000});
+        jiraCell.appendChild(standbyElementJira.domNode);
+        standbyElementJira.startup();
+        standbyElementJira.show();
+        dojo.xhrGet({
+            url: getContextPath() + "/timesheet/jiraIssuesPlanned",
+            handleAs:"text",
+            timeout:10000,
+            content:{employeeId:employeeId},
+            preventCache: true,
+            load:function (data) {
+                if (data.length != 0)
+                    dojo.byId("plan").value = data;
+                else
+                    dojo.byId("plan").value = "Активности по задачам не найдено";
+                standbyElementJira.hide();
+            },
+            error:function (err) {
+                dojo.byId("plan").value = "Ошибка при поиске активности в JIRA("+err+")";
+                standbyElementJira.hide();
             }
-        }
-        if (existsCookie('aplanaProject')) {
-            projectSelect.value = cookieValue('aplanaProject');
-            projectChange(projectSelect);
-        }
-    } else {
-
+        });
     }
-    sortSelectOptions(projectSelect);
 }
 
-/* Добавляет в указанный select пустой option. */
-function insertEmptyOption(select) {
-    insertEmptyOptionWithCaptionInHead(select, "");
-}
-
-/* Добавляет в указанный select пустой option с указанной подписью. */
-function insertEmptyOptionWithCaptionInHead(select, caption) {
-    var option = dojo.doc.createElement("option");
-    dojo.attr(option, {
-        value:"0"
-    });
-    option.innerHTML = caption;
-    select.insertBefore(option, select.options[0]);
+function getJiraInfo(rowIndex) {
+    var employeeId = dojo.byId("employeeId").value;
+    var projectId = dojo.byId("project_id_" + rowIndex).value;
+    var reportDate = dijit.byId('calDate').get('value').format("yyyy-mm-dd");
+    if (employeeId != 0 && projectId != 0 && reportDate != 0) {
+        var jiraCell = dojo.byId("jira_button_"+rowIndex).parentNode;
+        var standbyElementJira = new dojox.widget.Standby({target:jiraCell, zIndex:1000});
+        jiraCell.appendChild(standbyElementJira.domNode);
+        standbyElementJira.startup();
+        standbyElementJira.show();
+        dojo.xhrGet({
+            url: getContextPath() + "/timesheet/jiraIssues",
+            handleAs:"text",
+            timeout:10000,
+            content:{employeeId:employeeId, date:reportDate, projectId:projectId},
+            preventCache: true,
+            load:function (data) {
+                if (data.length != 0)
+                    dojo.byId("description_id_" + rowIndex).value = data;
+                else
+                    dojo.byId("description_id_" + rowIndex).value = "Активности по задачам не найдено";
+                textareaAutoGrow(dojo.byId("description_id_" + rowIndex));
+                standbyElementJira.hide();
+            },
+            error:function (err) {
+                dojo.byId("description_id_" + rowIndex).value = "Ошибка при поиске активности в JIRA("+err+")";
+                standbyElementJira.hide();
+            }
+        });
+    }
 }
 
 /*
- * Срабатывает при смене значения в списке проектов\пресейлов.
- * Управляет доступностью и содержимым списка проектных задач.
+ Запускаем Standby widget на весь экран
  */
-function projectChange(obj) {
+function processing() {
+    document.body.appendChild(standByElement.domNode);
+    standByElement.startup();
+    standByElement.show();
+}
+
+function somethingChanged(){
+    if (typeof(root.onbeforeunload) != "undefined") root.onbeforeunload = confirmTimeSheetCloseWindow;
+}
+
+function confirmTimeSheetCloseWindow() {
+    if (tablePartNotEmpty() || planBoxNotEmpty())
+        return "Отчет не был отправлен.";
+}
+
+/*
+ * Превращает timestamp строку (yyyy-mm-dd) в строку для
+ * displayValue DateTextBoxА (dd.mm.yyyy)
+ */
+function timestampStrToDisplayStr(str) {
+    if (str != "") {
+        var splittedStr = str.split("-");
+        return splittedStr[2] + "." + splittedStr[1] + "." + splittedStr[0];
+    } else {
+        return str;
+    }
+}
+
+function submitWithOvertimeCauseSet(){
+    var comment = dijit.byId("overtimeCauseComment").get("value");
+    var required = dijit.byId("overtimeCauseComment").get("required");
+
+    if (comment == "" && required == true) {
+        tooltip.show("Комментарий для причины 'Другое' является обязательным!");
+        return;
+    }
+
+    var overtimeCause = dijit.byId("overtimeCause").get("value");
+    var overtimeRequired = dijit.byId("overtimeCause").get("required");
+
+    if (overtimeCause == 0 && overtimeRequired == true) {
+        tooltip.show("Необходимо указать причину!");
+        return;
+    }
+
+    dojo.byId("overtimeCauseComment_hidden").value = dijit.byId("overtimeCauseComment").get('value');
+    dojo.byId("overtimeCause_hidden").value = overtimeCause;
+    dojo.byId("typeOfCompensation_hidden").value = dijit.byId("typeOfCompensation").get('value');
+
+
+    dijit.byId('dialogOne').hide();
+    submitform('send');
+}
+
+/*
+ * Срабатывает при смене значения в списке "Проектная роль"
+ * Влияет на доступные категории активности.
+ */
+function projectRoleChange(obj) {
     var select = null;
     if (obj.target == null) {
         select = obj;
@@ -802,114 +1354,11 @@ function projectChange(obj) {
         select = obj.target;
     }
     var selectId = dojo.attr(select, "id");
-    var projectId = select.value;
     var rowIndex = selectId.substring(selectId.lastIndexOf("_") + 1, selectId.length);
-    var taskSelect = dojo.byId("projectTask_id_" + rowIndex);
-    var taskOption = null;
-    taskSelect.options.length = 0;
-    if ( isEnableTaskSelect(rowIndex) ){
-        dojo.attr(taskSelect, {
-            disabled:"disabled",
-            value:"0"
-        });
-        for (var i = 0; i < projectTaskList.length; i++) {
-            if (projectId == projectTaskList[i].projId) {
-                dojo.removeAttr(taskSelect, "disabled");
-                insertEmptyOption(taskSelect);
-                for (var j = 0; j < projectTaskList[i].projTasks.length; j++) {
-                    taskOption = dojo.doc.createElement("option");
-                    dojo.attr(taskOption, {
-                        value:projectTaskList[i].projTasks[j].id
-                    });
-                    taskOption.title = projectTaskList[i].projTasks[j].value;
-                    taskOption.innerHTML = projectTaskList[i].projTasks[j].value;
-                    taskSelect.appendChild(taskOption);
-                }
-            }
-        }
-        dojo.byId("task_description_" + rowIndex).innerHTML = "";
-    }
+    fillAvailableActivityCategoryList(rowIndex);
+    setActDescription(rowIndex);
 }
 
-/* Выставляет должность сотрудника (проектная роль по умолчанию) */
-function setDefaultEmployeeJob(rowIndex) {
-    if (!document.employeeList || !dojo.byId("divisionId")) {
-        return;
-    }
-    var selectedEmployeeId = dojo.byId("employeeId").value;
-    var divisionId = dojo.byId("divisionId").value;
-    var defaultEmployeeJobId = 0;
-    for (var i = 0; i < employeeList.length; i++) {
-        if (divisionId == employeeList[i].divId) {
-            for (var j = 0; j < employeeList[i].divEmps.length; j++) {
-                if (employeeList[i].divEmps[j].id == selectedEmployeeId) {
-                    defaultEmployeeJobId = employeeList[i].divEmps[j].jobId;
-                    break;
-                }
-            }
-        }
-    }
-    var actTypeLists = new Array();
-    if (rowIndex >= 0) {
-        actTypeLists.push(dojo.byId("activity_type_id_" + rowIndex));
-    } else { //Если функция вызвана при выборе сотрудника
-        actTypeLists = dojo.query(".activityType");
-    }
-
-    for (var j = 0; j < actTypeLists.length; j++) {
-        var listId = dojo.attr(actTypeLists[j], "id");
-        var row = listId.substring(listId.lastIndexOf("_") + 1, listId.length);
-        // Проект Пресейл
-        var projectRoleIdText = "project_role_id_" + row;
-        if (    (actTypeLists[j].value == EnumConstants.TypesOfActivityEnum.PROJECT)
-            ||  (actTypeLists[j].value == EnumConstants.TypesOfActivityEnum.PRESALE)) {
-            var projectRoleList = dojo.byId(projectRoleIdText);
-            dojo.attr(projectRoleList, { value:defaultEmployeeJobId });
-            fillAvailableActivityCategoryList(row);
-        }
-        // Внепроектная активность
-        else if (actTypeLists[j].value == "14") {
-            var projectRoleList = dojo.byId(projectRoleIdText);
-            dojo.attr(projectRoleList, { value:defaultEmployeeJobId });
-            fillAvailableActivityCategoryList(row);
-        }
-    }
-}
-
-/*
- * функция чтобы показать хинт для уже выбранных значений селектов
- * здесь title-это атрибут у селекта - он же хинт
- */
-function getTitle(processed) {
-    var select = null;
-    if (processed.target == null) {
-        select = processed;
-    }
-    else {
-        select = processed.target;
-    }
-    //костыль чтобы в категории активности отображалось описание
-    if(select.id.indexOf("activity_category_id_")+1){
-        var description = dojo.byId("act_description_" + select.id.substring(21)).innerHTML;
-        if(description && description.trim()!=""){
-            return  description;
-        }
-    }
-    //
-    var index = select.selectedIndex;
-    if (select.options != null) {
-        if ((index > -1) && (select.options[index].text != "")) {
-            return select.options[index].text;
-        }
-        else {
-            return 'значение еще не выбрано';
-        }
-    }
-    else if (select.textbox != null) {
-        if (select.textbox.value != "") return select.textbox.value
-        else return 'значение еще не выбрано';
-    }
-}
 
 /*
  * Восстанавливает содержимое компонентов каждой строки табличной части отчёта
@@ -1029,17 +1478,6 @@ function reloadRowsState() {
     }
 }
 
-/* Восстанавливает содержимое компонентов отчёта после возврата страницы валидатором. */
-function reloadTimeSheetState() {
-
-    if (selectedCalDate !== "") {
-        var date_picker = dijit.byId("calDate");
-        date_picker.set("displayedValue", selectedCalDate);
-    }
-
-    reloadRowsState();
-}
-
 /*
  * Очищает содержимое компонентов каждой строки табличной части отчёта.
  * Если resetActType == true, "Тип активности" тоже очищается.
@@ -1094,33 +1532,6 @@ function resetRowState(rowIndex, resetActType) {
     recalculateDuration();
 }
 
-/* Делает строку табличной части отчёта с номером rowIndex недоступной. */
-function disableRow(rowIndex) {
-    resetRowState(rowIndex, true);
-    dojo.attr("activity_type_id_" + rowIndex, { disabled:"disabled" });
-}
-
-/* Делает все строки табличной части отчёта недоступными. */
-function disableRows() {
-    var rows = getRowsId(dojo.query(".time_sheet_row"));
-    for (var i = 0; i < rows.length; i++) {
-        disableRow(rows[i]);
-    }
-}
-
-/* Делает строку табличной части отчёта с номером rowIndex доступной. */
-function enableRow(rowIndex) {
-    var actType = dojo.byId("activity_type_id_" + rowIndex);
-    dojo.removeAttr(actType, "disabled");
-}
-
-/* Делает все строки табличной части отчёта с номером rowIndex доступными. */
-function enableRows() {
-    var rows = getRowsId(dojo.query(".time_sheet_row"));
-    for (var i = 0; i < rows.length; i++) {
-        enableRow(rows[i]);
-    }
-}
 
 /* Проверяет введённое значение часов, потраченных на выполнение задачи на валидность. */
 function checkDuration(processed) {
@@ -1351,18 +1762,18 @@ function checkDurationThenSendForm(){
                 }
             }
         });
-              /* не РЦК */
+        /* не РЦК */
         var check = !isDivisionLeader &&
-                /*недоработка */
+            /*недоработка */
             ( ( totalDuration < (8 - undertimeThreshold) ||
                 /* переработка */
                 totalDuration > (8 + overtimeThreshold)
-              ) ||
-              /* выходной и не РЦК */
-              isHoliday ||
-              /* работа в отпуск */
-              isVacation
-            );
+                ) ||
+                /* выходной и не РЦК */
+                isHoliday ||
+                /* работа в отпуск */
+                isVacation
+                );
         if (check) {
             var select_box = dijit.byId("overtimeCause");
 
@@ -1402,37 +1813,11 @@ function checkDurationThenSendForm(){
 
 
 
-function submitWithOvertimeCauseSet(){
-    var comment = dijit.byId("overtimeCauseComment").get("value");
-    var required = dijit.byId("overtimeCauseComment").get("required");
-
-    if (comment == "" && required == true) {
-        tooltip.show("Комментарий для причины 'Другое' является обязательным!");
-        return;
-    }
-
-    var overtimeCause = dijit.byId("overtimeCause").get("value");
-    var overtimeRequired = dijit.byId("overtimeCause").get("required");
-
-    if (overtimeCause == 0 && overtimeRequired == true) {
-        tooltip.show("Необходимо указать причину!");
-        return;
-    }
-
-    dojo.byId("overtimeCauseComment_hidden").value = dijit.byId("overtimeCauseComment").get('value');
-    dojo.byId("overtimeCause_hidden").value = overtimeCause;
-    dojo.byId("typeOfCompensation_hidden").value = dijit.byId("typeOfCompensation").get('value');
-
-
-    dijit.byId('dialogOne').hide();
-    submitform('send');
-}
-
 /*
- * Срабатывает при смене значения в списке "Проектная роль"
- * Влияет на доступные категории активности.
+ * Срабатывает при смене значения в списке проектов\пресейлов.
+ * Управляет доступностью и содержимым списка проектных задач.
  */
-function projectRoleChange(obj) {
+function projectChange(obj) {
     var select = null;
     if (obj.target == null) {
         select = obj;
@@ -1441,246 +1826,53 @@ function projectRoleChange(obj) {
         select = obj.target;
     }
     var selectId = dojo.attr(select, "id");
+    var projectId = select.value;
     var rowIndex = selectId.substring(selectId.lastIndexOf("_") + 1, selectId.length);
-    fillAvailableActivityCategoryList(rowIndex);
-    setActDescription(rowIndex);
-}
-
-/* Сортирует по алфавиту содержимое выпадающих списков. */
-function sortSelectOptions(select) {
-    var tmpArray = [];
-    for (var i = 0; i < select.options.length; i++) {
-        tmpArray.push(select.options[i]);
-    }
-    tmpArray.sort(function (a, b) {
-        return (a.text < b.text) ? -1 : 1;
-    });
-    select.options.length = 0;
-    for (var i = 0; i < tmpArray.length; i++) {
-        select.options[i] = tmpArray[i];
-    }
-}
-
-/*
- * Превращает timestamp строку (yyyy-mm-dd) в строку для
- * displayValue DateTextBoxА (dd.mm.yyyy)
- */
-function timestampStrToDisplayStr(str) {
-    if (str != "") {
-        var splittedStr = str.split("-");
-        return splittedStr[2] + "." + splittedStr[1] + "." + splittedStr[0];
-    } else {
-        return str;
-    }
-}
-/*Проверяет, какой тип проблемы выбран. Если выбран тип "Меня нет в списках",
- то делает списки подразделений и сотрудников неактивными*/
-function feedbackTypeChange(obj) {
-    var select = obj;
-    if (select.value == "Меня нет в списке") {
-        dojo.attr("divisionId", {disabled:"disabled", value:"0" });
-        dojo.attr("employeeId", {disabled:"disabled", value:"0"});
-
-        dojo.removeAttr("name", "disabled");
-        dojo.removeAttr("email", "disabled");
-        name_email.style.display = 'block';
-
-    } else {
-        dojo.removeAttr("divisionId", "disabled");
-        dojo.removeAttr("employeeId", "disabled");
-
-        dojo.attr("name", {disabled:"disabled"});
-        dojo.attr("email", {disabled:"disabled"});
-        name_email.style.display = 'none';
-    }
-}
-function confirmCancelWindow() {
-    return confirm("Вы действительно хотите закрыть окно?");
-}
-function confirmClearWindow() {
-    return confirm("Вы действительно хотите очистить окно?");
-}
-function confirmTimeSheetCloseWindow() {
-    if (tablePartNotEmpty() || planBoxNotEmpty())
-        return "Отчет не был отправлен.";
-}
-
-function openViewReportsWindow() {
-    var employeeId = dojo.byId("employeeId").value;
-    var divisionId = dojo.byId("divisionId").value;
-    if (employeeId != 0) {
-        var date = new Date();
-        window.open('viewreports/' + divisionId + '/' + employeeId + '/' + date.getFullYear() + '/' + (date.getMonth() + 1), 'reports_window' + employeeId);
-    }
-}
-
-/*
-Запускаем Standby widget на весь экран
- */
-function processing() {
-  document.body.appendChild(standByElement.domNode);
-  standByElement.startup();
-  standByElement.show();
-}
-
-function somethingChanged(){
-    if (typeof(root.onbeforeunload) != "undefined") root.onbeforeunload = confirmTimeSheetCloseWindow;
-}
-
-/* объект подсказки */
-var tooltip = function () {
-    var id = 'tt';
-    var top = 3;
-    var left = 3;
-    var maxw = 300;
-    var speed = 10;
-    var timer = 20;
-    var endalpha = 95;
-    var alpha = 0;
-    var tt, t, c, b, h;
-    var ie = document.all ? true : false;
-    return{
-        show:function (v, w) {
-            if (tt == null) {
-                tt = document.createElement('div');
-                tt.setAttribute('id', id);
-                t = document.createElement('div');
-                t.setAttribute('id', id + 'top');
-                c = document.createElement('div');
-                c.setAttribute('id', id + 'cont');
-                b = document.createElement('div');
-                b.setAttribute('id', id + 'bot');
-                tt.appendChild(t);
-                tt.appendChild(c);
-                tt.appendChild(b);
-                document.body.appendChild(tt);
-                tt.style.opacity = 0;
-                tt.style.filter = 'alpha(opacity=0)';
-                document.onmousemove = this.pos;
-            }
-            tt.style.display = 'block';
-            c.innerHTML = v;
-            tt.style.width = w ? w + 'px' : 'auto';
-            if (!w && ie) {
-                t.style.display = 'none';
-                b.style.display = 'none';
-                tt.style.width = tt.offsetWidth;
-                t.style.display = 'block';
-                b.style.display = 'block';
-            }
-            if (tt.offsetWidth > maxw) {
-                tt.style.width = maxw + 'px'
-            }
-            h = parseInt(tt.offsetHeight) + top;
-            clearInterval(tt.timer);
-            tt.timer = setInterval(function () {
-                tooltip.fade(1)
-            }, timer);
-        },
-        pos:function (e) {
-            var u = ie ? event.clientY + document.documentElement.scrollTop : e.pageY;
-            var l = ie ? event.clientX + document.documentElement.scrollLeft : e.pageX;
-            tt.style.top = (u - h) + 'px';
-            tt.style.left = (l + left) + 'px';
-        },
-        fade:function (d) {
-            var a = alpha;
-            if ((a != endalpha && d == 1) || (a != 0 && d == -1)) {
-                var i = speed;
-                if (endalpha - a < speed && d == 1) {
-                    i = endalpha - a;
-                } else if (alpha < speed && d == -1) {
-                    i = a;
-                }
-                alpha = a + (i * d);
-                tt.style.opacity = alpha * .01;
-                tt.style.filter = 'alpha(opacity=' + alpha + ')';
-            } else {
-                clearInterval(tt.timer);
-                if (d == -1) {
-                    tt.style.display = 'none'
+    var taskSelect = dojo.byId("projectTask_id_" + rowIndex);
+    var taskOption = null;
+    taskSelect.options.length = 0;
+    if ( isEnableTaskSelect(rowIndex) ){
+        dojo.attr(taskSelect, {
+            disabled:"disabled",
+            value:"0"
+        });
+        for (var i = 0; i < projectTaskList.length; i++) {
+            if (projectId == projectTaskList[i].projId) {
+                dojo.removeAttr(taskSelect, "disabled");
+                insertEmptyOption(taskSelect);
+                for (var j = 0; j < projectTaskList[i].projTasks.length; j++) {
+                    taskOption = dojo.doc.createElement("option");
+                    dojo.attr(taskOption, {
+                        value:projectTaskList[i].projTasks[j].id
+                    });
+                    taskOption.title = projectTaskList[i].projTasks[j].value;
+                    taskOption.innerHTML = projectTaskList[i].projTasks[j].value;
+                    taskSelect.appendChild(taskOption);
                 }
             }
-        },
-        hide:function () {
-            clearInterval(tt.timer);
-            tt.timer = setInterval(function () {
-                tooltip.fade(-1)
-            }, timer);
         }
-    };
-}();
-
-
-function getRootEventListener() {
-    return window.addEventListener || window.attachEvent ? window : document.addEventListener ? document : null;
-}
-
-function getJiraInfo(rowIndex) {
-    var employeeId = dojo.byId("employeeId").value;
-    var projectId = dojo.byId("project_id_" + rowIndex).value;
-    var reportDate = dijit.byId('calDate').get('value').format("yyyy-mm-dd");
-    if (employeeId != 0 && projectId != 0 && reportDate != 0) {
-        var jiraCell = dojo.byId("jira_button_"+rowIndex).parentNode;
-        var standbyElementJira = new dojox.widget.Standby({target:jiraCell, zIndex:1000});
-        jiraCell.appendChild(standbyElementJira.domNode);
-        standbyElementJira.startup();
-        standbyElementJira.show();
-        dojo.xhrGet({
-            url: getContextPath() + "/timesheet/jiraIssues",
-            handleAs:"text",
-            timeout:10000,
-            content:{employeeId:employeeId, date:reportDate, projectId:projectId},
-            preventCache: true,
-            load:function (data) {
-                if (data.length != 0)
-                    dojo.byId("description_id_" + rowIndex).value = data;
-                else
-                    dojo.byId("description_id_" + rowIndex).value = "Активности по задачам не найдено";
-                textareaAutoGrow(dojo.byId("description_id_" + rowIndex));
-                standbyElementJira.hide();
-            },
-            error:function (err) {
-                dojo.byId("description_id_" + rowIndex).value = "Ошибка при поиске активности в JIRA("+err+")";
-                standbyElementJira.hide();
-            }
-        });
+        dojo.byId("task_description_" + rowIndex).innerHTML = "";
     }
 }
 
-function getJiraPlans(){
-    var employeeId = dojo.byId("employeeId").value;
 
-    if (employeeId) {
-        var jiraCell = dojo.byId("plan").parentNode;
-        var standbyElementJira = new dojox.widget.Standby({target:jiraCell, zIndex:1000});
-        jiraCell.appendChild(standbyElementJira.domNode);
-        standbyElementJira.startup();
-        standbyElementJira.show();
-        dojo.xhrGet({
-            url: getContextPath() + "/timesheet/jiraIssuesPlanned",
-            handleAs:"text",
-            timeout:10000,
-            content:{employeeId:employeeId},
-            preventCache: true,
-            load:function (data) {
-                if (data.length != 0)
-                    dojo.byId("plan").value = data;
-                else
-                    dojo.byId("plan").value = "Активности по задачам не найдено";
-                standbyElementJira.hide();
-            },
-            error:function (err) {
-                dojo.byId("plan").value = "Ошибка при поиске активности в JIRA("+err+")";
-                standbyElementJira.hide();
-            }
-        });
-    }
+/* Удаляет куки с данным именем */
+function deleteCookie(CookieName) {
+    setCookie(CookieName, '', TimeAfter(-1, 0, 0));
 }
 
-function clearErrorBox(divId) {
-    var target = dojo.byId(divId);
-    if (target != null) {
-        dojo.destroy(divId);
+/* Узнает, имеется ли куки с данным именем */
+function existsCookie(CookieName) {
+    return (document.cookie.split(CookieName + '=').length > 1);
+}
+
+/* Выдает значение куки с данным именем */
+function cookieValue(CookieName) {
+    var razrez = document.cookie.split(CookieName + '=');
+    if (razrez.length > 1) { // Значит, куки с этим именем существует
+        var hvost = razrez[1],
+            tzpt = hvost.indexOf(';'),
+            EndOfValue = (tzpt > -1) ? tzpt : hvost.length;
+        return unescape(hvost.substring(0, EndOfValue));
     }
 }

@@ -14,9 +14,8 @@ dojo.ready(function () {
 
     dojo.byId("divisionId").value = divisionIdJsp;
 
-    updateManagerList();
     initRegionsList();
-    updateEmployeeList();
+    updateManagerList();
 
     if (dojo.byId("regions").value != -1) {
         sortEmployee();
@@ -87,9 +86,7 @@ function showBusinessTripsAndIllnessReport() {
         if (!regionsValid) {
             error += ("Необходимо выбрать регион или несколько регионов!\n");
         }
-
         alert(error);
-
     }
 }
 
@@ -227,6 +224,26 @@ function getSelectedIndexes(multiselect) {
 
 function updateEmployeeList() {
     var divisionId = dojo.byId('divisionId').value;
+    dojo.xhrGet({
+        url: getContextPath() + "/employee/employeeListWithLastWorkday/" + divisionId,
+        handleAs: "json",
+        timeout: 10000,
+        sync: true,
+        preventCache: false,
+        headers: {  'Content-Type': 'application/json;Charset=UTF-8',
+            "Accept": "application/json;Charset=UTF-8"},
+        load: function (data) {
+            refreshEmployeeSelect(data);
+        },
+
+        error: function (error) {
+            handleError(error.message);
+        }
+    });
+}
+
+function refreshEmployeeSelect(employeeList) {
+
     var managerId = dojo.byId('manager').value;
     var cities = [];
     var citySelect = dojo.byId('regions').options;
@@ -237,9 +254,6 @@ function updateEmployeeList() {
 
     if (employeeList.length > 0) {
 
-        dojo.forEach(dojo.filter(employeeList, function (division) {
-            return (division.divId == divisionId);
-        }), function (divisionData) {
 
             var employeeArray = [];
             var emptyObj = {
@@ -247,7 +261,7 @@ function updateEmployeeList() {
                 value: ""
             };
             employeeArray.push(emptyObj);
-            dojo.forEach(divisionData.divEmps, function (employee) {
+            dojo.forEach(employeeList, function (employee) {
 
                 var manegerEquals = (managerId == -1 || employee.manId == managerId);
                 var regionEquals = (cities.length == 1 && cities[0] == -1) || (dojo.indexOf(cities, +employee.regId) == 0);
@@ -255,6 +269,7 @@ function updateEmployeeList() {
                     employeeArray.push(employee);
                 }
             });
+
             employeeArray.sort(function (a, b) {
                 return (a.value < b.value) ? -1 : 1;
             });
@@ -299,7 +314,7 @@ function updateEmployeeList() {
                 dijit.byId("employeeIdDiv").set('value', null);
                 dojo.byId('employeeId').value = null;
             }
-        });
+
     }
     dijit.byId("employeeIdDiv").set('value', empId);
 }

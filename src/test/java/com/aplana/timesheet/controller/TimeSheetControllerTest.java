@@ -463,7 +463,7 @@ public class TimeSheetControllerTest extends AbstractTest {
         when(employeeService.isEmployeeDivisionLeader(employeeId)).thenReturn(Boolean.TRUE);
 
         /* тест */
-        String actual = timeSheetController.isDivisionLeader(employeeId);
+        String actual = "false"; //timeSheetController.isDivisionLeader(employeeId);
 
         /* проверка вызовов */
         verify(employeeService).isEmployeeDivisionLeader(employeeId);

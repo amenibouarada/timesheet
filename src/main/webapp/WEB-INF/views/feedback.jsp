@@ -118,6 +118,10 @@
 			disableInput('fileDelete2');
 			deleteFile('file2PathContainer');
 		}
+
+        function confirmClearWindow() {
+            return confirm("Вы действительно хотите очистить окно?");
+        }
     </script>
 
 </head>
@@ -144,8 +148,7 @@
             <tr class="time_sheet_row" id="ts_row">
                 <td width="38" class="top_align"> <!-- Тип проблемы -->
                     <form:select path="feedbackType" cssClass="activityType" cssStyle="width: 100%;" id="feedback_type"
-                                 name="feedback_type" onchange="feedbackTypeChange(this);"
-                                 onmouseover="tooltip.show(getTitle(this));" onmouseout="tooltip.hide();">
+                                 name="feedback_type" onmouseover="tooltip.show(getTitle(this));" onmouseout="tooltip.hide();">
                         <fmt:message key="feedback.type.newproposal" var="problemNewProposal"/>
                         <form:option value="1" title="${problemNewProposal}" label="${problemNewProposal}"/>
                         <fmt:message key="feedback.type.incorrectdata" var="problemIncorrectMessage"/>

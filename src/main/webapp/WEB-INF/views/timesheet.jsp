@@ -23,7 +23,6 @@
         var projectList = ${projectListJson};
         var actCategoryList = ${actCategoryListJson};
         var availableActCategoryList = ${availableActCategoriesJson};
-        var employeeList = ${employeeListJson};
         var projectRoleList = ${projectRoleListJson};
         var projectTaskList = ${projectTaskListJson};
         var selectedProjects = ${selectedProjectsJson};
@@ -42,13 +41,13 @@
         var undertimeOtherJsp = +"<%= UndertimeCausesEnum.OTHER.getId() %>";
         var workHolidayOtherJsp = +"<%= WorkOnHolidayCausesEnum.OTHER.getId() %>";
         var overtimeOtherJsp = +"<%= OvertimeCausesEnum.OTHER.getId() %>";
+        var employeeList;
 
         dojo.ready(function () {
             initTimeSheetForm();
         });
     </script>
-    <%--яваскрипт надо писать в timesheetForm.js  --%>
-    <script type="text/javascript" src="<%= request.getContextPath()%>/resources/js/timesheetForm.js"></script>
+    <script type="text/javascript" src="<%= request.getContextPath()%>/resources/js/timesheet.js"></script>
     <link rel="stylesheet" type="text/css" href="<%= request.getContextPath()%>/resources/css/timesheetForm.css">
 </head>
 <body>

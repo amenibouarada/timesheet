@@ -1,11 +1,9 @@
 package com.aplana.timesheet.controller;
 
-import argo.jdom.JsonArrayNodeBuilder;
 import argo.jdom.JsonObjectNodeBuilder;
 import com.aplana.timesheet.dao.entity.Division;
 import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.dao.entity.TimeSheet;
-import com.aplana.timesheet.dao.entity.TimeSheetDetail;
 import com.aplana.timesheet.enums.TypesOfTimeSheetEnum;
 import com.aplana.timesheet.form.TimeSheetForm;
 import com.aplana.timesheet.form.TimeSheetTableRowForm;
@@ -30,7 +28,6 @@ import java.util.List;
 import java.util.Locale;
 
 import static argo.jdom.JsonNodeBuilders.*;
-import static argo.jdom.JsonNodeFactories.*;
 
 @Controller
 public class TimeSheetController {
@@ -298,7 +295,7 @@ public class TimeSheetController {
     public String getJiraIssuesPlannedStr(@RequestParam("employeeId") Integer employeeId,
                                    HttpServletRequest httpServletRequest){
 
-        // Обрабатываю исключение и шлю письмо админами из-за com.aplana.timesheet.system.aspect.ResponceBodyExceptionAspect
+        // Обрабатываю исключение и шлю письмо админам и из-за com.aplana.timesheet.system.aspect.ResponceBodyExceptionAspect
         // TODO узнать зачем com.aplana.timesheet.system.aspect.ResponceBodyExceptionAspect и выпилить его, если что
         try{
             return jiraService.getPlannedIssues(employeeId);
@@ -310,19 +307,6 @@ public class TimeSheetController {
             return "Ошибка при поиске активности в JIRA. Письмо с описанием проблемы было отправлено администраторам.";
         }
     }
-
-    @RequestMapping(value = "/employee/isDivisionLeader", headers = "Accept=application/json")
-    @ResponseBody
-    public String isDivisionLeader(@RequestParam("employeeId") Integer employeeId) {
-        return JsonUtil.format(
-                object(
-                        field(
-                                "isDivisionLeader",
-                                employeeService.isEmployeeDivisionLeader(employeeId) ? trueNode() : falseNode())
-                )
-        );
-    }
-
 
     /**
      * Формирует {@link ModelAndView} с отчетом для timesheet.jsp

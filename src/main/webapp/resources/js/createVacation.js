@@ -76,6 +76,11 @@ require(["dijit/Tooltip", "dojo/domReady!"], function (Tooltip) {
     });
 });
 
+// переопределение метода из timesheet.js, не удалять
+function getEmployeeData() {
+    return dijit.byId("employeeIdSelect").item;
+}
+
 function getEmployeeId() {
     return dojo.byId("employeeId").value;
 }
