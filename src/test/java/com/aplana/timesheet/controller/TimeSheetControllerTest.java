@@ -198,7 +198,7 @@ public class TimeSheetControllerTest extends AbstractTest {
         when(propertyProvider.getUndertimeThreshold()).thenReturn(1D);
         when(divisionService.getDivisions()).thenReturn(divisions);
         when(employeeService.isShowAll((HttpServletRequest) any())).thenReturn(Boolean.TRUE);
-        when(employeeHelper.getEmployeeListWithLastWorkdayJson(divisions, Boolean.TRUE, Boolean.TRUE)).thenReturn(employeeListJSON);
+        //when(employeeHelper.getEmployeeListWithLastWorkdayJson(divisions, Boolean.TRUE, Boolean.TRUE)).thenReturn(employeeListJSON);
         when(dictionaryItemService.getCategoryOfActivity()).thenReturn(categorysOfActivity);
         when(dictionaryItemService.getDictionaryItemsInJson(categorysOfActivity)).thenReturn(categorysOfActivityJSON);
         when(availableActivityCategoryService.getAvailableActCategoriesJson()).thenReturn(availableActCategoriesJSON);
@@ -238,8 +238,8 @@ public class TimeSheetControllerTest extends AbstractTest {
                 List<Division> divisions = divisionService.getDivisions();
                 result.put("divisionList", divisions);
 
-                String employeeListJson = employeeHelper.getEmployeeListWithLastWorkdayJson(divisions, employeeService.isShowAll(request), true);
-                result.put("employeeListJson", employeeListJson);
+                //String employeeListJson = employeeHelper.getEmployeeListWithLastWorkdayJson(divisions, employeeService.isShowAll(request), true);
+                //result.put("employeeListJson", employeeListJson);
 
                 List<DictionaryItem> categoryOfActivity = dictionaryItemService.getCategoryOfActivity();
                 result.put("actCategoryList", categoryOfActivity);
