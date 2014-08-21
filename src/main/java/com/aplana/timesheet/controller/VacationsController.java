@@ -53,17 +53,11 @@ public class VacationsController extends AbstractControllerForEmployee {
     @Autowired
     private DictionaryItemService dictionaryItemService;
 
-    private ModelAndView getMavForDefaultView(VacationsForm vacationsForm){
-        final ModelAndView modelAndView = createMAVForEmployeeWithDivisionAndManagerAndRegion(
-                "vacations", vacationsForm.getEmployeeId(), vacationsForm.getDivisionId());
-        modelAndView.addObject("projectId", vacationsForm.getProjectId() == null ? 0 : vacationsForm.getProjectId());
-        modelAndView.addObject("regionList", regionService.getRegions());
-        modelAndView.addObject("vacationNeedsApprovalCount",
-                vacationService.findVacationsNeedsApprovalCount(getCurrentUser().getId()));
-
-        return modelAndView;
-    }
-
+    /**
+     * Срабатывает при открытии из меню, устанавливает значения по умолчанию
+     * @param vacationsForm
+     * @return
+     */
     @RequestMapping(value = "/vacations", method = RequestMethod.GET)
     public ModelAndView prepareToShowVacations(
             @ModelAttribute(VACATION_FORM) VacationsForm vacationsForm)
@@ -77,7 +71,7 @@ public class VacationsController extends AbstractControllerForEmployee {
         vacationsForm.setRegions(new ArrayList<Integer>());
         vacationsForm.getRegions().add(VacationsForm.ALL_VALUE);
         vacationsForm.setViewMode(VIEW_TABLE);
-        return getMavForDefaultView(vacationsForm);
+        return showVacations(vacationsForm, null);
     }
 
     @RequestMapping(value = "/vacations", method = RequestMethod.POST)
@@ -88,7 +82,13 @@ public class VacationsController extends AbstractControllerForEmployee {
         Date dateFrom = DateTimeUtil.parseStringToDateForDB(vacationsForm.getCalFromDate());
         Date dateTo = DateTimeUtil.parseStringToDateForDB(vacationsForm.getCalToDate());
 
-        final ModelAndView modelAndView = getMavForDefaultView(vacationsForm);
+        final ModelAndView modelAndView = createMAVForEmployeeWithDivisionAndManagerAndRegion(
+                "vacations", vacationsForm.getEmployeeId(), vacationsForm.getDivisionId());
+
+        modelAndView.addObject("projectId", vacationsForm.getProjectId() == null ? 0 : vacationsForm.getProjectId());
+        modelAndView.addObject("regionList", regionService.getRegions());
+        modelAndView.addObject("vacationNeedsApprovalCount",
+                vacationService.findVacationsNeedsApprovalCount(getCurrentUser().getId()));
 
         vacationsFormValidator.validate(vacationsForm, result);
         if (result != null && result.hasErrors()){
@@ -246,5 +246,4 @@ public class VacationsController extends AbstractControllerForEmployee {
                     .withField("message", JsonNodeBuilders.aStringBuilder("Недостаточно прав для выполнения данной операции")));
         }
     }
-
 }
