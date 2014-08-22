@@ -365,4 +365,8 @@ public class VacationDAO {
 
         return query.getResultList();
     }
+
+    public void detach(Vacation vacation) {
+        entityManager.detach(vacation);
+    }
 }

@@ -39,7 +39,6 @@
             </c:forEach>
         </div>
     </c:if>
-
     <span class="label">Подразделение</span>
     <form:select path="divisionId" id="divisionId" class="without_dojo"
                  onmouseover="tooltip.show(getTitle(this));" onmouseout="tooltip.hide();">

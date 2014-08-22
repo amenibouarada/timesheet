@@ -59,7 +59,7 @@ public class ViewReportsController extends AbstractControllerForEmployee {
     @RequestMapping(value = "/viewreports", method = RequestMethod.GET)
     public String sendViewReports() {
         java.util.Calendar calendar = java.util.Calendar.getInstance();
-        return String.format("redirect:/viewreports/%s/%s/%s/%s", securityService.getSecurityPrincipal().getEmployee().getDivision().getId(), securityService.getSecurityPrincipal().getEmployee().getId(), calendar.get(java.util.Calendar.YEAR), calendar.get(java.util.Calendar.MONTH) + 1);
+        return String.format("redirect:/viewreports/%s/%s/%s", securityService.getSecurityPrincipal().getEmployee().getId(), calendar.get(java.util.Calendar.YEAR), calendar.get(java.util.Calendar.MONTH) + 1);
     }
 
     @PostConstruct
@@ -70,9 +70,9 @@ public class ViewReportsController extends AbstractControllerForEmployee {
             logger.error("Cannot load exceptions for padeg module");
     }
 
-    @RequestMapping(value = "/viewreports/{divisionId}/{employeeId}/{year}/{month}")
+
+    @RequestMapping(value = "/viewreports/{employeeId}/{year}/{month}")
     public ModelAndView showDates(
-            @PathVariable("divisionId") Integer divisionId, 
             @PathVariable("employeeId") Integer employeeId, 
             @PathVariable("year") Integer year, 
             @PathVariable("month") Integer month, 
@@ -81,9 +81,83 @@ public class ViewReportsController extends AbstractControllerForEmployee {
             BindingResult result
     ) {
         logger.info("year {}, month {}", year, month);
+
+        Employee employee = employeeService.find(employeeId);
+
+        tsForm.setDivisionId(employee.getDivision().getId());
+
         tsFormValidator.validate(tsForm, result);
 
-        return fillAndGetModelAndView(divisionId, employeeId, year, month);
+        ModelAndView mav = createMAVForEmployeeWithDivision("viewreports", employeeId);
+        mav.addObject("divisionsEmployeesJSON", employeeService.getDivisionsEmployeesJSON());
+
+        mav.addObject("year", year);
+        mav.addObject("month", month);
+        mav.addObject("monthList", DateTimeUtil.getMonthListJson((List<Calendar>) mav.getModel().get(YEARS_LIST), calendarService));
+        List<DayTimeSheet> dayTimeSheets = timeSheetService.findDatesAndReportsForEmployee(employee, year, month);
+        mav.addObject("reports", dayTimeSheets);
+        mav.addObject("durationFact", getDurationFact(dayTimeSheets));
+        mav.addObject("employeeName", Padeg.getFIOPadegFS(employee.getName(), employee.getSex(), PadegConstants.Roditelnyy));
+        mav.addObject(
+                "durationPlan",
+                BigDecimal.valueOf( //todo переделать когда все числа будут BigDecimal
+                        (calendarService.getEmployeeRegionWorkDaysCount(
+                                employee,
+                                year,
+                                month
+                        ) * TimeSheetConstants.WORK_DAY_DURATION * employee.getJobRate())
+                ).setScale(2, BigDecimal.ROUND_HALF_UP)
+        );
+        Date toDate = new Date();
+        Integer curYear = calendarService.getYearFromDate(toDate);
+        Integer curMonth = calendarService.getMonthFromDate(toDate);
+
+        if ((year != curYear) && (month != curMonth)) {
+            toDate = calendarService.getMaxDateMonth(year,month);
+        }
+
+        mav.addObject(
+                "durationPlanToCurrDate",(toDate.after(new Date())) ? 0 :
+                BigDecimal.valueOf(//todo переделать когда все числа будут BigDecimal
+                        (calendarService.getCountWorkDayPriorDate(
+                                employee.getRegion(),
+                                year,
+                                month,
+                                toDate
+                        ) * TimeSheetConstants.WORK_DAY_DURATION * employee.getJobRate())
+                ).setScale(2, BigDecimal.ROUND_HALF_UP)
+        );
+
+        List<EmployeeMonthReportDetail> reportDetails = employeeReportService.getMonthReport(employeeId, year, month);
+
+        int factToCurrentDate = 0;
+        for (EmployeeMonthReportDetail reportDetail : reportDetails){
+            // возьмем строку итого, чтобы получить фактическое отработанное время на текущую дату
+            if (EmployeeMonthReportDetail.ITOGO.equals(reportDetail.getAct_type().getValue())){
+                factToCurrentDate = reportDetail.getFactHours().intValue();
+            }
+        }
+
+        mav.addObject("durationFactToCurrDate", BigDecimal.valueOf(factToCurrentDate).setScale(2, BigDecimal.ROUND_HALF_UP));
+        mav.addObject("reportsDetail", reportDetails);
+
+        viewReportsService.addVacationsForm(mav); //костыль, из за того что адрес для первоначальной загрузки формы отпусков и после применения фильтра один и тот же
+        return mav;
+    }
+
+    private BigDecimal getDurationFact(List<DayTimeSheet> dayTimeSheets) {
+        BigDecimal durationFact = BigDecimal.ZERO;
+        for (Iterator<DayTimeSheet> iterator = dayTimeSheets.iterator(); iterator.hasNext(); ) {
+            DayTimeSheet next = iterator.next();
+            BigDecimal vacationDuration = next.getVacationDay() && next.getWorkDay() ? new BigDecimal(8) : BigDecimal.ZERO;
+            durationFact = durationFact.add(vacationDuration);
+            //если это не черновик
+            if(!next.getStatusHaveDraft())
+                durationFact = durationFact.add(next.getDuration());
+            next.setDuration(next.getDuration().add(vacationDuration).setScale(2, BigDecimal.ROUND_HALF_UP));
+        }
+        durationFact = durationFact.setScale(2, BigDecimal.ROUND_HALF_UP);
+        return durationFact;
     }
 
     @RequestMapping(value = "/deleteReports", method = RequestMethod.POST)
@@ -139,75 +213,5 @@ public class ViewReportsController extends AbstractControllerForEmployee {
         timeSheetService.setReportApprovalData(tsDeleteForm.getReportId(), tsDeleteForm.getComment() ,ReportSendApprovalType.SET_DRAFT);
 
         return String.format("redirect:"+tsDeleteForm.getLink());
-    }
-
-    private ModelAndView fillAndGetModelAndView(Integer divisionId, Integer employeeId, Integer year, Integer month) {
-        ModelAndView mav = createMAVForEmployeeWithDivisionWithYears("viewreports", employeeId, divisionId);
-        mav.addObject("divisionsEmployeesJSON", employeeService.getDivisionsEmployeesJSON());
-        Employee employee = (Employee) mav.getModel().get(EMPLOYEE);
-
-        mav.addObject("year", year);
-        mav.addObject("month", month);
-        mav.addObject("monthList", DateTimeUtil.getMonthListJson((List<Calendar>) mav.getModel().get(YEARS_LIST), calendarService));
-        List<DayTimeSheet> dayTimeSheets = timeSheetService.findDatesAndReportsForEmployee(employee, year, month);
-        mav.addObject("reports", dayTimeSheets);
-        mav.addObject("employeeName", Padeg.getFIOPadegFS(employee.getName(), employee.getSex(), PadegConstants.Roditelnyy));
-        BigDecimal durationFact = BigDecimal.ZERO;
-        for (Iterator<DayTimeSheet> iterator = dayTimeSheets.iterator(); iterator.hasNext(); ) {
-            DayTimeSheet next = iterator.next();
-            BigDecimal vacationDuration = next.getVacationDay() && next.getWorkDay() ? new BigDecimal(8) : BigDecimal.ZERO;
-            durationFact = durationFact.add(vacationDuration);
-            //если это не черновик
-            if(!next.getStatusHaveDraft())
-                durationFact = durationFact.add(next.getDuration());
-            next.setDuration(next.getDuration().add(vacationDuration).setScale(2, BigDecimal.ROUND_HALF_UP));
-        }
-        durationFact = durationFact.setScale(2, BigDecimal.ROUND_HALF_UP);
-        mav.addObject("durationFact", durationFact/*.doubleValue()*/);
-        mav.addObject(
-                "durationPlan",
-                BigDecimal.valueOf( //todo переделать когда все числа будут BigDecimal
-                        (calendarService.getEmployeeRegionWorkDaysCount(
-                                employee,
-                                year,
-                                month
-                        ) * TimeSheetConstants.WORK_DAY_DURATION * employee.getJobRate())
-                ).setScale(2, BigDecimal.ROUND_HALF_UP)
-        );
-        Date toDate = new Date();
-        Integer curYear = calendarService.getYearFromDate(toDate);
-        Integer curMonth = calendarService.getMonthFromDate(toDate);
-
-        if ((year != curYear) && (month != curMonth)) {
-            toDate = calendarService.getMaxDateMonth(year,month);
-        }
-
-        mav.addObject(
-                "durationPlanToCurrDate",(toDate.after(new Date())) ? 0 :
-                BigDecimal.valueOf(//todo переделать когда все числа будут BigDecimal
-                        (calendarService.getCountWorkDayPriorDate(
-                                employee.getRegion(),
-                                year,
-                                month,
-                                toDate
-                        ) * TimeSheetConstants.WORK_DAY_DURATION * employee.getJobRate())
-                ).setScale(2, BigDecimal.ROUND_HALF_UP)
-        );
-
-        List<EmployeeMonthReportDetail> reportDetails = employeeReportService.getMonthReport(employeeId, year, month);
-
-        int factToCurrentDate = 0;
-        for (EmployeeMonthReportDetail reportDetail : reportDetails){
-            // возьмем строку итого, чтобы получить фактическое отработанное время на текущую дату
-            if (EmployeeMonthReportDetail.ITOGO.equals(reportDetail.getAct_type().getValue())){
-                factToCurrentDate = reportDetail.getFactHours().intValue();
-            }
-        }
-
-        mav.addObject("durationFactToCurrDate", BigDecimal.valueOf(factToCurrentDate).setScale(2, BigDecimal.ROUND_HALF_UP));
-        mav.addObject("reportsDetail", reportDetails);
-
-        viewReportsService.addVacationsForm(mav); //костыль, из за того что адрес для первоначальной загрузки формы отпусков и после применения фильтра один и тот же
-        return mav;
     }
 }

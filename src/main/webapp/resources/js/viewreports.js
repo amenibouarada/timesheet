@@ -16,6 +16,7 @@ var widgets = {
 dojo.ready(function () {
     window.focus();
     initWidgets();
+    updateEmployeeSelect();
     reloadViewReportsState();
 
     if (dojo.query('input[id^="delete_"]').length > 0) {
@@ -28,7 +29,7 @@ dojo.ready(function () {
         dojo.query("#deleteAllCheckbox").style("display", "none");
     }
 
-    dojo.on(widgets.division, "change", onDivisionChange);
+    dojo.on(widgets.division, "change", updateEmployeeSelect);
 
     dojo.connect(dijit.byId('sendDeleteReportDialog').closeButtonNode, "onclick", function (evt) {
         clearDeleteForm();
@@ -40,7 +41,6 @@ function initWidgets() {
     widgets.division = dojo.byId('divisionId');
     widgets.month = dojo.byId('month');
     widgets.year = dojo.byId('year');
-    onDivisionChange();
 }
 
 /* По умолчанию отображается текущий год и месяц. */
@@ -59,64 +59,76 @@ function reloadViewReportsState() {
     }
 }
 
-function onDivisionChange() {
-    var divisionId = widgets.division.value;
-    if (divisionsEmployeesJSON.length > 0) {
-        dojo.forEach(dojo.filter(divisionsEmployeesJSON, function (division) {
-            return (division.divisionId == divisionId);
-        }), function (divisionData) {
-            var employeesArray = [];
-            dojo.forEach(divisionData.employees, function (employeeData) {
-                employeesArray.push(employeeData);
-            });
-            employeesArray.sort(function (a, b) {
-                return (a.name < b.name) ? -1 : 1;
-            });
+function updateEmployeeSelect() {
+    var divisionId =  widgets.division.value;
 
-            var employeeDataStore = new dojo.data.ObjectStore({
-                objectStore: new dojo.store.Memory({
-                    data: employeesArray,
-                    idProperty: 'employeeId'
-                })
-            });
+    dojo.xhrGet({
+        url: getContextPath() + "/employee/employeeListWithLastWorkday/" + divisionId + "/true/true",
+        handleAs: "json",
+        timeout: 10000,
+        sync: true,
+        preventCache: false,
+        headers: {  'Content-Type': 'application/json;Charset=UTF-8',
+            "Accept": "application/json;Charset=UTF-8"},
+        load: function (data) {
+            refreshEmployeeSelect(data);
+        },
 
-            var employeeFilteringSelect = dijit.byId("employeeId");
+        error: function (error) {
+            console.log(error);
+            handleError(error.message);
+        }
+    });
+}
 
-            if (!employeeFilteringSelect) {
-                employeeFilteringSelect = new dijit.form.FilteringSelect({
-                    id: "employeeId",
-                    name: "employeeId",
-                    store: employeeDataStore,
-                    searchAttr: 'name',
-                    queryExpr: "*\${0}*",
-                    ignoreCase: true,
-                    autoComplete: false,
-                    style: 'width:200px',
-                    required: true,
-                    onChange: function () {
-                        onChangeEmployee(this.value);
-                    },
-                    onMouseOver: function () {
-                        tooltip.show(getTitle(this));
-                    },
-                    onMouseOut: function () {
-                        tooltip.hide();
-                    }
-                }, "employeeId");
-                employeeFilteringSelect.startup();
-                widgets.employee = employeeFilteringSelect;
-            } else {
-                employeeFilteringSelect.set('store', employeeDataStore);
-                widgets.employee.set('value', null);
+
+function refreshEmployeeSelect(employeeList) {
+    employeeList.sort(function (a, b) {
+        return (a.value < b.value) ? -1 : 1;
+    });
+
+    var employeeDataStore = new dojo.data.ObjectStore({
+        objectStore: new dojo.store.Memory({
+            data: employeeList,
+            idProperty: 'id'
+        })
+    });
+
+    var employeeFilteringSelect = dijit.byId("employeeId");
+
+    if (!employeeFilteringSelect) {
+        employeeFilteringSelect = new dijit.form.FilteringSelect({
+            id: "employeeId",
+            name: "employeeId",
+            store: employeeDataStore,
+            searchAttr: 'value',
+            queryExpr: "*\${0}*",
+            ignoreCase: true,
+            autoComplete: false,
+            style: 'width:200px',
+            required: true,
+            onChange: function () {
+                onChangeEmployee();
+            },
+            onMouseOver: function () {
+                tooltip.show(getTitle(this));
+            },
+            onMouseOut: function () {
+                tooltip.hide();
             }
-        });
+        }, "employeeId");
+        employeeFilteringSelect.startup();
+        widgets.employee = employeeFilteringSelect;
+    } else {
+        employeeFilteringSelect.set('store', employeeDataStore);
+        widgets.employee.set('value', null);
     }
 
 
     widgets.employee.set('value', employeeIdJsp);
 }
 
-function onChangeEmployee(empId) {
+function onChangeEmployee() {
     if (widgets.employee.item && !isUndefinedNullNaN(widgets.employee.item.birthday) && widgets.employee.item.birthday != ''){
         dojo.byId('employeeBirthday').innerHTML = birthday;
         dojo.byId('employeeBirthday').hidden = false;
@@ -166,29 +178,28 @@ function decYear() {
 }
 
 function showDates() {
-    var empId = widgets.employee.value;
+    var empId = widgets.employee.item != null ? widgets.employee.item.id : null;
     var year = widgets.year.value;
-    var divisionId = dojo.byId("divisionId").value;
     var month = widgets.month.value;
-    if (year != null && year != 0 && month != null && month != 0 && divisionId != null && divisionId != 0 && empId != null && empId != 0) {
-        viewReportsForm.action = getContextPath() + "/viewreports/" + divisionId + "/" + empId + "/" + year + "/" + month;
-        viewReportsForm.submit();
-    } else {
-        var error = "";
-        if (year == 0 || year == null) {
-            error += ("Необходимо выбрать год и месяц!\n");
-        }
-        else if (month == 0 || month == null) {
-            error += ("Необходимо выбрать месяц!\n");
-        }
-        if (divisionId == 0 || divisionId == null) {
-            error += ("Необходимо выбрать подразделение и сотрудника!\n");
-        }
-        else if (empId == 0 || empId == null) {
-            error += ("Необходимо выбрать сотрудника!\n");
-        }
-        alert(error);
+
+    var error = "";
+    if (year == 0 || year == null) {
+        error += ("Необходимо выбрать год и месяц!\n");
     }
+    if (month == 0 || month == null) {
+        error += ("Необходимо выбрать месяц!\n");
+    }
+    if (empId == 0 || empId == null) {
+        error += ("Необходимо выбрать сотрудника!\n");
+    }
+
+    if (error) {
+        alert(error);
+        return;
+    }
+
+    viewReportsForm.action = getContextPath() + "/viewreports/" + empId + "/" + year + "/" + month;
+    viewReportsForm.submit();
 }
 
 function yearChange(obj) {

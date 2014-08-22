@@ -439,8 +439,7 @@ public class SendMailService {
             if (project != null && project.getManager() != null &&
                     TypesOfActivityEnum.isProjectOrPresale(
                             EnumsUtils.tryFindById(timeSheetDetail.getActType().getId(), TypesOfActivityEnum.class)
-                    )
-                    ) {
+                    )) {
                 emails.add(project.getManager().getEmail());
             }
         }

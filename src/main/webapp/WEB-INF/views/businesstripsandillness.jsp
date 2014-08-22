@@ -1,5 +1,4 @@
 <%@ page import="static com.aplana.timesheet.form.BusinessTripsAndIllnessForm.*" %>
-<%@ page import="static com.aplana.timesheet.util.ResourceUtils.getResRealPath" %>
 <%@page contentType="text/html" pageEncoding="UTF-8" %>
 
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
@@ -28,8 +27,8 @@
 
         function saveForm() {
             <sec:authorize access="hasRole('CHANGE_ILLNESS_BUSINESS_TRIP')">
-                businesstripsandillness.action = getContextPath() + "/businesstripsandillnessadd/" + empId;
-                businesstripsandillness.submit();
+                dojo.byId("businesstripsandillness").action = getContextPath() + "/businesstripsandillnessadd/" + empId;
+                dojo.byId("businesstripsandillness").submit();
             </sec:authorize>
         }
     </script>
@@ -119,7 +118,7 @@
             </td>
             <td colspan="2">
                 <div class="floatleft lowspace">
-                    <button id="show" class="butt block " onclick="showBusinessTripsAndIllnessReport()">
+                    <button id="show" class="butt block" type="button" onclick="showBusinessTripsAndIllnessReport()">
                         Показать
                     </button>
                 </div>

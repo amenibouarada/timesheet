@@ -258,14 +258,11 @@ function updateProject() {
     else {
         document.getElementById("businesstripproject").className = 'onblock';
         document.getElementById("projectId").disabled = false;
-        var beginDate = dojo.byId("beginDate").value;
-        var endDate = dojo.byId("endDate").value;
         var projectIdElement = dojo.byId("projectId");
-        var employeeId = getEmployeeId();
         projectIdElement.innerHTML = loadingImageUrl;
 
         dojo.xhrGet({
-            url: getContextPath() + "/businesstripsandillnessadd/getprojects/" + employeeId + "/" + beginDate + "/" + endDate + "/",
+            url: getContextPath() + "/businesstripsandillnessadd/getprojects",
             handleAs: "json",
 
             load: function (data) {

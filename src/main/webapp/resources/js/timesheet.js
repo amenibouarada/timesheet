@@ -114,7 +114,7 @@ function updateEmployeeSelect() {
         checkIsVacationDay();
     } else {
         dojo.xhrGet({
-            url: getContextPath() + "/employee/employeeListWithLastWorkday/" + divisionId,
+            url: getContextPath() + "/employee/employeeListWithLastWorkday/" + divisionId + "/true/true",
             handleAs: "json",
             timeout: 10000,
             sync: true,
@@ -127,7 +127,6 @@ function updateEmployeeSelect() {
             },
 
             error: function (error) {
-                console.log(error);
                 handleError(error.message);
             }
         });

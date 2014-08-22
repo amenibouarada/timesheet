@@ -29,7 +29,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.BindingResult;
 
 import javax.annotation.Nullable;
 import java.sql.Timestamp;
@@ -37,6 +36,7 @@ import java.util.*;
 import java.util.Calendar;
 
 import static argo.jdom.JsonNodeBuilders.*;
+import static argo.jdom.JsonNodeBuilders.aStringBuilder;
 import static com.aplana.timesheet.form.VacationsForm.ALL_VALUE;
 import static com.aplana.timesheet.util.DateTimeUtil.VIEW_DATE_PATTERN;
 import static com.aplana.timesheet.util.DateTimeUtil.dateToString;
@@ -143,8 +143,16 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
         vacationDAO.delete(vacation);
     }
 
+
     @Transactional
-    public void deleteVacation(Integer vacationId) {
+    public void detach(Vacation vacation) {
+        vacationDAO.detach(vacation);
+    }
+
+    @Transactional
+    public String deleteVacation(Integer vacationId) {
+        final JsonArrayNodeBuilder builder = anArrayBuilder();
+        String message = null;
         final Vacation vacation = tryFindVacation(vacationId);
 
         if (vacation == null) { // если вдруг удалил автор, а не сотрудник
@@ -160,13 +168,17 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
             } else {
                 sendMailService.performVacationDeletedMailing(vacation);    //todo переделать, чтобы рассылка все-таки была после удаления?
             }
-
             delete(vacation);
         } else {
-            throw new DeleteVacationException(String.format(
-                    "Нельзя удалить заявление на отпуск. Для удаления данного заявления " +
-                            "необходимо написать на timesheet@aplana.com"));
+            message = "Нельзя удалить заявление на отпуск. Для удаления данного заявления необходимо написать на timesheet@aplana.com";
         }
+
+        builder.withElement(
+                anObjectBuilder().
+                        withField("status", aNumberBuilder(message == null ? "0" : "-1")).
+                        withField("message", aStringBuilder(message == null ? "" : message)));
+
+        return JsonUtil.format(builder);
     }
 
     public int getVacationsWorkdaysCount(Employee employee, Integer year, Integer month, VacationStatusEnum status) {
@@ -499,29 +511,6 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
                 withField("isApproved", JsonNodeBuilders.aTrueBuilder()));
     }
 
-    public void deleteVacationOrApproval(BindingResult result, VacationsForm vacationsForm) {
-        Integer vacationId = vacationsForm.getVacationId();
-        Integer approvalId = vacationsForm.getApprovalId();
-        // если передан айдишник отпуска, то удаляем отпуск
-        if (vacationId != null) {
-            try {
-                deleteVacation(vacationId);
-                vacationsForm.setVacationId(null);
-            } catch (DeleteVacationException ex) {
-                result.rejectValue("vacationId", "error.vacations.deletevacation.failed", ex.getLocalizedMessage());
-            }
-        }
-        // если согласование, то удаляем согласование
-        if (vacationId == null && approvalId != null) {
-            try {
-                vacationApprovalService.deleteVacationApprovalByIdAndCheckIsApproved(approvalId);
-                vacationsForm.setApprovalId(null);
-            } catch (VacationApprovalServiceException e) {
-                result.rejectValue("approvalID", "error.vacations.deletevacation.failed", e.getLocalizedMessage());
-            }
-        }
-    }
-
     public Map<Vacation, Integer> getCalDays(List<Vacation> vacations) {
         Map<Vacation, Integer> calDays = new HashMap<Vacation, Integer>(vacations.size());
         for (Vacation vacation : vacations) {
@@ -577,7 +566,7 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
             Integer daysInVacation = entry.getValue();
             if (VacationStatusEnum.APPROVED.getId() == vacation.getStatus().getId() ||
                     VacationTypesEnum.PLANNED.getId() == vacation.getType().getId()
-            ) {
+                    ) {
                 summaryDays += daysInVacation;
             }
         }

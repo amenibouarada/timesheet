@@ -11,7 +11,6 @@
 <html>
 <head>
     <title><fmt:message key="title.createPlanForPeriod" /></title>
-    <script src="<%= getResRealPath("/resources/js/utils.js", application) %>" type="text/javascript"></script>
 
     <style type="text/css">
         table.form td {

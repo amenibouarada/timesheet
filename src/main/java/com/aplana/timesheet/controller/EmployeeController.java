@@ -37,9 +37,11 @@ public class EmployeeController {
         );
     }
 
-    @RequestMapping(value = "/employee/employeeListWithLastWorkday/{divisionId}", headers = "Accept=application/json", method = RequestMethod.GET)
+    @RequestMapping(value = "/employee/employeeListWithLastWorkday/{divisionId}/{filterFired}/{addDetails}", headers = "Accept=application/json", method = RequestMethod.GET)
     @ResponseBody
-    public String getEmployeeListWithLastWorkdayForDivisionJson(@PathVariable("divisionId") Integer divisionId, HttpServletRequest request) {
-        return employeeHelper.getEmployeeListWithLastWorkdayForDivisionJson(divisionId, employeeService.isShowAll(request), true);
+    public String getEmployeeListWithLastWorkdayForDivisionJson(@PathVariable("divisionId") Integer divisionId,
+                                                                @PathVariable("filterFired") Boolean filterFired,
+                                                                @PathVariable("addDetails") Boolean addDetails) {
+        return employeeHelper.getEmployeeListWithLastWorkdayForDivisionJson(divisionId,filterFired, addDetails);
     }
 }
