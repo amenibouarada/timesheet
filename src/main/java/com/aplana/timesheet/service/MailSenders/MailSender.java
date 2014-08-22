@@ -30,19 +30,19 @@ public class MailSender<T> {
     protected ManagerRoleNameService managerRoleNameService;
     protected OvertimeCauseService overtimeCauseService;
 
-    public MailSender(SendMailService sendMailService, TSPropertyProvider propertyProvider) { //TODO костыль
+    public MailSender(SendMailService sendMailService, TSPropertyProvider propertyProvider) {
         this.sendMailService = sendMailService;
         this.propertyProvider = propertyProvider;
     }
 
-    public MailSender(SendMailService sendMailService, TSPropertyProvider propertyProvider, OvertimeCauseService overtimeCauseService) { //TODO костыль
+    public MailSender(SendMailService sendMailService, TSPropertyProvider propertyProvider, OvertimeCauseService overtimeCauseService) {
         this.sendMailService = sendMailService;
         this.propertyProvider = propertyProvider;
         this.overtimeCauseService = overtimeCauseService;
     }
 
     public MailSender(SendMailService sendMailService, TSPropertyProvider propertyProvider,
-                      VacationApprovalService vacationApprovalService, ManagerRoleNameService managerRoleNameService) { //TODO костыль
+                      VacationApprovalService vacationApprovalService, ManagerRoleNameService managerRoleNameService) {
         this.sendMailService = sendMailService;
         this.propertyProvider = propertyProvider;
         this.vacationApprovalService = vacationApprovalService;

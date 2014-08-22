@@ -115,7 +115,7 @@ public class CalendarController extends AbstractController {
 
     @RequestMapping(value = "/calendar/vacationDatesPlanned", headers = "Accept=application/json")
     @ResponseBody
-    public String vacationDatesPlanned(    //todo нужно удалить этот метод, и его вызов на createVacation.jsp
+    public String vacationDatesPlanned(
             @RequestParam("queryYear") Integer queryYear,
             @RequestParam("queryMonth") Integer queryMonth,
             @RequestParam("employeeId") Integer employeeId

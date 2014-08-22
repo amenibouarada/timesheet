@@ -111,7 +111,7 @@ public abstract class BaseReport implements TSJasperReport {
         if (regionNames == null) {
             return "Все";
         }
-		for(String rName : regionNames) {
+		for( String rName : regionNames) {
 			if(first) {
 				first = false;
 			} else {

@@ -1102,9 +1102,8 @@ function divisionChange(obj) {
     var activityType;
     for (var i = 0; i < rows.length; i++) {
         activityType = dojo.byId("activity_type_id_" + i).value;
-        //TODO "42", "12" и т.д. надо заменить на енум
-        if ((activityType == "12") || (activityType == "42")){
-            fillProjectList(i, "12");
+        if ((activityType == EnumConstants.TypesOfActivityEnum.PROJECT) || (activityType == EnumConstants.TypesOfActivityEnum.PROJECT_PRESALE)){
+            fillProjectList(i, EnumConstants.TypesOfActivityEnum.PROJECT);
         }else{
             fillProjectList(i, activityType);
         }
@@ -1116,7 +1115,7 @@ function divisionChange(obj) {
  */
 function isEnableTaskSelect(rowIndex){
     var typeActivitySelect = dojo.byId("activity_type_id_" + rowIndex);
-    return typeActivitySelect.value != "14";
+    return typeActivitySelect.value != EnumConstants.TypesOfActivityEnum.NON_PROJECT;
 }
 
 /*
@@ -1148,10 +1147,10 @@ function typeActivityChange(obj) {
         dojo.removeAttr(workPlaceIdEl, "disabled");
         dojo.removeAttr(projectIdEl, "disabled");
         dojo.removeAttr(projectRoleIdEl, "disabled");
-        if (select.value == "13"){
+        if (select.value == EnumConstants.TypesOfActivityEnum.PRESALE){
             fillProjectList(rowIndex, select.value);
         }else{
-            fillProjectList(rowIndex, "12");
+            fillProjectList(rowIndex, EnumConstants.TypesOfActivityEnum.PROJECT);
         }
     }
 

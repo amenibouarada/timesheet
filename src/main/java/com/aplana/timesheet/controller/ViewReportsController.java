@@ -100,7 +100,7 @@ public class ViewReportsController extends AbstractControllerForEmployee {
         mav.addObject("employeeName", Padeg.getFIOPadegFS(employee.getName(), employee.getSex(), PadegConstants.Roditelnyy));
         mav.addObject(
                 "durationPlan",
-                BigDecimal.valueOf( //todo переделать когда все числа будут BigDecimal
+                BigDecimal.valueOf(
                         (calendarService.getEmployeeRegionWorkDaysCount(
                                 employee,
                                 year,
@@ -118,7 +118,7 @@ public class ViewReportsController extends AbstractControllerForEmployee {
 
         mav.addObject(
                 "durationPlanToCurrDate",(toDate.after(new Date())) ? 0 :
-                BigDecimal.valueOf(//todo переделать когда все числа будут BigDecimal
+                BigDecimal.valueOf(
                         (calendarService.getCountWorkDayPriorDate(
                                 employee.getRegion(),
                                 year,
