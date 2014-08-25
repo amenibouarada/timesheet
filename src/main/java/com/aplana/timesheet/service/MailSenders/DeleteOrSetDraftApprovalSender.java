@@ -7,6 +7,7 @@ import com.aplana.timesheet.service.SendMailService;
 import com.aplana.timesheet.system.constants.PadegConstants;
 import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.util.DateTimeUtil;
+import org.apache.commons.lang.StringUtils;
 import padeg.lib.Padeg;
 
 import javax.mail.Multipart;
@@ -72,7 +73,7 @@ public class DeleteOrSetDraftApprovalSender extends MailSender<TimeSheet> {
                 fio));
 
         String comment = deleteTimeSheetApproval.getDeleteSendApprovalComment();
-        if (comment != null) {
+        if (StringUtils.isNotBlank(comment)) {
             body.append(String.format(" Комментарий: %s", comment));
         }
 
