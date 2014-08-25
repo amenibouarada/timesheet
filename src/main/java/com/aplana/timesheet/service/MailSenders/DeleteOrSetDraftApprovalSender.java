@@ -66,13 +66,17 @@ public class DeleteOrSetDraftApprovalSender extends MailSender<TimeSheet> {
 
         mail.setSubject(propertyProvider.getDeleteOrSetDraftApprovalMarker() + subject);
 
-        String body = String.format("Необходимо выполнить %s отчета за %s сотрудника %s \r\n. Комментарий: %s",
+        StringBuilder body = new StringBuilder(String.format("Необходимо выполнить %s отчета за %s сотрудника %s.",
                 deleteTimeSheetApproval.getReportSendApprovalType().getName(),
                 date,
-                fio,
-                deleteTimeSheetApproval.getDeleteSendApprovalComment());
+                fio));
 
-        mail.setPreconstructedMessageBody(body);
+        String comment = deleteTimeSheetApproval.getDeleteSendApprovalComment();
+        if (comment != null) {
+            body.append(String.format(" Комментарий: %s", comment));
+        }
+
+        mail.setPreconstructedMessageBody(body.toString());
 
         return Arrays.asList(mail);
     }

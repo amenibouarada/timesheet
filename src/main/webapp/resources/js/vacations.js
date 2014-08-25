@@ -1,5 +1,4 @@
 function showGraphic(type) {
-
     // запомним режим просмотра
     var selectedTabInput = dojo.byId(VIEW_MODE);
     selectedTabInput.value = type;
@@ -220,7 +219,7 @@ function approveVacation(vac_id, beginDate, endDate, type) {
             var jsonData = dojo.fromJson(data);
             console.log(jsonData);
             if (jsonData.isApproved) {
-                document.location = contextPath + "/vacations";
+                location.reload();
             } else {
                 alert(jsonData.message);
             }
