@@ -276,30 +276,30 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
         return !vacation.getStatus().getId().equals(VacationStatusEnum.APPROVED.getId());
     }
 
-    public String getExitToWorkAndCountVacationDayJson(String beginDate, String endDate, Integer employeeId, Integer vacationTypeId) {
+    public String getExitToWorkAndCountVacationDayJson(String beginDateString,
+                                                       String endDateString,
+                                                       Integer employeeId,
+                                                       Integer vacationTypeId
+    ) {
         final JsonObjectNodeBuilder builder = anObjectBuilder();
         try {
-            final Timestamp endDateT = DateTimeUtil.stringToTimestamp(endDate, CreateVacationForm.DATE_FORMAT);
-            final Timestamp beginDateT = DateTimeUtil.stringToTimestamp(beginDate, CreateVacationForm.DATE_FORMAT);
+            Employee employee = employeeService.find(employeeId);
+            final Timestamp endDate = DateTimeUtil.stringToTimestamp(endDateString, CreateVacationForm.DATE_FORMAT);
+            final Timestamp beginDate = DateTimeUtil.stringToTimestamp(beginDateString, CreateVacationForm.DATE_FORMAT);
+            com.aplana.timesheet.dao.entity.Calendar endDateCalendar = calendarService.find(endDate);
             //Получаем день выхода на работу
-            Date nextWorkDay = null;
-            try {
-                nextWorkDay = viewReportHelper.getNextWorkDay(endDateT, employeeId, null);
-            } catch (NotDataForYearInCalendarException e) {
-                String message = e.getMessage();
-                logger.error("Error in getExitToWorkAndCountVacationDayJson : " + message);
-                builder.withField("error", aStringBuilder(message));
-                return JsonUtil.format(builder);
-            }
-            String format = DateFormatUtils.format(nextWorkDay, CreateVacationForm.DATE_FORMAT);
+            com.aplana.timesheet.dao.entity.Calendar nextWorkDay =
+                    calendarService.getNextWorkDay(endDateCalendar, employee.getRegion());
+
+            String format = DateFormatUtils.format(nextWorkDay.getCalDate(), CreateVacationForm.DATE_FORMAT);
             builder.withField("exitDate", aStringBuilder(format));
-            Employee emp = employeeService.find(employeeId);
+
             //Получаем кол-во выходных в отпуске
             final List<Holiday> holidaysForRegion =
-                    calendarService.getHolidaysForRegion(beginDateT, endDateT, emp.getRegion());
-            final Integer holidaysCount = getHolidaysCount(holidaysForRegion, beginDateT, endDateT);
+                    calendarService.getHolidaysForRegion(beginDate, endDate, employee.getRegion());
+            final Integer holidaysCount = getHolidaysCount(holidaysForRegion, beginDate, endDate);
             //Получаем кол-во дней в отпуске
-            Integer vacationDayCount = DateTimeUtil.getAllDaysCount(beginDateT, endDateT).intValue();
+            Integer vacationDayCount = DateTimeUtil.getAllDaysCount(beginDate, endDate).intValue();
             //Получаем кол-во дней в отпуске за исключением выходых
             Integer vacationWorkCount = 0;
             if (vacationDayCount > 0) {
@@ -309,16 +309,15 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
             builder.withField("vacationDayCount", aStringBuilder((vacationDayCount <= 0) ? "0" : vacationDayCount.toString()));
             /* проверка на необходимость вывода информ сообщения о попадании
             *  на пятницу для отпуска с сохранением содержания */
-            if (vacationTypeId != null &&
+            if (    vacationTypeId != null &&
                     vacationTypeId == VacationTypesEnum.WITH_PAY.getId() &&
-                    vacationDayCount > propertyProvider.getVacantionFridayInformDays()) {
+                    vacationDayCount > propertyProvider.getVacantionFridayInformDays()
+                    ) {
                 Calendar calendar = new GregorianCalendar();
-                calendar.setTime(endDateT);
-
+                calendar.setTime(endDate);
                 if (calendar.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY)
                     builder.withField("vacationFridayInform", aStringBuilder("true"));
             }
-
             return JsonUtil.format(builder);
         } catch (Exception th) {
             logger.error(CANT_GET_EXIT_TO_WORK_EXCEPTION_MESSAGE, th);

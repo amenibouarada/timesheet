@@ -208,34 +208,4 @@ public class ViewReportHelper {
         checkVacationDay(year, month, vacationsPlanned, vacationDates, PLANNED_VACATION_MARK);
         return vacationDates;
     }
-
-    /**
-     * Рекурсивный поиск даты выхода на работу
-     * @param dayEndVacation дата окончания отпуска
-     * @param employeeId
-     * @param inVacationDates при вызове метода передавать null, мапа необходима для рекурсивного вызова
-     * @return дату выхода на работу без учета
-     */
-    public Date getNextWorkDay(Date dayEndVacation, Integer employeeId, Map<Date, Integer> inVacationDates) throws NotDataForYearInCalendarException {
-        java.util.Calendar mycal = java.util.Calendar.getInstance();
-        mycal.setTime(dayEndVacation);
-        Integer month = mycal.get(java.util.Calendar.MONTH) + 1;
-        Integer year = mycal.get(java.util.Calendar.YEAR);
-        if (inVacationDates == null) {
-            inVacationDates = getVacationWithPlannedMap(year, month, employeeId, false);
-        }
-        Date nextDay = DateUtils.addDays(dayEndVacation, 1);
-        mycal.setTime(nextDay);
-        Integer nextMonth = mycal.get(java.util.Calendar.MONTH) + 1;
-        if (inVacationDates.size() > 0) {
-            if (inVacationDates.get(nextDay) != null && (inVacationDates.get(nextDay).equals(TYPICAL_DAY_MARK) || inVacationDates.get(nextDay).equals(PREVIOUS_DAY_MARK))) {
-                return nextDay;
-            } else {
-                return getNextWorkDay(nextDay, employeeId, !nextMonth.equals(month) ? null : inVacationDates);
-            }
-        } else {
-            return null;
-        }
-
-    }
 }
