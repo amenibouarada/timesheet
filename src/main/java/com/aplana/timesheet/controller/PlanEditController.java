@@ -108,10 +108,9 @@ public class PlanEditController {
             @ModelAttribute("year") Integer year,
             @ModelAttribute("month") Integer month,
             @ModelAttribute(PlanEditForm.FORM) PlanEditForm form,
-            BindingResult bindingResult, HttpServletRequest request,
+            HttpServletRequest request,
             HttpServletResponse response
     ) {
-
         final Date date = DateTimeUtil.createDate(year, month);
 
         List<Project> projectList = planEditService.getProjects(form, date);
@@ -119,11 +118,10 @@ public class PlanEditController {
 
         com.aplana.timesheet.dao.entity.Calendar calDate = calendarService.find(new Timestamp(date.getTime()));
 
-        String reportName = "Планирование занятости за "+calDate.getMonthTxt()+" "+year.toString()+" года";
+        String reportName = String.format("Планирование занятости за %s %s года", calDate.getMonthTxt(),year.toString());
 
-        // TODO Спорный способ передавать сюда JSON, чтобы потом его снова разбирать. Переделать
+        //разбирается JSON из за того что может поменяться логика формирования данных планирования
         planEditExcelReportService.createAndExportReport(reportName, dataAsJson, projectList, response, request);
-
         return null;
     }
 

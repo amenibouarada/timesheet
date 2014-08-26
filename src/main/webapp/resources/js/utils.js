@@ -162,7 +162,7 @@ function fillProjectList(rowIndex, projectState) {
                 projectSelect.options.length = 0;
                 insertEmptyOption(projectSelect);
                 for (var j = 0; j < projectList[i].divProjs.length; j++) {
-                    if ((projectList[i].divProjs[j].state == projectState) && (projectList[i].divProjs[j].active == 'true')) {
+                    if ((projectList[i].divProjs[j].state === projectState) && (projectList[i].divProjs[j].active == 'true')) {
                         projectOption = dojo.doc.createElement("option");
                         dojo.attr(projectOption, {
                             value:projectList[i].divProjs[j].id

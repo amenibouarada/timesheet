@@ -41,6 +41,9 @@ public class VacationApproval {
     @Column (name = "result")
     private Boolean result;
 
+    @Column (nullable = true)
+    private String comment;
+
     public String getUid() {
         return uid;
     }
@@ -107,5 +110,13 @@ public class VacationApproval {
         sb.append(", responseDate=").append(responseDate);
         sb.append('}');
         return sb.toString();
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 }

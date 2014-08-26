@@ -1,6 +1,5 @@
 package com.aplana.timesheet.controller;
 
-import com.aplana.timesheet.dao.entity.Calendar;
 import com.aplana.timesheet.dao.entity.Division;
 import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.service.CalendarService;
@@ -53,7 +52,7 @@ public abstract class AbstractControllerForEmployee extends AbstractController{
                 : securityService.getSecurityPrincipal().getEmployee();
     }
 
-    private ModelAndView getCommonModelAndView(String viewName, Integer employeeId, Integer divisionId) {
+    protected ModelAndView getCommonModelAndView(String viewName, Integer employeeId, Integer divisionId) {
         List<Division> divisionList = divisionService.getDivisions();
         final ModelAndView modelAndView = new ModelAndView(viewName);
         modelAndView.addObject("divisionId", divisionId);
@@ -65,29 +64,11 @@ public abstract class AbstractControllerForEmployee extends AbstractController{
         return modelAndView;
     }
 
-    protected ModelAndView createMAVForEmployeeWithDivisionAndManagerAndRegion(String viewName, Integer employeeId, Integer divisionId) {
-        List<Division> divisionList = divisionService.getDivisions();
-        final ModelAndView modelAndView = getCommonModelAndView(viewName, employeeId, divisionId);
-        modelAndView.addObject("employeeListJson",
-                employeeHelper.getEmployeeListWithDivisionAndManagerAndRegionJson(divisionList, employeeService.isShowAll(request)));
-
-        return modelAndView;
-    }
-
-    protected ModelAndView createMAVForEmployeeWithDivision(String viewName, Integer employeeId, Integer divisionId) {
-        List<Division> divisionList = divisionService.getDivisions();
+    protected ModelAndView createMAVForEmployeeWithDivision(String viewName, Integer employeeId) {
         final ModelAndView modelAndView = new ModelAndView(viewName);
         modelAndView.addObject("employeeId", employeeId);
         modelAndView.addObject("divisionList", divisionService.getDivisions());
         modelAndView.addObject(EMPLOYEE, employeeService.find(employeeId));
-        modelAndView.addObject("employeeListJson",
-                employeeHelper.getEmployeeListWithDivisionAndManagerAndRegionJson(divisionList, employeeService.isShowAll(request)));
-
-        return modelAndView;
-    }
-
-    protected final ModelAndView createMAVForEmployeeWithDivisionWithYears(String viewName, Integer employeeId, Integer divisionId) {
-        final ModelAndView modelAndView = createMAVForEmployeeWithDivision(viewName, employeeId, divisionId);
         modelAndView.addObject(YEARS_LIST, DateTimeUtil.getYearsList(calendarService));
         return modelAndView;
     }

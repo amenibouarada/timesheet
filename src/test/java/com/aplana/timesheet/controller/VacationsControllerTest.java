@@ -231,7 +231,6 @@ public class VacationsControllerTest extends AbstractTest {
     }
 
     @Test
-    // ToDo неплохо было бы протестировать AbstractControllerForEmployee
     public void testShowVacations(){
 
         vacationsForm.setDivisionId(division.getId());

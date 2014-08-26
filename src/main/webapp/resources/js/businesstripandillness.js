@@ -18,7 +18,6 @@ dojo.ready(function () {
     updateManagerList();
 
     if (dojo.byId("regions").value != -1) {
-        sortEmployee();
         selectedAllRegion = false;
     } else {
         selectedAllRegion = true;
@@ -55,38 +54,35 @@ function showBusinessTripsAndIllnessReport() {
     var dateFrom = dojo.byId("dateFrom").value;
     var dateTo = dojo.byId("dateTo").value
 
-    var regionsValid = getSelectedIndexes(dojo.byId("regions")).length > 0;
+    var error = "";
+    if (dateFrom == null || dateFrom == undefined || dateFrom == "") {
+        error += ("Необходимо выбрать дату начало периода!\n");
+    }
 
-    var datesValid = (dateFrom != null && dateFrom != undefined && dateFrom != "") && (dateTo != null && dateTo != undefined && dateTo != "") && (dateFrom <= dateFrom);
+    if (dateTo == null || dateTo == undefined || dateTo == "") {
+        error += ("Необходимо выбрать дату окончания периода!\n");
+    }
 
-    if (datesValid && divisionId != null && divisionId != 0 && empId != null && empId != 0 && regionsValid) {
-        businesstripsandillness.action = getContextPath() + "/businesstripsandillness/"
-            + divisionId + "/" + empId;
-        businesstripsandillness.submit();
-    } else {
-        var error = "";
-        if (dateFrom == null || dateFrom == undefined || dateFrom == "") {
-            error += ("Необходимо выбрать дату начало периода!\n");
-        }
+    if (dateFrom > dateTo) {
+        error += ("Дата окончания периода должна быть больше даты начала периода!\n");
+    }
 
-        if (dateTo == null || dateTo == undefined || dateTo == "") {
-            error += ("Необходимо выбрать дату окончания периода!\n");
-        }
+    if (divisionId == 0 || divisionId == null) {
+        error += ("Необходимо выбрать подразделение и сотрудника!\n");
+    }
+    else if (empId == 0 || empId == null) {
+        error += ("Необходимо выбрать сотрудника!\n");
+    }
+    if ( getSelectedIndexes(dojo.byId("regions")).length == 0) {
+        error += ("Необходимо выбрать регион или несколько регионов!\n");
+    }
 
-        if (dateFrom > dateTo) {
-            error += ("Дата окончания периода должна быть больше даты начала периода!\n");
-        }
-
-        if (divisionId == 0 || divisionId == null) {
-            error += ("Необходимо выбрать подразделение и сотрудника!\n");
-        }
-        else if (empId == 0 || empId == null) {
-            error += ("Необходимо выбрать сотрудника!\n");
-        }
-        if (!regionsValid) {
-            error += ("Необходимо выбрать регион или несколько регионов!\n");
-        }
+    if (error) {
         alert(error);
+    } else {
+        dojo.byId("businesstripsandillness").action = getContextPath() + "/businesstripsandillness/"
+            + divisionId + "/" + empId;
+        dojo.byId("businesstripsandillness").submit();
     }
 }
 
@@ -215,7 +211,7 @@ function updateManagerList() {
 }
 
 function getSelectedIndexes(multiselect) {
-    var arrIndexes = new Array;
+    var arrIndexes = [];
     for (var i = 0; i < multiselect.options.length; i++) {
         if (multiselect.options[i].selected) arrIndexes.push(i);
     }
@@ -225,7 +221,7 @@ function getSelectedIndexes(multiselect) {
 function updateEmployeeList() {
     var divisionId = dojo.byId('divisionId').value;
     dojo.xhrGet({
-        url: getContextPath() + "/employee/employeeListWithLastWorkday/" + divisionId,
+        url: getContextPath() + "/employee/employeeListWithLastWorkday/" + divisionId + "/true/true",
         handleAs: "json",
         timeout: 10000,
         sync: true,

@@ -105,7 +105,7 @@ public class CreateVacationFormValidator extends AbstractValidator {
                     );
                 }
 
-                if (!isAdmin && VacationTypesEnum.WITH_NEXT_WORKING.getId() == createVacationForm.getVacationType().intValue()){
+                if (!isAdmin && VacationTypesEnum.WITH_NEXT_WORKING.getId() == createVacationForm.getVacationType()){
                     errors.rejectValue(
                             "calToDate",
                             "error.createVacation.rights.notadmin",

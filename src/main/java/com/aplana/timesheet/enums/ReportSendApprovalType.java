@@ -7,7 +7,7 @@ package com.aplana.timesheet.enums;
 public enum ReportSendApprovalType {
 
     DELETE(0, "удаление"),
-    SET_DRAFT(1, "перевод отчета в черновики");
+    SET_DRAFT(1, "перевод в черновики");
 
     Integer id;
     String name;

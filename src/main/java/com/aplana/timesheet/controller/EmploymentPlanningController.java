@@ -125,7 +125,6 @@ public class EmploymentPlanningController{
                     employeeProjectPlanService.updateEmployeeProjectPlan(employeeId, form, value);
                 }
                 catch(NumberFormatException nfe){
-                    //TODO something
                     throw new RuntimeException(nfe);
                 }
             }

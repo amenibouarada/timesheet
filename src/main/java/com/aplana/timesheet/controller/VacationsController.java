@@ -1,7 +1,6 @@
 package com.aplana.timesheet.controller;
 
 import argo.jdom.JsonNodeBuilders;
-import com.aplana.timesheet.dao.DictionaryItemDAO;
 import com.aplana.timesheet.dao.entity.*;
 import com.aplana.timesheet.enums.DictionaryEnum;
 import com.aplana.timesheet.enums.VacationStatusEnum;
@@ -52,6 +51,8 @@ public class VacationsController extends AbstractControllerForEmployee {
     private SecurityService securityService;
     @Autowired
     private DictionaryItemService dictionaryItemService;
+    @Autowired
+    private VacationApprovalService vacationApprovalService;
 
     /**
      * Срабатывает при открытии из меню, устанавливает значения по умолчанию
@@ -82,8 +83,11 @@ public class VacationsController extends AbstractControllerForEmployee {
         Date dateFrom = DateTimeUtil.parseStringToDateForDB(vacationsForm.getCalFromDate());
         Date dateTo = DateTimeUtil.parseStringToDateForDB(vacationsForm.getCalToDate());
 
-        final ModelAndView modelAndView = createMAVForEmployeeWithDivisionAndManagerAndRegion(
-                "vacations", vacationsForm.getEmployeeId(), vacationsForm.getDivisionId());
+        final ModelAndView modelAndView = getCommonModelAndView(
+                "vacations",
+                vacationsForm.getEmployeeId(),
+                vacationsForm.getDivisionId()
+        );
 
         modelAndView.addObject("projectId", vacationsForm.getProjectId() == null ? 0 : vacationsForm.getProjectId());
         modelAndView.addObject("regionList", regionService.getRegions());
@@ -93,13 +97,6 @@ public class VacationsController extends AbstractControllerForEmployee {
         vacationsFormValidator.validate(vacationsForm, result);
         if (result != null && result.hasErrors()){
             return modelAndView;
-        }
-
-        // iziyangirov ToDo перенести в другой контроллер
-        // удаление отпуска или согласования, результат операций вернется в result
-        vacationService.deleteVacationOrApproval(result, vacationsForm);
-        if (result != null && result.hasErrors()){
-            return prepareToShowVacations(new VacationsForm());
         }
 
         final List<Vacation> vacations = vacationService.getVacationList(vacationsForm);
@@ -143,22 +140,25 @@ public class VacationsController extends AbstractControllerForEmployee {
         return modelAndView;
     }
 
+    @RequestMapping(value = "/vacations/deleteVacation/{vacationID}", method = RequestMethod.GET)
+    @ResponseBody
+    public String deleteVacation(@PathVariable("vacationID") Integer vacationID) {
+        return vacationService.deleteVacation(vacationID);
+    }
+
+
+    @RequestMapping(value = "/vacations/deleteVacationApproval/{approvalId}", method = RequestMethod.GET)
+    @ResponseBody
+    public String deleteVacationApproval(@PathVariable("approvalId") Integer approvalId) {
+        return vacationApprovalService.deleteVacationApprovalByIdAndCheckIsApproved(approvalId);
+    }
+
+
     @RequestMapping(value = "/vacations_needs_approval")
     public ModelAndView showVacationsNeedsApproval(
             @ModelAttribute(VACATION_FORM) VacationsForm vacationsForm,
             BindingResult result)
     {
-
-        // ToDo iziyangirov возможно стоит перенести это в отдельный метод контроллера, по другому адресу
-        // и перенести в отдельный контроллер
-        if (vacationsForm.getVacationId() != null) {
-            try {
-                vacationService.deleteVacation(vacationsForm.getVacationId());
-                vacationsForm.setVacationId(null);
-            } catch (DeleteVacationException ex) {
-                result.rejectValue("vacationId", "error.vacations.deletevacation.failed", ex.getLocalizedMessage());
-            }
-        }
 
         Employee employee = securityService.getSecurityPrincipal().getEmployee();
         final ModelAndView modelAndView = new ModelAndView("vacationsNeedsApproval");
@@ -233,7 +233,7 @@ public class VacationsController extends AbstractControllerForEmployee {
         return employeeService.checkDayIsVacation(employeeId, date);
     }
 
-    @RequestMapping(value = "/approveVacation", method = RequestMethod.GET, headers = "Accept=text/plain;Charset=UTF-8")
+    @RequestMapping(value = "/vacation/approveVacation", method = RequestMethod.GET, headers = "Accept=text/plain;Charset=UTF-8")
     @ResponseBody
     public String approveVacation(@RequestParam("vacationId") Integer vacationId) {
         Vacation vacation = vacationService.findVacation(vacationId);

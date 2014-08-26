@@ -1,6 +1,5 @@
 <%@ page import="com.aplana.timesheet.system.properties.TSPropertyProvider" %>
 <%@ page import="com.aplana.timesheet.enums.VacationTypesEnum" %>
-<%@ page import="static com.aplana.timesheet.util.ResourceUtils.getResRealPath" %>
 <%@page contentType="text/html" pageEncoding="UTF-8" %>
 
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
@@ -18,14 +17,10 @@
     <title><fmt:message key="title.createVacation"/></title>
     <link rel="stylesheet" type="text/css" href="<%= request.getContextPath()%>/resources/css/vacations.css"/>
 
-    <script type="text/javascript" src="<%= request.getContextPath()%>/resources/js/utils.js"></script>
-    <script type="text/javascript" src="<%= request.getContextPath()%>/resources/js/vacations.js"></script>
-
     <script type="text/javascript">
         var divisionIdJsp = "${divisionId}" != "" ? +"${divisionId}" : null;
         var employeeIdJsp = "${employeeId}" != "" ? +"${employeeId}" : null;
         var typeVacPlanned = "${typeVacationPlanned}";
-        var employeeList = ${employeeListJson};
         var typeWithRequiredCommentJsp = +"${typeWithRequiredComment}";
         var loadImg = "<img src=\"<c:url value="/resources/img/loading_small.gif"/>\"/>";
         var childBearId = "<%= VacationTypesEnum.CHILDBEARING.getId() %>";
@@ -33,14 +28,13 @@
         var rulesUrl = "<%=rules%>";
 
         <sec:authorize access="not hasRole('ROLE_ADMIN')">
-        var hasRoleAdmin = false;
+            var hasRoleAdmin = false;
         </sec:authorize>
         <sec:authorize access="hasRole('ROLE_ADMIN')">
-        var hasRoleAdmin = true;
+            var hasRoleAdmin = true;
         </sec:authorize>
     </script>
-    <script type="text/javascript"
-            src="<%= getResRealPath("/resources/js/createVacation.js", application) %>"></script>
+    <script type="text/javascript" src="<%= request.getContextPath()%>/resources/js/createVacation.js"></script>
 
     <style type="text/css">
         .classDateGreen {
@@ -81,9 +75,7 @@
 </div>
 <div id="errorField"></div>
 <form:form method="post" commandName="createVacationForm" name="mainForm" cssStyle="padding-top: 5px;">
-    <%-- htmlEscape="false" для ошибки: error.createVacation.rights.notadmin --%>
     <form:errors path="*" cssClass="errors_box" delimiter="<br/><br/>" htmlEscape="false"/>
-    <%--<form:hidden path="employeeId" />--%>
     <table class="without_borders">
         <colgroup>
             <col width="150"/>

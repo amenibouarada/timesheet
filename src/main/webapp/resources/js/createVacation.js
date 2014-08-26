@@ -199,6 +199,7 @@ function updateExitToWorkAndCountVacationDay() {
             },
 
             error: function (error) {
+                handleError(error.message);
                 exitToWorkElement.setAttribute("class", "error");
                 exitToWorkElement.innerHTML = "Не удалось получить дату выхода из отпуска!";
             }
@@ -225,58 +226,71 @@ function updateSubmitButton() {
 
 function updateEmployeeSelect() {
     var divisionId = dojo.byId('divisionId').value;
-    dojo.forEach(dojo.filter(employeeList, function (division) {
-        return (division.divId == divisionId);
-    }), function (divisionData) {
+    dojo.xhrGet({
+        url: getContextPath() + "/employee/employeeListWithLastWorkday/" + divisionId + "/false/false",
+        handleAs: "json",
+        timeout: 10000,
+        sync: true,
+        preventCache: false,
+        headers: {  'Content-Type': 'application/json;Charset=UTF-8',
+            "Accept": "application/json;Charset=UTF-8"},
+        load: function (data) {
+            refreshEmployeeSelect(data);
+        },
 
-        var employeeArray = [];
-        dojo.forEach(divisionData.divEmps, function (employee) {
-            employeeArray.push(employee);
-        });
-
-        employeeArray.sort(function (a, b) {
-            return (a.value < b.value) ? -1 : 1;
-        });
-
-        var employeeDataStore = new dojo.data.ObjectStore({
-            objectStore: new dojo.store.Memory({
-                data: employeeArray,
-                idProperty: 'id'
-            })
-        });
-
-        var employeeFlteringSelect = dijit.byId("employeeIdSelect");
-
-        if (!employeeFlteringSelect) {
-            employeeFlteringSelect = new dijit.form.FilteringSelect({
-                id: "employeeIdSelect",
-                labelAttr: "value",
-                store: employeeDataStore,
-                searchAttr: 'value',
-                queryExpr: "*\${0}*",
-                ignoreCase: true,
-                autoComplete: false,
-                style: 'width:200px',
-                required: true,
-                onMouseOver: function () {
-                    tooltip.show(getTitle(this));
-                },
-                onMouseOut: function () {
-                    tooltip.hide();
-                },
-                onChange: function () {
-                    var value = this.item ? this.item.id : null;
-                    dojo.byId('employeeId').value = value;
-                    dateInfoHolder = [];
-                    updateExitToWorkAndCountVacationDay();
-                }
-            }, "employeeIdSelect");
-            employeeFlteringSelect.startup();
-        } else {
-            employeeFlteringSelect.set('store', employeeDataStore);
-            dijit.byId("employeeIdSelect").set('value', null);
-
+        error: function (error) {
+            console.log(error);
+            handleError(error.message);
         }
     });
+
+
+}
+
+function refreshEmployeeSelect(employeeList) {
+    employeeList.sort(function (a, b) {
+        return (a.value < b.value) ? -1 : 1;
+    });
+
+    var employeeDataStore = new dojo.data.ObjectStore({
+        objectStore: new dojo.store.Memory({
+            data: employeeList,
+            idProperty: 'id'
+        })
+    });
+
+    var employeeFlteringSelect = dijit.byId("employeeIdSelect");
+
+    if (!employeeFlteringSelect) {
+        employeeFlteringSelect = new dijit.form.FilteringSelect({
+            id: "employeeIdSelect",
+            labelAttr: "value",
+            store: employeeDataStore,
+            searchAttr: 'value',
+            queryExpr: "*\${0}*",
+            ignoreCase: true,
+            autoComplete: false,
+            style: 'width:200px',
+            required: true,
+            onMouseOver: function () {
+                tooltip.show(getTitle(this));
+            },
+            onMouseOut: function () {
+                tooltip.hide();
+            },
+            onChange: function () {
+                var value = this.item ? this.item.id : null;
+                dojo.byId('employeeId').value = value;
+                dateInfoHolder = [];
+                updateExitToWorkAndCountVacationDay();
+            }
+        }, "employeeIdSelect");
+        employeeFlteringSelect.startup();
+    } else {
+        employeeFlteringSelect.set('store', employeeDataStore);
+        dijit.byId("employeeIdSelect").set('value', null);
+
+    }
+
     dijit.byId("employeeIdSelect").set('value', employeeIdJsp);
 }

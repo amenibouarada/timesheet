@@ -20,7 +20,6 @@
 <head>
 <title><fmt:message key="menu.planEdit"/></title>
 <script src="<%= getResRealPath("/resources/js/DataGrid.ext.js", application) %>" type="text/javascript"></script>
-<script src="<%= getResRealPath("/resources/js/utils.js", application) %>" type="text/javascript"></script>
 <script src="<%= getResRealPath("/resources/js/planEdit.js", application) %>" type="text/javascript"></script>
 
 <style type="text/css">
@@ -112,8 +111,7 @@
 
 
         updateManagerList(dojo.byId(DIVISION_ID).value);
-        //TODO костыль, так как для данного поля куки не устанавливаются автоматически при загрузке
-        var prev_manager = getCookieValue("cookie_manager");
+        var prev_manager = getCookieValue("cookie_manager");// - костыль, так как для данного поля куки не устанавливаются автоматически при загрузке
         if (prev_manager == "null" || prev_manager == undefined) {
             prev_manager = ALL_VALUE;
         }

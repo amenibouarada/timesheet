@@ -7,6 +7,7 @@ import com.aplana.timesheet.service.SendMailService;
 import com.aplana.timesheet.system.constants.PadegConstants;
 import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.util.DateTimeUtil;
+import org.apache.commons.lang.StringUtils;
 import padeg.lib.Padeg;
 
 import javax.mail.Multipart;
@@ -66,13 +67,17 @@ public class DeleteOrSetDraftApprovalSender extends MailSender<TimeSheet> {
 
         mail.setSubject(propertyProvider.getDeleteOrSetDraftApprovalMarker() + subject);
 
-        String body = String.format("Необходимо выполнить %s отчета за %s сотрудника %s \r\n. Комментарий: %s",
+        StringBuilder body = new StringBuilder(String.format("Необходимо выполнить %s отчета за %s сотрудника %s.",
                 deleteTimeSheetApproval.getReportSendApprovalType().getName(),
                 date,
-                fio,
-                deleteTimeSheetApproval.getDeleteSendApprovalComment());
+                fio));
 
-        mail.setPreconstructedMessageBody(body);
+        String comment = deleteTimeSheetApproval.getDeleteSendApprovalComment();
+        if (StringUtils.isNotBlank(comment)) {
+            body.append(String.format(" Комментарий: %s", comment));
+        }
+
+        mail.setPreconstructedMessageBody(body.toString());
 
         return Arrays.asList(mail);
     }

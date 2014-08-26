@@ -1,5 +1,4 @@
 function showGraphic(type) {
-
     // запомним режим просмотра
     var selectedTabInput = dojo.byId(VIEW_MODE);
     selectedTabInput.value = type;
@@ -181,10 +180,25 @@ function deleteVacation(parentElement, vac_id) {
         return;
     }
 
-    dojo.byId(VACATION_ID).removeAttribute("disabled");
-    dojo.byId(VACATION_ID).value = vac_id;
-    vacationsForm.action = contextPath + "/vacations";
-    vacationsForm.submit();
+    dojo.xhrGet({
+        url: getContextPath() + "/vacations/deleteVacation/" + vac_id,
+        handleAs: "json",
+        timeout: 10000,
+        sync: true,
+        preventCache: false,
+        headers: {  'Content-Type': 'application/json;Charset=UTF-8',
+            "Accept": "application/json;Charset=UTF-8"},
+        load: function (data) {
+            if (data.status == -1) {
+                alert(data.message);
+            } else {
+                vacationsForm.submit();
+            }
+        },
+        error: function (error) {
+            handleError(error.message);
+        }
+    });
 }
 
 function approveVacation(vac_id, beginDate, endDate, type) {
@@ -195,7 +209,7 @@ function approveVacation(vac_id, beginDate, endDate, type) {
     }
 
     dojo.xhrGet({
-        url: contextPath + "/approveVacation",
+        url: contextPath + "/vacation/approveVacation",
         handleAs: "text",
         timeout: 10000,
         sync: true,
@@ -205,7 +219,7 @@ function approveVacation(vac_id, beginDate, endDate, type) {
             var jsonData = dojo.fromJson(data);
             console.log(jsonData);
             if (jsonData.isApproved) {
-                document.location = contextPath + "/vacations";
+                location.reload();
             } else {
                 alert(jsonData.message);
             }
@@ -220,12 +234,27 @@ function approveVacation(vac_id, beginDate, endDate, type) {
 function deleteApprover(apr_id) {
     if (!confirm("Удалить утверждающего?")) {
         return;
-    } else {
-//        console.log("apr_id = " + apr_id);
-        dojo.byId(APPROVAL_ID).value = apr_id;
-        vacationsForm.action = contextPath + "/vacations";
-        vacationsForm.submit();
     }
+
+    dojo.xhrGet({
+        url: getContextPath() + "/vacations/deleteVacationApproval/" + apr_id,
+        handleAs: "json",
+        timeout: 10000,
+        sync: true,
+        preventCache: false,
+        headers: {  'Content-Type': 'application/json;Charset=UTF-8',
+            "Accept": "application/json;Charset=UTF-8"},
+        load: function (data) {
+            if (data.status == -1) {
+                alert(data.message);
+            } else {
+                vacationsForm.submit();
+            }
+        },
+        error: function (error) {
+            handleError(error.message);
+        }
+    });
 }
 
 /* Заполняет список доступных проектов/пресейлов */

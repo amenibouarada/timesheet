@@ -337,7 +337,10 @@ public class SendMailService {
                 model.put("errors", "Unexpected error: " + exception.getMessage());
                 // получим ФИО пользователя
                 String FIO = "<не определен>";
-                TimeSheetUser securityUser = securityService.getSecurityPrincipal();
+                TimeSheetUser securityUser = null;
+                try {
+                    securityUser = securityService.getSecurityPrincipal();
+                } catch (NullPointerException e) {}
                 if (securityUser != null) {
                     int employeeId = securityUser.getEmployee().getId();
                     FIO = employeeService.find(employeeId).getName();
@@ -436,8 +439,7 @@ public class SendMailService {
             if (project != null && project.getManager() != null &&
                     TypesOfActivityEnum.isProjectOrPresale(
                             EnumsUtils.tryFindById(timeSheetDetail.getActType().getId(), TypesOfActivityEnum.class)
-                    )
-                    ) {
+                    )) {
                 emails.add(project.getManager().getEmail());
             }
         }

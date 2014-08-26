@@ -29,15 +29,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.BindingResult;
 
 import javax.annotation.Nullable;
+import javax.servlet.http.HttpServletRequest;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.Calendar;
 
 import static argo.jdom.JsonNodeBuilders.*;
+import static argo.jdom.JsonNodeBuilders.aStringBuilder;
 import static com.aplana.timesheet.form.VacationsForm.ALL_VALUE;
+import static com.aplana.timesheet.system.constants.RoleConstants.ROLE_ADMIN;
 import static com.aplana.timesheet.util.DateTimeUtil.VIEW_DATE_PATTERN;
 import static com.aplana.timesheet.util.DateTimeUtil.dateToString;
 
@@ -70,6 +72,8 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
     private RegionService regionService;
     @Autowired
     private TSPropertyProvider propertyProvider;
+    @Autowired
+    protected HttpServletRequest request;
 
     private static final Logger logger = LoggerFactory.getLogger(VacationService.class);
 
@@ -143,8 +147,16 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
         vacationDAO.delete(vacation);
     }
 
+
     @Transactional
-    public void deleteVacation(Integer vacationId) {
+    public void detach(Vacation vacation) {
+        vacationDAO.detach(vacation);
+    }
+
+    @Transactional
+    public String deleteVacation(Integer vacationId) {
+        final JsonArrayNodeBuilder builder = anArrayBuilder();
+        String message = null;
         final Vacation vacation = tryFindVacation(vacationId);
 
         if (vacation == null) { // если вдруг удалил автор, а не сотрудник
@@ -160,13 +172,17 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
             } else {
                 sendMailService.performVacationDeletedMailing(vacation);    //todo переделать, чтобы рассылка все-таки была после удаления?
             }
-
             delete(vacation);
         } else {
-            throw new DeleteVacationException(String.format(
-                    "Нельзя удалить заявление на отпуск. Для удаления данного заявления " +
-                            "необходимо написать на timesheet@aplana.com"));
+            message = "Нельзя удалить заявление на отпуск. Для удаления данного заявления необходимо написать на timesheet@aplana.com";
         }
+
+        builder.withElement(
+                anObjectBuilder().
+                        withField("status", aNumberBuilder(message == null ? "0" : "-1")).
+                        withField("message", aStringBuilder(message == null ? "" : message)));
+
+        return JsonUtil.format(builder);
     }
 
     public int getVacationsWorkdaysCount(Employee employee, Integer year, Integer month, VacationStatusEnum status) {
@@ -388,6 +404,11 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
         return Boolean.FALSE;
     }
 
+    /**
+     * Проверка на РЦК
+     * @param vacation
+     * @return
+     */
     public Boolean isVacationApprovePermission(Vacation vacation) {
         TimeSheetUser securityUser = securityService.getSecurityPrincipal();
         Employee manager = vacation.getEmployee().getDivision().getLeaderId();
@@ -490,6 +511,13 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
             for (VacationApproval vacationApproval : vacationApprovals) {
                 vacationApproval.setResult(true);
                 vacationApproval.setResponseDate(responseDate);
+                StringBuilder comment = new StringBuilder("Согласовано ");
+                if (isVacationApprovePermission(vacation)) {
+                    comment.append("РЦК");
+                } else if (request.isUserInRole(ROLE_ADMIN)) {
+                    comment.append("Администратором");
+                }
+                vacationApproval.setComment(comment.toString());
                 vacationApprovalService.store(vacationApproval);
 
             }
@@ -497,29 +525,6 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
 
         return JsonUtil.format(anObjectBuilder().
                 withField("isApproved", JsonNodeBuilders.aTrueBuilder()));
-    }
-
-    public void deleteVacationOrApproval(BindingResult result, VacationsForm vacationsForm) {
-        Integer vacationId = vacationsForm.getVacationId();
-        Integer approvalId = vacationsForm.getApprovalId();
-        // если передан айдишник отпуска, то удаляем отпуск
-        if (vacationId != null) {
-            try {
-                deleteVacation(vacationId);
-                vacationsForm.setVacationId(null);
-            } catch (DeleteVacationException ex) {
-                result.rejectValue("vacationId", "error.vacations.deletevacation.failed", ex.getLocalizedMessage());
-            }
-        }
-        // если согласование, то удаляем согласование
-        if (vacationId == null && approvalId != null) {
-            try {
-                vacationApprovalService.deleteVacationApprovalByIdAndCheckIsApproved(approvalId);
-                vacationsForm.setApprovalId(null);
-            } catch (VacationApprovalServiceException e) {
-                result.rejectValue("approvalID", "error.vacations.deletevacation.failed", e.getLocalizedMessage());
-            }
-        }
     }
 
     public Map<Vacation, Integer> getCalDays(List<Vacation> vacations) {
@@ -577,7 +582,7 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
             Integer daysInVacation = entry.getValue();
             if (VacationStatusEnum.APPROVED.getId() == vacation.getStatus().getId() ||
                     VacationTypesEnum.PLANNED.getId() == vacation.getType().getId()
-            ) {
+                    ) {
                 summaryDays += daysInVacation;
             }
         }

@@ -57,11 +57,9 @@ public class AdminProjectEditController {
         modelAndView.addObject("divisionsList", divisionService.getAllDivisions());
         modelAndView.addObject("projectStateTypes", Arrays.asList(TypesOfActivityEnum.PROJECT, TypesOfActivityEnum.PRESALE));
         modelAndView.addObject("projectFundingTypes", ProjectFundingTypeEnum.values());
-        // TODO iziyangirov не слишком ли много раз получается список сотрудников?
         modelAndView.addObject("divisionsEmployeesJSON", employeeService.getDivisionsEmployeesJSON());
         modelAndView.addObject("employeesListJSON", employeeService.getAllEmployeesJSON());
         modelAndView.addObject("employeesList", employeeService.getAllEmployees());
-        //////////////////////////////////////////////////////////////////////////
         modelAndView.addObject("projectRoleTypes", ProjectRolesEnum.values());
         modelAndView.addObject("projectRoleTypesJSON",
                 projectRoleService.getProjectRoleListJson(projectRoleService.getProjectRoles()));

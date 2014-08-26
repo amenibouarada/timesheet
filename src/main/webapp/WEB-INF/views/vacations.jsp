@@ -349,7 +349,12 @@
                                                 <td>
                                                     <c:choose>
                                                         <c:when test="${va.result}">
-                                                            Согласовано
+                                                            <c:if test="${empty va.comment}">
+                                                                Согласовано
+                                                            </c:if>
+                                                            <c:if test="${not empty va.comment}">
+                                                                ${va.comment}
+                                                            </c:if>
                                                             <br>
                                                             <fmt:formatDate value="${va.responseDate}" pattern="dd.MM.yyyy"/>
                                                         </c:when>

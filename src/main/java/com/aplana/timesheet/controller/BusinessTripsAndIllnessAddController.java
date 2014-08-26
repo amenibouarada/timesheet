@@ -11,7 +11,6 @@ import com.aplana.timesheet.form.BusinessTripsAndIllnessAddForm;
 import com.aplana.timesheet.form.validator.BusinessTripsAndIllnessAddFormValidator;
 import com.aplana.timesheet.service.*;
 import com.aplana.timesheet.service.helper.EmployeeHelper;
-import com.aplana.timesheet.system.security.SecurityService;
 import com.aplana.timesheet.util.EnumsUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,13 +33,10 @@ import java.util.NoSuchElementException;
  * Date: 25.01.13
  */
 @Controller
-public class BusinessTripsAndIllnessAddController extends AbstractController{
+public class BusinessTripsAndIllnessAddController extends AbstractController {
 
     public static final String ERROR_BUSINESS_TRIP_FIND = "Ошибка при получении отчета из БД!";
-    public static final String ERROR_BUSINESS_TRIP_SAVE = "Ошибка при сохранении командировки!";
-    public static final String ERROR_ILLNESS_SAVE = "Ошибка при сохранении больничного!";
-    public static final String ERROR_BUSINESS_TRIP_EDIT = "Ошибка при редактировании командировки!";
-    public static final String ERROR_ILLNESS_EDIT = "Ошибка при редактировании больничного!";
+
     @Autowired
     DictionaryItemService dictionaryItemService;
     @Autowired
@@ -55,10 +51,7 @@ public class BusinessTripsAndIllnessAddController extends AbstractController{
     BusinessTripsAndIllnessAddFormValidator businessTripsAndIllnessAddFormValidator;
     @Autowired
     EmployeeHelper employeeHelper;
-    @Autowired
-    private SecurityService securityService;
-    @Autowired
-    private IllnessMailService illnessMailService;
+
 
     private static final Logger logger = LoggerFactory.getLogger(BusinessTripsAndIllnessController.class);
 
@@ -67,14 +60,17 @@ public class BusinessTripsAndIllnessAddController extends AbstractController{
      */
     @RequestMapping(value = "/businesstripsandillnessadd/{reportId}/{reportFormed}")
     public ModelAndView editBusinessTripOrIllness(@PathVariable("reportId") Integer reportId,
-                                            @PathVariable("reportFormed") Integer reportFormed,
-                                            @ModelAttribute("businesstripsandillnessadd") BusinessTripsAndIllnessAddForm tsForm,
-                                            BindingResult result) throws BusinessTripsAndIllnessAddException {
+                                                  @PathVariable("reportFormed") Integer reportFormed,
+                                                  @ModelAttribute("businesstripsandillnessadd") BusinessTripsAndIllnessAddForm tsForm,
+                                                  BindingResult result) throws BusinessTripsAndIllnessAddException {
         QuickReportTypesEnum reportType = getReportTypeAsEnum(reportFormed);
-        switch (reportType){
-            case ILLNESS: return getIllnessEditingForm(reportId, tsForm);
-            case BUSINESS_TRIP: return getBusinessTripEditingForm(reportId, tsForm);
-            default: throw new BusinessTripsAndIllnessAddException("Редактирование отчетов такого типа пока не реализовано!");
+        switch (reportType) {
+            case ILLNESS:
+                return getIllnessEditingForm(reportId, tsForm);
+            case BUSINESS_TRIP:
+                return getBusinessTripEditingForm(reportId, tsForm);
+            default:
+                throw new BusinessTripsAndIllnessAddException("Редактирование отчетов такого типа пока не реализовано!");
         }
     }
 
@@ -82,10 +78,10 @@ public class BusinessTripsAndIllnessAddController extends AbstractController{
      * возвращает форму для создания больничного/командировки
      */
     @RequestMapping(value = "/businesstripsandillnessadd/{employeeId}")
-    public ModelAndView showCreateBusinessTripOrIllnessForm (
+    public ModelAndView showCreateBusinessTripOrIllnessForm(
             @PathVariable("employeeId") Integer employeeId,
             @ModelAttribute("businesstripsandillnessadd") BusinessTripsAndIllnessAddForm tsForm,
-            BindingResult result){
+            BindingResult result) {
         Employee employee = employeeService.find(employeeId);
         tsForm.setBeginDate(new Date());
         tsForm.setEndDate(new Date());
@@ -93,7 +89,7 @@ public class BusinessTripsAndIllnessAddController extends AbstractController{
     }
 
     @RequestMapping(value = "/businesstripsandillnessadd/")
-    public ModelAndView showCreateBusinessTripOrIllnessForm (){
+    public ModelAndView showCreateBusinessTripOrIllnessForm() {
         return new ModelAndView(String.format("redirect:/businesstripsandillnessadd/-1"));
     }
 
@@ -111,17 +107,24 @@ public class BusinessTripsAndIllnessAddController extends AbstractController{
         tsForm.setEmployee(employee);
         businessTripsAndIllnessAddFormValidator.validate(tsForm, result);
 
-        if (result.hasErrors()){
+        if (result.hasErrors()) {
             return getModelAndViewCreation(employee);
         }
 
         QuickReportTypesEnum reportType = getReportTypeAsEnum(tsForm.getReportType());
         tsForm.setEmployee(employee);
 
-        switch (reportType){
-            case BUSINESS_TRIP: return addBusinessTrip(tsForm);
-            case ILLNESS: return addIllness(tsForm);
-            default: throw new BusinessTripsAndIllnessAddException("Сохранение данных для такого типа отчета не реализовано!");
+        switch (reportType) {
+            case BUSINESS_TRIP: {
+                BusinessTrip businessTrip = businessTripService.addBusinessTrip(tsForm);
+                return getModelAndViewSuccess(businessTrip.getEmployee(), businessTrip.getBeginDate());
+            }
+            case ILLNESS: {
+                Illness illness = illnessService.addIllness(tsForm);
+                return getModelAndViewSuccess(illness.getEmployee(), illness.getBeginDate());
+            }
+            default:
+                throw new BusinessTripsAndIllnessAddException("Сохранение данных для такого типа отчета не реализовано!");
         }
     }
 
@@ -137,21 +140,27 @@ public class BusinessTripsAndIllnessAddController extends AbstractController{
         redirectAttributes.addAttribute("back", "1");
         tsForm.setReportId(reportId);
         businessTripsAndIllnessAddFormValidator.validate(tsForm, result);
-        if (result.hasErrors()){
+        if (result.hasErrors()) {
             return getModelAndViewCreation(tsForm.getEmployee());
         }
 
         QuickReportTypesEnum reportType = getReportTypeAsEnum(tsForm.getReportType());
 
-        switch (reportType){
-            case BUSINESS_TRIP: return saveBusinessTrip(tsForm, reportId);
-            case ILLNESS: return saveIllness(tsForm, reportId);
-            default: throw new BusinessTripsAndIllnessAddException("Редактирование данных для такого типа отчета пока не реализовано!");
+        switch (reportType) {
+            case BUSINESS_TRIP:
+                BusinessTrip businessTrip = businessTripService.saveBusinessTrip(tsForm, reportId);
+                return getModelAndViewSuccess(businessTrip.getEmployee(), businessTrip.getBeginDate());
+            case ILLNESS: {
+                Illness illness = illnessService.saveIllness(tsForm, reportId);
+                return getModelAndViewSuccess(illness.getEmployee(), illness.getEndDate());
+            }
+            default:
+                throw new BusinessTripsAndIllnessAddException("Редактирование данных для такого типа отчета пока не реализовано!");
         }
     }
 
     @RequestMapping(value = "/businesstripsandillnessadd/resultsuccess")
-    public ModelAndView businessTripOrIllnessAddedResultSuccess (){
+    public ModelAndView businessTripOrIllnessAddedResultSuccess() {
         ModelAndView modelAndView = new ModelAndView("businesstripsandillnessaddresult");
         modelAndView.addObject("result", 1);
 
@@ -159,7 +168,7 @@ public class BusinessTripsAndIllnessAddController extends AbstractController{
     }
 
     @RequestMapping(value = "/businesstripsandillnessadd/resultfailed")
-    public ModelAndView businessTripOrIllnessAddedResultError(){
+    public ModelAndView businessTripOrIllnessAddedResultError() {
         ModelAndView modelAndView = new ModelAndView("businesstripsandillnessaddresult");
         modelAndView.addObject("result", 0);
         modelAndView.addObject("errorMsg", "Произошла ошибка при сохранении данных на стороне сервиса.");
@@ -167,13 +176,10 @@ public class BusinessTripsAndIllnessAddController extends AbstractController{
         return modelAndView;
     }
 
-    @RequestMapping(value = "/businesstripsandillnessadd/getprojects/{employeeId}/{beginDate}/{endDate}", produces = "text/plain;charset=UTF-8")
+    @RequestMapping(value = "/businesstripsandillnessadd/getprojects", produces = "text/plain;charset=UTF-8")
     @ResponseBody
-    public String getProjects(@PathVariable("employeeId") Integer employeeId,
-                              @PathVariable("beginDate") String beginDateStr,
-                              @PathVariable("endDate") String endDateStr){
-         List<Project> projects = projectService.getAllProjects();
-
+    public String getProjects() {
+        List<Project> projects = projectService.getAllProjects();
         return projectService.getProjectListAsJson(projects);
     }
 
@@ -183,7 +189,7 @@ public class BusinessTripsAndIllnessAddController extends AbstractController{
     private QuickReportTypesEnum getReportTypeAsEnum(Integer reportId) throws BusinessTripsAndIllnessAddException {
         try {
             return EnumsUtils.getEnumById(reportId, QuickReportTypesEnum.class);
-        } catch (NoSuchElementException ex){
+        } catch (NoSuchElementException ex) {
             throw new BusinessTripsAndIllnessAddException("Операция не поддерживается для данного типа отчета!", ex);
         }
     }
@@ -242,54 +248,9 @@ public class BusinessTripsAndIllnessAddController extends AbstractController{
     }
 
     /**
-     * сохраняем больничный и возвращаем форму с табличкой по больничным и сообщением о результатах сохранения
-     */
-    private ModelAndView saveIllness(BusinessTripsAndIllnessAddForm tsForm, Integer reportId) throws BusinessTripsAndIllnessAddException {
-        try {
-            Illness illness = illnessService.find(reportId);
-            illness.setBeginDate(tsForm.getBeginDate());
-            illness.setEndDate(tsForm.getEndDate());
-            illness.setReason(dictionaryItemService.find(tsForm.getReason()));
-            illness.setComment(tsForm.getComment());
-            illness.setAuthor(securityService.getSecurityPrincipal().getEmployee());
-            illness.setEditionDate(new Date());
-            illnessService.setIllness(illness);
-            illnessMailService.sendEditMail(illness);
-            return getModelAndViewSuccess(illness.getEmployee(), illness.getEndDate());
-        } catch (Exception e) {
-            logger.error(ERROR_ILLNESS_EDIT, e);
-            throw new BusinessTripsAndIllnessAddException(ERROR_ILLNESS_EDIT, e);
-        }
-    }
-
-    /**
-     * сохраняем командировку и возвращаем форму с табличкой по командировкам и сообщением о результатах сохранения
-     */
-    private ModelAndView saveBusinessTrip(BusinessTripsAndIllnessAddForm tsForm, Integer reportId) throws BusinessTripsAndIllnessAddException {
-        try {
-            BusinessTrip businessTrip = businessTripService.find(reportId);
-            businessTrip.setBeginDate(tsForm.getBeginDate());
-            businessTrip.setEndDate(tsForm.getEndDate());
-            businessTrip.setType(dictionaryItemService.find(tsForm.getBusinessTripType()));
-            if (tsForm.getBusinessTripType().equals(BusinessTripTypesEnum.PROJECT.getId())){
-                businessTrip.setProject(projectService.find(tsForm.getProjectId()));
-            } else {
-                businessTrip.setProject(null);
-            }
-            businessTrip.setComment(tsForm.getComment());
-
-            businessTripService.setBusinessTrip(businessTrip);
-            return getModelAndViewSuccess(businessTrip.getEmployee(), businessTrip.getBeginDate());
-        } catch (Exception e) {
-            logger.error(ERROR_BUSINESS_TRIP_EDIT, e);
-            throw new BusinessTripsAndIllnessAddException(ERROR_BUSINESS_TRIP_EDIT, e);
-        }
-    }
-
-    /**
      * возвращает форму для редактирования
      */
-    private ModelAndView getModelAndViewEditing(Employee employee, Integer reportId){
+    private ModelAndView getModelAndViewEditing(Employee employee, Integer reportId) {
         ModelAndView modelAndView = getModelAndViewCreation(employee);
         modelAndView.addObject("reportId", reportId);
 
@@ -300,53 +261,11 @@ public class BusinessTripsAndIllnessAddController extends AbstractController{
      * возвращаем форму для создания
      */
     private ModelAndView getModelAndViewCreation(Employee employee) {
-
         ModelAndView modelAndView = new ModelAndView("businesstripsandillnessadd");
         if (employee != null) modelAndView.addObject("employeeId", employee.getId());
         modelAndView.addObject("employeeList", employeeHelper.makeEmployeeListInJSON(employeeService.getEmployees()));
         return modelAndView;
     }
 
-    /**
-     * создаем новый больничный, сохраняем в базу. возвращаем форму с табличкой по больничным и результатом сохранения
-     */
-    private ModelAndView addIllness(BusinessTripsAndIllnessAddForm tsForm) throws BusinessTripsAndIllnessAddException {
-        try {
-            Illness illness = new Illness();
-            illness.setEmployee(tsForm.getEmployee());
-            illness.setBeginDate(tsForm.getBeginDate());
-            illness.setEndDate(tsForm.getEndDate());
-            illness.setComment(tsForm.getComment());
-            illness.setReason(dictionaryItemService.find(tsForm.getReason()));
-            illness.setAuthor(securityService.getSecurityPrincipal().getEmployee());
-            illness.setEditionDate(new Date());
-            illnessService.setIllness(illness);
-            illnessMailService.sendCreateMail(illness);
-            return getModelAndViewSuccess(illness.getEmployee(), illness.getBeginDate());
-        } catch (Exception e) {
-            logger.error(ERROR_ILLNESS_SAVE, e);
-            throw new BusinessTripsAndIllnessAddException(ERROR_ILLNESS_SAVE, e);
-        }
-    }
-
-    /**
-     * создаем новую командировку, сохраняем в базу. возвращаем форму с табличкой по командировкам и результатом сохранения
-     */
-    private ModelAndView addBusinessTrip (BusinessTripsAndIllnessAddForm tsForm) throws BusinessTripsAndIllnessAddException {
-        try {
-            BusinessTrip businessTrip = new BusinessTrip();
-            businessTrip.setEmployee(tsForm.getEmployee());
-            businessTrip.setBeginDate(tsForm.getBeginDate());
-            businessTrip.setEndDate(tsForm.getEndDate());
-            businessTrip.setComment(tsForm.getComment());
-            businessTrip.setType(dictionaryItemService.find(tsForm.getBusinessTripType()));
-            businessTrip.setProject(projectService.find(tsForm.getProjectId()));
-            businessTripService.setBusinessTrip(businessTrip);
-            return getModelAndViewSuccess(businessTrip.getEmployee(), businessTrip.getBeginDate());
-        } catch (Exception e){
-            logger.error(ERROR_BUSINESS_TRIP_SAVE, e);
-            throw new BusinessTripsAndIllnessAddException(ERROR_BUSINESS_TRIP_SAVE, e);
-        }
-    }
 
 }

@@ -150,8 +150,8 @@ public class AdminProjectEditService {
 
         form.setManagerDivision(project.getManager().getDivision().getId());
         form.setCustomer(project.getCustomer());
-        form.setStartDate(DateTimeUtil.formatDateIntoDBFormat(project.getStartDate()));
-        form.setEndDate(DateTimeUtil.formatDateIntoDBFormat(project.getEndDate()));
+        form.setStartDate(project.getStartDate() == null ? null : DateTimeUtil.formatDateIntoDBFormat(project.getStartDate()));
+        form.setEndDate(project.getEndDate() == null ? null : DateTimeUtil.formatDateIntoDBFormat(project.getEndDate()));
         form.setState(project.getState().getId());
         form.setFundingType(project.getFundingType().getId());
         form.setJiraKey(project.getJiraProjectKey());
