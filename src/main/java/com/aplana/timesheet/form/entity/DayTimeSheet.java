@@ -169,7 +169,7 @@ public class DayTimeSheet implements Comparable<DayTimeSheet> {
      * @return
      */
     public Boolean getStatusNotStart() {
-        return this.getWorkDay() && this.getEmp().getStartDate().after(this.getCalDate());
+        return this.getEmp().getStartDate().after(this.getCalDate());
     }
 
     /**
