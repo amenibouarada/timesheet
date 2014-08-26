@@ -22,7 +22,7 @@
 		 */
 		function checkFileSize() {
             if( window.FormData === undefined ){
-                return false;   // Такой возврат не я придумал, функция так странно возвращала до меня.
+                return false;
             }
 			var file1 = feedbackForm.file1Path.files[0];
 			var file2 = feedbackForm.file2Path.files[0];
