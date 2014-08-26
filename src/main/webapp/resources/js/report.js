@@ -108,7 +108,6 @@ function fillProjectListByDivision(division) {
             }
         }
     } else {
-        console.log(projectListWithOwnerDivision);
         dojo.removeAttr("projectId", "disabled");
         dojo.removeAttr("divisionId", "disabled");
         for (var i = 0; i < projectListWithOwnerDivision.length; i++) {

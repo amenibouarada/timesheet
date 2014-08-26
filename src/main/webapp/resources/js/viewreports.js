@@ -130,7 +130,7 @@ function refreshEmployeeSelect(employeeList) {
 
 function onChangeEmployee() {
     if (widgets.employee.item && !isUndefinedNullNaN(widgets.employee.item.birthday) && widgets.employee.item.birthday != ''){
-        dojo.byId('employeeBirthday').innerHTML = birthday;
+        dojo.byId('employeeBirthday').innerHTML = widgets.employee.item.birthday;
         dojo.byId('employeeBirthday').hidden = false;
         dojo.byId('employeeBirthdayLabel').hidden = false;
     }else{

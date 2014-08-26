@@ -16,7 +16,6 @@
           href="<%= request.getContextPath()%>/resources/css/viewreports.css?modified=<%= new File(application.getRealPath("/resources/css/viewreports.css")).lastModified()%>">
     <script type="text/javascript">
         var monthList = ${monthList};
-        var divisionsEmployeesJSON = ${divisionsEmployeesJSON};
         var lastYear = ${year};
         var lastMonth = ${month};
         var employeeIdJsp = "${employeeId}" != "" ? +"${employeeId}" : null;

@@ -110,12 +110,9 @@ public class ProjectService {
 
         for (Project project : projectList) {
             final JsonObjectNodeBuilder projectBuilder = getProjectBuilder(project);
-
             /* определим принадлежность проекта к центру */
             Integer division_id = (project.getDivision() != null) ? project.getDivision().getId() : 0;
-
             projectBuilder.withField("ownerDivisionId", JsonUtil.aStringBuilder(division_id));
-
             builder.withElement(projectBuilder);
         }
 

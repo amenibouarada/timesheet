@@ -87,7 +87,7 @@ public class EmployeeHelper {
                 withField(ID, aStringBuilder(employee.getId())).
                 withField(VALUE, JsonNodeBuilders.aStringBuilder(getValue(employee))).
                 //добавил два поля из за того что на форме "командировки/болезни" все заточено под другую структуру данных
-                        withField(MANAGER_ID, aStringBuilder(employee.getManager() == null ? null : employee.getManager().getId())).
+                withField(MANAGER_ID, aStringBuilder(employee.getManager() == null ? null : employee.getManager().getId())).
                 withField(REGION_ID, aStringBuilder(employee.getRegion().getId()));
         if (addDetails) {
 
@@ -111,7 +111,8 @@ public class EmployeeHelper {
                             dateToString(employee.getStartDate(), DATE_FORMAT))).
                     withField(LAST_WORK_DATE, JsonNodeBuilders.aStringBuilder(
                             employee.getEndDate() != null ? dateToString(employee.getEndDate(), DATE_FORMAT) : ""
-                    ));
+                    )).withField("birthday",
+                        JsonNodeBuilders.aStringBuilder(DateTimeUtil.getDayMonthFromDate(employee.getBirthday())));
         }
         return objectNodeBuilder;
     }
