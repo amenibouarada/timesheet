@@ -45,17 +45,8 @@
     dojo.require(CALENDAR_EXT_PATH);
     require(["dojo/parser", "dijit/TitlePane"]);
 
-    // список отпусков для построения графика отпусков, если не пустой, то получим от контроллера
-    var vacationListJSON =  null;
-    <c:if test="${vacationListByRegionJSON != null}">
-        vacationListJSON = ${vacationListByRegionJSON};
-    </c:if>
-    // список праздников для построения графика отпусков, если не пустой, то получим от контроллера
-    var holidayList = null;
-    <c:if test="${vacationListByRegionJSON != null}">
-        holidayList = ${holidayList};
-    </c:if>
-
+    var vacationListJSON = ${vacationListByRegionJSON};
+    var holidayList = ${holidayList};
     var managerList = ${managerListJson};
     var selectedEmployee = ${employeeId};
     var fullProjectList = ${fullProjectListJsonWithDivisionId};
