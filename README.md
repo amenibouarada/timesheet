@@ -171,3 +171,10 @@ OpenLDAP, затем заново запустить сервис.
 
 Текстовые строки находятся в папке «src\main\webapp\WEB-INF\messages»: файл «errors.properties» содержит строки
 сообщений об ошибках, файл «messages.properties» содержит строки, присутствующие на страницах приложения.
+
+Формирование отчетов
+--------------------
+В Linux для формирования отчетов ыполнить команду:
+cp /opt/timesheet/webapps/ROOT/WEB-INF/classes/arial.ttf /usr/java/fonts
+где /usr/java/fonts - каталог со шрифтами JAVA (например /usr/java/jdk1.6.0_45/jre/lib/fonts)
+
