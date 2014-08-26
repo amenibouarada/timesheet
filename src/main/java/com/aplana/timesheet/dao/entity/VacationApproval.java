@@ -8,7 +8,7 @@ import java.util.Set;
 
 /**
  * @author rshamsutdinov
- * @version 1.0
+ * @version 1.0.0
  */
 @Entity
 @Table(name = "vacation_approval")
