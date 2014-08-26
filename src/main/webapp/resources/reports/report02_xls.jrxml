@@ -5,11 +5,11 @@
 	<property name="ireport.x" value="202"/>
 	<property name="ireport.y" value="0"/>
 	<import value="com.aplana.timesheet.util.DateTimeUtil"/>
-	<style name="Normal" isDefault="true" fontSize="8" pdfFontName="arial.ttf" pdfEncoding="Cp1251">
+	<style name="Normal" isDefault="true" fontSize="8" pdfEncoding="Cp1251">
 		<box topPadding="5" leftPadding="0" bottomPadding="0" rightPadding="20" />
         <paragraph lineSpacing="Double" spacingAfter="100"/>
 	</style>
-	<style name="Title" style="Normal" fontName="Arial" fontSize="26"/>
+	<style name="Title" style="Normal" fontSize="26"/>
 	<style name="SubTitle" style="Normal" forecolor="#666666" isBold="true"/>
 	<style name="Column header" style="Normal" forecolor="#666666" isBold="true"/>
 	<style name="Group Header 3" style="Normal" forecolor="#000000" isBold="true"/>
