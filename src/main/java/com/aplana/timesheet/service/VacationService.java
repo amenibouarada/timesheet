@@ -31,6 +31,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nullable;
+import javax.servlet.http.HttpServletRequest;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.Calendar;
@@ -38,6 +39,7 @@ import java.util.Calendar;
 import static argo.jdom.JsonNodeBuilders.*;
 import static argo.jdom.JsonNodeBuilders.aStringBuilder;
 import static com.aplana.timesheet.form.VacationsForm.ALL_VALUE;
+import static com.aplana.timesheet.system.constants.RoleConstants.ROLE_ADMIN;
 import static com.aplana.timesheet.util.DateTimeUtil.VIEW_DATE_PATTERN;
 import static com.aplana.timesheet.util.DateTimeUtil.dateToString;
 
@@ -70,6 +72,8 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
     private RegionService regionService;
     @Autowired
     private TSPropertyProvider propertyProvider;
+    @Autowired
+    protected HttpServletRequest request;
 
     private static final Logger logger = LoggerFactory.getLogger(VacationService.class);
 
@@ -400,6 +404,11 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
         return Boolean.FALSE;
     }
 
+    /**
+     * Проверка на РЦК
+     * @param vacation
+     * @return
+     */
     public Boolean isVacationApprovePermission(Vacation vacation) {
         TimeSheetUser securityUser = securityService.getSecurityPrincipal();
         Employee manager = vacation.getEmployee().getDivision().getLeaderId();
@@ -502,6 +511,13 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
             for (VacationApproval vacationApproval : vacationApprovals) {
                 vacationApproval.setResult(true);
                 vacationApproval.setResponseDate(responseDate);
+                StringBuilder comment = new StringBuilder("Согласовано ");
+                if (isVacationApprovePermission(vacation)) {
+                    comment.append("РЦК");
+                } else if (request.isUserInRole(ROLE_ADMIN)) {
+                    comment.append("Администратором");
+                }
+                vacationApproval.setComment(comment.toString());
                 vacationApprovalService.store(vacationApproval);
 
             }
