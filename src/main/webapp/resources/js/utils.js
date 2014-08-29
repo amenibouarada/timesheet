@@ -13,7 +13,7 @@ function showErrors(/* Array */ errors) {
     return true;
 }
 
-function handleError(message){
+function handleError(message) {
     console.log(message);
 }
 
@@ -51,7 +51,7 @@ var tooltip = function () {
     var tt, t, c, b, h;
     var ie = document.all ? true : false;
     return{
-        show:function (v, w) {
+        show: function (v, w) {
             if (tt == null) {
                 tt = document.createElement('div');
                 tt.setAttribute('id', id);
@@ -88,13 +88,13 @@ var tooltip = function () {
                 tooltip.fade(1)
             }, timer);
         },
-        pos:function (e) {
+        pos: function (e) {
             var u = ie ? event.clientY + document.documentElement.scrollTop : e.pageY;
             var l = ie ? event.clientX + document.documentElement.scrollLeft : e.pageX;
             tt.style.top = (u - h) + 'px';
             tt.style.left = (l + left) + 'px';
         },
-        fade:function (d) {
+        fade: function (d) {
             var a = alpha;
             if ((a != endalpha && d == 1) || (a != 0 && d == -1)) {
                 var i = speed;
@@ -113,7 +113,7 @@ var tooltip = function () {
                 }
             }
         },
-        hide:function () {
+        hide: function () {
             clearInterval(tt.timer);
             tt.timer = setInterval(function () {
                 tooltip.fade(-1)
@@ -123,12 +123,12 @@ var tooltip = function () {
 }();
 
 //необходимо переопределить на своих страницах
-function getEmployeeData(){
+function getEmployeeData() {
     throw "getEmployeeData is unsupported method"
 }
 
 // возвращает первый рабочий день сотрудника
-function getFirstWorkDate(){
+function getFirstWorkDate() {
     var employeeId = dojo.byId("employeeId").value;
     var employee = getEmployeeData();
     return convertStringToDate(employee.firstWorkDate);
@@ -152,28 +152,32 @@ function TimeAfter(d, h, m) {
     return now.toGMTString();
 }
 
-/* Заполняет список доступных проектов/пресейлов */
+/**
+ * Заполняет список доступных проектов/пресейлов
+ * @param rowIndex
+ * @param projectState тип проекта (проект, пресейл ...)
+ */
 function fillProjectList(rowIndex, projectState) {
     var projectSelect = dojo.byId("project_id_" + rowIndex);
     var division = dojo.byId("divisionId").value;
     if (division != 0) {
-        for (var i = 0; i < projectList.length; i++) {
-            if (division == projectList[i].divId) {
-                projectSelect.options.length = 0;
-                insertEmptyOption(projectSelect);
-                for (var j = 0; j < projectList[i].divProjs.length; j++) {
-                    if ((projectList[i].divProjs[j].state === projectState) && (projectList[i].divProjs[j].active == 'true')) {
-                        projectOption = dojo.doc.createElement("option");
-                        dojo.attr(projectOption, {
-                            value:projectList[i].divProjs[j].id
-                        });
-                        projectOption.title = projectList[i].divProjs[j].value;
-                        projectOption.innerHTML = projectList[i].divProjs[j].value;
-                        projectSelect.appendChild(projectOption);
-                    }
-                }
-            }
-        }
+
+        dojo.forEach(dojo.filter(projectList, function (projectsOfDiv) {
+            return (projectsOfDiv.divId == division);
+        }), function (projectsOfDiv) {
+            dojo.forEach(dojo.filter(projectsOfDiv.divProjs, function (project) {
+                return ((+project.state === projectState) && (project.active == 'true'));
+            }), function (project) {
+                var projectOption = dojo.doc.createElement("option");
+                dojo.attr(projectOption, {
+                    value: project.id
+                });
+                projectOption.title = project.value;
+                projectOption.innerHTML = project.value;
+                projectSelect.appendChild(projectOption);
+            });
+        });
+
         if (existsCookie('aplanaProject')) {
             projectSelect.value = cookieValue('aplanaProject');
             projectChange(projectSelect);
@@ -193,7 +197,7 @@ function insertEmptyOption(select) {
 function insertEmptyOptionWithCaptionInHead(select, caption) {
     var option = dojo.doc.createElement("option");
     dojo.attr(option, {
-        value:"0"
+        value: "0"
     });
     option.innerHTML = caption;
     select.insertBefore(option, select.options[0]);
@@ -229,16 +233,16 @@ function setDefaultEmployeeJob(rowIndex) {
         var row = listId.substring(listId.lastIndexOf("_") + 1, listId.length);
         // Проект Пресейл
         var projectRoleIdText = "project_role_id_" + row;
-        if (    (actTypeLists[j].value == EnumConstants.TypesOfActivityEnum.PROJECT)
-            ||  (actTypeLists[j].value == EnumConstants.TypesOfActivityEnum.PRESALE)) {
+        if ((actTypeLists[j].value == EnumConstants.TypesOfActivityEnum.PROJECT)
+            || (actTypeLists[j].value == EnumConstants.TypesOfActivityEnum.PRESALE)) {
             var projectRoleList = dojo.byId(projectRoleIdText);
-            dojo.attr(projectRoleList, { value:defaultEmployeeJobId });
+            dojo.attr(projectRoleList, { value: defaultEmployeeJobId });
             fillAvailableActivityCategoryList(row);
         }
         // Внепроектная активность
         else if (actTypeLists[j].value == "14") {
             var projectRoleList = dojo.byId(projectRoleIdText);
-            dojo.attr(projectRoleList, { value:defaultEmployeeJobId });
+            dojo.attr(projectRoleList, { value: defaultEmployeeJobId });
             fillAvailableActivityCategoryList(row);
         }
     }
@@ -257,9 +261,9 @@ function getTitle(processed) {
         select = processed.target;
     }
     //костыль чтобы в категории активности отображалось описание
-    if(select.id.indexOf("activity_category_id_")+1){
+    if (select.id.indexOf("activity_category_id_") + 1) {
         var description = dojo.byId("act_description_" + select.id.substring(21)).innerHTML;
-        if(description && description.trim()!=""){
+        if (description && description.trim() != "") {
             return  description;
         }
     }
@@ -316,11 +320,11 @@ function clearErrorBox(divId) {
 }
 
 // ковертирует дату в тип дата из строки (разделитель ".")
-function convertStringToDate(stringDate){
+function convertStringToDate(stringDate) {
     if (stringDate != null && stringDate != "") {
         var date = stringDate.split('.');
-        return new Date(date[2], date[1]-1, date[0]);
-    }else{
+        return new Date(date[2], date[1] - 1, date[0]);
+    } else {
         return null;
     }
 }
