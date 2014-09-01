@@ -26,6 +26,9 @@ public class Holiday implements Serializable {
     @ForeignKey(name = "fk_region")
     private Region region;
 
+    @Column(name = "consider", nullable = false)
+    private Boolean consider;
+
     public Calendar getCalDate() {
         return calDate;
     }
@@ -40,5 +43,13 @@ public class Holiday implements Serializable {
 
     public void setRegion(Region region) {
         this.region = region;
+    }
+
+    public Boolean getConsider() {
+        return consider;
+    }
+
+    public void setConsider(Boolean consider) {
+        this.consider = consider;
     }
 }

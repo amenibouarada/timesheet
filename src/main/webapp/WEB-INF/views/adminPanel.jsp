@@ -125,7 +125,7 @@
 
             <%--Сотрудники--%>
             <tr>
-                <td class="headerText" rowspan="5">
+                <td class="headerText" rowspan="6">
                     Сотрудники
                 </td>
                 <td class="elementText">
@@ -152,6 +152,11 @@
             <tr>
                 <td class="elementText">
                     <a href="admin/update/jiranameallusersfromldap"><fmt:message key="link.alljiranamesync"/></a>
+                </td>
+            </tr>
+            <tr>
+                <td class="elementText">
+                    <a href="admin/update/importEmpVacDays"><fmt:message key="link.import.employee.vacation.days"/></a>
                 </td>
             </tr>
 

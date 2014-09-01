@@ -7,6 +7,8 @@ import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.dao.entity.ldap.EmployeeLdap;
 import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.*;
+import com.aplana.timesheet.form.UploadedFile;
+import com.aplana.timesheet.util.XMLFileValidator;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import org.apache.commons.lang3.StringUtils;
@@ -17,9 +19,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.ldap.support.LdapUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Nullable;
 import javax.servlet.http.Cookie;
@@ -47,6 +50,10 @@ public class UpdateController {
     private EmployeeAssistantService employeeAssistantService;
     @Autowired
     private PlannedVacationService plannedVacationService;
+    @Autowired
+    private VacationDaysService vacationDaysService;
+    @Autowired(required=true)
+    XMLFileValidator fileValidator;
 
     public void setEmployeeLdapService(EmployeeLdapService employeeLdapService) {
         this.employeeLdapService = employeeLdapService;
@@ -104,6 +111,27 @@ public class UpdateController {
         ModelAndView mav = new ModelAndView("oqSync");
         mav.addObject("trace", oqProjectSyncService.getTrace().replaceAll("\n", "<br/>"));
         return mav;
+    }
+
+    @RequestMapping(value = "/update/importEmpVacDays", method = RequestMethod.GET)
+    public ModelAndView importEmpVacDaysForm(@ModelAttribute("uploadedFile") UploadedFile uploadedFile, BindingResult result) {
+        return new ModelAndView("importEmpVacDays");
+    }
+
+    @RequestMapping(value = "/update/importEmpVacDays", method = RequestMethod.POST)
+    public ModelAndView importEmpVacDays(@ModelAttribute("uploadedFile") UploadedFile uploadedFile, BindingResult result) {
+
+        MultipartFile file = uploadedFile.getFile();
+        fileValidator.validate(uploadedFile, result);
+
+        if (result.hasErrors()) {
+            return new ModelAndView("importEmpVacDays");
+        }
+
+        vacationDaysService.importFile(file);
+        ModelAndView modelAndView = new ModelAndView("importEmpVacDays");
+        modelAndView.addObject("trace", vacationDaysService.getTrace().replaceAll("\n", "<br/>"));
+        return modelAndView;
     }
 
     @RequestMapping(value = "/update/showalluser")

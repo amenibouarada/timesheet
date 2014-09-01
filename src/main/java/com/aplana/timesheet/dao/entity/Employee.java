@@ -98,6 +98,9 @@ public class Employee implements Identifiable, Comparable{
     @Column(nullable = false, name = "jira_name")
     private String jiraName;
 
+    @OneToOne(mappedBy = "employee", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private VacationDays vacationDays;
+
 
     public Employee getManager2() {
         return manager2;

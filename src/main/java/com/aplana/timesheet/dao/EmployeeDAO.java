@@ -776,4 +776,26 @@ public class EmployeeDAO {
         query.setParameter("birthdayMonth", birthdayMonth);
         return query.getResultList();
     }
+
+    public Employee tryFindByFioRegionDivision(String name, String patronymic, Region region, Division division) {
+        Query query = entityManager.createQuery(
+                "select " +
+                        "emp " +
+                        "from " +
+                        "Employee emp " +
+                        "where " +
+                        " emp.name = :name and " +
+                        " emp.region = :region and " +
+                        " emp.division = :division" +
+                        ( patronymic != null ? " and emp.patronymic = :patronymic"  : "")
+        );
+        query.setParameter("name", name);
+        query.setParameter("region", region);
+        query.setParameter("division", division);
+        if (patronymic != null) {
+            query.setParameter("patronymic", patronymic);
+        }
+
+        return query.getResultList().size() == 1 ? (Employee) query.getResultList().get(0) : null;
+    }
 }

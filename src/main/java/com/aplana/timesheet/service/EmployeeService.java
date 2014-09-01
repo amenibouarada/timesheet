@@ -55,18 +55,19 @@ public class EmployeeService {
     private VacationService vacationService;
 
     /**
-    * Возвращает сотрудника по идентификатору.
-    * @param id идентификатор сотрудника
-    * @return объект класса Employee либо null, если сотрудник
-    *         с указанным id не найден.
-    */
+     * Возвращает сотрудника по идентификатору.
+     *
+     * @param id идентификатор сотрудника
+     * @return объект класса Employee либо null, если сотрудник
+     *         с указанным id не найден.
+     */
     @Transactional(readOnly = true)
     public Employee find(Integer id) {
         return employeeDAO.find(id);
     }
 
     public Boolean isShowAll(HttpServletRequest request) {
-        if(!request.isUserInRole(ROLE_ADMIN))
+        if (!request.isUserInRole(ROLE_ADMIN))
             return false;
 
         Boolean isShowAll = false;
@@ -83,8 +84,7 @@ public class EmployeeService {
     }
 
     @Transactional(readOnly = true)
-    public Employee findByEmail(String mail)
-    {
+    public Employee findByEmail(String mail) {
         return employeeDAO.findByEmail(mail);
     }
 
@@ -94,6 +94,7 @@ public class EmployeeService {
 
     /**
      * Возвращает сотрудника по имени.
+     *
      * @param name имя сотрудника
      * @return объект класса Employee либо null, если сотрудник
      *         с указанным именем не найден.
@@ -105,8 +106,9 @@ public class EmployeeService {
 
     /**
      * Возвращает список сотрудников
-     * @param division Если null, то поиск осуществляется без учета подразделения,
-     *                 иначе с учётом подразделения
+     *
+     * @param division    Если null, то поиск осуществляется без учета подразделения,
+     *                    иначе с учётом подразделения
      * @param filterFired Отоброжать ли уволенных сотрудников
      * @return список действующих сотрудников.
      */
@@ -123,38 +125,38 @@ public class EmployeeService {
 
     /**
      * Возвращает список сотрудников
-     * @param divisions Если null, то поиск осуществляется по всем подразделениям (если 1 исп. функцию createDivisionList)
-     * @param managers  Если null, то поиск осуществляется по всем руководителям (если 1 исп. createManagerList)
-     * @param regions   Если null, то поиск осуществляется по всем регионам (см. также createRegionsList)
-     * @param projects  Если null, то поиск осуществляется по всем проектам (если 1 исп. createProjectList)
-     * @param beginDate Интервал работы на проекте/проектах (если null - 01.01.1900)
-     * @param endDate   Интервал работы на проекте/проектах (если null - 01.01.2100)
+     *
+     * @param divisions                    Если null, то поиск осуществляется по всем подразделениям (если 1 исп. функцию createDivisionList)
+     * @param managers                     Если null, то поиск осуществляется по всем руководителям (если 1 исп. createManagerList)
+     * @param regions                      Если null, то поиск осуществляется по всем регионам (см. также createRegionsList)
+     * @param projects                     Если null, то поиск осуществляется по всем проектам (если 1 исп. createProjectList)
+     * @param beginDate                    Интервал работы на проекте/проектах (если null - 01.01.1900)
+     * @param endDate                      Интервал работы на проекте/проектах (если null - 01.01.2100)
      * @param lookPreviousTwoWeekTimesheet - посмотреть были ли на проектах в последнии две недели списания занятости,
      *                                     т.е. если за последние две недели (от beginDate) пользователь списывал занятость
      *                                     по указанным проектам (projects), то значит он будет считаться как на этом проекте,
      *                                     даже если в employee_project_plan записей нет
-     *
      * @return список сотрудников
      */
     @Transactional(readOnly = true)
     public List<Employee> getEmployees(List<Division> divisions, List<Employee> managers, List<Region> regions,
                                        List<Project> projects, Date beginDate, Date endDate,
-                                       boolean lookPreviousTwoWeekTimesheet){
+                                       boolean lookPreviousTwoWeekTimesheet) {
         return employeeDAO.getEmployees(divisions, managers, regions, projects, beginDate, endDate, lookPreviousTwoWeekTimesheet);
     }
 
     // если первый 0 - вернет null => все регионы
-    public List<Region> createRegionsList(List<Integer> regions){
+    public List<Region> createRegionsList(List<Integer> regions) {
         if (regions == null || regions.get(0) <= 0) return null;
         List<Region> result = new ArrayList<Region>();
-        for (Integer regionId : regions){
+        for (Integer regionId : regions) {
             result.add(regionService.find(regionId));
         }
         return result;
     }
 
     // если 0 - вернет null => все подразделения
-    public List<Division> createDivisionList(Integer division){
+    public List<Division> createDivisionList(Integer division) {
         if (division == null || division <= 0) return null;
         List<Division> result = new ArrayList<Division>();
         result.add(divisionService.find(division));
@@ -162,7 +164,7 @@ public class EmployeeService {
     }
 
     // если 0 - вернет null => все руководители
-    public List<Employee> createManagerList(Integer manager){
+    public List<Employee> createManagerList(Integer manager) {
         if (manager == null || manager <= 0) return null;
         List<Employee> result = new ArrayList<Employee>();
         result.add(find(manager));
@@ -170,7 +172,7 @@ public class EmployeeService {
     }
 
     // если 0 - вернет null => все проекты
-    public List<Project> createProjectList(Integer project){
+    public List<Project> createProjectList(Integer project) {
         if (project == null || project <= 0) return null;
         List<Project> result = new ArrayList<Project>();
         result.add(projectService.find(project));
@@ -179,6 +181,7 @@ public class EmployeeService {
 
     /**
      * Возвращает список доступных для синхронизации с ldap сотрудников.
+     *
      * @param division Если null, то поиск осуществляется без учета подразделения,
      *                 иначе с учётом подразделения
      * @return список сотрудников для синхронизации
@@ -191,6 +194,7 @@ public class EmployeeService {
     /**
      * Сохраняет в базе нового сотрудника, либо обновляет данные уже
      * существующего сотрудника.
+     *
      * @param employee
      */
     @Transactional
@@ -201,6 +205,7 @@ public class EmployeeService {
     /**
      * Сохраняет в базе новых сотрудников, либо обновляет данные уже
      * существующих сотрудников.
+     *
      * @param employees
      */
     @Transactional
@@ -210,10 +215,10 @@ public class EmployeeService {
         StringBuffer trace = new StringBuffer();
 
         for (Employee emp : employees) {
-            if (emp.getRegion() == null){
+            if (emp.getRegion() == null) {
                 emp.setRegion(defaultCity);
             }
-            try{
+            try {
                 if (!employeeDAO.isNotToSync(emp)) {
                     trace.append(String.format(
                             "%s user: %s %s\n", emp.getId() != null ? "Updated" : "Added", emp.getEmail(), emp.getName()
@@ -225,7 +230,7 @@ public class EmployeeService {
                             "\nUser: %s %s marked not_to_sync.(Need update)\n%s\n\n",
                             emp.getEmail(), emp.getName(), emp.toString()));
                 }
-            } catch (Exception e){
+            } catch (Exception e) {
                 trace.append("exception: " + e);
                 logger.debug("update user failed", e);
             }
@@ -237,22 +242,23 @@ public class EmployeeService {
     /**
      * Сохраняет в базе нового сотрудника, либо обновляет данные уже
      * существующего сотрудника.
+     *
      * @param employee
      */
     public Employee save(Employee employee) {
         Employee empDb = employeeDAO.getEmployee(employee.getEmail());
         //если в базе есть дата увольнения, и дата не совпадает с лдапом, то дату в базе не меняем
-        if(empDb!=null && empDb.getEndDate()!=null && !empDb.getEndDate().equals(employee.getEndDate())){
+        if (empDb != null && empDb.getEndDate() != null && !empDb.getEndDate().equals(employee.getEndDate())) {
             employee.setEndDate(empDb.getEndDate());
             empDb = employeeDAO.save(employee);
             logger.debug("Final date not equal in ldap and database for Employee object id = {}", empDb.getId());
-        }else{
+        } else {
             empDb = employeeDAO.save(employee);
         }
         return empDb;
     }
 
-    public Double getWorkDaysOnIllnessWorked(Employee employee, Date beginDate, Date endDate){
+    public Double getWorkDaysOnIllnessWorked(Employee employee, Date beginDate, Date endDate) {
         return employeeDAO.getWorkDaysOnIllnessWorked(employee, beginDate, endDate);
     }
 
@@ -276,10 +282,10 @@ public class EmployeeService {
     }
 
     // ToDo нельзя ли эту логику перенести в запрос?
-    public List<Employee> getDivisionEmployeesByManager(Integer divisionId, Date date, List<Integer> regionIds, List<Integer> projectRoleIds,Integer managerId) {
+    public List<Employee> getDivisionEmployeesByManager(Integer divisionId, Date date, List<Integer> regionIds, List<Integer> projectRoleIds, Integer managerId) {
         List<Employee> divisionEmployeesByManager = employeeDAO.getDivisionEmployeesByManager(divisionId, date, regionIds, projectRoleIds, managerId);
         List<Employee> divisionEmployeesTemp = new ArrayList<Employee>();
-        for (Employee employee:divisionEmployeesByManager) {
+        for (Employee employee : divisionEmployeesByManager) {
             List<Employee> employeesByManager = getDivisionEmployeesByManager(divisionId, date, regionIds, projectRoleIds, employee.getId());
             for (Employee employeeTemp : employeesByManager) {
                 if (!(divisionEmployeesTemp.contains(employeeTemp)) && !(divisionEmployeesByManager.contains(employeeTemp))) {
@@ -346,9 +352,10 @@ public class EmployeeService {
 
     /**
      * Возвращает JSON-строку, содержащую список всех главных руководителей проектов и связанные с ними проекты.
+     *
      * @return Главные руководители и связанные проекты
      */
-    public String getMainProjectManagersJSON(){
+    public String getMainProjectManagersJSON() {
         final JsonArrayNodeBuilder builder = anArrayBuilder();
 
         // Заполнение списка руководителей проектов для варианта "Все подразделения"
@@ -401,16 +408,16 @@ public class EmployeeService {
         return JsonUtil.format(builder);
     }
 
-    private String getEmployeeNameByActiveStatus(Employee employee){
-        if (employee.isActive()){
+    private String getEmployeeNameByActiveStatus(Employee employee) {
+        if (employee.isActive()) {
             return employee.getName();
         }
         return employee.getName() + " (уволен)";
     }
 
-    private JsonNodeBuilder getEmployeesBuilder(List<Employee> employees){
+    private JsonNodeBuilder getEmployeesBuilder(List<Employee> employees) {
         JsonArrayNodeBuilder employeesBuilder = anArrayBuilder();
-        for (Employee employee :employees) {
+        for (Employee employee : employees) {
             employeesBuilder.withElement(
                     anObjectBuilder()
                             .withField("employeeId", aStringBuilder(employee.getId().toString()))
@@ -424,6 +431,7 @@ public class EmployeeService {
     /**
      * Возвращает JSON-строку, содержащую список всех подразделений и их сотрудников, включая неактивные подразделения
      * и уволенных сотрудников.
+     *
      * @return Главные руководители и связанные проекты
      */
     public String getDivisionsEmployeesJSON() {
@@ -465,10 +473,10 @@ public class EmployeeService {
     public Map<Employee, List<Project>> getJuniorProjectManagersAndProjects(List<Project> employeeProjects, Illness illness) {
         Map<Employee, List<Project>> managersAndProjects = new HashMap<Employee, List<Project>>();
         for (Project project : employeeProjects) {
-            if (! illness.getEmployee().getId().equals(project.getManager().getId())) {        //если оформляющий отпуск - руководитель этого проекта, то по этому проекту писем не рассылаем
+            if (!illness.getEmployee().getId().equals(project.getManager().getId())) {        //если оформляющий отпуск - руководитель этого проекта, то по этому проекту писем не рассылаем
                 List<Employee> managers = getProjectManagersSameRole(project, illness.getEmployee());
                 for (Employee manager : managers) {
-                    if (! manager.getId().equals(illness.getEmployee().getId())) {       //отсеиваем сотрудника, если он сам руководитель
+                    if (!manager.getId().equals(illness.getEmployee().getId())) {       //отсеиваем сотрудника, если он сам руководитель
                         if (managersAndProjects.containsKey(manager)) {
                             List<Project> projects = managersAndProjects.get(manager);
                             projects.add(project);
@@ -491,10 +499,10 @@ public class EmployeeService {
     public Map<Employee, List<Project>> getJuniorProjectManagersAndProjects(List<Project> employeeProjects, final Vacation vacation) {
         Map<Employee, List<Project>> managersAndProjects = new HashMap<Employee, List<Project>>();
         for (Project project : employeeProjects) {
-            if (! vacation.getEmployee().getId().equals(project.getManager().getId())) {        //если оформляющий отпуск - руководитель этого проекта, то по этому проекту писем не рассылаем
+            if (!vacation.getEmployee().getId().equals(project.getManager().getId())) {        //если оформляющий отпуск - руководитель этого проекта, то по этому проекту писем не рассылаем
                 List<Employee> managers = getProjectManagersThatDoesntApproveVacation(project, vacation);
                 for (Employee manager : managers) {
-                    if (! manager.getId().equals(vacation.getEmployee().getId())) {       //отсеиваем сотрудника, если он сам руководитель
+                    if (!manager.getId().equals(vacation.getEmployee().getId())) {       //отсеиваем сотрудника, если он сам руководитель
                         if (managersAndProjects.containsKey(manager)) {
                             List<Project> projects = managersAndProjects.get(manager);
                             projects.add(project);
@@ -515,11 +523,11 @@ public class EmployeeService {
         return employeeDAO.getEmployeesForSync();
     }
 
-    public List<Employee> getManagerListForAllEmployee(){
+    public List<Employee> getManagerListForAllEmployee() {
         return employeeDAO.getManagerListForAllEmployee();
     }
 
-    public String getManagerListJson(){
+    public String getManagerListJson() {
         final JsonArrayNodeBuilder builder = anArrayBuilder();
         List<Employee> managers = employeeDAO.getManagerListForAllEmployee();
         builder.withElement(
@@ -529,16 +537,16 @@ public class EmployeeService {
         );
         for (Employee manager : managers) {
             final JsonArrayNodeBuilder regionBuilder = anArrayBuilder();
-            for (Integer region : employeeDAO.getRegionsWhereManager(manager.getId())){
+            for (Integer region : employeeDAO.getRegionsWhereManager(manager.getId())) {
                 regionBuilder.withElement(
-                        anObjectBuilder().withField("id",aStringBuilder(region.toString())));
+                        anObjectBuilder().withField("id", aStringBuilder(region.toString())));
             }
             builder.withElement(
                     anObjectBuilder().
                             withField("id", JsonUtil.aStringBuilder(manager.getId())).
                             withField("name", aStringBuilder(manager.getName())).
-                            withField("division",aStringBuilder(manager.getDivision().getId().toString())).
-                            withField("regionWhereMan",regionBuilder)
+                            withField("division", aStringBuilder(manager.getDivision().getId().toString())).
+                            withField("regionWhereMan", regionBuilder)
             );
         }
         return JsonUtil.format(builder);
@@ -546,13 +554,14 @@ public class EmployeeService {
 
     /**
      * Получаем список линейных руководителей
+     *
      * @param employee
      * @return
      */
     public List<Employee> getLinearEmployees(Employee employee) {
         List<Employee> employees = new ArrayList<Employee>();
         Employee manager = employee.getManager();
-        if (manager !=null && !employees.contains(manager)) {
+        if (manager != null && !employees.contains(manager)) {
             employees.add(manager);
             employees.addAll(getLinearEmployees(manager));
         }
@@ -579,13 +588,14 @@ public class EmployeeService {
 
     /**
      * Возвращает список сотрудников по центру, руководителю, списку должностей и списку регионов
-     * @param division - идентификатора центра
-     * @param manager - идентификатора руководителя
+     *
+     * @param division        - идентификатора центра
+     * @param manager         - идентификатора руководителя
      * @param projectRoleList - список идентификаторов должностей
-     * @param regionList - список идентификаторов регионов
+     * @param regionList      - список идентификаторов регионов
      * @return
      */
-    public List<Employee> getEmployeeByDivisionManagerRoleRegion(Integer division, Integer manager, List<Integer> projectRoleList, List<Integer> regionList){
+    public List<Employee> getEmployeeByDivisionManagerRoleRegion(Integer division, Integer manager, List<Integer> projectRoleList, List<Integer> regionList) {
         return employeeDAO.getEmployeeByDivisionManagerRoleRegion(division, manager, projectRoleList, regionList);
     }
 
@@ -606,10 +616,10 @@ public class EmployeeService {
      *
      * @return true - не начал.
      */
-    public Boolean checkNotStartWorkByDate(Integer employeeId, String reportDate){
+    public Boolean checkNotStartWorkByDate(Integer employeeId, String reportDate) {
         Date date = DateTimeUtil.parseStringToDateForDB(reportDate);
         Employee employee = emloyeeDAO.find(employeeId);
-        if (employee.getStartDate().after(date)){
+        if (employee.getStartDate().after(date)) {
             return true;
         }
         return false;
@@ -623,7 +633,20 @@ public class EmployeeService {
      *
      * @return List<Employee>
      */
-    public List<Employee> getEmployeesForDivisionWithBirthdayMonth(Division division, Integer birthdayMonth){
+    public List<Employee> getEmployeesForDivisionWithBirthdayMonth(Division division, Integer birthdayMonth) {
         return employeeDAO.getEmployeesForDivisionWithBirthdayMonth(division, birthdayMonth);
+    }
+
+    public Employee tryFindByFioRegionDivision(String fio, Region region, Division division) {
+        String[] split = fio.split("\\s+");
+        if (split.length == 3) {
+            String name = split[0].concat(" ").concat(split[1]);
+            return employeeDAO.tryFindByFioRegionDivision(name, split[3], region, division);
+        } else if (split.length == 2) {
+            String name = split[0].concat(" ").concat(split[1]);
+            return employeeDAO.tryFindByFioRegionDivision(name, null, region, division);
+        }
+
+        return null;
     }
 }
