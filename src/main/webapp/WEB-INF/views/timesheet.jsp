@@ -286,10 +286,10 @@
     <span id="lbNextPlan" class="label">Планы на следующий рабочий день:</span>
 
     <div id="box_margin" style="margin-top :6px; margin-bottom: 8px;">
-        <div id='box_textArea' style="border: #AAA solid 1px;width: 775px;">
+        <div id='box_textArea' style="border: #AAA solid 1px;width: 685px;">
 
-            <form:textarea wrap="soft" path="plan" id="plan" rows="7" cols="92"
-                           cssStyle="border: none; outline: none;overflow:auto;"/>
+            <form:textarea wrap="soft" path="plan" id="plan" rows="7"
+                           cssStyle="border: none; outline: none;overflow:auto;width: 97%;"/>
             <img id="jira_get_plans_button" src="resources/img/logo-jira.png"
                  alt="Запрос из JIRA" title="Запрос из JIRA" height="15" width="15"
                  style="cursor: pointer; visibility: visible; position: absolute; margin-top: 4px; margin-left: 3px;">

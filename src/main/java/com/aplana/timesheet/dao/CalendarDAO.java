@@ -300,4 +300,31 @@ public class CalendarDAO {
 
         return ((Long) query.getSingleResult()).intValue();
     }
+
+    public Integer getCountWorkDaysForPeriodForRegion(Date begin, Date end, Region region) {
+        final Query query = entityManager.createQuery(
+                "select count(c) " +
+                        " from Calendar c" +
+                        " left join c.holidays h " +
+                        " where c.calDate >= :begin and c.calDate <= :endDate " +
+                        " and h is null" +
+                        " and (h.region.id is null or h.region = :region)");
+        query.setParameter("begin",begin);
+        query.setParameter("endDate",end);
+        query.setParameter("region", region);
+        return ((Long) query.getSingleResult()).intValue();
+    }
+    public Integer getCountDaysForPeriodForRegionExConsiderHolidays(Date begin, Date end, Region region) {
+        final Query query = entityManager.createQuery(
+                "select count(c) " +
+                        " from Calendar c" +
+                        " left join c.holidays h " +
+                        " where c.calDate >= :begin and c.calDate <= :endDate " +
+                        " and (h is null or h.consider = true) " +
+                        " and (h.region is null or h.region = :region)");
+        query.setParameter("begin",begin);
+        query.setParameter("endDate",end);
+        query.setParameter("region", region);
+        return ((Long) query.getSingleResult()).intValue();
+    }
 }

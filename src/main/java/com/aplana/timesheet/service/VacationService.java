@@ -8,7 +8,6 @@ import com.aplana.timesheet.dao.entity.*;
 import com.aplana.timesheet.enums.VacationStatusEnum;
 import com.aplana.timesheet.enums.VacationTypesEnum;
 import com.aplana.timesheet.exception.service.DeleteVacationException;
-import com.aplana.timesheet.exception.service.NotDataForYearInCalendarException;
 import com.aplana.timesheet.exception.service.VacationApprovalServiceException;
 import com.aplana.timesheet.form.CreateVacationForm;
 import com.aplana.timesheet.form.VacationsForm;
@@ -284,40 +283,103 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
         final JsonObjectNodeBuilder builder = anObjectBuilder();
         try {
             Employee employee = employeeService.find(employeeId);
-            final Timestamp endDate = DateTimeUtil.stringToTimestamp(endDateString, CreateVacationForm.DATE_FORMAT);
             final Timestamp beginDate = DateTimeUtil.stringToTimestamp(beginDateString, CreateVacationForm.DATE_FORMAT);
-            com.aplana.timesheet.dao.entity.Calendar endDateCalendar = calendarService.find(endDate);
+            final Timestamp endDate = DateTimeUtil.stringToTimestamp(endDateString, CreateVacationForm.DATE_FORMAT);
+
             //Получаем день выхода на работу
+            com.aplana.timesheet.dao.entity.Calendar endDateCalendar = calendarService.find(endDate);
             com.aplana.timesheet.dao.entity.Calendar nextWorkDay =
                     calendarService.getNextWorkDay(endDateCalendar, employee.getRegion());
-
             String format = DateFormatUtils.format(nextWorkDay.getCalDate(), CreateVacationForm.DATE_FORMAT);
             builder.withField("exitDate", aStringBuilder(format));
 
-            //Получаем кол-во выходных в отпуске
-            final List<Holiday> holidaysForRegion =
-                    calendarService.getHolidaysForRegion(beginDate, endDate, employee.getRegion());
-            final Integer holidaysCount = getHolidaysCount(holidaysForRegion, beginDate, endDate);
-            //Получаем кол-во дней в отпуске
-            Integer vacationDayCount = DateTimeUtil.getAllDaysCount(beginDate, endDate).intValue();
-            //Получаем кол-во дней в отпуске за исключением выходых
-            Integer vacationWorkCount = 0;
-            if (vacationDayCount > 0) {
-                vacationWorkCount = vacationDayCount - holidaysCount;
-            }
+            //Получаем кол-во дней в отпуске за исключением неучитываемых праздников
+            Integer vacationDayCountExCons = calendarService.getCountDaysForPeriodForRegionExConsiderHolidays(
+                    beginDate,
+                    endDate,
+                    employee.getRegion()
+            );
+            //Получаем кол-во рабочих дней в отпуске
+            Integer vacationWorkCount = calendarService.getCountWorkDaysForPeriodForRegion(
+                    beginDate,
+                    endDate,
+                    employee.getRegion());
+
             builder.withField("vacationWorkDayCount", aStringBuilder(vacationWorkCount.toString()));
-            builder.withField("vacationDayCount", aStringBuilder((vacationDayCount <= 0) ? "0" : vacationDayCount.toString()));
-            /* проверка на необходимость вывода информ сообщения о попадании
-            *  на пятницу для отпуска с сохранением содержания */
-            if (    vacationTypeId != null &&
-                    vacationTypeId == VacationTypesEnum.WITH_PAY.getId() &&
-                    vacationDayCount > propertyProvider.getVacantionFridayInformDays()
-                    ) {
-                Calendar calendar = new GregorianCalendar();
-                calendar.setTime(endDate);
-                if (calendar.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY)
+            builder.withField("vacationDayCount", aStringBuilder((vacationDayCountExCons <= 0) ? "0" : vacationDayCountExCons.toString()));
+
+            /*  проверка на необходимость вывода информ сообщения
+                о необходимости оформления отпуска по вск
+                для отпуска с сохранением содержания
+            */
+            Calendar calendar = java.util.Calendar.getInstance();
+
+            calendar.setTime(beginDate);
+            int beginWeekYear = calendar.get(Calendar.WEEK_OF_YEAR);
+
+            calendar.setTime(endDate);
+            int endWeekYear = calendar.get(Calendar.WEEK_OF_YEAR);
+
+            calendar.set(Calendar.DAY_OF_WEEK, calendar.getFirstDayOfWeek());
+            Date beginWeekDate = calendar.getTime();
+
+            int endDay = calendar.get(Calendar.DAY_OF_WEEK);
+            int leftDays = Calendar.SATURDAY - endDay;
+            calendar.add(Calendar.DATE, ++leftDays);
+            Date sunday = calendar.getTime();
+
+            //Количество рабочих дней в отпуске, если конец отпуска приходится
+            //на следующую неделю то считается с понедельника след недели по дату конца отпуска
+            Integer countWorkVacationPeriod = calendarService.getCountWorkDaysForPeriodForRegion(
+                    beginWeekYear != endWeekYear ? beginWeekDate : beginDate,
+                    endDate,
+                    employee.getRegion());
+
+            //Количество рабочих дней в неделе приходящихся на конец отпуска
+            Integer countWorkDaysWeek = calendarService.getCountWorkDaysForPeriodForRegion(
+                    beginWeekDate,
+                    DateUtils.addDays(beginWeekDate, 6),
+                    employee.getRegion());
+            //Если конец отпуска приходится на следующую неделю
+            if (beginWeekYear != endWeekYear) {
+                // кол -во учитываемых дней в последней неделе отпуска
+                Integer countVacConsiderDaysOnEndWeek = calendarService.getCountDaysForPeriodForRegionExConsiderHolidays(
+                        beginWeekDate,
+                        endDate,
+                        employee.getRegion());
+
+                // кол - во учитываемых дней в неделе
+                Integer countConsiderDaysOnEndWeek = calendarService.getCountDaysForPeriodForRegionExConsiderHolidays(
+                        beginWeekDate,
+                        sunday,
+                        employee.getRegion());
+
+                if (    vacationTypeId != null &&
+                        vacationTypeId == VacationTypesEnum.WITH_PAY.getId() &&
+                        // Если количество учитываемых дней в отпуске не равно
+                        // количеству учитываемых дней в неделе приходящихся на конец отпуска
+                        // (т.е. в отпуск попала не вся неделя)
+                        !countVacConsiderDaysOnEndWeek.equals(countConsiderDaysOnEndWeek) &&
+                        // то проверяем
+                        // Если количество рабочих дней с понедельника равно кол-ву рабочих дней в неделе
+                        // (проверка не выбрал ли пользователь период по пт)
+                        countWorkVacationPeriod.equals(countWorkDaysWeek)
+                        ) {
                     builder.withField("vacationFridayInform", aStringBuilder("true"));
+                }
+            } else {
+                Integer vacationDayCount = DateTimeUtil.getAllDaysCount(beginDate, endDate).intValue();
+                if (    vacationTypeId != null &&
+                        vacationTypeId == VacationTypesEnum.WITH_PAY.getId() &&
+                        // Если кол -во дней отпуска совпадает с кол-вом рабочих дней недели
+                        vacationDayCount.equals(countWorkDaysWeek) &&
+                        // и и кол-во рабочих дней в отпуске равно кол-ву рабочих дней в неделе
+                        countWorkVacationPeriod.equals(countWorkDaysWeek)
+                        ) {
+                    builder.withField("vacationFridayInform", aStringBuilder("true"));
+                }
             }
+
             return JsonUtil.format(builder);
         } catch (Exception th) {
             logger.error(CANT_GET_EXIT_TO_WORK_EXCEPTION_MESSAGE, th);
@@ -405,6 +467,7 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
 
     /**
      * Проверка на РЦК
+     *
      * @param vacation
      * @return
      */
