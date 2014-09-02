@@ -477,7 +477,7 @@ public class EmployeeLdapService extends AbstractServiceWithTransactionManagemen
                 for (EmployeeLdap employeeLdap : employeesLdap) {
                     Employee employee = createAndFillEmployee(employeeLdap, errors, EmployeeType.EMPLOYEE);
 
-                    if (employee.getManager() != null) {
+                    if (employee.getManager() != null ) {
                         empsToSync.add(employee);
                     }
                 }

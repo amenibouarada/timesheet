@@ -219,15 +219,19 @@ public class EmployeeService {
                 emp.setRegion(defaultCity);
             }
             try {
-                if (!employeeDAO.isNotToSync(emp)) {
+                Employee result = employeeDAO.findByObjectSid(emp.getObjectSid());
+                if ( result != null  && !result.isNotToSync() && result.getEndDate() == null) {
                     trace.append(String.format(
                             "%s user: %s %s\n", emp.getId() != null ? "Updated" : "Added", emp.getEmail(), emp.getName()
                     ));
-
                     save(emp);
-                } else {
+                } else if (result == null || result.isNotToSync()) {
                     trace.append(String.format(
                             "\nUser: %s %s marked not_to_sync.(Need update)\n%s\n\n",
+                            emp.getEmail(), emp.getName(), emp.toString()));
+                } else if (result.getEndDate() != null) {
+                    trace.append(String.format(
+                            "\nUser: %s %s is dismiss \n%s\n\n",
                             emp.getEmail(), emp.getName(), emp.toString()));
                 }
             } catch (Exception e) {

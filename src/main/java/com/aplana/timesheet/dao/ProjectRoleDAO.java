@@ -67,12 +67,16 @@ public class ProjectRoleDAO {
             return null;
         }
         Query query = entityManager.createQuery(
-                "from ProjectRole as pr where pr.active=:active and lower(pr.ldapTitle) like :title"
-        ).setParameter("active", true).setParameter("title", "%" + title.toLowerCase() + "%");
+                "from ProjectRole as pr where pr.active=:active and lower(pr.ldapTitle) like :title").
+                setParameter("active", true).
+                setParameter("title", "%" + title.toLowerCase() + "%");
         try {
             logger.debug("Title {}", title);
             return (ProjectRole) query.getSingleResult();
         } catch (NoResultException e) {
+            return null;
+        } catch (Exception e) {
+            logger.warn("Error on find {}", title);
             return null;
         }
     }
