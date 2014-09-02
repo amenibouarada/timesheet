@@ -330,7 +330,7 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
 
             //Количество рабочих дней в отпуске, если конец отпуска приходится
             //на следующую неделю то считается с понедельника след недели по дату конца отпуска
-            Integer countWorkVacationPeriod = calendarService.getCountWorkDaysForPeriodForRegion(
+            Integer countWorkDaysVacationPeriod = calendarService.getCountWorkDaysForPeriodForRegion(
                     beginWeekYear != endWeekYear ? beginWeekDate : beginDate,
                     endDate,
                     employee.getRegion());
@@ -340,46 +340,51 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
                     beginWeekDate,
                     DateUtils.addDays(beginWeekDate, 6),
                     employee.getRegion());
+
+            // Количество учитываемых дней в неделе
+            Integer countConsiderDaysOnEndWeek = calendarService.getCountDaysForPeriodForRegionExConsiderHolidays(
+                    beginWeekDate,
+                    sunday,
+                    employee.getRegion());
+
             //Если конец отпуска приходится на следующую неделю
             if (beginWeekYear != endWeekYear) {
-                // кол -во учитываемых дней в последней неделе отпуска
+                // Количество учитываемых дней в период с понедельника последней недели отпуска по конец отпуска
                 Integer countVacConsiderDaysOnEndWeek = calendarService.getCountDaysForPeriodForRegionExConsiderHolidays(
                         beginWeekDate,
                         endDate,
                         employee.getRegion());
 
-                // кол - во учитываемых дней в неделе
-                Integer countConsiderDaysOnEndWeek = calendarService.getCountDaysForPeriodForRegionExConsiderHolidays(
-                        beginWeekDate,
-                        sunday,
-                        employee.getRegion());
-
                 if (    vacationTypeId != null &&
                         vacationTypeId == VacationTypesEnum.WITH_PAY.getId() &&
-                        // Если количество учитываемых дней в отпуске не равно
-                        // количеству учитываемых дней в неделе приходящихся на конец отпуска
-                        // (т.е. в отпуск попала не вся неделя)
+                        // проверка что в отпуск попала не вся учитываемая неделя
                         !countVacConsiderDaysOnEndWeek.equals(countConsiderDaysOnEndWeek) &&
-                        // то проверяем
-                        // Если количество рабочих дней с понедельника равно кол-ву рабочих дней в неделе
-                        // (проверка не выбрал ли пользователь период по пт)
-                        countWorkVacationPeriod.equals(countWorkDaysWeek)
+                        // и в этот период попадают все рабочие дни
+                        countWorkDaysVacationPeriod.equals(countWorkDaysWeek)
                         ) {
                     builder.withField("vacationFridayInform", aStringBuilder("true"));
                 }
             } else {
-                Integer vacationDayCount = DateTimeUtil.getAllDaysCount(beginDate, endDate).intValue();
+                // Количество учитываемых дней за период отпуска
+                Integer vacationConsDayCount = calendarService.getCountDaysForPeriodForRegionExConsiderHolidays(
+                        beginDate,
+                        endDate,
+                        employee.getRegion());
+                // Количество учитываемых дней за период с начала отпуска по конец недели
+                Integer countConsiderDaysFromStartVacToEndWeek = calendarService.getCountDaysForPeriodForRegionExConsiderHolidays(
+                        beginDate,
+                        sunday,
+                        employee.getRegion());
                 if (    vacationTypeId != null &&
                         vacationTypeId == VacationTypesEnum.WITH_PAY.getId() &&
-                        // Если кол -во дней отпуска совпадает с кол-вом рабочих дней недели
-                        vacationDayCount.equals(countWorkDaysWeek) &&
-                        // и и кол-во рабочих дней в отпуске равно кол-ву рабочих дней в неделе
-                        countWorkVacationPeriod.equals(countWorkDaysWeek)
+                        // если пользователь выбрал не всю неделю
+                        (!vacationConsDayCount.equals(countConsiderDaysFromStartVacToEndWeek) &&
+                        // и в этот период попадают все рабочие дни
+                        countWorkDaysVacationPeriod.equals(countWorkDaysWeek))
                         ) {
                     builder.withField("vacationFridayInform", aStringBuilder("true"));
                 }
             }
-
             return JsonUtil.format(builder);
         } catch (Exception th) {
             logger.error(CANT_GET_EXIT_TO_WORK_EXCEPTION_MESSAGE, th);
