@@ -774,5 +774,15 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
     }
 
 
+    public String getVacActualizationDate(Employee employee, Integer year, Integer month) {
+        Calendar calendarAct = Calendar.getInstance();
+        calendarAct.setTime(employee.getStartDate());
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.MONTH, --month);
+        calendar.set(Calendar.YEAR, year);
+        calendar.set(Calendar.DAY_OF_MONTH, calendarAct.get(Calendar.DAY_OF_MONTH));
+        return DateTimeUtil.formatDateIntoViewFormat(calendar.getTime());
+    }
 }
 

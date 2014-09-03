@@ -114,6 +114,7 @@ public class ViewReportsController extends AbstractControllerForEmployee {
         Date toDate = new Date();
         mav.addObject("planVacDaysCount", vacationService.getPlanVacationDaysCount(employee, year, month));
         mav.addObject("factVacDaysCount", vacationService.getFactVacationDaysCount(employee, year, month));
+        mav.addObject("vacActualizationDate", vacationService.getVacActualizationDate(employee, year, month));
         Integer curYear = calendarService.getYearFromDate(toDate);
         Integer curMonth = calendarService.getMonthFromDate(toDate);
 
