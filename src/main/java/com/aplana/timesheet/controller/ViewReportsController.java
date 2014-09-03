@@ -56,6 +56,9 @@ public class ViewReportsController extends AbstractControllerForEmployee {
     @Autowired
     ViewReportsService viewReportsService;
 
+    @Autowired
+    VacationService vacationService;
+
     @RequestMapping(value = "/viewreports", method = RequestMethod.GET)
     public String sendViewReports() {
         java.util.Calendar calendar = java.util.Calendar.getInstance();
@@ -109,6 +112,8 @@ public class ViewReportsController extends AbstractControllerForEmployee {
                 ).setScale(2, BigDecimal.ROUND_HALF_UP)
         );
         Date toDate = new Date();
+        mav.addObject("planVacDaysCount", vacationService.getPlanVacationDaysCount(employee, year, month));
+        mav.addObject("factVacDaysCount", vacationService.getFactVacationDaysCount(employee, year, month));
         Integer curYear = calendarService.getYearFromDate(toDate);
         Integer curMonth = calendarService.getMonthFromDate(toDate);
 

@@ -366,6 +366,46 @@ public class VacationDAO {
         return query.getResultList();
     }
 
+    /**
+     *
+     * @param employee
+     * @param beginDate
+     * @param endDate
+     * @return
+     */
+    public Integer getVacationsCountByPeriod(Employee employee, Date beginDate, Date endDate, Boolean fact) {
+
+        Query query = entityManager.createNativeQuery(
+                "select count(c.*) from employee e " +
+                "left join vacation v on (e.id = v.employee_id) " +
+                "left join calendar c on (c.caldate between v.begin_date and v.end_date) " +
+                "left join holiday h on (h.caldate = c.caldate and (h.region = e.region or h.region is null)) " +
+                "where " +
+                "v.employee_id = :employee and " +
+                        (fact ? " (v.type_id in (:type1) and v.status_id in (:status1)) " :
+                                "((v.type_id in (:type1) and v.status_id in (:status1)) or (v.type_id in (:type2) and v.status_id in (:status2,:status3,:status4,:status5))) ") +
+                "and c.calDate >= :beginDate and c.calDate <= :endDate " +
+                "and (h.id is null or h.consider = true)");
+        if (fact) {
+            query.setParameter("type1", VacationTypesEnum.WITH_PAY.getId());
+            query.setParameter("status1", VacationStatusEnum.APPROVED.getId());
+        } else {
+            query.setParameter("type1", VacationTypesEnum.PLANNED.getId());
+            query.setParameter("type2", VacationTypesEnum.WITH_PAY.getId());
+            query.setParameter("status1", VacationStatusEnum.CREATED.getId());
+            query.setParameter("status2", VacationStatusEnum.APPROVEMENT_WITH_PM.getId());
+            query.setParameter("status3", VacationStatusEnum.APPROVED_BY_PM.getId());
+            query.setParameter("status4", VacationStatusEnum.APPROVEMENT_WITH_LM.getId());
+            query.setParameter("status5", VacationStatusEnum.APPROVED.getId());
+        }
+
+        query.setParameter("beginDate", beginDate);
+        query.setParameter("endDate", endDate);
+        query.setParameter("employee", employee);
+
+        return ((Number)query.getSingleResult()).intValue();
+    }
+
     public void detach(Vacation vacation) {
         entityManager.detach(vacation);
     }

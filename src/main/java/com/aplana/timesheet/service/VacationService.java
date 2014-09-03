@@ -11,9 +11,7 @@ import com.aplana.timesheet.exception.service.DeleteVacationException;
 import com.aplana.timesheet.exception.service.VacationApprovalServiceException;
 import com.aplana.timesheet.form.CreateVacationForm;
 import com.aplana.timesheet.form.VacationsForm;
-import com.aplana.timesheet.service.helper.ViewReportHelper;
 import com.aplana.timesheet.service.vacationapproveprocess.VacationApprovalProcessService;
-import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.system.security.SecurityService;
 import com.aplana.timesheet.system.security.entity.TimeSheetUser;
 import com.aplana.timesheet.util.DateTimeUtil;
@@ -22,6 +20,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.apache.commons.lang.time.DateUtils;
+import org.joda.time.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,19 +63,19 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
     @Autowired
     private VacationApprovalService vacationApprovalService;
     @Autowired
-    private ViewReportHelper viewReportHelper;
-    @Autowired
     protected CalendarService calendarService;
     @Autowired
     private RegionService regionService;
     @Autowired
-    private TSPropertyProvider propertyProvider;
+    private VacationDaysService vacationDaysService;
     @Autowired
     protected HttpServletRequest request;
 
     private static final Logger logger = LoggerFactory.getLogger(VacationService.class);
 
     public static final String CANT_GET_EXIT_TO_WORK_EXCEPTION_MESSAGE = "Не удалось получить дату выхода из отпуска и количество дней.";
+
+    private final double VACATION_KOEF = 2.33D;
 
     @Transactional
     public void store(Vacation vacation) {
@@ -355,7 +354,7 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
                         endDate,
                         employee.getRegion());
 
-                if (    vacationTypeId != null &&
+                if (vacationTypeId != null &&
                         vacationTypeId == VacationTypesEnum.WITH_PAY.getId() &&
                         // проверка что в отпуск попала не вся учитываемая неделя
                         !countVacConsiderDaysOnEndWeek.equals(countConsiderDaysOnEndWeek) &&
@@ -375,12 +374,12 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
                         beginDate,
                         sunday,
                         employee.getRegion());
-                if (    vacationTypeId != null &&
+                if (vacationTypeId != null &&
                         vacationTypeId == VacationTypesEnum.WITH_PAY.getId() &&
                         // если пользователь выбрал не всю неделю
                         (!vacationConsDayCount.equals(countConsiderDaysFromStartVacToEndWeek) &&
-                        // и в этот период попадают все рабочие дни
-                        countWorkDaysVacationPeriod.equals(countWorkDaysWeek))
+                                // и в этот период попадают все рабочие дни
+                                countWorkDaysVacationPeriod.equals(countWorkDaysWeek))
                         ) {
                     builder.withField("vacationFridayInform", aStringBuilder("true"));
                 }
@@ -720,6 +719,60 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
         sortVacations(vacations);
         return vacations;
     }
+
+    public Integer getPlanVacationDaysCount(Employee employee, Integer year, Integer month) {
+        return getVacationDaysCount(employee, year, month, false);
+    }
+
+    public Integer getFactVacationDaysCount(Employee employee, Integer year, Integer month) {
+        return getVacationDaysCount(employee, year, month, true);
+    }
+
+    public Integer getVacationDaysCount(Employee employee, Integer year, Integer month, Boolean fact) {
+        VacationDays vacationDays = vacationDaysService.findByEmployee(employee);
+        if (vacationDays != null) {
+            Calendar calendarAct = Calendar.getInstance();
+            calendarAct.setTime(employee.getStartDate());
+
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(Calendar.MONTH, --month);
+            calendar.set(Calendar.YEAR, year);
+            calendar.set(Calendar.DAY_OF_MONTH, calendarAct.get(Calendar.DAY_OF_MONTH));
+
+            DateTime start = new DateTime(vacationDays.getActualizationDate());
+            DateTime end = new DateTime(calendar.getTime());
+
+            if (start.isAfter(end)) {
+                return 0;
+            }
+
+            int months = Months.monthsBetween(start, end).get(DurationFieldType.months());
+            int vacDays = (int) (months * VACATION_KOEF);
+            vacDays += vacationDays.getCountDays();
+            Integer vacationsCountByPeriod;
+            if (!fact) {
+                vacationsCountByPeriod = getPlannedVacationsCountByPeriod(employee, vacationDays.getActualizationDate(), calendar.getTime());
+            } else {
+                vacationsCountByPeriod = getFactVacationsCountByPeriod(employee, vacationDays.getActualizationDate(), calendar.getTime());
+            }
+            if (vacDays > 0) {
+                vacDays -= vacationsCountByPeriod;
+                return vacDays;
+            } else {
+                return vacDays;
+            }
+        }
+        return null;
+    }
+
+    public Integer getPlannedVacationsCountByPeriod(Employee employee, Date beginDate, Date endDate) {
+        return vacationDAO.getVacationsCountByPeriod(employee, beginDate, endDate, false);
+    }
+
+    public Integer getFactVacationsCountByPeriod(Employee employee, Date beginDate, Date endDate) {
+        return vacationDAO.getVacationsCountByPeriod(employee, beginDate, endDate, true);
+    }
+
 
 }
 
