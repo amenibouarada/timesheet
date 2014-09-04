@@ -107,6 +107,7 @@ function setDate(date_picker, date) {
 }
 
 function createVacation(approved) {
+    processing();
     dojo.byId("createVacationId").disabled = true;
     var createVacAdminBtn = dojo.byId("createApprovedVacationId");
     //Может быть null если пользователь не с админискими правами
@@ -117,6 +118,7 @@ function createVacation(approved) {
         createVacationForm.action = getContextPath() + "/validateAndCreateVacation/" + empId + "/" + (approved ? "1" : "0");
         createVacationForm.submit();
     } else {
+        stopProcessing();
         dojo.byId("createVacationId").disabled = false;
         if (createVacAdminBtn) createVacAdminBtn.disabled = false;
     }
