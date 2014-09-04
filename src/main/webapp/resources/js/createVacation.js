@@ -2,6 +2,7 @@ dojo.require("dijit.form.DateTextBox");
 dojo.require("dijit.form.FilteringSelect");
 dojo.require("dojo.data.ObjectStore");
 dojo.require("dojo.store.Memory");
+dojo.require("dojo.on");
 dojo.require(CALENDAR_EXT_PATH);
 
 dojo.ready(function () {
@@ -9,6 +10,14 @@ dojo.ready(function () {
     dojo.byId("divisionId").value = divisionIdJsp;
     updateEmployeeSelect();
     dojo.byId("employeeId").value = employeeIdJsp;
+    dojo.connect(dojo.byId("divisionId"), "onchange", dojo.byId("divisionId"), updateEmployeeSelect);
+    dojo.connect(dojo.byId("divisionId"), "onchange", dojo.byId("divisionId"), updateExitToWorkAndCountVacationDay);
+    dojo.connect(dojo.byId("vacationType"), "onchange", dojo.byId("vacationType"), updateExitToWorkAndCountVacationDay);
+    dojo.connect(dojo.byId("vacationType"), "onchange", dojo.byId("vacationType"), updateSubmitButton);
+    dojo.connect(dojo.byId("vacationType"), "onchange", dojo.byId("vacationType"), updateCountVacationDaysForPeriod);
+    dojo.on(dijit.byId("calFromDate"), "change", updateExitToWorkAndCountVacationDay);
+    dojo.on(dijit.byId("calFromDate"), "change", updateCountVacationDaysForPeriod);
+    dojo.on(dijit.byId("calToDate"), "change", updateExitToWorkAndCountVacationDay);
     initCurrentDateInfo(employeeIdJsp, dijit.byId('calFromDate').value, getUrl());
 });
 
@@ -141,6 +150,10 @@ function validate() {
         error += "Необходимо написать комментарий\n";
     }
 
+    if (!checkVacation()) {
+        return false;
+    }
+
     if (error.length == 0) {
         return true;
     }
@@ -148,6 +161,85 @@ function validate() {
     alert(error);
 
     return false;
+}
+
+function checkVacation() {
+    var vacationType = dojo.byId("types").value;
+    var errorField = dojo.byId("errorField");
+    if (vacationType != EnumConstants.VacationTypesEnum.WITH_PAY && vacationType != EnumConstants.VacationTypesEnum.PLANNED) {
+        errorField.innerHTML = "";
+        return;
+    }
+
+    var result = true;
+    var fromDate = dojo.byId("calFromDate").value;
+    var endDate = dojo.byId("calToDate").value;
+    processing();
+    dojo.xhrGet({
+        url: getContextPath() + "/checkVacationCountDays",
+        handleAs: "json",
+        sync: true,
+        content: {
+            beginDate: fromDate,
+            endDate: endDate,
+            employeeId: getEmployeeId(),
+            vacationTypeId: vacationType
+        },
+
+        load: function (data) {
+            stopProcessing();
+            errorField.innerHTML = "";
+            if (data.error == -1) {
+                alert(data.message);
+                result = false;
+            } else if (data.error == 1) {
+                result = confirm(data.message);
+            } else if (data.error == 0) {
+                result = true;
+            }
+        },
+
+        error: function (error) {
+            stopProcessing();
+            handleError(error.message);
+            errorField.setAttribute("class", "error");
+            errorField.innerHTML = "Не удалось выполнить проверку на оставшиеся дни отпуска";
+            result = false;
+        }
+    });
+
+    return result;
+}
+
+function updateCountVacationDaysForPeriod() {
+    var countDaysElement = dojo.byId("countDays");
+    var fromDate = dojo.byId("calFromDate").value;
+    var vacationType = dojo.byId("types").value;
+    if (vacationType != EnumConstants.VacationTypesEnum.WITH_PAY && vacationType != EnumConstants.VacationTypesEnum.PLANNED) {
+        countDaysElement.innerHTML = "";
+        return;
+    }
+    countDaysElement.innerHTML = loadImg;
+    dojo.xhrGet({
+        url: getContextPath() + "/getCountVacationDayForPeriod",
+        handleAs: "json",
+        content: {
+            beginDate: fromDate,
+            employeeId: getEmployeeId(),
+            vacationTypeId: vacationType
+        },
+        load: function (data) {
+            countDaysElement.setAttribute("class", "");
+            countDaysElement.innerHTML = "";
+            countDaysElement.innerHTML = "Количество доступных дней отпуска: " + data.vacation_days_count;
+        },
+
+        error: function (error) {
+            handleError(error.message);
+            countDaysElement.setAttribute("class", "error");
+            countDaysElement.innerHTML = "Не удалось получить количество доступных дней отпуска!";
+        }
+    });
 }
 
 function updateExitToWorkAndCountVacationDay() {
@@ -165,7 +257,7 @@ function updateExitToWorkAndCountVacationDay() {
         exitToWorkElement.innerHTML = loadImg;
 
         dojo.xhrGet({
-            url: getContextPath()+"/getExitToWorkAndCountVacationDay",
+            url: getContextPath() + "/getExitToWorkAndCountVacationDay",
             handleAs: "json",
             content: {
                 beginDate: fromDate,

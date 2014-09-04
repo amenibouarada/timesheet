@@ -1,3 +1,11 @@
+dojo.require("dojox.widget.Standby");
+var standByElement;
+dojo.ready(function () {
+    //крутилка создается при после загрузки страницы,
+    //т.к. если она создается в месте использования - ghb show не отображается картинка
+    standByElement = new dojox.widget.Standby({target: dojo.query("body")[0], zIndex: 1000});
+});
+
 function showErrors(/* Array */ errors) {
     var errorsStr = '';
 
@@ -329,3 +337,15 @@ function convertStringToDate(stringDate) {
     }
 }
 
+/*
+ Запускаем Standby widget на весь экран
+ */
+function processing() {
+    document.body.appendChild(standByElement.domNode);
+    standByElement.startup();
+    standByElement.show();
+}
+
+function stopProcessing() {
+    standByElement.hide();
+}

@@ -29,7 +29,7 @@
     @import "<%= getResRealPath("/resources/css/DataGrid.ext.css", application) %>";
     @import "<%= getResRealPath("/resources/css/planEdit.css", application) %>";
 </style>
-
+<%--TODO НАДО КАК ТО ВЕСЬ ЯВАСКРИПТ ПЕРЕНЕСТИ В JS ФАЙЛ !!!--%>
 <script type="text/javascript">
 
     var REGIONS = "<%= REGIONS %>";
@@ -439,6 +439,7 @@
     }
 
     function save() {
+        processing();
         var items = normalize(modelFieldsForSave, myStoreObject.items);
         var errors = [];
 
@@ -506,6 +507,8 @@
             form.action = "<%= PLAN_SAVE_URL %>";
             form.<%= JSON_DATA %>.value = dojo.toJson(object);
             form.submit();
+        } else {
+            stopProcessing();
         }
     }
 

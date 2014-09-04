@@ -19,14 +19,16 @@
             <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
                 <property name="showSql" value="false"/>
                 <!--Этот параметр отвечает за автоматическое обновление схемы БД-->
+                <!--<property name="generateDdl" value="true" />-->
                 <property name="databasePlatform" value="${db.dialect}"/>
             </bean>
         </property>
-        <property name="jpaProperties">
+        <!--Если не работает generateDdl=true то попробуй раскоментить это свойство-->
+        <!--<property name="jpaProperties">
             <props>
                 <prop key="hibernate.hbm2ddl.auto">update</prop>
             </props>
-        </property>
+        </property>-->
     </bean>
 
     <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"

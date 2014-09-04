@@ -340,50 +340,28 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
                     DateUtils.addDays(beginWeekDate, 6),
                     employee.getRegion());
 
+            // Количество учитываемых дней в период с понедельника последней недели отпуска по конец отпуска
+            Integer countVacConsiderDaysOnEndWeek = calendarService.getCountDaysForPeriodForRegionExConsiderHolidays(
+                    beginWeekYear != endWeekYear ? beginWeekDate : beginDate,
+                    endDate,
+                    employee.getRegion());
+
             // Количество учитываемых дней в неделе
             Integer countConsiderDaysOnEndWeek = calendarService.getCountDaysForPeriodForRegionExConsiderHolidays(
-                    beginWeekDate,
+                    beginWeekYear != endWeekYear ? beginWeekDate : beginDate,
                     sunday,
                     employee.getRegion());
 
-            //Если конец отпуска приходится на следующую неделю
-            if (beginWeekYear != endWeekYear) {
-                // Количество учитываемых дней в период с понедельника последней недели отпуска по конец отпуска
-                Integer countVacConsiderDaysOnEndWeek = calendarService.getCountDaysForPeriodForRegionExConsiderHolidays(
-                        beginWeekDate,
-                        endDate,
-                        employee.getRegion());
-
-                if (vacationTypeId != null &&
-                        vacationTypeId == VacationTypesEnum.WITH_PAY.getId() &&
-                        // проверка что в отпуск попала не вся учитываемая неделя
-                        !countVacConsiderDaysOnEndWeek.equals(countConsiderDaysOnEndWeek) &&
-                        // и в этот период попадают все рабочие дни
-                        countWorkDaysVacationPeriod.equals(countWorkDaysWeek)
-                        ) {
-                    builder.withField("vacationFridayInform", aStringBuilder("true"));
-                }
-            } else {
-                // Количество учитываемых дней за период отпуска
-                Integer vacationConsDayCount = calendarService.getCountDaysForPeriodForRegionExConsiderHolidays(
-                        beginDate,
-                        endDate,
-                        employee.getRegion());
-                // Количество учитываемых дней за период с начала отпуска по конец недели
-                Integer countConsiderDaysFromStartVacToEndWeek = calendarService.getCountDaysForPeriodForRegionExConsiderHolidays(
-                        beginDate,
-                        sunday,
-                        employee.getRegion());
-                if (vacationTypeId != null &&
-                        vacationTypeId == VacationTypesEnum.WITH_PAY.getId() &&
-                        // если пользователь выбрал не всю неделю
-                        (!vacationConsDayCount.equals(countConsiderDaysFromStartVacToEndWeek) &&
-                                // и в этот период попадают все рабочие дни
-                                countWorkDaysVacationPeriod.equals(countWorkDaysWeek))
-                        ) {
-                    builder.withField("vacationFridayInform", aStringBuilder("true"));
-                }
+            if (    vacationTypeId != null &&
+                    vacationTypeId == VacationTypesEnum.WITH_PAY.getId() &&
+                    // проверка что в отпуск попала не вся учитываемая неделя
+                    !countVacConsiderDaysOnEndWeek.equals(countConsiderDaysOnEndWeek) &&
+                    // и в этот период попадают все рабочие дни
+                    countWorkDaysVacationPeriod.equals(countWorkDaysWeek)
+                    ) {
+                builder.withField("vacationFridayInform", aStringBuilder("true"));
             }
+
             return JsonUtil.format(builder);
         } catch (Exception th) {
             logger.error(CANT_GET_EXIT_TO_WORK_EXCEPTION_MESSAGE, th);
@@ -720,6 +698,69 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
         return vacations;
     }
 
+    public String checkVacationCountDaysJSON(String beginDateString, String endDateString, Integer employeeId, Integer vacationTypeId) {
+        Employee employee = employeeService.find(employeeId);
+
+        final Timestamp beginDate = DateTimeUtil.stringToTimestamp(beginDateString, CreateVacationForm.DATE_FORMAT);
+        final Timestamp endDate = DateTimeUtil.stringToTimestamp(endDateString, CreateVacationForm.DATE_FORMAT);
+
+        Integer factCount = getVacationDaysCountForPeriod(beginDateString, employeeId, VacationTypesEnum.WITH_PAY.getId());
+        Integer planCount = getVacationDaysCountForPeriod(beginDateString, employeeId, VacationTypesEnum.PLANNED.getId());
+
+        //Получаем кол-во дней в отпуске за исключением неучитываемых праздников
+        Integer vacationDayCountExCons = calendarService.getCountDaysForPeriodForRegionExConsiderHolidays(
+                beginDate,
+                endDate,
+                employee.getRegion()
+        );
+
+        boolean factError = factCount - vacationDayCountExCons < 0 && vacationTypeId.equals(VacationTypesEnum.WITH_PAY.getId());
+        boolean planError = planCount - vacationDayCountExCons < 0;
+
+        JsonObjectNodeBuilder builder = anObjectBuilder().
+                withField("error", factError ? JsonUtil.aNumberBuilder(-1) : planError ? JsonUtil.aNumberBuilder(1)  : JsonUtil.aNumberBuilder(0)).
+                withField("message",aStringBuilder(
+                        factError ? String.format("Внимание! Вы не можете запланировать отпуск на количество дней, больше %s дней", factCount.toString()) :
+                        planError ? "Внимание! Создаваемый отпуск превышает допустимое количество дней. Продолжить?" : ""
+                ));
+
+        return JsonUtil.format(builder);
+    }
+
+    public String getVacationDaysCountForPeriodJSON(String beginDateString, Integer employeeId, Integer vacationTypeId) {
+        Integer count = getVacationDaysCountForPeriod(beginDateString, employeeId, vacationTypeId);
+
+        JsonObjectNodeBuilder builder = anObjectBuilder().
+                withField("vacation_days_count", aNumberBuilder(count.toString()));
+
+        return JsonUtil.format(builder);
+    }
+
+    private Integer getVacationDaysCountForPeriod(String beginDateString, Integer employeeId, Integer vacationTypeId) {
+        Employee employee = employeeService.find(employeeId);
+        final Timestamp beginDate = DateTimeUtil.stringToTimestamp(beginDateString, CreateVacationForm.DATE_FORMAT);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(employee.getStartDate());
+        Integer beginDay = calendar.get(Calendar.DAY_OF_MONTH);
+
+        calendar.setTime(beginDate);
+        Integer vacDay = calendar.get(Calendar.DAY_OF_MONTH);
+        Integer month = calendar.get(Calendar.MONTH);
+        Integer year = calendar.get(Calendar.YEAR);
+        //  Если день начала отпуска меньше даты устройства на работу
+        //  то оставляем месяц без изменений т.к. calendar.get(Calendar.MONTH) дает -1 один месяц
+        if (vacDay > beginDay) {
+            ++month;
+        }
+        Integer count = null;
+        if (vacationTypeId.equals(VacationTypesEnum.WITH_PAY.getId())) {
+            count = getFactVacationDaysCount(employee, year, month);
+        } else {
+            count = getPlanVacationDaysCount(employee, year, month);
+        }
+        return count;
+    }
+
     public Integer getPlanVacationDaysCount(Employee employee, Integer year, Integer month) {
         return getVacationDaysCount(employee, year, month, false);
     }
@@ -769,10 +810,10 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
         return vacationDAO.getVacationsCountByPeriod(employee, beginDate, endDate, false);
     }
 
+
     public Integer getFactVacationsCountByPeriod(Employee employee, Date beginDate, Date endDate) {
         return vacationDAO.getVacationsCountByPeriod(employee, beginDate, endDate, true);
     }
-
 
     public String getVacActualizationDate(Employee employee, Integer year, Integer month) {
         Calendar calendarAct = Calendar.getInstance();

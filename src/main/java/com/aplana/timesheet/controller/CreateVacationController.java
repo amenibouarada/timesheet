@@ -93,15 +93,36 @@ public class CreateVacationController {
         return getModelAndView(employee);
     }
 
-    @RequestMapping(value = "/getExitToWorkAndCountVacationDay",  produces = "text/plain;Charset=UTF-8")
+    @RequestMapping(value = "/getExitToWorkAndCountVacationDay", produces = "text/plain;Charset=UTF-8")
     @ResponseBody
     public String getExitToWorkAndCountVacationDay(
-                                           @RequestParam("beginDate") String beginDate,
-                                           @RequestParam("endDate") String endDate,
-                                           @RequestParam("employeeId") Integer employeeId,
-                                           @RequestParam("vacationTypeId") Integer vacationTypeId
+            @RequestParam("beginDate") String beginDate,
+            @RequestParam("endDate") String endDate,
+            @RequestParam("employeeId") Integer employeeId,
+            @RequestParam("vacationTypeId") Integer vacationTypeId
     ) {
         return vacationService.getExitToWorkAndCountVacationDayJson(beginDate, endDate, employeeId, vacationTypeId);
+    }
+
+    @RequestMapping(value = "/getCountVacationDayForPeriod", produces = "text/plain;Charset=UTF-8")
+    @ResponseBody
+    public String getCountVacationDayForPeriod(
+            @RequestParam("beginDate") String beginDate,
+            @RequestParam("employeeId") Integer employeeId,
+            @RequestParam("vacationTypeId") Integer vacationTypeId
+    ) {
+        return vacationService.getVacationDaysCountForPeriodJSON(beginDate, employeeId, vacationTypeId);
+    }
+
+    @RequestMapping(value = "/checkVacationCountDays", produces = "text/plain;Charset=UTF-8")
+    @ResponseBody
+    public String checkVacationCountDays(
+            @RequestParam("beginDate") String beginDate,
+            @RequestParam("endDate") String endDate,
+            @RequestParam("employeeId") Integer employeeId,
+            @RequestParam("vacationTypeId") Integer vacationTypeId
+    ) {
+        return vacationService.checkVacationCountDaysJSON(beginDate, endDate, employeeId, vacationTypeId);
     }
 
     @RequestMapping(value = "/validateAndCreateVacation/{employeeId}/{approved}", method = RequestMethod.POST)

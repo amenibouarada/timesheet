@@ -108,9 +108,11 @@
         }
 
         function save() {
+            processing();
             if (validate()) {
                 dojo.byId("<%= CreatePlanForPeriodContoller.FORM %>").submit();
             } else {
+                stopProcessing();
                 dojo.byId("save_button").disabled = false;
             }
         }

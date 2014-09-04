@@ -134,6 +134,7 @@ function showIllnesses() {
 
 function submitform() {
     dojo.byId("create").disabled = true;
+    processing();
     if (validate()) {
         if (hasReportId) {
             var employeeId = getEmployeeId();
@@ -143,6 +144,7 @@ function submitform() {
         }
         mainForm.submit();
     } else {
+        stopProcessing();
         dojo.byId("create").disabled = false;
     }
 }

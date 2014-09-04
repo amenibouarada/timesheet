@@ -46,20 +46,25 @@
 
         //проверяем и отсылаем форму
         function submitform() {
+            processing();
             var description = dojo.byId('feedbackDescription');
 
 			if (checkFileSize()) {
+                stopProcessing();
 				alert("Суммарный размер вложений превышает 8 Mb");
                 enableInput("send_button");
 				return;
 			}
-            if (description != null && description.value != "") {
-                feedbackForm.action = "feedback";
-                feedbackForm.submit();
-            } else {
+
+            if (description == null || description.value == "") {
+                stopProcessing();
                 alert("Поле 'Текст сообщения' не определено.");
                 enableInput("send_button");
+                return;
             }
+
+            feedbackForm.action = "feedback";
+            feedbackForm.submit();
         }
 
         //очищаем форму

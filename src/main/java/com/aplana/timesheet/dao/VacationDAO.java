@@ -383,7 +383,7 @@ public class VacationDAO {
                 "where " +
                 "v.employee_id = :employee and " +
                         (fact ? " (v.type_id in (:type1) and v.status_id in (:status1)) " :
-                                "((v.type_id in (:type1) and v.status_id in (:status1)) or (v.type_id in (:type2) and v.status_id in (:status2,:status3,:status4,:status5))) ") +
+                                "((v.type_id in (:type1) and v.status_id in (:status1, :status5)) or (v.type_id in (:type2) and v.status_id in (:status2,:status3,:status4,:status5))) ") +
                 "and c.calDate >= :beginDate and c.calDate <= :endDate " +
                 "and (h.id is null or h.consider = true)");
         if (fact) {

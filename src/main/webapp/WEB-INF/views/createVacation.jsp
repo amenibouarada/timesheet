@@ -87,7 +87,6 @@
             </td>
             <td>
                 <form:select path="divisionId" id="divisionId" class="without_dojo"
-                             onchange="updateEmployeeSelect();updateExitToWorkAndCountVacationDay();"
                              onmouseover="tooltip.show(getTitle(this));" onmouseout="tooltip.hide();">
                     <form:options items="${divisionList}" itemLabel="name" itemValue="id"/>
                 </form:select>
@@ -109,8 +108,7 @@
                     <td>
                         <form:input path="calFromDate" id="calFromDate" class="date_picker" required="true"
                                     data-dojo-type="DateTextBox"
-                                    onMouseOver="tooltip.show(getTitle(this));" onMouseOut="tooltip.hide();"
-                                    onChange="updateExitToWorkAndCountVacationDay();"/>
+                                    onMouseOver="tooltip.show(getTitle(this));" onMouseOut="tooltip.hide();"/>
                     </td>
                     <td>
                         <div class="question-hint">
@@ -118,6 +116,7 @@
                         </div>
                     </td>
                 </table>
+                <div id="countDays"></div>
             </td>
         </tr>
 
@@ -130,8 +129,7 @@
                     <td>
                         <form:input path="calToDate" id="calToDate" class="date_picker" required="true"
                                     data-dojo-type="DateTextBox"
-                                    onMouseOver="tooltip.show(getTitle(this));" onMouseOut="tooltip.hide();"
-                                    onChange="updateExitToWorkAndCountVacationDay();"/>
+                                    onMouseOver="tooltip.show(getTitle(this));" onMouseOut="tooltip.hide();"/>
                     </td>
                     <td>
                         <div class="question-hint">
@@ -150,7 +148,6 @@
             </td>
             <td>
                 <form:select path="vacationType" id="types" onMouseOver="tooltip.show(getTitle(this));"
-                             onChange="updateExitToWorkAndCountVacationDay();updateSubmitButton();"
                              onMouseOut="tooltip.hide();" multiple="false" size="1">
                     <form:option value="0" label=""/>
                     <form:options items="${vacationTypes}" itemLabel="value" itemValue="id"/>

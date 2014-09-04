@@ -261,7 +261,7 @@ function deleteSelectedReports() {
     if (!confirm("Вы действительно хотите удалить выделенные отчеты")) {
         return;
     }
-
+    processing();
     var deleteForm = dojo.byId("deleteReportsForm");
     dojo.byId("link").value = document.URL;
     deleteForm.action = getContextPath()+"/deleteReports";
@@ -276,6 +276,7 @@ function sendToRawReports() {
     if (!confirm("Вы действительно хотите отправить выделенные отчеты в черновик")) {
         return;
     }
+    processing();
     var deleteForm = dojo.byId("deleteReportsForm");
     dojo.byId("link").value = document.URL;
     deleteForm.action = getContextPath()+"/sendToRawReports";

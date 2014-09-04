@@ -1,6 +1,7 @@
 <%@ page import="static com.aplana.timesheet.system.constants.TimeSheetConstants.DOJO_PATH" %>
 <%@ page import="static com.aplana.timesheet.util.ResourceUtils.getResRealPath" %>
 <%@ page import="com.aplana.timesheet.enums.TypesOfActivityEnum" %>
+<%@ page import="com.aplana.timesheet.enums.VacationTypesEnum" %>
 <!-- load Dojo -->
 <%!
     private static final String DATE_TEXT_BOX_EXT_JS_PATH = "/resources/js/DateTextBox.ext.js";
@@ -14,7 +15,9 @@
     };
 
     window.EnumConstants = {
-        TypesOfActivityEnum : {<%for (TypesOfActivityEnum name: TypesOfActivityEnum.values()) {
+        TypesOfActivityEnum: {<%for (TypesOfActivityEnum name: TypesOfActivityEnum.values()) {
+                out.print(String.format("%s : %s,\n", name.name(), name.getId()));}%>},
+        VacationTypesEnum: {<%for (VacationTypesEnum name: VacationTypesEnum.values()) {
                 out.print(String.format("%s : %s,\n", name.name(), name.getId()));}%>}
     }
 </script>
