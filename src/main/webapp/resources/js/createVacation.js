@@ -232,8 +232,9 @@ function updateCountVacationDaysForPeriod() {
         },
         load: function (data) {
             countDaysElement.setAttribute("class", "");
+            var count = (data.vacation_days_count != null ? data.vacation_days_count : 0);
             countDaysElement.innerHTML = "";
-            countDaysElement.innerHTML = "Количество доступных дней отпуска: " + data.vacation_days_count;
+            countDaysElement.innerHTML = "Количество доступных дней отпуска: " + count;
         },
 
         error: function (error) {
@@ -377,6 +378,7 @@ function refreshEmployeeSelect(employeeList) {
                 dojo.byId('employeeId').value = value;
                 dateInfoHolder = [];
                 updateExitToWorkAndCountVacationDay();
+                updateCountVacationDaysForPeriod();
             }
         }, "employeeIdSelect");
         employeeFlteringSelect.startup();

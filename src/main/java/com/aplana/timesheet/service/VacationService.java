@@ -731,7 +731,7 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
         Integer count = getVacationDaysCountForPeriod(beginDateString, employeeId, vacationTypeId);
 
         JsonObjectNodeBuilder builder = anObjectBuilder().
-                withField("vacation_days_count", aNumberBuilder(count.toString()));
+                withField("vacation_days_count", count == null ? aNullBuilder() : aNumberBuilder(count.toString()));
 
         return JsonUtil.format(builder);
     }
@@ -788,13 +788,13 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
             }
 
             int months = Months.monthsBetween(start, end).get(DurationFieldType.months());
-            int vacDays = (int) (months * VACATION_KOEF);
+            int vacDays = (int) (++months * VACATION_KOEF);
             vacDays += vacationDays.getCountDays();
             Integer vacationsCountByPeriod;
             if (!fact) {
-                vacationsCountByPeriod = getPlannedVacationsCountByPeriod(employee, vacationDays.getActualizationDate(), calendar.getTime());
+                vacationsCountByPeriod = getPlannedVacationsCountByPeriod(employee, vacationDays.getActualizationDate());
             } else {
-                vacationsCountByPeriod = getFactVacationsCountByPeriod(employee, vacationDays.getActualizationDate(), calendar.getTime());
+                vacationsCountByPeriod = getFactVacationsCountByPeriod(employee, vacationDays.getActualizationDate());
             }
             if (vacDays > 0) {
                 vacDays -= vacationsCountByPeriod;
@@ -806,13 +806,13 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
         return null;
     }
 
-    public Integer getPlannedVacationsCountByPeriod(Employee employee, Date beginDate, Date endDate) {
-        return vacationDAO.getVacationsCountByPeriod(employee, beginDate, endDate, false);
+    public Integer getPlannedVacationsCountByPeriod(Employee employee, Date beginDate) {
+        return vacationDAO.getVacationsCountByPeriod(employee, beginDate, false);
     }
 
 
-    public Integer getFactVacationsCountByPeriod(Employee employee, Date beginDate, Date endDate) {
-        return vacationDAO.getVacationsCountByPeriod(employee, beginDate, endDate, true);
+    public Integer getFactVacationsCountByPeriod(Employee employee, Date beginDate) {
+        return vacationDAO.getVacationsCountByPeriod(employee, beginDate, true);
     }
 
     public String getVacActualizationDate(Employee employee, Integer year, Integer month) {

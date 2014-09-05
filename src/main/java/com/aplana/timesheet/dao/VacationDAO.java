@@ -370,10 +370,9 @@ public class VacationDAO {
      *
      * @param employee
      * @param beginDate
-     * @param endDate
      * @return
      */
-    public Integer getVacationsCountByPeriod(Employee employee, Date beginDate, Date endDate, Boolean fact) {
+    public Integer getVacationsCountByPeriod(Employee employee, Date beginDate, Boolean fact) {
 
         Query query = entityManager.createNativeQuery(
                 "select count(c.*) from employee e " +
@@ -384,7 +383,7 @@ public class VacationDAO {
                 "v.employee_id = :employee and " +
                         (fact ? " (v.type_id in (:type1) and v.status_id in (:status1)) " :
                                 "((v.type_id in (:type1) and v.status_id in (:status1, :status5)) or (v.type_id in (:type2) and v.status_id in (:status2,:status3,:status4,:status5))) ") +
-                "and c.calDate >= :beginDate and c.calDate <= :endDate " +
+                "and c.calDate >= :beginDate " +
                 "and (h.id is null or h.consider = true)");
         if (fact) {
             query.setParameter("type1", VacationTypesEnum.WITH_PAY.getId());
@@ -400,7 +399,6 @@ public class VacationDAO {
         }
 
         query.setParameter("beginDate", beginDate);
-        query.setParameter("endDate", endDate);
         query.setParameter("employee", employee);
 
         return ((Number)query.getSingleResult()).intValue();

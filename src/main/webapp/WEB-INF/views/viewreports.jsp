@@ -269,28 +269,32 @@
         <td colspan="3">Всего(факт):</td>
         <td class="rightAlign" id="durationall">${durationFact}</td>
     </tr>
+    <c:if test="${planVacDaysCount != null}">
     <tr>
         <td colspan="3">Плановое количество дней отпуска на ${vacActualizationDate}:</td>
         <td class="rightAlign" id="planVacDaysCount">
-            <c:if test="${planVacDaysCount != null}">
+            <c:if test="${planVacDaysCount >= 0}">
                 ${planVacDaysCount}
             </c:if>
-            <c:if test="${planVacDaysCount == null}">
+            <c:if test="${planVacDaysCount < 0}">
                 0
             </c:if>
         </td>
     </tr>
+    </c:if>
+    <c:if test="${factVacDaysCount != null}">
     <tr>
         <td colspan="3">Фактическое количество дней отпуска на ${vacActualizationDate}:</td>
         <td class="rightAlign" id="factVacDaysCount">
-            <c:if test="${factVacDaysCount != null}">
+            <c:if test="${factVacDaysCount >= 0}">
                 ${factVacDaysCount}
             </c:if>
-            <c:if test="${factVacDaysCount == null}">
+            <c:if test="${factVacDaysCount < 0}">
                 0
             </c:if>
         </td>
     </tr>
+    </c:if>
     </thead>
 </table>
 
