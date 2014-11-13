@@ -50,7 +50,7 @@
             </repository> -->
         <repository>
             <id>aplana-nexus-ts</id>
-            <url>http://192.168.101.242:8081/nexus/content/groups/public/</url>
+            <url>http://192.168.102.17:8081/nexus/content/groups/public/</url>
             <snapshots>
                 <enabled>true</enabled>
                 <checksumPolicy>warn</checksumPolicy>
