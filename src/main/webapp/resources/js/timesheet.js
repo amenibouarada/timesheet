@@ -1230,7 +1230,7 @@ function getJiraPlans() {
         dojo.xhrGet({
             url: getContextPath() + "/timesheet/jiraIssuesPlanned",
             handleAs: "text",
-            timeout: 10000,
+            timeout: 30000,
             content: {employeeId: employeeId},
             preventCache: true,
             load: function (data) {
