@@ -1717,7 +1717,7 @@ function getJiraInfo(rowIndex) {
         dojo.xhrGet({
             url: getContextPath() + "/timesheet/jiraIssues",
             handleAs:"text",
-            timeout:10000,
+            timeout:30000,
             content:{employeeId:employeeId, date:reportDate, projectId:projectId},
             preventCache: true,
             load:function (data) {
