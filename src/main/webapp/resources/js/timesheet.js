@@ -66,32 +66,30 @@ function initTimeSheetForm() {
     dojo.connect(dojo.byId("divisionId"), "onchange", dojo.byId("divisionId"), updateEmployeeSelect);
     dojo.connect(dojo.byId("employeeId"), "onchange", dojo.byId("employeeId"), checkIsVacationDay);
 
-    if (timeSheetForm) {
-        timeSheetForm.divisionId.value = divIdJsp;
-    }
+    /*смотрим, поддерживаются ли куки и рисуем индикатор*/
+    showCookieIndicator();
 
+    timeSheetForm.divisionId.value = divIdJsp;
     divisionChange(timeSheetForm.divisionId);
     updateEmployeeSelect();
 
     timeSheetForm.employeeId.value = employeeIdJsp;
 
-    /*смотрим, поддерживаются ли куки и рисуем индикатор*/
-    showCookieIndicator();
-
     if (selectedCalDate != "") {
-        setTimesheetDate(selectedCalDate);
+        var datePicker = dijit.byId("calDate");
+        datePicker.set("displayedValue", selectedCalDate);
     } else {
-        setDefaultDate(dojo.byId("employeeId").value);
+        setDefaultDate();
     }
-
-    initCurrentDateInfo(employeeIdJsp, dijit.byId('calDate').value, '/calendar/dates');
 
     currentDate = dijit.byId('calDate').get("value");
 
+    initCurrentDateInfo(employeeIdJsp, currentDate, '/calendar/dates');
+
     if (!isErrorPage) {
-        requestAndRefreshDailyTimesheetData(dijit.byId('calDate').value, dojo.byId('employeeId').value);
+        requestAndRefreshDailyTimesheetData(currentDate, dojo.byId('employeeId').value);
     } else {
-        requestAndRefreshPreviousDayPlans(dijit.byId('calDate').value, dojo.byId('employeeId').value);
+        requestAndRefreshPreviousDayPlans(currentDate, dojo.byId('employeeId').value);
         reloadRowsState();
     }
 }
@@ -308,6 +306,7 @@ function refreshDailyTimesheetData(data, ioArgs) {
     }
 }
 
+// TODO т.к. функция вызывается только один раз - надо перенести её в контроллер и передавать сразу в jsp
 function requestAndRefreshPreviousDayPlans(date, employeeId) {
     var month = correctLength(date.getMonth() + 1);
     var year = date.getFullYear();
@@ -932,20 +931,15 @@ function planBoxNotEmpty() {
 
 /* Устанавливает компоненту calDate дату по умолчанию. */
 function setDefaultDate() {
-    var employee = getEmployeeData();
     var date_picker = dijit.byId("calDate");
+    var employee = getEmployeeData();
     if (!employee) {
         date_picker.set('disabled', true);
         return;
     } else {
         date_picker.set('disabled', false);
+        date_picker.set("displayedValue", employee.dateByDefault);
     }
-    date_picker.set("displayedValue", employee.dateByDefault);
-}
-
-function setTimesheetDate(date) {
-    var datePicker = dijit.byId("calDate");
-    datePicker.set("displayedValue", date);
 }
 
 // возващает последний рабочий день сотрудника
@@ -1060,7 +1054,7 @@ function cancelCalDateChange() {
 
 function onEmployeeChange(employeeObj) {
     setDefaultEmployeeJob(-1);
-    setDefaultDate(employeeObj.value)
+    setDefaultDate()
 }
 
 /*
@@ -1168,7 +1162,7 @@ function typeActivityChange(obj) {
         if (!isNaN(duration)) {
             dojo.attr(durationIdEl, { value: duration });
         }
-    } else if ((select.value == EnumConstants.TypesOfActivityEnum.COMPENSATORY_HOLIDAY) || (select.value == "24")) { //Отгулы  TODO 24 - видимо неактуально
+    } else if (select.value == EnumConstants.TypesOfActivityEnum.COMPENSATORY_HOLIDAY) { //Отгулы
         var duration = parseFloat(dojo.attr(durationIdEl, "value"));
         var description = dojo.byId(descIdEl).value;
         resetRowState(rowIndex, false);
@@ -1179,8 +1173,6 @@ function typeActivityChange(obj) {
             dojo.attr(durationIdEl, { value: duration });
         }
     } else if (select.value == EnumConstants.TypesOfActivityEnum.VACATION) { //Отпуск
-        resetRowState(rowIndex, false);
-    } else if (select.value == "18") { //Не рабочий день TODO 18 - видимо неактуально
         resetRowState(rowIndex, false);
     }
 
@@ -1355,17 +1347,6 @@ function reloadRowsState() {
     var rowsCount = dojo.query(".time_sheet_row").length;
     var rows = dojo.query(".time_sheet_row");
     for (var i = 0; i < rowsCount; i++) {
-        var actTypeSelect = dojo.byId("activity_type_id_" + i);
-        typeActivityChange(actTypeSelect);
-
-        var workplaceSelect = dojo.byId("workplace_id_" + i);
-        workplaceSelect.options.length = 0;
-        fillWorkplaceSelect(workplaceSelect);
-        for (var l = 0; l < selectedWorkplace.length; l++) {
-            if (selectedWorkplace[l].row == i) {
-                dojo.attr(workplaceSelect, { value: selectedWorkplace[l].workplace });
-            }
-        }
 
         var projectSelect = dojo.byId("project_id_" + i);
         if (dojo.attr(projectSelect, "disabled") != "disabled") {
@@ -1454,11 +1435,10 @@ function reloadRowsState() {
             jiraCell.appendChild(jiraImg);
         }
 
-        sortSelectOptions(actCatSelect);
-        sortSelectOptions(projectSelect);
-        sortSelectOptions(projectRoleSelect);
-        sortSelectOptions(taskSelect);
+
     }
+
+    recalculateDuration();
 
     if (dataDraft != null && dataDraft == "true") {
         loadDraft();
@@ -1853,6 +1833,7 @@ function existsCookie(CookieName) {
 }
 
 /* Выдает значение куки с данным именем */
+// TODO вынести в отдельный метод
 function cookieValue(CookieName) {
     var razrez = document.cookie.split(CookieName + '=');
     if (razrez.length > 1) { // Значит, куки с этим именем существует
