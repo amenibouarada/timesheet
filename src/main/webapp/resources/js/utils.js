@@ -214,7 +214,7 @@ function fillProjectList(rowIndex, projectState) {
         });
 
         if (existsCookie('aplanaProject')) {
-            projectSelect.value = cookieValue('aplanaProject');
+            projectSelect.value = getCookieValue('aplanaProject');
             projectChange(projectSelect);
         }
     } else {
@@ -432,5 +432,26 @@ function updateManagerListByDivision(currentValue, managerList, divisionId, mana
     managerSelect.value = currentValue;
     if (managerSelect.value == "") {
         managerSelect.value = optionAllValue;
+    }
+}
+
+/* Удаляет куки с данным именем */
+function deleteCookie(CookieName) {
+    setCookie(CookieName, '', TimeAfter(-1, 0, 0));
+}
+
+/* Узнает, имеется ли куки с данным именем */
+function existsCookie(CookieName) {
+    return (document.cookie.split(CookieName + '=').length > 1);
+}
+
+/* Выдает значение куки с данным именем */
+function getCookieValue(CookieName) {
+    var razrez = document.cookie.split(CookieName + '=');
+    if (razrez.length > 1) { // Значит, куки с этим именем существует
+        var hvost = razrez[1],
+            tzpt = hvost.indexOf(';'),
+            EndOfValue = (tzpt > -1) ? tzpt : hvost.length;
+        return unescape(hvost.substring(0, EndOfValue));
     }
 }

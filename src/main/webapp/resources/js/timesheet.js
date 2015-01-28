@@ -266,7 +266,7 @@ function refreshDailyTimesheetData(data, ioArgs) {
                 loadTableRow(j, currentTableData, isFinal);
             }
         } else if (existsCookie("aplanaRowsCount")) {
-            var cookieRowsCount = cookieValue("aplanaRowsCount");
+            var cookieRowsCount = getCookieValue("aplanaRowsCount");
             addNewRows((cookieRowsCount > 0) ? cookieRowsCount : 1);
         } else {
             addNewRow();
@@ -1180,7 +1180,7 @@ function typeActivityChange(obj) {
         var workplaceSelect = dojo.byId(workPlaceIdEl);
         if (!workplaceSelect.value || workplaceSelect.value == "" || workplaceSelect.value == "0") {
             if (existsCookie('aplanaWorkPlace')) {
-                workplaceSelect.value = cookieValue('aplanaWorkPlace');
+                workplaceSelect.value = getCookieValue('aplanaWorkPlace');
             }
         }
     }
@@ -1818,28 +1818,5 @@ function projectChange(obj) {
             }
         }
         dojo.byId("task_description_" + rowIndex).innerHTML = "";
-    }
-}
-
-
-/* Удаляет куки с данным именем */
-function deleteCookie(CookieName) {
-    setCookie(CookieName, '', TimeAfter(-1, 0, 0));
-}
-
-/* Узнает, имеется ли куки с данным именем */
-function existsCookie(CookieName) {
-    return (document.cookie.split(CookieName + '=').length > 1);
-}
-
-/* Выдает значение куки с данным именем */
-// TODO вынести в отдельный метод
-function cookieValue(CookieName) {
-    var razrez = document.cookie.split(CookieName + '=');
-    if (razrez.length > 1) { // Значит, куки с этим именем существует
-        var hvost = razrez[1],
-            tzpt = hvost.indexOf(';'),
-            EndOfValue = (tzpt > -1) ? tzpt : hvost.length;
-        return unescape(hvost.substring(0, EndOfValue));
     }
 }
