@@ -203,13 +203,8 @@ function updateEmployeeList() {
 function refreshEmployeeSelect(employeeList) {
 
     var managerId = dojo.byId('managerId').value;
-    var cities = [];
-    var citySelect = dojo.byId('regions').options;
+    var cities = getSelectValues(dojo.byId('regions'));
     var employeeFlteringSelect = dijit.byId("employeeIdDiv");
-
-    for (var i = 0; i < citySelect.length; i++) {
-        if (citySelect[i].selected) cities.push(citySelect[i].value);
-    }
 
     if (employeeList.length > 0) {
         var employeeArray = [];
