@@ -20,7 +20,7 @@
         var divisionIdJsp = ${divisionId};
         var reportFormedJsp = ${reportFormed};
         var periodicalsListNotEmpty = ${fn:length(reports.periodicalsList) > 0};
-        var managerMapJson = '${managerMapJson}';
+        var managerMapJson = ${managerMapJson};
         var regions = ${regionIds};
         var allValue = <%= ALL_VALUE %>;
         var loadImg = "<img src=\"<c:url value="/resources/img/loading_small.gif"/>\"/>";
@@ -64,7 +64,7 @@
                 <span class="lowspace">Руководитель:</span>
             </td>
             <td>
-                <form:select class="without_dojo" path="manager" onmouseover="showTooltip(this);"
+                <form:select class="without_dojo" path="managerId" onmouseover="showTooltip(this);"
                              onmouseout="tooltip.hide();" multiple="false" cssStyle="margin-left: 0px">
                     <form:options items="${managerList}" itemLabel="name" itemValue="id"/>
                 </form:select>

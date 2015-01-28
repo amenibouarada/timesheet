@@ -100,7 +100,7 @@ public class BusinessTripsAndIllnessController extends AbstractController {
             @ModelAttribute("businesstripsandillness") BusinessTripsAndIllnessForm tsForm
     ) throws BusinessTripsAndIllnessControllerException {
         Integer printtype = tsForm.getReportType();
-        Integer manager = tsForm.getManager();
+        Integer manager = tsForm.getManagerId();
         List<Integer> regions = tsForm.getRegions();
         Date dateFrom = tsForm.getDateFrom();
         Date dateTo = tsForm.getDateTo();

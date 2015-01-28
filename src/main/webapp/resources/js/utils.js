@@ -202,10 +202,11 @@ function insertEmptyOption(select) {
 }
 
 /* Добавляет в указанный select пустой option с указанной подписью. */
-function insertEmptyOptionWithCaptionInHead(select, caption) {
+function insertEmptyOptionWithCaptionInHead(select, caption, value) {
+    value = value || "0"; // если не указан, то по умолчанию 0
     var option = dojo.doc.createElement("option");
     dojo.attr(option, {
-        value: "0"
+        value: value
     });
     option.innerHTML = caption;
     select.insertBefore(option, select.options[0]);
@@ -337,8 +338,8 @@ function convertStringToDate(stringDate) {
 }
 
 /*
- Запускаем Standby widget на весь экран
- */
+ Запускаем Standby widget "крутилка" на весь экран
+  */
 function processing() {
     document.body.appendChild(standByElement.domNode);
     standByElement.startup();
@@ -347,4 +348,47 @@ function processing() {
 
 function stopProcessing() {
     standByElement.hide();
+}
+
+/**
+ * Обновляет список руководителей подразделения
+ *
+ * @param currentValue      - текущее значение селекта руководителей, чтоб после обновления попробовать его же и установить
+ * @param managerList       - список всех руководителей типа List<Employee>
+ * @param divisionId        - подразделение, по которому определяется список сотрудников
+ * @param managerSelect     - селект, который заполняется руководителями
+ */
+function updateManagerListByDivision(currentValue, managerList, divisionId, managerSelect) {
+    var optionAllValue = -1;
+    // зададим значения по умолчанию
+    managerList = managerList || managerMapJson;
+    divisionId = divisionId || dojo.byId("divisionId").value;
+    managerSelect = managerSelect || dojo.byId("managerId");
+    currentValue = managerSelect.value || optionAllValue;
+
+    managerSelect.options.length = 0;
+    insertEmptyOptionWithCaptionInHead(managerSelect, "Все руководители", optionAllValue);
+
+    if (managerList.length > 0) {
+        dojo.forEach(dojo.filter(managerList, function (m) {
+            return (m.division == divisionId);
+        }), function (managerData) {
+            var option = document.createElement("option");
+            dojo.attr(option, {
+                value: managerData.id
+            });
+            option.title = managerData.name;
+            option.innerHTML = managerData.name;
+            managerSelect.appendChild(option);
+        });
+    }
+    if (managerSelect.options.length == 1 && managerSelect.options[0].value == optionAllValue) {
+        managerSelect.disabled = true;
+    } else {
+        managerSelect.disabled = '';
+    }
+    managerSelect.value = currentValue;
+    if (managerSelect.value == "") {
+        managerSelect.value = optionAllValue;
+    }
 }
