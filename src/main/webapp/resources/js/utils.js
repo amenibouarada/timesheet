@@ -25,6 +25,33 @@ function handleError(message) {
     console.log(message);
 }
 
+// Возвращает название месяца по номеру
+function getMonthByNumber(number) {
+    var month = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль",
+        "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
+    return month[number - 1];
+}
+
+// Бежит по циклу между двумя месяцами и для каждого месяца дергает функцию handler(month, year)
+function iterateMonth(yearStart, monthStart, yearEnd, monthEnd, handler) {
+    for (var month = monthStart, year = yearStart; (month <= monthEnd && year == yearEnd) || year < yearEnd;) {
+        handler(month, year);
+        ++month;
+        if (month == 13) {
+            month = 1;
+            ++year;
+        }
+    }
+}
+
+function monthCount(yearStart, monthStart, yearEnd, monthEnd) {
+    var cnt = 0;
+    iterateMonth(yearStart, monthStart, yearEnd, monthEnd, function () {
+        ++cnt
+    });
+    return cnt;
+}
+
 function isNumber(n) {
     return (typeof n != typeof undefined) && !isNaN(parseFloat(n)) && isFinite(n);
 }
@@ -212,6 +239,22 @@ function insertEmptyOptionWithCaptionInHead(select, caption, value) {
     select.insertBefore(option, select.options[0]);
 }
 
+// Снимает выбранные элементы в селекте
+function unselectValues(select) {
+    for (var option in select.selectedOptions){
+        option.selected = false;
+    }
+}
+
+// Возвращает все выбранные значение(value) в <select multiple="true">
+function getSelectValues(select) {
+    var result = [];
+    for (var option in select.selectedOptions){
+        result.push(option.value);
+    }
+    return result;
+}
+
 /* Выставляет должность сотрудника (проектная роль по умолчанию) */
 function setDefaultEmployeeJob(rowIndex) {
     if (!document.employeeList || !dojo.byId("divisionId")) {
@@ -306,7 +349,6 @@ function sortSelectOptions(select) {
         select.options[i] = tmpArray[i];
     }
 }
-
 
 function openViewReportsWindow() {
     var employeeId = dojo.byId("employeeId").value;
