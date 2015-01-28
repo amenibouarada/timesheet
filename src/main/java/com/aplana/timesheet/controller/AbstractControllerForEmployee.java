@@ -59,7 +59,7 @@ public abstract class AbstractControllerForEmployee extends AbstractController{
         modelAndView.addObject("employeeId", employeeId);
         modelAndView.addObject("divisionList", divisionList);
         modelAndView.addObject("managerListJson", employeeHelper.getManagerListJson());
-        modelAndView.addObject("fullProjectListJsonWithDivisionId", projectService.getProjectListJson(divisionList, true));
+        modelAndView.addObject("fullProjectListJsonWithDivisionId", projectService.getProjectListByDivisionsJson(divisionList, true));
 
         return modelAndView;
     }

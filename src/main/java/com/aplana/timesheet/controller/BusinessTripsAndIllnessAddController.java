@@ -180,7 +180,7 @@ public class BusinessTripsAndIllnessAddController extends AbstractController {
     @ResponseBody
     public String getProjects() {
         List<Project> projects = projectService.getAllProjects();
-        return projectService.getProjectListAsJson(projects);
+        return projectService.getProjectListAsJsonOld(projects);
     }
 
     /**

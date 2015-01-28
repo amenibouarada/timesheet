@@ -88,7 +88,7 @@ public abstract class AbstractJasperReportModelAndViewGenerator implements Jaspe
     }
 
     protected void fillFullProjectListJson( final ModelAndView mav ){
-        mav.addObject("fullProjectListJson", projectService.getProjectListJson());
+        mav.addObject("fullProjectListJson", projectService.getProjectListJsonOld());
     }
 
     protected void fillWithProjects( final ModelAndView mav ) {
