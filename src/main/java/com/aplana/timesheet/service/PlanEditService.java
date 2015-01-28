@@ -36,6 +36,8 @@ import static argo.jdom.JsonNodeFactories.array;
 import static com.aplana.timesheet.controller.PlanEditController.*;
 import static com.aplana.timesheet.util.JsonUtil.aNumberBuilder;
 
+import static com.aplana.timesheet.service.ProjectService.*;
+
 /**
  * @author rshamsutdinov
  * @version 1.0
@@ -88,11 +90,6 @@ public class PlanEditService {
     public static final String SUMMARY_INVESTMENT_FACT = SUMMARY_INVESTMENT + _FACT;
     public static final String SUMMARY_COMMERCIAL_FACT = SUMMARY_COMMERCIAL + _FACT;
 
-    public static final String PROJECT_ID = "id";
-    public static final String PROJECT_NAME = "name";
-    public static final String PROJECT_DIVISION = "project_division";
-    public static final String PROJECT_TYPE = "project_type";
-    public static final String PROJECT_FUNDING_TYPE = "project_funding_type";
     public static final String PROJECTS_PLANS = "projects_plans";
 
     public static final String SUMMARY_FACT = SUMMARY + _FACT;
@@ -212,8 +209,6 @@ public class PlanEditService {
     }
 
     private void addEmployeeProjectPlans(List<EmployeeProjectPlan> employeeProjectPlans, Integer year, Integer month, Employee employee, JsonNode jsonNode) {
-        //employeeProjectPlanService.remove(employee, year, month); KSS APLANATS-850 Удалять будем только существующие записи с value=0. Удаление будет вызвано в методе com.aplana.timesheet.service.EmployeeProjectPlanService.mergeEmployeeProjectPlans
-
         if (jsonNode.getFields().containsKey(PROJECTS_PLANS_FIELD)) {
             for (JsonNode node : jsonNode.getArrayNode(PROJECTS_PLANS)) {
                 employeeProjectPlans.add(createEmployeeProjectPlanIfNeed(year, month, employee, node));
@@ -240,10 +235,6 @@ public class PlanEditService {
                 employeePlans.add(employeePlan);
             }
         }
-
-        // KSS APLANATS-850 Удалять будем только существующие записи с value=0.
-        // Удаление будет вызвано в методе com.aplana.timesheet.service.EmployeePlanService.mergeProjectPlans
-
     }
 
     private EmployeePlan createEmployeePlanIfNeed(Integer year, Integer month, Employee employee, DictionaryItem dictionaryItem) {
@@ -509,7 +500,8 @@ public class PlanEditService {
         final Date date = DateTimeUtil.createDate(form.getYear(), form.getMonth());
         List<Project> projectList = getProjects(form, date);
 
-        modelAndView.addObject("projectListJson", getProjectListAsJson(projectList));
+        modelAndView.addObject("projectListJson", projectService.getProjectListAsJson(projectList,
+                new String[]{PROJECT_ID, PROJECT_NAME, PROJECT_DIVISION, PROJECT_TYPE, PROJECT_FUNDING_TYPE }));
         modelAndView.addObject("jsonDataToShow", getDataAsJson(form, date, projectList));
     }
 
@@ -523,27 +515,6 @@ public class PlanEditService {
                 date,
                 form.getDivisionId()
         );
-    }
-
-    private String getProjectListAsJson(List<Project> projects) {
-        final List<JsonNode> nodes = new ArrayList<JsonNode>();
-
-        for (Project project : projects) {
-            nodes.add(
-                    object(
-                            field(PROJECT_ID, number(project.getId())),
-                            field(PROJECT_NAME, string(project.getName())),
-                            field(PROJECT_DIVISION,
-                                    number( project.getDivision() != null ? project.getDivision().getId() : -1 )
-                            ),
-                            field(PROJECT_TYPE, number( project.getState().getId() )),
-                            field(PROJECT_FUNDING_TYPE,
-                                    number(project.getFundingType() != null ? project.getFundingType().getId() : -1))
-                    )
-            );
-        }
-
-        return JsonUtil.format(array(nodes));
     }
 
     private List<Integer> getProjectStates(PlanEditForm form) {
@@ -561,24 +532,16 @@ public class PlanEditService {
     }
 
     public String getDataAsJson(PlanEditForm form, Date date, List<Project> projectList) {
-        final List<Employee> employees;
         final Integer managerId = form.getManager();
         LOGGER.debug("manager = {}",managerId);
-        if (managerId == null || managerId < 1) {
-            employees = employeeService.getDivisionEmployees(
-                    form.getDivisionId(),
-                    date,
-                    getRegionIds(form),
-                    getProjectRoleIds(form)
-            );
-        } else {
-            employees = employeeService.getDivisionEmployeesByManager(
-                    form.getDivisionId(),
-                    date,
-                    getRegionIds(form),
-                    getProjectRoleIds(form),
-                    managerId
-            );
+        final List<Employee> employees = employeeService.getDivisionEmployeesByManager(
+                form.getDivisionId(),
+                date,
+                getRegionIds(form),
+                getProjectRoleIds(form),
+                managerId
+        );
+        if (managerId != null && managerId >= 1) {
             Employee manager = employeeService.find(managerId);
             if (!employees.contains(manager) && manager != null) {
                 employees.add(manager);
