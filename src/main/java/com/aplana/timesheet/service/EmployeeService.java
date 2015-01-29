@@ -50,8 +50,6 @@ public class EmployeeService {
     @Autowired
     RegionDAO regionDAO;
     @Autowired
-    private EmployeeDAO emloyeeDAO;
-    @Autowired
     private VacationService vacationService;
 
     /**
@@ -281,32 +279,36 @@ public class EmployeeService {
         });
     }
 
-    public List<Employee> getDivisionEmployees(Integer divisionId, Date date, List<Integer> regionIds, List<Integer> projectRoleIds) {
-        return employeeDAO.getDivisionEmployees(divisionId, date, regionIds, projectRoleIds);
-    }
-
-    // ToDo нельзя ли эту логику перенести в запрос?
     public List<Employee> getDivisionEmployeesByManager(Integer divisionId, Date date, List<Integer> regionIds, List<Integer> projectRoleIds, Integer managerId) {
-        List<Employee> divisionEmployeesByManager = employeeDAO.getDivisionEmployeesByManager(divisionId, date, regionIds, projectRoleIds, managerId);
-        List<Employee> divisionEmployeesTemp = new ArrayList<Employee>();
-        for (Employee employee : divisionEmployeesByManager) {
-            List<Employee> employeesByManager = getDivisionEmployeesByManager(divisionId, date, regionIds, projectRoleIds, employee.getId());
-            for (Employee employeeTemp : employeesByManager) {
-                if (!(divisionEmployeesTemp.contains(employeeTemp)) && !(divisionEmployeesByManager.contains(employeeTemp))) {
-                    divisionEmployeesTemp.add(employeeTemp);
-                }
-            }
-        }
-        divisionEmployeesByManager.addAll(divisionEmployeesTemp);
+        List<Employee> employees =
+                getSubManagersEmployee(divisionId, date, regionIds, projectRoleIds, managerId);
 
-        Collections.sort(divisionEmployeesByManager, new Comparator<Employee>() {
+        Collections.sort(employees, new Comparator<Employee>() {
             @Override
             public int compare(Employee o1, Employee o2) {
                 return o1.getName().compareTo(o2.getName());
             }
         });
-        return divisionEmployeesByManager;
+
+        return employees;
     }
+
+    // возвращает список сотрудников по переданным параметром,
+    // а также рекурсивно всех подчиненных у найденных сотрудников
+    public List<Employee> getSubManagersEmployee(
+            Integer divisionId, Date date, List<Integer> regionIds, List<Integer> projectRoleIds, Integer managerId){
+
+        Set<Employee> employeesByManager = new HashSet<Employee>(employeeDAO.getDivisionEmployeesByManager(divisionId, date, regionIds, projectRoleIds, managerId));
+        Set<Employee> employeesBySubManagers = new HashSet<Employee>();
+        for (Employee employee : employeesByManager) {
+            if (!(employeesBySubManagers.contains(employee))) {
+                employeesBySubManagers.add(employee);
+                employeesBySubManagers.addAll(getSubManagersEmployee(divisionId, date, regionIds, projectRoleIds, employee.getId()));
+            }
+        }
+        employeesByManager.addAll(employeesBySubManagers);
+        return new ArrayList<Employee>(employeesByManager);
+    };
 
     public List<Employee> getEmployees() {
         return employeeDAO.getEmployees();
@@ -412,13 +414,6 @@ public class EmployeeService {
         return JsonUtil.format(builder);
     }
 
-    private String getEmployeeNameByActiveStatus(Employee employee) {
-        if (employee.isActive()) {
-            return employee.getName();
-        }
-        return employee.getName() + " (уволен)";
-    }
-
     private JsonNodeBuilder getEmployeesBuilder(List<Employee> employees) {
         JsonArrayNodeBuilder employeesBuilder = anArrayBuilder();
         for (Employee employee : employees) {
@@ -471,6 +466,9 @@ public class EmployeeService {
         return employeeDAO.getProjectManagersSameRole(project, employee);
     }
 
+    /* ToDo нельзя ли объединить методы
+        getJuniorProjectManagersAndProjects и getJuniorProjectManagersAndProjects
+    */
     /**
      * получаем список младших (тимлиды, ведущие аналитики) руководителей проектов, на которых сотрудник планирует свою занятость в даты болезни.
      */
@@ -590,22 +588,9 @@ public class EmployeeService {
         return employeeDAO.getEmployeeByRegionAndManagerRecursiveAndDivision(regions, divisionId, manager);
     }
 
-    /**
-     * Возвращает список сотрудников по центру, руководителю, списку должностей и списку регионов
-     *
-     * @param division        - идентификатора центра
-     * @param manager         - идентификатора руководителя
-     * @param projectRoleList - список идентификаторов должностей
-     * @param regionList      - список идентификаторов регионов
-     * @return
-     */
-    public List<Employee> getEmployeeByDivisionManagerRoleRegion(Integer division, Integer manager, List<Integer> projectRoleList, List<Integer> regionList) {
-        return employeeDAO.getEmployeeByDivisionManagerRoleRegion(division, manager, projectRoleList, regionList);
-    }
-
     public String checkDayIsVacation(Integer employeeId, String reportDate) {
         Date date = DateTimeUtil.parseStringToDateForDB(reportDate);
-        Employee user = emloyeeDAO.find(employeeId);
+        Employee user = employeeDAO.find(employeeId);
         Boolean isVacationDay = vacationService.isDayVacationWithoutPlanned(user, date);
         final JsonArrayNodeBuilder builder = anArrayBuilder();
         JsonObjectNodeBuilder objectNodeBuilder = anObjectBuilder().
@@ -622,7 +607,7 @@ public class EmployeeService {
      */
     public Boolean checkNotStartWorkByDate(Integer employeeId, String reportDate) {
         Date date = DateTimeUtil.parseStringToDateForDB(reportDate);
-        Employee employee = emloyeeDAO.find(employeeId);
+        Employee employee = employeeDAO.find(employeeId);
         if (employee.getStartDate().after(date)) {
             return true;
         }

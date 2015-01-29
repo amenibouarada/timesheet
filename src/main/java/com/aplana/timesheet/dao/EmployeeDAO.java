@@ -155,37 +155,6 @@ public class EmployeeDAO {
 
         return query.getResultList();
     }
-    /**
-     * Возвращает список менеджеров для конкретного работника
-     * @param employeeId
-     * @return List<Employee>
-     */
-    public List<Employee> getRegionManager (Integer employeeId) {
-        Query query = this.entityManager.createQuery(
-                "select m.employee from  Employee e, Manager m " +
-                "where e.id = :emp_id " +
-                    "AND m.division.id = e.division.id " +
-                    "AND m.region.id = e.region.id"
-        ).setParameter("emp_id", employeeId);
-
-        return query.getResultList();
-    }
-
-    /**
-     * Возвращает список менеджеров для конкретного региона и подразделения
-     * @param regionId
-     * @param divisionId
-     * @return
-     */
-    public List<Employee> getRegionManager(Integer regionId, Integer divisionId) {
-        Query query = this.entityManager.createQuery(
-                "select m.employee from  Manager m " +
-                        "WHERE m.division.id = :div_id " +
-                        "AND m.region.id = :region_id"
-        ).setParameter("region_id", regionId).setParameter("div_id", divisionId);
-
-        return query.getResultList();
-    }
 
 	/**
 	 * Возвращает список действующих сотрудников указанного подразделения
@@ -299,25 +268,6 @@ public class EmployeeDAO {
                         "AND emp.endDate >= :curDate) " +
                         "OR (emp.endDate IS NULL) AND emp.id NOT IN :ids"
         ).setParameter("curDate", new Date()).setParameter("ids", syncedEmployees).getResultList();
-    }
-
-    public List<Employee> getDivisionEmployees(Integer divisionId, Date date, List<Integer> regionIds, List<Integer> projectRoleIds) {
-        final Calendar calendar = Calendar.getInstance();
-
-        calendar.setTime(date);
-
-        final Query query = entityManager.createQuery(
-                "from Employee e where e.division.id = :div_id" +
-                        " and ((:date_month >= MONTH(e.startDate) and :date_year = YEAR(e.startDate) or :date_year > YEAR(e.startDate))" +
-                        "       and (e.endDate is null or :date_month <= MONTH(e.endDate) and :date_year = YEAR(e.endDate) or :date_year < YEAR(e.endDate)))" +
-                        " and (e.region.id in :region_ids or " + ALL_REGIONS + " in (:region_ids))" +
-                        " and (e.job.id in :project_role_ids or " + ALL_PROJECT_ROLES + " in (:project_role_ids))" +
-                        " order by e.name"
-        ).setParameter("div_id", divisionId).setParameter("date_month", calendar.get(Calendar.MONTH) + 1).
-                setParameter("date_year", calendar.get(Calendar.YEAR)).
-                setParameter("region_ids", regionIds).setParameter("project_role_ids", projectRoleIds);
-
-        return query.getResultList();
     }
 
     public List<Employee> getEmployees() {
@@ -528,17 +478,6 @@ public class EmployeeDAO {
         return query.getResultList();
     }
 
-    public List<Integer> getEmployeesIdByDivisionManagerRegion(Integer divisionId, Integer managerId, Integer regionId){
-        Query query = entityManager.createQuery("select emp.id from Employee as emp where " +
-                "emp.manager.id = :managerId and " +
-                "emp.region.id = :regionId and " +
-                "emp.division.id = :divisionId")
-                .setParameter("divisionId", divisionId)
-                .setParameter("managerId", managerId)
-                .setParameter("regionId", regionId);
-        return query.getResultList();
-    }
-
     /**
      * множенственный выбор по подразделениям, руководителям подразделений, проектам и регионам
      * если параметр передан как null - то поиск по всем
@@ -612,40 +551,36 @@ public class EmployeeDAO {
         return query.getResultList();
     }
 
-    public List<Integer> getEmployeesIdByDivisionRegion(Integer divisionId, Integer regionId){
-        Query query = entityManager.createQuery("select emp.id from Employee as emp where " +
-                "emp.region.id = :regionId and " +
-                "emp.division.id = :divisionId")
-                .setParameter("divisionId", divisionId)
-                .setParameter("regionId", regionId);
-        return query.getResultList();
-    }
+    // Если manager_Id == null или <1, то ищет без учета менеджера
+    public List<Employee> getDivisionEmployeesByManager(
+            Integer divisionId, Date date, List<Integer> regionIds, List<Integer> projectRoleIds, Integer managerId) {
 
-    public List<Integer> getEmployeesIdByDivisionManager(Integer divisionId, Integer managerId){
-        Query query = entityManager.createQuery("select emp.id from Employee as emp where " +
-                "emp.manager.id = :managerId and " +
-                "emp.division.id = :divisionId")
-                .setParameter("divisionId", divisionId)
-                .setParameter("managerId", managerId);
-        return query.getResultList();
-    }
+        Map<String, Object> parameters = new HashMap<String, Object>();
+        parameters.put("div_id", divisionId);
+        parameters.put("date", date);
 
-    public List<Employee> getDivisionEmployeesByManager(Integer divisionId, Date date, List<Integer> regionIds, List<Integer> projectRoleIds, Integer managerId) {
-        final Calendar calendar = Calendar.getInstance();
-
-        calendar.setTime(date);
-
-        final Query query = entityManager.createQuery(
+        StringBuilder queryString = new StringBuilder(
                 "from Employee e where e.division.id = :div_id" +
-                        " and ((:date_month >= MONTH(e.startDate) and :date_year = YEAR(e.startDate) or :date_year > YEAR(e.startDate))" +
-                        "       and (e.endDate is null or :date_month <= MONTH(e.endDate) and :date_year = YEAR(e.endDate) or :date_year < YEAR(e.endDate)))" +
-                        " and (e.region.id in :region_ids or " + ALL_REGIONS + " in (:region_ids))" +
-                        " and (e.job.id in :project_role_ids or " + ALL_PROJECT_ROLES + " in (:project_role_ids))" +
-                        " and (e.manager.id = :manager_Id or e.manager2.id = :manager_Id)" +
-                        " order by e.name"
-        ).setParameter("div_id", divisionId).setParameter("date_month", calendar.get(Calendar.MONTH) + 1).
-                setParameter("date_year", calendar.get(Calendar.YEAR)).
-                setParameter("region_ids", regionIds).setParameter("project_role_ids", projectRoleIds).setParameter("manager_Id",managerId);
+                " and (:date >= e.startDate and (e.endDate is null or :date <= e.endDate))"
+        );
+
+        if (regionIds != null && !regionIds.contains(ALL_REGIONS)){
+            queryString.append(" and (e.region.id in :region_ids)");
+            parameters.put("region_ids", regionIds);
+        }
+        if (projectRoleIds != null && !projectRoleIds.contains(ALL_PROJECT_ROLES)){
+            queryString.append(" and (e.job.id in :project_role_ids)");
+            parameters.put("project_role_ids", projectRoleIds);
+        }
+        if (managerId != null && managerId >= 1){
+            queryString.append(" and (e.manager.id = :manager_Id or e.manager2.id = :manager_Id)");
+            parameters.put("manager_Id",managerId);
+        }
+        queryString.append(" order by e.name");
+        final Query query = entityManager.createQuery(queryString.toString());
+        for (Map.Entry entry : parameters.entrySet()){
+            query.setParameter(entry.getKey().toString(), entry.getValue());
+        }
 
         return query.getResultList();
     }
@@ -662,31 +597,6 @@ public class EmployeeDAO {
                 .setParameter("employeeID", employeeID)
                 .getSingleResult();
         return slavesCount > 0;
-    }
-
-    public List<Employee> getEmployeeByRegionAndManagerAndDivision(List<Integer> regions, Integer divisionId, Integer manager) {
-        String qlString = "select emp from Employee as emp where emp.endDate is null";
-        if (manager != null && manager >= 0 ) {
-            qlString += " and  emp.manager.id = :managerId ";
-        }
-        if (regions != null && regions.size() > 0 && !regions.get(0).equals(-1)) {
-            qlString += " and emp.region.id in :regionId  ";
-        }
-        if (divisionId != null && divisionId != 0 ) {
-            qlString += " and emp.division.id = :divisionId ";
-        }
-        Query query = entityManager.createQuery(qlString);
-        if ( manager != null && manager >= 0) {
-            query.setParameter("managerId", manager);
-        }
-        if (regions != null && regions.size() > 0 && !regions.get(0).equals(-1)) {
-            query.setParameter("regionId", regions);
-        }
-        if ( divisionId != null && divisionId != 0 ) {
-            query.setParameter("divisionId", divisionId);
-
-        }
-        return query.getResultList();
     }
 
     /**
@@ -737,35 +647,6 @@ public class EmployeeDAO {
      */
     public List<Integer> getRegionsWhereManager(Integer id) {
         Query query = entityManager.createQuery("select emp.region.id from Employee emp where emp.endDate=null and emp.manager.id = :id group by emp.region").setParameter("id", id);
-        return query.getResultList();
-    }
-
-    /**
-     * Возвращает список сотрудников по центру, руководителю, списку должностей и списку регионов
-     * @param division - идентификатора центра
-     * @param manager - идентификатора руководителя
-     * @param projectRoleList - список идентификаторов должностей
-     * @param regionList - список идентификаторов регионов
-     * @return
-     */
-    public List<Employee> getEmployeeByDivisionManagerRoleRegion(Integer division, Integer manager, List<Integer> projectRoleList, List<Integer> regionList){
-        Query query = entityManager.createQuery(
-                "select " +
-                    "emp " +
-                "from " +
-                    "Employee emp " +
-                "where " +
-                     "emp.endDate is NULL " +
-                     "and emp.division.id = :division " +
-                     "and (emp.manager.id = :manager or :manager = -1)" +
-                     "and emp.job.id in :projectRoleList " +
-                     "and emp.region.id in :regionList");
-
-        query.setParameter("division", division);
-        query.setParameter("manager", manager);
-        query.setParameter("projectRoleList", projectRoleList);
-        query.setParameter("regionList", regionList);
-
         return query.getResultList();
     }
 
