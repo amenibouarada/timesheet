@@ -249,8 +249,8 @@ function unselectValues(select) {
 // Возвращает все выбранные значение(value) в <select multiple="true">
 function getSelectValues(select) {
     var result = [];
-    for (var option in select.selectedOptions){
-        result.push(option.value);
+    for (var i = 0; i < select.selectedOptions.length; i++){
+        result.push(select.selectedOptions[i].value);
     }
     return result;
 }
