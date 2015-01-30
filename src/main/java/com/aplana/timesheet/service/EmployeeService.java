@@ -35,6 +35,9 @@ public class EmployeeService {
 
     private static final Logger logger = LoggerFactory.getLogger(EmployeeService.class);
 
+    public static final String EMPLOYEE_ID      = "employee_id";
+    public static final String EMPLOYEE_NAME    = "employee_name";
+
     @Autowired
     public VelocityEngine velocityEngine;
     @Autowired
@@ -119,6 +122,28 @@ public class EmployeeService {
             result = employeeDAO.getEmployees(division);
         }
         return result;
+    }
+
+    /**
+     * Возвращает список сотрудников как json {id, name}
+     * @param employeeList
+     * @return
+     */
+    public String getEmployeeListAsJson(List<Employee> employeeList){
+        JsonArrayNodeBuilder builder = anArrayBuilder();
+
+        for(Employee employee : employeeList){
+            JsonObjectNodeBuilder objectNodeBuilder = anObjectBuilder();
+            objectNodeBuilder.withField(EMPLOYEE_ID, aNumberBuilder(employee.getId().toString()));
+            objectNodeBuilder.withField(EMPLOYEE_NAME, aStringBuilder(employee.getName()));
+            builder.withElement(objectNodeBuilder);
+        }
+
+        return JsonUtil.format(builder.build());
+    }
+
+    public String getAllEmployeesJSON() {
+        return getEmployeeListAsJson(employeeDAO.getAllEmployees());
     }
 
     /**
@@ -318,20 +343,6 @@ public class EmployeeService {
         return employeeDAO.getAllEmployees();
     }
 
-    public String getAllEmployeesJSON() {
-        final JsonArrayNodeBuilder builder = anArrayBuilder();
-
-        for (Employee employee : employeeDAO.getAllEmployees()) {
-            builder.withElement(
-                    anObjectBuilder()
-                            .withField("id", aStringBuilder(employee.getId().toString()))
-                            .withField("name", aStringBuilder(employee.getName()))
-            );
-        }
-
-        return JsonUtil.format(builder);
-    }
-
     public Employee getEmployeeFromBusinessTrip(Integer reportId) {
         return employeeDAO.tryGetEmployeeFromBusinessTrip(reportId);
     }
@@ -466,8 +477,9 @@ public class EmployeeService {
         return employeeDAO.getProjectManagersSameRole(project, employee);
     }
 
-    /* ToDo нельзя ли объединить методы
-        getJuniorProjectManagersAndProjects и getJuniorProjectManagersAndProjects
+    /* ToDo нельзя ли объединить метод getJuniorProjectManagersAndProjects для vacation и illness
+    * скорее всего, когда проект перейдет на Java 8 можно будет это реализовать, когда можно будет
+    * передавать функции в качестве аргументов.
     */
     /**
      * получаем список младших (тимлиды, ведущие аналитики) руководителей проектов, на которых сотрудник планирует свою занятость в даты болезни.
