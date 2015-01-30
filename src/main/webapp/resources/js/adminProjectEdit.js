@@ -27,7 +27,8 @@ dojo.require("dojo.store.Memory");
 
 var employeesDataStore = new dojo.data.ObjectStore({
     objectStore: new dojo.store.Memory({
-        data: employeesListJSON
+        data: employeesListJSON,
+        idProperty: EMPLOYEE_ID
     })
 });
 
@@ -275,7 +276,7 @@ function createManager() {
         id: managerIdText,
         name: managerNameText,
         store: employeesDataStore,
-        searchAttr: 'name',
+        searchAttr: EMPLOYEE_NAME,
         queryExpr: "*\${0}*",
         ignoreCase: true,
         autoComplete: false,
@@ -416,7 +417,7 @@ function createBillable() {
         id: idBillbleName,
         name: nameBillableName,
         store: employeesDataStore,
-        searchAttr: 'name',
+        searchAttr: EMPLOYEE_NAME,
         queryExpr: "*\${0}*",
         ignoreCase: true,
         autoComplete: false,
@@ -645,7 +646,7 @@ function createFilteringSelect(row, idValue, fieldNames, rowName) {
         id: idElement,
         name: nameElement,
         store: employeesDataStore,
-        searchAttr: 'name',
+        searchAttr: EMPLOYEE_NAME,
         queryExpr: "*\${0}*",
         ignoreCase: true,
         autoComplete: false,
