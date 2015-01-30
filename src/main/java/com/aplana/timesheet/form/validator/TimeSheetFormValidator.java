@@ -150,6 +150,7 @@ public class TimeSheetFormValidator extends AbstractValidator {
                     valdateCategoryOfActivity(formRow, emplJob, notNullRowNumber, errors);
                     validateProjectTask(formRow, notNullRowNumber, errors);
                     validateDescription(formRow, emplJob, notNullRowNumber, errors);
+                    validateProblem(formRow);
 
                     notNullRowNumber++;
                 }
@@ -655,5 +656,9 @@ public class TimeSheetFormValidator extends AbstractValidator {
                 }
             }
         }
+    }
+
+    private void validateProblem(TimeSheetTableRowForm rowForm){
+        rowForm.setProblem(rowForm.getProblem().trim());
     }
 }
