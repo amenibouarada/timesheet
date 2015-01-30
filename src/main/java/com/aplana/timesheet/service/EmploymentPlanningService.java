@@ -30,24 +30,18 @@ public class EmploymentPlanningService {
 
     @Autowired
     private CalendarService calendarService;
-
     @Autowired
     private SecurityService securityService;
-
     @Autowired
     private DivisionService divisionService;
-
-    @Autowired
-    private ManagerService managerService;
-
     @Autowired
     private ProjectRoleService projectRoleService;
-
     @Autowired
     private RegionService regionService;
-
     @Autowired
     private ProjectService projectService;
+    @Autowired
+    private EmployeeService employeeService;
 
     private List<Calendar> getYearList() {
         return DateTimeUtil.getYearsList(calendarService);
@@ -68,7 +62,7 @@ public class EmploymentPlanningService {
         modelAndView.addObject("monthList", calendarService.getMonthList(2013));
         modelAndView.addObject("projectList", getProjects(currentUser.getDivision().getId(), date));
         modelAndView.addObject("divisionList", divisionService.getDivisions());
-        modelAndView.addObject("managerList", managerService.getManagerList());
+        modelAndView.addObject("managerList", employeeService.getManagerListJson());
         modelAndView.addObject("projectRoleList", projectRoleService.getProjectRoles());
         modelAndView.addObject("regionList", regionService.getRegions());
         modelAndView.addObject("all", ALL);
@@ -200,40 +194,4 @@ public class EmploymentPlanningService {
         return JsonUtil.format(builder.build());
     }
 
-
-    /**
-     * Возвращает список сотрудников как json {id, name}
-     * @param employeeList
-     * @return
-     */
-    public String getEmployeeListAsJson(List<Employee> employeeList){
-        JsonArrayNodeBuilder builder = anArrayBuilder();
-
-        for(Employee employee : employeeList){
-            JsonObjectNodeBuilder objectNodeBuilder = anObjectBuilder();
-            objectNodeBuilder.withField("employee_id", aNumberBuilder(employee.getId().toString()));
-            objectNodeBuilder.withField("employee_name", aStringBuilder(employee.getName()));
-            builder.withElement(objectNodeBuilder);
-        }
-
-        return JsonUtil.format(builder.build());
-    }
-
-    /**
-     * Возвращает список проектов как json {id, name}
-     * @param projectList
-     * @return
-     */
-    public String getProjectListAsJson(List<Project> projectList){
-        JsonArrayNodeBuilder builder = anArrayBuilder();
-
-        for(Project project : projectList){
-            JsonObjectNodeBuilder objectNodeBuilder = anObjectBuilder();
-            objectNodeBuilder.withField("project_id", aNumberBuilder(project.getId().toString()));
-            objectNodeBuilder.withField("project_name", aStringBuilder(project.getName()));
-            builder.withElement(objectNodeBuilder);
-        }
-
-        return JsonUtil.format(builder.build());
-    }
 }

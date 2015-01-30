@@ -7,27 +7,11 @@ dojo.require("dojo.date.locale");
 
 require(["dijit/Dialog", "dijit/form/TextBox", "dijit/form/Button"]);
 
-
 // Первоначальные значения грида "сотрудник-проекты" - для отмены изменений
 var clearData = {};
 var gPlan;
 var gEmployeeName;
 var gEmployeeId;
-
-var month = new Array();
-
-month[0] = "Январь";
-month[1] = "Февраль";
-month[2] = "Март";
-month[3] = "Апрель";
-month[4] = "Май";
-month[5] = "Июнь";
-month[6] = "Июль";
-month[7] = "Август";
-month[8] = "Сентябрь";
-month[9] = "Октябрь";
-month[10] = "Ноябрь";
-month[11] = "Декабрь";
 
 // Инициализация при загрузке
 dojo.addOnLoad(function () {
@@ -35,88 +19,11 @@ dojo.addOnLoad(function () {
     projectDataHandler(gProjectId, gYearBegin, gMonthBegin, gYearEnd, gMonthEnd, initProjectGrid);
     // Посторить грид "сотрудник-проекты", но не заполнять
     employeeDataHandler(0, gYearBegin, gMonthBegin, gYearEnd, gMonthEnd, initEmployeeGrid);
+    // обновим руководителей на форме добавления сотрудников
+    updateManagerListByDivision();
+    // и сразу же обновим список сотрудников
+    updateAdditionEmployeeList();
 });
-
-
-// Число ли это
-function isNumber(n) {
-    return !isNaN(parseFloat(n)) && isFinite(n);
-}
-
-// Возвращает название месяца по номеру
-function getMonthByNumber(number) {
-    return month[number - 1];
-}
-
-// Возвращает все выбранные значение(value) в <select multiple="true">
-function getSelectValues(select) {
-    var result = [];
-    var options = select && select.options;
-    var opt;
-
-    for (var i = 0, iLen = options.length; i < iLen; i++) {
-        opt = options[i];
-
-        if (opt.selected) {
-            result.push(opt.value);
-        }
-    }
-    return result;
-}
-
-
-// Возвращает все выбранные значение(в виде: [value, text]) в <select multiple="true">
-function getSelectObjects(select) {
-    var result = [];
-    var options = select && select.options;
-    var opt;
-
-    for (var i = 0, iLen = options.length; i < iLen; i++) {
-        opt = options[i];
-
-        if (opt.selected) {
-            result.push(opt);
-        }
-    }
-    return result;
-}
-
-// Очищает все значения в select
-function clearSelectValues(select) {
-    var i = 0;
-    for (; i < select.length;) {
-        select.options[i] = null;
-    }
-}
-
-// Снимает выбранные элементы в селекте
-function unselectValues(select) {
-    for (var i = 0; i < select.length; ++i) {
-        select.options[i].selected = false;
-    }
-}
-
-// Бежит по циклу между двумя месяцами и для каждого месяца дергает функцию handler(month, year)
-function iterateMonth(yearStart, monthStart, yearEnd, monthEnd, handler) {
-    for (var month = monthStart, year = yearStart; (month <= monthEnd && year == yearEnd) || year < yearEnd;) {
-        handler(month, year);
-
-        ++month;
-        if (month == 13) {
-            month = 1;
-            ++year;
-        }
-    }
-}
-
-function monthCount(yearStart, monthStart, yearEnd, monthEnd) {
-    var cnt = 0;
-    iterateMonth(yearStart, monthStart, yearEnd, monthEnd, function () {
-        ++cnt
-    });
-    return cnt;
-}
-
 
 function textFormat(value, color) {
     if (color === undefined) {
@@ -150,22 +57,6 @@ function formatterData(value) {
     return textFormat(value);
 }
 
-// Формат вывода ячеек в гриде для редактируемых полей
-function formatterEditableData(value) {
-    var color = "black";
-    var showValue;
-
-    if ((value === undefined) || (!isNumber(value))) {
-        return;
-    } else {
-        showValue = Math.round(value);
-        if (value > 100) {
-            color = "red";
-        }
-    }
-
-    return textFormat(showValue, color);
-}
 // Делает ajax запрос по занятости сотрудников на проекте, полученный json ответ отправляет в функцию handler(json_value)
 function projectDataHandler(projectId, yearStart, monthStart, yearEnd, monthEnd, handler) {
     dojo.xhrGet({
@@ -211,6 +102,7 @@ function employeeDataHandler(employeeId, yearStart, monthStart, yearEnd, monthEn
 // Делает ajax запрос, возвращающий сотрудников по центру/руководителю/должности/региону,
 // полученны ответ в виде JSON передает в функцию handler(json_value)
 function additionEmployeeDataHandler(division, manager, roleList, regionList, handler) {
+    processing();
     dojo.xhrGet({
         url: "/employmentPlanning/getAddEmployeeListAsJSON",
         content: {
@@ -222,8 +114,10 @@ function additionEmployeeDataHandler(division, manager, roleList, regionList, ha
         handleAs: "text",
         load: function (response, ioArgs) {
             handler(response);
+            stopProcessing();
         },
         error: function (response, ioArgs) {
+            stopProcessing();
             alert('additionEmployeeDataHandler Panic !');
         }
     });
@@ -974,7 +868,7 @@ function updateAdditionEmployeeList() {
     additionEmployeeDataHandler(divisionId, managerId, projectRoleListId, regionListId, function (response) {
         var grid = dijit.byId("projectGrid");
         var employeeSelect = dojo.byId("additionEmployeeList");
-        clearSelectValues(employeeSelect);
+        employeeSelect.options.length = 0;
 
         grid.store.fetch({query: {}, onComplete: checkExists, queryOptions: {deep: true}});
 
@@ -1017,8 +911,7 @@ function clearDialogSelection() {
 // Добавляет строчку к гриду "проект-сотрудники"
 function addRow() {
     var grid = dijit.byId("projectGrid");
-    var select = dojo.byId("additionEmployeeList");
-    var employeeList = getSelectObjects(select);
+    var employeeList = dojo.byId("additionEmployeeList").selectedOptions;
 
     dojo.forEach(employeeList, function (row) {
         var employeeId = parseFloat(row.value);

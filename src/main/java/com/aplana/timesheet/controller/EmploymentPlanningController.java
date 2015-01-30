@@ -14,6 +14,7 @@ import com.aplana.timesheet.form.EmploymentPlanningForm;
 import com.aplana.timesheet.service.EmployeeProjectPlanService;
 import com.aplana.timesheet.service.EmployeeService;
 import com.aplana.timesheet.service.EmploymentPlanningService;
+import com.aplana.timesheet.service.ProjectService;
 import com.aplana.timesheet.util.DateTimeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,8 +26,10 @@ import org.springframework.web.servlet.ModelAndView;
 import java.util.Date;
 import java.util.List;
 
+import static com.aplana.timesheet.service.ProjectService.*;
+
 @Controller
-public class EmploymentPlanningController{
+public class EmploymentPlanningController {
     private static final Logger logger = LoggerFactory.getLogger(EmploymentPlanningController.class);
 
     @Autowired
@@ -37,6 +40,9 @@ public class EmploymentPlanningController{
 
     @Autowired
     private EmployeeService employeeService;
+
+    @Autowired
+    private ProjectService projectService;
 
     /* страница по умолчанию */
     @RequestMapping("/employmentPlanning")
@@ -86,9 +92,14 @@ public class EmploymentPlanningController{
     @RequestMapping(value="/employmentPlanning/getAddEmployeeListAsJSON", produces = "text/plain;charset=UTF-8")
     @ResponseBody
     public String showAddEmployeeList(@ModelAttribute(AddEmployeeForm.ADD_FORM) AddEmployeeForm form) {
-        List<Employee> employeeList = employeeService.getEmployeeByDivisionManagerRoleRegion(form.getDivisionId(), form.getManagerId(), form.getProjectRoleListId(), form.getRegionListId());
+        List<Employee> employeeList = employeeService.getDivisionEmployeesByManager(
+                form.getDivisionId(),
+                new Date(),
+                form.getRegionListId(),
+                form.getProjectRoleListId(),
+                form.getManagerId());
 
-        return employmentPlanningService.getEmployeeListAsJson(employeeList);
+        return employeeService.getEmployeeListAsJson(employeeList);
     }
 
     /* Возвращает JSON для форме выбора сотрудников */
@@ -101,7 +112,7 @@ public class EmploymentPlanningController{
         Date date = DateTimeUtil.createDate(yearBegin, monthBegin);
         List<Project> projectList = employmentPlanningService.getProjects(Integer.parseInt(divisionId), date);
 
-        return employmentPlanningService.getProjectListAsJson(projectList);
+        return projectService.getProjectListAsJson(projectList, new String[]{PROJECT_ID, PROJECT_NAME});
     }
 
     /* Сохраняем данные план по сотрудникам по проекту*/
