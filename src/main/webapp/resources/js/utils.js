@@ -44,6 +44,23 @@ function iterateMonth(yearStart, monthStart, yearEnd, monthEnd, handler) {
     }
 }
 
+String.prototype.trim = function () {
+    return this.replace(/^\s+|\s+$/g, '');
+};
+
+/*
+ * Превращает timestamp строку (yyyy-mm-dd) в строку для
+ * displayValue DateTextBoxА (dd.mm.yyyy)
+ */
+function timestampStrToDisplayStr(str) {
+    if (str != "") {
+        var splittedStr = str.split("-");
+        return splittedStr[2] + "." + splittedStr[1] + "." + splittedStr[0];
+    } else {
+        return str;
+    }
+}
+
 function monthCount(yearStart, monthStart, yearEnd, monthEnd) {
     var cnt = 0;
     iterateMonth(yearStart, monthStart, yearEnd, monthEnd, function () {
@@ -157,16 +174,16 @@ var tooltip = function () {
     };
 }();
 
-//необходимо переопределить на своих страницах
-function getEmployeeData() {
-    throw "getEmployeeData is unsupported method"
+// возвращает первый рабочий день сотрудника
+function getFirstWorkDate(employee) {
+    var employeeId = dojo.byId("employeeId").value;
+    return convertStringToDate(employee.firstWorkDate);
 }
 
-// возвращает первый рабочий день сотрудника
-function getFirstWorkDate() {
+// возващает последний рабочий день сотрудника
+function getLastWorkDate(employee) {
     var employeeId = dojo.byId("employeeId").value;
-    var employee = getEmployeeData();
-    return convertStringToDate(employee.firstWorkDate);
+    return convertStringToDate(employee.lastWorkDate);
 }
 
 /* Создает cookie с указанными параметрами */
