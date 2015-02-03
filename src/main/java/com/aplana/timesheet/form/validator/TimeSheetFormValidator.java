@@ -76,7 +76,9 @@ public class TimeSheetFormValidator extends AbstractValidator {
         tsForm.setTimeSheetTablePart(tsTablePart);
         logger.info("##### ");
         int notNullRowNumber = 0;
-        if (tsTablePart != null && tsTablePart.size() != 0) {
+        if ((tsTablePart != null && tsTablePart.size() != 0) || // если табличная часть не пустая
+             !tsForm.getPlan().isEmpty())                       // или заполнены планы
+        {
             Integer selectedEmployeeId = tsForm.getEmployeeId();
             checkForEffectiveActTypes(tsTablePart, tsForm.getEmployeeId(), errors);
             validateSelectedDate(tsForm, selectedEmployeeId, errors);

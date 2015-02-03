@@ -151,15 +151,17 @@ public class TimeSheetService {
             TimeSheetDetail timeSheetDetail = new TimeSheetDetail();
             timeSheetDetail.setDuration((double) 0);
             timeSheetDetail.setTimeSheet(timeSheet);
-            String comment;
-            if (businessTripService.isBusinessTripDay(timeSheet.getEmployee(), timeSheet.getCalDate().getCalDate())) {
-                OvertimeCausesEnum overtimeCause =
-                        EnumsUtils.getEnumById(tsForm.getOvertimeCause(), OvertimeCausesEnum.class);
-                comment = overtimeCause.getName() + ":" + tsForm.getOvertimeCauseComment();
-            } else {
-                UndertimeCausesEnum undertimeCause =
-                        EnumsUtils.getEnumById(tsForm.getOvertimeCause(), UndertimeCausesEnum.class);
-                comment = undertimeCause.getName() + ":" + tsForm.getOvertimeCauseComment();
+            String comment = "";
+            if (TypesOfTimeSheetEnum.DRAFT != type){ // если это не черновик, то проверим причину отсутствия строк отчета
+                if (businessTripService.isBusinessTripDay(timeSheet.getEmployee(), timeSheet.getCalDate().getCalDate())) {
+                    OvertimeCausesEnum overtimeCause =
+                            EnumsUtils.getEnumById(tsForm.getOvertimeCause(), OvertimeCausesEnum.class);
+                    comment = overtimeCause.getName() + ":" + tsForm.getOvertimeCauseComment();
+                } else {
+                    UndertimeCausesEnum undertimeCause =
+                            EnumsUtils.getEnumById(tsForm.getOvertimeCause(), UndertimeCausesEnum.class);
+                    comment = undertimeCause.getName() + ":" + tsForm.getOvertimeCauseComment();
+                }
             }
             timeSheetDetail.setDescription(comment);
             timeSheetDetails.add(timeSheetDetail);
