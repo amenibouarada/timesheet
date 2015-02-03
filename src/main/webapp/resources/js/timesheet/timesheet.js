@@ -46,7 +46,7 @@ dojo.declare("Calendar", com.aplana.dijit.ext.Calendar, {
                 return 'classDateBrownBack';
                 break;
             case "0":   //день без отчета
-                if (date <= getFirstWorkDate(getEmployeeData)) // день раньше начала работы
+                if (date <= getFirstWorkDate(getEmployeeData())) // день раньше начала работы
                     return '';
                 var lastWorkDate = getLastWorkDate(getEmployeeData());
                 if (lastWorkDate != null && lastWorkDate != "" && date > lastWorkDate) // день после увольнения

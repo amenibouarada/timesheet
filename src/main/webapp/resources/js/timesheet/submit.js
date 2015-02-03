@@ -107,7 +107,7 @@ function checkDurationThenSendForm() {
         alert("Укажите подразделение, сотрудника и дату");
     } else if (typeof employeeId == typeof undefined || employeeId == null || employeeId == 0) {
         alert("Укажите сотрудника и дату");
-    } else if (getFirstWorkDate() > pickedDate) {
+    } else if (getFirstWorkDate(getEmployeeData()) > pickedDate) {
         alert("Нельзя отправить отчет за выбранную дату, так как сотрудник еще не был принят на работу");
     } else {
         if (pickedDate) {
