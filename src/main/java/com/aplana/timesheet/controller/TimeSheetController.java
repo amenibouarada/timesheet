@@ -296,12 +296,13 @@ public class TimeSheetController {
     @RequestMapping(value = "/timesheet/jiraIssuesPlanned", headers = "Accept=application/octet-stream;Charset=UTF-8")
     @ResponseBody
     public String getJiraIssuesPlannedStr(@RequestParam("employeeId") Integer employeeId,
+                                          @RequestParam("date") String date,
                                    HttpServletRequest httpServletRequest){
 
         // Обрабатываю исключение и шлю письмо админам и из-за com.aplana.timesheet.system.aspect.ResponceBodyExceptionAspect
         // TODO узнать зачем com.aplana.timesheet.system.aspect.ResponceBodyExceptionAspect и выпилить его, если что
         try{
-            return jiraService.getPlannedIssues(employeeId);
+            return jiraService.getPlannedIssues(employeeId, date);
         } catch (Exception e){
             StringBuilder sb = sendMailService.buildMailException(httpServletRequest, e);
             if (sb != null){

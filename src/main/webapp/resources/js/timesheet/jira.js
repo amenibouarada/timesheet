@@ -4,6 +4,7 @@ function getJiraPlans() {
     if (employeeId) {
         var jiraCell = dojo.byId("plan").parentNode;
         var standbyElementJira = new dojox.widget.Standby({target: jiraCell, zIndex: 1000});
+        var reportDate = dijit.byId('calDate').get('value').format("yyyy-mm-dd");
         jiraCell.appendChild(standbyElementJira.domNode);
         standbyElementJira.startup();
         standbyElementJira.show();
@@ -11,7 +12,7 @@ function getJiraPlans() {
             url: getContextPath() + "/timesheet/jiraIssuesPlanned",
             handleAs: "text",
             timeout: 30000,
-            content: {employeeId: employeeId},
+            content: {employeeId: employeeId, date: reportDate},
             preventCache: true,
             load: function (data) {
                 if (data.length != 0)
