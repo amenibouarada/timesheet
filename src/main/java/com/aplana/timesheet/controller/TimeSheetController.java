@@ -164,6 +164,9 @@ public class TimeSheetController {
         return JsonUtil.format(timeSheetService.getJsonObjectNodeBuilderForReport(date, employeeId, Arrays.asList(TypesOfTimeSheetEnum.DRAFT)));
     }
 
+    /**
+     * Получение формы с заполненным отчетом и сохранение
+    */
     @RequestMapping(value = "/timesheet", method = RequestMethod.POST)
     public ModelAndView sendTimeSheet(@ModelAttribute("timeSheetForm") TimeSheetForm tsForm, BindingResult result) {
         logger.info("Processing form validation for employee {} ({}).", tsForm.getEmployeeId(), tsForm.getCalDate());

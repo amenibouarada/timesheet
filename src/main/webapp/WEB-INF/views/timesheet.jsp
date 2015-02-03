@@ -47,7 +47,14 @@
             initTimeSheetForm();
         });
     </script>
-    <script type="text/javascript" src="<%= request.getContextPath()%>/resources/js/timesheet.js"></script>
+    <%-- TODO Возможно стоит при сборке складывать в один файл и тогда браузер будет только 1 запрос делать, а не 6 --%>
+    <script type="text/javascript" src="<%= request.getContextPath()%>/resources/js/timesheet/timesheet.js"></script>
+    <script type="text/javascript" src="<%= request.getContextPath()%>/resources/js/timesheet/draft.js"></script>
+    <script type="text/javascript" src="<%= request.getContextPath()%>/resources/js/timesheet/jira.js"></script>
+    <script type="text/javascript" src="<%= request.getContextPath()%>/resources/js/timesheet/submit.js"></script>
+    <script type="text/javascript" src="<%= request.getContextPath()%>/resources/js/timesheet/table.js"></script>
+    <script type="text/javascript" src="<%= request.getContextPath()%>/resources/js/timesheet/widgetChanging.js"></script>
+
     <link rel="stylesheet" type="text/css" href="<%= request.getContextPath()%>/resources/css/timesheetForm.css">
 </head>
 <body>
