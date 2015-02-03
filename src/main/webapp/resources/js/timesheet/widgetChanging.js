@@ -33,7 +33,7 @@ function onCalDateChange(calDateObj) {
             dojo.style(dialog.closeButtonNode, "display", "none");
             dialog.show();
         } else {
-            requestAndRefreshDailyTimesheetData(calDateObj.value, dojo.byId('employeeId').value);
+            refreshDailyTimesheetData(requestDailyTimesheetData(calDateObj.value, dojo.byId('employeeId').value));
 
             if (isErrorPage) {
                 dojo.style("errors_box", {"display": "none"});
@@ -48,7 +48,7 @@ function confirmCalDateChange() {
     var dialog = dijit.byId("dialogChangeDate");
     dialog.hide();
 
-    requestAndRefreshDailyTimesheetData(dijit.byId('calDate').value, dojo.byId('employeeId').value);
+    refreshDailyTimesheetData(requestDailyTimesheetData(dijit.byId('calDate').value, dojo.byId('employeeId').value));
 
     if (isErrorPage) {
         dojo.style("errors_box", {"display": "none"});

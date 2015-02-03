@@ -228,6 +228,7 @@ function requestDailyTimesheetData(date, employeeId){
         url: getContextPath() + "/timesheet/dailyTimesheetData",
         handleAs: "json",
         timeout: 10000,
+        sync: true,
         content: {date: requestDate, employeeId: employeeId},
         load: function (data, ioArgs) {
             dailyTimesheetData = data;
