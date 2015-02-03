@@ -38,7 +38,7 @@ dojo.declare("Calendar", com.aplana.dijit.ext.Calendar, {
                 return 'classDateVioletBack';
                 break;
             case "0":   //день без отпуска
-                if (date <= getFirstWorkDate()) {// день раньше начала работы
+                if (date <= getFirstWorkDate(dijit.byId("employeeIdSelect").item)) {// день раньше начала работы
                     return '';
                 } else {
                     return 'classDateGreen';
@@ -84,11 +84,6 @@ require(["dijit/Tooltip", "dojo/domReady!"], function (Tooltip) {
             "<table>"
     });
 });
-
-// переопределение метода из timesheet.js, не удалять
-function getEmployeeData() {
-    return dijit.byId("employeeIdSelect").item;
-}
 
 function getEmployeeId() {
     return dojo.byId("employeeId").value;
