@@ -211,6 +211,7 @@ function TimeAfter(d, h, m) {
  */
 function fillProjectList(rowIndex, projectState) {
     var projectSelect = dojo.byId("project_id_" + rowIndex);
+    projectSelect.options.length = 0;
     var division = dojo.byId("divisionId").value;
     if (division != 0) {
 
