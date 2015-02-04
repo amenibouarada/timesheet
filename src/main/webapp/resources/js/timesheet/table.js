@@ -180,28 +180,7 @@ function addNewRow() {
     descriptionCell.appendChild(descriptionTextarea);
 
     //ячейка с кнопкой(картинкой) запроса из JIRA
-    var jiraCell = newTsRow.insertCell(10);
-    dojo.addClass(jiraCell, "text_center_align");
-    var jiraImg = dojo.doc.createElement("img");
-    dojo.addClass(jiraImg, "pointer");
-    dojo.attr(jiraImg, {
-        id: "jira_button_" + newRowIndex,
-        // class:"controlToHide",
-        src: "resources/img/logo-jira.png",
-        alt: "Запрос из JIRA",
-        title: "Запрос из JIRA",
-        //без px так как IE не понимает
-        height: "15",
-        width: "15",
-        style: "cursor:pointer;"
-    });
-    dojo.attr(jiraImg, "class", "controlToHide");
-
-    //неведома ошибка исправляется для IE добавлением onclick именно через функцию
-    jiraImg.onclick = function () {
-        getJiraInfo(newRowIndex);
-    };
-    jiraCell.appendChild(jiraImg);
+    createJiraCell(newTsRow, newRowIndex);
 
     // Ячейка с проблемами
     var problemCell = newTsRow.insertCell(11);
@@ -372,24 +351,7 @@ function reloadRowsState() {
 
         //ячейка с кнопкой(картинкой) запроса из JIRA
         if (dojo.byId("jira_button_" + i) === null || dojo.byId("jira_button_" + i) === undefined) {
-            var jiraCell = rows[i].cells[10];
-            var jiraImg = dojo.doc.createElement("img");
-            dojo.addClass(jiraImg, "pointer");
-            dojo.attr(jiraImg, {
-                id: "jira_button_" + i,
-                src: "resources/img/logo-jira.png",
-                alt: "Запрос из JIRA",
-                title: "Запрос из JIRA",
-                //без px так как IE не понимает
-                height: "15",
-                width: "15"
-            });
-
-            //неведома ошибка исправляется для IE добавлением onclick именно через функцию
-            jiraImg.onclick = function () {
-                getJiraInfo(newRowIndex);
-            };
-            jiraCell.appendChild(jiraImg);
+            createJiraCell(rows[i], i);
         }
     }
 

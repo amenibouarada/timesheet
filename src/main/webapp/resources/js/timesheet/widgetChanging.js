@@ -162,6 +162,7 @@ function typeActivityChange(obj) {
     }
     setActDescription(rowIndex);
     setTaskDescription(rowIndex);
+    updateJiraButtonVisibility();
 }
 
 /*

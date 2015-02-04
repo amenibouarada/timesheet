@@ -60,3 +60,52 @@ function getJiraInfo(rowIndex) {
         });
     }
 }
+
+function createJiraCell(row, rowIndex){
+    var jiraCell = row.insertCell(10);
+    dojo.addClass(jiraCell, "text_center_align");
+    var jiraImg = dojo.doc.createElement("img");
+    dojo.addClass(jiraImg, "pointer");
+    dojo.attr(jiraImg, {
+        id: "jira_button_" + rowIndex,
+        src: getJiraLogo(),
+        alt: "Запрос из JIRA",
+        title: "Запрос из JIRA",
+        //без px так как IE не понимает
+        height: "15",
+        width: "15",
+        style: getJiraLogoStyle()
+    });
+    dojo.attr(jiraImg, "class", "controlToHide");
+
+    //неведома ошибка исправляется для IE добавлением onclick именно через функцию
+    jiraImg.onclick = function () {
+        getJiraInfo(rowIndex);
+    };
+    jiraCell.appendChild(jiraImg);
+}
+
+function getJiraLogo(){
+    return "resources/img/logo-jira.png";
+}
+
+function getJiraLogoDisabled(){
+    return "resources/img/logo-jira-disabled.png";
+}
+
+function getJiraLogoStyle(){
+    return "cursor:pointer;";
+}
+
+function updateJiraButtonVisibility(){
+    var timesheetRowsCount = dojo.query(".time_sheet_row").length;
+    for (var i = 0; i < timesheetRowsCount; i++) {
+        if (dojo.byId("project_id_" + i).value == undefined || dojo.byId("project_id_" + i).value == 0){
+            dojo.byId("jira_button_" + i).src = getJiraLogoDisabled();
+            dojo.removeAttr("jira_button_" + i, "style");
+        }else{
+            dojo.byId("jira_button_" + i).src = getJiraLogo();
+            dojo.setAttr("jira_button_" + i, "style", getJiraLogoStyle());
+        }
+    }
+}

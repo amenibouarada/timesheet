@@ -104,12 +104,14 @@ function initTimeSheetForm() {
 
     var dailyTimesheetData = requestDailyTimesheetData(currentDate,  dojo.byId('employeeId').value);
 
-    if (!isErrorPage) {
-        refreshDailyTimesheetData(dailyTimesheetData);
-    } else {
+    if (isErrorPage) {
         refreshPreviousDayPlans(dailyTimesheetData);
         reloadRowsState();
+    } else {
+        refreshDailyTimesheetData(dailyTimesheetData);
     }
+
+    updateJiraButtonVisibility();
 }
 
 // переопределение метода из timesheet.js, не удалять
@@ -309,6 +311,7 @@ function refreshDailyTimesheetData(data) {
 
     isFinalForm = isFinal;
 
+    updateJiraButtonVisibility();
     setElementsAvailability(isFinal);
 }
 
