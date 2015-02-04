@@ -27,7 +27,7 @@ function loadDraft() {
                     addNewRow();
                     loadTableRow(i, data.data);
                 }
-                dojo.byId('plan').innerHTML = data.plan;
+                dojo.byId('plan').innerHTML = dojoxDecode(data.plan);
                 hideShowElement("load_draft", true);
                 hideShowElement("load_draft_text", true);
             }

@@ -285,7 +285,7 @@ function refreshDailyTimesheetData(data) {
 
     // Заполнение планов работы на будущее
 
-    var currentPlan = current.plan;
+    var currentPlan = dojoxDecode(current.plan);
     var nextWorkDate = current.nextWorkDate;
     var nextDayEffort = current.effort;
     var nextDaySummary = next.workSummary;
@@ -320,7 +320,7 @@ function refreshPreviousDayPlans(data) {
     if (data == null) { return; }
 
     var previousWorkDate = data.previousDayData.workDate;
-    var previousPlan = data.previousDayData.plan;
+    var previousPlan = dojoxDecode(data.previousDayData.plan);
 
     dojo.byId("lbPrevPlan").innerHTML = (previousWorkDate != null) ?
         "Планы предыдущего рабочего дня (" + timestampStrToDisplayStr(previousWorkDate.toString()) + "):" :
