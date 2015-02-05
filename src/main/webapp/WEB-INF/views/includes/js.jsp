@@ -22,8 +22,8 @@
 <script type="text/javascript" src="<%= getResRealPath("/resources/js/utils/dformat.js", application) %>"></script>
 <script type="text/javascript" src="<%= getResRealPath("/resources/js/utils/commonUtils.js", application) %>"></script>
 <script type="text/javascript" src="<%= getResRealPath("/resources/js/utils/selectWidgetsUtils.js", application) %>"></script>
-<script type="text/javascript" src="<%= getResRealPath("/resources/js/DateTextBox.ext.js", application) %>"></script>
-<script type="text/javascript" src="<%= getResRealPath("/resources/js/Calendar.ext.js", application) %>"></script>
+<script type="text/javascript" src="<%= getResRealPath("/resources/js/utils/DateTextBox.ext.js", application) %>"></script>
+<script type="text/javascript" src="<%= getResRealPath("/resources/js/utils/Calendar.ext.js", application) %>"></script>
 
 <script type="text/javascript">
     function getContextPath() {
