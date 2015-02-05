@@ -2,11 +2,6 @@
 <%@ page import="static com.aplana.timesheet.util.ResourceUtils.getResRealPath" %>
 <%@ page import="com.aplana.timesheet.enums.TypesOfActivityEnum" %>
 <%@ page import="com.aplana.timesheet.enums.VacationTypesEnum" %>
-<!-- load Dojo -->
-<%!
-    private static final String DATE_TEXT_BOX_EXT_JS_PATH = "/resources/js/DateTextBox.ext.js";
-    private static final String CALENDAR_EXT_RES_PATH = "/resources/js/Calendar.ext.js";
-%>
 
 <script type="text/javascript">
     var dojoConfig = {
@@ -21,14 +16,14 @@
                 out.print(String.format("%s : %s,\n", name.name(), name.getId()));}%>}
     }
 </script>
-
 <script type="text/javascript" src="<%=request.getContextPath()%><%= DOJO_PATH %>/dojo/dojo.js"></script>
 
-<script type="text/javascript" src="<%= getResRealPath("/resources/js/dformat.js", application) %>"></script>
-<script type="text/javascript" src="<%= getResRealPath("/resources/js/utils.js", application) %>"></script>
-
-<script type="text/javascript" src="<%= getResRealPath(CALENDAR_EXT_RES_PATH, application) %>"></script>
-<script type="text/javascript" src="<%= getResRealPath(DATE_TEXT_BOX_EXT_JS_PATH, application) %>"></script>
+<%--TODO возможно при сборке надо объединять в один файл, чтобы клиент скачивал только один файл, а не 5 --%>
+<script type="text/javascript" src="<%= getResRealPath("/resources/js/utils/dformat.js", application) %>"></script>
+<script type="text/javascript" src="<%= getResRealPath("/resources/js/utils/commonUtils.js", application) %>"></script>
+<script type="text/javascript" src="<%= getResRealPath("/resources/js/utils/selectWidgetsUtils.js", application) %>"></script>
+<script type="text/javascript" src="<%= getResRealPath("/resources/js/DateTextBox.ext.js", application) %>"></script>
+<script type="text/javascript" src="<%= getResRealPath("/resources/js/Calendar.ext.js", application) %>"></script>
 
 <script type="text/javascript">
     function getContextPath() {

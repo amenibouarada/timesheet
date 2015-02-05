@@ -681,35 +681,3 @@ function invalidReportDate(value) {
 function confirmCreateNewReport() {
     return confirm("Вы уверены?");
 }
-
-/*
- * Заполняет список "Категория активности" доступными значениями
- * в соответствии с определённой логикой.
- */
-function fillAvailableActivityCategoryList(rowIndex) {
-    var actTypeSelect = dojo.byId("activity_type_id_" + rowIndex);
-    var projectRoleSelect = dojo.byId("project_role_id_" + rowIndex);
-    var actCatSelect = dojo.byId("activity_category_id_" + rowIndex);
-    var actType = dojo.attr(actTypeSelect, "value");
-    var projectRole = dojo.attr(projectRoleSelect, "value");
-    actCatSelect.options.length = 0;
-    insertEmptyOption(actCatSelect);
-    for (var i = 0; i < availableActCategoryList.length; i++) {
-        if (actType == availableActCategoryList[i].actType && projectRole != 0 && projectRole == availableActCategoryList[i].projRole) {
-            for (var j = 0; j < availableActCategoryList[i].avActCats.length; j++) {
-                var actCatOption = dojo.doc.createElement("option");
-                dojo.attr(actCatOption, {
-                    value: availableActCategoryList[i].avActCats[j]
-                });
-                for (var k = 0; k < actCategoryList.length; k++) {
-                    if (availableActCategoryList[i].avActCats[j] == actCategoryList[k].id) {
-                        actCatOption.title = actCategoryList[k].value;
-                        actCatOption.innerHTML = actCategoryList[k].value;
-                        actCatSelect.appendChild(actCatOption);
-                    }
-                }
-            }
-        }
-    }
-    sortSelectOptions(actCatSelect);
-}
