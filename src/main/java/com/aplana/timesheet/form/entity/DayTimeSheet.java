@@ -3,9 +3,10 @@ package com.aplana.timesheet.form.entity;
 import com.aplana.timesheet.dao.BusinessTripDAO;
 import com.aplana.timesheet.dao.IllnessDAO;
 import com.aplana.timesheet.dao.TimeSheetDAO;
-import com.aplana.timesheet.dao.VacationDAO;
 import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.dao.entity.TimeSheet;
+import com.aplana.timesheet.dao.entity.Vacation;
+import com.aplana.timesheet.service.VacationService;
 import com.aplana.timesheet.util.DateTimeUtil;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,12 +21,13 @@ public class DayTimeSheet implements Comparable<DayTimeSheet> {
 
     private TimeSheetDAO timeSheetDAO;
     private IllnessDAO illnessDAO;
-    private VacationDAO vacationDAO;
+    private VacationService vacationService;
     private BusinessTripDAO businessTripDAO;
     private Employee emp;
     private Timestamp calDate;
     private Boolean workDay;
     private Integer id;
+    private Vacation vacation;
     /**
      * Отпуск или отгул или ещё что (не я это придумал так было до меня)
      */
@@ -71,8 +73,8 @@ public class DayTimeSheet implements Comparable<DayTimeSheet> {
         this.timeSheetDAO = timeSheetDAO;
     }
 
-    public void setVacationDAO(VacationDAO vacationDAO) {
-        this.vacationDAO = vacationDAO;
+    public void setVacationService(VacationService vacationService) {
+        this.vacationService = vacationService;
     }
 
     public void setBusinessTripDAO(BusinessTripDAO businessTripDAO) {
@@ -287,10 +289,25 @@ public class DayTimeSheet implements Comparable<DayTimeSheet> {
         return illnessDAO.isDayIllness(emp, new Date(calDate.getTime()));
     }
 
-    // является данный день отпуском или нет, без учета планируемых отпусков
+    // возвращает отпуск, если он есть на дату и если он не планируемый
     @Transactional(readOnly = true)
+    private Vacation getVacation(){
+        if (vacation != null){
+            return vacation;
+        }else{
+            vacation = vacationService.getVacationWithoutPlanned(emp, new Date(calDate.getTime()));
+            return vacation;
+        }
+    }
+
+    // является данный день отпуском, который необходимо учитывать в месячном учете часов
+    public Boolean getConsiderVacationDay() {
+        return vacationService.isConsiderVacation(getVacation());
+    }
+
+    // является данный день отпуском или нет, без учета планируемых отпусков
     public Boolean getVacationDay() {
-        return vacationDAO.isDayVacationWithoutPlanned(emp, new Date(calDate.getTime()));
+        return getVacation() != null;
     }
 
     @Transactional(readOnly = true)

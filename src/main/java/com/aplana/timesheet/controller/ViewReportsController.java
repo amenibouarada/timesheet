@@ -155,7 +155,7 @@ public class ViewReportsController extends AbstractControllerForEmployee {
         BigDecimal durationFact = BigDecimal.ZERO;
         for (Iterator<DayTimeSheet> iterator = dayTimeSheets.iterator(); iterator.hasNext(); ) {
             DayTimeSheet next = iterator.next();
-            BigDecimal vacationDuration = next.getVacationDay() && next.getWorkDay() ? new BigDecimal(8) : BigDecimal.ZERO;
+            BigDecimal vacationDuration = next.getConsiderVacationDay() && next.getWorkDay() ? new BigDecimal(8) : BigDecimal.ZERO;
             durationFact = durationFact.add(vacationDuration);
             //если это не черновик
             if(!next.getStatusHaveDraft())

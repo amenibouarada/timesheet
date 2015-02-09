@@ -492,6 +492,16 @@ public class DateTimeUtil {
         return (int) ((endDate.getTime() - beginDate.getTime()) / (24 * 3600 * 1000) + 1);
     }
 
+    public static int getDiffInMonths(Date beginDate, Date endDate){
+        Calendar startCalendar = Calendar.getInstance();
+        startCalendar.setTime(beginDate);
+        Calendar endCalendar = Calendar.getInstance();
+        endCalendar.setTime(endDate);
+        int diffYear = endCalendar.get(Calendar.YEAR) - startCalendar.get(Calendar.YEAR);
+        int diffMonth = diffYear * 12 + endCalendar.get(Calendar.MONTH) - startCalendar.get(Calendar.MONTH);
+        return diffMonth;
+    }
+
     private static String[] months = new String[] {"января", "февраля", "марта", "апреля", "мая", "июня", "июля",
             "августа", "сентября", "октября", "ноября", "декабря"};
 

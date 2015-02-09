@@ -67,8 +67,9 @@ public class EmployeeReportService {
             sumFactH = sumFactH.add((BigDecimal) item[3]);
         }
         /* отпуска */
-        int vacationWorkDaysCount = vacationService.getVacationsWorkdaysCount(employee, year, month, null);
-        sumFactH = sumFactH.add(BigDecimal.valueOf(vacationWorkDaysCount * TimeSheetConstants.WORK_DAY_DURATION));
+        BigDecimal vacationWorkDaysHours = BigDecimal.valueOf(
+                vacationService.getApprovedVacationsWorkdaysCount(employee, year, month) * TimeSheetConstants.WORK_DAY_DURATION);
+        sumFactH = sumFactH.add(vacationWorkDaysHours);
         /* болезни */
         int illnessWorkdaysCount = illnessService.getIllnessWorkdaysCount(employee, year, month);
         sumFactH = sumFactH.add(BigDecimal.valueOf(illnessWorkdaysCount * TimeSheetConstants.WORK_DAY_DURATION));
@@ -89,7 +90,7 @@ public class EmployeeReportService {
 
         /* проверяем отпуска */
         BigDecimal vacationPlanH = BigDecimal.ZERO;
-        BigDecimal vacationFactH = new BigDecimal(vacationService.getVacationsWorkdaysCount(employee, year, month, null) * TimeSheetConstants.WORK_DAY_DURATION, MathContext.DECIMAL64);
+        BigDecimal vacationFactH = new BigDecimal(vacationWorkDaysHours.toString(), MathContext.DECIMAL64);
         DictionaryItem vacationDic = dictionaryItemService.find(EmployeePlanType.VACATION.getId());
         EmployeePlan vacationPlan = employeePlanService.tryFind(employee, year, month, vacationDic);
         if (vacationPlan != null) {

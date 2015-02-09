@@ -9,6 +9,7 @@ import com.aplana.timesheet.enums.TypesOfActivityEnum;
 import com.aplana.timesheet.enums.TypesOfTimeSheetEnum;
 import com.aplana.timesheet.enums.VacationStatusEnum;
 import com.aplana.timesheet.form.entity.DayTimeSheet;
+import com.aplana.timesheet.service.VacationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +33,7 @@ public class TimeSheetDAO {
     @Autowired
     IllnessDAO illnessDAO;
     @Autowired
-    VacationDAO vacationDAO;
+    VacationService vacationService;
     @Autowired
     BusinessTripDAO businessTripDAO;
     private static final Logger logger = LoggerFactory.getLogger(TimeSheetDAO.class);
@@ -192,7 +193,7 @@ public class TimeSheetDAO {
                 );
                 ds.setTimeSheetDAO(this);
                 ds.setIllnessDAO(illnessDAO);
-                ds.setVacationDAO(vacationDAO);
+                ds.setVacationService(vacationService);
                 ds.setBusinessTripDAO(businessTripDAO);
                 map.put(calDate.getTime(), ds);
             } else {

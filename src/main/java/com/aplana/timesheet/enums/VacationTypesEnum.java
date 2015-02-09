@@ -1,10 +1,13 @@
 package com.aplana.timesheet.enums;
 
+import com.aplana.timesheet.dao.entity.DictionaryItem;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author rshamsutdinov
@@ -45,5 +48,18 @@ public enum VacationTypesEnum implements TSEnum {
                 return input.getId() == id;
             }
         }).orNull();
+    }
+
+    /**
+     * Возвращает список отпусков, которые являются учитываемыми в подсчете отработанного времени за месяц
+     * @return
+     */
+    public static List<TSEnum> getConsiderVacationTypes(){
+        List<TSEnum> result = new ArrayList<TSEnum>(4);
+        result.add(WITH_PAY);
+        result.add(WITHOUT_PAY);
+        result.add(CHILDCARE);
+        result.add(CHILDBEARING);
+        return result;
     }
 }

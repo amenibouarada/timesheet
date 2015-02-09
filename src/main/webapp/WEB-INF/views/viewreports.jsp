@@ -196,7 +196,7 @@
                         href="<%=request.getContextPath()%>/timesheet?date=<fmt:formatDate value="${report.calDate}" pattern="yyyy-MM-dd"/>&id=${employeeId}">(Создать)</a>
                 </td>
                 <c:choose>
-                    <c:when test="${report.vacationDay || report.illnessDay}">
+                    <c:when test="${report.considerVacationDay || report.illnessDay}">
                         <td class="rightAlign">${report.duration}</td>
                     </c:when>
                     <c:otherwise>
@@ -237,8 +237,10 @@
             <c:if test="${report.illnessDay}">Болезнь</c:if>
             <c:if test="${report.vacationDay}">
                 Отпуск
-                <a href="#" onclick="openVacation('<fmt:formatDate value="${report.calDate}"
-                                                                   pattern="yyyy-MM-dd"/>', ${report.emp.id},  ${report.emp.division.id});">(Подробнее)</a>
+                <a href="#" onclick="openVacation('<fmt:formatDate value="${report.calDate}" pattern="yyyy-MM-dd"/>',
+                                                    ${report.emp.id},  ${report.emp.division.id});">
+                    (Подробнее)
+                </a>
             </c:if>
             <c:if test="${report.businessTripDay}">Командировка</c:if>
         </td>
