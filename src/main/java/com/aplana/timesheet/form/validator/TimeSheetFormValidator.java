@@ -623,14 +623,24 @@ public class TimeSheetFormValidator extends AbstractValidator {
                 );
             }
             /* проверим коментарии к причине */
+            String overtimeCauseComment = tsForm.getOvertimeCauseComment();
             if (overtimeCause.getValue().equals("Другое")) {
-                String overtimeCauseComment = tsForm.getOvertimeCauseComment();
-                if (StringUtils.isBlank(overtimeCauseComment)
-                        || !overtimeCauseComment.matches(inStringMoreThanTwoWordsRegex)) {
+                if (StringUtils.isBlank(overtimeCauseComment)) {
+                    errors.rejectValue(
+                            "overtimeCauseComment",
+                            "error.tsform.overtimecause.wrongemptycomment",
+                            "Необходимо указать комментарий к недоработкам/переработкам/работам в выходной, если указана причина \"Другое\""
+                    );
+                }
+            }
+            // Если комментарий не пустой, то должны соблюдаться условия
+            if ( ! StringUtils.isBlank(overtimeCauseComment)){
+                if (!overtimeCauseComment.matches(inStringMoreThanTwoWordsRegex)
+                    || (overtimeCauseComment.length() > 256)) {
                     errors.rejectValue(
                             "overtimeCauseComment",
                             "error.tsform.overtimecause.wrongcommentformat",
-                            "Комментарий должен содержать не менее двух слов"
+                            "Комментарий к причинам недоработок/переработок/работы в выходной день должен быть не менее двух слов и не более 256 символов"
                     );
                 }
             }
