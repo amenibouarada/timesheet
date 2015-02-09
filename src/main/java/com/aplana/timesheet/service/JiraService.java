@@ -71,7 +71,7 @@ public class JiraService {
 
     /* формируем запрос по почте пользователя, проекту, дате
     *  пример строки запроса
-        project = APLANATS and
+        project in APLANATS and
         (status changed by Nlebedev on 2013-07-31
          or assignee changed from Nlebedev on 2013-07-31
          or assignee changed to Nlebedev on 2013-07-31
@@ -83,7 +83,7 @@ public class JiraService {
         StringBuilder stringBuilder = new StringBuilder();
         String onDate = " on " + reportDate;
         stringBuilder
-            .append("project = ").append(project).append(" and ")
+            .append("project in (").append(project).append(") and ")
             .append("(status changed by ").append(user).append(onDate)
             .append(" or assignee changed from ").append(user).append(onDate)
             .append(" or assignee changed to ").append(user).append(onDate)
