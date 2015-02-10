@@ -16,19 +16,19 @@
 	<style name="Detail" style="Normal" backcolor="#FF0000"/>
 	<style name="ColoredDetail" style="Normal" forecolor="#000000">
 		<conditionalStyle>
-			<conditionExpression><![CDATA[new Boolean($F{day_type}.equals(new Integer(1)) && $F{region} != null)]]></conditionExpression>
+			<conditionExpression><![CDATA[new Boolean($F{day_type} == 11 )]]></conditionExpression>
 			<style forecolor="#FF6700"/>
 		</conditionalStyle>
 		<conditionalStyle>
-			<conditionExpression><![CDATA[new Boolean($F{day_type}.equals(new Integer(1)) && $F{region} == null)]]></conditionExpression>
+			<conditionExpression><![CDATA[new Boolean($F{day_type} == 1  )]]></conditionExpression>
 			<style forecolor="#CC211B"/>
 		</conditionalStyle>
 		<conditionalStyle>
-			<conditionExpression><![CDATA[new Boolean($F{day_type}.equals(new Integer(2)))]]></conditionExpression>
+			<conditionExpression><![CDATA[new Boolean($F{day_type} == 2  )]]></conditionExpression>
 			<style forecolor="#00BFFF"/>
 		</conditionalStyle>
 		<conditionalStyle>
-			<conditionExpression><![CDATA[new Boolean($F{day_type}.equals(new Integer(3)))]]></conditionExpression>
+			<conditionExpression><![CDATA[new Boolean($F{day_type} == 3  )]]></conditionExpression>
 			<style forecolor="#ADFF2F"/>
 		</conditionalStyle>
 	</style>
@@ -193,7 +193,11 @@
             </textField>
             <textField isStretchWithOverflow="true" isBlankWhenNull="true">
                 <reportElement uuid="8c599907-f7aa-45c8-8822-8bd3a09fd967" style="ColoredDetail" positionType="Float" stretchType="RelativeToTallestObject" x="772" y="0" width="82" height="18"/>
-                <textFieldExpression><![CDATA[$F{day_type}.equals(new Integer(1)) ? ($F{region} == null?"Общий выходной":"Региональный выходной"):$F{day_type}.equals(new Integer(2)) ? $F{vacation_type}:$F{day_type}.equals(new Integer(3))?"Болезнь":"Рабочий день"]]></textFieldExpression>
+                <textFieldExpression><![CDATA[$F{day_type} == 1  ? "Общий выходной" :
+                                              $F{day_type} == 11 ? "Региональный выходной" :
+                                              $F{day_type} == 2  ? $F{vacation_type} :
+                                              $F{day_type} == 3  ? "Болезнь" :
+                                              "Рабочий день"]]></textFieldExpression>
             </textField>
 			<!--<textField isStretchWithOverflow="true" isBlankWhenNull="true">-->
 				<!--<reportElement uuid="fcbe9434-d503-4bee-82d6-7c7027445b14" style="ColoredDetail" positionType="Float" stretchType="RelativeToTallestObject" x="772" y="0" width="82" height="15"/>-->

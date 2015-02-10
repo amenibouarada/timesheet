@@ -256,7 +256,9 @@
 				<textElement>
 					<paragraph lineSpacing="Double"/>
 				</textElement>
-				<textFieldExpression><![CDATA[!$F{day_type}.equals(0) && $F{region_name} == null ? "Общий выходной" : !$F{day_type}.equals(0) && $F{region_name} != null ? "Региональный выходной" : "Рабочий день"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{day_type} == 1  ? "Общий выходной" :
+				                              $F{day_type} == 11 ? "Региональный выходной" :
+				                              "Рабочий день"]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement uuid="5f031ff6-b14c-467e-b3eb-fed13a8f51ca" style="Detail" stretchType="RelativeToTallestObject" x="1557" y="0" width="90" height="13"/>

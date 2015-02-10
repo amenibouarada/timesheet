@@ -17,23 +17,23 @@
 	</style>
 	<style name="ColoredDetail" style="Normal" forecolor="#000000">
 		<conditionalStyle>
-			<conditionExpression><![CDATA[new Boolean(($F{day_type}.equals(new Integer(1))) && ($F{region} != null))]]></conditionExpression>
+			<conditionExpression><![CDATA[new Boolean($F{day_type} == 11 )]]></conditionExpression>
 			<style forecolor="#FF6700"/>
 		</conditionalStyle>
 		<conditionalStyle>
-			<conditionExpression><![CDATA[new Boolean(($F{day_type}.equals(new Integer(1))) && ($F{region} == null))]]></conditionExpression>
+			<conditionExpression><![CDATA[new Boolean($F{day_type} == 1  )]]></conditionExpression>
 			<style forecolor="#CC211B"/>
 		</conditionalStyle>
 		<conditionalStyle>
-			<conditionExpression><![CDATA[new Boolean($F{day_type}.equals(new Integer(2)))]]></conditionExpression>
+			<conditionExpression><![CDATA[new Boolean($F{day_type} == 2  )]]></conditionExpression>
 			<style forecolor="#00BFFF"/>
 		</conditionalStyle>
 		<conditionalStyle>
-			<conditionExpression><![CDATA[new Boolean($F{day_type}.equals(new Integer(3))||$F{day_type}.equals(new Integer(4)))]]></conditionExpression>
+			<conditionExpression><![CDATA[new Boolean($F{day_type} == 3  )]]></conditionExpression>
 			<style forecolor="#ADFF2F"/>
 		</conditionalStyle>
 		<conditionalStyle>
-			<conditionExpression><![CDATA[new Boolean($F{day_type}.equals(new Integer(5)))]]></conditionExpression>
+			<conditionExpression><![CDATA[new Boolean($F{day_type} == 5  )]]></conditionExpression>
 			<style forecolor="#FF69B4"/>
 		</conditionalStyle>
 	</style>
@@ -280,7 +280,9 @@
 					<font fontName="SansSerif" size="8" isUnderline="false" isStrikeThrough="false"/>
 					<paragraph lineSpacing="Double"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{day_type}.equals(new Integer(1)) ? ($F{region} == null?"Общий выходной":"Региональный выходной"):"Рабочий день"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{day_type} == 1  ? "Общий выходной" :
+				                              $F{day_type} == 11 ? "Региональный выходной"
+				                              :"Рабочий день"]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement uuid="fcbe9434-d503-4bee-82d6-7c7027445b14" style="ColoredDetail" stretchType="RelativeToTallestObject" x="787" y="0" width="40" height="15"/>
@@ -296,7 +298,9 @@
 					<font fontName="SansSerif" size="8" isUnderline="false" isStrikeThrough="false"/>
 					<paragraph lineSpacing="Double"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{day_type}.equals(new Integer(3))?"Подтвержденная болезнь":$F{day_type}.equals(new Integer(4))?"Неподтвержденная болезнь":"Нет"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{day_type} == 4 ? "Подтвержденная болезнь" :
+				                              $F{day_type} == 3 ? "Неподтвержденная болезнь" :
+				                              "Нет"]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement uuid="8524bbe5-2c84-4fd7-ae55-277618f353f2" style="ColoredDetail" stretchType="RelativeToTallestObject" x="880" y="0" width="75" height="15"/>
@@ -304,7 +308,9 @@
 					<font fontName="SansSerif" size="8" isUnderline="false" isStrikeThrough="false"/>
 					<paragraph lineSpacing="Double"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{day_type}.equals(new Integer(5))?"Да":"Нет"]]></textFieldExpression>
+				<textFieldExpression>
+				    <![CDATA[$F{day_type} == 5 ? "Да" : "Нет" ]]>
+				</textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement uuid="5058fa35-e776-4838-b8e6-24790fd22e51" style="ColoredDetail" stretchType="RelativeToTallestObject" x="955" y="0" width="71" height="15"/>
