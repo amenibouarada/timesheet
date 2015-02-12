@@ -63,7 +63,7 @@ function showBusinessTripsAndIllnessReport() {
         error += ("Необходимо выбрать дату окончания периода!\n");
     }
 
-    if (dateFrom > dateTo) {
+    if (getDateByString(dateFrom) > getDateByString(dateTo)) {
         error += ("Дата окончания периода должна быть больше даты начала периода!\n");
     }
 
