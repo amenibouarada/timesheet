@@ -203,23 +203,16 @@ function updateEmployeeList() {
 function refreshEmployeeSelect(employeeList) {
 
     var managerId = dojo.byId('managerId').value;
-    var cities = getSelectValues(dojo.byId('regions'));
+    var regions = getSelectValues(dojo.byId('regions'));
     var employeeFlteringSelect = dijit.byId("employeeIdDiv");
 
     if (employeeList.length > 0) {
-        var employeeArray = [];
-            var emptyObj = {
-                id: 0,
-                value: ""
-            };
-            employeeArray.push(emptyObj);
-        dojo.forEach(employeeList, function (employee) {
-            var manegerEquals = (managerId == -1 || employee.manId == managerId);
-            var regionEquals = (cities.length == 1 && cities[0] == -1) || (dojo.indexOf(cities, +employee.regId) == 0);
-            if (manegerEquals && regionEquals && !employee.lastWorkDate) {
-                employeeArray.push(employee);
-            }
-        });
+        var employeeArray = getEmployeeListByManagerAndRegions(employeeList, managerId, regions);
+        var emptyObj = {
+            id: 0,
+            value: ""
+        };
+        employeeArray.push(emptyObj);
 
         employeeArray.sort(function (a, b) {
             return (a.value < b.value) ? -1 : 1;
@@ -264,4 +257,22 @@ function refreshEmployeeSelect(employeeList) {
         }
     }
     employeeFlteringSelect.set('value', empId);
+}
+
+// рекурсивный поиск всех сотрудников, по менеджеру, с учетом регионов
+// т.е. находим сотрудников по менеджеру, если сотрудник сам менеджер других - то добавляем и его подчиненных
+// и так рекурсивно собираем всем сотрудников менеджера вниз по иерархии
+function getEmployeeListByManagerAndRegions(employeeList, managerId, regions){
+    var employeeArray = [];
+    dojo.forEach(employeeList, function (employee) {
+        var manegerEquals = (managerId == -1 || employee.manId == managerId);
+        var regionEquals = (regions.length == 1 && regions[0] == -1) || (dojo.indexOf(regions, +employee.regId) == 0);
+        if (manegerEquals && regionEquals && !employee.lastWorkDate) {
+            if (dojo.indexOf(employee, employeeArray) < 0){
+                employeeArray.push(employee);
+                employeeArray = employeeArray.concat(getEmployeeListByManagerAndRegions(employeeList, employee.id, regions));
+            }
+        }
+    });
+    return employeeArray;
 }
