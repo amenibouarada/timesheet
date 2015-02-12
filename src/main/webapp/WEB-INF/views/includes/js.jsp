@@ -18,9 +18,10 @@
 </script>
 <script type="text/javascript" src="<%=request.getContextPath()%><%= DOJO_PATH %>/dojo/dojo.js"></script>
 
-<%--TODO возможно при сборке надо объединять в один файл, чтобы клиент скачивал только один файл, а не 5 --%>
+<%--TODO возможно при сборке надо объединять в один файл, чтобы клиент скачивал только один файл, а не 6 --%>
 <script type="text/javascript" src="<%= getResRealPath("/resources/js/utils/dformat.js", application) %>"></script>
 <script type="text/javascript" src="<%= getResRealPath("/resources/js/utils/commonUtils.js", application) %>"></script>
+<script type="text/javascript" src="<%= getResRealPath("/resources/js/utils/DateTimeUtils.js", application) %>"></script>
 <script type="text/javascript" src="<%= getResRealPath("/resources/js/utils/selectWidgetsUtils.js", application) %>"></script>
 <script type="text/javascript" src="<%= getResRealPath("/resources/js/utils/DateTextBox.ext.js", application) %>"></script>
 <script type="text/javascript" src="<%= getResRealPath("/resources/js/utils/Calendar.ext.js", application) %>"></script>

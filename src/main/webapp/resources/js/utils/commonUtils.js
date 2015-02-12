@@ -36,64 +36,6 @@ function clearErrorBox(divId) {
     }
 }
 
-// Возвращает название месяца по номеру
-function getMonthByNumber(number) {
-    var month = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль",
-        "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
-    return month[number - 1];
-}
-
-// Бежит по циклу между двумя месяцами и для каждого месяца дергает функцию handler(month, year)
-function iterateMonth(yearStart, monthStart, yearEnd, monthEnd, handler) {
-    for (var month = monthStart, year = yearStart; (month <= monthEnd && year == yearEnd) || year < yearEnd;) {
-        handler(month, year);
-        ++month;
-        if (month == 13) {
-            month = 1;
-            ++year;
-        }
-    }
-}
-
-/* Выдает время через d дней h часов m минут */
-function TimeAfter(d, h, m) {
-    var now = new Date(), // объект класса Data
-        nowMS = now.getTime(), // в миллисекундах (мс)
-        newMS = ((d * 24 + h) * 60 + m) * 60 * 1000 + nowMS;
-    now.setTime(newMS);    // новое время в мс
-    return now.toGMTString();
-}
-
-/*
- * Превращает timestamp строку (yyyy-mm-dd) в строку для
- * displayValue DateTextBoxА (dd.mm.yyyy)
- */
-function timestampStrToDisplayStr(str) {
-    if (str != "") {
-        var splittedStr = str.split("-");
-        return splittedStr[2] + "." + splittedStr[1] + "." + splittedStr[0];
-    } else {
-        return str;
-    }
-}
-
-function monthCount(yearStart, monthStart, yearEnd, monthEnd) {
-    var cnt = 0;
-    iterateMonth(yearStart, monthStart, yearEnd, monthEnd, function () {
-        ++cnt
-    });
-    return cnt;
-}
-
-// ковертирует дату в тип дата из строки (разделитель ".")
-function convertStringToDate(stringDate) {
-    if (stringDate != null && stringDate != "") {
-        var date = stringDate.split('.');
-        return new Date(date[2], date[1] - 1, date[0]);
-    } else {
-        return null;
-    }
-}
 
 function isNumber(n) {
     return (typeof n != typeof undefined) && !isNaN(parseFloat(n)) && isFinite(n);
@@ -202,12 +144,12 @@ var tooltip = function () {
 
 // возвращает первый рабочий день сотрудника
 function getFirstWorkDate(employee) {
-    return convertStringToDate(employee.firstWorkDate);
+    return getDateByString(employee.firstWorkDate);
 }
 
 // возващает последний рабочий день сотрудника
 function getLastWorkDate(employee) {
-    return convertStringToDate(employee.lastWorkDate);
+    return getDateByString(employee.lastWorkDate);
 }
 
 /* Создает cookie с указанными параметрами */

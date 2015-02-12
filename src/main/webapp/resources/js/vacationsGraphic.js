@@ -10,7 +10,6 @@ function getTableHeight(){
     return tableRowCount * tableRowHeightKoef + 10;
 }
 
-
 function RegionEmployees(regionName, regionEmployees, holidayList){
     var employees = new Array();
     for (var i in regionEmployees){
@@ -123,18 +122,6 @@ function drawUnaskedPeriod(startDate, endDate, minDate, maxDate){
     return leftBlock + rightBlock;
 }
 
-function dateDiffInDay(begin, end){
-    return (Date.parse(end) - Date.parse(begin)) / 86400000; // разница в датах в днях
-}
-
-function getDateByString(dateString){
-    if (dateString instanceof Date){ return dateString; }
-    var date = new Date();
-    var dvArr = dateString.split('.');
-    date.setFullYear(dvArr[2], dvArr[1] - 1, dvArr[0]);
-    return date;
-}
-
 function sortEmployeeList(employeeList){
     for (var i = 0; i < employeeList.length; i++){
         for (var j = i + 1; j < employeeList.length; j++){
@@ -208,11 +195,6 @@ function getTableRowCount(regionEmployeeList){
     return result;
 }
 
-function getLastDayOfMonth(year, month) {
-    var date = new Date(year, month+1, 0);
-    return date.getDate();
-}
-
 function findMaxDate(vacations, viewType, endDate){
     var maxDate = new Date();
     maxDate.setFullYear(vacations[0].endDate.getFullYear(),
@@ -270,72 +252,9 @@ function findMinDate(vacations, viewType, startDate){
     return minDate;
 }
 
-// GET NUMBER OF DAYS IN MONTH
-function getDaysInMonth(month, year)
-{
-    var days;
-    switch(month)
-    {
-        case 1:
-        case 3:
-        case 5:
-        case 7:
-        case 8:
-        case 10:
-        case 12:
-            days = 31;
-            break;
-        case 4:
-        case 6:
-        case 9:
-        case 11:
-            days = 30;
-            break;
-        case 2:
-            if (((year% 4)==0) && ((year% 100)!=0) || ((year% 400)==0))
-                days = 29;
-            else
-                days = 28;
-            break;
-    }
-    return (days);
-}
-
-function getMonthByNumber(number){
-    var month;
-    switch(number)
-    {
-        case 1:  month = 'январь'; break;
-        case 2:  month = 'февраль'; break;
-        case 3:  month = 'март'; break;
-        case 4:  month = 'апрель'; break;
-        case 5:  month = 'май'; break;
-        case 6:  month = 'июнь'; break;
-        case 7:  month = 'июль'; break;
-        case 8:  month = 'август'; break;
-        case 9:  month = 'сентябрь'; break;
-        case 10: month = 'октябрь'; break;
-        case 11: month = 'ноябрь'; break;
-        case 12: month = 'декабрь'; break;
-    }
-    return (month);
-}
-
-function getWeek(date){ // возвращает номер недели
-    var tmp = new Date(date.getFullYear(),0,1);
-    return Math.ceil(((dateDiffInDay(tmp, date)) + tmp.getDay() + 1)/7);
-}
-
-function addWeek(date){
-    var tmpDate = new Date(date);
-    tmpDate.setDate(tmpDate.getDate() + 7);
-    return tmpDate;
-}
-
 function makeMonthDivTitle(date){
     var firstDay = new Date(date);
     var lastDay  = new Date(date);
-    var month;
     while (firstDay.getDay() != 1){ // пока не понедельник
         firstDay.setDate(firstDay.getDate() - 1);
     }
