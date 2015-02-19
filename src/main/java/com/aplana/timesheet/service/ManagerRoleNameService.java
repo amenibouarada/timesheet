@@ -3,14 +3,12 @@ package com.aplana.timesheet.service;
 import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.dao.entity.Project;
 import com.aplana.timesheet.dao.entity.VacationApproval;
-import com.aplana.timesheet.dao.entity.VacationApprovalResult;
 import com.aplana.timesheet.enums.ProjectRolesEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -30,14 +28,14 @@ public class ManagerRoleNameService {
     private static final Logger logger = LoggerFactory.getLogger(ManagerRoleNameService.class);
 
     @Autowired
-    private VacationApprovalResultService vacationApprovalResultService;
+    private ProjectService projectService;
 
     /** Получить проектную роль согласующего*/
     public String getManagerRoleName(VacationApproval vacationApproval){
         if (isLineManager(vacationApproval.getVacation().getEmployee(), vacationApproval.getManager())){
             return LINE_MANAGER;
         }
-        List<Project> projectList = getProjects(vacationApproval);
+        List<Project> projectList = projectService.getProjectsForVacation(vacationApproval.getVacation());
         for (Project project : projectList){
             if (project.getManager().getId().equals(vacationApproval.getManager().getId())){
                 return String.format(PROJECT_LEADER, project.getName());
@@ -53,15 +51,6 @@ public class ManagerRoleNameService {
             logger.error(String.format("Не удалось определить проектную роль согласующего \"%s\"",vacationApproval.getManager().getName()));
         }
         return "";
-    }
-
-    private List<Project> getProjects(VacationApproval vacationApproval){
-        List<VacationApprovalResult> projectsVarList = vacationApprovalResultService.getVacationApprovalResultByManager(vacationApproval);
-        List<Project> resultList = new ArrayList<Project>();
-        for (VacationApprovalResult var : projectsVarList){
-            resultList.add(var.getProject());
-        }
-        return resultList;
     }
 
     /** Проверка на линейного руководителя*/

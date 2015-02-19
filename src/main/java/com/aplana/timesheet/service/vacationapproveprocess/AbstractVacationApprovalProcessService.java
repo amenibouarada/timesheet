@@ -41,8 +41,6 @@ public abstract class AbstractVacationApprovalProcessService extends AbstractSer
     @Autowired
     protected SendMailService sendMailService;
     @Autowired
-    private VacationApprovalResultService vacationApprovalResultService;
-    @Autowired
     protected ProjectManagerService projectManagerService;
     @Autowired
     protected VacationApprovalService vacationApprovalService;
@@ -145,7 +143,7 @@ public abstract class AbstractVacationApprovalProcessService extends AbstractSer
             return vacationIsNotRejected(vacation);
         }
 
-        List<Project> projectsForVacation = projectService.getProjectsAssignedToVacation(vacation);
+        List<Project> projectsForVacation = projectService.getProjectsForVacation(vacation);
         Map<Project, Boolean> managerApproveResult = checkManagerApproveResultForVacationByProjects(vacation, projectsForVacation);
 
         if (managerApproveResult.values().contains(false)) {        //один из менеджеров отказал в отпуске! :(
@@ -393,7 +391,7 @@ public abstract class AbstractVacationApprovalProcessService extends AbstractSer
             Employee vacationEmployee = vacation.getEmployee();
 
             if (vacationEmployee.getDivision().equals(projectDivision)) {
-                tryAddNewManagerToApprovalResults(vacation, requestDate, approvals, projectManager, Lists.newArrayList(project));
+                tryAddNewManagerToApprovalResults(vacation, requestDate, approvals, projectManager);
             }
         }
 
@@ -407,18 +405,10 @@ public abstract class AbstractVacationApprovalProcessService extends AbstractSer
         Map<Employee, List<Project>> juniorProjectManagersAndProjects =
                 employeeService.getJuniorProjectManagersAndProjects(projects, vacation);
 
-        return createJuniorManagersVacationApprovals(juniorProjectManagersAndProjects, vacation);
-    }
-
-    /**
-     * Создаем записи для утверждения отпусков младшими менеджерами в таблицах.
-     */
-    private Map<String, VacationApproval> createJuniorManagersVacationApprovals(Map<Employee, List<Project>> juniorProjectManagersAndProjects, Vacation vacation) {
-        Date requestDate = new Date();
         Map<String, VacationApproval> approvals = new HashMap<String, VacationApproval>();
 
         for (Employee manager : juniorProjectManagersAndProjects.keySet()) {
-            tryAddNewManagerToApprovalResults(vacation, requestDate, approvals, manager, juniorProjectManagersAndProjects.get(manager));
+            tryAddNewManagerToApprovalResults(vacation, new Date(), approvals, manager);
         }
 
         return approvals;
@@ -428,35 +418,17 @@ public abstract class AbstractVacationApprovalProcessService extends AbstractSer
      * пытаемся добавить сотрудника к рассылке. Если сотрудник уже есть в рассылке - не добавляем его. Если сотрудник является линейным менеджером, игнорируем его.
      */
     private void tryAddNewManagerToApprovalResults(Vacation vacation, Date requestDate, Map<String, VacationApproval> approvals,
-                                                   Employee manager, List<Project> projects) {
+                                                   Employee manager) {
         //Не согласуем у самого себя
         if(vacation.getEmployee().getId().equals(manager.getId()))
             return;
         //получаем список линейных руководителей
         List<Employee> linearManagers = employeeService.getLinearEmployees(vacation.getEmployee());
-        for (Project project : projects) {
-            if((linearManagers!=null && !linearManagers.contains(manager)) && manager.getEndDate() == null){
-                VacationApproval vacationApproval = (approvals.get(manager.getEmail()) != null) ?
-                        approvals.get(manager.getEmail()) : addNewVacationApproval(approvals, vacation, requestDate, manager);
-
-                VacationApprovalResult vacationApprovalResult = new VacationApprovalResult();
-                vacationApprovalResult.setProject(project);
-                vacationApprovalResult.setVacationApproval(vacationApproval);
-
-                vacationApprovalResultService.store(vacationApprovalResult);
-            }
+        if(linearManagers != null && !linearManagers.contains(manager) && manager.isActive() && manager.getEmail() != null){
+            VacationApproval vacationApproval = createNewVacationApproval(vacation, requestDate, manager);
+            vacationApproval = vacationApprovalService.store(vacationApproval);
+            approvals.put(manager.getEmail(), vacationApproval);
         }
-    }
-
-    /**
-     * добавляем в мапу с заготовками новую заготовку
-     */
-    private VacationApproval addNewVacationApproval(Map<String, VacationApproval> approvals, Vacation vacation, Date requestDate, Employee employee) {
-        VacationApproval vacationApproval = createNewVacationApproval(vacation, requestDate, employee);
-        vacationApproval = vacationApprovalService.store(vacationApproval);
-        approvals.put(employee.getEmail(), vacationApproval);
-
-        return vacationApproval;
     }
 
     /**
