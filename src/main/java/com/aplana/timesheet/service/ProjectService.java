@@ -270,13 +270,6 @@ public class ProjectService {
         return projectDAO.getEmployeeProjectsFromTimeSheetByDates(beginDate, endDate, employee);
     }
 
-    /**
-     * получаем список проектов, менеджерам которых разосланы письма с просьбой согласовать данный отпуск
-     */
-    public List<Project> getProjectsAssignedToVacation(Vacation vacation) {
-        return projectDAO.getProjectsAssignedToVacation(vacation);
-    }
-
     public List<Project> getProjectsByStatesForDateAndDivisionId(List<Integer> projectStates, Date date,
                                                                  Integer divisionId) {
         return projectDAO.getProjectsByStatesForDateAndDivisionId(projectStates, date, divisionId);

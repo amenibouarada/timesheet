@@ -89,11 +89,8 @@ public class VacationApprovalDAO {
 
     public List<VacationApproval> getProjectManagerApprovalsForVacationByProject(Vacation vacation, Project project) {
         Query query = entityManager.createQuery("select distinct va from VacationApproval as va " +
-                "left outer join va.vacationApprovalResults as var " +
-                "left outer join var.project as p " +
-                "where (va.vacation = :vacation) and (p = :project or va.manager = :manager)")
-                .setParameter("project", project)
-                .setParameter("manager", project.getManager())
+                "where (va.vacation = :vacation) and va.manager = :manager")
+                  .setParameter("manager", project.getManager())
                 .setParameter("vacation", vacation);
 
         return query.getResultList();
