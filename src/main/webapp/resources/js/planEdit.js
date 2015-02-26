@@ -10,7 +10,7 @@ function recalcColumns(myStoreObject, inRowIndex) {
     var sumComercial = 0;
 
     dojo.forEach(projectList, function (project) {
-        var projectPlan = myStoreObject.items[inRowIndex][project.id + _PLAN][0] * 1;
+        var projectPlan = myStoreObject.items[inRowIndex][project[PROJECT_ID] + _PLAN][0] * 1;
 
         if (project.project_type == PRESALE){
             sumPresaleCenter += projectPlan;

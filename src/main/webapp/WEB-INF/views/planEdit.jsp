@@ -97,6 +97,9 @@
     var scrollX = '${scrollX}';
     var scrollY = '${scrollY}';
 
+    var PROJECT_ID = "<%= PROJECT_ID %>";
+    var PROJECT_NAME = "<%= PROJECT_NAME %>";
+
     dojo.addOnLoad(function () {
 
         require(["dijit/Tooltip", "dojo/domReady!"], function (Tooltip) {
