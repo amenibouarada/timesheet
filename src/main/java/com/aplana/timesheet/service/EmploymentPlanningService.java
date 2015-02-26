@@ -113,44 +113,19 @@ public class EmploymentPlanningService {
         form.setSelectDivisionId(currentUser.getDivision().getId());
     }
 
-    /**
-     * Получает JSON для грида занятости сотрудников на проекте
-     * @param planList
-     * @return
-     */
-    public String getProjectPlanAsJSON(List<EmployeePercentPlan> planList){
+    public String getEmployeesPlanAsJSON(Map<Employee, List<ProjectPercentPlan>> employeePlanList){
         JsonArrayNodeBuilder builder = anArrayBuilder();
-        Map<Integer, JsonObjectNodeBuilder> jsonMap = new LinkedHashMap<Integer, JsonObjectNodeBuilder>();
 
-        for(EmployeePercentPlan result : planList){
-            Integer employee_id = result.getEmployeeId();
-            String  employee_name = result.getEmployeeName();
-            Integer year = result.getYear();
-            Integer month = result.getMonth();
-            Double  value = result.getPercent();
-
-            JsonObjectNodeBuilder objectNodeBuilder = jsonMap.get(employee_id);
-
-            if (objectNodeBuilder != null){
-                objectNodeBuilder.withField(year+"_"+month, aNumberBuilder(value.toString()));
-            } else {
-                objectNodeBuilder = anObjectBuilder();
-                objectNodeBuilder.
-                        withField("employee_id", aNumberBuilder(employee_id.toString())).
-                        withField("employee_name", aStringBuilder(employee_name)).
-                        withField(year+"_"+month, aNumberBuilder(value.toString()));
-                jsonMap.put(employee_id, objectNodeBuilder);
-            }
-        }
-
-        for(Map.Entry<Integer, JsonObjectNodeBuilder> entry : jsonMap.entrySet()){
-            builder.withElement(entry.getValue());
+        for (Employee employee : employeePlanList.keySet()){
+            JsonObjectNodeBuilder employeePlanNodeBuilder = employeeService.getEmployeeAsJSONBulder(employee);
+            employeePlanNodeBuilder.withField("planList", getEmployeePlanAsJSON(employeePlanList.get(employee)));
+            builder.withElement(employeePlanNodeBuilder);
         }
 
         return JsonUtil.format(builder.build());
     }
 
-    public String getEmployeePlanAsJSON(List<ProjectPercentPlan> planList){
+    public JsonArrayNodeBuilder getEmployeePlanAsJSON(List<ProjectPercentPlan> planList){
         JsonArrayNodeBuilder builder = anArrayBuilder();
         Map<Integer, JsonObjectNodeBuilder> jsonMap = new LinkedHashMap<Integer, JsonObjectNodeBuilder>();
 
@@ -191,7 +166,7 @@ public class EmploymentPlanningService {
             builder.withElement(entry.getValue());
         }
 
-        return JsonUtil.format(builder.build());
+        return builder;
     }
 
 }

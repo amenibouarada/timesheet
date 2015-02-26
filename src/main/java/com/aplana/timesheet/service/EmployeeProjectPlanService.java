@@ -8,13 +8,12 @@ import argo.saj.InvalidSyntaxException;
 import com.aplana.timesheet.dao.EmployeeProjectPlanDAO;
 import com.aplana.timesheet.dao.entity.*;
 import com.aplana.timesheet.form.EmploymentPlanningForm;
+import com.aplana.timesheet.util.DateTimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author rshamsutdinov
@@ -66,46 +65,41 @@ public class EmployeeProjectPlanService {
     }
 
     @Transactional(readOnly = true)
-    public List<EmployeePercentPlan> getProjectPlan(EmploymentPlanningForm employmentPlanningForm){
-        List<Object[]> projectPlan = employeeProjectPlanDAO.getProjectPlan(employmentPlanningForm);
-        List<EmployeePercentPlan> percentPlanList = new ArrayList<EmployeePercentPlan>(projectPlan.size());
+    public Map<Employee, List<ProjectPercentPlan>> getEmployeesPlan(List<Employee> employeeIds, Integer yearBeg, Integer monthBeg, Integer yearEnd, Integer monthEnd){
+        HashMap<Employee, List<ProjectPercentPlan>> result = new HashMap<Employee, List<ProjectPercentPlan>>(employeeIds.size());
+        for (Employee employee : employeeIds){
 
-        for (Object[] objectPlan : projectPlan){
-            Integer employeeId = (Integer)objectPlan[0];
-            String  employeeName = (String)objectPlan[1];
-            Integer year = (Integer)objectPlan[2];
-            Integer month = (Integer)objectPlan[3];
-            Double  value = (Double)objectPlan[4];
+            List<Object[]> employeePlan =  employeeProjectPlanDAO.getEmployeePlan(employee.getId(), yearBeg, monthBeg, yearEnd, monthEnd);
+            List<ProjectPercentPlan> percentPlanList = new ArrayList<ProjectPercentPlan>(employeePlan.size());
 
-            EmployeePercentPlan employeePercentPlan = new EmployeePercentPlan(employeeId, employeeName, year, month, value);
-            percentPlanList.add(employeePercentPlan);
+            for (Object[] projectPlan : employeePlan){
+                Integer projectId = (Integer)projectPlan[0];
+                String  projectName = (String)projectPlan[1];
+                Integer month = (Integer)projectPlan[2];
+                Integer year = (Integer)projectPlan[3];
+                Double  value = (Double)projectPlan[4];
+                Integer isFact = (Integer) projectPlan[5];
+
+                ProjectPercentPlan projectPercentPlan = new ProjectPercentPlan(projectId, projectName, month, year, value, isFact);
+                percentPlanList.add(projectPercentPlan);
+            }
+
+            result.put(employee, percentPlanList);
         }
-
-        return percentPlanList;
+        return result;
     }
 
-    @Transactional(readOnly = true)
-    public List<ProjectPercentPlan> getEmployeePlan(Integer employeeId, Integer yearBeg, Integer monthBeg, Integer yearEnd, Integer monthEnd){
-        List<Object[]> employeePlan =  employeeProjectPlanDAO.getEmployeePlan(employeeId, yearBeg, monthBeg, yearEnd, monthEnd);
-        List<ProjectPercentPlan> percentPlanList = new ArrayList<ProjectPercentPlan>(employeePlan.size());
-
-        for (Object[] projectPlan : employeePlan){
-            Integer projectId = (Integer)projectPlan[0];
-            String  projectName = (String)projectPlan[1];
-            Integer month = (Integer)projectPlan[2];
-            Integer year = (Integer)projectPlan[3];
-            Double  value = (Double)projectPlan[4];
-            Integer isFact = (Integer) projectPlan[5];
-
-            ProjectPercentPlan projectPercentPlan = new ProjectPercentPlan(projectId, projectName, month, year, value, isFact);
-            percentPlanList.add(projectPercentPlan);
-        }
-
-        return percentPlanList;
+    public List<Employee> getEmployeesWhoWillWorkOnProject(int projectId, int beginMonth, int beginYear, int endMonth, int endYear){
+        return employeeProjectPlanDAO.getEmployeesWhoWillWorkOnProject(projectId, beginMonth, beginYear, endMonth, endYear);
     }
 
-    public List<Employee> getEmployesWhoWillWorkOnProject(Project project, Date beginDate, Date endDate, List<Integer> excludeIds){
-       return employeeProjectPlanDAO.getEmployesWhoWillWorkOnProject(project, beginDate, endDate, excludeIds);
+    public List<Employee> getEmployeesWhoWillWorkOnProject(int projectId, Date beginDate, Date endDate){
+        Integer beginMonth = DateTimeUtil.getMonth(beginDate) + 1; // в БД нумерация с 1
+        Integer beginYear = DateTimeUtil.getYear(beginDate);
+        Integer endMonth = DateTimeUtil.getMonth(endDate) + 1; // в БД нумерация с 1
+        Integer endYear = DateTimeUtil.getYear(endDate);
+
+        return getEmployeesWhoWillWorkOnProject(projectId, beginMonth, beginYear, endMonth, endYear);
     }
 
     public void saveProjectData(String jsonData, Integer employeeId) throws InvalidSyntaxException {

@@ -58,10 +58,6 @@
                     <form:options items="${divisionList}" itemLabel="name" itemValue="id"/>
                 </form:select>
             </td>
-            <td>
-                <input style="width:150px;margin-left: 23px;" type="button" value="Показать планы"
-                       onclick="submitShowButton();"/>
-            </td>
         </tr>
         <tr>
             <td>
@@ -76,10 +72,6 @@
                 <form:select path="yearBeg" onchange="updateProjectList()">
                     <form:options items="${yearList}" itemLabel="year" itemValue="year"/>
                 </form:select>
-            </td>
-            <td>
-                <input style="width:150px;margin-left: 23px;" type="button" value="Сохранить"
-                       onclick="saveProjectPlan();"/>
             </td>
         </tr>
         <tr>
@@ -103,12 +95,18 @@
                 <span class="label">Выбор проекта:</span>
             </td>
             <td colspan="2">
-                <form:select path="projectId" cssClass="bigSelect">
+                <form:select path="projectId" cssClass="bigSelect" onchange="onProjectChanged();">
                     <form:option label="" value="${all}"/>
                     <form:options items="${projectList}" itemLabel="name" itemValue="id"/>
                 </form:select>
             </td>
             <td></td>
+        </tr>
+        <tr>
+            <td>
+                <input style="width:150px;margin-left: 23px;" type="button" value="Сохранить"
+                       onclick="saveProjectPlan();"/>
+            </td>
         </tr>
     </table>
 </form:form>

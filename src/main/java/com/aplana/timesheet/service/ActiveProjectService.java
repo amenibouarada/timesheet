@@ -77,7 +77,7 @@ public class ActiveProjectService {
             ids.add(project.getManager().getId());
         }
         HashMap<Employee, List<ProjectRole>> employees = projectService.getEmployesWhoWasOnProjectByDates(DateUtils.addDays(new Date(), -30), new Date(), project, ids);
-        List<Employee> employeesPlan = employeeProjectPlanService.getEmployesWhoWillWorkOnProject(project, new Date(), DateUtils.addDays(new Date(), 30), ids);
+        List<Employee> employeesPlan = employeeProjectPlanService.getEmployeesWhoWillWorkOnProject(projectId, new Date(), DateUtils.addDays(new Date(), 30));
 
         HashMap<HashMap<String, String>,Integer> employeesStrings = new HashMap<HashMap<String, String>,Integer>();
         // Формируется мапа с именем пользователя, списком его ролей и приоритетом для сортировки
