@@ -37,6 +37,9 @@ public class EmployeeService {
 
     public static final String EMPLOYEE_ID      = "employee_id";
     public static final String EMPLOYEE_NAME    = "employee_name";
+    public static final String DIVISION_ID      = "divisionId";
+    public static final String ID               = "id";
+    public static final String MANAGER_ID       = "managerId";
 
     @Autowired
     public VelocityEngine velocityEngine;
@@ -131,15 +134,17 @@ public class EmployeeService {
      */
     public String getEmployeeListAsJson(List<Employee> employeeList){
         JsonArrayNodeBuilder builder = anArrayBuilder();
-
         for(Employee employee : employeeList){
-            JsonObjectNodeBuilder objectNodeBuilder = anObjectBuilder();
-            objectNodeBuilder.withField(EMPLOYEE_ID, aNumberBuilder(employee.getId().toString()));
-            objectNodeBuilder.withField(EMPLOYEE_NAME, aStringBuilder(employee.getName()));
-            builder.withElement(objectNodeBuilder);
+            builder.withElement(getEmployeeAsJSONBulder(employee));
         }
-
         return JsonUtil.format(builder.build());
+    }
+
+    public JsonObjectNodeBuilder getEmployeeAsJSONBulder(Employee employee){
+        JsonObjectNodeBuilder objectNodeBuilder = anObjectBuilder();
+        objectNodeBuilder.withField(EMPLOYEE_ID, aNumberBuilder(employee.getId().toString()));
+        objectNodeBuilder.withField(EMPLOYEE_NAME, aStringBuilder(employee.getName()));
+        return objectNodeBuilder;
     }
 
     public String getAllEmployeesJSON() {
@@ -380,13 +385,13 @@ public class EmployeeService {
         for (Employee manager : employeeDAO.getMainProjectManagers()) {
             allDivisionsBuilder.withElement(
                     anObjectBuilder()
-                            .withField("managerId", aStringBuilder(manager.getId().toString()))
+                            .withField(MANAGER_ID, aStringBuilder(manager.getId().toString()))
                             .withField("name", aStringBuilder(manager.getName()))
             );
         }
         builder.withElement(
                 anObjectBuilder()
-                        .withField("divisionId", aStringBuilder("-1"))
+                        .withField(DIVISION_ID, aStringBuilder("-1"))
                         .withField("managers", allDivisionsBuilder)
         );
 
@@ -395,13 +400,13 @@ public class EmployeeService {
         for (Employee manager : employeeDAO.getMainProjectManagers(null)) {
             nullDivisionBuilder.withElement(
                     anObjectBuilder()
-                            .withField("managerId", aStringBuilder(manager.getId().toString()))
+                            .withField(MANAGER_ID, aStringBuilder(manager.getId().toString()))
                             .withField("name", aStringBuilder(manager.getName()))
             );
         }
         builder.withElement(
                 anObjectBuilder()
-                        .withField("divisionId", aStringBuilder("0"))
+                        .withField(DIVISION_ID, aStringBuilder("0"))
                         .withField("managers", nullDivisionBuilder)
         );
 
@@ -411,13 +416,13 @@ public class EmployeeService {
             for (Employee manager : employeeDAO.getMainProjectManagers(division)) {
                 divisionBuilder.withElement(
                         anObjectBuilder()
-                                .withField("managerId", aStringBuilder(manager.getId().toString()))
+                                .withField(MANAGER_ID, aStringBuilder(manager.getId().toString()))
                                 .withField("name", aStringBuilder(manager.getName()))
                 );
             }
             builder.withElement(
                     anObjectBuilder()
-                            .withField("divisionId", aStringBuilder(division.getId().toString()))
+                            .withField(DIVISION_ID, aStringBuilder(division.getId().toString()))
                             .withField("managers", divisionBuilder)
             );
         }
@@ -450,7 +455,7 @@ public class EmployeeService {
         // Заполнение списка сотрудников для варианта "Все подразделения"
         builder.withElement(
                 anObjectBuilder()
-                        .withField("divisionId", aStringBuilder("-1"))
+                        .withField(DIVISION_ID, aStringBuilder("-1"))
                         .withField("employees", getEmployeesBuilder(employeeDAO.getAllEmployees()))
         );
 
@@ -461,7 +466,7 @@ public class EmployeeService {
         for (Division division : divisionsEmployees.keySet()) {
             builder.withElement(
                     anObjectBuilder()
-                            .withField("divisionId", aStringBuilder(division.getId().toString()))
+                            .withField(DIVISION_ID, aStringBuilder(division.getId().toString()))
                             .withField("active", aStringBuilder(String.valueOf(division.isActive())))
                             .withField("employees", getEmployeesBuilder(divisionsEmployees.get(division)))
             );
@@ -553,13 +558,13 @@ public class EmployeeService {
             final JsonArrayNodeBuilder regionBuilder = anArrayBuilder();
             for (Integer region : employeeDAO.getRegionsWhereManager(manager.getId())) {
                 regionBuilder.withElement(
-                        anObjectBuilder().withField("id", aStringBuilder(region.toString())));
+                        anObjectBuilder().withField(ID, aStringBuilder(region.toString())));                // ToDo заменить на regionId
             }
             builder.withElement(
                     anObjectBuilder().
-                            withField("id", JsonUtil.aStringBuilder(manager.getId())).
+                            withField(ID, JsonUtil.aStringBuilder(manager.getId())).                        // ToDo заменить на managerId
                             withField("name", aStringBuilder(manager.getName())).
-                            withField("division", aStringBuilder(manager.getDivision().getId().toString())).
+                            withField("division", aStringBuilder(manager.getDivision().getId().toString())).  // ToDo заменить на divisionId
                             withField("regionWhereMan", regionBuilder)
             );
         }
