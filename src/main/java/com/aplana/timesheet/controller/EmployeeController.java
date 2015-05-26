@@ -1,7 +1,6 @@
 package com.aplana.timesheet.controller;
 
 import com.aplana.timesheet.service.EmployeeService;
-import com.aplana.timesheet.service.helper.EmployeeHelper;
 import com.aplana.timesheet.util.JsonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -22,9 +21,6 @@ public class EmployeeController {
     @Autowired
     private EmployeeService employeeService;
 
-    @Autowired
-    private EmployeeHelper employeeHelper;
-
     @RequestMapping(value = "/employee/isDivisionLeader", headers = "Accept=application/json")
     @ResponseBody
     public String isDivisionLeader(@RequestParam("employeeId") Integer employeeId) {
@@ -42,6 +38,6 @@ public class EmployeeController {
     public String getEmployeeListWithLastWorkdayForDivisionJson(@PathVariable("divisionId") Integer divisionId,
                                                                 @PathVariable("filterFired") Boolean filterFired,
                                                                 @PathVariable("addDetails") Boolean addDetails) {
-        return employeeHelper.getEmployeeListWithLastWorkdayForDivisionJson(divisionId,filterFired, addDetails);
+        return employeeService.getEmployeeListWithLastWorkdayForDivisionJson(divisionId,filterFired, addDetails);
     }
 }

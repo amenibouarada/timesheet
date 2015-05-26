@@ -13,7 +13,6 @@ import com.aplana.timesheet.enums.RegionsEnum;
 import com.aplana.timesheet.exception.TSRuntimeException;
 import com.aplana.timesheet.exception.controller.BusinessTripsAndIllnessControllerException;
 import com.aplana.timesheet.form.BusinessTripsAndIllnessForm;
-import com.aplana.timesheet.service.helper.EmployeeHelper;
 import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.system.security.SecurityService;
 import com.aplana.timesheet.util.DateNumbers;
@@ -63,9 +62,6 @@ public class BusinessTripsAndIllnessService {
 
     @Autowired
     EmployeeService employeeService;
-
-    @Autowired
-    EmployeeHelper employeeHelper;
 
     @Autowired
     DivisionService divisionService;

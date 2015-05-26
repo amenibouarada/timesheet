@@ -29,7 +29,7 @@ import java.text.ParseException;
 import java.util.*;
 
 import static argo.jdom.JsonNodeBuilders.anObjectBuilder;
-import static com.aplana.timesheet.util.JsonUtil.aStringBuilder;
+import static com.aplana.timesheet.util.JsonUtil.aStringBuilderBoolean;
 
 @Service
 public class JasperReportService {
@@ -295,13 +295,13 @@ public class JasperReportService {
 
     public String jsonResponse(Boolean result, String errorMessage) {
         return JsonUtil.format(anObjectBuilder().
-                withField("result", aStringBuilder(result)).
+                withField("result", aStringBuilderBoolean(result)).
                 withField("errorMessage", JsonNodeBuilders.aStringBuilder(errorMessage)));
     }
 
     public String jsonResponse(Boolean result) {
         return JsonUtil.format(anObjectBuilder().
-                withField("result", aStringBuilder(result)).
+                withField("result", aStringBuilderBoolean(result)).
                 withField("errorMessage", JsonNodeBuilders.aStringBuilder("")));
     }
 

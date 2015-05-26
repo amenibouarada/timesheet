@@ -8,7 +8,6 @@ import com.aplana.timesheet.form.TimeSheetForm;
 import com.aplana.timesheet.form.TimeSheetTableRowForm;
 import com.aplana.timesheet.form.validator.TimeSheetFormValidator;
 import com.aplana.timesheet.service.*;
-import com.aplana.timesheet.service.helper.EmployeeHelper;
 import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.system.security.SecurityService;
 import com.aplana.timesheet.system.security.entity.TimeSheetUser;
@@ -55,8 +54,6 @@ public class TimeSheetControllerTest extends AbstractTest {
     TSPropertyProvider propertyProvider;
     @Mock
     DivisionService divisionService;
-    @Mock
-    EmployeeHelper employeeHelper;
     @Mock
     AvailableActivityCategoryService availableActivityCategoryService;
     @Mock

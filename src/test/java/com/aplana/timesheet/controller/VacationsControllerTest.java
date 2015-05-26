@@ -9,7 +9,6 @@ import com.aplana.timesheet.form.validator.VacationsFormValidator;
 import com.aplana.timesheet.service.*;
 import com.aplana.timesheet.system.security.SecurityService;
 import com.aplana.timesheet.util.DateTimeUtil;
-import com.aplana.timesheet.service.helper.EmployeeHelper;
 import com.aplana.timesheet.system.security.entity.TimeSheetUser;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.time.DateUtils;
@@ -51,8 +50,6 @@ public class VacationsControllerTest extends AbstractTest {
     DivisionService divisionService;
     @Mock
     ProjectService projectService;
-    @Mock
-    EmployeeHelper employeeHelper;
     @Mock
     RegionService regionService;
     @Mock
@@ -122,9 +119,9 @@ public class VacationsControllerTest extends AbstractTest {
                                                                         thenReturn(employeeList);
         when(employeeService.find(employee.getId())).                   thenReturn(employee);
         when(employeeService.isShowAll((HttpServletRequest) any())).    thenReturn(false);
-        when(employeeHelper.getEmployeeListWithDivisionAndManagerAndRegionJson(divisions, employeeService.isShowAll(request))).
+        when(employeeService.getEmployeeListWithDivisionAndManagerAndRegionJson(divisions, employeeService.isShowAll(request))).
                                                                         thenReturn(employeeListJSON);
-        when(employeeHelper.makeEmployeeListInJSON(employeeList)).      thenReturn(employeeListJSON);
+        when(employeeService.makeEmployeeListInJSON(employeeList)).      thenReturn(employeeListJSON);
         when(regionService.getRegions()).                               thenReturn(regionList);
         when(calendarService.getHolidaysForRegion((Date) any(), (Date) any(), (Region) any())).
                                                                         thenReturn(holidayList);

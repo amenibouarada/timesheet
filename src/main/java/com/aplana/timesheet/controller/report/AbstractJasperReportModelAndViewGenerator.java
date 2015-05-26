@@ -5,7 +5,6 @@ import com.aplana.timesheet.dao.entity.Division;
 import com.aplana.timesheet.exception.JReportBuildError;
 import com.aplana.timesheet.reports.TSJasperReport;
 import com.aplana.timesheet.service.*;
-import com.aplana.timesheet.service.helper.EmployeeHelper;
 import com.aplana.timesheet.system.security.SecurityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.servlet.ModelAndView;
@@ -27,9 +26,6 @@ public abstract class AbstractJasperReportModelAndViewGenerator implements Jaspe
 
     @Autowired
     private ProjectService projectService;
-
-    @Autowired
-    private EmployeeHelper employeeHelper;
 
     @Autowired
     protected HttpServletRequest request;
@@ -80,7 +76,7 @@ public abstract class AbstractJasperReportModelAndViewGenerator implements Jaspe
         if ( fillProjectListWithOwnerDivisionJson )
             mav.addObject("projectListWithOwnerDivisionJson", projectService.getProjectListWithOwnerDivisionJson());
         if( fillEmployeeListJson )
-            mav.addObject("employeeListJson", employeeHelper.getEmployeeListWithDivisionAndManagerAndRegionJson(divisions, true));
+            mav.addObject("employeeListJson", employeeService.getEmployeeListWithDivisionAndManagerAndRegionJson(divisions, true));
     }
 
     protected void fillWithAllProjects( final ModelAndView mav ) {

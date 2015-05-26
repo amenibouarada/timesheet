@@ -12,7 +12,6 @@ import com.aplana.timesheet.form.validator.CreateVacationFormValidator;
 import com.aplana.timesheet.service.*;
 import com.aplana.timesheet.system.security.SecurityService;
 import com.aplana.timesheet.util.DateTimeUtil;
-import com.aplana.timesheet.service.helper.EmployeeHelper;
 import org.apache.commons.lang.BooleanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,8 +53,6 @@ public class CreateVacationController {
     private VacationService vacationService;
     @Autowired
     private DivisionService divisionService;
-    @Autowired
-    protected EmployeeHelper employeeHelper;
     @Autowired
     protected SendMailService sendMailService;
     @Autowired

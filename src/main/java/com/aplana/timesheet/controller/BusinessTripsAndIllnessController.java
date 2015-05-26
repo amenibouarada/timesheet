@@ -5,7 +5,6 @@ import com.aplana.timesheet.enums.QuickReportTypesEnum;
 import com.aplana.timesheet.exception.controller.BusinessTripsAndIllnessControllerException;
 import com.aplana.timesheet.form.BusinessTripsAndIllnessForm;
 import com.aplana.timesheet.service.*;
-import com.aplana.timesheet.service.helper.EmployeeHelper;
 import com.aplana.timesheet.system.security.SecurityService;
 import com.aplana.timesheet.util.EnumsUtils;
 import org.apache.commons.lang.time.DateUtils;
@@ -37,9 +36,6 @@ public class BusinessTripsAndIllnessController extends AbstractController {
 
     @Autowired
     EmployeeService employeeService;
-
-    @Autowired
-    EmployeeHelper employeeHelper;
 
     @Autowired
     DivisionService divisionService;

@@ -67,7 +67,7 @@ public class ProjectTaskService {
 
             builder.withElement(
                     anObjectBuilder().
-                            withField("projId", JsonUtil.aStringBuilder(projectId)).
+                            withField("projId", JsonUtil.aStringBuilderNumber(projectId)).
                             withField("projTasks", tasksBuilder)
             );
         }

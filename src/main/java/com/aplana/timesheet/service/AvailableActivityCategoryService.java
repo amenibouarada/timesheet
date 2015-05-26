@@ -4,7 +4,6 @@ import argo.jdom.JsonArrayNodeBuilder;
 import com.aplana.timesheet.dao.AvailableActivityCategoryDAO;
 import com.aplana.timesheet.dao.entity.AvailableActivityCategory;
 import com.aplana.timesheet.dao.entity.DictionaryItem;
-import com.aplana.timesheet.dao.entity.Project;
 import com.aplana.timesheet.dao.entity.ProjectRole;
 import com.aplana.timesheet.util.JsonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,13 +53,13 @@ public class AvailableActivityCategoryService {
                 final JsonArrayNodeBuilder avActCatsBuilder = anArrayBuilder();
 
                 for (AvailableActivityCategory avActCat : avActCats) {
-                    avActCatsBuilder.withElement(JsonUtil.aStringBuilder(avActCat.getActCat().getId()));
+                    avActCatsBuilder.withElement(JsonUtil.aStringBuilderNumber(avActCat.getActCat().getId()));
                 }
 
                 builder.withElement(
                         anObjectBuilder().
-                                withField("actType", JsonUtil.aStringBuilder(actType.getId())).
-                                withField("projRole", JsonUtil.aStringBuilder(projectRole.getId())).
+                                withField("actType", JsonUtil.aStringBuilderNumber(actType.getId())).
+                                withField("projRole", JsonUtil.aStringBuilderNumber(projectRole.getId())).
                                 withField("avActCats", avActCatsBuilder)
                 );
             }

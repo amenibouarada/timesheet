@@ -56,7 +56,7 @@ public class ProjectRoleService {
         for (ProjectRole item : projectRoleList) {
             builder.withElement(
                     anObjectBuilder().
-                            withField("id", JsonUtil.aStringBuilder(item.getId())).
+                            withField("id", JsonUtil.aStringBuilderNumber(item.getId())).
                             withField("value", aStringBuilder(item.getName()))
             );
         }

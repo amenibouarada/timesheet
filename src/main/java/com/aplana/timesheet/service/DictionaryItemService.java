@@ -111,7 +111,7 @@ public class DictionaryItemService {
         for (DictionaryItem item : items) {
             builder.withElement(
                     anObjectBuilder().
-                            withField("id", JsonUtil.aStringBuilder(item.getId())).
+                            withField("id", JsonUtil.aStringBuilderNumber(item.getId())).
                             withField("value", aStringBuilder(item.getValue()))
             );
         }

@@ -7,7 +7,6 @@ import com.aplana.timesheet.service.DivisionService;
 import com.aplana.timesheet.service.EmployeeService;
 import com.aplana.timesheet.service.ProjectService;
 import com.aplana.timesheet.system.security.SecurityService;
-import com.aplana.timesheet.service.helper.EmployeeHelper;
 import com.aplana.timesheet.util.DateTimeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,9 +35,6 @@ public abstract class AbstractControllerForEmployee extends AbstractController{
     protected DivisionService divisionService;
 
     @Autowired
-    protected EmployeeHelper employeeHelper;
-
-    @Autowired
     protected SecurityService securityService;
 
     @Autowired
@@ -58,7 +54,7 @@ public abstract class AbstractControllerForEmployee extends AbstractController{
         modelAndView.addObject("divisionId", divisionId);
         modelAndView.addObject("employeeId", employeeId);
         modelAndView.addObject("divisionList", divisionList);
-        modelAndView.addObject("managerListJson", employeeHelper.getManagerListJson());
+        modelAndView.addObject("managerListJson", employeeService.getManagerListJsonNew());
         modelAndView.addObject("fullProjectListJsonWithDivisionId", projectService.getProjectListByDivisionsJson(divisionList, true));
 
         return modelAndView;

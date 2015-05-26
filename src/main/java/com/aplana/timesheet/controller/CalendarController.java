@@ -3,8 +3,8 @@ package com.aplana.timesheet.controller;
 import com.aplana.timesheet.service.CalendarService;
 import com.aplana.timesheet.service.EmployeeService;
 import com.aplana.timesheet.service.VacationService;
+import com.aplana.timesheet.service.ViewReportsService;
 import com.aplana.timesheet.util.JsonUtil;
-import com.aplana.timesheet.service.helper.ViewReportHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +35,7 @@ public class CalendarController extends AbstractController {
     public static final String ISVACATION_EMPLOYEE_ID = "employeeId";
 
     @Autowired
-    private ViewReportHelper viewReportHelper;
+    private ViewReportsService viewReportService;
 
     @Autowired
     private CalendarService calendarService;
@@ -55,7 +55,7 @@ public class CalendarController extends AbstractController {
             @RequestParam("queryMonth") Integer queryMonth,
             @RequestParam("employeeId") Integer employeeId
     ) {
-        return viewReportHelper.getDateReportsListJson(queryYear, queryMonth, employeeId);
+        return viewReportService.getDateReportsListJson(queryYear, queryMonth, employeeId);
     }
 
     @RequestMapping(value = CALENDAR_ISHOLIDAY_URL, headers = "Accept=application/json")
@@ -110,7 +110,7 @@ public class CalendarController extends AbstractController {
             @RequestParam("queryMonth") Integer queryMonth,
             @RequestParam("employeeId") Integer employeeId
     ) {
-        return viewReportHelper.getDateVacationWithPlannedListJson(queryYear, queryMonth, employeeId); // отмечаем в календаре обычные и плановые отпуска
+        return viewReportService.getDateVacationWithPlannedListJson(queryYear, queryMonth, employeeId); // отмечаем в календаре обычные и плановые отпуска
     }
 
     @RequestMapping(value = "/calendar/vacationDatesPlanned", headers = "Accept=application/json")
@@ -120,6 +120,6 @@ public class CalendarController extends AbstractController {
             @RequestParam("queryMonth") Integer queryMonth,
             @RequestParam("employeeId") Integer employeeId
     ) {
-        return viewReportHelper.getDateVacationWithPlannedListJson(queryYear, queryMonth, employeeId);
+        return viewReportService.getDateVacationWithPlannedListJson(queryYear, queryMonth, employeeId);
     }
 }

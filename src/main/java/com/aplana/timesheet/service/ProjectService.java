@@ -124,7 +124,7 @@ public class ProjectService {
             final JsonObjectNodeBuilder projectBuilder = getProjectBuilder(project);
             /* определим принадлежность проекта к центру */
             Integer division_id = (project.getDivision() != null) ? project.getDivision().getId() : 0;
-            projectBuilder.withField("ownerDivisionId", JsonUtil.aStringBuilder(division_id));
+            projectBuilder.withField("ownerDivisionId", JsonUtil.aStringBuilderNumber(division_id));
             builder.withElement(projectBuilder);
         }
 
@@ -198,7 +198,7 @@ public class ProjectService {
             if (projects.isEmpty()) {
                 projectsBuilder.withElement(
                         anObjectBuilder().
-                                withField(ID, JsonUtil.aStringBuilder(0)).
+                                withField(ID, JsonUtil.aStringBuilderNumber(0)).
                                 withField(VALUE, aStringBuilder(StringUtils.EMPTY))
                 );
             } else {
@@ -213,7 +213,7 @@ public class ProjectService {
 
             builder.withElement(
                     anObjectBuilder().
-                            withField("divId", JsonUtil.aStringBuilder(division.getId())).
+                            withField("divId", JsonUtil.aStringBuilderNumber(division.getId())).
                             withField("divProjs", projectsBuilder)
             );
         }
@@ -240,7 +240,7 @@ public class ProjectService {
         if (projects.isEmpty()) {
             builder.withElement(
                     anObjectBuilder().
-                            withField(ID, JsonUtil.aStringBuilder(0)).
+                            withField(ID, JsonUtil.aStringBuilderNumber(0)).
                             withField(VALUE, aStringBuilder(StringUtils.EMPTY))
             );
         } else {
@@ -256,10 +256,10 @@ public class ProjectService {
 
     private JsonObjectNodeBuilder getProjectBuilder(Project project) {
         return anObjectBuilder().
-                withField(ID, JsonUtil.aStringBuilder(project.getId())).
+                withField(ID, JsonUtil.aStringBuilderNumber(project.getId())).
                 withField(VALUE, aStringBuilder(project.getName())).
-                withField("state", JsonUtil.aStringBuilder(project.getState().getId())).
-                withField("active", JsonUtil.aStringBuilder(Boolean.valueOf(project.isActive())));
+                withField("state", JsonUtil.aStringBuilderNumber(project.getState().getId())).
+                withField("active", JsonUtil.aStringBuilderBoolean(Boolean.valueOf(project.isActive())));
     }
 
     public List<Project> getEmployeeProjectPlanByDates(Employee employee, HashMap<Integer, Set<Integer>> dates) {
