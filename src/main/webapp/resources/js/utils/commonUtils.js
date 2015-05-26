@@ -161,14 +161,6 @@ function setCookie(name, value, exp, pth, dmn, sec) {
         + ((sec) ? '; secure' : '');
 }
 
-function openViewReportsWindow() {
-    var employeeId = dojo.byId("employeeId").value;
-    if (employeeId != 0) {
-        var date = new Date();
-        window.open('viewreports/' + employeeId + '/' + date.getFullYear() + '/' + (date.getMonth() + 1), 'reports_window' + employeeId);
-    }
-}
-
 function getRootEventListener() {
     return window.addEventListener || window.attachEvent ? window : document.addEventListener ? document : null;
 }

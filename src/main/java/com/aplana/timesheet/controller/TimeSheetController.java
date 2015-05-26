@@ -126,7 +126,7 @@ public class TimeSheetController {
     }
 
     /**
-     * Пользователь нажал на кнопку "Отправить новый отчёт" на странице selected.jsp
+     * Пользователь нажал на кнопку "Отправить новый отчёт"
      *
      * @return редирект timesheet
      */
@@ -136,7 +136,8 @@ public class TimeSheetController {
     }
 
     @RequestMapping(value = "/sendDraft", method = RequestMethod.POST)
-    public ModelAndView sendDraft(@ModelAttribute("timeSheetForm") TimeSheetForm tsForm, BindingResult result) {
+    public ModelAndView sendDraft(@ModelAttribute("timeSheetForm") TimeSheetForm tsForm, BindingResult result,
+                                  Locale locale) {
 
         tsFormValidator.validateDraft(tsForm, result);
         if (result.hasErrors()) {
@@ -145,7 +146,9 @@ public class TimeSheetController {
 
         timeSheetService.storeTimeSheet(tsForm, TypesOfTimeSheetEnum.DRAFT);
 
-        ModelAndView mav = new ModelAndView("draftSaved");
+        // черновик сохранен - отображаем соответсвующую форму
+        ModelAndView mav = new ModelAndView("tsSent");
+        mav.addObject("message", messageSource.getMessage("timesheet.ts.draft.sent", null, locale));
         mav.addObject("timeSheetForm", tsForm);
 
         return mav;
@@ -168,7 +171,8 @@ public class TimeSheetController {
      * Получение формы с заполненным отчетом и сохранение
     */
     @RequestMapping(value = "/timesheet", method = RequestMethod.POST)
-    public ModelAndView sendTimeSheet(@ModelAttribute("timeSheetForm") TimeSheetForm tsForm, BindingResult result) {
+    public ModelAndView sendTimeSheet(@ModelAttribute("timeSheetForm") TimeSheetForm tsForm, BindingResult result,
+                                      Locale locale) {
         logger.info("Processing form validation for employee {} ({}).", tsForm.getEmployeeId(), tsForm.getCalDate());
 
         // Переделывает html-символы(&#40 и т.п.) в нормальные
@@ -189,7 +193,9 @@ public class TimeSheetController {
         overtimeCauseService.store(timeSheet, tsForm);
         sendMailService.performMailing(tsForm);
 
-        ModelAndView mav = new ModelAndView("selected");
+        // всё нормально - отображаем соответсвующую форму
+        ModelAndView mav = new ModelAndView("tsSent");
+        mav.addObject("message", messageSource.getMessage("timesheet.ts.report.sent", null, locale));
         mav.addObject("timeSheetForm", tsForm);
         logger.info("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
 
