@@ -478,7 +478,7 @@ public class TimeSheetControllerTest extends AbstractTest {
         /* определяем поведение сервисов */
         when(timeSheetService.storeTimeSheet(timeSheetForm, TypesOfTimeSheetEnum.REPORT)).thenReturn(timeSheet);
         /* тест */
-        ModelAndView result = timeSheetController.sendTimeSheet(timeSheetForm, errors);
+        ModelAndView result = timeSheetController.sendTimeSheet(timeSheetForm, errors, new Locale("ru"));
         /* проверка вызовов */
         verify(tsFormValidator).validate(timeSheetForm, errors);
         verify(overtimeCauseService, times(1)).store(timeSheet, timeSheetForm);
@@ -532,7 +532,7 @@ public class TimeSheetControllerTest extends AbstractTest {
         when(timeSheetService.getEffortList()).thenReturn(effortList);
 
         /* тест */
-        ModelAndView result = timeSheetController.sendTimeSheet(timeSheetForm, errors);
+        ModelAndView result = timeSheetController.sendTimeSheet(timeSheetForm, errors, new Locale("ru"));
 
         /* проверка вызовов */
         verify(tsFormValidator).validate(timeSheetForm, errors);
