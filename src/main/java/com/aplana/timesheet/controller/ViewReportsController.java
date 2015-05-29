@@ -129,6 +129,7 @@ public class ViewReportsController extends AbstractControllerForEmployee {
                                 employee.getRegion(),
                                 year,
                                 month,
+                                employee.getStartDate(),
                                 toDate
                         ) * TimeSheetConstants.WORK_DAY_DURATION * employee.getJobRate())
                 ).setScale(2, BigDecimal.ROUND_HALF_UP)

@@ -265,8 +265,8 @@ public class CalendarService {
     }
 
 
-    public int getCountWorkDayPriorDate(Region region, Integer year, Integer month, @NotNull Date toDate) {
-        return calendarDAO.getCountWorkDayPriorDate(region, year, month, toDate);
+    public int getCountWorkDayPriorDate(Region region, Integer year, Integer month, Date startDate, @NotNull Date toDate) {
+        return calendarDAO.getCountWorkDayPriorDate(region, year, month, startDate, toDate);
     }
 
     public Integer getCountWorkDaysForPeriodForRegion(Date begin, Date end, Region region) {
