@@ -4,8 +4,12 @@ import com.aplana.timesheet.dao.entity.Calendar;
 import com.aplana.timesheet.dao.entity.Division;
 import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.dao.entity.TimeSheet;
+import com.aplana.timesheet.enums.ReportSendApprovalType;
 import com.aplana.timesheet.enums.TypesOfActivityEnum;
+import com.aplana.timesheet.enums.TypesOfTimeSheetEnum;
+import com.aplana.timesheet.enums.VacationStatusEnum;
 import com.aplana.timesheet.form.entity.DayTimeSheet;
+import com.aplana.timesheet.service.VacationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +33,7 @@ public class TimeSheetDAO {
     @Autowired
     IllnessDAO illnessDAO;
     @Autowired
-    VacationDAO vacationDAO;
+    VacationService vacationService;
     @Autowired
     BusinessTripDAO businessTripDAO;
     private static final Logger logger = LoggerFactory.getLogger(TimeSheetDAO.class);
@@ -48,15 +52,47 @@ public class TimeSheetDAO {
         logger.debug("Flushed TimeSheet object id = {}", tsMerged.getId());
     }
 
+    /**
+     * Метод возвращает {@link TimeSheet} по заданным дате отчета, идентификатору сотрудника
+     * и списку {@link TypesOfTimeSheetEnum} типов отчета, которые можно использовать для поиска.
+     * Если список типов отчета пусто, тогда поиск происходит по всем типам.
+     * Так как на уровне БД установлен CONSTRAINT на уникальные записи по дате отчета, идентификатору
+     * сотрудника кол-во записей не будет превышать 1.
+     *
+     * @param date       - дата отчета
+     * @param employeeId - идентификатор сотрудника, оставившего отчет
+     * @param types      - список типов отчета для поиска
+     * @return - найденный отчет
+     */
     @SuppressWarnings("unchecked")
-    public TimeSheet findForDateAndEmployee(Calendar date, Integer employeeId) {
+    public TimeSheet findForDateAndEmployeeByTypes(Calendar date, Integer employeeId, List<TypesOfTimeSheetEnum> types) {
+        StringBuilder stringBuilder = new StringBuilder();
+        if (types != null) {
+            stringBuilder.append(" AND (ts.type=").append(types.get(0).getId());
+            for (int i = 1; i < types.size(); i++) {
+                stringBuilder.append(" OR ts.type=").append(types.get(i).getId());
+            }
+            stringBuilder.append(")");
+        }
         Query query = entityManager.createQuery(
-                "select ts from TimeSheet as ts where ts.calDate = :calDate and ts.employee.id = :employeeId"
+                "select ts from TimeSheet as ts where ts.calDate = :calDate and ts.employee.id = :employeeId " + stringBuilder.toString()
         ).setParameter("calDate", date).setParameter("employeeId", employeeId);
-
         List<TimeSheet> result = query.getResultList();
 
         return result.isEmpty() ? null : result.get(0);
+    }
+
+    /**
+     * Для совместимости.
+     * See {@link TimeSheetDAO#findForDateAndEmployeeByTypes(com.aplana.timesheet.dao.entity.Calendar, Integer, java.util.List)}
+     *
+     * @param date       - дата отчета
+     * @param employeeId - идентификатор сотрудника, оставившего отчет
+     * @return - найденный отчет
+     */
+    @SuppressWarnings("unchecked")
+    public TimeSheet findForDateAndEmployee(Calendar date, Integer employeeId) {
+        return findForDateAndEmployeeByTypes(date, employeeId, Arrays.asList(TypesOfTimeSheetEnum.REPORT));
     }
 
     /**
@@ -72,37 +108,52 @@ public class TimeSheetDAO {
 
         // Я не знаю как написать это на HQL, но на SQL пишется легко и непринужденно.
         Query query = entityManager.createNativeQuery(
-                "select " +
-                        "c.caldate caldate, " +
-                        "h.id holiday_id, " +
-                        "ts.id timesheet_id, " +
-                        "SUM(tsd.duration), " +
-                        "tsd.act_type "
-                        + "from calendar c "
-                        + "left outer join time_sheet as ts " +
-                        "on ts.emp_id = :employeeId and ts.caldate=c.caldate "
-                        + "left outer join holiday h " +
-                        "on c.caldate=h.caldate and (h.region is null or h.region=:region) "
-                        + "left outer join time_sheet_detail as tsd " +
-                        "on ts.id=tsd.time_sheet_id "
-                        + "where c.year=:yearPar " +
-                        "and c.month=:monthPar "
-                        + "group by " +
-                        "c.caldate, " +
-                        "h.id, " +
-                        "ts.id, " +
-                        "tsd.act_type "
-                        + "order by c.calDate asc"
+            "select " +
+                "c.caldate caldate, " +
+                "h.id holiday_id, " +
+                "ts.id timesheet_id, " +
+                "SUM(tsd.duration), " +
+                "tsd.act_type, " +
+                "ts.ts_type_id, " +
+                "dta.delete_approval_date, " +
+                "dta.delete_approval_comment, " +
+                "dta.send_approval_type " +
+            "from calendar c " +
+                "left outer join time_sheet as ts " +
+                    "on ts.emp_id = :employeeId and ts.caldate=c.caldate " +
+                "left outer join holiday h " +
+                    "on c.caldate=h.caldate and (h.region is null or h.region=:region) " +
+                "left outer join time_sheet_detail as tsd " +
+                    "on ts.id=tsd.time_sheet_id " +
+                "left outer join delete_timesheet_approval as dta " +
+                    "on ts.id=dta.timesheet_id " +
+            "where " +
+                "c.year=:yearPar and c.month=:monthPar " +
+            "group by " +
+                "c.caldate, " +
+                "h.id, " +
+                "ts.id, " +
+                "tsd.act_type, " +
+                "dta.delete_approval_date, " +
+                "dta.delete_approval_comment, " +
+                "dta.send_approval_type " +
+            "order by " +
+                "c.calDate asc, timesheet_id asc"
         ).setParameter("yearPar", year).setParameter("monthPar", month)
                 .setParameter("region", region).setParameter("employeeId", employee.getId());
 
         List result = query.getResultList();
 
+        return getDayTimeSheetsForEmployee(employee, result);
+    }
+
+    private List<DayTimeSheet> getDayTimeSheetsForEmployee(Employee employee, List result) {
         List<DayTimeSheet> dayTSList = new ArrayList<DayTimeSheet>();
 
         HashMap<Long, DayTimeSheet> map = new HashMap<Long, DayTimeSheet>();
         for (Object object : result) {
             Object[] item = (Object[]) object;
+
             //дата в месяце
             Timestamp calDate = new Timestamp(((Date) item[0]).getTime());
             //если айдишник из таблицы календарь есть то это выходной
@@ -113,22 +164,44 @@ public class TimeSheetDAO {
             BigDecimal duration = item[3] != null ? ((BigDecimal) item[3]) : null;
             //по этому полю определяем отпуск\отгул и т.п.
             Integer actType = item[4] != null ? ((Integer) item[4]) : null;
+            //по этому полю определяем отчет или черновик
+            Integer tsType = item[5] != null ? ((Integer) item[5]) : null;
 
+            Date deleteSendApprovalDate = item[6] != null ? ((Date) item[6]) : null;
+            String deleteSendApprovalComment = item[7] != null ? ((String) item[7]) : null;
+
+            Integer deleteSendApprovalType = item[8] != null ? ((Integer) item[8]) : null;
+            String deleteSendApprovalTypeName = deleteSendApprovalType != null ? ReportSendApprovalType.findById(deleteSendApprovalType).getName() : "" ;
             // Если нерабочая активность - сразу проставим в duration 0
-            if (duration != null && !TypesOfActivityEnum.isEfficientActivity(actType)) {
+            if (duration != null && actType != null && !TypesOfActivityEnum.isEfficientActivity(actType)) {
                 duration = BigDecimal.ZERO;
             }
 
+            //если Map еще не содержит запись на эту дату
             if (!map.containsKey(calDate.getTime())) {
-                DayTimeSheet ds = new DayTimeSheet(calDate, holiday, tsId, actType, duration, employee);
+                DayTimeSheet ds = new DayTimeSheet(
+                        calDate,
+                        holiday,
+                        tsId,
+                        actType,
+                        duration,
+                        employee,
+                        tsType != null && TypesOfTimeSheetEnum.DRAFT.getId() == tsType,
+                        deleteSendApprovalDate,
+                        deleteSendApprovalComment,
+                        deleteSendApprovalTypeName
+                );
                 ds.setTimeSheetDAO(this);
                 ds.setIllnessDAO(illnessDAO);
-                ds.setVacationDAO(vacationDAO);
+                ds.setVacationService(vacationService);
                 ds.setBusinessTripDAO(businessTripDAO);
                 map.put(calDate.getTime(), ds);
             } else {
+                //если есть еще запись со списанным временем
                 DayTimeSheet dts = map.get(calDate.getTime());
-                dts.setDuration(dts.getDuration().add(duration));
+                //todo удалить условие, условие не должно срабатывать для черновиков
+                if (duration != null)
+                    dts.setDuration(dts.getDuration().add(duration));
             }
         }
         for (DayTimeSheet val : map.values()) {
@@ -152,7 +225,7 @@ public class TimeSheetDAO {
                 "select ts "
                         + "from TimeSheet as ts "
                         + "where ts.calDate <:calDate "
-                        + "and ts.employee.id = :employeeId "
+                        + "and ts.employee.id = :employeeId AND (ts.type = "+TypesOfTimeSheetEnum.REPORT.getId()+") "
                         + "order by ts.calDate desc"
         ).setParameter("calDate", date).setParameter("employeeId", employeeId);
 
@@ -175,6 +248,7 @@ public class TimeSheetDAO {
                 + "from TimeSheet as ts "
                 + "where ts.calDate = :calDate "
                 + "and ts.employee.id = :employeeId "
+                + "AND (ts.type = "+TypesOfTimeSheetEnum.REPORT.getId()+") "
                 + "order by ts.calDate asc"
         ).setParameter("calDate", nextDate).setParameter("employeeId", employeeId);
 
@@ -190,7 +264,10 @@ public class TimeSheetDAO {
     // возвращает следующий рабочий день, после даты последнего списания занятости
     public Calendar getDateNextAfterLastDayWithTS(Employee employee) {
         Query query = entityManager.createQuery(
-                "SELECT MAX(ts.calDate) FROM TimeSheet ts WHERE ts.employee = :employee"
+                "SELECT MAX(ts.calDate) " +
+                        "FROM TimeSheet ts " +
+                        "WHERE ts.employee = :employee " +
+                        "and (ts.type = "+TypesOfTimeSheetEnum.REPORT.getId()+")"
         ).setParameter("employee", employee);
 
         if (!query.getResultList().isEmpty() && query.getSingleResult() != null) {
@@ -208,7 +285,8 @@ public class TimeSheetDAO {
           При желании можно переписать на Criteria
          */
 
-        final Query query = entityManager.createNativeQuery("SELECT tscal.empid, MIN(calnext.calDate)" +
+        final Query query = entityManager.createNativeQuery(
+                " SELECT tscal.empid, MIN(calnext.calDate)" +
                 " FROM (SELECT emp.id empid, MAX(cal.calDate) maxcaldate" +
                 "       FROM calendar cal" +
                 "       INNER JOIN time_sheet ts on cal.caldate=ts.caldate" +
@@ -223,17 +301,19 @@ public class TimeSheetDAO {
                 " AND NOT EXISTS (" +
                 "       SELECT i.employee_id,cal.caldate from calendar cal " +
                 "       RIGHT JOIN illness i on cal.caldate between i.begin_date and i.end_date where " +
-                "       calnext.caldate = cal.caldate and emp1.id= i.employee_id) AND " +
-                " NOT EXISTS (" +
+                "       calnext.caldate = cal.caldate and emp1.id= i.employee_id) " +
+                " AND NOT EXISTS (" +
                 "       SELECT v.employee_id,calv.caldate from calendar calv " +
                 "       RIGHT JOIN vacation v on calv.caldate between v.begin_date and v.end_date " +
                 "       WHERE calv.caldate = calnext.caldate AND v.employee_id = emp1.id AND v.status_id = :statusId AND v.type_id <> :typePlanned) " +
-                " AND " +
-                " NOT EXISTS (" +
+                " AND NOT EXISTS (" +
                 "       SELECT h.caldate from holiday h " +
                 "       WHERE h.calDate=calnext.calDate and (h.region=r.id or h.region is null) )" +
                 " GROUP BY 1" +
-                " ORDER BY 1").setParameter("division", division).setParameter("statusId", APPROVED.getId()).setParameter("typePlanned", PLANNED.getId());
+                " ORDER BY 1").
+                setParameter("division", division).
+                setParameter("statusId", APPROVED.getId()).
+                setParameter("typePlanned", PLANNED.getId());
 
         final List resultList = query.getResultList();
         final Map<Integer, Date> resultMap = new HashMap<Integer, Date>(resultList.size());
@@ -249,9 +329,18 @@ public class TimeSheetDAO {
         entityManager.remove(timeSheet);
     }
 
+    public void deleteAndFlush(TimeSheet timeSheet) {
+        entityManager.remove(timeSheet);
+        entityManager.flush();
+    }
+
     public List<TimeSheet> getTimeSheetsForEmployee(Employee employee, Integer year, Integer month) {
         final Query query = entityManager.createQuery(
-                "from TimeSheet ts where ts.employee = :employee and YEAR(ts.calDate.calDate) = :year and MONTH(ts.calDate.calDate) = :month"
+                "from TimeSheet ts " +
+                        "where ts.employee = :employee " +
+                        "and YEAR(ts.calDate.calDate) = :year " +
+                        "and MONTH(ts.calDate.calDate) = :month " +
+                        "and (ts.type = "+TypesOfTimeSheetEnum.REPORT.getId()+")"
         ).setParameter("employee", employee).setParameter("year", year).setParameter("month", month);
 
         return query.getResultList();
@@ -259,10 +348,114 @@ public class TimeSheetDAO {
 
     public Boolean timeSheetTrouble(Integer id) {
         final Query query = entityManager.createQuery(
-                "from TimeSheet ts inner join ts.timeSheetDetails tsd where ts.id = :id and tsd.problem <> ''"
+                "from TimeSheet ts inner join ts.timeSheetDetails tsd " +
+                        "where ts.id = :id and tsd.problem <> '' " +
+                        "and (ts.type = "+TypesOfTimeSheetEnum.REPORT.getId()+")"
         ).setParameter("id", id);
         return query.getResultList().size() != 0;
     }
 
+    public Integer findIdForDateAndEmployeeByTypes(Calendar calendar, Integer employeeId, List<TypesOfTimeSheetEnum> types) {
 
+        StringBuilder stringBuilder = new StringBuilder();
+        if (types != null) {
+            stringBuilder.append(" AND (ts.type=").append(types.get(0).getId());
+            for (int i = 1; i < types.size(); i++) {
+                stringBuilder.append(" OR ts.type=").append(types.get(i).getId());
+            }
+            stringBuilder.append(")");
+        }
+
+        final Query query = entityManager.createQuery(
+                "SELECT ts.id from TimeSheet ts " +
+                        "where ts.calDate = :calDate " +
+                        "and ts.employee.id = :employeeId " +
+                        stringBuilder.toString()
+        )       .setParameter("calDate", calendar)
+                .setParameter("employeeId", employeeId);
+
+        List resultList = query.getResultList();
+        return resultList != null && !resultList.isEmpty() ? ((Integer) resultList.get(0)) : null;
+    }
+
+    public  List<Date> getOverdueTimesheet(Long employeeId, Date startDate, Date endDate, Boolean findFirstEmptyDate){
+        Query query = entityManager.createNativeQuery(
+                "with data_employee as " +
+                "( " +
+                    "select " +
+                    "   e.* " +
+                    "from  " +
+                    "   employee e " +
+                    "where " +
+                    "   e.id = :employeeId " +
+                    "   and (e.end_date > current_date or e.end_date is NULL) " +
+                    "   and e.manager is not NULL " +
+                ") " +
+                "select " +
+                "   c.caldate " +
+                "from " +
+                "   data_employee de " +
+                "   join calendar c on (de.start_date + 1 < c.caldate) " +
+                "   left join holiday h on (c.caldate = h.caldate and (de.region = h.region or h.region is null)) " +
+                "where " +
+                    //полу-костыль: искать незаполненные отчеты в период :startDate and :endDate, но если это командировки - искать всегда
+                        (findFirstEmptyDate ?  "   (c.calDate < :endDate " :"   (c.calDate between :startDate and :endDate ") +
+                        "or exists(select 1 from business_trip bt where bt.employee_id = de.id and c.caldate between bt.begin_date and bt.end_date)) " +
+                "   and not exists(select 1 from time_sheet ts where ts.ts_type_id = " + TypesOfTimeSheetEnum.REPORT.getId() + " and ts.emp_id = de.id and ts.caldate = c.caldate) " +
+                "   and not exists(select 1 from vacation v where v.status_id = " + VacationStatusEnum.APPROVED.getId() + " and v.employee_id = de.id and c.caldate between v.begin_date and v.end_date) " +
+                "   and not exists(select 1 from illness i where i.employee_id = de.id and c.caldate between i.begin_date and i.end_date) " +
+                "   and (h.id is null or exists(select 1 from business_trip bt where bt.employee_id = de.id and c.caldate between bt.begin_date and bt.end_date))" +
+                "order by " +
+                "   c.calDate"
+        );
+
+        query.setParameter("employeeId", employeeId);
+        if (!findFirstEmptyDate) {
+            query.setParameter("startDate", startDate);
+        }
+        query.setParameter("endDate", endDate);
+        return query.getResultList();
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<String> getOverdueTimesheetEmployeeNames(
+            Division division, Date startDate, Date endDate, Integer threshold
+    ) {
+        Query query = entityManager.createNativeQuery(
+                "select\n" +
+                "  e.name || ' (' || count(1) || ')'\n" +
+                "from\n" +
+                "  calendar c\n" +
+                "  inner join employee e\n" +
+                "    on c.caldate between e.start_date + 1 and current_date - 1\n" +
+                "      and e.division = :division  \n" +
+                "      and (e.end_date is null or e.end_date > current_date)\n" +
+                "      and e.manager is not null\n" +
+                "  left outer join region r on e.region = r.id\n" +
+                "  left outer join holiday h on c.caldate = h.caldate and (h.region = r.id or h.region is null)\n" +
+                "  left outer join time_sheet ts on c.caldate = ts.caldate and ts.emp_id = e.id\n" +
+                "where\n" +
+                "  c.caldate between :startDate and :endDate\n" +
+                "  and (ts.ts_type_id != :tsTypeReport or ts.ts_type_id is null)\n" +
+                "  and (h.caldate is null or exists( select t.id from business_trip t where c.caldate between t.begin_date and t.end_date and t.employee_id = e.id))\n" +
+                "  and not exists (\n" +
+                "      select v.id from vacation v\n" +
+                "      where c.caldate between v.begin_date and v.end_date and v.employee_id = e.id and v.status_id = :vStatusApproved\n" +
+                "  )\n" +
+                "  and not exists (\n" +
+                "      select i.id from illness i\n" +
+                "      where c.caldate between i.begin_date and i.end_date and i.employee_id = e.id\n" +
+                "  )\n" +
+                "group by e.id having count(1) > :threshold\n" +
+                "order by count(1) desc, e.id"
+        )
+                .setParameter("division", division.getId())
+                .setParameter("startDate", startDate)
+                .setParameter("endDate", endDate)
+                .setParameter("tsTypeReport", TypesOfTimeSheetEnum.REPORT.getId())
+                .setParameter("vStatusApproved", VacationStatusEnum.APPROVED.getId())
+                .setParameter("threshold", threshold);
+
+        return query.getResultList();
+    }
 }

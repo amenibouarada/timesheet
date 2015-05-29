@@ -2,10 +2,10 @@ package com.aplana.timesheet.controller;
 
 import com.aplana.timesheet.form.FeedbackForm;
 import com.aplana.timesheet.form.validator.FeedbackFormValidator;
-import com.aplana.timesheet.properties.TSPropertyProvider;
-import com.aplana.timesheet.service.SecurityService;
+import com.aplana.timesheet.system.properties.TSPropertyProvider;
+import com.aplana.timesheet.system.security.SecurityService;
 import com.aplana.timesheet.service.SendMailService;
-import com.aplana.timesheet.util.TimeSheetUser;
+import com.aplana.timesheet.system.security.entity.TimeSheetUser;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,10 +35,6 @@ public class FeedbackController {
     @Autowired
     private TSPropertyProvider propertyProvider;
 
-
-	//IDs подразделения и сотрудника по умолчанию
-	private Integer divisionId = 0, employeeId = 0; //TODO зачем это нужно? контроллер — синглтон, они будут доступны всем
-
 	// Эти коды должны соответствовать страничке feedback.jsp
 	private static final String[] FEEDBACK_TYPE_NAME_KEYS = {
 		null,
@@ -64,6 +60,7 @@ public class FeedbackController {
             BindingResult result,
             Locale locale
     ) {
+
 		//Валидируем форму
 		logger.info("Processing FeedbackForm validation for employee {}", fbForm.getEmployeeId());
 		fbFormValidator.validate(fbForm, result);
@@ -74,6 +71,7 @@ public class FeedbackController {
 		}
 		//Если ошибок нет
 		fbForm.setFeedbackTypeName(messageSource.getMessage(FEEDBACK_TYPE_NAME_KEYS[ fbForm.getFeedbackType() ], null, locale));
+        Integer divisionId = 0, employeeId = 0;
         TimeSheetUser securityUser = securityService.getSecurityPrincipal();
         if (securityUser != null) {
             divisionId = securityUser.getEmployee().getDivision().getId();
@@ -83,9 +81,6 @@ public class FeedbackController {
         fbForm.setEmployeeId(employeeId);
 		sendMailService.performFeedbackMailing(fbForm);
 		ModelAndView mav = new ModelAndView("feedbackSent");
-		//сохраняем ID подразделения и сотрудника для будущей формы
-		divisionId = fbForm.getDivisionId();
-		employeeId = fbForm.getEmployeeId();
 		mav.addObject("feedbackForm", fbForm);
 		logger.info("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
 

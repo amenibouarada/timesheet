@@ -1,165 +1,83 @@
 package com.aplana.timesheet.service;
+
 import com.aplana.timesheet.AbstractJsonTest;
+import com.aplana.timesheet.AbstractTest;
+import com.aplana.timesheet.TestUtils;
 import com.aplana.timesheet.dao.*;
 import com.aplana.timesheet.dao.entity.*;
 
 import com.aplana.timesheet.enums.DictionaryEnum;
+import com.aplana.timesheet.enums.TypesOfTimeSheetEnum;
 import com.aplana.timesheet.enums.VacationStatusEnum;
 import com.aplana.timesheet.util.DateTimeUtil;
-import junit.framework.Assert;
-import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
 import java.util.Calendar;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.when;
+
 /**
- * Created with IntelliJ IDEA.
  * User: bsirazetdinov
  * Date: 07.08.13
- * Time: 13:57
- * To change this template use File | Settings | File Templates.
  */
-public class PlannedVacationServiceTest extends AbstractJsonTest{
+public class PlannedVacationServiceTest extends AbstractTest {
 
-    @Autowired
-    private DictionaryItemService dictionaryItemService;
-
-    @Autowired
-    ProjectManagerService projectManagerService;
-    @Autowired
-    private ProjectTaskService projectTaskService;
-    @Autowired
-    private ProjectRoleService projectRoleService;
-    @Autowired
-    private VacationService vacationService;
-    @Autowired
+    @Mock
     private EmployeeDAO employeeDAO;
-    @Autowired
-    private CalendarService calendarService;
-    @Autowired
-    private PlannedVacationService plannedVacationService;
-    @Autowired
-    private TimeSheetDAO timeSheetDAO;
-    @Autowired
-    private ProjectDAO projectDAO;
-    @Autowired
-    private VacationDAO vacationDAO;
-    
-    
-    @Autowired 
+    @Mock
     private ProjectService projectService;
 
-    private Project project;
-    private Employee employee;
-    private TimeSheet timeSheet;
-    private Vacation vacation;
+    @InjectMocks
+    PlannedVacationService plannedVacationService;
 
-    final static String JOB_CODE = "DV";
-    final static private Date dateCreate;
-    final static private Date dateBegin;
-    final static private Date dateEnd;
-    static {
-        final Calendar calendar2 = Calendar.getInstance();
-        dateCreate = calendar2.getTime();
-        calendar2.add(Calendar.WEEK_OF_YEAR, 1);
-        dateBegin = calendar2.getTime();
-        calendar2.add(Calendar.WEEK_OF_YEAR, 1);
-        dateEnd = calendar2.getTime();
-    }
-    static private Random random;
+    private Project project;
+    private List<Project> projects;
+    private Employee employee;
+    private List<Employee> employees;
+    private Employee manager;
+    private List<Employee> managers;
 
     @Before
     public void initData() {
-        random = new Random();
-        List<Employee> employees = employeeDAO.getEmployees();
-        List<Employee> suitableEmployees = employeeDAO.getEmployees();
-        for(Employee emp:employees) {
-            if(emp.getJob().getCode().equals(JOB_CODE)) {               	
-                suitableEmployees.add(emp);
-            }
-        }
-        employee = suitableEmployees.get(random.nextInt(suitableEmployees.size()));
-        
-        List<Project> projects = projectDAO.getAll();
-        List<Project> suitableProjects = new ArrayList<Project>();
-        for(Project proj:projects) {
-            if(proj.isActive() && !projectTaskService.getProjectTasks(proj.getId()).isEmpty() && !employeeDAO.getProjectManagers(proj).isEmpty()) {
-                suitableProjects.add(proj);           
-            }
-        }
+        MockitoAnnotations.initMocks(this);
 
-        project = suitableProjects.get(random.nextInt(suitableProjects.size()));       
+        employee = TestUtils.createEmployee();
+        project = TestUtils.createProject();
+        manager = TestUtils.createManager();
 
-        timeSheet = createTestTimeSheet(employee, project);
-        timeSheetDAO.storeTimeSheet(timeSheet);
+        employees = new ArrayList<Employee>();
+        employees.add(employee);
+        projects = new ArrayList<Project>();
+        projects.add(project);
+        managers = new ArrayList<Employee>();
+        managers.add(manager);
 
-        vacation = createTestVacation(employee);
-        vacationDAO.store(vacation);
-    }
-
-    private Vacation createTestVacation(Employee employee) {
-        Vacation vacation = new Vacation();
-        vacation.setComment("unittest comment");
-        vacation.setCreationDate(dateCreate);
-        vacation.setBeginDate(dateBegin);
-        vacation.setEndDate(dateEnd);
-        vacation.setAuthor(employee);
-        vacation.setStatus(vacation.getStatus());
-        vacation.setType(dictionaryItemService.getItemsByDictionaryId(DictionaryEnum.VACATION_TYPE.getId()).get(0));
-        vacation.setStatus(dictionaryItemService.find(VacationStatusEnum.APPROVEMENT_WITH_PM.getId()));
-        vacation.setEmployee(employee);
-
-        return vacation;
-    }
-
-    private TimeSheet createTestTimeSheet(Employee employee, Project project) {
-        TimeSheet timeSheet = new TimeSheet();
-        Set<TimeSheetDetail> timeSheetDetails = new HashSet<TimeSheetDetail>();
-
-        TimeSheetDetail timeSheetDetail = new TimeSheetDetail();
-
-        timeSheetDetail.setProject(project);
-        timeSheetDetail.setActCat(dictionaryItemService.getCategoryOfActivity().get(0));
-        timeSheetDetail.setWorkplace(dictionaryItemService.getWorkplaces().get(0));
-        timeSheetDetail.setActType(dictionaryItemService.getTypesOfActivity().get(0));
-        timeSheetDetail.setDuration(8d);
-        timeSheetDetail.setDescription("unit test description | lololo ");
-        timeSheetDetail.setProblem("unit test problem");
-        timeSheetDetail.setProjectRole(projectRoleService.getProjectRoles().get(0));
-        timeSheetDetail.setProjectTask(projectTaskService.getProjectTasks(project.getId()).get(0));     //projectTaskService.getProjectTasks(project.getId()).get(0)
-        timeSheetDetail.setTimeSheet(timeSheet);
-
-        timeSheetDetails.add(timeSheetDetail);
-
-        timeSheet.setTimeSheetDetails(timeSheetDetails);
-        timeSheet.setCreationDate(new Date());
-        timeSheet.setCalDate(calendarService.find(DateTimeUtil.currentDay()));
-        timeSheet.setEmployee(employee);
-        timeSheet.setPlan("unit test plan");
-        timeSheet.setEffortInNextDay(dictionaryItemService.getItemsByDictionaryId(DictionaryEnum.EFFORT_IN_NEXTDAY.getId()).get(0));
-        timeSheet.setOvertimeCause(timeSheet.getOvertimeCause());
-        timeSheet.setState(null);
-
-        return timeSheet;
+        when(employeeDAO.getEmployeeWithPlannedVacation((Date) any(), (Date) any())).thenReturn(employees);
+        when(employeeDAO.getProjectManagers(project)).thenReturn(managers);
+        when(projectService.getEmployeeProjectsFromTimeSheetByDates((Date) any(), (Date) any(), (Employee) any())).thenReturn(projects);
+        when(projectService.getEmployeeProjectPlanByDates((Date) any(), (Date) any(), (Employee) any())).thenReturn(projects);
     }
 
     @Test
     public void testVacation() {
 
+        Map<Employee, Set<Employee>> result = plannedVacationService.getEmployeeManagers(employees);
+        Assert.assertNotNull(result);
 
-        // TODO APLANATS-1209
-
-        /*Map<Employee, Set<Vacation>> employeeVacations = plannedVacationService.getManagerEmployeesVacation();
-        
-        
-        boolean isConsist = false;
-        for(Map.Entry<Employee, Set<Vacation>> entry : employeeVacations.entrySet()) {
-            if (entry.getValue().contains(vacation)) isConsist = true;
-        }       
-        
-        Assert.assertTrue(isConsist);*/
+        /*
+            Необходимо протестировать
+            reverseEmployeeManagersToManagerEmployees
+            getManagerEmployeesVacation
+            remindDeletePlannedVacation
+            getDateByCurrentDayPeriod
+        */
     }
 }

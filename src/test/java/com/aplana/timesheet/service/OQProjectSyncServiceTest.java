@@ -1,33 +1,25 @@
 package com.aplana.timesheet.service;
 
+import com.aplana.timesheet.AbstractTest;
 import com.aplana.timesheet.dao.ProjectDAO;
 import com.aplana.timesheet.dao.entity.Project;
 import com.aplana.timesheet.enums.TypesOfActivityEnum;
-import junit.framework.TestCase;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.transaction.TransactionConfiguration;
-import org.springframework.transaction.annotation.Transactional;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.NodeList;
 
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author iziyangirov
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = {"classpath:WEB-INF/spring/testApplicationContext.xml"})
-@Transactional
-@TransactionConfiguration(defaultRollback = true)
-public class OQProjectSyncServiceTest extends TestCase {
+public class OQProjectSyncServiceTest extends AbstractTest {
 
     @Autowired
     OQProjectSyncService oqProjectSyncService;
@@ -65,7 +57,7 @@ public class OQProjectSyncServiceTest extends TestCase {
 
                 return null;
             }})
-            .when(dao).store((Project) anyObject());
+            .when(dao).syncStore((Project) anyObject());
 
         oqProjectSyncService.createOrUpdateProject(
                 nodeList.item(checkingNode).getAttributes(), dao,

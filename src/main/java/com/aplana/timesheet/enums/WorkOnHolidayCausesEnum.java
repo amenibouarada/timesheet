@@ -5,7 +5,7 @@ package com.aplana.timesheet.enums;
  * @version 1.0
  */
 public enum WorkOnHolidayCausesEnum implements TSEnum {
-    A_LOT_OF_WORK(118, "У меня большой объем задач, не успеваю справляться в рабочее время"),
+    A_LOT_OF_WORK(118, "У меня большой объем задач - не успеваю в рабочее время"),
     OWN_INITIATIVE(119, "Моя собственная инициатива"),
     MANAGER_REQUEST(120, "Просьба руководителя"),
     WORKING_OFF(121, "Отрабатываю время за предыдущие (последующие) дни"),

@@ -117,7 +117,7 @@ function createLayout(/* Array */ headerViews) {
                 width: cell.width,
                 name: (nogroups && headerView.expand == true) ? createNameWithHideButton(cell.name, cell.field) : cell.name,
                 editable: cell.editable,
-                headerStyles: "width: " + cell.width,
+                headerStyles:  (!cell.headerStyles ? "" : cell.headerStyles) + "width: " + cell.width,
                 cellStyles: cellStyles,
                 hasBeenChanged: {},
                 formatter: function(text, rowIndex, cell) {
@@ -170,14 +170,15 @@ function createLayout(/* Array */ headerViews) {
                     childs: [],
                     isHidden: false,
                     cellsFormatter: group.cellsFormatter,
-                    updateWidth: function() {
+                    headerStylesTemp: !group.headerStyles ? "" : group.headerStyles,
+                    updateWidth: function () {
                         var width = 0;
 
-                        dojo.forEach(this.childs, function(child) {
+                        dojo.forEach(this.childs, function (child) {
                             width += parseFloat(child.width);
                         });
 
-                        this.headerStyles = "width: " + width + "px;";
+                        this.headerStyles = this.headerStylesTemp + "width: " + width + "px;";
                     }
                 };
 
@@ -226,10 +227,23 @@ function showCol(button, colField) {
     switchColDisplay(button, colField, false, true);
 }
 
+function getNatural (DOMelement) {
+    var img = new Image();
+    img.src = DOMelement.src;
+    return {width: img.width, height: img.height};
+}
+
 function switchColDisplay(button, colField, /* Boolean */ hide, /* Boolean */ updateStructure) {
     var container = dojo.NodeList(button).parents(".colContainer")[0];
     var display = hide ? "none" : "";
     var buttonWidth = (button.style.width || (button.width + "px"));
+
+    // Если IE8 или ниже
+    if (buttonWidth == "0px"){
+        var natural = getNatural(button);
+        buttonWidth = natural.width;
+    }
+
     var grid = dijit.byId(dojo.NodeList(container).parents(".dojoxGrid")[0].id);
 
     dojo.forEach(grid.structure, function(structure) {
@@ -245,7 +259,11 @@ function switchColDisplay(button, colField, /* Boolean */ hide, /* Boolean */ up
                     var newWidth = (parseInt(buttonWidth) / item.childs.length) + "px";
 
                     dojo.forEach(item.childs, function(child) {
-                        child.editable = !hide;
+                        child.editable = hide ? !hide :
+                            dojo.some(modelFieldsForSave, function (fieldForSave) {
+                                return ((child.field == fieldForSave) && (child.field !== VACATION_PLAN_COLUMN));
+                            }) && isEditable;
+
                         child.name = hide ? "<div>&nbsp;</div>" : child.srcName;
                         child.width = hide ? newWidth : child.srcWidth;
                     });
@@ -257,7 +275,11 @@ function switchColDisplay(button, colField, /* Boolean */ hide, /* Boolean */ up
                     }
 
                     item.width = hide ? buttonWidth : item.srcWidth;
-                    item.editable = !hide;
+
+                    child.editable = hide ? !hide :
+                        dojo.some(modelFieldsForSave, function (fieldForSave) {
+                            return ((child.field == fieldForSave) && (child.field !== VACATION_PLAN_COLUMN));
+                        });
                 }
 
                 dojo.query(".colTextHolder", container).forEach(function(textHolder) {

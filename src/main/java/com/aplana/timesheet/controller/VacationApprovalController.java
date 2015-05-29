@@ -5,11 +5,12 @@ import com.aplana.timesheet.dao.entity.Vacation;
 import com.aplana.timesheet.dao.entity.VacationApproval;
 import com.aplana.timesheet.exception.service.VacationApprovalServiceException;
 import com.aplana.timesheet.form.VacationApprovalForm;
-import com.aplana.timesheet.properties.TSPropertyProvider;
+import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.ManagerRoleNameService;
 import com.aplana.timesheet.service.SendMailService;
 import com.aplana.timesheet.service.VacationApprovalService;
 import com.aplana.timesheet.service.vacationapproveprocess.VacationApprovalProcessService;
+import com.aplana.timesheet.util.DateTimeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -47,8 +47,7 @@ public class VacationApprovalController {
     final String NOT_ACCEPTED_YET = "%s, просьба принять решение по \"%s\" сотрудника %s из г. %s на период с %s по %s. %s";
     final String ACCEPTANCE = "Запрос \"%s\" сотрудника %s из г. %s на период с %s по %s %s.";
     final String ACCEPTED = "согласован";
-    final String REFUSE = "не согласован";
-    final String DATE_FORMAT = "dd.MM.yyyy";
+    final String REFUSED = "не согласован";
     final String BAD_REQUEST = "Неверный запрос!";
     final String LOGGER_MESSAGE = "\n    UserIP: %s\n";
     final String REFUSE_ANSWER = "%s, Вы не согласовали \"%s\" сотрудника %s из г. %s на период с %s по %s.";
@@ -78,17 +77,16 @@ public class VacationApprovalController {
         String vacationType = vacationApproval.getVacation().getType().getValue();
         String employeeFIO = vacationApproval.getVacation().getEmployee().getName();
         String region = vacationApproval.getVacation().getEmployee().getRegion().getName();
-        String dateBegin = getOnlyDate(vacationApproval.getVacation().getBeginDate());
-        String dateEnd = getOnlyDate(vacationApproval.getVacation().getEndDate());
+        String dateBegin = DateTimeUtil.getOnlyDate(vacationApproval.getVacation().getBeginDate());
+        String dateEnd = DateTimeUtil.getOnlyDate(vacationApproval.getVacation().getEndDate());
         String comment = vacationApproval.getVacation().getComment();
         Boolean result = vacationApproval.getResult();
-
 
         vaForm.setApprovalList(getApprovalList(vacationApproval));
 
         if (result == null){
             vaForm.setMessage(String.format(NOT_ACCEPTED_YET, matchingFIO, vacationType, employeeFIO, region, dateBegin,
-                    dateEnd, comment));
+                    dateEnd, comment == null ? "" : comment));
             vaForm.setButtonsVisible("");
         } else {
            vaForm.setMessage(String.format(ACCEPTANCE, vacationType, employeeFIO, region, dateBegin, dateEnd,
@@ -126,8 +124,8 @@ public class VacationApprovalController {
         String vacationType = vacationApproval.getVacation().getType().getValue();
         String employeeFIO = vacationApproval.getVacation().getEmployee().getName();
         String region = vacationApproval.getVacation().getEmployee().getRegion().getName();
-        String dateBegin = getOnlyDate(vacationApproval.getVacation().getBeginDate());
-        String dateEnd = getOnlyDate(vacationApproval.getVacation().getEndDate());
+        String dateBegin = DateTimeUtil.getOnlyDate(vacationApproval.getVacation().getBeginDate());
+        String dateEnd = DateTimeUtil.getOnlyDate(vacationApproval.getVacation().getEndDate());
 
         vacationApproval.setResult(acceptance);
         vacationApproval.setResponseDate(new Date());
@@ -184,15 +182,11 @@ public class VacationApprovalController {
         }
     }
 
-    public String getOnlyDate(Date date){
-        return new SimpleDateFormat(DATE_FORMAT).format(date);
-    }
-
     public String getResultString(Boolean result){
         if (result) {
             return ACCEPTED;
         }
-        return REFUSE;
+        return REFUSED;
     }
 
 

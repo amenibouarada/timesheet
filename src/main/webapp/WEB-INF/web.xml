@@ -8,10 +8,9 @@
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
          version="2.5">
 
-
     <error-page>
-        <exception-type>org.springframework.web.multipart.MaxUploadSizeExceededException</exception-type>
-        <location>/WEB-INF/views/error.jsp</location>
+        <error-code>404</error-code>
+        <location>/WEB-INF/views/errors/errorPageNotFound.jsp</location>
     </error-page>
 
     <filter>
@@ -47,10 +46,9 @@
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 
-
     <filter>
         <filter-name>AutentificationFilter</filter-name>
-        <filter-class>com.aplana.timesheet.filters.AutentificationFilter</filter-class>
+        <filter-class>com.aplana.timesheet.system.security.AutentificationFilter</filter-class>
 
     </filter>
 

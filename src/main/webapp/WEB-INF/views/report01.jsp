@@ -28,7 +28,7 @@
         <form:form commandName="reportForm" method="post" action="${formUrl}">
 
             <c:if test="${fn:length(errors) > 0}">
-                <div class="errors_box">
+                <div id="errorBoxId" class="errors_box">
                     <c:forEach items="${errors}" var="error">
                         <fmt:message key="${error.code}">
                             <fmt:param value="${error.arguments[0]}"/>
@@ -40,7 +40,7 @@
             <div id="form_header">
                 <table class="report_params" cellspacing="3">
                     <tr>
-                        <td><span class="label"><fmt:message key="label.r01.center"/></span><span style="color:red">*</span></td>
+                        <td><span class="label"><fmt:message key="label.r01.center"/></span></td>
                         <td><form:select id="divisionId" name="divisionOwnerId" cssClass="without_dojo"
                                          onmouseover="tooltip.show(getTitle(this));"
                                          onmouseout="tooltip.hide();" path="divisionOwnerId">
@@ -49,7 +49,7 @@
                         </form:select></td>
                     </tr>
                     <tr>
-                        <td><span class="label"><fmt:message key="label.r01.begin.date"/></span><span style="color:red">*</span></td>
+                        <td><span class="label"><fmt:message key="label.r01.begin.date"/></span></td>
                         <td><form:input path="beginDate" id="beginDate" name="beginDate" class="date_picker"
                                         data-dojo-id="fromDate"
                                         data-dojo-type='dijit/form/DateTextBox'
@@ -97,17 +97,20 @@
                 <div class="radiogroup">
                     <div class="label"><fmt:message key="report.formattitle"/></div>
                     <ul class="radio">
-                        <li><input type=radio name="printtype" id="printtype1" value="1" checked/><label
-                                for="printtype1"><fmt:message key="label.report.html"/></label></li>
-                        <li><input type=radio name="printtype" id="printtype2" value="2"/><label for="printtype2"><fmt:message key="label.report.excel"/></label>
+                        <li><input type=radio name="printtype" id="printtype2" value="2" checked/>
+                            <label for="printtype2"><fmt:message key="label.report.excel"/></label>
                         </li>
-                        <li><input type=radio name="printtype" id="printtype3" value="3"/><label for="printtype3"><fmt:message key="label.report.pdf"/></label>
+                        <li><input type=radio name="printtype" id="printtype1" value="1" disabled/>
+                            <label for="printtype1"><fmt:message key="label.report.html"/></label>
+                        </li>
+                        <li><input type=radio name="printtype" id="printtype3" value="3" disabled/>
+                            <label for="printtype3"><fmt:message key="label.report.pdf"/></label>
                         </li>
                     </ul>
                 </div>
             </div>
 
-            <button id="make_report_button" style="width:210px" type="submit"><fmt:message key="label.report.form"/></button>
+            <button id="make_report_button" style="width:210px" type="submit" onclick="clearErrorBox('errorBoxId')"><fmt:message key="label.report.form"/></button>
         </form:form>
 </body>
 

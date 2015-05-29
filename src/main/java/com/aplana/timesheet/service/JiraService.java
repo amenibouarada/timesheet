@@ -5,11 +5,12 @@ import com.aplana.timesheet.dao.JiraDAO;
 import com.aplana.timesheet.dao.ProjectDAO;
 import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.dao.entity.Project;
-import com.aplana.timesheet.properties.TSPropertyProvider;
+import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.util.DateTimeUtil;
 import com.atlassian.jira.rest.client.JiraRestClient;
 import com.atlassian.jira.rest.client.domain.Issue;
 import com.atlassian.jira.rest.client.internal.jersey.JerseyJiraRestClientFactory;
+import com.google.common.base.Joiner;
 import org.apache.commons.lang.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,10 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class JiraService {
@@ -39,6 +37,7 @@ public class JiraService {
     @Autowired
     private ProjectDAO projectDAO;
 
+    static final String IN_PROGRESS_STATUS = "In Progress";
 
     /* создание подключения к серверу JIRA */
     private JiraRestClient getRestClient() {
@@ -70,79 +69,103 @@ public class JiraService {
         return factory.createWithBasicHttpAuthentication(jiraServerUri, jiraInsiderUserName, jiraInsiderUserPassword);
     }
 
-    /* формируем запрос по почте пользователя, проекту (необязат), дате (необязат) */
-    private String genJqlQuery(String user, String project, Date date) {
+    /* формируем запрос по почте пользователя, проекту, дате
+    *  пример строки запроса
+        project in APLANATS and
+        (status changed by Nlebedev on 2013-07-31
+         or assignee changed from Nlebedev on 2013-07-31
+         or assignee changed to Nlebedev on 2013-07-31
+         or (reporter = Nlebedev and created = 2013-07-31)
+         or (status = "In Progress" AND assignee = Nlebedev and created <= 2013-07-31)
+        )
+    */
+    private String genJqlQueryForProject(String user, String project, String reportDate) {
         StringBuilder stringBuilder = new StringBuilder();
-
-        if ( user != null && !user.equals("") ) {
-            String onDate = "";
-            String createdDate = "";
-            if ( date != null ) {
-                onDate = " on " + new SimpleDateFormat(DateTimeUtil.DATE_PATTERN).format(date) + " ";
-                createdDate = " or (reporter = " + user +
-                        " and created > " + DateTimeUtil.dateToString(date) +
-                        " and created < " + DateTimeUtil.dateToString(DateUtils.addDays(date, 1)) + ")";
-            }
-
-            if ( project != null && !project.equals("") )
-                stringBuilder.append("project in (").append(project).append(") and ");
-
-            stringBuilder
-                    .append("(status changed by ").append(user).append(onDate)
-                    .append(" or assignee changed from ").append(user).append(onDate)
-                    .append(" or assignee changed to ").append(user).append(onDate)
-                    .append(" or reporter changed from ").append(user).append(onDate)
-                    .append(" or reporter changed to ").append(user).append(onDate)
-                    .append((createdDate.isEmpty()) ? "" : createdDate)
-                    .append(")");
-/*  пример строки запроса*/
-//  project in (APLANATS) and
-// (status changed by Nlebedev on 2013-07-31
-//  or assignee changed from Nlebedev on 2013-07-31
-//  or assignee changed to Nlebedev on 2013-07-31
-//  or reporter changed from Nlebedev on 2013-07-31
-//  or reporter changed to Nlebedev on 2013-07-31
-//  or (reporter = Nlebedev and created > 2013-07-31 and created < 2013-08-01)
-//  )
-
-        }
+        String onDate = " on " + reportDate;
+        stringBuilder
+            .append("project in (").append(project).append(") and ")
+            .append("(status changed by ").append(user).append(onDate)
+            .append(" or assignee changed from ").append(user).append(onDate)
+            .append(" or assignee changed to ").append(user).append(onDate)
+            .append(" or (reporter = ").append(user).append(" and created = ").append(reportDate).append(")")
+            .append(" or ").append(genJqlQueryInProgress(user, reportDate))
+            .append(")");
 
         return stringBuilder.toString();
     }
 
+    /* формируем запрос по почте пользователя, дате планах
+    *
+    *  пример строки запроса
+        (status = "In Progress" AND assignee = Nlebedev and created <= 2013-07-31)
+    *
+    */
+    private String genJqlQueryInProgress(String user, String reportDate) {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder
+                .append(" (status =  \"" + IN_PROGRESS_STATUS + "\" AND assignee = ").append(user)
+                .append(" and created <= ").append(reportDate)
+                .append(")");
+        return stringBuilder.toString();
+
+    }
 
     /* возвращаем строку с key и summary по каждой задаче */
     public String getDayIssues(Integer employeeId, String reportDate, Integer projectId) {
         StringBuilder stringBuilder = new StringBuilder();
-        /* берём по умолчанию текущую дату */
-        Date date = new Date();
-        try {
-            date = new SimpleDateFormat(DateTimeUtil.DATE_PATTERN).parse(reportDate);
-        } catch (ParseException e) {
-            logger.error("Сообщение об ошибке", e);
-        }
-        if (employeeId != null) {
-            Employee user = emloyeeDAO.find(employeeId);
-            if (user != null) {
-                String userJira = user.getJiraName();
-                Project project = projectDAO.find(projectId);
-                String userProject = project.getJiraProjectKey();
-                if (userProject != null && !userProject.equals("")) {
+        Employee user = emloyeeDAO.find(employeeId);
+        if (employeeId != null && user != null) {
+            String userJira = user.getJiraName();
+            Project project = projectDAO.find(projectId);
+            String userProject = project.getJiraProjectKey();
+            if (userProject != null && !userProject.equals("")) {
                     /* формируем запрос на JQL */
-                    String query = genJqlQuery(userJira, userProject, date);
+                String query = genJqlQueryForProject(userJira, userProject, reportDate);
                     /* создаём подключение к сервру JIRA */
-                    JiraRestClient jiraRestClient = getRestClient();
+                JiraRestClient jiraRestClient = getRestClient();
                     /* получаем список задач */
-                    List<Issue> issueList = jiraDAO.getIssues(jiraRestClient, query);
+                List<Issue> issueList = jiraDAO.getIssues(jiraRestClient, query);
                     /* формируем строку с краткими данными */
-                    for (Issue item : issueList) {
-                        stringBuilder.append("\r\n").append(item.getKey()).append(" - ").append(item.getSummary());
-                    }
-                    /* подрезаем первый перенос строки */
-                    if (stringBuilder.length() > 0) {
-                        stringBuilder.delete(0, 2);
-                    }
+                for (Issue item : issueList) {
+                    stringBuilder.append("\r\n").append(item.getKey()).append(" - ").append(item.getSummary());
                 }
+                    /* подрезаем первый перенос строки */
+                if (stringBuilder.length() > 0) {
+                    stringBuilder.delete(0, 2);
+                }
+            }
+        }
+        return stringBuilder.toString();
+    }
+
+    public String getPlannedIssues(Integer employeeId, String reportDate) {
+        Map<String, List<String>> projects = new HashMap<String, List<String>>();
+        Employee user = emloyeeDAO.find(employeeId);
+        StringBuilder stringBuilder = new StringBuilder();
+        if (employeeId != null && user != null) {
+            JiraRestClient jiraRestClient = getRestClient();
+
+            List<Issue> issueList = jiraDAO.getIssues(jiraRestClient, genJqlQueryInProgress(user.getJiraName(), reportDate));
+
+            for (Issue item : issueList) {
+                Project project = projectDAO.findByJiraKey(item.getProject().getKey());
+                String key = project != null ? project.getName() : "Проект неопределен";
+                String format = String.format("%s - %s", item.getKey(), item.getSummary());
+                if (projects.get(key) != null) {
+                    projects.get(key).add(format);
+                } else {
+                    projects.put(key, new LinkedList<String>());
+                    projects.get(key).add(format);
+                }
+            }
+
+            for (Map.Entry<String, List<String>> entry : projects.entrySet()) {
+                stringBuilder.append("\r\n").append(entry.getKey()).append(":");
+                stringBuilder.append(Joiner.on("\r\n").join(projects.get(entry.getKey())));
+            }
+                    /* подрезаем первый перенос строки */
+            if (stringBuilder.length() > 0) {
+                stringBuilder.delete(0, 2);
             }
         }
         return stringBuilder.toString();

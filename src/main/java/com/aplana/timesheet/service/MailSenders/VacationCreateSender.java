@@ -3,15 +3,15 @@ package com.aplana.timesheet.service.MailSenders;
 import com.aplana.timesheet.dao.entity.ApprovalResultModel;
 import com.aplana.timesheet.dao.entity.Vacation;
 import com.aplana.timesheet.dao.entity.VacationApproval;
-import com.aplana.timesheet.properties.TSPropertyProvider;
+import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.ManagerRoleNameService;
 import com.aplana.timesheet.service.SendMailService;
 import com.aplana.timesheet.service.VacationApprovalService;
+import com.aplana.timesheet.util.DateTimeUtil;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.time.DateFormatUtils;
 import org.springframework.ui.velocity.VelocityEngineUtils;
 
 import java.util.*;
@@ -24,6 +24,11 @@ public class VacationCreateSender extends AbstractVacationSender<Vacation> {
     public VacationCreateSender(SendMailService sendMailService, TSPropertyProvider propertyProvider,
                                 VacationApprovalService vacationApprovalService, ManagerRoleNameService managerRoleNameService) {
         super(sendMailService, propertyProvider,vacationApprovalService,managerRoleNameService);
+        logger.info("Run sending message for: {}", getName());
+    }
+
+    final String getName() {
+        return String.format(" Оповещение о создании отпуска (%s)", this.getClass().getSimpleName());
     }
 
     @Override
@@ -53,9 +58,9 @@ public class VacationCreateSender extends AbstractVacationSender<Vacation> {
         String vacationTypeStr = vacation.getType().getValue();
         String employeeNameStr = vacation.getEmployee().getName();
         String regionNameStr = vacation.getEmployee().getRegion().getName();
-        String beginDateStr = DateFormatUtils.format(vacation.getBeginDate(), DATE_FORMAT);
-        String endDateStr = DateFormatUtils.format(vacation.getEndDate(), DATE_FORMAT);
-        String creationDate = DateFormatUtils.format(vacation.getCreationDate(), DATE_FORMAT);
+        String beginDateStr = DateTimeUtil.formatDateIntoViewFormat(vacation.getBeginDate());
+        String endDateStr = DateTimeUtil.formatDateIntoViewFormat(vacation.getEndDate());
+        String creationDate = DateTimeUtil.formatDateIntoViewFormat(vacation.getCreationDate());
         String commentStr = StringUtils.EMPTY;
         if (StringUtils.isNotBlank(vacation.getComment())) {
             commentStr = String.format("Комментарий: %s. ", vacation.getComment());
@@ -85,7 +90,7 @@ public class VacationCreateSender extends AbstractVacationSender<Vacation> {
             Map model = new HashMap();
             model.put("approvalList", approvalList.iterator());
             String messageBody = VelocityEngineUtils.mergeTemplateIntoString(
-                    sendMailService.velocityEngine, "vacationapprovals.vm", model);
+                    sendMailService.velocityEngine, "velocity/vacationapprovals.vm", model);
             logger.debug("Message Body: {}", messageBody);
             stringBuilder.append(messageBody);
         }

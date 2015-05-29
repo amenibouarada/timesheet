@@ -117,14 +117,6 @@ public abstract class AbstractValidator implements Validator{
         }
     }
 
-    public void validateEmployee(Employee employee, Errors errors){
-        validateEmployeeId(employee.getId(), errors);
-    }
-
-    public void validateDivision(Division division, Errors errors){
-        validateDivisionId(division.getId(), errors);
-    }
-
     public void validateEmployeeId(Integer employeeId, Errors errors){
         if (employeeId == null || employeeId < 0){
             errors.rejectValue(

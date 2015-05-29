@@ -1,12 +1,15 @@
 package com.aplana.timesheet.service.MailSenders;
 
 import com.aplana.timesheet.dao.entity.ProjectTask;
+import com.aplana.timesheet.dao.entity.TimeSheet;
+import com.aplana.timesheet.dao.entity.TimeSheetDetail;
 import com.aplana.timesheet.enums.*;
 import com.aplana.timesheet.form.TimeSheetForm;
 import com.aplana.timesheet.form.TimeSheetTableRowForm;
-import com.aplana.timesheet.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.OvertimeCauseService;
+import com.aplana.timesheet.service.ReportService;
 import com.aplana.timesheet.service.SendMailService;
+import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
@@ -16,6 +19,7 @@ import org.springframework.ui.velocity.VelocityEngineUtils;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import java.math.BigDecimal;
 import java.util.*;
 
 import static com.aplana.timesheet.enums.DictionaryEnum.UNDERTIME_CAUSE;
@@ -31,19 +35,23 @@ public class TimeSheetSender extends MailSender<TimeSheetForm> {
     public static final String DESCRIPTION_STRINGS = "descriptionStrings";
     public static final String PROBLEM_STRINGS = "problemStrings";
     public static final String PLAN_STRINGS = "planStrings";
-    public static final String REASON = "reason";
-    public static final String BEGIN_LONG_DATE = "beginLongDate";
-    public static final String END_LONG_DATE = "endLongDate";
     public static final String SENDER_NAME = "senderName";
     public static final String OVERTIME_CAUSE = "overtimeCause";
     public static final String OVERTIME_COMMENT = "overtimeComment";
     public static final String OVERTIME_CAUSE_ID = "overtimeCauseId";
     public static final String TYPE_OF_COMPENSATION = "typeOfCompensation";
     public static final String EFFORT_IN_NEXTDAY = "effortInNextDay";
+    public static final String SUMM_DURATION = "summDuration";
     private String employeeEmail;
-
-    public TimeSheetSender(SendMailService sendMailService, TSPropertyProvider propertyProvider, OvertimeCauseService overtimeCauseService) {
+    private ReportService reportService;
+    public TimeSheetSender(SendMailService sendMailService, TSPropertyProvider propertyProvider, OvertimeCauseService overtimeCauseService, ReportService reportService) {
         super(sendMailService, propertyProvider, overtimeCauseService);
+        this.reportService = reportService;
+        logger.info("Run sending message for: {}", getName());
+    }
+
+    final String getName() {
+        return String.format(" Оповещение о новом отчете о списании занятости (%s)", this.getClass().getSimpleName());
     }
 
     @Override
@@ -69,10 +77,10 @@ public class TimeSheetSender extends MailSender<TimeSheetForm> {
 
         logger.info("follows initialization output from velocity");
         String messageBody = VelocityEngineUtils.mergeTemplateIntoString(
-                sendMailService.velocityEngine, "sendmail.vm", model);
+                sendMailService.velocityEngine, "velocity/sendmail.vm", model);
         logger.debug("Message Body: {}", messageBody);
         try {
-            message.setText(messageBody, "UTF-8", "html");
+            message.setText(reportService.modifyURL(messageBody), "UTF-8", "html");
         } catch (MessagingException e) {
             logger.error("Error while init message body.", e);
         }
@@ -103,6 +111,14 @@ public class TimeSheetSender extends MailSender<TimeSheetForm> {
             return MailPriorityEnum.HIGH;
         }
 
+        if (params.getTimeSheetTablePart() != null) {
+            for (TimeSheetTableRowForm form : params.getTimeSheetTablePart()) {
+                if (form.getProblem() != null && !form.getProblem().isEmpty()) {
+                    return MailPriorityEnum.HIGH;
+                }
+            }
+        }
+
         return MailPriorityEnum.NORMAL;
     }
 
@@ -113,16 +129,6 @@ public class TimeSheetSender extends MailSender<TimeSheetForm> {
 
     private Collection<String> getToEmails(TimeSheetForm params) {
         final Integer employeeId = params.getEmployeeId();
-
-        /*Set<String> toEmails = Sets.newHashSet(Iterables.transform(
-                sendMailService.getRegionManagerList(employeeId),
-                new Function<Employee, String>() {
-                    @Nullable
-                    @Override
-                    public String apply(@Nullable Employee params) {
-                        return params.getEmail();
-                    }
-                }));*/
 
         Set<String> toEmails = new HashSet<String>();
 
@@ -136,7 +142,7 @@ public class TimeSheetSender extends MailSender<TimeSheetForm> {
 
         return toEmails;
     }
-
+    // todo сложный метод, можно упростить
     private Table<Integer, String, String> getBody(TimeSheetForm tsForm) {
         Table<Integer, String, String> result = HashBasedTable.create();
         int FIRST = 0;
@@ -155,13 +161,12 @@ public class TimeSheetSender extends MailSender<TimeSheetForm> {
                 Integer actTypeId = tsRow.getActivityTypeId();
                 result.put(i, ACT_TYPE, TypesOfActivityEnum.getById(actTypeId).getName());
 
-                String projectName = null;
                 if ((actTypeId.equals(TypesOfActivityEnum.PROJECT.getId()))
                         ||(actTypeId.equals(TypesOfActivityEnum.PROJECT_PRESALE.getId()))
                         ||(actTypeId.equals(TypesOfActivityEnum.PRESALE.getId()))){
                     Integer projectId = tsRow.getProjectId();
                     if (projectId != null) {
-                        result.put(i, PROJECT_NAME, (projectName = sendMailService.getProjectName(projectId)));
+                        result.put(i, PROJECT_NAME,  sendMailService.getProjectName(projectId));
                     }
                 }
                 Integer actCatId = tsRow.getActivityCategoryId();
@@ -186,6 +191,19 @@ public class TimeSheetSender extends MailSender<TimeSheetForm> {
         putIfIsNotBlank(FIRST, result, TYPE_OF_COMPENSATION, sendMailService.getTypeOfCompensation(tsForm));
         putIfIsNotBlank(FIRST, result, EFFORT_IN_NEXTDAY, sendMailService.getEffort(tsForm));
 
+        TimeSheet timeSheet = sendMailService.findForDateAndEmployee(tsForm.getCalDate(), tsForm.getEmployeeId());
+        Iterator<TimeSheetDetail> iteratorTSD = timeSheet.getTimeSheetDetails().iterator();
+        BigDecimal summDuration = BigDecimal.ZERO;
+        while (iteratorTSD.hasNext()) {
+            Double duration = iteratorTSD.next().getDuration();
+            if (duration != null) {
+                summDuration = summDuration.add(BigDecimal.valueOf(duration));
+            }
+        }
+
+        String duration = summDuration.setScale(isIntegerValue(summDuration) ? 0 : 1, BigDecimal.ROUND_HALF_UP).toString();
+        putIfIsNotBlank(FIRST, result, SUMM_DURATION, duration);
+
         return result;
     }
 
@@ -193,5 +211,9 @@ public class TimeSheetSender extends MailSender<TimeSheetForm> {
         if (StringUtils.isNotBlank(value)) {
             result.put(i, key, value);
         }
+    }
+
+    private boolean isIntegerValue(BigDecimal bd) {
+        return bd.signum() == 0 || bd.scale() <= 0 || bd.stripTrailingZeros().scale() <= 0;
     }
 }

@@ -8,6 +8,8 @@ public class Report05 extends BaseReport {
 
     private Boolean showInactiveEmployees = false;
 
+    private String comment;
+
     @Override
     public String getJRName() {
         return jrName;
@@ -34,5 +36,13 @@ public class Report05 extends BaseReport {
 
     public void setShowInactiveEmployees(Boolean showInactiveEmployees) {
         this.showInactiveEmployees = showInactiveEmployees;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 }

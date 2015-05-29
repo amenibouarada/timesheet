@@ -1,6 +1,6 @@
 package com.aplana.timesheet.service.MailSenders;
 
-import com.aplana.timesheet.properties.TSPropertyProvider;
+import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.SendMailService;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
@@ -23,7 +23,7 @@ public abstract class AbstractSenderWithCcAddress<T> extends AbstractSenderWithA
         super(sendMailService, propertyProvider);
     }
 
-    final protected List<Mail> getMailList(T params) {
+    protected final List<Mail> getMailList(T params) {
         List<Mail> mailList = getMainMailList(params);
         String ccEmail = getCcEmail(params);
         addAddressToCcEmails(mailList, ccEmail);
@@ -31,7 +31,7 @@ public abstract class AbstractSenderWithCcAddress<T> extends AbstractSenderWithA
         return mailList;
     }
 
-    final protected List<Mail> addAddressToCcEmails(List<Mail> mailList, String ccEmail) {
+    protected final List<Mail> addAddressToCcEmails(List<Mail> mailList, String ccEmail) {
         for (Mail mail : mailList) {
             ArrayList<String> emails = Lists.newArrayList(mail.getCcEmails());
             emails.add(ccEmail);
@@ -41,7 +41,7 @@ public abstract class AbstractSenderWithCcAddress<T> extends AbstractSenderWithA
         return mailList;
     }
 
-    final protected Iterable<String> getNotBlankEmails(Collection<String> ccEmails) {
+    protected final Iterable<String> getNotBlankEmails(Collection<String> ccEmails) {
         return Iterables.filter(ccEmails, new Predicate<String>() {
             @Override
             public boolean apply(@Nullable String email) {

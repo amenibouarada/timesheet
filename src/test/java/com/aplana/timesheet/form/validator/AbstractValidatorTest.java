@@ -35,7 +35,7 @@ public class AbstractValidatorTest {
         public void validate(Object o, Errors errors) {
         }
     }
-    // создана не абстарактна форма для тестирования
+    // создана не абстарактная форма для тестирования
     private class AbstractForm extends CommonAbstractForm{
         Integer year;
         Integer month;
@@ -86,93 +86,131 @@ public class AbstractValidatorTest {
     }
 
     @Test
-    public void testValidateYear(){
-        abstractValidator.validateYear(2013, errors); // нет ошибок
+    public void testValidateYear1(){
+        abstractValidator.validateYear(2013, errors);
         assertEquals(0, errors.getErrorCount());
-        abstractValidator.validateYear(null, errors); // +1 ошибка
+    }
+    @Test
+    public void testValidateYear2(){
+        abstractValidator.validateYear(null, errors);
         assertEquals(1, errors.getErrorCount());
+    }
+    @Test
+    public void testValidateYear3(){
         when(calendarServiceMock.yearValid((Integer) any())).thenReturn(false);
-        abstractValidator.validateYear(2013, errors); // +1 ошибка
-        assertEquals(2, errors.getErrorCount());
+        abstractValidator.validateYear(2013, errors);
+        assertEquals(1, errors.getErrorCount());
     }
 
     @Test
-    public void testValidatePeriod(){
+    public void testValidatePeriod1(){
+        Timestamp date = new Timestamp((new Date()).getTime());
+        abstractValidator.validatePeriod(date, date, errors);
+        assertEquals(0, errors.getErrorCount());
+    }
+    @Test
+    public void testValidatePeriod2(){
         Timestamp fromDate = new Timestamp((new Date()).getTime() + 1);
         Timestamp toDate = new Timestamp((new Date()).getTime());
-        abstractValidator.validatePeriod(fromDate, fromDate, errors); // нет ошибок
-        assertEquals(0, errors.getErrorCount());
-        abstractValidator.validatePeriod(fromDate, toDate, errors); // +1 ошибка
+        abstractValidator.validatePeriod(fromDate, toDate, errors);
         assertEquals(1, errors.getErrorCount());
     }
 
     @Test
-    public void testValidateDateExistsInCalendar(){
+    public void testValidateDateExistsInCalendar1(){
         Timestamp date = new Timestamp((new Date()).getTime());
-        abstractValidator.validateDateExistsInCalendar(date, errors);  // нет ошибок
+        abstractValidator.validateDateExistsInCalendar(date, errors);
         assertEquals(0, errors.getErrorCount());
+    }
+    @Test
+    public void testValidateDateExistsInCalendar2(){
+        Timestamp date = new Timestamp((new Date()).getTime());
         when(calendarServiceMock.find((Timestamp) any())).thenReturn(null);
-        abstractValidator.validateDateExistsInCalendar(date, errors);  // +1 ошибка
+        abstractValidator.validateDateExistsInCalendar(date, errors);
         assertEquals(1, errors.getErrorCount());
     }
 
     @Test
-    public void testValidateDatesIsNotEmpty(){
+    public void testValidateDatesIsNotEmpty1(){
         String fromDate = "21-03-2013";
         String toDate = "22-04-2013";
-        abstractValidator.validateDatesIsNotEmpty(fromDate, toDate, errors);    // нет ошибок
+        abstractValidator.validateDatesIsNotEmpty(fromDate, toDate, errors);
         assertEquals(0, errors.getErrorCount());
-        fromDate = "";
-        abstractValidator.validateDatesIsNotEmpty(fromDate, toDate, errors);    // +1 ошибка
+    }
+    @Test
+    public void testValidateDatesIsNotEmpty2(){
+        String fromDate = "";
+        String toDate = "22-04-2013";
+        abstractValidator.validateDatesIsNotEmpty(fromDate, toDate, errors);
         assertEquals(1, errors.getErrorCount());
-        toDate = "";
-        abstractValidator.validateDatesIsNotEmpty(fromDate, toDate, errors);    // +2 ошибка
-        assertEquals(3, errors.getErrorCount());
-        fromDate = "21-03-2013";
-        abstractValidator.validateDatesIsNotEmpty(fromDate, toDate, errors);    // +1 ошибка
-        assertEquals(4, errors.getErrorCount());
+    }
+    @Test
+    public void testValidateDatesIsNotEmpty3(){
+        String fromDate = "21-03-2013";
+        String toDate = "";
+        abstractValidator.validateDatesIsNotEmpty(fromDate, toDate, errors);
+        assertEquals(1, errors.getErrorCount());
+    }
+    @Test
+    public void testValidateDatesIsNotEmpty4(){
+        String fromDate = "";
+        String toDate = "";
+        abstractValidator.validateDatesIsNotEmpty(fromDate, toDate, errors);
+        assertEquals(2, errors.getErrorCount());
     }
 
     @Test
-    public void testValidateMonth(){
-        Integer year  = 2013;
-        Integer month = 1;
-        abstractValidator.validateMonth(year, month, errors);    // нет ошибок
+    public void testValidateMonth1(){
+        abstractValidator.validateMonth(2013, 1, errors);
         assertEquals(0, errors.getErrorCount());
-        month = null;
-        abstractValidator.validateMonth(year, month, errors);    // +1 ошибка
+    }
+    @Test
+    public void testValidateMonth2(){
+        abstractValidator.validateMonth(2013, null, errors);
         assertEquals(1, errors.getErrorCount());
-        month = 14;
+    }
+    @Test
+    public void testValidateMonth3(){
         when(calendarServiceMock.monthValid((Integer) any(), (Integer) any())).thenReturn(false);
-        abstractValidator.validateMonth(year, month, errors);    // +1 ошибка
-        assertEquals(2, errors.getErrorCount());
+        abstractValidator.validateMonth(2014, 14, errors);
+        assertEquals(1, errors.getErrorCount());
     }
 
     @Test
-    public void testValidateEmployee(){
-        Integer employeeId = 12;
-        abstractValidator.validateEmployeeId(employeeId, errors);
+    public void testValidateEmployee1(){
+        abstractValidator.validateEmployeeId(12, errors);
         assertEquals(0, errors.getErrorCount());
-        employeeId = null;
-        abstractValidator.validateEmployeeId(employeeId, errors);
+    }
+    @Test
+    public void testValidateEmployee2(){
+        abstractValidator.validateEmployeeId(null, errors);
         assertEquals(1, errors.getErrorCount());
-        employeeId = -12;
-        abstractValidator.validateEmployeeId(employeeId, errors);
-        assertEquals(2, errors.getErrorCount());
+    }
+    @Test
+    public void testValidateEmployee3(){
+        abstractValidator.validateEmployeeId(-12, errors);
+        assertEquals(1, errors.getErrorCount());
     }
 
+
     @Test
-    public void testValidateDivision(){
-        Integer divisionId = 12;
-        abstractValidator.validateDivisionId(divisionId, errors);
+    public void testValidateDivision1(){
+        abstractValidator.validateDivisionId(12, errors);
         assertEquals(0, errors.getErrorCount());
-        divisionId = null;
-        abstractValidator.validateDivisionId(divisionId, errors);
-        assertEquals(1, errors.getErrorCount());
-        divisionId = -12;
-        abstractValidator.validateDivisionId(divisionId, errors);
-        assertEquals(2, errors.getErrorCount());
     }
+    @Test
+    public void testValidateDivision2(){
+        abstractValidator.validateDivisionId(null, errors);
+        assertEquals(1, errors.getErrorCount());
+    }
+    @Test
+    public void testValidateDivision3(){
+         abstractValidator.validateDivisionId(-12, errors);
+        assertEquals(1, errors.getErrorCount());
+    }
+
+
+
 
 
 }

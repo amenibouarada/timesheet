@@ -16,7 +16,76 @@
 <script type="text/javascript">
     dojo.ready(function () {
         dojo.require("dijit.form.DateTextBox");
+        dojo.connect(dojo.byId("make_report_button"), "onclick", dojo.byId("make_report_button"), submitReportForm);
     });
+
+    function submitReportForm(){
+        dojo.attr(dojo.byId("make_report_button"), "disabled", "disabled");
+        clearErrorBox('errorBoxId');
+
+        var beginDateParts = dijit.byId('beginDate').getDisplayedValue().split(".");
+        var endDateParts = dijit.byId('endDate').getDisplayedValue().split(".");
+        var beginDate = new Date(beginDateParts[2], (beginDateParts[1] - 1), beginDateParts[0]);
+        var endDate = new Date(endDateParts[2], (endDateParts[1] - 1), endDateParts[0]);
+        if (beginDate.valueOf() > endDate.valueOf()){
+            alert("Дата окончания периода меньше даты начала периода");
+            dojo.removeAttr("make_report_button", "disabled");
+            return;
+        }
+
+        //Если разница в года есть запускаем обычное формирование отчета
+        var beginYear = +beginDateParts[2];
+        var endYear = +endDateParts[2];
+        if (beginYear == endYear) {
+            dojo.byId('reportForm').submit();
+            dojo.removeAttr("make_report_button", "disabled");
+            return;
+        }
+
+        if (checkReportForm()) {
+            dojo.xhrPost({
+                url: '<%= request.getContextPath()%>/managertools/report/make/4',
+                form: dojo.byId('reportForm'),
+                handleAs: "json",
+                preventCache: false,
+                load: function (response) {
+                },
+                error: function () {
+                    console.log('submitReportForm panic!');
+                    dojo.removeAttr("make_report_button", "disabled");
+                }
+            });
+            dojo.removeAttr("make_report_button", "disabled");
+        }
+    }
+
+    function checkReportForm() {
+        var result = false;
+        dojo.attr(dojo.byId("make_report_button"), "disabled", "disabled");
+        clearErrorBox('errorBoxId');
+        dojo.xhrPost({
+            url: '<%= request.getContextPath()%>/managertools/report/checkParamsReport04',
+            form: dojo.byId('reportForm'),
+            handleAs: "json",
+            preventCache: false,
+            sync: true,
+            load: function (response) {
+                if (response.result == "false") {
+                    result = false;
+                    alert(response.errorMessage);
+                    dojo.removeAttr("make_report_button", "disabled");
+                } else {
+                    result = true;
+                    alert("Отчет поставлен на выполнение, ожидайте письма со ссылкой для скачивания отчета");
+                }
+            },
+            error: function () {
+                console.log('submitReportForm Panic !');
+                dojo.removeAttr("make_report_button", "disabled");
+            }
+        });
+        return result;
+    }
 </script>
 
 <h1><fmt:message key="title.reportparams"/></h1>
@@ -27,7 +96,7 @@
 <form:form commandName="reportForm" method="post" action="${formUrl}">
 
     <c:if test="${fn:length(errors) > 0}">
-        <div class="errors_box">
+        <div id="errorBoxId" class="errors_box">
             <c:forEach items="${errors}" var="error">
                 <fmt:message key="${error.code}">
                     <fmt:param value="${error.arguments[0]}"/>
@@ -89,19 +158,21 @@
         <div class="radiogroup">
             <div class="label"><fmt:message key="report.formattitle"/></div>
             <ul class="radio">
-                <li><input type=radio name="printtype" id="printtype1" value="1" checked/><label
-                        for="printtype1">HTML</label></li>
-                <li><input type=radio name="printtype" id="printtype2" value="2"/><label for="printtype2">MS Excel</label>
+                <li><input type=radio name="printtype" id="printtype2" value="2" checked/>
+                    <label for="printtype2"><fmt:message key="label.report.excel"/></label>
                 </li>
-                <li><input type=radio name="printtype" id="printtype3" value="3"/><label for="printtype3">PDF</label>
+                <li><input type=radio name="printtype" id="printtype1" value="1" disabled/>
+                    <label for="printtype1"><fmt:message key="label.report.html"/></label>
+                </li>
+                <li><input type=radio name="printtype" id="printtype3" value="3" disabled/>
+                    <label for="printtype3"><fmt:message key="label.report.pdf"/></label>
                 </li>
             </ul>
         </div>
 
-
     </div>
 
-    <button id="make_report_button" style="width:210px" type="submit">Сформировать отчет</button>
+    <button type="button" id="make_report_button" style="width:210px">Сформировать отчет</button>
 </form:form>
 </body>
 

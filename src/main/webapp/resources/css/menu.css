@@ -1,0 +1,145 @@
+#headerMarquee {
+    overflow: hidden;
+    margin-left: 120px;
+    margin-right: 290px;
+    margin-top: 10px;
+    position: relative;
+    font-size: 13px;
+    text-align: left;
+    height: 20px;
+}
+
+#cssmenu {
+  width: auto;
+}
+#cssmenu,
+#cssmenu ul,
+#cssmenu ul li,
+#cssmenu ul li a {
+  padding: 0;
+  margin: 1px 0px;
+  line-height: 1;
+  font-weight: 500;
+  font-size: 14px;
+  color: #1a4977;
+  -webkit-transition: all ease .3s;
+  -o-transition: all ease .3s;
+  -moz-transition: all ease .3s;
+  -ms-transition: all ease .3s;
+  transition: all ease .3s;
+}
+/*
+#cssmenu:before,
+#cssmenu:after,
+#cssmenu > ul:before,
+#cssmenu > ul:after {
+  content: '';
+  display: table;
+}
+#cssmenu:after,
+#cssmenu > ul:after {
+  clear: both;
+}
+*/
+#cssmenu a {
+  /*text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);*/
+}
+#cssmenu ul {
+  background: #ffffff;
+}
+#cssmenu ul > li {
+  float: left;
+  list-style: none;
+}
+#cssmenu ul > li > a {
+  display: block;
+  text-decoration: none;
+  padding: 10px 25px;
+  position: relative;
+}
+
+#cssmenu ul > li > a:hover {
+  background: #e6e6e6;
+  -webkit-box-shadow: inset 0 0 1px #cccccc;
+  -o-box-shadow: inset 0 0 1px #cccccc;
+  -moz-box-shadow: inset 0 0 1px #cccccc;
+  -ms-box-shadow: inset 0 0 1px #cccccc;
+  box-shadow: inset 0 0 1px #cccccc;
+  -webkit-transition: all ease .3s;
+  -o-transition: all ease .3s;
+  -moz-transition: all ease .3s;
+  -ms-transition: all ease .3s;
+  transition: all ease .3s;
+}
+/*
+#cssmenu ul > li > a:hover:before {
+  content: '';
+  z-index: 2;
+  position: absolute;
+  border: 1px solid white;
+  border-top: 0;
+  border-bottom: 0;
+  border-right: 0;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: -1px;
+  opacity: .2;
+}
+#cssmenu ul > li > a:hover:after {
+  content: '';
+  z-index: 2;
+  position: absolute;
+  border: 1px solid white;
+  border-top: 0;
+  border-bottom: 0;
+  border-left: 0;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  right: -1px;
+  opacity: .2;
+}
+*/
+#cssmenu > ul > li > ul {
+  opacity: 0;
+  visibility: hidden;
+  position: absolute;
+}
+#cssmenu > ul > li:hover > ul {
+  opacity: 1;
+  visibility: visible;
+  position: absolute;
+  border-radius: 0 0 3px 3px;
+  -webkit-box-shadow: none;
+  -o-box-shadow: none;
+  -moz-box-shadow: none;
+  -ms-box-shadow: none;
+  box-shadow: none;
+}
+#cssmenu > ul > li > ul {
+  width: 250px;
+  position: absolute;
+}
+#cssmenu > ul > li > ul > li {
+  float: none;
+  position: relative;
+}
+#cssmenu > ul > li > ul > li > ul {
+  opacity: 0;
+  visibility: hidden;
+  position: absolute;
+}
+#cssmenu > ul > li > ul > li:hover > ul {
+  opacity: 1;
+  visibility: visible;
+  position: absolute;
+}
+#cssmenu > ul > li > ul > li > ul {
+  left: 250px;
+  top: 1px;
+  width: 250px;
+}
+#cssmenu > ul > li > ul > li > ul > li {
+  float: none;
+}

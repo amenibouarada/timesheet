@@ -28,6 +28,9 @@ public class EmployeeAssistant {
     @JoinColumn(name = "assistant_id", nullable = false)
     private Employee assistant;
 
+    @Column(columnDefinition = "bool")
+    private Boolean active;
+
     public Integer getId() {
         return id;
     }
@@ -50,5 +53,13 @@ public class EmployeeAssistant {
 
     public void setAssistant(Employee assistant) {
         this.assistant = assistant;
+    }
+
+    public Boolean isActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
     }
 }

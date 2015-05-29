@@ -32,7 +32,7 @@ public class VacationApprovalProcessService extends AbstractVacationApprovalProc
 
         Employee manager = vacationApproval.getManager();
 
-        if (!managerExists(manager)) {  //у линейного нет руководителя или он сам себе руководитель
+        if (!employeeHasManager(manager)) {  //у линейного нет руководителя или он сам себе руководитель
             return vacationApproval;
         }
 
@@ -65,13 +65,6 @@ public class VacationApprovalProcessService extends AbstractVacationApprovalProc
             return lineManagerApproval.getResult();
         }
 
-        /* APLANATS-865
-        Boolean manager2VacationApproval = getManager2Result(vacation);     //проверяем результат второго линейного
-        if (manager2VacationApproval != null) {
-            setFinalStatusForVacationAndSendVacationApprovedMessages(vacation, manager2VacationApproval);
-            return manager2VacationApproval;
-        }*/
-
         return null;
     }
 
@@ -91,7 +84,7 @@ public class VacationApprovalProcessService extends AbstractVacationApprovalProc
             managers.put(project.getManager().getEmail(), project.getManager());
         }
 
-        if (managerExists(vacation.getEmployee())) {
+        if (employeeHasManager(vacation.getEmployee())) {
             managers.put(vacation.getEmployee().getManager().getEmail(), vacation.getEmployee().getManager());
         }
 

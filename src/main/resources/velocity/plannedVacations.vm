@@ -1,0 +1,23 @@
+<h2 align="justify">Указанные ниже сотрудники планируют отпуска в ближайшие две недели</h2>
+<table border="2" style="padding: 5px">
+    <tr>
+        <td><b>Фамилия Имя сотрудника</b></td>
+        <td><b>Должность</b></td>
+        <td><b>Начало</b></td>
+        <td><b>Конец</b></td>
+        <td><b>Тип отпуска</b></td>
+    </tr>
+
+    #foreach($key in $paramsForGenerateBody.rowKeySet())
+        <tr>
+            <td>$paramsForGenerateBody.get($key, "employeeName")</td>
+            <td>$paramsForGenerateBody.get($key, "employeeJob")</td>
+            <td>$paramsForGenerateBody.get($key, "beginDate")</td>
+            <td>$paramsForGenerateBody.get($key, "endDate")</td>
+            <td>$paramsForGenerateBody.get($key, "vacationType")</td>
+        </tr>
+    #end
+</table>
+
+<br/><br/>
+<span style="font-size: 90%">Сформировано $forDate</span>

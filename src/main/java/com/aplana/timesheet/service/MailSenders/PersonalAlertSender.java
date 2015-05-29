@@ -2,7 +2,7 @@ package com.aplana.timesheet.service.MailSenders;
 
 import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.dao.entity.ReportCheck;
-import com.aplana.timesheet.properties.TSPropertyProvider;
+import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.SendMailService;
 import com.aplana.timesheet.util.DateTimeUtil;
 import com.google.common.base.Function;
@@ -20,6 +20,11 @@ public class PersonalAlertSender extends AbstractSenderWithAssistants<List<Repor
 
     public PersonalAlertSender(SendMailService sendMailService, TSPropertyProvider propertyProvider) {
         super(sendMailService, propertyProvider);
+        logger.info("Run sending message for: {}", getName());
+    }
+
+    final String getName() {
+        return String.format(" Оповещение о несписанной занятости (%s)", this.getClass().getSimpleName());
     }
 
     @Override
@@ -30,7 +35,7 @@ public class PersonalAlertSender extends AbstractSenderWithAssistants<List<Repor
         model.put("employee", Iterables.getFirst(mail.getEmployeeList(), null));
         model.put("timesheeturl",propertyProvider.getTimeSheetURL());
         String messageBody = VelocityEngineUtils.mergeTemplateIntoString(
-                sendMailService.velocityEngine, "alertpersonalmail.vm", model);
+                sendMailService.velocityEngine, "velocity/alertpersonalmail.vm", model);
         logger.debug("Message Body: {}", messageBody);
         try {
             message.setText(messageBody, "UTF-8", "html");
@@ -59,7 +64,7 @@ public class PersonalAlertSender extends AbstractSenderWithAssistants<List<Repor
     }
 
     private String getSubject(ReportCheck currentReportCheck) {
-        return  propertyProvider.getTimesheetMailMarker() + // APLANATS-571
+        return  propertyProvider.getTimesheetMailMarker() +
                 " Отчитаться за " + Joiner.on(", ").join(
                 Sets.newHashSet(Iterables.transform(currentReportCheck.getPassedDays(), new Function<String, String>() {
                     @Nullable @Override

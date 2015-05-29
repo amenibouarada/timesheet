@@ -130,14 +130,14 @@ public class ProjectServiceTest extends AbstractJsonTest {
 
     @Test
     public void testGetProjectListJson() throws Exception {
-        assertJsonEquals(getProjectListJson(), projectService.getProjectListJson());
+        assertJsonEquals(getProjectListJson(), projectService.getProjectListJsonOld());
     }
 
     @Test
     public void testGetProjectListAsJson() throws Exception {
         final List<Project> projects = projectDAO.getAll();
 
-        assertJsonEquals(getProjectListAsJson(projects), projectService.getProjectListAsJson(projects));
+        assertJsonEquals(getProjectListAsJson(projects), projectService.getProjectListAsJsonOld(projects));
     }
 
 }

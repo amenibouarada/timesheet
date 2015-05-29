@@ -4,12 +4,13 @@ import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.dao.entity.Region;
 import com.aplana.timesheet.dao.entity.Vacation;
 import com.aplana.timesheet.enums.VacationStatusEnum;
-import com.aplana.timesheet.properties.TSPropertyProvider;
+import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.SendMailService;
+import com.aplana.timesheet.util.DateTimeUtil;
 import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.time.DateFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,17 +22,28 @@ import java.util.List;
 /**
  * User: vsergeev
  * Date: 13.02.13
+ * Письмо отправляется, когда отпуск согласован полностью.
  */
 public class VacationApprovedSender extends AbstractVacationSenderWithCopyToAuthor {
 
     protected static final Logger logger = LoggerFactory.getLogger(VacationApprovedSender.class);
 
     private final List<String> emails;
+    final String MAIL_ACCEPT_SUBJECT = "Утвержден отпуск %s - %s";
+    final String MAIL_REFUSE_SUBJECT = "Отклонен отпуск %s - %s";
 
     public VacationApprovedSender(SendMailService sendMailService, TSPropertyProvider propertyProvider,
                                   List<String> emails) {
         super(sendMailService, propertyProvider);
         this.emails = emails;
+    }
+
+    {
+        logger.info("Run sending message for: {}", getName());
+    }
+
+    final String getName() {
+        return String.format(" Оповещение о согласовании отпуска (%s)", this.getClass().getSimpleName());
     }
 
     @Override
@@ -44,7 +56,7 @@ public class VacationApprovedSender extends AbstractVacationSenderWithCopyToAuth
         final Collection<String> ccEmails =
                 new ArrayList<String>(getAdditionalEmailsForRegion(employee.getRegion()));
 
-        ccEmails.add(getAssistantEmail(getManagersEmails(mail, employee)));
+        ccEmails.addAll(getAssistantEmail(Sets.newHashSet(mail.getToEmails())));
 
         // оповещаем отдел кадров подразделения
         if (employee.getDivision() != null) {
@@ -78,8 +90,8 @@ public class VacationApprovedSender extends AbstractVacationSenderWithCopyToAuth
     }
 
     private Table<Integer, String, String> getRejectedBody(Vacation vacation) {
-        String beginDateStr = DateFormatUtils.format(vacation.getBeginDate(), DATE_FORMAT);
-        String endDateStr = DateFormatUtils.format(vacation.getEndDate(), DATE_FORMAT);
+        String beginDateStr = DateTimeUtil.formatDateIntoViewFormat(vacation.getBeginDate());
+        String endDateStr = DateTimeUtil.formatDateIntoViewFormat(vacation.getEndDate());
 
         String messageBody = String.format("Отклонен %s сотрудника %s из г. %s на период с %s по %s",
                 vacation.getType().getValue(), vacation.getEmployee().getName(), vacation.getEmployee().getRegion().getName(), beginDateStr, endDateStr);
@@ -92,15 +104,9 @@ public class VacationApprovedSender extends AbstractVacationSenderWithCopyToAuth
         mail.setParamsForGenerateBody(getApprovedBody(vacation));
     }
 
-    private Collection<String> getAdditionalEmailsForRegion(Region region) {
-        String additionalEmails = region.getAdditionalEmails();
-
-        return  (StringUtils.isNotBlank(additionalEmails)) ? Arrays.asList(additionalEmails.split("\\s*,\\s*")) : Arrays.asList(StringUtils.EMPTY);
-    }
-
     private Table<Integer, String, String> getApprovedBody(Vacation vacation) {
-        String beginDateStr = DateFormatUtils.format(vacation.getBeginDate(), DATE_FORMAT);
-        String endDateStr = DateFormatUtils.format(vacation.getEndDate(), DATE_FORMAT);
+        String beginDateStr = DateTimeUtil.formatDateIntoViewFormat(vacation.getBeginDate());
+        String endDateStr = DateTimeUtil.formatDateIntoViewFormat(vacation.getEndDate());
 
         String messageBody = String.format("Успешно согласован %s сотрудника %s из г. %s на период с %s по %s",
                 vacation.getType().getValue(), vacation.getEmployee().getName(), vacation.getEmployee().getRegion().getName(), beginDateStr, endDateStr);
@@ -116,11 +122,9 @@ public class VacationApprovedSender extends AbstractVacationSenderWithCopyToAuth
     }
 
     private String getSubject(Vacation vacation, Boolean accepted) {
-        String beginDateStr = DateFormatUtils.format(vacation.getBeginDate(), DATE_FORMAT);
-        String endDateStr = DateFormatUtils.format(vacation.getEndDate(), DATE_FORMAT);
-        return  String.format(accepted?"Согласован отпуск %s - %s":"Отклонен отпуск %s - %s", beginDateStr, endDateStr);
-//        return  String.format("Согласование %s сотрудника %s на период с %s - %s", vacation.getType().getValue(), vacation.getEmployee().getName(),
-//                        beginDateStr, endDateStr);
+        String beginDateStr = DateTimeUtil.formatDateIntoViewFormat(vacation.getBeginDate());
+        String endDateStr = DateTimeUtil.formatDateIntoViewFormat(vacation.getEndDate());
+        return  String.format(accepted?MAIL_ACCEPT_SUBJECT:MAIL_REFUSE_SUBJECT, beginDateStr, endDateStr);
     }
 
 }

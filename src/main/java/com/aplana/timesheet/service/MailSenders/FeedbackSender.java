@@ -1,9 +1,8 @@
 package com.aplana.timesheet.service.MailSenders;
 
 import com.aplana.timesheet.form.FeedbackForm;
-import com.aplana.timesheet.properties.TSPropertyProvider;
+import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.SendMailService;
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,6 +19,11 @@ public class FeedbackSender extends MailSender<FeedbackForm> {
 
     public FeedbackSender(SendMailService sendMailService, TSPropertyProvider propertyProvider) {
         super(sendMailService, propertyProvider);
+        logger.info("Run sending message for: {}", getName());
+    }
+
+    final String getName() {
+        return String.format(" Оповещения о фидбэке (%s)", this.getClass().getSimpleName());
     }
 
     @Override
@@ -55,7 +59,7 @@ public class FeedbackSender extends MailSender<FeedbackForm> {
 
         mail.setToEmails(Arrays.asList(propertyProvider.getMailProblemsAndProposalsCoaddress(params.getFeedbackType())));
         mail.setCcEmails(Arrays.asList(employeeEmail));
-        mail.setSubject(propertyProvider.getFeedbackMarker());
+        mail.setSubject(propertyProvider.getFeedbackMarker() + " Сообщение от пользователя системы списания занятости");
         mail.setFilePahts(Arrays.asList(params.getFile1Path(), params.getFile2Path()));
         mail.setPreconstructedMessageBody(
                 getMessageBody(employeeName, employeeEmail, params.getFeedbackDescription(), params.getFeedbackTypeName(), employeeDivision) );

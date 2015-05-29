@@ -6,6 +6,7 @@ import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.dao.entity.Region;
 import com.aplana.timesheet.dao.entity.ldap.EmployeeLdap;
 import com.aplana.timesheet.enums.RegionsEnum;
+import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
@@ -40,6 +41,9 @@ public class WithLdapSyncService {
 
     @Autowired
     LdapDAO ldapDAO;
+
+    @Autowired
+    TSPropertyProvider propertyProvider;
 
     @Autowired
     DivisionDAO dao;
@@ -79,7 +83,7 @@ public class WithLdapSyncService {
         logger.info("Starting synchronization other division …");
         Iterable<Division> divisions = Iterables.filter(dao.getAllDivisions(), new Predicate<Division>() {
             @Override public boolean apply(@Nullable Division input) {
-                return input.getNotToSyncWithLdap() && input.getSyncEmployye();
+                return input.getNotToSyncWithLdap() && input.getSyncEmployee();
             } });
         logger.info("Count division for sync — {}", Iterables.size(divisions));
         for (Division division : divisions) {
@@ -98,15 +102,16 @@ public class WithLdapSyncService {
         logger.info("…in DB {} divisions.", divisionsFromDB.size());
 
         for (Map division : divisions) {
-            logger.info("Searching for division \"{}\" from LDAP according one in DB…", division.get(LdapDAO.NAME));
-            Division dbDivision = findDbDivision(divisionsFromDB, LdapUtils.convertBinarySidToString((byte[]) division.get(LdapDAO.SID)));
+            logger.info("Searching for division \"{}\" from LDAP according one in DB…", division.get(propertyProvider.getLdapFieldForDivisionName()));
+            Division dbDivision = findDbDivision(divisionsFromDB, LdapUtils.convertBinarySidToString((byte[]) division.get(propertyProvider.getLdapFieldForSID())));
             logger.info("…finded division has {} id.", dbDivision == null ? null : dbDivision.getId());
             //Затем для каждого проверять существует ли данный отдел в системе
             if (dbDivision == null) {
                 logger.info("According division not founded in DB.");
                 logger.info("Creating new division in DB started...");
                 //Если не удалось найти отдел - добавить новый отдел
-                dao.save(dbDivision = createNewDivision(division));
+                dbDivision = createNewDivision(division);
+                dao.save(dbDivision);
 
                 setLeaderIfNeed(division, dbDivision);
                 logger.info("…created division saved.");
@@ -121,7 +126,7 @@ public class WithLdapSyncService {
             //Если отдел уже есть и active = true - проверить/обновить поля ldap_name, leader
             } else {
                 setLeaderIfNeed(division, dbDivision);
-                Employee employeeByObjectSid = employeeDAO.findByObjectSid((String) division.get(LdapDAO.LEADER));
+                Employee employeeByObjectSid = employeeDAO.findByObjectSid((String) division.get(propertyProvider.getLdapFieldForLeader()));
                 if (employeeByObjectSid != null && !employeeByObjectSid.getName().equals(dbDivision.getLeader())) {
                     logger.info("Divisions in LDAP and DB is not same.");
                     logger.info("Updating started...");
@@ -143,9 +148,9 @@ public class WithLdapSyncService {
 
     private void setLeaderIfNeed(Map division, Division dbDivision) {
         if (dbDivision.getLeaderId() == null) {
-            Employee leader;
-            String employeeLdap = (String) division.get(LdapDAO.LEADER);
-            if ((leader = employeeDAO.findByLdapName(employeeLdap)) == null) {
+            String employeeLdap = (String) division.get(propertyProvider.getLdapFieldForLeader());
+            Employee leader = employeeDAO.findByLdapName(employeeLdap);
+            if (leader == null) {
                 leader = employeeService.save(createUser(ldapDAO.getEmployeeByLdapName(employeeLdap), true));
             }
 
@@ -263,7 +268,7 @@ public class WithLdapSyncService {
     }
 
     private boolean checkThatLeaderInMembers(Map division, Iterable<EmployeeLdap> employyes) {
-        final EmployeeLdap employeeByLdapName = ldapDAO.getEmployeeByLdapName((String) division.get(LdapDAO.LEADER));
+        final EmployeeLdap employeeByLdapName = ldapDAO.getEmployeeByLdapName((String) division.get(propertyProvider.getLdapFieldForLeader()));
 
         Optional<EmployeeLdap> employeeLdapOptional = Iterables.tryFind(employyes, new Predicate<EmployeeLdap>() {
             @Override
@@ -341,18 +346,18 @@ public class WithLdapSyncService {
     Division createNewDivision(Map division) {
         Division dbDivision = new Division();
 
-        dbDivision.setObjectSid(LdapUtils.convertBinarySidToString((byte[]) division.get(LdapDAO.SID)));
+        dbDivision.setObjectSid(LdapUtils.convertBinarySidToString((byte[]) division.get(propertyProvider.getLdapFieldForSID())));
         logger.info("In field objectSid set \"()\" value.", dbDivision.getObjectSid());
         dbDivision.setActive(true);
         dbDivision.setNotToSyncWithLdap(false);
-        dbDivision.setSyncEmployye(true);
-        dbDivision.setLdapName((String) division.get(LdapDAO.NAME));
+        dbDivision.setSyncEmployee(true);
+        dbDivision.setLdapName((String) division.get(propertyProvider.getLdapFieldForDivisionName()));
         logger.info("In field ldapName set \"()\" value.", dbDivision.getLdapName());
 
 
         dbDivision.setName(dbDivision.getLdapName());
         dbDivision.setDepartmentName(dbDivision.getLdapName());
-        dbDivision.setLeaderId(employeeDAO.findByLdapName((String) division.get(LdapDAO.LEADER)));
+        dbDivision.setLeaderId(employeeDAO.findByLdapName((String) division.get(propertyProvider.getLdapFieldForLeader())));
         dbDivision.setLeader(dbDivision.getLeaderId() == null ? null : dbDivision.getLeaderId().getName());
         logger.info("In field leader set \"()\" value.", dbDivision.getLeader());
 

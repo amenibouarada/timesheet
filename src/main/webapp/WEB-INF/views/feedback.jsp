@@ -22,7 +22,7 @@
 		 */
 		function checkFileSize() {
             if( window.FormData === undefined ){
-                return false;   // Такой возврат не я придумал, функция так странно возвращала до меня.
+                return false;
             }
 			var file1 = feedbackForm.file1Path.files[0];
 			var file2 = feedbackForm.file2Path.files[0];
@@ -41,27 +41,30 @@
 				size2 = 0;
 			}
 			var totalSize = size1 + size2;
-			if (totalSize > 8388608) {
-				return true;
-			} else {
-				return false;
-			}
+			return totalSize > 8388608;
 		}		
 
         //проверяем и отсылаем форму
         function submitform() {
+            processing();
             var description = dojo.byId('feedbackDescription');
 
 			if (checkFileSize()) {
+                stopProcessing();
 				alert("Суммарный размер вложений превышает 8 Mb");
+                enableInput("send_button");
 				return;
 			}
-            if (description != null && description.value != "") {
-                feedbackForm.action = "feedback";
-                feedbackForm.submit();
-            } else {
+
+            if (description == null || description.value == "") {
+                stopProcessing();
                 alert("Поле 'Текст сообщения' не определено.");
+                enableInput("send_button");
+                return;
             }
+
+            feedbackForm.action = "feedback";
+            feedbackForm.submit();
         }
 
         //очищаем форму
@@ -120,6 +123,10 @@
 			disableInput('fileDelete2');
 			deleteFile('file2PathContainer');
 		}
+
+        function confirmClearWindow() {
+            return confirm("Вы действительно хотите очистить окно?");
+        }
     </script>
 
 </head>
@@ -146,8 +153,7 @@
             <tr class="time_sheet_row" id="ts_row">
                 <td width="38" class="top_align"> <!-- Тип проблемы -->
                     <form:select path="feedbackType" cssClass="activityType" cssStyle="width: 100%;" id="feedback_type"
-                                 name="feedback_type" onchange="feedbackTypeChange(this);"
-                                 onmouseover="tooltip.show(getTitle(this));" onmouseout="tooltip.hide();">
+                                 name="feedback_type" onmouseover="tooltip.show(getTitle(this));" onmouseout="tooltip.hide();">
                         <fmt:message key="feedback.type.newproposal" var="problemNewProposal"/>
                         <form:option value="1" title="${problemNewProposal}" label="${problemNewProposal}"/>
                         <fmt:message key="feedback.type.incorrectdata" var="problemIncorrectMessage"/>
@@ -201,7 +207,7 @@
 
     <div id="marg_buttons" style="margin-top:10px; margin-bottom:10px ">
         <button id="send_button" name="send_button" style="width:150px" type="button"
-                onclick="submitform()">Отправить
+                onclick="disableInput(this.id);submitform()">Отправить
         </button>
 
         <button id="clear_button" name="clear_button" style="width:150px" type="button"

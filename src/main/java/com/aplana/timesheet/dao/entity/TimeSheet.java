@@ -1,6 +1,5 @@
 package com.aplana.timesheet.dao.entity;
 
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.hibernate.annotations.ForeignKey;
 
 import javax.persistence.*;
@@ -39,6 +38,11 @@ public class TimeSheet {
     @ForeignKey(name = "FK_TIME_SHEET_EFFORT")
     private DictionaryItem effortInNextDay;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ts_type_id")
+    @ForeignKey(name = "FK_TIME_SHEET_TS_TYPE")
+    private DictionaryItem type;
+
     @OneToMany(mappedBy = "timeSheet", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @OrderBy("id asc")
     private Set<TimeSheetDetail> timeSheetDetails;
@@ -48,6 +52,17 @@ public class TimeSheet {
 
     @Column(name = "creation_date")
     private Date creationDate;
+
+    @OneToOne(mappedBy = "timeSheet", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private DeleteTimeSheetApproval deleteTimeSheetApproval;
+
+    public DictionaryItem getType() {
+        return type;
+    }
+
+    public void setType(DictionaryItem type) {
+        this.type = type;
+    }
 
     public Date getCreationDate() {
         return creationDate;
@@ -130,6 +145,16 @@ public class TimeSheet {
                 .append(" employee [").append(employee).append("]")
                 .append(" state [").append(state).append("]")
                 .append(" plan=").append(plan)
+                .append(" typeReport=").append(type)
                 .toString();
+    }
+
+
+    public DeleteTimeSheetApproval getDeleteTimeSheetApproval() {
+        return deleteTimeSheetApproval;
+    }
+
+    public void setDeleteTimeSheetApproval(DeleteTimeSheetApproval deleteTimeSheetApproval) {
+        this.deleteTimeSheetApproval = deleteTimeSheetApproval;
     }
 }

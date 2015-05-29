@@ -5,7 +5,7 @@
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
 	<import value="com.aplana.timesheet.util.DateTimeUtil"/>
-	<style name="Normal" isDefault="true" fontSize="8" pdfFontName="arial.ttf" pdfEncoding="Cp1251"/>
+	<style name="Normal" isDefault="true" fontSize="8" pdfEncoding="Cp1251"/>
 	<style name="Title" style="Normal" fontName="Arial" fontSize="26"/>
 	<style name="SubTitle" style="Normal" forecolor="#666666"/>
 	<style name="SubTitle 2" style="Normal" forecolor="#666666"/>
@@ -72,19 +72,19 @@
 				<text><![CDATA[Сотрудник]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="40124c18-d007-470b-befd-f869c224b5b7" style="Column header" x="455" y="0" width="100" height="13"/>
-				<textElement textAlignment="Center"/>
-				<text><![CDATA[Дни]]></text>
+				<reportElement uuid="e5b65ba5-f077-43f9-94c3-0783569fcd1e" style="Column header" x="179" y="0" width="107" height="13"/>
+				<textElement/>
+				<text><![CDATA[Роль]]></text>
 			</staticText>
-			<staticText>
+            <staticText>
 				<reportElement uuid="40124c18-d007-470b-befd-f869c224b5b7" style="Column header" x="286" y="0" width="169" height="13"/>
 				<textElement textAlignment="Center"/>
 				<text><![CDATA[Регион]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="e5b65ba5-f077-43f9-94c3-0783569fcd1e" style="Column header" x="179" y="0" width="107" height="13"/>
-				<textElement/>
-				<text><![CDATA[Роль]]></text>
+				<reportElement uuid="40124c18-d007-470b-befd-f869c224b5b7" style="Column header" x="455" y="0" width="100" height="13"/>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[Дни]]></text>
 			</staticText>
 		</band>
 	</columnHeader>
@@ -101,14 +101,14 @@
 				<textFieldExpression><![CDATA[$F{role}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement uuid="ac375746-2193-4435-a9d6-4d261035fd22" style="Detail" x="455" y="0" width="100" height="13"/>
-				<textElement textAlignment="Center"/>
-				<textFieldExpression><![CDATA[new SimpleDateFormat("dd-MM-yyyy").format($F{date})]]></textFieldExpression>
-			</textField>
-			<textField>
 				<reportElement uuid="ac375746-2193-4435-a9d6-4d261035fd22" style="Detail" x="286" y="0" width="169" height="13"/>
 				<textElement textAlignment="Center"/>
 				<textFieldExpression><![CDATA[$F{region_name}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd.MM.yyyy">
+				<reportElement uuid="ac375746-2193-4435-a9d6-4d261035fd22" style="Detail" x="455" y="0" width="100" height="13"/>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{date}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>

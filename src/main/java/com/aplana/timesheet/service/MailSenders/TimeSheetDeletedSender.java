@@ -2,10 +2,11 @@ package com.aplana.timesheet.service.MailSenders;
 
 import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.dao.entity.TimeSheet;
-import com.aplana.timesheet.properties.TSPropertyProvider;
+import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.SendMailService;
 import com.aplana.timesheet.util.DateTimeUtil;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
 import org.springframework.ui.velocity.VelocityEngineUtils;
 
 import javax.mail.MessagingException;
@@ -18,6 +19,11 @@ public class TimeSheetDeletedSender extends AbstractSenderWithAssistants<TimeShe
 
     public TimeSheetDeletedSender(SendMailService sendMailService, TSPropertyProvider propertyProvider) {
         super(sendMailService, propertyProvider);
+        logger.info("Run sending message for: {}", getName());
+    }
+
+    final String getName() {
+        return String.format(" Оповещение о удалении отчета о списании (%s)", this.getClass().getSimpleName());
     }
 
     @Override
@@ -31,7 +37,7 @@ public class TimeSheetDeletedSender extends AbstractSenderWithAssistants<TimeShe
         model.put("dateStr", formatDateString(mail.getDate()));
 
         String messageBody = VelocityEngineUtils.mergeTemplateIntoString(
-                sendMailService.velocityEngine, "timesheetdeleted.vm", model) +
+                sendMailService.velocityEngine, "velocity/timesheetdeleted.vm", model) +
                 mail.getPreconstructedMessageBody();
         logger.debug("Message Body: {}", messageBody);
         try {
@@ -47,17 +53,17 @@ public class TimeSheetDeletedSender extends AbstractSenderWithAssistants<TimeShe
         logger.info("Performing mailing about deleted timesheet.");
         Mail mail = new TimeSheetMail();
         mail.setToEmails(getToEmails(params));
-        mail.setCcEmails(Arrays.asList(getAssistantEmail(getManagersEmails(mail, employee))));
+        mail.setCcEmails(getAssistantEmail(Sets.newHashSet(mail.getToEmails())));
         mail.setEmployeeList(Arrays.asList(employee));
-        String date = DateTimeUtil.formatDate(params.getCalDate().getCalDate());
+        String date = DateTimeUtil.formatDateIntoDBFormat(params.getCalDate().getCalDate());
         mail.setDate(date);
-        mail.setSubject(getSubject(employee, date ));
+        mail.setSubject(getSubject(date ));
         //APLANATS-574 дополняем бэкапом
         mail.setPreconstructedMessageBody(sendMailService.initMessageBodyForReport(params));
         return Arrays.asList(mail);
     }
 
-    private String getSubject(Employee employee, String date) {
+    private String getSubject(String date) {
         return  propertyProvider.getTimesheetMailMarker() + // APLANATS-571
                 String.format(" Удален отчет за %s", date);
     }

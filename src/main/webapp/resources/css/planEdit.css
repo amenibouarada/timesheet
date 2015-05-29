@@ -1,0 +1,59 @@
+#planEditForm > table {
+    margin-bottom: 10px;
+}
+
+#planEditForm td {
+    padding: 2px;
+}
+
+#planEditForm table table {
+    width: 100%;
+}
+
+#planEditForm label {
+    padding-left: 2px;
+}
+
+#footer {
+    display: none;
+}
+
+.topAlignTD {
+    padding: 5px;
+    vertical-align: top;
+}
+.blockYearMonth {
+    float: left;
+    position: relative;
+}
+.blockElement {
+    float: left;
+    position: relative;
+    top: -8px;
+}
+
+.question-hint img {
+    vertical-align: middle;
+    width: 20px;
+    height: 20px;
+    max-height: 20px;
+    max-width: 20px;
+    margin: 5px;
+}
+
+.blockTooltip {
+    width: 20px;
+    height: 20px;
+}
+
+.classDateBlueBack {
+    background-color: #CDECFF !important;
+}
+
+.classDateRedBack {
+    background-color: #FFD8EE !important;
+}
+
+.classDateGrayBack {
+    background-color: #E9E9E9 !important;
+}

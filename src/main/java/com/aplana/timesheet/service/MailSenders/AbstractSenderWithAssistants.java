@@ -2,13 +2,13 @@ package com.aplana.timesheet.service.MailSenders;
 
 import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.dao.entity.EmployeeAssistant;
-import com.aplana.timesheet.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.ManagerRoleNameService;
 import com.aplana.timesheet.service.SendMailService;
 import com.aplana.timesheet.service.VacationApprovalService;
-import com.google.common.collect.Sets;
-import org.apache.commons.lang.StringUtils;
+import com.aplana.timesheet.system.properties.TSPropertyProvider;
 
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -26,20 +26,19 @@ public abstract class AbstractSenderWithAssistants<T> extends MailSender<T> {
         super(sendMailService, propertyProvider, vacationApprovalService, managerRoleNameService);
     }
 
-    protected final String getAssistantEmail(Set<String> managersEmails) {
-        final EmployeeAssistant employeeAssistant = sendMailService.getEmployeeAssistant(managersEmails);
-
-        return (employeeAssistant == null) ? StringUtils.EMPTY : employeeAssistant.getAssistant().getEmail();
-    }
-
-    protected final Set<String> getManagersEmails(Mail mail, Employee employee) {
-        final Set<String> emails = Sets.newHashSet(mail.getToEmails());
-
-        if (employee.getManager() != null || employee.getManager2() != null) {
-            emails.remove(employee.getEmail());
+    protected final Set<String> getAssistantEmail(Set<String> managersEmails) {
+        final Set<String> emails = new HashSet<String>();
+        final List<EmployeeAssistant> employeeAssistantList = sendMailService.getEmployeeAssistant(managersEmails);
+        if(employeeAssistantList == null) return null;
+        for (EmployeeAssistant employeeAssistant : employeeAssistantList){
+            if (employeeAssistant != null && (employeeAssistant.isActive() == null || employeeAssistant.isActive())){
+                Employee assistant = employeeAssistant.getAssistant();
+                if (assistant.getEndDate() == null){
+                    emails.add(employeeAssistant.getAssistant().getEmail());
+                }
+            }
         }
-        emails.remove(TSPropertyProvider.getMailFromAddress());
-
         return emails;
     }
+
 }

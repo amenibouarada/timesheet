@@ -1,5 +1,6 @@
 package com.aplana.timesheet.service;
 
+import com.aplana.timesheet.dao.EmployeeDAO;
 import com.aplana.timesheet.dao.LdapDAO;
 import com.aplana.timesheet.dao.ProjectRolePermissionsDAO;
 import com.aplana.timesheet.dao.entity.*;
@@ -24,10 +25,13 @@ public class EmployeeLdapService extends AbstractServiceWithTransactionManagemen
 
     @Autowired
     private DivisionService divisionService;
+
     @Autowired
     private EmployeeService employeeService;
+
     @Autowired
     private ProjectRoleService projectRoleService;
+
     @Autowired
     private ProjectManagerService projectManagerService;
 
@@ -40,10 +44,15 @@ public class EmployeeLdapService extends AbstractServiceWithTransactionManagemen
     @Autowired
     private ProjectRolePermissionsDAO projectRolePermissionsDAO;
 
+    private enum EmployeeType {
+        EMPLOYEE,
+        DIVISION_MANAGER,
+        NEW_EMPLOYEE
+    }
 
-    public void updateSidDisableddUsersFromLdap() {
+    public void updateSidDisabledUsersFromLdap() {
         trace.append("Synchronization sid of disabled user with ldap started.\n\n");
-        List<EmployeeLdap> disabledEmployeesLdap = ldapDao.getDisabledEmployyes();
+        List<EmployeeLdap> disabledEmployeesLdap = ldapDao.getDisabledEmployees();
         TransactionStatus transactionStatus = null;
 
         try {
@@ -72,10 +81,11 @@ public class EmployeeLdapService extends AbstractServiceWithTransactionManagemen
             }
             trace.append("\n Synchronization sid of disabled user with ldap finished.\n\n");
         } catch (Exception e) {
-            logger.error(" Exception in updateSidDisableddUsersFromLdap : {}", e.getMessage());
+            logger.error(" Exception in updateSidDisabledUsersFromLdap : {}", e.getMessage());
             if (transactionStatus != null) {
                 rollback(transactionStatus);
             }
+            e.printStackTrace();
         }
     }
 
@@ -174,9 +184,7 @@ public class EmployeeLdapService extends AbstractServiceWithTransactionManagemen
         }
     }
 
-    private enum EmployeeType {
-        EMPLOYEE, DIVISION_MANAGER, NEW_EMPLOYEE
-    }
+
 
     /**
      * Отображение ProjectRole --> роль в системе списания занятости.
@@ -274,7 +282,7 @@ public class EmployeeLdapService extends AbstractServiceWithTransactionManagemen
         final TransactionStatus transactionStatus = getNewTransaction();
         try {
             //берем удаленных сотрудников из LDAP
-            List<EmployeeLdap> disabledEmployeesLdap = ldapDao.getDisabledEmployyes();
+            List<EmployeeLdap> disabledEmployeesLdap = ldapDao.getDisabledEmployees();
             logger.debug("disabled employees ldap size = {}", disabledEmployeesLdap.size());
 
             //берем сотрудников из БД
@@ -396,6 +404,7 @@ public class EmployeeLdapService extends AbstractServiceWithTransactionManagemen
             if (transactionStatus != null) {
                 rollback(transactionStatus);
             }
+            e.printStackTrace();
         }
 
         return errors.toString();
@@ -438,6 +447,7 @@ public class EmployeeLdapService extends AbstractServiceWithTransactionManagemen
             if (transactionStatus != null) {
                 rollback(transactionStatus);
             }
+            e.printStackTrace();
         }
     }
 
@@ -467,7 +477,7 @@ public class EmployeeLdapService extends AbstractServiceWithTransactionManagemen
                 for (EmployeeLdap employeeLdap : employeesLdap) {
                     Employee employee = createAndFillEmployee(employeeLdap, errors, EmployeeType.EMPLOYEE);
 
-                    if (employee.getManager() != null) {
+                    if (employee.getManager() != null ) {
                         empsToSync.add(employee);
                     }
                 }
@@ -487,11 +497,15 @@ public class EmployeeLdapService extends AbstractServiceWithTransactionManagemen
             if (transactionStatus != null) {
                 rollback(transactionStatus);
             }
+            e.printStackTrace();
         }
 
         return errors.toString();
 
     }
+
+    @Autowired
+    private EmployeeDAO employeeDAO;
 
     private Employee createAndFillEmployee(
             EmployeeLdap employeeLdap,
@@ -506,17 +520,17 @@ public class EmployeeLdapService extends AbstractServiceWithTransactionManagemen
         employee.setObjectSid(employeeLdap.getObjectSid());
         employee.setJiraName(employeeLdap.getMailNickname());
 
-        // Роли из БД по умолчанию ставятся только для новых сотрудников
-        if ((employee.getJob() != null) && (employeeType.equals(EmployeeType.NEW_EMPLOYEE))) {
-            setEmployeePermission(employee);
-        } else {
-            employee.setPermissions(new HashSet<Permission>());
-        }
-
         findAndFillJobField(employeeLdap, errors, employee);
         // важно установить Region и Division до установки Manager
         findAndFillRegionField(employeeLdap, errors, employee);
         findAndFillDivisionField(employeeLdap, employee, errors);
+
+        // Роли из БД по умолчанию ставятся только для новых сотрудников
+        if (!employeeDAO.isNotToSync(employee)){
+            setEmployeePermission(employee);
+        } else {
+            employee.setPermissions(new HashSet<Permission>());
+        }
 
         switch (employeeType) {
             case NEW_EMPLOYEE:
@@ -533,6 +547,7 @@ public class EmployeeLdapService extends AbstractServiceWithTransactionManagemen
                     empInDb = employeeService.findByEmail(employeeLdap.getEmail());
                 }
                 if (empInDb != null) {
+                    employee.setBillable(empInDb.isBillable());
                     employee.setId(empInDb.getId());
                     employee.setStartDate(empInDb.getStartDate());
                     employee.getPermissions().addAll(empInDb.getPermissions());
@@ -626,8 +641,6 @@ public class EmployeeLdapService extends AbstractServiceWithTransactionManagemen
             employee.setJob(job);
         } else {
             employee.setJob(projectRoleService.getUndefinedRole());
-            // TODO fix?
-//            errors.append("job not found for employee " + employeeLdap.getDisplayName());
         }
     }
 

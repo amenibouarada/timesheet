@@ -3,7 +3,6 @@ package com.aplana.timesheet.dao;
 import com.aplana.timesheet.dao.entity.Calendar;
 import com.aplana.timesheet.dao.entity.Holiday;
 import com.aplana.timesheet.dao.entity.Region;
-import com.aplana.timesheet.exception.service.CalendarServiceException;
 import com.aplana.timesheet.util.DateTimeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,10 +13,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
-import javax.persistence.criteria.*;
 import javax.validation.constraints.NotNull;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -31,6 +28,13 @@ public class CalendarDAO {
 
     private static final String HOLIDAYS_FOR_REGION_BETWEEN_DATES = String.format(
             "from Holiday as h where ((h.calDate.calDate between :%s and :%s) and (h.region is null or h.region = :%s))",
+            BEGIN_DATE,
+            END_DATE,
+            REGION
+    );
+
+    private static final String HOLIDAYS_ONLY_FOR_REGION_BETWEEN_DATES = String.format(
+            "from Holiday as h where ((h.calDate.calDate between :%s and :%s) and h.region = :%s)",
             BEGIN_DATE,
             END_DATE,
             REGION
@@ -126,12 +130,12 @@ public class CalendarDAO {
      * @return Calendar
      */
     public Calendar getLastWorkDay(Calendar day) {
-        Date monthLastDay = DateTimeUtil.stringToTimestamp(DateTimeUtil.endMonthDay(day.getCalDate()));
+        Date monthLastDay = DateTimeUtil.stringToTimestamp(DateTimeUtil.getLastDayOfMonth(day.getCalDate()));
 
         Query query = entityManager.createQuery(
                 "select max(c) from Calendar as c " +
-                "left outer join c.holidays as h with h.region.id is null " +
-                "where c.calDate<=:calDatePar and h.id is null "
+                        "left outer join c.holidays as h with h.region.id is null " +
+                        "where c.calDate<=:calDatePar and h.id is null "
         ).setParameter("calDatePar", monthLastDay);
 
         return (Calendar) query.getSingleResult();
@@ -176,6 +180,21 @@ public class CalendarDAO {
         return query.getResultList();
     }
 
+    /**
+     * Возвращает список праздничных дней только для указанного региона
+     * @param dateFrom
+     * @param dateTo
+     * @param region
+     * @return
+     */
+    public List<Holiday> getHolidaysOnlyForRegion(Date dateFrom, Date dateTo, Region region) {
+        final Query query = entityManager.createQuery(HOLIDAYS_ONLY_FOR_REGION_BETWEEN_DATES);
+
+        setParametersForHolidaysQuery(dateFrom, dateTo, region, query);
+
+        return query.getResultList();
+    }
+
     private void setParametersForHolidaysQuery(Date beginDate, Date endDate, Region region, Query query) {
         query.setParameter(BEGIN_DATE, beginDate)
              .setParameter(END_DATE, endDate)
@@ -186,6 +205,16 @@ public class CalendarDAO {
     public List<Holiday> getHolidaysInInterval(Date beginDate, Date endDate){
         Query query = entityManager.createQuery(
                 "select h from Holiday as h where h.calDate.calDate between :beginDate AND :endDate AND h.region is null")
+                .setParameter("beginDate", beginDate)
+                .setParameter("endDate", endDate);
+
+        return query.getResultList();
+    }
+
+    // возвращает все выходные дни без региональных
+    public List<Holiday> getAllHolidaysInInterval(Date beginDate, Date endDate){
+        Query query = entityManager.createQuery(
+                "select h from Holiday as h where h.calDate.calDate between :beginDate AND :endDate")
                 .setParameter("beginDate", beginDate)
                 .setParameter("endDate", endDate);
 
@@ -209,8 +238,8 @@ public class CalendarDAO {
 
     public int getWorkDaysCountForRegion(Region region, Integer year, Integer month, @Nullable Date fromDate,
                                          @Nullable Date toDate) {
-        final Date qFromDate = (fromDate != null) ? fromDate : DateTimeUtil.stringToDateForDB(DateTimeUtil.MIN_DATE);
-        final Date qToDate = (toDate != null) ? toDate : DateTimeUtil.stringToDateForDB(DateTimeUtil.MAX_DATE);
+        final Date qFromDate = (fromDate != null) ? fromDate : DateTimeUtil.parseStringToDateForDB(DateTimeUtil.MIN_DATE);
+        final Date qToDate = (toDate != null) ? toDate : DateTimeUtil.parseStringToDateForDB(DateTimeUtil.MAX_DATE);
 
         final Query query = entityManager.createQuery(
                         " select count(c)-count(h)" +
@@ -225,58 +254,6 @@ public class CalendarDAO {
                 .setParameter("dateEnd", qToDate);
 
         return ((Long) query.getSingleResult()).intValue();
-
-/*  проблемы вставки условий в секцию left join on (xxx = 1 and yyy = 2) */
-/*        final CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        final CriteriaQuery<Object> criteriaQuery = criteriaBuilder.createQuery();
-        final Root<Calendar> from = criteriaQuery.from(Calendar.class);
-        final Join<Object, Object> join = from.join("holidays", JoinType.LEFT);
-        final CriteriaQuery<Object> select = criteriaQuery.select(criteriaBuilder.diff(
-                criteriaBuilder.count(from),
-                criteriaBuilder.count(join)
-        ));
-        final List<Predicate> predicates = new ArrayList<Predicate>();
-        final Path<Date> calDatePath = from.get("calDate");
-        final Path<Region> regionPath = join.get("region");
-
-        predicates.add(
-                criteriaBuilder.and(
-                        criteriaBuilder.equal(
-                                criteriaBuilder.function("YEAR", Integer.class, calDatePath),
-                                year
-                        ),
-                        criteriaBuilder.equal(
-                                criteriaBuilder.function("MONTH", Integer.class, calDatePath),
-                                month
-                        ),
-                        criteriaBuilder.or(
-                                criteriaBuilder.isNull(regionPath),
-                                criteriaBuilder.equal(regionPath, region)
-                        )
-                )
-        );
-
-        if (fromDate != null) {
-            predicates.add(
-                    criteriaBuilder.greaterThanOrEqualTo(
-                            calDatePath,
-                            fromDate
-                    )
-            );
-        }
-
-        if (toDate != null) {
-            predicates.add(
-                    criteriaBuilder.lessThanOrEqualTo(
-                            calDatePath,
-                            toDate
-                    )
-            );
-        }
-
-        select.where(predicates.toArray(new Predicate[predicates.size()]));
-
-        return ((Long) entityManager.createQuery(select).getSingleResult()).intValue();*/
     }
 
     public Date tryGetMaxDateMonth(Integer year, Integer month) {
@@ -321,6 +298,33 @@ public class CalendarDAO {
                 .setParameter("month", month)
                 .setParameter("toDate", toDate);
 
+        return ((Long) query.getSingleResult()).intValue();
+    }
+
+    public Integer getCountWorkDaysForPeriodForRegion(Date begin, Date end, Region region) {
+        final Query query = entityManager.createQuery(
+                "select count(c) " +
+                        " from Calendar c" +
+                        " left join c.holidays h " +
+                        " where c.calDate >= :begin and c.calDate <= :endDate " +
+                        " and h is null" +
+                        " and (h.region.id is null or h.region = :region)");
+        query.setParameter("begin",begin);
+        query.setParameter("endDate",end);
+        query.setParameter("region", region);
+        return ((Long) query.getSingleResult()).intValue();
+    }
+    public Integer getCountDaysForPeriodForRegionExConsiderHolidays(Date begin, Date end, Region region) {
+        final Query query = entityManager.createQuery(
+                "select count(c) " +
+                        " from Calendar c" +
+                        " left join c.holidays h " +
+                        " where c.calDate >= :begin and c.calDate <= :endDate " +
+                        " and (h is null or h.consider = true) " +
+                        " and (h.region is null or h.region = :region)");
+        query.setParameter("begin",begin);
+        query.setParameter("endDate",end);
+        query.setParameter("region", region);
         return ((Long) query.getSingleResult()).intValue();
     }
 }

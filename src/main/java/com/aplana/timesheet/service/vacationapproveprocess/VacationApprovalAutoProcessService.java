@@ -131,12 +131,13 @@ public class VacationApprovalAutoProcessService extends AbstractVacationApproval
      */
     private Boolean getProjectManagerApproveResult(List<VacationApproval> projectManagerApprovals, Project project) throws VacationApprovalServiceException {
         if (project != null) {
-            if (project.getManager() != null) {
-                Integer projectManagerId = project.getManager().getId();
+            Employee manager = project.getManager();
+            if (manager != null) {
+                Integer projectManagerId = manager.getId();
                 for (VacationApproval approval : projectManagerApprovals) {
                     Integer managerId = approval.getManager().getId();
                     if (managerId.equals(projectManagerId)) {
-                        return approval.getResult();
+                        return (manager.getEndDate() != null  && projectManagerApprovals.size() == 1) ? true : approval.getResult();
                     }
                 }
 
@@ -159,16 +160,10 @@ public class VacationApprovalAutoProcessService extends AbstractVacationApproval
             return true;
         }
 
-        if (!managerExists(vacation.getEmployee())) {      //если линейных нет или сам себе линейный - утверждаем без проверок
+        if (!employeeHasManager(vacation.getEmployee())) {      //если линейных нет или сам себе линейный - утверждаем без проверок
             setFinalStatusForVacationAndSendVacationApprovedMessages(vacation, true);
             return true;
         }
-
-        /* APLANATS-865
-         Boolean manager2Result = getManager2Result(vacation);       //если второй линейный отказал - сразу возвращаем отказ
-        if (BooleanUtils.isFalse(manager2Result)) {
-            return manager2Result;
-        }*/
 
         int lineManagerDaysToApprove = getControlTimeForLineManager(vacation);
         VacationApproval lineManagerApproval = getTopLineManagerApproval(vacation);
@@ -181,10 +176,6 @@ public class VacationApprovalAutoProcessService extends AbstractVacationApproval
         if (lineManagerHasTimeToApproveVacation(lineManagerDaysToApprove, lineManagerApproval)) { //у линейного еще есть время подумать
             return lineManagerApproval.getResult();
         }
-
-        /*if (manager2Result != null) {       //после проверки всех линейных, если они не отвечают и если второй линейный вынес решение - возвращаем его
-            return manager2Result;
-        }*/
 
         VacationApproval approvalResult = prepareApproveLetterForLineManagerOfEmployee(vacation, lineManagerApproval.getManager());
         if (approvalResult != null) {
@@ -217,7 +208,7 @@ public class VacationApprovalAutoProcessService extends AbstractVacationApproval
 
         Employee manager = vacationApproval.getManager();
 
-        if (!managerExists(manager)) {  //у линейного нет руководителя или он сам себе руководитель
+        if (!employeeHasManager(manager)) {  //у линейного нет руководителя или он сам себе руководитель
             return vacationApproval;
         }
 

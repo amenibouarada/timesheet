@@ -18,9 +18,8 @@ import java.util.Map;
  * @author eshangareev
  * @version 1.0
  */
-/*@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = {"classpath:WEB-INF/spring/testApplicationContext.xml"})
-public class WithLdapSyncServiceTest {
+/*
+public class WithLdapSyncServiceTest extends AbstractTest {
     @Autowired
     private WithLdapSyncService service;
 

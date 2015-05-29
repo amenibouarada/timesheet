@@ -1,16 +1,11 @@
 package com.aplana.timesheet.service;
 
+import com.aplana.timesheet.AbstractTest;
 import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.dao.entity.Permission;
 import com.aplana.timesheet.dao.entity.ProjectRole;
-import junit.framework.TestCase;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.transaction.TransactionConfiguration;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
 
@@ -20,12 +15,7 @@ import static org.mockito.Mockito.*;
  * @author iziyangirov
  *
 */
-
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = {"classpath:WEB-INF/spring/testApplicationContext.xml"})
-@Transactional
-@TransactionConfiguration(defaultRollback = true)
-public class EmployeeLdapServiceTest extends TestCase {
+public class EmployeeLdapServiceTest extends AbstractTest {
 
     @Autowired
     EmployeeLdapService employeeLdapService;

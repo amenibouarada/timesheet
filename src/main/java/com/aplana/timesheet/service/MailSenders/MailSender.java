@@ -1,16 +1,14 @@
 package com.aplana.timesheet.service.MailSenders;
 
-import com.aplana.timesheet.properties.TSPropertyProvider;
-import com.aplana.timesheet.service.ManagerRoleNameService;
-import com.aplana.timesheet.service.OvertimeCauseService;
-import com.aplana.timesheet.service.SendMailService;
-import com.aplana.timesheet.service.VacationApprovalService;
+import com.aplana.timesheet.service.*;
+import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.mail.*;
 import javax.mail.internet.AddressException;
@@ -18,14 +16,11 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 public class MailSender<T> {
 
     protected static final Logger logger = LoggerFactory.getLogger(MailSender.class);
-    protected static final String DATE_FORMAT = "dd.MM.yyyy";
     protected static final String MAIL_BODY = "mail_body";
     protected static final int FIRST = 0;
 
@@ -35,19 +30,19 @@ public class MailSender<T> {
     protected ManagerRoleNameService managerRoleNameService;
     protected OvertimeCauseService overtimeCauseService;
 
-    public MailSender(SendMailService sendMailService, TSPropertyProvider propertyProvider) { //TODO костыль
+    public MailSender(SendMailService sendMailService, TSPropertyProvider propertyProvider) {
         this.sendMailService = sendMailService;
         this.propertyProvider = propertyProvider;
     }
 
-    public MailSender(SendMailService sendMailService, TSPropertyProvider propertyProvider, OvertimeCauseService overtimeCauseService) { //TODO костыль
+    public MailSender(SendMailService sendMailService, TSPropertyProvider propertyProvider, OvertimeCauseService overtimeCauseService) {
         this.sendMailService = sendMailService;
         this.propertyProvider = propertyProvider;
         this.overtimeCauseService = overtimeCauseService;
     }
 
     public MailSender(SendMailService sendMailService, TSPropertyProvider propertyProvider,
-                      VacationApprovalService vacationApprovalService, ManagerRoleNameService managerRoleNameService) { //TODO костыль
+                      VacationApprovalService vacationApprovalService, ManagerRoleNameService managerRoleNameService) {
         this.sendMailService = sendMailService;
         this.propertyProvider = propertyProvider;
         this.vacationApprovalService = vacationApprovalService;
@@ -83,7 +78,7 @@ public class MailSender<T> {
                 }
 
                 initMessageBody(mail, message);
-
+                debugSendToMail(message);
                 logger.info("Sending message.");
                 if (Boolean.parseBoolean(propertyProvider.getMailSendEnable())) {
                     transport.sendMessage(message, message.getAllRecipients());
@@ -113,6 +108,14 @@ public class MailSender<T> {
         }
     }
 
+    private void debugSendToMail(Message message) throws MessagingException {
+        logger.info("Mail will be sent from: {}", Arrays.toString(message.getFrom()));
+        logger.info("Mail will be sent to: {}", Arrays.toString(message.getRecipients(MimeMessage.RecipientType.TO)));
+        logger.info("Copy mail will be sent to: {}", message.getRecipients(MimeMessage.RecipientType.CC) != null ?
+                Arrays.toString(message.getRecipients(MimeMessage.RecipientType.CC)) :
+                "");
+    }
+
     private String getDebugInfo(Message message){
         StringBuilder additionalMessageBody = new StringBuilder();
         try{
@@ -135,7 +138,8 @@ public class MailSender<T> {
     private void addDebugInfoAndChangeReceiver(MimeMessage message, String mailDebugAddress){
         try{
             String debugInfo = getDebugInfo(message);
-            message.setSubject("[TSDEBUG] " + message.getSubject(), "UTF-8");
+            String charset = "UTF-8";
+            message.setSubject("[TSDEBUG] " + message.getSubject(), charset);
             message.setRecipients(MimeMessage.RecipientType.TO, InternetAddress.parse(mailDebugAddress));
             message.setRecipients(MimeMessage.RecipientType.CC, "");
             if (message.getContent() instanceof MimeMultipart){   // если это сложное письмо (напр, с вл. файлами)
@@ -151,9 +155,9 @@ public class MailSender<T> {
                     }
                 }
 
-                message.setText(builder.toString(), "UTF-8", "html");
+                message.setText(builder.toString(), charset, "html");
             } else{                                               // обычный текст
-                message.setText(debugInfo + message.getContent(), "UTF-8", "html");
+                message.setText(debugInfo + message.getContent(), charset, "html");
             }
         }catch (MessagingException ex){
             logger.error("Error while init message recipients.", ex);
@@ -166,6 +170,20 @@ public class MailSender<T> {
         InternetAddress fromAddr = initFromAddresses(mail);
         InternetAddress[] ccAddresses = initAddresses(mail.getCcEmails());
         InternetAddress[] toAddresses = initAddresses(mail.getToEmails());
+        InternetAddress[] ccAssistantAddresses = initAddresses(getAssistantMail(mail.getToEmails()));
+        InternetAddress[] ccAddressesWithAssistant;
+        if (ccAddresses != null && ccAssistantAddresses != null) {
+            ccAddressesWithAssistant = new InternetAddress[ccAddresses.length+ccAssistantAddresses.length];
+            System.arraycopy(ccAddresses,0,ccAddressesWithAssistant,0,ccAddresses.length);
+            System.arraycopy(ccAssistantAddresses,0,ccAddressesWithAssistant,ccAddresses.length,ccAssistantAddresses.length);
+
+        } else if(ccAddresses != null){
+            ccAddressesWithAssistant = ccAddresses;
+        } else {
+            ccAddressesWithAssistant = ccAssistantAddresses;
+        }
+        logger.debug("CC AssistantAddresses: {}", Arrays.toString(ccAssistantAddresses));
+        logger.debug("CC AddressesWithAssistant: {}", Arrays.toString(ccAddressesWithAssistant));
         logger.debug("CC Addresses: {}", Arrays.toString(ccAddresses));
         logger.debug("TO Addresses: {}", Arrays.toString(toAddresses));
 
@@ -180,12 +198,21 @@ public class MailSender<T> {
 
             message.setRecipients(MimeMessage.RecipientType.TO, toAddresses);
             if (ccAddresses != null) {
-                message.setRecipients(MimeMessage.RecipientType.CC, ccAddresses);
+                message.setRecipients(MimeMessage.RecipientType.CC, ccAddressesWithAssistant);
             }
             message.setFrom(fromAddr);
         } catch (MessagingException e) {
             logger.error("Error while init message recipients.", e);
          }
+    }
+
+    private Iterable<String> getAssistantMail(Iterable<String> toEmails) {
+        Set<String> ccMailAss = new HashSet<String>();
+        for(String x : toEmails){
+            ccMailAss.add(x);
+        }
+        Iterable<String> ccMailAssistant = new SenderWithAssistants(sendMailService,propertyProvider).getAssistantEmail(ccMailAss);
+        return ccMailAssistant;
     }
 
     @VisibleForTesting
@@ -225,6 +252,9 @@ public class MailSender<T> {
     protected String getSubjectFormat() {
         return "%s";
     }
+
+    @Autowired
+    ReportService reportService;
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     protected void initMessageBody(Mail mail, MimeMessage message) throws MessagingException {

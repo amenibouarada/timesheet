@@ -2,7 +2,6 @@ package com.aplana.timesheet.dao;
 
 import com.aplana.timesheet.dao.entity.AvailableActivityCategory;
 import com.aplana.timesheet.dao.entity.DictionaryItem;
-import com.aplana.timesheet.dao.entity.Project;
 import com.aplana.timesheet.dao.entity.ProjectRole;
 import org.springframework.stereotype.Repository;
 
@@ -34,30 +33,7 @@ public class AvailableActivityCategoryDAO {
         ).setParameter("actType", actType).setParameter("projectRole", projectRole);
 
         return query.getResultList();
-	}
-	
-	/**
-	 * Возвращает доступные категории активности
-	 * @param actType
-	 * 			Тип активности.
-	 * @param project
-	 * 			Проект\Пресейл.
-	 * @param projectRole
-	 * 			Проектная роль.
-	 * @return List<AvailableActivityCategory>
-	 * 			Список доступных категорий активности.
-	 */
-	@SuppressWarnings("unchecked")
-	public List<AvailableActivityCategory> getAvailableActivityCategories(
-           DictionaryItem actType, Project project, ProjectRole projectRole
-    ) {
-		Query query = entityManager.createQuery(
-                "from AvailableActivityCategory as ac " +
-                        "where ac.actType=:actType and ac.project=:project and ac.projectRole=:projectRole"
-        ).setParameter("actType", actType).setParameter("project", project).setParameter("projectRole", projectRole);
-
-        return query.getResultList();
-	}
+    }
 
     public List<AvailableActivityCategory> getAllAvailableActivityCategories(){
         Query query = entityManager.createQuery("from AvailableActivityCategory as aac");

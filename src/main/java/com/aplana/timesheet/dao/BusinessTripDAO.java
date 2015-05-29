@@ -28,7 +28,7 @@ public class BusinessTripDAO {
     }
 
     public void setBusinessTrip(BusinessTrip businessTrip){
-        BusinessTrip businessTripMerged = entityManager.merge(businessTrip);
+        entityManager.merge(businessTrip);
         entityManager.flush();
     }
 
@@ -60,7 +60,8 @@ public class BusinessTripDAO {
                 .getResultList();
     }
 
-    public Boolean isDayBusinessTrip(Employee employee, Date date){
+
+    public Boolean isBusinessTripDay(Employee employee, Date date){
         Query query = entityManager.createQuery(
                 "from BusinessTrip as bt where bt.employee = :employee and :date between bt.beginDate and bt.endDate"
         ).setParameter("employee", employee).setParameter("date", date);

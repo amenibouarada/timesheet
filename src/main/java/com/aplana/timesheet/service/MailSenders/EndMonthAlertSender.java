@@ -2,7 +2,7 @@ package com.aplana.timesheet.service.MailSenders;
 
 import com.aplana.timesheet.dao.entity.Division;
 import com.aplana.timesheet.dao.entity.ReportCheck;
-import com.aplana.timesheet.properties.TSPropertyProvider;
+import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.SendMailService;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
@@ -21,13 +21,18 @@ public class EndMonthAlertSender extends MailSender<List<ReportCheck>> {
 
     public EndMonthAlertSender(SendMailService sendMailService, TSPropertyProvider propertyProvider) {
         super(sendMailService, propertyProvider);
+        logger.info("Run sending message for: {}", getName());
+    }
+
+    final String getName() {
+        return String.format("Напоминание о списании занятости (%s)", this.getClass().getSimpleName());
     }
 
     @Override
     @SuppressWarnings({"rawtypes", "unchecked"})
     protected void initMessageBody(Mail mail, MimeMessage message) {
         String messageBody = VelocityEngineUtils.mergeTemplateIntoString(
-                sendMailService.velocityEngine, "alertendmonthmail.vm", new HashMap());
+                sendMailService.velocityEngine, "velocity/alertendmonthmail.vm", new HashMap());
         logger.debug("Message Body: {}", messageBody);
 
         try {

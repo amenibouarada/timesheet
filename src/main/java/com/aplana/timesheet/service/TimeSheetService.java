@@ -5,24 +5,28 @@ import argo.jdom.JsonObjectNodeBuilder;
 import com.aplana.timesheet.dao.AvailableActivityCategoryDAO;
 import com.aplana.timesheet.dao.EmployeeDAO;
 import com.aplana.timesheet.dao.TimeSheetDAO;
-import com.aplana.timesheet.dao.TimeSheetDetailDAO;
 import com.aplana.timesheet.dao.entity.*;
 import com.aplana.timesheet.dao.entity.Calendar;
-import com.aplana.timesheet.enums.DictionaryEnum;
+import com.aplana.timesheet.enums.*;
 import com.aplana.timesheet.form.TimeSheetForm;
 import com.aplana.timesheet.form.TimeSheetTableRowForm;
 import com.aplana.timesheet.form.entity.DayTimeSheet;
+import com.aplana.timesheet.system.properties.TSPropertyProvider;
+import com.aplana.timesheet.system.security.SecurityService;
 import com.aplana.timesheet.util.DateTimeUtil;
+import com.aplana.timesheet.util.EnumsUtils;
 import com.aplana.timesheet.util.JsonUtil;
+import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
-import org.apache.velocity.app.VelocityEngine;
+import org.apache.commons.lang.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 import static argo.jdom.JsonNodeBuilders.*;
@@ -45,7 +49,7 @@ public class TimeSheetService {
     private TimeSheetDAO timeSheetDAO;
 
     @Autowired
-    private TimeSheetDetailDAO timeSheetDetailDAO;
+    private TSPropertyProvider propertyProvider;
 
     @Autowired
     private EmployeeDAO employeeDAO;
@@ -60,13 +64,13 @@ public class TimeSheetService {
     private EmployeeService employeeService;
 
     @Autowired
+    private DivisionService divisionService;
+
+    @Autowired
     private DictionaryItemService dictionaryItemService;
 
     @Autowired
     private ProjectService projectService;
-
-    @Autowired
-    public VelocityEngine velocityEngine;
 
     @Autowired
     public ProjectRoleService projectRoleService;
@@ -77,8 +81,20 @@ public class TimeSheetService {
     @Autowired
     public SecurityService securityService;
 
+    @Autowired
+    private AvailableActivityCategoryService availableActivityCategoryService;
+
+    @Autowired
+    private BusinessTripService businessTripService;
+
+    @Autowired
+    private DeleteTimeSheetApprovalService deleteTimeSheetApprovalService;
+
+    @Autowired
+    private SendMailService sendMailService;
+
     @Transactional
-    public TimeSheet storeTimeSheet(TimeSheetForm tsForm) {
+    public TimeSheet storeTimeSheet(TimeSheetForm tsForm, TypesOfTimeSheetEnum type) {
         TimeSheet timeSheet = new TimeSheet();
         logger.debug("Selected employee id = {}", tsForm.getEmployeeId());
         logger.debug("Selected calDate = {}", tsForm.getCalDate());
@@ -87,22 +103,20 @@ public class TimeSheetService {
         timeSheet.setPlan(tsForm.getPlan());
         timeSheet.setEffortInNextDay(dictionaryItemService.find(tsForm.getEffortInNextDay()));
 
-        List<TimeSheetTableRowForm> tsTablePart = tsForm.getTimeSheetTablePart();
-        Set<TimeSheetDetail> timeSheetDetails = new LinkedHashSet<TimeSheetDetail>();
-        if (tsTablePart != null) { // Отчет может быть вообще без строк списания
-            for (TimeSheetTableRowForm formRow : tsTablePart) {
-                // По каким-то неведомым причинам при нажатии на кнопку веб
-                // интерфейса "Удалить выбранные строки"
-                // (если выбраны промежуточные строки) они удаляются с формы, но в
-                // объект формы вместо них
-                // попадают null`ы. Мы эти строки удаляем из объекта формы. Если
-                // удалять последние строки (с конца
-                // табличной части формы), то все работает корректно.
-                if (formRow.getActivityTypeId() == null) {
-                    tsTablePart.remove(formRow);
-                    continue;
-                }
+        List<TimeSheetTableRowForm> tsTablePart = new ArrayList<TimeSheetTableRowForm>();
+        if (tsForm.getTimeSheetTablePart() != null) {
+            tsTablePart.addAll(tsForm.getTimeSheetTablePart());
+        }
+        //очищаем от некорректных строк
+        for (TimeSheetTableRowForm form : tsTablePart) {
+            if (form.getActivityTypeId() == null) {
+                tsTablePart.remove(form);
+            }
+        }
 
+        Set<TimeSheetDetail> timeSheetDetails = new LinkedHashSet<TimeSheetDetail>();
+        if (!tsTablePart.isEmpty()) { // Отчет может быть вообще без строк списания
+            for (TimeSheetTableRowForm formRow : tsTablePart) {
                 TimeSheetDetail timeSheetDetail = new TimeSheetDetail();
                 timeSheetDetail.setTimeSheet(timeSheet);
                 timeSheetDetail.setActType(dictionaryItemService.find(formRow.getActivityTypeId()));
@@ -120,7 +134,7 @@ public class TimeSheetService {
                     timeSheetDetail.setProjectTask(projectTaskService.find(projectId, formRow.getProjectTaskId()));
                 }
                 // Сохраняем часы только для тех полей, которые не disabled
-                if (durationStr != null) {
+                if (durationStr != null && !durationStr.isEmpty()) {
                     duration = Double.parseDouble(durationStr.replace(",", "."));
                 }
                 timeSheetDetail.setDuration(duration);
@@ -129,11 +143,71 @@ public class TimeSheetService {
                 timeSheetDetail.setProjectRole(projectRoleService.find(formRow.getProjectRoleId()));
                 timeSheetDetails.add(timeSheetDetail);
             }
+        } else {
+            // Если записей в таблице нет то создаем пустую запись с 0 часами
+            // Такое возможно если отправляют пустой отчет
+            TimeSheetDetail timeSheetDetail = new TimeSheetDetail();
+            timeSheetDetail.setDuration((double) 0);
+            timeSheetDetail.setTimeSheet(timeSheet);
+            String comment = "";
+            if (TypesOfTimeSheetEnum.DRAFT != type){ // если это не черновик, то проверим причину отсутствия строк отчета
+                if (businessTripService.isBusinessTripDay(timeSheet.getEmployee(), timeSheet.getCalDate().getCalDate())) {
+                    OvertimeCausesEnum overtimeCause =
+                            EnumsUtils.getEnumById(tsForm.getOvertimeCause(), OvertimeCausesEnum.class);
+                    comment = overtimeCause.getName() + ":" + tsForm.getOvertimeCauseComment();
+                } else {
+                    UndertimeCausesEnum undertimeCause =
+                            EnumsUtils.getEnumById(tsForm.getOvertimeCause(), UndertimeCausesEnum.class);
+                    comment = undertimeCause.getName() + ":" + tsForm.getOvertimeCauseComment();
+                }
+            }
+            timeSheetDetail.setDescription(comment);
+            timeSheetDetails.add(timeSheetDetail);
         }
         timeSheet.setTimeSheetDetails(timeSheetDetails);
+        //сохраняем тип отчета
+        timeSheet.setType(dictionaryItemService.find(type.getId()));
+
+        //пытаемся узнать, может у нас есть уже черновик вне зависисмости от типа отчета
+        //на случай если появится еще состояния
+        if (TypesOfTimeSheetEnum.DRAFT == type || TypesOfTimeSheetEnum.REPORT == type) {
+            Integer id = timeSheetDAO.findIdForDateAndEmployeeByTypes(
+                    calendarService.find(tsForm.getCalDate()),
+                    tsForm.getEmployeeId(),
+                    Arrays.asList(TypesOfTimeSheetEnum.REPORT, TypesOfTimeSheetEnum.DRAFT)
+            );
+
+            if (id != null) {
+                TimeSheet timeSheet2 = find(id);
+                timeSheetDAO.deleteAndFlush(timeSheet2);
+                logger.debug("Old TimeSheet object for employee {} ({}) deleted.", tsForm.getEmployeeId(), timeSheet.getCalDate());
+                timeSheetDAO.storeTimeSheet(timeSheet);
+                logger.debug("TimeSheet object for employee {} ({}) saved.", tsForm.getEmployeeId(), timeSheet.getCalDate());
+                return timeSheet;
+            }
+        }
+
         timeSheetDAO.storeTimeSheet(timeSheet);
         logger.info("TimeSheet object for employee {} ({}) saved.", tsForm.getEmployeeId(), timeSheet.getCalDate());
+
         return timeSheet;
+    }
+
+    /**
+     * Ищет в таблице timesheet запись соответсвующую date для сотрудника с
+     * идентификатором employeeId, с определенным типом и возвращает объект типа Timesheet.
+     *
+     * @param calDate    Дата в виде строки.
+     * @param employeeId Идентификатор сотрудника в базе данных.
+     * @return объект типа Timesheet, либо null, если объект не найден.
+     */
+    @Transactional
+    public TimeSheet findForDateAndEmployeeByTypes(String calDate, Integer employeeId, List<TypesOfTimeSheetEnum> types) {
+        return timeSheetDAO.findForDateAndEmployeeByTypes(
+                calendarService.find(calDate),
+                employeeId,
+                types
+        );
     }
 
     /**
@@ -187,8 +261,7 @@ public class TimeSheetService {
             emp.setRegion(region);
         }
 
-        return timeSheetDAO
-                .findDatesAndReportsForEmployee(year, month, emp.getRegion().getId(), emp);
+        return timeSheetDAO.findDatesAndReportsForEmployee(year, month, emp.getRegion().getId(), emp);
     }
 
     public TimeSheet find(Integer id) {
@@ -209,6 +282,11 @@ public class TimeSheetService {
      */
     @Transactional(readOnly = true)
     public String getPlansJson(String date, Integer employeeId) {
+        return JsonUtil.format(getPlansJsonBuilder(date, employeeId));
+    }
+
+    @Transactional(readOnly = true)
+    public JsonObjectNodeBuilder getPlansJsonBuilder(String date, Integer employeeId) {
         final JsonObjectNodeBuilder builder = anObjectBuilder();
 
         final TimeSheet lastTimeSheet = timeSheetDAO.findLastTimeSheetBefore(calendarService.find(date), employeeId);
@@ -229,13 +307,135 @@ public class TimeSheetService {
                 ) { // <APLANATS-458>
             builder.withField("next", getPlanBuilder(nextTimeSheet, false));
         }
+        return builder;
+    }
 
-        return JsonUtil.format(builder);
+    /**
+     * Формирует JSON, содержащий дату и план предыдущего рабочего дня, таблицу работ
+     * и план для текущего дня, дату и сводку о выполненных работах следующего дня.
+     *
+     * @param date
+     * @param employeeId
+     * @return jsonString
+     */
+    @Transactional(readOnly = true)
+    public JsonObjectNodeBuilder getDailyTimesheetJsonBuilder(String date, Integer employeeId) {
+        final JsonObjectNodeBuilder builder = anObjectBuilder();
+
+        builder.withField("previousDayData", getDailyTimesheetPreviousDayJsonBuilder(date, employeeId));
+        builder.withField("currentDayData", getDailyTimesheetCurrentDayJsonBuilder(date, employeeId));
+        builder.withField("nextDayData", getDailyTimesheetNextDayJsonBuilder(date, employeeId));
+
+        return builder;
+    }
+
+    /**
+     * Формирует JSON, содержащий дату и план работ предыдущего рабочего дня.
+     *
+     * @param date
+     * @param employeeId
+     * @return jsonString
+     */
+    public JsonObjectNodeBuilder getDailyTimesheetPreviousDayJsonBuilder(String date, Integer employeeId) {
+        final JsonObjectNodeBuilder builder = anObjectBuilder();
+
+        final TimeSheet lastTimeSheet = timeSheetDAO.findLastTimeSheetBefore(calendarService.find(date), employeeId);
+        if (lastTimeSheet != null) {
+            builder.withField("workDate", aStringBuilder(DateTimeUtil.formatDateIntoDBFormat(lastTimeSheet.getCalDate().getCalDate())));
+            builder.withField("plan", aStringBuilder(getPlan(lastTimeSheet)));
+        }
+
+        return builder;
+    }
+
+    /**
+     * Формирует JSON, содержащий факт утверждённого списания, нагрузку, таблицу работ и план для текущего дня.
+     *
+     * @param date
+     * @param employeeId
+     * @return jsonString
+     */
+    public JsonObjectNodeBuilder getDailyTimesheetCurrentDayJsonBuilder(String date, Integer employeeId) {
+        final JsonObjectNodeBuilder builder = anObjectBuilder();
+
+        final TimeSheet currentTimeSheet = timeSheetDAO.findForDateAndEmployeeByTypes(calendarService.find(date), employeeId, Arrays.asList(TypesOfTimeSheetEnum.REPORT, TypesOfTimeSheetEnum.DRAFT));
+        final Calendar nextWorkDateCalendar = calendarService.getNextWorkDay(calendarService.find(date), employeeService.find(employeeId).getRegion());
+        builder.withField("nextWorkDate", aStringBuilder(DateTimeUtil.formatDateIntoDBFormat(nextWorkDateCalendar.getCalDate())));
+
+        if (currentTimeSheet != null) {
+            builder.withField("plan", aStringBuilder(getPlan(currentTimeSheet)));
+            builder.withField("effort", aStringBuilder(currentTimeSheet.getEffortInNextDay().getId().toString()));
+            builder.withField("isFinal", (currentTimeSheet.getType().getId() == TypesOfTimeSheetEnum.REPORT.getId()) ? aTrueBuilder() : aFalseBuilder());
+
+            Set<TimeSheetDetail> timeSheetDetailSet = currentTimeSheet.getTimeSheetDetails();
+            builder.withField("rows", aStringBuilder(String.valueOf(timeSheetDetailSet.size())));
+
+            int i = 0;
+            JsonArrayNodeBuilder detailsBuilder = anArrayBuilder();
+            if (timeSheetDetailSet != null && timeSheetDetailSet.size() != 0) {
+                for (TimeSheetDetail timeSheetDetail : timeSheetDetailSet) {
+                    detailsBuilder.withElement(
+                            anObjectBuilder().
+                                    withField("row", JsonUtil.aStringBuilderNumber(i++)).
+                                    withField("activity_type_id", aStringBuilder(timeSheetDetail.getActType() != null ? timeSheetDetail.getActType().getId().toString() : "0")).
+                                    withField("workplace_id", aStringBuilder(timeSheetDetail.getWorkplace() != null ? timeSheetDetail.getWorkplace().getId().toString() : "0")).
+                                    withField("project_id", aStringBuilder(timeSheetDetail.getProject() != null ? timeSheetDetail.getProject().getId().toString() : "0")).
+                                    withField("project_role_id", aStringBuilder(timeSheetDetail.getProjectRole() != null ? timeSheetDetail.getProjectRole().getId().toString() : "0")).
+                                    withField("activity_category_id", aStringBuilder(timeSheetDetail.getActCat() != null ? timeSheetDetail.getActCat().getId().toString() : "0")).
+                                    withField("projectTask_id", aStringBuilder(timeSheetDetail.getProjectTask() != null ? timeSheetDetail.getProjectTask().getId().toString() : "0")).
+                                    withField("duration_id", aStringBuilder(timeSheetDetail.getDuration() != null ? timeSheetDetail.getDuration().toString() : "")).
+                                    withField("description_id", aStringBuilder(timeSheetDetail.getDescription() != null ? timeSheetDetail.getDescription() : "")).
+                                    withField("problem_id", aStringBuilder(timeSheetDetail.getProblem() != null ? timeSheetDetail.getProblem() : ""))
+                    );
+                }
+            }
+            builder.withField("data", detailsBuilder);
+        } else {
+            builder.withField("isFinal", aFalseBuilder());
+        }
+
+        return builder;
+    }
+
+    /**
+     * Формирует JSON, содержащий дату следующего рабочего дня и комментарии об уже списанной в этом дне занятости.
+     *
+     * @param date
+     * @param employeeId
+     * @return
+     */
+    @Transactional(readOnly = true)
+    private JsonObjectNodeBuilder getDailyTimesheetNextDayJsonBuilder(String date, Integer employeeId) {
+        final JsonObjectNodeBuilder builder = anObjectBuilder();
+        TimeSheet nextTimeSheet;
+
+        Calendar calendarReportDate = calendarService.find(date);
+
+        Date nextReportDate = DateUtils.addDays(new Date(calendarReportDate.getCalDate().getTime()), 1);
+        Calendar nextReportCalendarDate = calendarService.find(DateTimeUtil.formatDateIntoDBFormat(nextReportDate));
+        nextTimeSheet = timeSheetDAO.findForDateAndEmployeeByTypes(nextReportCalendarDate, employeeId, Arrays.asList(TypesOfTimeSheetEnum.REPORT));
+
+        if (nextTimeSheet == null) {
+            final Calendar nextWorkDateCalendar = calendarService.getNextWorkDay(calendarReportDate, employeeService.find(employeeId).getRegion());
+            builder.withField("workDate", aStringBuilder(DateTimeUtil.formatDateIntoDBFormat(nextWorkDateCalendar.getCalDate())));
+
+            nextTimeSheet = timeSheetDAO.findForDateAndEmployeeByTypes(nextWorkDateCalendar, employeeId, Arrays.asList(TypesOfTimeSheetEnum.REPORT));
+        }
+
+        if (nextTimeSheet != null) {
+            Set<TimeSheetDetail> nextDayDetails = nextTimeSheet.getTimeSheetDetails();
+
+            if (nextDayDetails != null && nextDayDetails.size() > 0) {
+                builder.withField("workSummary", aStringBuilder(getStringTimeSheetDetails(nextTimeSheet)));
+            }
+        }
+
+        return builder;
     }
 
     private JsonObjectNodeBuilder getPlanBuilder(TimeSheet timeSheet, Boolean nextOrPrev) {
         return anObjectBuilder().
-                withField("dateStr", aStringBuilder(DateTimeUtil.formatDate(timeSheet.getCalDate().getCalDate()))).
+                withField("dateStr", aStringBuilder(DateTimeUtil.formatDateIntoDBFormat(timeSheet.getCalDate().getCalDate()))).
                 withField("plan", aStringBuilder(nextOrPrev ? getPlan(timeSheet) : getStringTimeSheetDetails(timeSheet)));
     }
 
@@ -351,14 +551,14 @@ public class TimeSheetService {
             for (int i = 0; i < tablePart.size(); i++) {
                 builder.withElement(
                         anObjectBuilder().
-                                withField(ROW, JsonUtil.aStringBuilder(i)).
-                                withField(ACT_CAT, JsonUtil.aStringBuilder(tablePart.get(i).getActivityCategoryId()))
+                                withField(ROW, JsonUtil.aStringBuilderNumber(i)).
+                                withField(ACT_CAT, JsonUtil.aStringBuilderNumber(tablePart.get(i).getActivityCategoryId()))
                 );
             }
         } else {
             builder.withElement(
                     anObjectBuilder().
-                            withField(ROW, JsonUtil.aStringBuilder(0)).
+                            withField(ROW, JsonUtil.aStringBuilderNumber(0)).
                             withField(ACT_CAT, aStringBuilder(StringUtils.EMPTY))
             );
         }
@@ -373,14 +573,14 @@ public class TimeSheetService {
             for (int i = 0; i < tablePart.size(); i++) {
                 builder.withElement(
                         anObjectBuilder().
-                                withField(ROW, JsonUtil.aStringBuilder(i)).
-                                withField(WORKPLACE, JsonUtil.aStringBuilder(tablePart.get(i).getWorkplaceId()))
+                                withField(ROW, JsonUtil.aStringBuilderNumber(i)).
+                                withField(WORKPLACE, JsonUtil.aStringBuilderNumber(tablePart.get(i).getWorkplaceId()))
                 );
             }
         } else {
             builder.withElement(
                     anObjectBuilder().
-                            withField(ROW, JsonUtil.aStringBuilder(0)).
+                            withField(ROW, JsonUtil.aStringBuilderNumber(0)).
                             withField(WORKPLACE, aStringBuilder(StringUtils.EMPTY))
             );
         }
@@ -397,7 +597,7 @@ public class TimeSheetService {
                 if (tablePart.get(i).getProjectTaskId() != null) {
                     builder.withElement(
                             anObjectBuilder().
-                                    withField(ROW, JsonUtil.aStringBuilder(i)).
+                                    withField(ROW, JsonUtil.aStringBuilderNumber(i)).
                                     withField(TASK, aStringBuilder(tablePart.get(i).getProjectTaskId().toString()))
                     );
                 }
@@ -405,7 +605,7 @@ public class TimeSheetService {
         } else {
             builder.withElement(
                     anObjectBuilder().
-                            withField(ROW, JsonUtil.aStringBuilder(0)).
+                            withField(ROW, JsonUtil.aStringBuilderNumber(0)).
                             withField(TASK, aStringBuilder(StringUtils.EMPTY))
             );
         }
@@ -422,15 +622,15 @@ public class TimeSheetService {
                 if (tablePart.get(i).getProjectTaskId() != null) {
                     builder.withElement(
                             anObjectBuilder().
-                                    withField(ROW, JsonUtil.aStringBuilder(i)).
-                                    withField(ROLE, JsonUtil.aStringBuilder(tablePart.get(i).getProjectRoleId()))
+                                    withField(ROW, JsonUtil.aStringBuilderNumber(i)).
+                                    withField(ROLE, JsonUtil.aStringBuilderNumber(tablePart.get(i).getProjectRoleId()))
                     );
                 }
             }
         } else {
             builder.withElement(
                     anObjectBuilder().
-                            withField(ROW, JsonUtil.aStringBuilder(0)).
+                            withField(ROW, JsonUtil.aStringBuilderNumber(0)).
                             withField(ROLE, aStringBuilder(StringUtils.EMPTY))
             );
         }
@@ -446,14 +646,14 @@ public class TimeSheetService {
             for (int i = 0; i < tablePart.size(); i++) {
                 builder.withElement(
                         anObjectBuilder().
-                                withField(ROW, JsonUtil.aStringBuilder(i)).
-                                withField(PROJECT, JsonUtil.aStringBuilder(tablePart.get(i).getProjectId()))
+                                withField(ROW, JsonUtil.aStringBuilderNumber(i)).
+                                withField(PROJECT, JsonUtil.aStringBuilderNumber(tablePart.get(i).getProjectId()))
                 );
             }
         } else {
             builder.withElement(
                     anObjectBuilder().
-                            withField(ROW, JsonUtil.aStringBuilder(0)).
+                            withField(ROW, JsonUtil.aStringBuilderNumber(0)).
                             withField(PROJECT, aStringBuilder(StringUtils.EMPTY))
             );
         }
@@ -464,4 +664,163 @@ public class TimeSheetService {
     public List<DictionaryItem> getEffortList() {
         return dictionaryItemService.getItemsByDictionaryId(DictionaryEnum.EFFORT_IN_NEXTDAY.getId());
     }
+
+    /**
+     * Возвращает Map со значениями для заполнения списков сотрудников,
+     * проектов, пресейлов, проектных задач, типов и категорий активности на
+     * форме приложения.
+     *
+     * @return
+     */
+    @Transactional(readOnly = true)
+    public Map<String, Object> getListsToMAV(HttpServletRequest request) {
+        Map<String, Object> result = new HashMap<String, Object>();
+
+        List<DictionaryItem> typesOfActivity = dictionaryItemService.getTypesOfActivity();
+        result.put("actTypeList", typesOfActivity);
+
+        String typesOfActivityJson = dictionaryItemService.getDictionaryItemsInJson(typesOfActivity);
+        result.put("actTypeJson", typesOfActivityJson);
+
+        result.put("workplaceList", dictionaryItemService.getWorkplaces());
+
+        String workplacesJson = dictionaryItemService.getDictionaryItemsInJson(dictionaryItemService.getWorkplaces());
+        result.put("workplaceJson", workplacesJson);
+
+        result.put("overtimeCauseJson", dictionaryItemService.getDictionaryItemsInJson(dictionaryItemService
+                .getOvertimeCauses()));
+        result.put("unfinishedDayCauseJson", dictionaryItemService.getDictionaryItemsInJson(dictionaryItemService
+                .getUnfinishedDayCauses()
+        ));
+        result.put("overtimeThreshold", propertyProvider.getOvertimeThreshold());
+        result.put("undertimeThreshold", propertyProvider.getUndertimeThreshold());
+
+        List<Division> divisions = divisionService.getDivisions();
+        result.put("divisionList", divisions);
+
+        List<DictionaryItem> categoryOfActivity = dictionaryItemService.getCategoryOfActivity();
+        result.put("actCategoryList", categoryOfActivity);
+
+        String actCategoryListJson = dictionaryItemService.getDictionaryItemsInJson(categoryOfActivity);
+        result.put("actCategoryListJson", actCategoryListJson);
+
+        result.put("availableActCategoriesJson", availableActivityCategoryService.getAvailableActCategoriesJson());
+
+        result.put("projectListJson", projectService.getProjectListJson(divisions));
+        result.put(
+                "projectTaskListJson",
+                projectTaskService.getProjectTaskListJson(projectService.getProjectsWithCq())
+        );
+
+        List<ProjectRole> projectRoleList = projectRoleService.getProjectRoles();
+
+        for (int i = 0; i < projectRoleList.size(); i++) {
+            if (projectRoleList.get(i).getCode().equals("ND")) {  // Убираем из списка роль "Не определена" APLANATS-270
+                projectRoleList.remove(i);
+                break;
+            }
+        }
+
+        result.put("projectRoleList", projectRoleList);
+        result.put("projectRoleListJson", projectRoleService.getProjectRoleListJson(projectRoleList));
+
+        result.put("listOfActDescriptionJson", getListOfActDescription());
+        result.put(
+                "typesOfCompensation",
+                dictionaryItemService.getItemsByDictionaryId(DictionaryEnum.TYPES_OF_COMPENSATION.getId())
+        );
+        result.put(
+                "workOnHolidayCauseJson",
+                dictionaryItemService.getDictionaryItemsInJson(DictionaryEnum.WORK_ON_HOLIDAY_CAUSE.getId())
+        );
+
+        return result;
+    }
+
+    public String getOverdueTimesheetEmployeesNames(Division division) {
+
+        // Логика выбора дат перенесена из ReportCheckService,
+        // по принципу "работает - не ломай".
+        Date currentDay = new Date();
+
+        Date startDate = DateTimeUtil.previousMonthFirstDayDate(currentDay);
+        Date currentMonthLastDay = DateTimeUtil.currentMonthLastDayDate(currentDay);
+        Date previousMonthLastDay = DateTimeUtil.previousMonthLastDayDate(currentDay);
+        Date lastSunday = DateTimeUtil.lastSundayDate(currentDay);
+
+        Date endDate = lastSunday;
+
+        if (currentMonthLastDay.after(lastSunday))
+            endDate = currentDay;
+        if (previousMonthLastDay.after(lastSunday))
+            endDate = previousMonthLastDay;
+        if (endDate.equals(currentDay))
+            endDate = DateUtils.addDays(endDate, -1);
+
+        Integer threshold = propertyProvider.getReportsOverdueThreshold();
+        List<String> names = timeSheetDAO.getOverdueTimesheetEmployeeNames(division, startDate, endDate, threshold);
+
+        return Joiner.on(", ").join(names);
+    }
+
+    @Transactional
+    public void setDraftTypeToTimeSheet(Integer id) {
+        TimeSheet timeSheet = find(id);
+        DictionaryItem draftItem = dictionaryItemService.find(TypesOfTimeSheetEnum.DRAFT.getId());
+        timeSheet.setType(draftItem);
+        timeSheetDAO.storeTimeSheet(timeSheet);
+    }
+
+    @Transactional
+    public void setReportApprovalData(Integer timeSheetId, String comment, ReportSendApprovalType reportSendApprovalType) {
+        TimeSheet timeSheet = find(timeSheetId);
+        DeleteTimeSheetApproval deleteTimeSheetApproval = new DeleteTimeSheetApproval();
+        deleteTimeSheetApproval.setDeleteSendApprovalDate(new Date());
+        deleteTimeSheetApproval.setDeleteSendApprovalComment(comment);
+        deleteTimeSheetApproval.setReportSendApprovalType(reportSendApprovalType);
+        deleteTimeSheetApproval.setTimeSheet(timeSheet);
+        deleteTimeSheetApproval = deleteTimeSheetApprovalService.storeDeleteTimeSheetApproval(deleteTimeSheetApproval);
+        timeSheet.setDeleteTimeSheetApproval(deleteTimeSheetApproval);
+        timeSheetDAO.storeTimeSheet(timeSheet);
+        sendMailService.performDeleteOrSetDraftApproval(timeSheet);
+    }
+
+    /**
+     * Возвращает {@link JsonObjectNodeBuilder} в котором находится сохраненный черновик
+     * на дату и для пользователя
+     *
+     * @param date       - дата отчета
+     * @param employeeId - идентификатор пользователя чей отчет прогружаем в @link JsonObjectNodeBuilder}
+     * @param types      - типы отчета, один из которых может быть возращен на указанныую дату
+     * @return {@link JsonObjectNodeBuilder}
+     */
+    public JsonObjectNodeBuilder getJsonObjectNodeBuilderForReport(String date, Integer employeeId, List<TypesOfTimeSheetEnum> types) {
+        TimeSheet timeSheet = findForDateAndEmployeeByTypes(date, employeeId, types);
+
+        final JsonArrayNodeBuilder builder = anArrayBuilder();
+        final JsonObjectNodeBuilder builderNode = anObjectBuilder();
+        if (timeSheet != null && timeSheet.getTimeSheetDetails() != null && timeSheet.getTimeSheetDetails().size() != 0) {
+            int i = 0;
+            builderNode.withField("plan", aStringBuilder(timeSheet.getPlan()));
+            builderNode.withField("rows", aStringBuilder(String.valueOf(timeSheet.getTimeSheetDetails().size())));
+
+            for (TimeSheetDetail timeSheetDetail : timeSheet.getTimeSheetDetails())
+                builder.withElement(
+                        anObjectBuilder().
+                                withField("row", JsonUtil.aStringBuilderNumber(i++)).
+                                withField("activity_type_id", aStringBuilder(timeSheetDetail.getActType() != null ? timeSheetDetail.getActType().getId().toString() : "0")).
+                                withField("workplace_id", aStringBuilder(timeSheetDetail.getWorkplace() != null ? timeSheetDetail.getWorkplace().getId().toString() : "0")).
+                                withField("project_id", aStringBuilder(timeSheetDetail.getProject() != null ? timeSheetDetail.getProject().getId().toString() : "0")).
+                                withField("project_role_id", aStringBuilder(timeSheetDetail.getProjectRole() != null ? timeSheetDetail.getProjectRole().getId().toString() : "0")).
+                                withField("activity_category_id", aStringBuilder(timeSheetDetail.getActCat() != null ? timeSheetDetail.getActCat().getId().toString() : "0")).
+                                withField("projectTask_id", aStringBuilder(timeSheetDetail.getProjectTask() != null ? timeSheetDetail.getProjectTask().getId().toString() : "0")).
+                                withField("duration_id", aStringBuilder(timeSheetDetail.getDuration() != null ? timeSheetDetail.getDuration().toString() : "")).
+                                withField("description_id", aStringBuilder(timeSheetDetail.getDescription() != null ? timeSheetDetail.getDescription() : "")).
+                                withField("problem_id", aStringBuilder(timeSheetDetail.getProblem() != null ? timeSheetDetail.getProblem() : ""))
+                );
+            builderNode.withField("data", builder);
+        }
+        return builderNode;
+    }
+
 }

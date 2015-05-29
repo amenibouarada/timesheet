@@ -1,0 +1,54 @@
+<h1 align="justify"><b>Указанные ниже сотрудники "${division}" не заполнили отчеты за предшествующие рабочие дни</b></h1>
+<table border = "2">
+      <tr>
+        <td><b>Сотрудник</b></td>
+        <td><b>Должность</b></td>
+        <td><b>Руководитель</b></td>
+          #if($region=="show")
+              <td><b>Регион</b></td>
+          #end
+        <td><b>Пропущенные дни</b></td>
+      </tr>
+    #if($region=="show")
+        #foreach($employee in $employeeList)
+            <tr>
+                <td><b> $employee.name </b></td>
+                <td><b> $employee.job.name </b></td>
+                <td><b>
+                    #if ($employee.manager != $null)
+                    $employee.manager.name
+                    #end
+                </b></td>
+                <td>
+                    $employee.region.name
+                </td>
+                <td>
+                    <ol>
+                        #foreach($day in ${passedDays.get($employee)})
+                            <li><b> $day </b></li>
+                        #end
+                    </ol>
+                </td>
+            </tr>
+        #end
+    #else
+         #foreach($employee in $employeeList)
+          <tr>
+            <td><b> $employee.name </b></td>
+            <td><b> $employee.job.name </b></td>
+            <td><b>
+                #if ($employee.manager != $null)
+                $employee.manager.name
+                #end
+            </b></td>
+            <td>
+            <ol>
+               #foreach($day in ${passedDays.get($employee)})
+                <li><b> $day </b></li>
+                #end
+            </ol>
+            </td>
+          </tr>
+        #end
+    #end
+</table>

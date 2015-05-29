@@ -8,7 +8,7 @@ import java.util.Set;
 
 /**
  * @author rshamsutdinov
- * @version 1.0
+ * @version 1.0.0
  */
 @Entity
 @Table(name = "vacation_approval")
@@ -35,23 +35,14 @@ public class VacationApproval {
     @ForeignKey(name = "fk_manager")
     private Employee manager;
 
-    @OneToMany(mappedBy = "vacationApproval", fetch = FetchType.LAZY)
-    @OrderBy("id asc")
-    private Set<VacationApprovalResult> vacationApprovalResults;
-
     @Column(name = "uid", columnDefinition = "CHAR(36) NOT NULL")
     private String uid;
 
     @Column (name = "result")
     private Boolean result;
 
-    public Set<VacationApprovalResult> getVacationApprovalResults() {
-        return vacationApprovalResults;
-    }
-
-    public void setVacationApprovalResults(Set<VacationApprovalResult> vacationApprovalResults) {
-        this.vacationApprovalResults = vacationApprovalResults;
-    }
+    @Column (nullable = true)
+    private String comment;
 
     public String getUid() {
         return uid;
@@ -119,5 +110,13 @@ public class VacationApproval {
         sb.append(", responseDate=").append(responseDate);
         sb.append('}');
         return sb.toString();
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 }

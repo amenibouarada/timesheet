@@ -17,6 +17,7 @@ public class TimeSheetForm {
     private Integer typeOfCompensation;
     /* оценка моего объема работ на следующий рабочий день */
     private Integer effortInNextDay;
+    private Integer totalDuration;
 
     public Integer getDivisionId() {
         return divisionId;
@@ -99,5 +100,13 @@ public class TimeSheetForm {
                 part.setProblem(StringEscapeUtils.unescapeHtml4(part.getProblem()));
             }
         }
+    }
+
+    public Integer getTotalDuration() {
+        return totalDuration;
+    }
+
+    public void setTotalDuration(Integer totalDuration) {
+        this.totalDuration = totalDuration;
     }
 }

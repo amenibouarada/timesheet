@@ -1,0 +1,32 @@
+img.iconbutton{
+    cursor: pointer;
+    vertical-align: middle;
+    padding: 0px;
+    text-align: center;
+    width: 16px;
+    height: 16px;
+    margin: 5px;
+}
+
+.butt{
+    width: 200px;
+    vertical-align: middle;
+    margin-left: 20px;
+}
+
+.floatleft{
+    float: left;
+}
+
+.lowspace {
+    margin: 6px;
+    font-weight: bold;
+}
+
+table.no_border, table.no_border td {
+    border: none;
+}
+
+td {
+    padding: 5px;
+}

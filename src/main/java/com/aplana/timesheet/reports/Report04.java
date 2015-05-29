@@ -30,4 +30,14 @@ public class Report04 extends BaseReport {
             endDate = yesterday;
         }
     }
+
+    @Override
+    public int hashCode() {
+        int result =(getDivisionOwnerId() != null ? getDivisionOwnerId().hashCode() : 0);
+        result = 31 * result + (getBeginDate()!= null ? getBeginDate().hashCode(): 0);
+        result = 31 * result + (getEndDate()!= null ? getEndDate().hashCode(): 0);
+        result = 31 * result + (getRegionIds()!= null ? getRegionIds().hashCode(): 0);
+        result = 31 * result + (getRegionNames()!= null ? getRegionNames().hashCode(): 0);
+        return result;
+    }
 }

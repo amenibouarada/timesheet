@@ -38,16 +38,6 @@ public class LoginController {
 
     @RequestMapping(value="/loginfailed", method = RequestMethod.GET)
     public String loginError(ModelMap model, HttpServletRequest request) {
-//        String username="";
-
-//        HttpSession session = request.getSession(false);
-//        if(session != null) {
-//            Object usrnameObj =
-//                    session.getAttribute(UsernamePasswordAuthenticationFilter.SPRING_SECURITY_LAST_USERNAME_KEY);
-
-//            username = (usrnameObj != null) ? usrnameObj.toString() : null;
-//        }
-
         model.addAttribute("error", "true");
         return "login";
     }

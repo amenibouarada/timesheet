@@ -1,12 +1,14 @@
 package com.aplana.timesheet.controller;
 
-import com.aplana.timesheet.constants.TimeSheetConstants;
+import com.aplana.timesheet.system.constants.TimeSheetConstants;
 import com.aplana.timesheet.dao.LdapDAO;
 import com.aplana.timesheet.dao.entity.Division;
 import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.dao.entity.ldap.EmployeeLdap;
-import com.aplana.timesheet.properties.TSPropertyProvider;
+import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.*;
+import com.aplana.timesheet.form.UploadedFile;
+import com.aplana.timesheet.util.XMLFileValidator;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import org.apache.commons.lang3.StringUtils;
@@ -17,9 +19,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.ldap.support.LdapUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Nullable;
 import javax.servlet.http.Cookie;
@@ -40,7 +43,17 @@ public class UpdateController {
     @Autowired
     private LdapDAO ldapDAO;
     @Autowired
+    private TSPropertyProvider propertyProvider;
+    @Autowired
     private EmployeeService employeeService;
+    @Autowired
+    private EmployeeAssistantService employeeAssistantService;
+    @Autowired
+    private PlannedVacationService plannedVacationService;
+    @Autowired
+    private VacationDaysService vacationDaysService;
+    @Autowired(required=true)
+    XMLFileValidator fileValidator;
 
     public void setEmployeeLdapService(EmployeeLdapService employeeLdapService) {
         this.employeeLdapService = employeeLdapService;
@@ -66,7 +79,7 @@ public class UpdateController {
 
     @RequestMapping(value = "/update/siddisabledusersfromldap")
     public String updateSidDeletedUsersFromLdap(Model model) {
-        this.employeeLdapService.updateSidDisableddUsersFromLdap();
+        this.employeeLdapService.updateSidDisabledUsersFromLdap();
         model.addAttribute("trace", this.employeeLdapService.getTrace().replaceAll("\n", "<br/>"));
         return "updateLDAP";
     }
@@ -98,6 +111,27 @@ public class UpdateController {
         ModelAndView mav = new ModelAndView("oqSync");
         mav.addObject("trace", oqProjectSyncService.getTrace().replaceAll("\n", "<br/>"));
         return mav;
+    }
+
+    @RequestMapping(value = "/update/importEmpVacDays", method = RequestMethod.GET)
+    public ModelAndView importEmpVacDaysForm(@ModelAttribute("uploadedFile") UploadedFile uploadedFile, BindingResult result) {
+        return new ModelAndView("importEmpVacDays");
+    }
+
+    @RequestMapping(value = "/update/importEmpVacDays", method = RequestMethod.POST)
+    public ModelAndView importEmpVacDays(@ModelAttribute("uploadedFile") UploadedFile uploadedFile, BindingResult result) {
+
+        MultipartFile file = uploadedFile.getFile();
+        fileValidator.validate(uploadedFile, result);
+
+        if (result.hasErrors()) {
+            return new ModelAndView("importEmpVacDays");
+        }
+
+        vacationDaysService.importFile(file);
+        ModelAndView modelAndView = new ModelAndView("importEmpVacDays");
+        modelAndView.addObject("trace", vacationDaysService.getTrace().replaceAll("\n", "<br/>"));
+        return modelAndView;
     }
 
     @RequestMapping(value = "/update/showalluser")
@@ -152,10 +186,10 @@ public class UpdateController {
                 Map map = Iterables.find(divisions, new Predicate<Map>() {
                     @Override
                     public boolean apply(@Nullable Map input) {
-                        return division.getLdapName().equalsIgnoreCase((String) input.get(LdapDAO.NAME));
+                        return division.getLdapName().equalsIgnoreCase((String) input.get(propertyProvider.getLdapFieldForDivisionName()));
                     }
                 });
-                division.setObjectSid(LdapUtils.convertBinarySidToString((byte[]) map.get(LdapDAO.SID)));
+                division.setObjectSid(LdapUtils.convertBinarySidToString((byte[]) map.get(propertyProvider.getLdapFieldForSID())));
                 divisionService.setDivision(division);
             }
         }
@@ -176,5 +210,26 @@ public class UpdateController {
         }
 
         return "redirect:/admin";
+    }
+
+    @RequestMapping(value = "/update/employeeassistantactivestatus")
+    public String updateEmployeeAssistantActiveStatus() {
+        employeeAssistantService.changeAssistantActivity();
+        return "redirect:/admin";
+    }
+
+    /**
+     * Запуск рассылки писем о ближайщих отпусках сотрудников
+     * @return ошибку или удачу
+     */
+    @RequestMapping(value = "/update/schedulerplannedvacationcheck", produces = "text/plain;charset=UTF-8")
+    @ResponseBody
+    public String startSchedulerPlannedVacationCheck() {
+        try {
+            plannedVacationService.service();
+        } catch (Exception e) {
+            return "Ошибка! " + e.getLocalizedMessage();
+        }
+        return "операция завершена успешно.";
     }
 }

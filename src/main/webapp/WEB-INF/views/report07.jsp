@@ -13,7 +13,7 @@
     <body>
         <script type="text/javascript" src="<%= getResRealPath("/resources/js/report.js", application) %>"></script>
         <script type="text/javascript">
-            dojo.ready(function (){
+            dojo.ready(function () {
                 var defaultDivision = "${employeeDivision}";
                 var lastDivision = "${reportForm.divisionOwner}";
                 if (lastDivision != "") {
@@ -32,7 +32,7 @@
         <form:form commandName="reportForm" method="post" action="">
 
             <c:if test="${fn:length(errors) > 0}">
-                <div class="errors_box">
+                <div id="errorBoxId" class="errors_box">
                     <c:forEach items="${errors}" var="error">
                         <fmt:message key="${error.code}">
                             <fmt:param value="${error.arguments[0]}"/>
@@ -44,7 +44,7 @@
             <div id="form_header">
                 <table class="report_params" cellspacing="3">
                     <tr>
-                        <td  style="width: 225px"><span class="label">Центр владельца проекта</span><span style="color:red">*</span></td>
+                        <td  style="width: 225px"><span class="label">Центр владельца проекта</span></td>
                         <td>
                             <form:select path="divisionOwner" class="without_dojo">
                                 <form:option label="Все" value="0"/>
@@ -53,7 +53,7 @@
                         </td>
                     </tr>
                     <tr>
-                        <td><span class="label">Центр сотрудников </span><span style="color:red">*</span></td>
+                        <td><span class="label">Центр сотрудников </span></td>
                         <td colspan="2">
                             <form:select path="divisionEmployee" class="without_dojo">
                                 <form:option value="0">Все</form:option>
@@ -62,7 +62,7 @@
                         </td>
                     </tr>
                     <tr>
-                        <td><span class="label">Отчетный период </span><span style="color:red">*</span></td>
+                        <td><span class="label">Отчетный период </span></td>
                         <td colspan="2">
                             <form:select path="periodType" class="without_dojo">
                                 <form:option value="1">Месяц</form:option>
@@ -88,16 +88,16 @@
                 <div class="radiogroup">
                     <div class="label"><fmt:message key="report.formattitle"/></div>
                     <ul class="radio">
-                        <li><input type=radio name="printtype" id="printtype1" value="1" checked/>
-                            <label for="printtype1">HTML</label>
+                        <li><input type=radio name="printtype" id="printtype2" value="2" checked/>
+                            <label for="printtype2"><fmt:message key="label.report.excel"/></label>
                         </li>
-                        <li><input type=radio name="printtype" id="printtype2" value="2"/>
-                            <label for="printtype2">MS Excel</label>
+                        <li><input type=radio name="printtype" id="printtype1" value="1" disabled/>
+                            <label for="printtype1"><fmt:message key="label.report.html"/></label>
                         </li>
                     </ul>
                 </div>
             </div>
-            <button id="make_report_button" style="width:210px" type="submit">Сформировать отчет</button>
+            <button id="make_report_button" style="width:210px" type="submit" onclick="clearErrorBox('errorBoxId')">Сформировать отчет</button>
         </form:form>
     </body>
 

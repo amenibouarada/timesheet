@@ -1,6 +1,6 @@
 package com.aplana.timesheet.service.MailSenders;
 
-import com.aplana.timesheet.properties.TSPropertyProvider;
+import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.SendMailService;
 
 import javax.mail.Multipart;
@@ -18,6 +18,11 @@ public class ExceptionSender extends MailSender<String> {
 
     public ExceptionSender(SendMailService sendMailService, TSPropertyProvider propertyProvider) {
         super(sendMailService, propertyProvider);
+        logger.info("Run sending message for: {}", getName());
+    }
+
+    final  String getName() {
+        return String.format("Оповещения об ошибке (%s)", this.getClass().getSimpleName());
     }
 
     @Override

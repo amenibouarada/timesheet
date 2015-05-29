@@ -1,8 +1,7 @@
 package com.aplana.timesheet.dao;
 
-import com.aplana.timesheet.enums.OvertimeCategory;
-import com.aplana.timesheet.enums.Report07PeriodTypeEnum;
-import com.aplana.timesheet.properties.TSPropertyProvider;
+import com.aplana.timesheet.enums.*;
+import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.reports.*;
 import com.aplana.timesheet.util.DateTimeUtil;
 import com.aplana.timesheet.util.HibernateQueryResultDataSource;
@@ -10,6 +9,7 @@ import com.aplana.timesheet.util.report.Report7Period;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.time.DateUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,8 +21,6 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static com.aplana.timesheet.enums.TypesOfActivityEnum.getProjectPresaleNonProjectActivityId;
@@ -41,7 +39,7 @@ public class JasperReportDAO {
         //может быть это вынести в сам класс Reports? kss - нет, это мапинг полей datasource для отчета, его логично делать там же, где формируются данные.
         fieldsMap.put( Report01.class, new String[] { "id", "name", "caldate", "projnames", "overtime", "duration",
                 "holiday", "region", "projdetail", "durationdetail", "region_name", "project_role", "vacation", "illness",
-                "billable", "overtime_cause", "comment", "compensation", "vacation_type" } );
+                "billable", "overtime_cause", "comment", "compensation", "vacation_type", "day_type" } );
         fieldsMap.put( Report02.class, new String[] { "name", "empldivision", "project",
                 "taskname", "duration", "day_type", "region", "region_name", "project_role", "project_state", "billable", "vacation_type" } );
         fieldsMap.put( Report03.class, new String[] { "name", "empldivision", "project", "taskname",
@@ -65,8 +63,28 @@ public class JasperReportDAO {
     private static final String PROJECT_SQL_CLAUSE  = "project.id=:projectId AND ";
     private static final String BILLABLE_CLAUSE = "(epbillable.billable = 'true' OR (epbillable.billable is null AND empl.billable = 'true')) AND ";
     private static final String HIDE_INACTIVE_PROJECTS_CLAUSE = "AND project.active = 'true' ";
+    private static final String TIMESHEET_COMMENT_CLAUSE = " timesheet_details.description like :description AND ";
+
+    private static final String NOT_DRAFT_ONLY_CLAUSE = "AND ts_type.id = " + TypesOfTimeSheetEnum.REPORT.getId() + " ";
+    private static final String JOIN_TIMESHEET_TO_DICTIONARY_ON_TS_TYPE = "INNER JOIN dictionary_item ts_type ON timesheet.ts_type_id=ts_type.id ";
 
     private static final String WITHOUT_CLAUSE  = "";
+
+    /** Коды дней используемые в отчетах
+     Пример использования в отчетах:
+     $F{day_type} == 1  ? "Общий выходной" :
+     $F{day_type} == 11 ? "Региональный выходной" :
+     $F{day_type} == 2  ? $F{vacation_type} :
+     $F{day_type} == 3  ? "Болезнь" :
+     "<НЕ ОПРЕДЕЛЕНО>"]
+    */
+    private static final Integer UNDEFINED_DAY              = 0; // неопределенный день или рабочий день
+    private static final Integer HOLIDAY_DAY                = 1;
+    private static final Integer REGION_HOLIDAY_DAY         = 11;
+    private static final Integer VACATION_DAY               = 2;
+    private static final Integer ILLNESS_DAY                = 3; // болезнь, для 3 отчета - неподтвержденная болезнь
+    private static final Integer ILLNESS_DAY_WITH_REASON    = 4; // только для 3 отчета - подтвержденная болезнь
+    private static final Integer TRIP_DAY                   = 5;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -150,12 +168,14 @@ public class JasperReportDAO {
                     "       INNER JOIN employee empl    ON timesheet.emp_id=empl.id " +
                     "       INNER JOIN region region        ON empl.region=region.id " +
                     "       INNER JOIN division division    ON empl.division=division.id " +
+                            JOIN_TIMESHEET_TO_DICTIONARY_ON_TS_TYPE +
                     "       LEFT OUTER JOIN calendar calendar  ON timesheet.caldate=calendar.caldate " +
                     "       LEFT OUTER JOIN project project    ON timesheet_details.proj_id=project.id " +
                 "where " +
                     (withDivisionClause ? DIVISION_SQL_CLAUSE : WITHOUT_CLAUSE) +
                     (withRegionClause ? REGION_SQL_CLAUSE : WITHOUT_CLAUSE ) +
-                    "calendar.calDate between :beginDate and :endDate ");
+                    "(calendar.calDate between :beginDate and :endDate) " +
+                    NOT_DRAFT_ONLY_CLAUSE);
 
         if (withRegionClause)
             projQuery.setParameter("regionIds", report.getRegionIds());
@@ -222,17 +242,21 @@ public class JasperReportDAO {
                         "        compensation.value AS col_17, " +
                         "        vacation_type.value AS col_18, " +
                         "        CASE" +
-                        "           WHEN (holidays.id is not null) " +
-                        "               THEN 1 " +
+                        "           WHEN (holidays.id is not null) THEN " +
+                        "               CASE " +
+                        "                   WHEN (holidays.region is not null)" +
+                        "                       THEN " + REGION_HOLIDAY_DAY +
+                        "                   ELSE " + HOLIDAY_DAY +
+                        "               END " +
                         "           ELSE " +
                         "               CASE " +
                         "                   WHEN (vacations.id is not null) " +
-                        "                       THEN 2 " +
+                        "                       THEN " + VACATION_DAY +
                         "                   ELSE " +
                         "                       CASE " +
                         "                           WHEN (illnesses.id is not null) " +
-                        "                               THEN 3 " +
-                        "                           ELSE 0" +
+                        "                               THEN " + ILLNESS_DAY +
+                        "                           ELSE " + UNDEFINED_DAY +
                         "                       END" +
                         "               END" +
                         "        END AS day_type " +
@@ -242,6 +266,7 @@ public class JasperReportDAO {
                         "       INNER JOIN employee empl    ON timesheet.emp_id=empl.id " +
                         "       INNER JOIN region region        ON empl.region=region.id " +
                         "       INNER JOIN division division    ON empl.division=division.id " +
+                                JOIN_TIMESHEET_TO_DICTIONARY_ON_TS_TYPE +
                         "       LEFT OUTER JOIN calendar calendar  ON timesheet.caldate=calendar.caldate " +
                         "       LEFT OUTER JOIN holiday holidays   ON calendar.caldate=holidays.caldate " +
                         "       LEFT OUTER JOIN project project    ON timesheet_details.proj_id=project.id " +
@@ -255,6 +280,7 @@ public class JasperReportDAO {
                         "               empl.id=vacations.employee_id AND " +
                         "               timesheet.caldate BETWEEN vacations.begin_date AND vacations.end_date " +
                         "               AND vacations.status_id=:status " +
+                        "               AND vacations.type_id != " + VacationTypesEnum.PLANNED.getId() + " " +
                         "       LEFT OUTER JOIN dictionary_item vacation_type    ON vacation_type.id=vacations.type_id " +
                         "       LEFT OUTER JOIN illness illnesses ON " +
                         "               empl.id=illnesses.employee_id AND " +
@@ -265,8 +291,9 @@ public class JasperReportDAO {
                                 workDaySeparator +
                                 (report.getShowNonBillable() ? WITHOUT_CLAUSE : BILLABLE_CLAUSE) +
                         "        timesheet_details.act_type in :actTypes AND " +
-                        "        timesheet.caldate BETWEEN :beginDate AND :endDate AND " +
-                        "        (holidays.region is null OR holidays.region=region.id) " +
+                        "        timesheet.caldate BETWEEN :beginDate AND :endDate " +
+                                 NOT_DRAFT_ONLY_CLAUSE +
+                        "        AND (holidays.region is null OR holidays.region=region.id) " +
                         "GROUP BY" +
                         "        empl.id ," +
                         "        empl.name ," +
@@ -333,21 +360,25 @@ public class JasperReportDAO {
                                 "project_task.name as col_3, " +
                                 "sum(timesheet_details.duration) as col_4, " +
                                 "CASE" +
-                                "   WHEN (holidays.id is not null) " +
-                                "       THEN 1 " +
+                                "   WHEN (holidays.id is not null) THEN " +
+                                "       CASE " +
+                                "           WHEN (holidays.region is not null)" +
+                                "               THEN " + REGION_HOLIDAY_DAY +
+                                "           ELSE " + HOLIDAY_DAY +
+                                "       END " +
                                 "   ELSE " +
                                 "       CASE " +
                                 "           WHEN (vacations.id is not null) " +
-                                "               THEN 2 " +
+                                "               THEN " + VACATION_DAY +
                                 "           ELSE " +
                                 "               CASE " +
                                 "                   WHEN (illnesses.id is not null) " +
-                                "                       THEN 3 " +
-                                "                   ELSE 0 " +
+                                "                       THEN " + ILLNESS_DAY +
+                                "                   ELSE " + UNDEFINED_DAY +
                                 "               END " +
                                 "       END " +
                                 "END as day_type, " +
-                                "max(h_region.id) as col_6, " +
+                                "max(region.id) as col_6, " +
                                 "region.name as col_7, " +
                                 "project_role.name as col_8, " +
                                 "project_state.value as col_9, " +
@@ -363,17 +394,18 @@ public class JasperReportDAO {
                                 "INNER JOIN division division    ON empl.division=division.id " +
                                 "INNER JOIN project project    ON timesheet_details.proj_id=project.id " + "%s " +
                                 "INNER JOIN region region        ON empl.region=region.id " +
+                                JOIN_TIMESHEET_TO_DICTIONARY_ON_TS_TYPE +
                                 "LEFT OUTER JOIN project_task project_task ON timesheet_details.task_id=project_task.id " +
                                 "LEFT OUTER JOIN project_role project_role ON timesheet_details.projectrole_id=project_role.id " +
-                                "LEFT OUTER JOIN holiday holidays   ON calendar.caldate=holidays.caldate " +
-                                "LEFT OUTER JOIN region h_region   ON holidays.region=h_region.id " +
+                                "LEFT OUTER JOIN holiday holidays   ON calendar.caldate=holidays.caldate AND (holidays.region IS NULL OR holidays.region = empl.region) " +
                                 "LEFT OUTER JOIN employee_project_billable epbillable    ON project.id=epbillable.project_id AND empl.id=epbillable.employee_id AND " +
                                 "                                                           timesheet.caldate BETWEEN epbillable.start_date AND  epbillable.end_date " +
-                                "LEFT OUTER JOIN dictionary_item project_state    ON project.state=project_state.id " +
+                                "LEFT OUTER JOIN dictionary_item project_state    ON timesheet_details.act_type=project_state.id " +
                                 "LEFT OUTER JOIN vacation vacations ON " +
                                 "        empl.id=vacations.employee_id AND " +
                                 "        timesheet.caldate BETWEEN vacations.begin_date AND vacations.end_date " +
                                 "        AND vacations.status_id=:status " +
+                                "        AND vacations.type_id != " + VacationTypesEnum.PLANNED.getId() + " " +
                                 "LEFT OUTER JOIN dictionary_item vacation_type    ON vacation_type.id=vacations.type_id " +
                                 "LEFT OUTER JOIN illness illnesses ON " +
                                 "        empl.id=illnesses.employee_id AND " +
@@ -381,8 +413,10 @@ public class JasperReportDAO {
                                 "%s " +
                         "WHERE " +
                                 "timesheet_details.duration > 0 AND " +
+                                "timesheet_details.act_type in ("+ TypesOfActivityEnum.getOnlyWorkTypeString()+")  AND " +
                                 " %s %s %s %s %s " +
                                 "calendar.calDate between :beginDate AND :endDate " +
+                                NOT_DRAFT_ONLY_CLAUSE +
                         "GROUP BY " +
                                 "empl.name, " +
                                 "division.name, " +
@@ -476,31 +510,34 @@ public class JasperReportDAO {
                     "calendar.caldate as col_4, " +
                     "sum(timesheet_details.duration) as col_5, " +
                     "CASE" +
-                    "   WHEN (holidays.id is not null) " +
-                    "       THEN 1 " +
+                    "   WHEN (holidays.id is not null) THEN" +
+                    "       CASE " +
+                    "           WHEN (holidays.region is not null)" +
+                    "               THEN " + REGION_HOLIDAY_DAY +
+                    "           ELSE " + HOLIDAY_DAY +
+                    "       END " +
                     "   ELSE " +
                     "       CASE " +
                     "           WHEN (vacations.id is not null) " +
-                    "               THEN 2 " +
+                    "               THEN " + VACATION_DAY +
                     "           ELSE " +
                     "               CASE " +
-                    "                   WHEN (trip.id is not null) " +
-                    "                       THEN 5 " +
-                    "                   ELSE " +
+                    "                   WHEN (illnesses.id is not null) THEN " +
                     "                       CASE " +
-                    "                           WHEN (illnesses.id is not null) " +
-                    "                               THEN  " +
-                    "                                   CASE " +
-                    "                                       WHEN (illnesses.reason_id=:reasonable_illness) " +
-                    "                                           THEN 3 " +
-                    "                                   ELSE 4 " +
-                    "                                   END " +
-                    "                           ELSE 0 " +
+                    "                           WHEN (illnesses.reason_id = :reasonable_illness) " +
+                    "                               THEN " + ILLNESS_DAY_WITH_REASON +
+                    "                           ELSE " + ILLNESS_DAY +
+                    "                       END " +
+                    "                   ELSE " +
+                    "                       CASE" +
+                    "                           WHEN (trip.id is not null) " +
+                    "                               THEN " + TRIP_DAY +
+                    "                           ELSE " + UNDEFINED_DAY +
                     "                       END " +
                     "               END " +
                     "       END " +
                     "END as col_6, " +
-                    "h_region.id as col_7, " +
+                    "region.id as col_7, " +
                     "region.name as col_8, " +
                     "project_role.name as col_9, " +
                     "project_state.value as col_10, " +
@@ -516,17 +553,18 @@ public class JasperReportDAO {
                     "INNER JOIN division division    ON empl.division=division.id " +
                     "INNER JOIN project project    ON timesheet_details.proj_id=project.id " + "%s " +
                     "INNER JOIN region region        ON empl.region=region.id " +
+                    JOIN_TIMESHEET_TO_DICTIONARY_ON_TS_TYPE +
                     "LEFT OUTER JOIN project_task project_task ON timesheet_details.task_id=project_task.id " +
                     "LEFT OUTER JOIN project_role project_role ON timesheet_details.projectrole_id=project_role.id " +
-                    "LEFT OUTER JOIN holiday holidays   ON calendar.caldate=holidays.caldate " +
-                    "LEFT OUTER JOIN region h_region   ON holidays.region=h_region.id " +
+                    "LEFT OUTER JOIN holiday holidays   ON calendar.caldate=holidays.caldate AND (holidays.region IS NULL OR holidays.region = empl.region) " +
                     "LEFT OUTER JOIN employee_project_billable epbillable    ON project.id=epbillable.project_id and empl.id=epbillable.employee_id AND " +
                     "                                                           timesheet.caldate BETWEEN epbillable.start_date AND  epbillable.end_date " +
-                    "LEFT OUTER JOIN dictionary_item project_state    ON project.state=project_state.id " +
+                    "LEFT OUTER JOIN dictionary_item project_state    ON timesheet_details.act_type=project_state.id " +
                     "LEFT OUTER JOIN vacation vacations ON " +
                     "        empl.id=vacations.employee_id AND " +
                     "        timesheet.caldate BETWEEN vacations.begin_date AND vacations.end_date " +
                     "        AND vacations.status_id=:status " +
+                    "        AND vacations.type_id != " + VacationTypesEnum.PLANNED.getId() + " " +
                     "LEFT OUTER JOIN dictionary_item vacation_type    ON vacation_type.id=vacations.type_id " +
                     "LEFT OUTER JOIN illness illnesses ON " +
                     "        empl.id=illnesses.employee_id AND " +
@@ -537,8 +575,10 @@ public class JasperReportDAO {
                     "%s " +
             "WHERE " +
                     "timesheet_details.duration > 0 AND " +
+                    "timesheet_details.act_type in ("+ TypesOfActivityEnum.getOnlyWorkTypeString()+")  AND " +
                     " %s %s %s %s %s " +
                     "calendar.caldate between :beginDate AND :endDate " +
+                    NOT_DRAFT_ONLY_CLAUSE +
             "GROUP BY " +
                     "empl.name, " +
                     "division.name, " +
@@ -549,7 +589,7 @@ public class JasperReportDAO {
                     "vacations.id, " +
                     "illnesses.id, " +
                     "trip.id, " +
-                    "h_region.id, " +
+                    "region.id, " +
                     "region.id, " +
                     "region.name, " +
                     "epbillable.billable, " +
@@ -647,7 +687,8 @@ public class JasperReportDAO {
                     "                employee.id=vacations.employee_id AND  " +
                     "                (calendar.caldate BETWEEN vacations.begin_date AND vacations.end_date) AND  " +
                     "                (vacations.begin_date <= :endDate AND vacations.end_date >= :beginDate) AND  " +
-                    "                (vacations.status_id = :statusId), " +
+                    "                (vacations.status_id = :statusId) " +
+                    "                AND vacations.type_id != " + VacationTypesEnum.PLANNED.getId() + ", " +
                     "        region region  " +
                     "WHERE  " +
                              ( withDivisionClause ? "        division.id=:emplDivisionId AND  " : "") +
@@ -661,10 +702,15 @@ public class JasperReportDAO {
                     "                ELSE :endDate end) AND " +
                     "        employee.not_to_sync=FALSE AND  " +
                     "        (employee.manager IS NOT NULL) AND  " +
-                    "        (calendar.caldate NOT IN  " +
-                    "                (SELECT timesheet.caldate FROM time_sheet timesheet WHERE timesheet.emp_id=employee.id)) AND  " +
-                    "        (calendar.caldate NOT IN   " +
-                    "                (SELECT holiday.caldate FROM holiday holiday WHERE holiday.region IS NULL OR holiday.region=employee.region)) AND  " +
+                    "( " +
+                        "( " +
+                        "        (calendar.caldate NOT IN  " +
+                        "                (SELECT timesheet.caldate FROM time_sheet timesheet WHERE timesheet.emp_id=employee.id AND (timesheet.ts_type_id = "+TypesOfTimeSheetEnum.REPORT.getId()+"))) AND  " +
+                        "        (calendar.caldate NOT IN   " +
+                        "                (SELECT holiday.caldate FROM holiday holiday WHERE holiday.region IS NULL OR holiday.region=employee.region))" +
+                        ") " +
+                  //  " OR exists ( select 1 from business_trip bt where bt.employee_id = employee.id and calendar.caldate BETWEEN bt.begin_date and bt.end_date)" +
+                    ") AND" +
                     "        employee.start_date<=calendar.caldate  " +
                     "ORDER BY " +
                     "        employee.name,  " +
@@ -688,7 +734,8 @@ public class JasperReportDAO {
     private List getResultList( Report05 report ) {
         boolean withRegionClause   = report.hasRegions()                && !report.isAllRegions();
         boolean withDivisionClause = report.getDivisionOwnerId() != null && report.getDivisionOwnerId() != 0;
-        boolean withEmployeeClause = report.getEmployeeId() != null && report.getEmployeeId    () != 0;
+        boolean withEmployeeClause = report.getEmployeeId() != null && report.getEmployeeId() != 0;
+        boolean withCommentClause = report.getComment() != null && StringUtils.isNotBlank(report.getComment());
 
         Query query = entityManager.createNativeQuery(
                 "select " +
@@ -706,9 +753,13 @@ public class JasperReportDAO {
                         "workplace.value as col_11," +
                         "project_role.name as col_12," +
                         "CASE" +
-                        "   WHEN (holidays.id is not null) " +
-                        "       THEN 1 " +
-                        "   ELSE 0 " +
+                        "   WHEN (holidays.id is not null) THEN " +
+                        "       CASE " +
+                        "           WHEN (holidays.region is not null)" +
+                        "               THEN " + REGION_HOLIDAY_DAY +
+                        "           ELSE " + HOLIDAY_DAY +
+                        "       END " +
+                        "   ELSE " + UNDEFINED_DAY +
                         "END as col_13, " +
                         "CASE " +
                         "    WHEN (epbillable.billable is not null) THEN epbillable.billable " +
@@ -717,27 +768,31 @@ public class JasperReportDAO {
                         "epbillable.comment as col_15, " +
                         "timesheet.plan as col_16 " +
                 "FROM time_sheet_detail AS timesheet_details " +
-                        "INNER JOIN time_sheet timesheet ON timesheet_details.time_sheet_id=timesheet.id " +
-                        "INNER JOIN employee empl    ON timesheet.emp_id=empl.id " +
-                        "INNER JOIN calendar calendar  ON timesheet.caldate=calendar.caldate " +
-                        "INNER JOIN project project    ON timesheet_details.proj_id=project.id " +
-                        "INNER JOIN region region        ON empl.region=region.id " +
-                        "INNER JOIN project_role project_role        ON timesheet_details.projectrole_id=project_role.id " +
+                        "INNER JOIN time_sheet timesheet    ON timesheet_details.time_sheet_id=timesheet.id " +
+                        "INNER JOIN employee empl           ON timesheet.emp_id=empl.id " +
+                        "INNER JOIN calendar calendar       ON timesheet.caldate=calendar.caldate " +
+                        JOIN_TIMESHEET_TO_DICTIONARY_ON_TS_TYPE +
+                        "INNER JOIN region region           ON empl.region=region.id " +
                         "INNER JOIN project_role job        ON empl.job=job.id " +
-                        "INNER JOIN division division    ON empl.division=division.id " +
+                        "INNER JOIN division division       ON empl.division=division.id " +
+                        "LEFT OUTER JOIN project project    ON timesheet_details.proj_id=project.id " +
+                        "LEFT OUTER JOIN project_role project_role ON timesheet_details.projectrole_id=project_role.id " +
                         "LEFT OUTER JOIN project_task project_task ON timesheet_details.task_id=project_task.id " +
-                        "LEFT OUTER JOIN dictionary_item act_type    ON timesheet_details.act_type=act_type.id " +
-                        "LEFT OUTER JOIN dictionary_item act_cat    ON timesheet_details.act_cat=act_cat.id " +
-                        "LEFT OUTER JOIN dictionary_item workplace    ON timesheet_details.workplace_id=workplace.id " +
-                        "LEFT OUTER JOIN holiday holidays   ON calendar.caldate=holidays.caldate " +
-                        "LEFT OUTER JOIN employee_project_billable epbillable    ON project.id=epbillable.project_id and empl.id=epbillable.employee_id AND " +
-                        "                                                           timesheet.caldate BETWEEN epbillable.start_date AND  epbillable.end_date " +
+                        "LEFT OUTER JOIN dictionary_item act_type  ON timesheet_details.act_type=act_type.id " +
+                        "LEFT OUTER JOIN dictionary_item act_cat   ON timesheet_details.act_cat=act_cat.id " +
+                        "LEFT OUTER JOIN dictionary_item workplace ON timesheet_details.workplace_id=workplace.id " +
+                        "LEFT OUTER JOIN holiday holidays          ON calendar.caldate=holidays.caldate AND (holidays.region IS NULL OR holidays.region = empl.region) " +
+                        "LEFT OUTER JOIN employee_project_billable epbillable    " +
+                        "ON project.id=epbillable.project_id and empl.id=epbillable.employee_id " +
+                        "                   AND timesheet.caldate BETWEEN epbillable.start_date AND  epbillable.end_date " +
                 "where " +
                         (withDivisionClause ? DIVISION_SQL_CLAUSE : WITHOUT_CLAUSE) +
                         (withRegionClause ? REGION_SQL_CLAUSE : WITHOUT_CLAUSE) +
                         (withEmployeeClause ? EMPLOYEE_SQL_CLAUSE : WITHOUT_CLAUSE) +
+                        (withCommentClause ?  TIMESHEET_COMMENT_CLAUSE : WITHOUT_CLAUSE) +
                         "calendar.calDate between :beginDate and :endDate " +
-                "order by calendar.calDate, empl.name ");
+                        NOT_DRAFT_ONLY_CLAUSE +
+                " order by calendar.calDate, empl.name ");
 
         if (withRegionClause) {
 			query.setParameter("regionIds", report.getRegionIds());
@@ -747,6 +802,9 @@ public class JasperReportDAO {
         }
         if (withDivisionClause) {
             query.setParameter("emplDivisionId", report.getDivisionOwnerId());
+        }
+        if (withCommentClause) {
+            query.setParameter("description", '%'+report.getComment()+'%');
         }
         query.setParameter("beginDate", DateTimeUtil.stringToTimestamp( report.getBeginDate() ));
         query.setParameter("endDate", DateTimeUtil.stringToTimestamp(report.getEndDate()));
@@ -777,8 +835,9 @@ public class JasperReportDAO {
                         "join tsd.timeSheet.employee empl " +
                         "join empl.region r " +
                 "WHERE " +
-                        "tsd.actType=act.actType AND " +
-                        "tsd.actCat=act.actCat AND " +
+                        "tsd.actType = act.actType AND " +
+                        "tsd.actCat = act.actCat AND " +
+                        "tsd.timeSheet.type = "+TypesOfTimeSheetEnum.REPORT.getId()+" AND " +
                         (withRegionClause ? REGION_CLAUSE : WITHOUT_CLAUSE) +
                         (withProjectClause ? PROJECT_CLAUSE : WITHOUT_CLAUSE) +
                         (withDatesClause?"tsd.timeSheet.calDate.calDate between :beginDate AND :endDate AND ":WITHOUT_CLAUSE) +
@@ -804,6 +863,7 @@ public class JasperReportDAO {
                             "join tsd.timeSheet.employee empl " +
                             "join empl.region r " +
                     "WHERE " +
+                            "(tsd.timeSheet.type = "+TypesOfTimeSheetEnum.REPORT.getId()+") AND " +
                             (withRegionClause ? REGION_CLAUSE : WITHOUT_CLAUSE) +
                             (withProjectClause ? PROJECT_CLAUSE : WITHOUT_CLAUSE) +
                             (withDatesClause?"tsd.timeSheet.calDate.calDate between :beginDate AND :endDate AND":WITHOUT_CLAUSE)+
@@ -829,8 +889,8 @@ public class JasperReportDAO {
         if (!withDatesClause) {
             Map<String, Timestamp> dates= (Map<String, Timestamp>) datesQuery.getSingleResult();
             if(dates!=null){
-                report.setBeginDate(DateTimeUtil.formatDate(dates.get("minDate")));
-                report.setEndDate(DateTimeUtil.formatDate(dates.get("maxDate")));
+                report.setBeginDate(DateTimeUtil.formatDateIntoDBFormat(dates.get("minDate")));
+                report.setEndDate(DateTimeUtil.formatDateIntoDBFormat(dates.get("maxDate")));
             }
         }
 
@@ -838,19 +898,17 @@ public class JasperReportDAO {
     }
 
     public HibernateQueryResultDataSource getReport07Data(Report07 report) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         try {
             final Report07PeriodTypeEnum periodType =
                     Report07PeriodTypeEnum.getByMonthsCount(report.getPeriodType());
 
-            ArrayList rolesDev = this.readRolesFromString(propertyProvider.getProjectRoleDeveloper());
-            ArrayList rolesRp = this.readRolesFromString(propertyProvider.getProjectRoleRp());
-            ArrayList rolesTest = this.readRolesFromString(propertyProvider.getProjectRoleTest());
-            ArrayList rolesAnalyst = this.readRolesFromString(propertyProvider.getProjectRoleAnalyst());
-            ArrayList rolesSystem = this.readRolesFromString(propertyProvider.getProjectRoleSystem());
-            Date start = sdf.parse(report.getBeginDate());
-            Date end = sdf.parse(report.getEndDate());
-            HashMap<String, Object> itogo = new HashMap<String, Object>();
+            List rolesDev = this.readRolesFromString(propertyProvider.getProjectRoleDeveloper());
+            List rolesRp = this.readRolesFromString(propertyProvider.getProjectRoleRp());
+            List rolesTest = this.readRolesFromString(propertyProvider.getProjectRoleTest());
+            List rolesAnalyst = this.readRolesFromString(propertyProvider.getProjectRoleAnalyst());
+            List rolesSystem = this.readRolesFromString(propertyProvider.getProjectRoleSystem());
+            Date start = DateTimeUtil.parseStringToDateForDB(report.getBeginDate());
+            Date end = DateTimeUtil.parseStringToDateForDB(report.getEndDate());
             Query query1;
             if (report.getDivisionOwner() != 0) {
                 query1 = this.getReport07Query1(start, end, report.getDivisionEmployee(), report.getDivisionOwner());
@@ -858,11 +916,15 @@ public class JasperReportDAO {
                 query1 = this.getReport07Query1(start, end, report.getDivisionEmployee());
             }
             List dataSource = new ArrayList();
-            Double temp = null;
+            Double temp;
             HashMap<String, HashMap<String, Double>> periodsDuration = new HashMap<String, HashMap<String, Double>>();
             HashMap<String, Double> durations = new HashMap<String, Double>();
             Report7Period itogoPeriod = new Report7Period("Итого");
-            for (Object o : query1.getResultList()) {
+            List<Object[]> resultList = query1.getResultList();
+            if (resultList.isEmpty()){
+                return null;
+            }
+            for (Object o : resultList) {
                 Object[] projects = (Object[]) o;
                 Integer projectId = (Integer) projects[0];
                 Integer projectDivision = (Integer) projects[2];
@@ -878,7 +940,7 @@ public class JasperReportDAO {
                 Double periodByCenterOwner = 0D;
                 Double periodByCenterEtc = 0D;
                 HashMap<String, Double> periodRegions = new HashMap<String, Double>();
-                for (periodNumber = 1; periodEnd.before(end); periodNumber = periodNumber + 1) {
+                for (periodNumber = 1; periodEnd.before(end) || (periodNumber == 1 && periodEnd.equals(end)); periodNumber = periodNumber + 1) {
                     final Date maxEndOfPeriod = getMaxEndOfPeriod(end, periodStart, periodType);
 
                     periodEnd = getEndOfPeriod(periodType, periodEnd, maxEndOfPeriod);
@@ -993,7 +1055,6 @@ public class JasperReportDAO {
                         regions.clear();
                     }
 
-                    //durations.put(projectName, Double.valueOf(0));
                     if (periodEnd.equals(maxEndOfPeriod)) {
                         periodEnd = DateUtils.addDays(periodEnd, 1);
                     }
@@ -1055,8 +1116,6 @@ public class JasperReportDAO {
             }
             String[] fields = {"period", "name", "group", "type", "value"};
             return new HibernateQueryResultDataSource(dataSource, fields);
-        } catch (ParseException e) {
-            e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -1103,7 +1162,7 @@ public class JasperReportDAO {
         return list.toArray();
     }
 
-    private ArrayList readRolesFromString(String s) {
+    private List readRolesFromString(String s) {
         String[] roles = s.split(",");
         ArrayList role = new ArrayList();
         for (String role1 : roles) {
@@ -1121,7 +1180,7 @@ public class JasperReportDAO {
                     "JOIN ts.employee emp " +
                     "JOIN project.manager as manager " +
                     "JOIN manager.division as md " +
-                    "WHERE emp.division.id = :divisionEmployeeId " +
+                    "WHERE emp.division.id = :divisionEmployeeId AND (ts.type = "+TypesOfTimeSheetEnum.REPORT.getId()+") " +
                     "AND ts.calDate.calDate between :beginDate AND :endDate " +
                     "GROUP BY 1, 3 " +
                     "ORDER BY 2 DESC ");
@@ -1135,7 +1194,7 @@ public class JasperReportDAO {
                     "JOIN ts.employee emp " +
                     "JOIN project.manager as manager " +
                     "JOIN manager.division as md " +
-                    "WHERE ts.calDate.calDate between :beginDate AND :endDate " +
+                    "WHERE ts.calDate.calDate between :beginDate AND :endDate AND (ts.type = "+TypesOfTimeSheetEnum.REPORT.getId()+") " +
                     "GROUP BY 1, 3 " +
                     "ORDER BY 2 DESC ");
             query.setParameter("beginDate", new Timestamp(periodStart.getTime()));
@@ -1155,7 +1214,7 @@ public class JasperReportDAO {
                             "JOIN ts.employee emp " +
                             "JOIN project.manager as manager " +
                             "JOIN manager.division as md " +
-                            "WHERE emp.division.id = :divisionEmployeeId AND division.id = :divisionOwnerId " +
+                            "WHERE emp.division.id = :divisionEmployeeId AND division.id = :divisionOwnerId AND (ts.type = "+TypesOfTimeSheetEnum.REPORT.getId()+") " +
                             "AND ts.calDate.calDate between :beginDate AND :endDate " +
                             "GROUP BY 1, 3 " +
                             "ORDER BY 2 DESC");
@@ -1173,7 +1232,7 @@ public class JasperReportDAO {
                             "JOIN project.manager as manager " +
                             "JOIN manager.division as md " +
                             "WHERE division.id = :divisionOwnerId " +
-                            "AND ts.calDate.calDate between :beginDate AND :endDate " +
+                            "AND ts.calDate.calDate between :beginDate AND :endDate AND (ts.type = "+TypesOfTimeSheetEnum.REPORT.getId()+") " +
                             "GROUP BY 1, 3 " +
                             "ORDER BY 2 DESC");
             query.setParameter("beginDate", new Timestamp(periodStart.getTime()));
@@ -1193,7 +1252,7 @@ public class JasperReportDAO {
                             "JOIN tsd.timeSheet ts " +
                             "JOIN ts.employee as emp " +
                             "WHERE p.id = :projectId " +
-                            "AND ts.calDate.calDate between :beginDate AND :endDate " +
+                            "AND ts.calDate.calDate between :beginDate AND :endDate AND (ts.type = "+TypesOfTimeSheetEnum.REPORT.getId()+") " +
                             "GROUP BY 1, 3, 2, 5, 6"
             );
             query.setParameter("projectId", projectId);
@@ -1206,7 +1265,7 @@ public class JasperReportDAO {
                             "LEFT JOIN p.timeSheetDetail tsd " +
                             "JOIN tsd.timeSheet ts " +
                             "JOIN ts.employee as emp " +
-                            "WHERE p.id = :projectId AND emp.division.id = :divisionEmployeeId " +
+                            "WHERE p.id = :projectId AND emp.division.id = :divisionEmployeeId AND (ts.type = "+TypesOfTimeSheetEnum.REPORT.getId()+") " +
                             "AND ts.calDate.calDate between :beginDate AND :endDate " +
                             "GROUP BY 1, 3, 2, 5, 6"
             );

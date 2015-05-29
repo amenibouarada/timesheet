@@ -20,7 +20,7 @@
 
 <html>
 <head>
-    <title><fmt:message key="title.vacations"/></title>
+    <title><fmt:message key="title.vacations.approvals"/></title>
     <link rel="stylesheet" type="text/css" href="<%= getResRealPath("/resources/css/vacations.css", application) %>" />
     <script src="<%= getResRealPath("/resources/js/vacations.js", application) %>" type="text/javascript"></script>
     <script type="text/javascript">
@@ -33,11 +33,25 @@
                 return;
             }
 
-            dojo.byId("<%= VACATION_ID %>").removeAttribute("disabled");
-            dojo.byId("<%= VACATION_ID %>").value = vac_id;
-            vacationsForm.action =
-                    "<%=request.getContextPath()%>/vacations_needs_approval";
-            vacationsForm.submit();
+            dojo.xhrGet({
+                url: getContextPath() + "/vacations/deleteVacation/" + vac_id,
+                handleAs: "json",
+                timeout: 10000,
+                sync: true,
+                preventCache: false,
+                headers: {  'Content-Type': 'application/json;Charset=UTF-8',
+                    "Accept": "application/json;Charset=UTF-8"},
+                load: function (data) {
+                    if (data.status == -1) {
+                        alert(data.message);
+                    } else {
+                        vacationsForm.submit();
+                    }
+                },
+                error: function (error) {
+                    handleError(error.message);
+                }
+            });
         }
 
     </script>

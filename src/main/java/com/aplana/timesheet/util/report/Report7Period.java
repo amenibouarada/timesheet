@@ -55,7 +55,7 @@ public class Report7Period implements Comparable {
             return sdf.format(this.start);
         } else if (type.equals(PERIOD_TYPE_KVARTAL)) {
             SimpleDateFormat sdf = new SimpleDateFormat("MM");
-            Integer number = new Integer(sdf.format(this.start));
+            Integer number = Integer.valueOf(sdf.format(this.start));
             SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy");
             if (number > 0 && number < 4) {
                 return "1-ый квартал " + sdf2.format(this.start);

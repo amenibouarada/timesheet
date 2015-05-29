@@ -4,6 +4,7 @@ import argo.jdom.JsonArrayNodeBuilder;
 import com.aplana.timesheet.dao.DictionaryItemDAO;
 import com.aplana.timesheet.dao.entity.DictionaryItem;
 import com.aplana.timesheet.enums.DictionaryEnum;
+import com.aplana.timesheet.enums.TSEnum;
 import com.aplana.timesheet.enums.TypesOfActivityEnum;
 import com.aplana.timesheet.enums.UndertimeCausesEnum;
 import com.aplana.timesheet.util.JsonUtil;
@@ -62,6 +63,15 @@ public class DictionaryItemService {
         return dictionaryItemDAO.find(id);
     }
 
+    /**
+     * Получает элемент какого либо справочника
+     * @param enumItem один из элементов енума
+     * @return объект справочника
+     */
+    public DictionaryItem find(TSEnum enumItem) {
+        return dictionaryItemDAO.find(enumItem.getId());
+    }
+
     @Transactional(readOnly = true)
     public DictionaryItem find(Integer id, Integer dictionaryId) {
         return dictionaryItemDAO.find(id, dictionaryId);
@@ -101,7 +111,7 @@ public class DictionaryItemService {
         for (DictionaryItem item : items) {
             builder.withElement(
                     anObjectBuilder().
-                            withField("id", JsonUtil.aStringBuilder(item.getId())).
+                            withField("id", JsonUtil.aStringBuilderNumber(item.getId())).
                             withField("value", aStringBuilder(item.getValue()))
             );
         }
@@ -111,5 +121,25 @@ public class DictionaryItemService {
 
     public String getDictionaryItemsInJson(int dictId) {
         return getDictionaryItemsInJson(getItemsByDictionaryId(dictId));
+    }
+
+    public List<DictionaryItem> getDictionaryItemsByEnumElements(List<TSEnum> enumElements){
+        List<DictionaryItem> result = new ArrayList<DictionaryItem>(enumElements.size());
+        for ( TSEnum element : enumElements){
+            result.add(find(element.getId()));
+        }
+        return result;
+    }
+
+    public List<Integer> getDictItemsIdByEnumElements(List<TSEnum> enumElements){
+        return getDictionaryItemsIds(getDictionaryItemsByEnumElements(enumElements));
+    }
+
+    public List<Integer> getDictionaryItemsIds(List<DictionaryItem> dictionaryItemList){
+        List<Integer> result = new ArrayList<Integer>(dictionaryItemList.size());
+        for ( DictionaryItem element : dictionaryItemList){
+            result.add(element.getId());
+        }
+        return result;
     }
 }

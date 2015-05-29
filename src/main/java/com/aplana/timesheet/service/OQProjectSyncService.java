@@ -8,14 +8,17 @@ import com.aplana.timesheet.dao.entity.Division;
 import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.dao.entity.Project;
 import com.aplana.timesheet.enums.ProjectFundingTypeEnum;
+import com.aplana.timesheet.enums.TSEnum;
 import com.aplana.timesheet.enums.TypesOfActivityEnum;
-import com.aplana.timesheet.properties.TSPropertyProvider;
+import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.util.DateTimeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.annotation.Transactional;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.NodeList;
@@ -30,10 +33,17 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import static com.aplana.timesheet.util.ExceptionUtils.getRealLastCause;
 
+/**
+ * Сервис синхронизации проектов с Over Quota
+ * Аналитика
+ */
 @Service("oqProgectSyncService")
 public class OQProjectSyncService extends AbstractServiceWithTransactionManagement {
 
@@ -68,6 +78,7 @@ public class OQProjectSyncService extends AbstractServiceWithTransactionManageme
     private DivisionDAO divisionDAO;
 
     @Autowired
+    @Qualifier("employeeLdapService")
     EmployeeLdapService employeeLdapService;
 
     @Autowired
@@ -102,34 +113,25 @@ public class OQProjectSyncService extends AbstractServiceWithTransactionManageme
      *     </workgroup>
      * </project>
     */
+    @Transactional
     public void sync() {
-        final TransactionStatus transactionStatus = getNewTransaction();
+        trace.setLength(0);
         try {
-            trace.setLength(0);
-            try {
-                trace.append("Начало синхронизации\n");
-                projectDAO.setTrace(trace);
-                // получим список веток project из xml файла
-                NodeList nodes = getOQasNodeList();
-                trace.append("В файле синхронизации найдено: ").append(nodes.getLength()).append(" проектов\n");
+            trace.append("Начало синхронизации\n");
+            projectDAO.setTrace(trace);
+            // получим список веток project из xml файла
+            NodeList nodes = getOQasNodeList();
+            trace.append("В файле синхронизации найдено: ").append(nodes.getLength()).append(" проектов\n");
 
-                final DictionaryItem projectState = getProjectState();
+            final DictionaryItem projectState = getDictionaryItem(TypesOfActivityEnum.PROJECT);
 
-                for (int i = 0; i < nodes.getLength(); i++) {
-                    createOrUpdateProject(nodes.item(i).getAttributes(), projectDAO, projectState);
-                }
-                trace.append("Синхронизация завершена\n");
-            } catch (Exception e) {
-                logger.error("oq project sync error: ", e);
-                trace.append("Синхронизация прервана из-за ошибки: ").append(getRealLastCause(e).getMessage()).append("\n");
+            for (int i = 0; i < nodes.getLength(); i++) {
+                createOrUpdateProject(nodes.item(i).getAttributes(), projectDAO, projectState);
             }
-
-            commit(transactionStatus);
-
+            trace.append("Синхронизация завершена\n");
         } catch (Exception e) {
-            if (transactionStatus != null) {
-                rollback(transactionStatus);
-            }
+            logger.error("oq project sync error: ", e);
+            trace.append("Синхронизация прервана из-за ошибки: ").append(getRealLastCause(e).getMessage()).append("\n");
         }
     }
 
@@ -139,19 +141,26 @@ public class OQProjectSyncService extends AbstractServiceWithTransactionManageme
             Project project = new Project();      // проект из БД
 
             // поля синхронизации
-            String name = nodeMap.getNamedItem("name").getNodeValue().trim();    // название проекта
-            String idProject = nodeMap.getNamedItem("id").getNodeValue();        // id проекта
-            String status = nodeMap.getNamedItem("status").getNodeValue();       // статус проекта
-            String pmLdap = nodeMap.getNamedItem("pm").getNodeValue();           // руководитель проекта
-            String hcLdap = nodeMap.getNamedItem("hc").getNodeValue();           // hc
+            String name = nodeMap.getNamedItem("name").getNodeValue().trim(); // название проекта
+            String idProject = nodeMap.getNamedItem("id").getNodeValue();          // id проекта
+            String status = nodeMap.getNamedItem("status").getNodeValue();      // статус проекта
+            String pmLdap = nodeMap.getNamedItem("pm").getNodeValue();          // руководитель проекта
+            String hcLdap = nodeMap.getNamedItem("hc").getNodeValue();          // hc
+
+            String workType = nodeMap.getNamedItem("worktype").getNodeValue().trim();    // направление по виду работ
+            String activityType = nodeMap.getNamedItem("product").getNodeValue().trim();     // вид деятельности
+            String passport = nodeMap.getNamedItem("pq3").getNodeValue().trim();         // паспорт качества
+            String customer = nodeMap.getNamedItem("customer").getNodeValue().trim();    // заказчик
+            String finsource = nodeMap.getNamedItem("finsource").getNodeValue().trim();   // источник финансирования
+            String description = nodeMap.getNamedItem("description").getNodeValue().trim();   // источник финансирования
 
             // ищем в БД запись о проекте
             Project foundProject = dao.findByProjectId(idProject);
             if (foundProject == null) {  // если проекта еще нет в БД
                 project.setActive(newStatus.contains(status)); // установим ему новый статус
-                project.setEndDate(DateTimeUtil.stringToDate("01.01.2050", DATE_FORMAT)); // APLANATS-826 при добавлении проекта прописываем в качестве даты окончания фиксированную большую дату
+                // APLANATS-826 при добавлении проекта прописываем в качестве даты окончания фиксированную большую дату
+                project.setEndDate(DateTimeUtil.stringToDate("01.01.2050", DATE_FORMAT));
                 /* тип финансирования (по умолчанию) */
-                project.setFundingType(dictionaryItemService.find(ProjectFundingTypeEnum.COMMERCIAL_PROJECT.getId()));
             } else {
                 // если проект уже существовал - статус менять не будем
                 // см. //APLANATS-408
@@ -164,26 +173,33 @@ public class OQProjectSyncService extends AbstractServiceWithTransactionManageme
                 }
                 project.setCqRequired(foundProject.isCqRequired());
                 project.setEndDate(foundProject.getEndDate()); // APLANATS-826
-                project.setFundingType(foundProject.getFundingType());
                 project.setJiraProjectKey(foundProject.getJiraProjectKey());
             }
+
+            // todo
+            // возможно стоит перенести. Сейчас всегда эти поля будут обновляться,
+            // замедляет работу, но если они могут изменяться, то тут нужны сравнения
+            project.setActivityType(activityType);
+            project.setWorkType(workType);
+            project.setCustomer(customer);
+            project.setDescription(description);
+            project.setPassport(passport);
 
             project.setName(name);
             project.setProjectId(idProject);
             project.setStartDate(DateTimeUtil.stringToDate(nodeMap.getNamedItem("begining").getNodeValue(), DATE_FORMAT));
-            // APLANATS-826
-            // project.setEndDate(DateTimeUtil.stringToDate(nodeMap.getNamedItem("ending").getNodeValue(), DATE_FORMAT));
             project.setState(state);
+            project.setFundingType(getDictionaryItem(ProjectFundingTypeEnum.getById(finsource)));
 
-            if (project.isActive()) {
-                if (!setPM(project, pmLdap)) {
-                    return; //если не указан РП или его нет в БД, то проект не сохраняем, переходим к следующему
-                }
-                setLinkProjectAndDivision(project, hcLdap, foundProject);  // установим подразделения, связанные с проектом
-                setProjectDivision(project, hcLdap, pmLdap);  // установим ответственное подразделение к проекту
+            if (!setPM(project, pmLdap)) {
+                rollback(transactionStatus);
+                return; //если не указан РП или его нет в БД, то проект не сохраняем, переходим к следующему
             }
+            setLinkProjectAndDivision(project, hcLdap, foundProject);  // установим подразделения, связанные с проектом
+            setProjectDivision(project, hcLdap, pmLdap);  // установим ответственное подразделение к проекту
 
-            dao.store(project); // запишем в БД
+
+            dao.syncStore(project); // запишем в БД
 
             if (transactionStatus != null) {
                 commit(transactionStatus);
@@ -197,8 +213,8 @@ public class OQProjectSyncService extends AbstractServiceWithTransactionManageme
         }
     }
 
-    private DictionaryItem getProjectState() {
-        return dictionaryItemService.find(TypesOfActivityEnum.PROJECT.getId());
+    private DictionaryItem getDictionaryItem(TSEnum enumItem) {
+        return dictionaryItemService.find(enumItem);
     }
 
     private boolean setPM(Project project, String pmLdap) {
@@ -229,8 +245,7 @@ public class OQProjectSyncService extends AbstractServiceWithTransactionManageme
             Set<Division> foundProjectDivisions = foundProject.getDivisions();
             if (foundProjectDivisions != null) {
                 divisions.addAll(foundProjectDivisions);
-                for (Iterator<Division> iterator = foundProjectDivisions.iterator(); iterator.hasNext(); ) {
-                    Division next = iterator.next();
+                for (Division next : foundProjectDivisions) {
                     if (divisions.contains(next))
                         divisions.add(next);
                 }
@@ -268,7 +283,7 @@ public class OQProjectSyncService extends AbstractServiceWithTransactionManageme
         if (oqUrl == null) {
             logger.warn("OQ.url not found. Synchronization impossible.");
             trace.append("Синхронизация невозможна: OQ.url не указан.");
-            return result;
+            return null;
         }
         try {
             URLConnection oqc = oqUrl.openConnection();

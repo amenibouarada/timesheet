@@ -16,6 +16,9 @@ public class ProjectManager {
 	@Column(columnDefinition = "bool not null default true")
 	private boolean active;
 
+    @Column(columnDefinition = "bool not null default true")
+    private boolean master;
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "employee", nullable = false)
     @ForeignKey(name = "FK_EMPLOYEE")
@@ -81,4 +84,12 @@ public class ProjectManager {
 			.append(" project=").append(project.toString())
 		.toString();
 	}
+
+    public boolean isMaster() {
+        return master;
+    }
+
+    public void setMaster(boolean master) {
+        this.master = master;
+    }
 }

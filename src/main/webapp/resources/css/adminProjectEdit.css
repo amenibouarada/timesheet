@@ -1,0 +1,69 @@
+table.maintable {
+    width: 99%;
+    border: 0px;
+}
+
+table.maintable th {
+    border: 1px solid #ffffff;
+}
+
+table.maintable td {
+    padding: 5px;
+    border: 1px solid #ffffff;
+}
+
+table.details_table, table.details_table th, table.details_table td {
+    border: 1px solid #AAAAAA;
+}
+
+table.details_table td {
+    vertical-align: top;
+    text-align: center;
+}
+
+table.details_table textarea {
+    border-style: none;
+    border-color: Transparent;
+}
+
+table.details_table tr.hidden_delete {
+    display: none;
+}
+
+textarea {
+    width: 100%;
+}
+
+input.has_error {
+    background-color: #ffcfcf;
+}
+
+img.iconbutton {
+    cursor: pointer;
+    width: 16px;
+    height: 16px;
+    margin: 2px;
+}
+
+img.hidden_button {
+    visibility: hidden;
+}
+
+textarea.multiline {
+    margin: 0px;
+}
+
+.lowspace {
+    font-weight: bold;
+}
+
+/*
+
+div.dijitComboBox .dijitDownArrowButton {
+    height: 18px!important;
+}
+
+input.dijitReset .dijitInputField .dijitArrowButtonInner {
+    height: 8px!important;
+}
+*/

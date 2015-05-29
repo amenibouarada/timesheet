@@ -3,8 +3,9 @@ package com.aplana.timesheet.form.validator;
 import com.aplana.timesheet.dao.entity.DictionaryItem;
 import com.aplana.timesheet.enums.VacationTypesEnum;
 import com.aplana.timesheet.form.CreateVacationForm;
-import com.aplana.timesheet.properties.TSPropertyProvider;
+import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.*;
+import com.aplana.timesheet.system.security.SecurityService;
 import com.aplana.timesheet.util.DateTimeUtil;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
@@ -13,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.Errors;
 
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
@@ -41,15 +41,10 @@ public class CreateVacationFormValidator extends AbstractValidator {
     private EmployeeService employeeService;
 
     @Autowired
-    private CalendarService calendarService;
-
-    @Autowired
     protected TSPropertyProvider propertyProvider;
 
     @Autowired
     private DictionaryItemService dictionaryItemService;
-
-    public static final String DATE_FORMAT = "dd.MM.yyyy";
 
     @Override
     public boolean supports(Class<?> aClass) {
@@ -79,11 +74,9 @@ public class CreateVacationFormValidator extends AbstractValidator {
         if (calFromDateIsNotEmpty && calToDateIsNotEmpty) {
             final Timestamp fromDate = DateTimeUtil.stringToTimestamp(calFromDate);
             final Timestamp toDate = DateTimeUtil.stringToTimestamp(calToDate);
+            final boolean isAdmin = employeeService.isEmployeeAdmin(securityService.getSecurityPrincipal().getEmployee().getId());
 
-            if (!(
-                    approved &&
-                    employeeService.isEmployeeAdmin(securityService.getSecurityPrincipal().getEmployee().getId())
-            )) {
+            if (!(approved && isAdmin)) {
                 final Date currentDate = new Date();
                 Date allowedDate = DateUtils.addDays(currentDate, createThreshold);
 
@@ -107,9 +100,18 @@ public class CreateVacationFormValidator extends AbstractValidator {
                     errors.rejectValue(
                             "calToDate",
                             "error.createVacation.planned.todate.wrong",
-                            new Object[]{new SimpleDateFormat(DATE_FORMAT).format(allowedDate)},
+                            new Object[]{DateTimeUtil.formatDateIntoViewFormat(allowedDate)},
                             WRONG_PLANNED_TODATE_ERROR_MESSAGE
                     );
+                }
+
+                if (!isAdmin && VacationTypesEnum.WITH_NEXT_WORKING.getId() == createVacationForm.getVacationType()){
+                    errors.rejectValue(
+                            "calToDate",
+                            "error.createVacation.rights.notadmin",
+                            "Для создания отпуска с последующей отработкой обратитесь к администратору центру"
+                    );
+
                 }
 
             }

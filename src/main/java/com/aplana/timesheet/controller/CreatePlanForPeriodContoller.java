@@ -8,6 +8,7 @@ import com.aplana.timesheet.form.validator.CreatePlanForPeriodFormValidator;
 import com.aplana.timesheet.service.CreatePlanForPeriodService;
 import com.aplana.timesheet.service.EmployeeService;
 import com.aplana.timesheet.service.ProjectService;
+import com.aplana.timesheet.util.DateTimeUtil;
 import com.aplana.timesheet.util.JsonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -62,7 +63,9 @@ public class CreatePlanForPeriodContoller extends AbstractController {
         final ModelAndView modelAndView = new ModelAndView(VIEW);
 
         modelAndView.addObject("employeeList", employeeService.getEmployees());
-        modelAndView.addObject("projectList", getProjects(form.getFromDate(), form.getToDate()));
+        // если дата не задана передаем проекты которые не закончились на 1 число текущего месяца
+        Date fromDate = form.getFromDate() != null ? form.getFromDate() : DateTimeUtil.currentMonthFirstDayDate();
+        modelAndView.addObject("projectList", getProjects( fromDate, form.getToDate()));
 
         return modelAndView;
     }

@@ -6,9 +6,10 @@ import com.aplana.timesheet.dao.entity.DictionaryItem;
 import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.enums.VacationTypesEnum;
 import com.aplana.timesheet.form.CreateVacationForm;
-import com.aplana.timesheet.properties.TSPropertyProvider;
+import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.*;
-import com.aplana.timesheet.util.TimeSheetUser;
+import com.aplana.timesheet.system.security.SecurityService;
+import com.aplana.timesheet.system.security.entity.TimeSheetUser;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -95,17 +96,23 @@ public class CreateVacationFormValidatorTest  extends AbstractTest {
     }
 
     @Test
-    public void testPeriod() {
+    public void testPeriod1() {
         createVacationForm.setCalFromDate("2100-10-20");
         createVacationForm.setCalToDate("2100-10-10");
+
         createVacationFormValidator.validate(createVacationForm, errors, true);
         assertEquals(1, errors.getErrorCount());
 
-        setDefaultFormData();
+    }
+    @Test
+    public void testPeriod2() {
+        createVacationForm.setCalFromDate("2100-10-20");
+        createVacationForm.setCalToDate("2100-10-10");
+
         when(vacationServiceMock.getIntersectVacationsCount(
                 (Integer) any(), (Timestamp) any(), (Timestamp) any(), (DictionaryItem) any())).thenReturn(1L);
         createVacationFormValidator.validate(createVacationForm, errors, true);
-        assertEquals(1, errors.getErrorCount());
+        assertEquals(2, errors.getErrorCount());
     }
 
     @Test
@@ -133,55 +140,67 @@ public class CreateVacationFormValidatorTest  extends AbstractTest {
     }
 
     @Test
-    public void testComment() {
+    public void testComment1() {
         // 601 символ
         createVacationForm.setComment(" 123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890");
+
         createVacationFormValidator.validate(createVacationForm, errors, false);
         assertEquals(1, errors.getErrorCount());
-
-        setDefaultFormData();
+    }
+    @Test
+    public void testComment2() {
         createVacationForm.setComment("");
         createVacationForm.setVacationType(WITH_NEXT_WORKING.getId());
+
         createVacationFormValidator.validate(createVacationForm, errors, false);
         assertEquals(1, errors.getErrorCount());
     }
 
     @Test
-    public void testToDate() {
+    public void testToDate1() {
         createVacationForm.setCalToDate("2010-10-10");
+
         createVacationFormValidator.validate(createVacationForm, errors, true);
         assertEquals(1, errors.getErrorCount());
-
-        setDefaultFormData();
+    }
+    @Test
+    public void testToDate2() {
         createVacationForm.setCalToDate("2010-10-10");
         createVacationForm.setVacationType(PLANNED.getId());
+
         createVacationFormValidator.validate(createVacationForm, errors, true);
         assertEquals(1, errors.getErrorCount());
-
-        setDefaultFormData();
+    }
+    @Test
+    public void testToDate3() {
         createVacationForm.setCalToDate("");
+
         createVacationFormValidator.validate(createVacationForm, errors, true);
         assertEquals(1, errors.getErrorCount());
     }
 
     @Test
-    public void testFromDate(){
+    public void testFromDate1(){
         createVacationForm.setCalFromDate("2010-10-10");
+
         createVacationFormValidator.validate(createVacationForm, errors, false);
         assertEquals(1, errors.getErrorCount());
-
-        setDefaultFormData();
+    }
+    @Test
+    public void testFromDate2(){
         when(calendarServiceMock.find((Timestamp) any())).thenReturn(null);
         createVacationForm.setVacationType(PLANNED.getId());
-        createVacationFormValidator.validate(createVacationForm, errors, true);
-        assertEquals(1, errors.getErrorCount());
 
-        setDefaultFormData();
-        createVacationForm.setCalFromDate("");
         createVacationFormValidator.validate(createVacationForm, errors, true);
         assertEquals(1, errors.getErrorCount());
     }
+    @Test
+    public void testFromDate3(){
+        createVacationForm.setCalFromDate("");
 
+        createVacationFormValidator.validate(createVacationForm, errors, true);
+        assertEquals(1, errors.getErrorCount());
+    }
 
     @Test
     public void testZeroErrors(){

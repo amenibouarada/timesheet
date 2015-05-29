@@ -1,25 +1,30 @@
-<%@ page import="static com.aplana.timesheet.constants.TimeSheetConstants.DOJO_PATH" %>
+<%@ page import="static com.aplana.timesheet.system.constants.TimeSheetConstants.DOJO_PATH" %>
 <%@ page import="static com.aplana.timesheet.util.ResourceUtils.getResRealPath" %>
-<!-- load Dojo -->
-<%!
-    private static final String DATE_TEXT_BOX_EXT_JS_PATH = "/resources/js/DateTextBox.ext.js";
-    private static final String CALENDAR_EXT_RES_PATH = "/resources/js/Calendar.ext.js";
-%>
+<%@ page import="com.aplana.timesheet.enums.TypesOfActivityEnum" %>
+<%@ page import="com.aplana.timesheet.enums.VacationTypesEnum" %>
 
-<script
-        src="<%=request.getContextPath()%><%= DOJO_PATH %>/dojo/dojo.js"
-        djConfig="parseOnLoad: true,
-                  locale:'ru'">
-</script>
-<script
-        src="<%= getResRealPath("/resources/js/timesheet.js", application) %>">
-</script>
-<script
-        src="<%= getResRealPath("/resources/js/dformat.js", application) %>">
-</script>
+<script type="text/javascript">
+    var dojoConfig = {
+        parseOnLoad: true,
+        locale:'ru'
+    };
 
-<script type="text/javascript" src="<%= getResRealPath(CALENDAR_EXT_RES_PATH, application) %>"></script>
-<script type="text/javascript" src="<%= getResRealPath(DATE_TEXT_BOX_EXT_JS_PATH, application) %>"></script>
+    window.EnumConstants = {
+        TypesOfActivityEnum: {<%for (TypesOfActivityEnum name: TypesOfActivityEnum.values()) {
+                out.print(String.format("%s : %s,\n", name.name(), name.getId()));}%>},
+        VacationTypesEnum: {<%for (VacationTypesEnum name: VacationTypesEnum.values()) {
+                out.print(String.format("%s : %s,\n", name.name(), name.getId()));}%>}
+    }
+</script>
+<script type="text/javascript" src="<%=request.getContextPath()%><%= DOJO_PATH %>/dojo/dojo.js"></script>
+
+<%--TODO возможно при сборке надо объединять в один файл, чтобы клиент скачивал только один файл, а не 6 --%>
+<script type="text/javascript" src="<%= getResRealPath("/resources/js/utils/dformat.js", application) %>"></script>
+<script type="text/javascript" src="<%= getResRealPath("/resources/js/utils/commonUtils.js", application) %>"></script>
+<script type="text/javascript" src="<%= getResRealPath("/resources/js/utils/DateTimeUtils.js", application) %>"></script>
+<script type="text/javascript" src="<%= getResRealPath("/resources/js/utils/selectWidgetsUtils.js", application) %>"></script>
+<script type="text/javascript" src="<%= getResRealPath("/resources/js/utils/DateTextBox.ext.js", application) %>"></script>
+<script type="text/javascript" src="<%= getResRealPath("/resources/js/utils/Calendar.ext.js", application) %>"></script>
 
 <script type="text/javascript">
     function getContextPath() {

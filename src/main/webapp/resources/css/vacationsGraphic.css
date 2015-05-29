@@ -40,6 +40,12 @@
     height: 14px;
     background-color: red;
     text-align: center;
+    float:left;
+    padding-left:3;
+}
+
+.GRegionHoliday{
+    background-color:sandybrown;
 }
 
 .GProgress {
@@ -47,4 +53,8 @@
     height: 2px;
     overflow: hidden;
     margin-top: 5px;
+}
+
+.GUnAskedPeriod{
+    background-color: rgba(0, 0, 0, 0.2);
 }

@@ -56,6 +56,9 @@ public class Vacation implements Comparable{
     @OrderBy("requestDate, responseDate ASC")
     private Set<VacationApproval> vacationApprovals;
 
+    @Column(name = "remind", columnDefinition = "bool not null default false")
+    private Boolean remind;
+
     public Integer getId() {
         return id;
     }
@@ -134,6 +137,14 @@ public class Vacation implements Comparable{
 
     public void setVacationApprovals(Set<VacationApproval> vacationApprovals) {
         this.vacationApprovals = vacationApprovals;
+    }
+
+    public Boolean getRemind() {
+        return remind;
+    }
+
+    public void setRemind(Boolean remind) {
+        this.remind = remind;
     }
 
     @Override

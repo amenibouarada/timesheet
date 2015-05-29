@@ -5,14 +5,6 @@
 
 <html>
 <head>
-    <script type="text/javascript">
-        //закрываем окно
-        function cancel() {
-            if (confirmCancelWindow()) {
-                self.close();
-            }
-        };
-    </script>
     <title><fmt:message key="feedback"/></title>
 </head>
 
@@ -23,8 +15,6 @@
 <br/>
 <form:form method="post" action="sendNewFeedbackMessage">
     <button id="submit_button" type="submit">Отправить новое сообщение</button>
-    <%--<button id="cancel_button" name="cancel_button" style="width:150px" type="button" onclick="cancel()">Закрыть</button>--%>
 </form:form>
-
 </body>
 </html>

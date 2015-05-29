@@ -1,6 +1,7 @@
 package com.aplana.timesheet.controller;
 
 import com.aplana.timesheet.dao.entity.Calendar;
+import com.aplana.timesheet.dao.entity.DictionaryItem;
 import com.aplana.timesheet.dao.entity.Division;
 import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.enums.DictionaryEnum;
@@ -9,8 +10,8 @@ import com.aplana.timesheet.exception.service.VacationApprovalServiceException;
 import com.aplana.timesheet.form.CreateVacationForm;
 import com.aplana.timesheet.form.validator.CreateVacationFormValidator;
 import com.aplana.timesheet.service.*;
+import com.aplana.timesheet.system.security.SecurityService;
 import com.aplana.timesheet.util.DateTimeUtil;
-import com.aplana.timesheet.util.EmployeeHelper;
 import org.apache.commons.lang.BooleanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +25,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.sql.Timestamp;
 import java.util.List;
+
+import static com.aplana.timesheet.system.constants.RoleConstants.ROLE_ADMIN;
 
 /**
  * @author rshamsutdinov
@@ -50,8 +53,6 @@ public class CreateVacationController {
     private VacationService vacationService;
     @Autowired
     private DivisionService divisionService;
-    @Autowired
-    protected EmployeeHelper employeeHelper;
     @Autowired
     protected SendMailService sendMailService;
     @Autowired
@@ -82,50 +83,43 @@ public class CreateVacationController {
                 employeeService.find(employee.getId()).getRegion()).getCalDate(); //При выборе текущего сотрудника, поле Регион незаполнено
 
         createVacationForm.setDivisionId(employee.getDivision().getId());
-        createVacationForm.setCalFromDate(DateTimeUtil.formatDate(nextWorkDay));
-        createVacationForm.setCalToDate(DateTimeUtil.formatDate(nextWorkDay));
+        createVacationForm.setCalFromDate(DateTimeUtil.formatDateIntoDBFormat(nextWorkDay));
+        createVacationForm.setCalToDate(DateTimeUtil.formatDateIntoDBFormat(nextWorkDay));
         createVacationForm.setEmployeeId(employee.getId());
 
         return getModelAndView(employee);
     }
 
-    private ModelAndView getModelAndView(Employee employee) {
-        final ModelAndView modelAndView = new ModelAndView("createVacation");
-
-        List<Division> divisionList = divisionService.getDivisions();
-
-        modelAndView.addObject(
-                "vacationTypes",
-                dictionaryItemService.getItemsByDictionaryId(DictionaryEnum.VACATION_TYPE.getId())
-        );
-        modelAndView.addObject("employee", employee);
-        modelAndView.addObject("divisionId", employee.getDivision().getId());
-        modelAndView.addObject("employeeId", employee.getId());
-        modelAndView.addObject("divisionList", divisionList);
-        modelAndView.addObject("employeeListJson", employeeHelper.getEmployeeListWithDivisionJson(divisionList, employeeService.isShowAll(request)));
-        modelAndView.addObject("typeWithRequiredComment", CreateVacationFormValidator.TYPE_WITH_REQUIRED_COMMENT);
-        modelAndView.addObject("typeVacationPlanned", VacationTypesEnum.PLANNED.getId());
-
-        return modelAndView;
-    }
-
-    private Calendar getCalendar(Timestamp date) {
-        final Calendar calendar = new Calendar();
-
-        calendar.setCalDate(date);
-
-        return calendar;
-    }
-
-    @RequestMapping(value = "/getExitToWorkAndCountVacationDay",  produces = "text/plain;Charset=UTF-8")
+    @RequestMapping(value = "/getExitToWorkAndCountVacationDay", produces = "text/plain;Charset=UTF-8")
     @ResponseBody
     public String getExitToWorkAndCountVacationDay(
-                                           @RequestParam("beginDate") String beginDate,
-                                           @RequestParam("endDate") String endDate,
-                                           @RequestParam("employeeId") Integer employeeId,
-                                           @RequestParam("vacationTypeId") Integer vacationTypeId
+            @RequestParam("beginDate") String beginDate,
+            @RequestParam("endDate") String endDate,
+            @RequestParam("employeeId") Integer employeeId,
+            @RequestParam("vacationTypeId") Integer vacationTypeId
     ) {
         return vacationService.getExitToWorkAndCountVacationDayJson(beginDate, endDate, employeeId, vacationTypeId);
+    }
+
+    @RequestMapping(value = "/getCountVacationDayForPeriod", produces = "text/plain;Charset=UTF-8")
+    @ResponseBody
+    public String getCountVacationDayForPeriod(
+            @RequestParam("beginDate") String beginDate,
+            @RequestParam("employeeId") Integer employeeId,
+            @RequestParam("vacationTypeId") Integer vacationTypeId
+    ) {
+        return vacationService.getVacationDaysCountForPeriodJSON(beginDate, employeeId, vacationTypeId);
+    }
+
+    @RequestMapping(value = "/checkVacationCountDays", produces = "text/plain;Charset=UTF-8")
+    @ResponseBody
+    public String checkVacationCountDays(
+            @RequestParam("beginDate") String beginDate,
+            @RequestParam("endDate") String endDate,
+            @RequestParam("employeeId") Integer employeeId,
+            @RequestParam("vacationTypeId") Integer vacationTypeId
+    ) {
+        return vacationService.checkVacationCountDaysJSON(beginDate, endDate, employeeId, vacationTypeId);
     }
 
     @RequestMapping(value = "/validateAndCreateVacation/{employeeId}/{approved}", method = RequestMethod.POST)
@@ -146,20 +140,47 @@ public class CreateVacationController {
             return getModelAndView(employee);
         }
 
-        vacationService.createAndMailngVacation(createVacationForm,employee,curEmployee,isApprovedVacation);
+        vacationService.createAndMailVacation(createVacationForm, employee, curEmployee, isApprovedVacation);
 
         HttpSession session = request.getSession(false);
         session.setAttribute("employeeId", employeeId);
-        return new ModelAndView(
-                String.format(
-                        "redirect:../../vacations"
-                )
-        );
+        return new ModelAndView("redirect:../../vacations");
     }
 
     @RequestMapping(value = "/validateAndCreateVacation", method = RequestMethod.GET)
     public String validateAndCreateVacation(
     ) {
         return "redirect:/vacations";
+    }
+
+
+    private ModelAndView getModelAndView(Employee employee) {
+        final ModelAndView modelAndView = new ModelAndView("createVacation");
+
+        List<Division> divisionList = divisionService.getDivisions();
+
+        List<DictionaryItem> itemsByDictionaryId = dictionaryItemService.getItemsByDictionaryId(DictionaryEnum.VACATION_TYPE.getId());
+        if (!request.isUserInRole(ROLE_ADMIN)) {
+            itemsByDictionaryId.remove(dictionaryItemService.find(VacationTypesEnum.CHILDBEARING.getId()));
+            itemsByDictionaryId.remove(dictionaryItemService.find(VacationTypesEnum.CHILDCARE.getId()));
+        }
+        modelAndView.addObject("vacationTypes", itemsByDictionaryId);
+
+        modelAndView.addObject("employee", employee);
+        modelAndView.addObject("divisionId", employee.getDivision().getId());
+        modelAndView.addObject("employeeId", employee.getId());
+        modelAndView.addObject("divisionList", divisionList);
+        modelAndView.addObject("typeWithRequiredComment", CreateVacationFormValidator.TYPE_WITH_REQUIRED_COMMENT);
+        modelAndView.addObject("typeVacationPlanned", VacationTypesEnum.PLANNED.getId());
+
+        return modelAndView;
+    }
+
+    private Calendar getCalendar(Timestamp date) {
+        final Calendar calendar = new Calendar();
+
+        calendar.setCalDate(date);
+
+        return calendar;
     }
 }

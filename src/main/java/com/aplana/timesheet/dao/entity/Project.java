@@ -21,6 +21,9 @@ public class Project {
 	@Column
 	private String projectId;
 
+	@Column
+	private String description;
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "manager")
 	@ForeignKey(name = "FK_PROJECT_MANAGER")
@@ -43,16 +46,11 @@ public class Project {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "project", cascade = CascadeType.ALL)
     private Set<TimeSheetDetail> timeSheetDetail;
 
-	@ManyToMany(fetch = FetchType.LAZY)
-	@JoinTable(name = "division_project",
-            joinColumns = {
-                    @JoinColumn(name = "project_id", nullable = false) },
-            inverseJoinColumns = {
-                    @JoinColumn(name = "division_id", nullable = false) })
-	private Set<Division> divisions;
-
     @OneToMany(mappedBy = "project", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<EmployeeProjectBillable> employeeProjectBillables;
+
+    @OneToMany(mappedBy = "project", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Set<ProjectManager> projectManagers;
 
     @Column(name = "start_date", columnDefinition = "date")
     private Date startDate;
@@ -63,10 +61,30 @@ public class Project {
     @Column(name = "jira_project_key")
     private String jiraProjectKey;
 
+    @Column(name = "act_type")
+    private String activityType;
+
+    @Column(name = "passport")
+    private String passport;
+
+    @Column(name = "work_type")
+    private String workType;
+
+    @Column(name = "customer")
+    private String customer;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "division", nullable = true) //todo Определиться обязательно ли поле к заполнению. Пока таблица заполняется отключил.
     @ForeignKey(name = "FK_PROJECT_DIVISION")
     private Division division;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "division_project",
+            joinColumns = {
+                    @JoinColumn(name = "project_id", nullable = false) },
+            inverseJoinColumns = {
+                    @JoinColumn(name = "division_id", nullable = false) })
+    private Set<Division> divisions;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "funding_type", nullable = true) //todo Определиться обязательно ли поле к заполнению. Пока таблица заполняется отключил.
@@ -169,16 +187,6 @@ public class Project {
         this.jiraProjectKey = jiraProjectKey;
     }
 
-    @Override
-	public String toString() {
-		return new StringBuilder()
-			.append(" id=").append(id)
-			.append(" name=").append(name)
-            .append(" manager [").append(manager).append("]")
-            .append(" projectid=").append(projectId)
-		.toString();
-	}
-
     public Set<TimeSheetDetail> getTimeSheetDetail() {
         return timeSheetDetail;
     }
@@ -209,5 +217,63 @@ public class Project {
 
     public void setFundingType(DictionaryItem fundingType) {
         this.fundingType = fundingType;
+    }
+
+    public String getActivityType() {
+        return activityType;
+    }
+
+    public void setActivityType(String activityType) {
+        this.activityType = activityType;
+    }
+
+    public String getPassport() {
+        return passport;
+    }
+
+    public void setPassport(String passport) {
+        this.passport = passport;
+    }
+
+    public String getWorkType() {
+        return workType;
+    }
+
+    public void setWorkType(String workType) {
+        this.workType = workType;
+    }
+
+    public String getCustomer() {
+        return customer;
+    }
+
+    public void setCustomer(String customer) {
+        this.customer = customer;
+    }
+
+    public Set<ProjectManager> getProjectManagers() {
+        return projectManagers;
+    }
+
+    public void setProjectManagers(Set<ProjectManager> projectManagers) {
+        this.projectManagers = projectManagers;
+    }
+
+    @Override
+    public String toString() {
+        return new StringBuilder()
+                .append(" id=").append(id)
+                .append(" name=").append(name)
+                .append(" manager [").append(manager).append("]")
+                .append(" projectid=").append(projectId)
+                .toString();
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

@@ -7,6 +7,9 @@ import java.math.BigDecimal;
 
 /* класс - строка в таблице детализации месячной работы по проектам */
 public class EmployeeMonthReportDetail implements Comparable<EmployeeMonthReportDetail> {
+
+    public static final String ITOGO = "Итого";
+
     private DictionaryItem act_type;
     private Project project;
     private BigDecimal planHours;
@@ -65,10 +68,10 @@ public class EmployeeMonthReportDetail implements Comparable<EmployeeMonthReport
     public EmployeeMonthReportDetail(DictionaryItem act_type, Project project, BigDecimal planHours, BigDecimal factHours, BigDecimal planDuration, BigDecimal factDuration) {
         this.act_type = act_type;
         this.project = project;
-        this.planHours = planHours.setScale(2, BigDecimal.ROUND_HALF_UP);;
-        this.factHours = factHours.setScale(2, BigDecimal.ROUND_HALF_UP);;
-        this.planDuration = planDuration.setScale(2, BigDecimal.ROUND_HALF_UP);;
-        this.factDuration = factDuration.setScale(2, BigDecimal.ROUND_HALF_UP);;
+        this.planHours = planHours.setScale(2, BigDecimal.ROUND_HALF_UP);
+        this.factHours = factHours.setScale(2, BigDecimal.ROUND_HALF_UP);
+        this.planDuration = planDuration.setScale(2, BigDecimal.ROUND_HALF_UP);
+        this.factDuration = factDuration.setScale(2, BigDecimal.ROUND_HALF_UP);
     }
 
     public int compareTo(EmployeeMonthReportDetail o) {
@@ -81,7 +84,7 @@ public class EmployeeMonthReportDetail implements Comparable<EmployeeMonthReport
     }
 
     public Integer getPlanPercent() {
-        if (planDuration != null && !planDuration.equals(BigDecimal.ZERO) && planHours != null) {
+        if (planDuration != null && !(planDuration.doubleValue() == 0) && planHours != null) {
             BigDecimal l = planHours.divide(planDuration, BigDecimal.ROUND_HALF_EVEN).multiply(BigDecimal.valueOf(100));
             return l.intValue();
         } else {
@@ -90,7 +93,7 @@ public class EmployeeMonthReportDetail implements Comparable<EmployeeMonthReport
     }
 
     public Integer getFactPercent() {
-        if (factDuration != null && !factDuration.equals(BigDecimal.ZERO) && factHours != null) {
+        if (factDuration != null && !(factDuration.doubleValue() == 0) && factHours != null) {
             BigDecimal l = factHours.divide(factDuration, BigDecimal.ROUND_HALF_EVEN).multiply(BigDecimal.valueOf(100));
             return l.intValue();
         } else {

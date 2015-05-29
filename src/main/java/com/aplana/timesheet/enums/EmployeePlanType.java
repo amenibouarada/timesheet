@@ -6,7 +6,7 @@ package com.aplana.timesheet.enums;
  */
 public enum EmployeePlanType implements TSEnum {
 
-    WORK_FOR_OTHER_DIVISIONS(111, "Работы на другие центры"),
+    WORK_FOR_OTHER_DIVISIONS(111, "Работа на другие центры"),
     NON_PROJECT(112, "Непроектная"),
     ILLNESS(113, "Болезнь"),
     VACATION(114, "Отпуск");

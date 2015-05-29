@@ -3,14 +3,14 @@ package com.aplana.timesheet.service.MailSenders;
 import com.aplana.timesheet.dao.entity.ApprovalResultModel;
 import com.aplana.timesheet.dao.entity.Vacation;
 import com.aplana.timesheet.dao.entity.VacationApproval;
-import com.aplana.timesheet.properties.TSPropertyProvider;
+import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.ManagerRoleNameService;
 import com.aplana.timesheet.service.SendMailService;
 import com.aplana.timesheet.service.VacationApprovalService;
+import com.aplana.timesheet.util.DateTimeUtil;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.time.DateFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ui.velocity.VelocityEngineUtils;
@@ -28,6 +28,11 @@ public class VacationApproveRequestSender extends AbstractVacationSender<Vacatio
     public VacationApproveRequestSender(SendMailService sendMailService, TSPropertyProvider propertyProvider,
                                         VacationApprovalService vacationApprovalService, ManagerRoleNameService managerRoleNameService) {
         super(sendMailService, propertyProvider, vacationApprovalService, managerRoleNameService);
+        logger.info("Run sending message for: {}", getName());
+    }
+
+    final String getName() {
+        return String.format(" Оповещение о подтвержении отпуска подчиненного (%s)", this.getClass().getSimpleName());
     }
 
     @Override
@@ -56,9 +61,9 @@ public class VacationApproveRequestSender extends AbstractVacationSender<Vacatio
         String vacationTypeStr = vacation.getType().getValue();
         String employeeNameStr = vacation.getEmployee().getName();
         String regionNameStr = vacation.getEmployee().getRegion().getName();
-        String beginDateStr = DateFormatUtils.format(vacation.getBeginDate(), DATE_FORMAT);
-        String endDateStr = DateFormatUtils.format(vacation.getEndDate(), DATE_FORMAT);
-        String creationDate = DateFormatUtils.format(vacation.getCreationDate(), DATE_FORMAT);
+        String beginDateStr = DateTimeUtil.formatDateIntoViewFormat(vacation.getBeginDate());
+        String endDateStr = DateTimeUtil.formatDateIntoViewFormat(vacation.getEndDate());
+        String creationDate = DateTimeUtil.formatDateIntoViewFormat(vacation.getCreationDate());
         String commentStr = StringUtils.EMPTY;
         String approveURL = String.format("%s/vacation_approval?uid=%s", getTimeSheetURL(), vacationApproval.getUid());
         if (StringUtils.isNotBlank(vacation.getComment())) {
@@ -96,7 +101,7 @@ public class VacationApproveRequestSender extends AbstractVacationSender<Vacatio
             Map model = new HashMap();
             model.put("approvalList", approvalList.iterator());
             String messageBody = VelocityEngineUtils.mergeTemplateIntoString(
-                    sendMailService.velocityEngine, "vacationapprovals.vm", model);
+                    sendMailService.velocityEngine, "velocity/vacationapprovals.vm", model);
             logger.debug("Message Body: {}", messageBody);
             stringBuilder.append(messageBody);
         }
@@ -108,12 +113,7 @@ public class VacationApproveRequestSender extends AbstractVacationSender<Vacatio
     }
 
     private String getSubject(Vacation vacation) {
-        String beginDateStr = DateFormatUtils.format(vacation.getBeginDate(), DATE_FORMAT);
-        String endDateStr = DateFormatUtils.format(vacation.getEndDate(), DATE_FORMAT);
-
         return  String.format("Запрос отпуска %s", vacation.getEmployee().getName());
-//        return  String.format("%s %s %s - %s", vacation.getStatus().getValue(), vacation.getEmployee().getName(),
-//                        beginDateStr, endDateStr);
     }
 
 }

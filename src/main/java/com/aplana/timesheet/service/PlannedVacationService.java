@@ -1,8 +1,13 @@
 package com.aplana.timesheet.service;
 
-import com.aplana.timesheet.dao.*;
-import com.aplana.timesheet.dao.entity.*;
-
+import com.aplana.timesheet.dao.EmployeeDAO;
+import com.aplana.timesheet.dao.VacationDAO;
+import com.aplana.timesheet.dao.entity.DictionaryItem;
+import com.aplana.timesheet.dao.entity.Employee;
+import com.aplana.timesheet.dao.entity.Project;
+import com.aplana.timesheet.dao.entity.Vacation;
+import com.aplana.timesheet.enums.VacationStatusEnum;
+import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,14 +17,11 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.Calendar;
 
 /**
- * Created with IntelliJ IDEA.
  * User: bsirazetdinov
  * Date: 22.07.13
  * Time: 16:16
- * To change this template use File | Settings | File Templates.
  */
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, noRollbackFor = DataAccessException.class)
@@ -39,20 +41,17 @@ public class PlannedVacationService {
     @Autowired
     protected ProjectService projectService;
 
-    final static Date dateCurrent;
-    final static Date dateAfter;
-    final static Date dateBefore;
-    static {
-        final Calendar calendar2 = Calendar.getInstance();
-        dateCurrent = calendar2.getTime();
-        calendar2.add(Calendar.WEEK_OF_YEAR, 2);
-        dateAfter = calendar2.getTime();
-        calendar2.add(Calendar.WEEK_OF_YEAR, -4);
-        dateBefore = calendar2.getTime();
-    }
+    @Autowired
+    private DictionaryItemService dictionaryItemService;
+
+    @Autowired
+    private TSPropertyProvider tsPropertyProvider;
+
+    private Date dateCurrent;
+    private Date dateAfter;
+    private Date dateBefore;
 
     public PlannedVacationService() {}
-
 
     /**
      * Получаем руководителей сотрудников
@@ -72,14 +71,18 @@ public class PlannedVacationService {
 
         for(Map.Entry<Employee, List<Project>> entry : employeeProjects.entrySet()) {
             Set<Employee> managers = new HashSet<Employee>();
+
+
+            Employee manager = entry.getKey();
+            while ((manager = manager.getManager()) != null) {
+                managers.add(manager);
+            }
+            if (entry.getKey().getManager2() != null){
+                managers.add(entry.getKey().getManager2());
+            }
+
             for (Project project:entry.getValue()) {
                 managers.addAll(employeeDAO.getProjectManagers(project));
-                
-                Employee manager = entry.getKey();
-                while ((manager = getManager(manager)) != null) {
-                    managers.add(manager);
-                }
-
             }
             employeeManagers.put(entry.getKey(), managers);
         }
@@ -110,33 +113,32 @@ public class PlannedVacationService {
         return managerEmployees;
     }
 
-
-    private Employee getManager(Employee e) {
-        return e.getManager();
-    }
-
     /**
-    *   Получаем руководителей чьи "близкие" подчиненые планируют отпуска в ближайшие 2 недели
-    *   (с датой начала отпуска cur + 2 недели)
+    * Получаем руководителей чьи "близкие" подчиненые планируют отпуска в ближайшие 2 недели
     */
 
     public Map<Employee, Set<Vacation>> getManagerEmployeesVacation() {
-        final List<Employee> employees = employeeDAO.getEmployeeWithPlannedVacation(dateAfter);
+        final List<Employee> employees = employeeDAO.getEmployeeWithPlannedVacation(dateCurrent, dateAfter);
 
         Map<Employee, Set<Employee>> employeeManagers = getEmployeeManagers(employees);
 
         Map<Employee, Set<Employee>> managerEmployees = reverseEmployeeManagersToManagerEmployees(employeeManagers);
-        
-        
+
         Map<Employee, Set<Vacation>> managerEmployeesVacation = new HashMap<Employee, Set<Vacation>>();
+
+        DictionaryItem approved = dictionaryItemService.find(VacationStatusEnum.APPROVED.getId()); //статус - Утвержденно
+
         for(Map.Entry<Employee, Set<Employee>> entry : managerEmployees.entrySet()) {
             Set<Vacation> vacations = new TreeSet<Vacation>();
 
             for (Employee employee:entry.getValue()) {
-                vacations.add(vacationDAO.findVacation(employee.getId(), dateAfter, null));
+                //добавление утвержденных отпусков
+                vacations.addAll(vacationDAO.findVacationsByStatus(employee.getId(), dateCurrent, dateAfter, approved));
             }
 
-            managerEmployeesVacation.put(entry.getKey(), new TreeSet<Vacation>(vacations));
+            if (vacations.size() > 0) {
+                managerEmployeesVacation.put(entry.getKey(), new TreeSet<Vacation>(vacations));
+            }
         }
         
         return managerEmployeesVacation;
@@ -144,6 +146,57 @@ public class PlannedVacationService {
 
     @Transactional
     public void service() {
+        setupDates();
+        logger.info("Start sending mail to managers! Current dates! dateCurrent {} dateAfter {} dateBefore {}", Arrays.asList(dateCurrent, dateAfter, dateBefore));
         sendMailService.plannedVacationInfoMailing(getManagerEmployeesVacation());
+    }
+
+    private void setupDates(){
+        final Calendar calendar2 = Calendar.getInstance();
+        dateCurrent = calendar2.getTime();
+        calendar2.add(Calendar.WEEK_OF_YEAR, 2);
+        dateAfter = calendar2.getTime();
+        calendar2.add(Calendar.WEEK_OF_YEAR, -4);
+        dateBefore = calendar2.getTime();
+    }
+
+    @Transactional
+    public void remindDeletePlannedVacation() {
+        // Удаляем планируемые отпуска, о которых уже предупреждали
+        Integer deletePeriod = tsPropertyProvider.getPlannedVacationDeleteThreshold();
+        Date deleteDate = getDateByCurrentDayPeriod(deletePeriod);
+        List<Vacation> deleteVacationList = vacationDAO.getPlannedVacationByBeginDateLess(deleteDate);
+
+        for (Vacation vacation : deleteVacationList) {
+            vacationDAO.delete(vacation);
+            sendMailService.performPlannedRemove(vacation);
+        }
+
+        // Напоминаем, что планируемый отпуск будет удален
+        Integer remindPeriod = tsPropertyProvider.getPlannedVacationDeleteReminderThreshold();
+        Date remindDate = getDateByCurrentDayPeriod(remindPeriod);
+        List<Vacation> remindVacationList = vacationDAO.getPlannedVacationByBeginDate(remindDate, false);
+
+        for (Vacation vacation : remindVacationList) {
+            vacation.setRemind(true);
+            sendMailService.performPlannedRemind(vacation);
+        }
+    }
+
+    private Date getDateByCurrentDayPeriod(Integer period) {
+        Date currentDate = new Date();
+        Calendar calendar = Calendar.getInstance();
+        Date date;
+
+        calendar.setTime(currentDate);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+
+        calendar.add(Calendar.DATE, period);
+        date = calendar.getTime();
+
+        return date;
     }
 }

@@ -1,0 +1,29 @@
+<h1 align="justify"><b>Необходимо в течение рабочего дня в обязательном порядке заполнить отчеты за предшествующие
+    рабочие дни</b></h1>
+<table border="2">
+    <tr>
+        <td><b>Сотрудник</b></td>
+        <td><b>Должность</b></td>
+        <td><b>Руководитель</b></td>
+        <td><b>Пропущенные дни</b></td>
+    </tr>
+    <tr>
+        <td><b>$employee.name </b></td>
+        <td><b>$employee.job.name </b></td>
+        <td><b>
+            #if ($employee.manager != $null)
+			$employee.manager.name
+			#end
+        </b></td>
+        <td>
+            <table style="margin-bottom: 20px;">
+                #foreach($day in $passedDays)
+                    <tr>
+                        <td><b> $day </b></td>
+                        <td><a href="$timesheeturl/timesheet?date=$day&id=$employee.id">Создать отчет</a></td>
+                    </tr>
+                #end
+            </table>
+        </td>
+    </tr>
+</table>

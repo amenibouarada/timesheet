@@ -14,15 +14,13 @@ import java.util.List;
  */
 public enum TypesOfActivityEnum implements TSEnum {
 
-    PROJECT( 12, "Проект", 1 ),
-    PROJECT_PRESALE( 42, "Проектный пресейл", 2 ),
-    PRESALE( 13, "Пресейл", 3 ),
-    NON_PROJECT( 14, "Непроектная", 4 ),
-    TIME_OFF_FOR_OVERTIME( 24, "Отгул за переработки", 5 ),
-    VACATION( 16, "Отпуск", 6 ),
-    ILLNESS( 17, "Болезнь", 7 ),
-    HOLIDAY( 18, "Нерабочий день", 8 ),
-    COMPENSATORY_HOLIDAY( 15, "Отгул", 9 );
+    PROJECT(                12, "Проект",              1),
+    PROJECT_PRESALE(        42, "Проектный пресейл",   2),
+    PRESALE(                13, "Пресейл",             3),
+    NON_PROJECT(            14, "Непроектная",         4),
+    VACATION(               16, "Отпуск",              6),
+    ILLNESS(                17, "Болезнь",             7),
+    COMPENSATORY_HOLIDAY(   15, "Отгул",               9);
 
     private int id;
     private String name;
@@ -52,45 +50,35 @@ public enum TypesOfActivityEnum implements TSEnum {
 
     /**
      * Проверяет, входит ли тип активности в перечень тех, по которым нужно считать время работы
+     *
      * @param id ид типа работы
      * @return
      */
-    public static boolean isEfficientActivity( int id ) {
-        return isEfficientActivity( getById( id ) );
+    public static boolean isEfficientActivity(int id) {
+        return isEfficientActivity(getById(id));
     }
 
     /**
      * Проверяет, входит ли тип активности в перечень тех, по которым нужно считать время работы
+     *
      * @param typeOfActivity тип работы
      * @return
      */
-    public static boolean isEfficientActivity( TypesOfActivityEnum typeOfActivity ) {
-        return  typeOfActivity == NON_PROJECT
+    public static boolean isEfficientActivity(TypesOfActivityEnum typeOfActivity) {
+        return typeOfActivity == NON_PROJECT
                 || typeOfActivity == PRESALE
                 || typeOfActivity == PROJECT
                 || typeOfActivity == PROJECT_PRESALE;
-    }
-
-    public static boolean isProjectActivity( TypesOfActivityEnum typeOfActivity ) {
-        return     PROJECT == typeOfActivity
-                || PRESALE == typeOfActivity
-                || PROJECT_PRESALE == typeOfActivity;
     }
 
     public static boolean isProjectOrPresale(TypesOfActivityEnum typesOfActivityEnum) {
         return (typesOfActivityEnum == PROJECT || typesOfActivityEnum == PRESALE);
     }
 
-    public static boolean isNotEfficientActivity( int id ) {
-        return ! isEfficientActivity( id );
-    }
-
-    public static boolean isNotEfficientActivity( TypesOfActivityEnum typeOfActivity ) {
-        return ! isEfficientActivity( typeOfActivity );
-    }
-
-    public static TypesOfActivityEnum getById( final Integer id ) {
-        if (id == null) {return null;}
+    public static TypesOfActivityEnum getById(final Integer id) {
+        if (id == null) {
+            return null;
+        }
         return Iterables.tryFind(Arrays.asList(TypesOfActivityEnum.values()), new Predicate<TypesOfActivityEnum>() {
             @Override
             public boolean apply(@Nullable TypesOfActivityEnum input) {
@@ -99,7 +87,7 @@ public enum TypesOfActivityEnum implements TSEnum {
         }).orNull();
     }
 
-    public static List<Integer> getProjectPresaleNonProjectActivityId(){
+    public static List<Integer> getProjectPresaleNonProjectActivityId() {
         List<Integer> result = new ArrayList<Integer>();
         result.add(PROJECT.getId());
         result.add(PRESALE.getId());
@@ -109,8 +97,15 @@ public enum TypesOfActivityEnum implements TSEnum {
 
     public static boolean isNotCheckableForOvertime(TypesOfActivityEnum activityType) {
         return (
-                activityType == VACATION || activityType == ILLNESS || activityType == COMPENSATORY_HOLIDAY ||
-                activityType == TIME_OFF_FOR_OVERTIME || activityType == HOLIDAY
+                activityType == VACATION || activityType == ILLNESS || activityType == COMPENSATORY_HOLIDAY
         );
+    }
+
+    /*
+        Возвращает перечисление в виде строки через запятую id типов активности которые будут учитываться в отчетах
+        42, 12, 13
+     */
+    public static String getOnlyWorkTypeString() {
+        return String.valueOf(PROJECT.getId()) + ',' + PROJECT_PRESALE.getId() + ',' + PRESALE.getId();
     }
 }

@@ -34,7 +34,7 @@ public class CalendarService {
      */
     @Transactional(readOnly = true)
     public Calendar find(String date) {
-        return calendarDAO.find(DateTimeUtil.stringToTimestamp(date, DateTimeUtil.DATE_PATTERN));
+        return calendarDAO.find(DateTimeUtil.stringToTimestamp(date, DateTimeUtil.DB_DATE_PATTERN));
     }
 
     /**
@@ -140,6 +140,10 @@ public class CalendarService {
         return calendarDAO.getHolidaysCountForRegion(beginDate, endDate, region);
     }
 
+    public List<Holiday> getAllHolidaysInInterval(Date beginDate, Date endDate) {
+        return calendarDAO.getAllHolidaysInInterval(beginDate, endDate);
+    }
+
     /**
      * получаем мапу для периода
      * ключ - год в периоде
@@ -178,11 +182,6 @@ public class CalendarService {
         return result;
     }
 
-
-    public int getWorkDaysCountForRegion(Region region, Integer year, Integer month, @NotNull Date fromDate) {
-        return calendarDAO.getWorkDaysCountForRegion(region, year, month, fromDate);
-    }
-
     public int getWorkDaysCountForRegion(Region region, Integer year, Integer month,
                                          @Nullable Date fromDate, @Nullable Date toDate) {
         return calendarDAO.getWorkDaysCountForRegion(region, year, month, fromDate, toDate);
@@ -194,10 +193,25 @@ public class CalendarService {
 
     // если регион = нул - возвращает общий для всех
     public List<Holiday> getHolidaysForRegion(Date minDate, Date maxDate, Region region) {
-        if (region == null){
+        if (region == null) {
             return calendarDAO.getHolidaysInInterval(minDate, maxDate);
         }
         return calendarDAO.getHolidaysForRegion(minDate, maxDate, region);
+    }
+
+    /**
+     * Возвращает список праздничных дней только для указанного региона
+     *
+     * @param dateFrom
+     * @param dateTo
+     * @param region
+     * @return
+     */
+    public List<Holiday> getHolidaysOnlyForRegion(Date dateFrom, Date dateTo, Region region) {
+        if (region == null) {
+            return calendarDAO.getHolidaysInInterval(dateFrom, dateTo);
+        }
+        return calendarDAO.getHolidaysOnlyForRegion(dateFrom, dateTo, region);
     }
 
     public boolean isHoliday(Date date, Employee employee) {
@@ -206,26 +220,29 @@ public class CalendarService {
 
     /**
      * Возвращает максимальную дату месяца
+     *
      * @param year
      * @param month
      * @return
      */
     public Date getMaxDateMonth(Integer year, Integer month) {
-        return calendarDAO.tryGetMaxDateMonth(year,month);
+        return calendarDAO.tryGetMaxDateMonth(year, month);
     }
 
     /**
      * Возвращает минимальную дату месяца
+     *
      * @param year
      * @param month
      * @return
      */
     public Date getMinDateMonth(Integer year, Integer month) {
-        return calendarDAO.tryGetMinDateMonth(year,month);
+        return calendarDAO.tryGetMinDateMonth(year, month);
     }
 
     /**
      * Возвращает год из даты
+     *
      * @param date
      * @return
      */
@@ -237,17 +254,26 @@ public class CalendarService {
 
     /**
      * Возвращает мясяц из даты
+     *
      * @param date
      * @return
      */
     public Integer getMonthFromDate(Date date) {
         java.util.Calendar calendar = java.util.Calendar.getInstance(java.util.TimeZone.getDefault(), java.util.Locale.getDefault());
         calendar.setTime(date);
-        return calendar.get(java.util.Calendar.MONTH)+1;
+        return calendar.get(java.util.Calendar.MONTH) + 1;
     }
 
 
     public int getCountWorkDayPriorDate(Region region, Integer year, Integer month, @NotNull Date toDate) {
         return calendarDAO.getCountWorkDayPriorDate(region, year, month, toDate);
+    }
+
+    public Integer getCountWorkDaysForPeriodForRegion(Date begin, Date end, Region region) {
+        return calendarDAO.getCountWorkDaysForPeriodForRegion(begin, end, region);
+    }
+
+    public Integer getCountDaysForPeriodForRegionExConsiderHolidays(Date begin, Date end, Region region) {
+        return calendarDAO.getCountDaysForPeriodForRegionExConsiderHolidays(begin, end, region);
     }
 }

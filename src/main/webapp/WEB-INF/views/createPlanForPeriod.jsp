@@ -2,6 +2,7 @@
 <%@ page import="com.aplana.timesheet.controller.PlanEditController" %>
 <%@ page import="com.aplana.timesheet.form.CreatePlanForPeriodForm" %>
 <%@ page import="static com.aplana.timesheet.util.ResourceUtils.getResRealPath" %>
+<%@ page import="com.aplana.timesheet.util.DateTimeUtil" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
@@ -10,7 +11,6 @@
 <html>
 <head>
     <title><fmt:message key="title.createPlanForPeriod" /></title>
-    <script src="<%= getResRealPath("/resources/js/utils.js", application) %>" type="text/javascript"></script>
 
     <style type="text/css">
         table.form td {
@@ -66,7 +66,7 @@
             putParamIfNotEmpty(requestContent, "<%= CreatePlanForPeriodContoller.TO_DATE_PARAM %>", toDateParam);
 
             function formatDate(date) {
-                return (date == null) ? "" : date.format("<%= CreatePlanForPeriodContoller.DATE_FORMAT.toLowerCase() %>");
+                return (date == null) ? "" : date.format("<%= DateTimeUtil.DB_DATE_PATTERN.toLowerCase() %>");
             }
 
             function putParamIfNotEmpty(requestContent, paramName, paramValue) {
@@ -108,8 +108,12 @@
         }
 
         function save() {
+            processing();
             if (validate()) {
                 dojo.byId("<%= CreatePlanForPeriodContoller.FORM %>").submit();
+            } else {
+                stopProcessing();
+                dojo.byId("save_button").disabled = false;
             }
         }
 
@@ -163,16 +167,6 @@
                     <form:options items="${employeeList}" itemValue="id" itemLabel="name" />
                 </form:select>
             </td>
-            <td>
-                <span class="label">Проект</span>
-            </td>
-            <td>
-                <form:select path="<%= CreatePlanForPeriodForm.PROJECT_ID %>" cssClass="without_dojo"
-                             onmouseover="showTooltip(this)" onmouseout="tooltip.hide()">
-                    <form:option value="0" label="" />
-                    <form:options items="${projectList}" itemValue="id" itemLabel="name" />
-                </form:select>
-            </td>
         </tr>
         <tr>
             <td>
@@ -194,6 +188,18 @@
         </tr>
         <tr>
             <td>
+                <span class="label">Проект</span>
+            </td>
+            <td>
+                <form:select path="<%= CreatePlanForPeriodForm.PROJECT_ID %>" cssClass="without_dojo"
+                             onmouseover="showTooltip(this)" onmouseout="tooltip.hide()">
+                    <form:option value="0" label="" />
+                    <form:options items="${projectList}" itemValue="id" itemLabel="name" />
+                </form:select>
+            </td>
+        </tr>
+        <tr>
+            <td>
                 <span class="label">Процент загрузки</span>
             </td>
             <td colspan="2">
@@ -208,7 +214,7 @@
 
     <br />
 
-    <button style="width: 150px;" type="button" onclick="save()">Сохранить</button>
+    <button id="save_button" style="width: 150px;" type="button" onclick="this.disabled=true;save()" >Сохранить</button>
     <button style="width: 150px;" type="button" onclick="cancel()">Отмена</button>
 </form:form>
 

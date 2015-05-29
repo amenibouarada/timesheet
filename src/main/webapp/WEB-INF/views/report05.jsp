@@ -21,7 +21,7 @@
         fillEmployeeListByDivision(reportForm.divisionId);
 
     });
-	var employeeList = ${employeeListJson};
+    var employeeList = ${employeeListJson};
 </script>
 
 <h1><fmt:message key="title.reportparams"/></h1>
@@ -32,7 +32,7 @@
 <form:form commandName="reportForm" method="post" action="${formUrl}">
 
     <c:if test="${fn:length(errors) > 0}">
-        <div class="errors_box">
+        <div id="errorBoxId" class="errors_box">
             <c:forEach items="${errors}" var="error">
                 <fmt:message key="${error.code}">
                     <fmt:param value="${error.arguments[0]}"/>
@@ -84,6 +84,16 @@
 
             </tr>
             <tr>
+                <td>
+                    <span class="label" style="float:left">Комментарий</span>
+                </td>
+                <td>
+                    <span style="float: right">
+                    <form:input path="comment" cssStyle="width: 200px;"/>
+                        	</span>
+                </td>
+            </tr>
+            <tr>
                 <td style="width: 225px">
                     <span class="label" style="float:left">Регион</span>
 							<span style="float: right">
@@ -109,7 +119,8 @@
         <div class="radiogroup">
             <div class="label"><fmt:message key="report.formattitle"/></div>
             <ul class="radio">
-                <li><input type=radio name="printtype" id="printtype2" value="2" checked/><label for="printtype2">MS Excel</label>
+                <li><input type=radio name="printtype" id="printtype2" value="2" checked/>
+                    <label for="printtype2"><fmt:message key="label.report.excel"/></label>
                 </li>
             </ul>
         </div>
@@ -117,7 +128,7 @@
 
     </div>
 
-    <button id="make_report_button" style="width:210px" type="submit">Сформировать отчет</button>
+    <button id="make_report_button" style="width:210px" type="submit" onclick="clearErrorBox('errorBoxId')">Сформировать отчет</button>
 </form:form>
 </body>
 

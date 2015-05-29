@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 import javax.persistence.*;
 import java.sql.Timestamp;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Set;
 
 @Entity
@@ -22,11 +23,17 @@ public class Employee implements Identifiable, Comparable{
     @Column(nullable = false)
     private String name;
 
+    @Column(nullable = false)
+    private String patronymic;
+
     @Column(nullable = false, length = 50)
     private String email;
 
     @Column(name = "start_date", columnDefinition = "date not null")
     private Timestamp startDate;
+
+    @Column(name = "birthday")
+    private Timestamp birthday;
 
 	@Column
 	private String ldap;
@@ -90,6 +97,9 @@ public class Employee implements Identifiable, Comparable{
 
     @Column(nullable = false, name = "jira_name")
     private String jiraName;
+
+    @OneToOne(mappedBy = "employee", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private VacationDays vacationDays;
 
 
     public Employee getManager2() {
@@ -307,5 +317,46 @@ public class Employee implements Identifiable, Comparable{
             return 0;
         else
             return getName().compareTo(((Employee) o).getName());
+    }
+
+    public String getPatronymic() {
+        return patronymic;
+    }
+
+    public void setPatronymic(String patronymic) {
+        this.patronymic = patronymic;
+    }
+
+    public Timestamp getBirthday() {
+        return birthday;
+    }
+
+    public void setBirthday(Timestamp birthday) {
+        this.birthday = birthday;
+    }
+
+    /**
+     *
+     * @return true if male, false if female
+     */
+    public Boolean getSex(){
+        if (getPatronymic() == null) {
+            return true;
+        }
+        String lastChar = getPatronymic().substring(getPatronymic().length()-2,getPatronymic().length());
+        if ("ич".equals(lastChar) || "лы".equals(lastChar)) {
+            return true;
+        } else if ("на".equals(lastChar) || "зы".equals(lastChar) || "ва".equals(lastChar)) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    public Boolean isActive(){
+        if (getEndDate() == null || getEndDate().after(new Date())){
+            return true;
+        }
+        return false;
     }
 }

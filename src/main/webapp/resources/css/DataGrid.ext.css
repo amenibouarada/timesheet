@@ -28,8 +28,13 @@ th {
     background-color: #3C8CE6 !important;
 }
 
+.tundra .dojoxGridRowSelected .dojoxGridCell {
+    background-color: rgba(60, 140, 230, 0.54) !important;
+}
+
+/* высота заголовка таблицы */
 .dojoxGridMasterHeader .dojoxGridRowTable {
-    height: 88px !important;
+    height: 100px !important;
 }
 
 .dojoxGridMasterHeader .dojoxGridCell {
@@ -37,10 +42,11 @@ th {
     vertical-align: middle !important;
 }
 
+/* отвечает за высоту строки с названием проектов */
 .colContainer {
     position: relative;
     width: 100%;
-    height: 40px !important;
+    height: 60px !important;
     vertical-align: middle;
     min-width: 16px;
 }

@@ -27,6 +27,16 @@ public class ProjectTaskService {
     public List<ProjectTask> getProjectTasks(Integer projectId) {
 		return projectTaskDAO.getProjectTasks(projectId);
 	}
+
+    /**
+     * Возвращает все проектные задачи по указанному проекту.
+     * @param project Проект
+     * @return Список проектных задач
+     */
+    @Transactional(readOnly = true)
+    public List<ProjectTask> findAllByProject(Project project) {
+        return projectTaskDAO.findAllByProject(project);
+    }
 	
 	/**
 	 * Возвращает активную проектную задачу, относящуюся к указанному проекту,
@@ -57,7 +67,7 @@ public class ProjectTaskService {
 
             builder.withElement(
                     anObjectBuilder().
-                            withField("projId", JsonUtil.aStringBuilder(projectId)).
+                            withField("projId", JsonUtil.aStringBuilderNumber(projectId)).
                             withField("projTasks", tasksBuilder)
             );
         }

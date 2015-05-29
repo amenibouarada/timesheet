@@ -1,3 +1,7 @@
+html, body {
+    height: 100%;
+}
+
 table {
     border-collapse: collapse;
 }
@@ -37,52 +41,41 @@ h1, h2, h3, h4, h5, h6 {
     padding-top: 3px;
     font-size: 24px;
     color: #888;
-    height: 72px;
+    height: 69px;
 }
 
-div.menu_holder {
-    /*padding-top: 40px;*/
+.content_wrapper {
+    min-height: 100%; /* to keep footer on bottom*/
+    position: relative; /* must be relative or .footer will cover content*/
 }
 
-div.menu_holder ul {
-    list-style-type: none;
-    margin: auto;
-    padding-left: 0px;
+.content_page {
+    padding-bottom: 100px;
+}
+
+.content_footer {
+    position: absolute; /* to keep footer on bottom*/
+    bottom: 25px; /* to keep footer on bottom*/
+    height: 55px; /* height must be smaller then .page's bottom padding*/
+    width: 100%;
+}
+
+#footer{
+    background: url("../img/footer_bg.png") repeat-x;
+}
+
+#footer_wrapper {
+    /*для центровки*/
+    margin: 0 auto;
+    width: 50%;
 }
 
 .employee_name {
-    float: right;
-    padding-right: 32px;
-    padding-left: 32px;
-    display: block;
     line-height: 35px;
     font-size: 14px;
-    color: #371C1C;
     position: absolute;
     top: 35px;
-    right: 0;
-}
-
-div.menu_holder li {
-    float: left;
-    width: 270px;
-}
-
-div.menu_holder ul a, div.menu_holder span a {
-    padding-right: 32px;
-    padding-left: 32px;
-    display: block;
-    line-height: 35px;
-    font-size: 14px;
-    color: #371C1C;
-}
-
-div.menu_holder ul a:hover, div.menu_holder span a:hover {
-    text-decoration: none;
-}
-
-div.menu_holder table td {
-    border: none;
+    right: 5px;
 }
 
 #logo {
@@ -128,7 +121,7 @@ div.menu_holder table td {
 }
 
 #vacation_ill {
-    font: 12px;
+    font-size: 12px;
     color: #666;
 }
 
@@ -196,12 +189,12 @@ div.menu_holder table td {
     background-color: transparent !important;
     vertical-align: middle !important;
     border: #AAA solid 1px;
-    font: 12px;
+    font-size: 12px;
 }
 
 .checkbox_without_dojo {
     width: 23px;
-    font: 12px;
+    font-size: 12px;
     margin: 5px 5px 5px 0px;
 }
 
@@ -249,7 +242,7 @@ div.menu_holder table td {
 }
 
 #ttcont {
-    font: 10.5px;
+    font-size: 10.5px;
     display: block;
     padding: 2px 12px 3px 7px;
     margin-left: 5px;
@@ -276,6 +269,10 @@ div.menu_holder table td {
 .duration {
     padding-right: 2px;
     width: 35px !important;
+}
+
+.durationDraftText {
+    color: #adadad;
 }
 
 .login_div {
@@ -390,6 +387,14 @@ table.report_params td {
 
 .classDateRedText {
     color: #f58383;
+}
+
+.classDateBrown {
+    color: #CC9966 ;
+}
+
+.dijitCalendarCurrentDate {
+    background-color: #6495ED !important;
 }
 
 textarea {

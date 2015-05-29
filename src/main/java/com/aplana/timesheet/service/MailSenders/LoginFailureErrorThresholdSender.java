@@ -1,6 +1,6 @@
 package com.aplana.timesheet.service.MailSenders;
 
-import com.aplana.timesheet.properties.TSPropertyProvider;
+import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.SendMailService;
 
 import java.util.Arrays;
@@ -14,6 +14,11 @@ import java.util.List;
 public class LoginFailureErrorThresholdSender extends MailSender<String> {
     public LoginFailureErrorThresholdSender(SendMailService sendMailService, TSPropertyProvider propertyProvider) {
         super(sendMailService, propertyProvider);
+        logger.info("Run sending message for: {}", getName());
+    }
+
+    final String getName() {
+        return String.format(" Оповещения о попытки подбора пароля (%s)", this.getClass().getSimpleName());
     }
 
     @Override

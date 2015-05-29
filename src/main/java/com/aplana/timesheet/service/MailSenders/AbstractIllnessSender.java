@@ -3,7 +3,7 @@ package com.aplana.timesheet.service.MailSenders;
 import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.dao.entity.Illness;
 import com.aplana.timesheet.dao.entity.Project;
-import com.aplana.timesheet.properties.TSPropertyProvider;
+import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.EmployeeService;
 import com.aplana.timesheet.service.ProjectService;
 import com.aplana.timesheet.service.SendMailService;
@@ -35,6 +35,8 @@ public abstract class AbstractIllnessSender extends MailSender<Illness> {
         final List<Project> projects = projectService.getProjectsForIllness(illness);
 
         List<String> emails = new ArrayList<String>();
+
+        emails.add(illness.getEmployee().getEmail());
 
         Map<Employee, List<Project>> juniorProjectManagersAndProjects =
                 employeeService.getJuniorProjectManagersAndProjects(projects, illness);
@@ -89,7 +91,7 @@ public abstract class AbstractIllnessSender extends MailSender<Illness> {
     }
 
     @Override
-    final protected void initMessageBody(Mail mail, MimeMessage message) throws MessagingException {
+    protected final void initMessageBody(Mail mail, MimeMessage message) throws MessagingException {
         try {
             if (mail.getParamsForGenerateBody() != null) {
                 message.setText(mail.getParamsForGenerateBody().get(FIRST, MAIL_BODY), "UTF-8", "html");

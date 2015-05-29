@@ -2,7 +2,7 @@ package com.aplana.timesheet.service.MailSenders;
 
 import com.aplana.timesheet.dao.entity.Vacation;
 import com.aplana.timesheet.dao.entity.VacationApproval;
-import com.aplana.timesheet.properties.TSPropertyProvider;
+import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.SendMailService;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateFormatUtils;
@@ -12,6 +12,7 @@ import java.util.List;
 
 /**
  * @author iziyangirov
+ * Письмо отправляется, когда отпуск согласован одним из руководителей.
  */
 
 public class VacationApprovalAcceptanceSender extends AbstractSenderWithCcAddress<VacationApproval>
@@ -25,6 +26,11 @@ public class VacationApprovalAcceptanceSender extends AbstractSenderWithCcAddres
 
     public VacationApprovalAcceptanceSender(SendMailService sendMailService, TSPropertyProvider propertyProvider) {
         super(sendMailService, propertyProvider);
+    }
+
+
+    final String getName() {
+        return String.format("Оповещение о новом отчете (%s)", this.getClass().getSimpleName());
     }
 
     @Override
@@ -55,7 +61,7 @@ public class VacationApprovalAcceptanceSender extends AbstractSenderWithCcAddres
     }
 
     @Override
-    final public String getCcEmail(VacationApproval vacationApproval) {
+    public final String getCcEmail(VacationApproval vacationApproval) {
         Vacation vacation = vacationApproval.getVacation();
         return (vacation.getEmployee().getId().equals(vacation.getAuthor().getId())) ? StringUtils.EMPTY : vacation.getAuthor().getEmail();
     }

@@ -1,12 +1,12 @@
 package com.aplana.timesheet.service;
 
-import com.aplana.timesheet.constants.RoleConstants;
+import com.aplana.timesheet.system.constants.RoleConstants;
 import com.aplana.timesheet.dao.EmployeeDAO;
 import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.dao.entity.Permission;
 import com.aplana.timesheet.enums.PermissionsEnum;
 import com.aplana.timesheet.util.EnumsUtils;
-import com.aplana.timesheet.util.TimeSheetUser;
+import com.aplana.timesheet.system.security.entity.TimeSheetUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,7 +76,10 @@ public class LdapUserDetailsService implements UserDetailsContextMapper {
                 case CHANGE_ILLNESS_BUSINESS_TRIP: {
                     list.add(new SimpleGrantedAuthority(RoleConstants.CHANGE_ILLNESS_BUSINESS_TRIP));
                     list.add(new SimpleGrantedAuthority(RoleConstants.VIEW_ILLNESS_BUSINESS_TRIP));
+                    break;
                 }
+                default:
+                    logger.error("Unknown permission");
             }
         }
     }
@@ -99,7 +102,7 @@ public class LdapUserDetailsService implements UserDetailsContextMapper {
                 logger.warn("Employee add in DB {}", email);
                 String errors = employeeLdapService.synchronizeOneEmployee(email);
                 if (errors != null) {
-                    if ( ! errors.equals( "" ) ) {
+                    if ( !errors.equals( "" ) ) {
                         final int endIndex = errors.lastIndexOf(',');
 
                         String errorsSub = (endIndex < 0) ? errors : errors.substring(0, endIndex);
@@ -108,8 +111,9 @@ public class LdapUserDetailsService implements UserDetailsContextMapper {
                     } else {
                         throw new BadCredentialsException("Авторизация выполнена успешно, пользователь добавлен в БД<br> Авторизуйтесь еще раз");
                     }
-                } else
+                } else {
                     throw new BadCredentialsException("В LDAP что-то изменилось. попробуйте еще раз");
+                }
             }
 
             return new TimeSheetUser(employee, list);

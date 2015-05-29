@@ -32,9 +32,6 @@ public class EmployeeHelperTest extends AbstractJsonTest {
     private DivisionDAO divisionDAO;
 
     @Autowired
-    private EmployeeHelper employeeHelper;
-
-    @Autowired
     private EmployeeService employeeService;
 
     final Boolean filterFired = Boolean.FALSE;
@@ -62,7 +59,7 @@ public class EmployeeHelperTest extends AbstractJsonTest {
     private static final JdomParser JDOM_PARSER = new JdomParser();
 
     private Map<String, String> getEmployeeFromJsonList(int employee_id, int division_id) {
-        String jsonText = employeeHelper.getEmployeeListWithLastWorkdayJson(divisions, filterFired, true);
+        String jsonText =""; //employeeHelper.getEmployeeListWithLastWorkdayJson(divisions, filterFired, true);
         try {
             JsonRootNode jsonn = JDOM_PARSER.parse(jsonText);
             List<JsonNode> divisionList= jsonn.getElements();

@@ -1,0 +1,27 @@
+<h2 align="justify"> В принятии решения по данному заявлению участвуют следующие лица</h2>
+<table border = "2">
+    <tr>
+        <td><b>Роль сотрудника</b></td>
+        <td><b>Фамилия Имя сотрудника</b></td>
+        <td><b>Решение</b></td>
+    </tr>
+    #foreach($approval in $approvalList)
+    <tr>
+        <td>
+            <ol>
+                $approval.role
+            </ol>
+        </td>
+        <td>
+            <ol>
+                $approval.name
+            </ol>
+        </td>
+        <td>
+            <ol>
+                $approval.result
+            </ol>
+        </td>
+    </tr>
+    #end
+</table>

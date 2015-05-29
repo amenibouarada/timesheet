@@ -1,20 +1,5 @@
 package com.aplana.timesheet.service.MailSenders;
 
-import com.aplana.timesheet.properties.TSPropertyProvider;
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
-import org.junit.Assert;
-import org.junit.Test;
-import org.mockito.Mockito;
-
-import javax.annotation.Nullable;
-import javax.mail.*;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
-import java.util.Arrays;
-import java.util.List;
-
 /**
  * @author eshangareev
  * @version 1.0

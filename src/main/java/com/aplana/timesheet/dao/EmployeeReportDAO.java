@@ -1,6 +1,7 @@
 package com.aplana.timesheet.dao;
 
 import com.aplana.timesheet.enums.TypesOfActivityEnum;
+import com.aplana.timesheet.enums.TypesOfTimeSheetEnum;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
@@ -45,6 +46,7 @@ public class EmployeeReportDAO {
                 "inner join dictionary_item di on tsd.act_type = di.id\n" +
                 "left outer join project p on p.id=tsd.proj_id\n" +
                 "where  c.year = :year\n" +
+                "and ts.ts_type_id = "+ TypesOfTimeSheetEnum.REPORT.getId() + "\n" +
                 "and    c.month = :month\n" +
                 "and    ts.emp_id = :employee_id\n" +
                 ") as foo\n" +

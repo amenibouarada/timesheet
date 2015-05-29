@@ -6,6 +6,7 @@
 <%@ page import="com.aplana.timesheet.dao.entity.Vacation" %>
 <%@ page import="com.aplana.timesheet.enums.VacationStatusEnum" %>
 <%@ page import="com.aplana.timesheet.service.VacationService" %>
+<%@ page import="com.aplana.timesheet.util.DateTimeUtil" %>
 
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
@@ -18,6 +19,7 @@
 <c:set var="vacationAprovementWiyhPm" value="<%=VacationStatusEnum.APPROVEMENT_WITH_PM.getId()%>"/>
 <c:set var="vacationAprovedByPm" value="<%=VacationStatusEnum.APPROVED_BY_PM.getId()%>"/>
 <c:set var="vacationRejected" value="<%=VacationStatusEnum.REJECTED.getId()%>"/>
+<c:set var="vacationCreated" value="<%=VacationStatusEnum.CREATED.getId()%>"/>
 
 <%
     VacationService vacationService = (VacationService) request.getAttribute("vacationService");
@@ -25,7 +27,7 @@
 
 <html>
 <head>
-<title><fmt:message key="title.vacations"/></title>
+<title><fmt:message key="menu.vacations"/></title>
 
 <link rel="stylesheet" type="text/css" href="<%= getResRealPath("/resources/css/vacations.css", application) %>"/>
 <link rel="stylesheet" type="text/css" href="<%= getResRealPath("/resources/css/vacationsGraphic.css", application) %>"/>
@@ -37,14 +39,17 @@
     dojo.require("dojo.NodeList-traverse");
     dojo.require("dojox.html.entities");
     dojo.require("dijit.form.DateTextBox");
+    dojo.require("dijit.form.FilteringSelect");
+    dojo.require("dojo.data.ObjectStore");
+    dojo.require("dojo.store.Memory");
     dojo.require(CALENDAR_EXT_PATH);
     require(["dojo/parser", "dijit/TitlePane"]);
 
+    var vacationListJSON = ${vacationListByRegionJSON};
+    var holidayList = ${holidayList};
     var managerList = ${managerListJson};
     var selectedEmployee = ${employeeId};
-    var vacationListJSON =  ${vacationListByRegionJSON};
     var fullProjectList = ${fullProjectListJsonWithDivisionId};
-    var holidayList = ${holidayList};
 
     var PROJECT_ID = "<%= PROJECT_ID %>";
     var CAL_FROM_DATE = "<%= CAL_FROM_DATE %>";
@@ -73,11 +78,12 @@
         popupClass:"dijit.Calendar"
     });
 
-    dojo.addOnLoad(function () {
-        updateMultipleForSelect(dojo.byId(REGIONS));
-    });
-
     dojo.ready(function () {
+
+        dojo.connect(dojo.byId("<%= MANAGER_ID %>"), "onchange", dojo.byId("<%= MANAGER_ID %>"), updateEmployeeSelect);
+        dojo.connect(dojo.byId("<%= PROJECT_ID %>"), "onchange", dojo.byId("<%= PROJECT_ID %>"), updateEmployeeSelect);
+
+        dojo.query("#graphic_div").style("width", (document.body.offsetWidth - 30) + "px");
         window.focus();
         divisionChangeVac(dojo.byId(DIVISION_ID).value);
 
@@ -116,7 +122,7 @@
         }
         tabContainer.selectChild(tab);
 
-        fillEmployeeSelect();
+        updateEmployeeSelect();
         dojo.byId(EMPLOYEE_ID).value = ${employeeId};
         dojo.byId(VACATION_ID).setAttribute("disabled", "disabled");
 
@@ -132,23 +138,22 @@
 </head>
 <body>
 
-<h1><fmt:message key="title.vacations"/></h1>
+<h1><fmt:message key="menu.vacations"/></h1>
 <br/>
 <a target="_blank" href="<c:url value='/vacations_needs_approval'/>"><fmt:message key="link.vacation.approval"/></a>
 <br/>
-<a style="color: blue"><fmt:message key="title.approval.waiting">
+<a style="color: blue">
     <c:choose>
-        <c:when test="${vacationNeedsApprovalCount!=1}">
-            <fmt:message key="title.waiting.parts" var="waitingPart"/>
+        <c:when test="${vacationNeedsApprovalCount == 0}">
+            <fmt:message key="title.approval.waiting.nothing"/>
         </c:when>
         <c:otherwise>
-            <fmt:message key="title.waiting.part" var="waitingPart"/>
+            <fmt:message key="title.approval.waiting">
+                <fmt:param value="${vacationNeedsApprovalCount}"/>
+            </fmt:message>
         </c:otherwise>
     </c:choose>
-    <fmt:param value="${waitingPart}"/>
-    <fmt:param value="${vacationNeedsApprovalCount}"/>
-    <fmt:param value="${approvalPart}"/>
-</fmt:message></a>
+</a>
 <br/>
 <form:form method="post" commandName="vacationsForm" name="mainForm">
     <form:hidden path="<%= VACATION_ID%>"/>
@@ -173,8 +178,7 @@
                 <span class="label">Руководитель:</span>
             </td>
             <td>
-                <form:select path="<%= MANAGER_ID %>" id="<%= MANAGER_ID %>" onChange="fillEmployeeSelect()"
-                             class="without_dojo"
+                <form:select path="<%= MANAGER_ID %>" id="<%= MANAGER_ID %>" class="without_dojo"
                              onmouseover="tooltip.show(getTitle(this));" onmouseout="tooltip.hide();">
                     <form:options items="${managerList}" itemLabel="name" itemValue="id"/>
                 </form:select>
@@ -185,8 +189,7 @@
                 <span class="label">Проект</span>
             </td>
             <td>
-                <form:select id="<%= PROJECT_ID %>" path="<%= PROJECT_ID %>" onChange="fillEmployeeSelect()"
-                             cssClass="without_dojo"
+                <form:select id="<%= PROJECT_ID %>" path="<%= PROJECT_ID %>" cssClass="without_dojo"
                              onmouseover="tooltip.show(getTitle(this));"
                              onmouseout="tooltip.hide();">
                 </form:select>
@@ -200,7 +203,7 @@
                 <form:input path="<%= CAL_FROM_DATE %>" id="<%= CAL_FROM_DATE %>" class="date_picker"
                             data-dojo-type="DateTextBox" required="true"
                             onMouseOver="tooltip.show(getTitle(this));" onMouseOut="tooltip.hide();"
-                            onchange="fillEmployeeSelect()"/>
+                            onchange="updateEmployeeSelect()"/>
             </td>
             <td>
                 <span class="label">Окончание периода</span>
@@ -209,7 +212,7 @@
                 <form:input path="<%= CAL_TO_DATE %>" id="<%= CAL_TO_DATE %>" class="date_picker"
                             data-dojo-type="DateTextBox" required="true"
                             onMouseOver="tooltip.show(getTitle(this));" onMouseOut="tooltip.hide();"
-                            onchange="fillEmployeeSelect()"/>
+                            onchange="updateEmployeeSelect()"/>
             </td>
         </tr>
         <tr>
@@ -217,8 +220,8 @@
                 <span class="label">Регионы:</span>
             </td>
             <td>
-                <form:select path="<%= REGIONS %>" onmouseover="showTooltip(this)" size="5"
-                             onmouseout="tooltip.hide()" multiple="true" onchange="updateMultipleForSelect(this)">
+                <form:select path="<%= REGIONS %>" onmouseover="showTooltip(this)" size="5" cssStyle="width: 200px;"
+                             onmouseout="tooltip.hide()" multiple="true" onchange="multipleOptSelectedInSelect(this)">
                     <form:option value="<%= ALL_VALUE %>" label="Все регионы"/>
                     <form:options items="${regionList}" itemLabel="name" itemValue="id"/>
                 </form:select>
@@ -227,11 +230,8 @@
                 <span class="label">Сотрудник:</span>
             </td>
             <td>
-                <form:select path="<%= EMPLOYEE_ID %>" id="<%= EMPLOYEE_ID %>" class="without_dojo"
-                             onmouseover="tooltip.show(getTitle(this));"
-                             onmouseout="tooltip.hide();" onChange="changeSelectedEmployee()">
-                    <form:option items="${employeeList}" label="" value="0"/>
-                </form:select>
+                <div id='employeeIdSelect'></div>
+                <form:hidden path="employeeId" />
             </td>
         </tr>
         <tr>
@@ -239,7 +239,7 @@
                 <span class="label">Тип отпуска:</span>
             </td>
             <td>
-                <form:select path="<%= VACATION_TYPE %>" id="<%= VACATION_TYPE %>"
+                <form:select path="<%= VACATION_TYPE %>" id="<%= VACATION_TYPE %>" cssStyle="width: 200px;"
                              onMouseOver="tooltip.show(getTitle(this));"
                              onMouseOut="tooltip.hide();" multiple="false" size="1">
                     <form:option value="0" label="Все"/>
@@ -265,7 +265,7 @@
             <thead>
             <tr>
                 <th width="15" class="create-button">
-                    <img src="<c:url value="/resources/img/add.gif"/>" title="Создать" onclick="createVacation();"/>
+                    <img src="<c:url value="/resources/img/add.gif"/>" title="Создать" onclick="addVacation();"/>
                 </th>
                 <th width="160">Статус</th>
                 <th width="220">Тип отпуска</th>
@@ -292,9 +292,10 @@
                 <c:forEach var="vacation" items="${vacationsList}" varStatus="lp">
                     <tr>
                         <td>
+                            <% Vacation vacation = (Vacation) pageContext.getAttribute("vacation"); %>
                             <c:set var="vacationDeletePermission"
                                    value="<%= vacationService.isVacationDeletePermission(
-                                        (Vacation) pageContext.getAttribute(\"vacation\"),
+                                        vacation,
                                         (Employee) pageContext.findAttribute(\"curEmployee\")) %>"
                                     />
                             <sec:authorize access="hasRole('ROLE_ADMIN') or ${vacationDeletePermission}">
@@ -303,11 +304,29 @@
                                          onclick="deleteVacation(this.parentElement, ${vacation.id});"/>
                                 </div>
                             </sec:authorize>
+                            <c:set var="isVacationNotApproved"
+                                   value="<%= vacationService.isVacationNotApproved(vacation)%>"/>
+                            <c:set var="vacationApprovePermission"
+                                   value="<%= vacationService.isVacationApprovePermission(vacation)%>"/>
+
+                            <c:set var="beginDate" value="<%= DateTimeUtil.getOnlyDate(vacation.getBeginDate()) %>" />
+                            <c:set var="endDate" value="<%= DateTimeUtil.getOnlyDate(vacation.getEndDate()) %>" />
+                            <c:if test="${isVacationNotApproved }">
+                                <sec:authorize access="hasRole('ROLE_ADMIN') or ${vacationApprovePermission}">
+                                    <div class="delete-button">
+                                        <img src="<c:url value="/resources/img/ok.png"/>" title="Утвердить"
+                                             onclick="approveVacation(${vacation.id},'${beginDate}','${endDate}','${vacation.type.value}');"/>
+                                    </div>
+                                </sec:authorize>
+                            </c:if>
                         </td>
                     <td id="statusTd" class="centered">
                         <c:choose>
                         <c:when test="${vacation.status.id == vacationApproved}">
-                            <span  style="color: #00b114">
+                            <span style="color: #00b114">
+                        </c:when>
+                        <c:when test="${vacation.status.id == vacationCreated}">
+                            <span style="color: #00b114">
                         </c:when>
                         <c:when test="${vacation.status.id == vacationRejected}">
                             <span style="color: #d90002">
@@ -330,7 +349,12 @@
                                                 <td>
                                                     <c:choose>
                                                         <c:when test="${va.result}">
-                                                            Согласовано
+                                                            <c:if test="${empty va.comment}">
+                                                                Согласовано
+                                                            </c:if>
+                                                            <c:if test="${not empty va.comment}">
+                                                                ${va.comment}
+                                                            </c:if>
                                                             <br>
                                                             <fmt:formatDate value="${va.responseDate}" pattern="dd.MM.yyyy"/>
                                                         </c:when>
@@ -376,7 +400,7 @@
                         </td>
                         <td class="centered">${vacation.type.value}</td>
                         <td class="centered">${vacation.employee.name}</td>
-                        <td class="date"><fmt:formatDate value="${vacation.creationDate}" pattern="dd.MM.yyyy HH:mm"/></td>
+                        <td class="date"><fmt:formatDate value="${vacation.creationDate}" pattern="dd.MM.yyyy"/></td>
                         <td class="date"><fmt:formatDate value="${vacation.beginDate}" pattern="dd.MM.yyyy"/></td>
                         <td class="date"><fmt:formatDate value="${vacation.endDate}" pattern="dd.MM.yyyy"/></td>
                         <td class="centered">${calDays[vacation]}</td>
@@ -421,19 +445,19 @@
                                         <tbody>
                                         <c:forEach var="cal" items="${calDaysCount}" varStatus="status">
 
-                                        <c:if test="${(status.count-1)%years == 0 && years!=1}">
-                                            <c:if test="${(status.count==1)}"><tr></c:if>
-                                            <c:if test="${(status.count!=1)}"><tr class="trDelimeter"></c:if>
-                                            <td rowspan="${years}">${cal.vacationType}</td>
-                                        </c:if>
+                                            <c:if test="${(status.count-1)%years == 0 && years!=1}">
+                                                <c:if test="${(status.count==1)}"><tr></c:if>
+                                                <c:if test="${(status.count!=1)}"><tr class="trDelimeter"></c:if>
+                                                <td rowspan="${years}">${cal.vacationType}</td>
+                                            </c:if>
                                             <c:if test="${years==1}">
-                                            <c:if test="${(status.count==1)}"><tr></c:if>
-                                            <c:if test="${(status.count!=1)}"><tr class="trDelimeter"></c:if>
-                                            <td>${cal.vacationType}</td>
-                                        </c:if>
-                                                <td>${cal.year}</td>
-                                                <td>${cal.summaryCalDays}</td>
-                                                <td>${cal.summaryWorkDays}</td>
+                                                <c:if test="${(status.count==1)}"><tr></c:if>
+                                                <c:if test="${(status.count!=1)}"><tr class="trDelimeter"></c:if>
+                                                <td>${cal.vacationType}</td>
+                                            </c:if>
+                                            <td>${cal.year}</td>
+                                            <td>${cal.summaryCalDays}</td>
+                                            <td>${cal.summaryWorkDays}</td>
                                             </tr>
 
                                         </c:forEach>
@@ -449,7 +473,7 @@
             </c:choose>
         </table>
     </div>
-    <div data-dojo-type="dijit/layout/ContentPane" id="secondTab" title="График">
+    <div data-dojo-type="dijit/layout/ContentPane" id="secondTab" title="График" onShow="showGraphic(dojo.byId(VIEW_MODE).value)">
         <div style="padding-left: 10px">
 
             <br>
@@ -460,7 +484,7 @@
 
         </div>
         <div id="emptyMessage"></div>
-        <div style="position:relative;" class="Gantt" id="graphic_div"> </div>
+        <div style="position:relative;overflow: scroll" class="Gantt" id="graphic_div"> </div>
     </div>
 </div>
 
