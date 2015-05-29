@@ -579,7 +579,7 @@ function log(text){
     <form:errors path="*" cssClass="errors_box" delimiter="<br/><br/>"/>
     <form:hidden path="<%= JSON_DATA %>"/>
 
-    <table>
+    <table style="border:none">
         <tr>
             <td class="topAlignTD">
                 <div class="blockYearMonth">

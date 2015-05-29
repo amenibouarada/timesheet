@@ -2,11 +2,11 @@ package com.aplana.timesheet.controller;
 
 import com.aplana.timesheet.dao.entity.Division;
 import com.aplana.timesheet.dao.entity.Employee;
-import com.aplana.timesheet.service.DivisionService;
-import com.aplana.timesheet.service.EmployeeService;
-import com.aplana.timesheet.service.ProjectService;
-import com.aplana.timesheet.service.SecurityService;
-import com.aplana.timesheet.util.EmployeeHelper;
+import com.aplana.timesheet.form.AddEmployeeForm;
+import com.aplana.timesheet.service.*;
+import com.aplana.timesheet.system.constants.TimeSheetConstants;
+import com.aplana.timesheet.system.security.SecurityService;
+import com.aplana.timesheet.util.DateTimeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,74 +26,55 @@ public abstract class AbstractControllerForEmployee extends AbstractController{
 
     @Autowired
     private ProjectService projectService;
-
     @Autowired
     protected EmployeeService employeeService;
-
     @Autowired
     protected DivisionService divisionService;
-
-    @Autowired
-    protected EmployeeHelper employeeHelper;
-
     @Autowired
     protected SecurityService securityService;
+    @Autowired
+    protected CalendarService calendarService;
+    @Autowired
+    protected RegionService regionService;
+    @Autowired
+    protected ProjectRoleService projectRoleService;
 
-    protected List<Division> divisionList;
+    protected static final String YEARS_LIST = "yearsList";
 
-    protected ModelAndView createModelAndViewForEmployee(String viewName, Integer employeeId, Integer divisionId) {
+    public Employee getCurrentUser(){
+        return session.getAttribute("employeeId") != null
+                ? employeeService.find((Integer)session.getAttribute("employeeId"))
+                : securityService.getSecurityPrincipal().getEmployee();
+    }
+
+    protected ModelAndView getCommonModelAndView(String viewName, Integer employeeId, Integer divisionId) {
+        List<Division> divisionList = divisionService.getDivisions();
         final ModelAndView modelAndView = new ModelAndView(viewName);
-
-        Employee employee = employeeService.find(employeeId);
-
-        divisionList = divisionService.getDivisions();
-
         modelAndView.addObject("divisionId", divisionId);
         modelAndView.addObject("employeeId", employeeId);
-        modelAndView.addObject(EMPLOYEE, employee);
         modelAndView.addObject("divisionList", divisionList);
-        modelAndView.addObject("fullProjectListJsonWithDivisionId", projectService.getProjectListJson(divisionList, true));
-        modelAndView.addObject("employeeListJson", employeeHelper.getEmployeeListWithLastWorkdayJson(divisionList, employeeService.isShowAll(request)));
-        modelAndView.addObject("managerListJson", employeeHelper.getManagerListJson());
+        modelAndView.addObject("managerListJson", employeeService.getManagerListJsonNew());
+        modelAndView.addObject("fullProjectListJsonWithDivisionId", projectService.getProjectListByDivisionsJson(divisionList, true));
 
         return modelAndView;
     }
 
-    protected ModelAndView createMAVForEmployeeWithDivisionAndManagerAndRegion(String viewName, Integer employeeId, Integer divisionId) {
+    protected ModelAndView createMAVForEmployeeWithDivision(String viewName, Integer employeeId) {
         final ModelAndView modelAndView = new ModelAndView(viewName);
-
-        divisionList = divisionService.getDivisions();
-
-        modelAndView.addObject("divisionId", divisionId);
         modelAndView.addObject("employeeId", employeeId);
-        modelAndView.addObject("divisionList", divisionList);
-        modelAndView.addObject("fullProjectListJsonWithDivisionId", projectService.getProjectListJson(divisionList, true));
-        modelAndView.addObject("employeeListJson",
-                employeeHelper.getEmployeeListWithDivisionAndManagerAndRegionJson(
-                        divisionList, employeeService.isShowAll(request)
-                )
-        );
-        modelAndView.addObject("managerListJson", employeeHelper.getManagerListJson());
-
+        modelAndView.addObject("divisionList", divisionService.getDivisions());
+        modelAndView.addObject(EMPLOYEE, employeeService.find(employeeId));
+        modelAndView.addObject(YEARS_LIST, DateTimeUtil.getYearsList(calendarService));
+        modelAndView.addObject(AddEmployeeForm.ADD_FORM, new AddEmployeeForm());
         return modelAndView;
     }
 
-    protected ModelAndView createMAVForEmployeeWithDivision(String viewName, Integer employeeId, Integer divisionId) {
-        final ModelAndView modelAndView = new ModelAndView(viewName);
-
-        Employee employee = employeeService.find(employeeId);
-
-        divisionList = divisionService.getDivisions();
-
-        modelAndView.addObject("employeeId", employeeId);
-        modelAndView.addObject(EMPLOYEE, employee);
-        modelAndView.addObject("divisionList", divisionList);
-        modelAndView.addObject("employeeListJson",
-                employeeHelper.getEmployeeListWithDivisionJson(
-                        divisionList, employeeService.isShowAll(request)
-                )
-        );
-
+    protected ModelAndView fillMavForAddEmployeesForm(ModelAndView modelAndView){
+        modelAndView.addObject("divisionList", divisionService.getDivisions());
+        modelAndView.addObject("projectRoleList", projectRoleService.getProjectRoles());
+        modelAndView.addObject("regionList", regionService.getRegions());
+        modelAndView.addObject("managerList", employeeService.getManagerListJson());
+        modelAndView.addObject("all", TimeSheetConstants.ALL_VALUES);
         return modelAndView;
     }
 }
