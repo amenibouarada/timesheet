@@ -23,6 +23,7 @@ public class ReportService {
     private static final String JIRA_URL = "http://jira.aplana.com/browse/";
     private static final Pattern PATTERN_TASK = Pattern.compile("\\b([A-Z][A-Z]+)-[0-9]+\\b");
     private static final Pattern PATTERN_APLANA_URL = Pattern.compile("\\b(https?://)?(([-.a-zA-ZА-Яа-я0-9]+)\\.aplana\\.com((/browse/(\\w+-\\d+))|([0-9a-zA-ZА-Яа-я-./!?=$&_%]+))?)\\b");
+    private static final Pattern EMAIL_URL = Pattern.compile("\\b([<a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.>]+)\\b");
 
     @Autowired
     public ProjectDAO projectDAO;
@@ -40,6 +41,7 @@ public class ReportService {
         String result;
         result = shorterLink(text);
         result = replaceJiraLink(result);
+        result = replaceEmail(result);
         return result;
     }
     /**
@@ -90,21 +92,7 @@ public class ReportService {
             }
         }
 
-        StringBuffer result = new StringBuffer(text);
-        // TODO кривой replace
-        // При замене подстроки в строке, последующие индексы сдвигаются, offset - изменение
-        Integer offset = 0;
-
-        for(Map.Entry<Pair<Integer, Integer>, String> entry : replaceMap.entrySet()){
-            Integer indexStart = entry.getKey().getFirst();
-            Integer indexEnd = entry.getKey().getSecond();
-
-            result.replace(offset + indexStart, offset + indexEnd, entry.getValue());
-
-            offset += entry.getValue().length() - (indexEnd-indexStart);
-        }
-
-        return result.toString();
+        return replacementResult(text, replaceMap);
     }
 
     /**
@@ -153,21 +141,31 @@ public class ReportService {
             replaceMap.put(new Pair<Integer, Integer>(indexStart, indexEnd), word.toString());
         }
 
-        StringBuffer result = new StringBuffer(text);
-        // TODO кривой replace
-        // При замене подстроки в строке, последующие индексы сдвигаются, offset - изменение
-        Integer offset = 0;
+        return replacementResult(text, replaceMap);
+    }
 
-        for(Map.Entry<Pair<Integer, Integer>, String> entry : replaceMap.entrySet()){
-            Integer indexStart = entry.getKey().getFirst();
-            Integer indexEnd = entry.getKey().getSecond();
+    public String replaceEmail(String text){
+        Matcher matcher = EMAIL_URL.matcher(text);
 
-            result.replace(offset + indexStart, offset + indexEnd, entry.getValue());
+        // Важен порядок
+        Map<Pair<Integer, Integer>, String> replaceMap = new LinkedHashMap<Pair<Integer, Integer>, String>();
 
-            offset += entry.getValue().length() - (indexEnd-indexStart);
+        while(matcher.find()) {
+            String email = matcher.group(0);
+
+            Integer indexStart = matcher.start();
+            Integer indexEnd = matcher.end();
+
+            StringBuffer word = new StringBuffer(128);
+
+                word.append("a href='mailto:");
+                word.append(email);
+                word.append("'>"+email+"</a");
+
+            replaceMap.put(new Pair<Integer, Integer>(indexStart, indexEnd), word.toString());
         }
 
-        return result.toString();
+        return replacementResult(text, replaceMap);
     }
 
     @Transactional(readOnly = true)
@@ -187,5 +185,24 @@ public class ReportService {
         }
 
         return result;
+    }
+
+    public String replacementResult (String text, Map<Pair<Integer, Integer>, String> replaceMap) {
+
+        StringBuffer result = new StringBuffer(text);
+        // TODO кривой replace
+        // При замене подстроки в строке, последующие индексы сдвигаются, offset - изменение
+        Integer offset = 0;
+
+        for (Map.Entry<Pair<Integer, Integer>, String> entry : replaceMap.entrySet()) {
+            Integer indexStart = entry.getKey().getFirst();
+            Integer indexEnd = entry.getKey().getSecond();
+
+            result.replace(offset + indexStart, offset + indexEnd, entry.getValue());
+
+            offset += entry.getValue().length() - (indexEnd - indexStart);
+        }
+
+        return result.toString();
     }
 }
