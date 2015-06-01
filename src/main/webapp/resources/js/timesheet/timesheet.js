@@ -346,10 +346,8 @@ function requiredCommentSet() {
 
     if (undertimeExp || overtimeExp || workOnHolidayExp) {
         dijit.byId("overtimeCauseComment").attr("required", true);
-        dijit.byId("typeOfCompensation").attr("required", true);
     } else {
         dijit.byId("overtimeCauseComment").attr("required", false);
-        dijit.byId("typeOfCompensation").attr("required", false);
     }
 }
 
