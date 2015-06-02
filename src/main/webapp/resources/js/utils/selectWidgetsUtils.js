@@ -136,6 +136,15 @@ function fillProjectListByDivision(division) {
     projectSelect.value=0;
 }
 
+function validateAndAddNewOption(hasAny, divisionId, select){
+    if (hasAny || divisionId == 0){
+        insertEmptyOptionWithCaptionInHead(select, "Все");
+    }else{
+        insertEmptyOptionWithCaptionInHead(select, "Пусто");
+        dojo.attr(select, {disabled:"disabled"});
+    }
+}
+
 /* Выставляет должность сотрудника (проектная роль по умолчанию) */
 function setDefaultEmployeeJob(rowIndex) {
     if (!document.employeeList || !dojo.byId("divisionId")) {

@@ -78,17 +78,6 @@ function fillEmployeeListByDivision(division) {
     }
 }
 
-
-
-function validateAndAddNewOption(hasAny, divisionId, select){
-    if (hasAny || divisionId == 0){
-        insertEmptyOptionWithCaptionInHead(select, "Все");
-    }else{
-        insertEmptyOptionWithCaptionInHead(select, "Пусто");
-        dojo.attr(select, {disabled:"disabled"});
-    }
-}
-
 function setDefaultValuesForReport2And3(){
     reportForm.emplDivisionId.value = 0;
     reportForm.employeeId.value = 0;
