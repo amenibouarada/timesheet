@@ -72,6 +72,7 @@ function fillEmployeeListByDivision(division) {
     sortSelectOptions(employeeSelect);
     validateAndAddNewOption(hasAny, divisionId, employeeSelect);
 
+    // ToDo нужен ли этот кусок?
     var rows = dojo.query(".row_number");
     for (var i = 0; i < rows.length; i++) {
         fillProjectList(i, dojo.byId("activity_type_id_" + i).value);

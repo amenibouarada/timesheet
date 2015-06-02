@@ -77,6 +77,7 @@ function fillProjectList(rowIndex, projectState) {
 
         if (existsCookie('aplanaProject')) {
             projectSelect.value = getCookieValue('aplanaProject');
+            // ToDo нужен ли этот вызов?
             projectChange(projectSelect);
         }
     } else {
@@ -86,6 +87,7 @@ function fillProjectList(rowIndex, projectState) {
 }
 
 /* Заполняет список доступных проектов/пресейлов */
+// ToDo необходимо попробовать заменить на функцию fillProjectList (и саму функцию (fillProjectList) переименовать)
 function fillProjectListByDivision(division) {
 
     if (division == null) {
