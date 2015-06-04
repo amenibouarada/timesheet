@@ -53,15 +53,19 @@ function getJiraInfo(rowIndex) {
                 textareaAutoGrow(dojo.byId("description_id_" + rowIndex));
                 standbyElementJira.hide();
             },
-            error: function (err) {
-                dojo.byId("description_id_" + rowIndex).value = "Ошибка при поиске активности в JIRA(" + err + ")";
-                standbyElementJira.hide();
+            error: function (err, args) {
+                if (args.xhr.status == 901)
+                    window.location.href = getContextPath() + "/login";
+                else {
+                    dojo.byId("description_id_" + rowIndex).value = "Ошибка при поиске активности в JIRA(" + err + ")";
+                    standbyElementJira.hide();
+                }
             }
         });
     }
 }
 
-function createJiraCell(row, rowIndex){
+function createJiraCell(row, rowIndex) {
     var jiraCell = row.insertCell(10);
     dojo.addClass(jiraCell, "text_center_align");
     var jiraImg = dojo.doc.createElement("img");
@@ -85,25 +89,25 @@ function createJiraCell(row, rowIndex){
     jiraCell.appendChild(jiraImg);
 }
 
-function getJiraLogo(){
+function getJiraLogo() {
     return "resources/img/logo-jira.png";
 }
 
-function getJiraLogoDisabled(){
+function getJiraLogoDisabled() {
     return "resources/img/logo-jira-disabled.png";
 }
 
-function getJiraLogoStyle(){
+function getJiraLogoStyle() {
     return "cursor:pointer;";
 }
 
-function updateJiraButtonVisibility(){
+function updateJiraButtonVisibility() {
     var timesheetRowsCount = dojo.query(".time_sheet_row").length;
     for (var i = 0; i < timesheetRowsCount; i++) {
-        if (dojo.byId("project_id_" + i).value == undefined || dojo.byId("project_id_" + i).value == 0){
+        if (dojo.byId("project_id_" + i).value == undefined || dojo.byId("project_id_" + i).value == 0) {
             dojo.byId("jira_button_" + i).src = getJiraLogoDisabled();
             dojo.removeAttr("jira_button_" + i, "style");
-        }else{
+        } else {
             dojo.byId("jira_button_" + i).src = getJiraLogo();
             dojo.setAttr("jira_button_" + i, "style", getJiraLogoStyle());
         }
