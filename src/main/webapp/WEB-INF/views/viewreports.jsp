@@ -131,8 +131,7 @@
                 <td class="date"><fmt:formatDate value="${report.calDate}" pattern="dd.MM.yyyy"/></td>
                 <td>
                     <a target="_blank"
-                       href="<%=request.getContextPath()%>/report<fmt:formatDate value="${report.calDate}" pattern="/yyyy/MM/dd/"/>${report.timeSheet.employee.id}"
-                       onclick="return checkReportExistence(href);">
+                       href="<%=request.getContextPath()%>/report<fmt:formatDate value="${report.calDate}" pattern="/yyyy/MM/dd/"/>${report.timeSheet.employee.id}">
                         Посмотреть отчёт
                     </a>
                     <c:if test="${report.deleteSendApprovalDate ne null}">

@@ -17,46 +17,50 @@ import org.springframework.web.servlet.ModelAndView;
 
 @Controller
 public class ReportController {
-	private static final Logger logger = LoggerFactory.getLogger(TimeSheetController.class);
+    private static final Logger logger = LoggerFactory.getLogger(TimeSheetController.class);
+    static final String ERROR_CAUSE = "Отчет, который Вы пытаетесь просмотреть, был удалён или перемещен в черновики. Пожалуйста, обновите страницу просмотра отчётов.";
 
-	@Autowired
-	CalendarService calendarService;
-	@Autowired
-	TimeSheetService timeSheetService;
-	@Autowired
-	EmployeeService employeeService;
-	@Autowired
-	TimeSheetDetailService timeSheetDetailService;
-	@Autowired
-	SendMailService sendMailService;
-	@Autowired
-	ProjectService projectService;
-	@Autowired
+    @Autowired
+    CalendarService calendarService;
+    @Autowired
+    TimeSheetService timeSheetService;
+    @Autowired
+    EmployeeService employeeService;
+    @Autowired
+    TimeSheetDetailService timeSheetDetailService;
+    @Autowired
+    SendMailService sendMailService;
+    @Autowired
+    ProjectService projectService;
+    @Autowired
     ReportService reportService;
 
-	@RequestMapping(value = "/report/{year}/{month}/{day}/{employeeId}", method = RequestMethod.GET)
-	public ModelAndView sendViewReports ( @PathVariable("year") Integer year,@PathVariable("month") Integer month,@PathVariable("day") Integer day, @PathVariable("employeeId") Integer employeeId, @ModelAttribute("ReportForm") TimeSheetForm tsForm, BindingResult result) {
-		logger.info("Date for report: {}.{}", year, month);
-		logger.info("Date for report: {}", day);
-		ModelAndView mav = new ModelAndView("report");
-		mav.addObject("ReportForm", tsForm);
-		mav.addObject("year", Integer.toString(year));
-		mav.addObject("month", month);
-		mav.addObject("day", day);
-		mav.addObject("employeeId", employeeId);
+    @RequestMapping(value = "/report/{year}/{month}/{day}/{employeeId}", method = RequestMethod.GET)
+    public ModelAndView sendViewReports(@PathVariable("year") Integer year, @PathVariable("month") Integer month, @PathVariable("day") Integer day, @PathVariable("employeeId") Integer employeeId, @ModelAttribute("ReportForm") TimeSheetForm tsForm, BindingResult result) {
+        logger.info("Date for report: {}.{}", year, month);
+        logger.info("Date for report: {}", day);
+        ModelAndView mav = new ModelAndView("report");
+        mav.addObject("ReportForm", tsForm);
+        mav.addObject("year", Integer.toString(year));
+        mav.addObject("month", month);
+        mav.addObject("day", day);
+        mav.addObject("employeeId", employeeId);
 
         final TimeSheet timeSheet = timeSheetService.findForDateAndEmployee(year.toString() + "-" + month.toString() + "-" + day.toString(), employeeId);
 
         if (timeSheet == null) {
-            return null;
+            ModelAndView errorMav = new ModelAndView("/errors/commonErrors");
+            errorMav.addObject("cause", ERROR_CAUSE);
+            logger.error("Trying to view a report that was deleted or placed in draft");
+            return errorMav;
         } else {
 
             mav.addObject("creationDate", (timeSheet.getCreationDate() != null) ?
-                DateTimeUtil.dateToString(timeSheet.getCreationDate(), DateTimeUtil.VIEW_DATE_TIME_PATTERN) : "");
-        mav.addObject("report", reportService.modifyURL(sendMailService.initMessageBodyForReport(timeSheet)));
+                    DateTimeUtil.dateToString(timeSheet.getCreationDate(), DateTimeUtil.VIEW_DATE_TIME_PATTERN) : "");
+            mav.addObject("report", reportService.modifyURL(sendMailService.initMessageBodyForReport(timeSheet)));
 
-        logger.info("<<<<<<<<< End of RequestMapping <<<<<<<<<<<<<<<<<<<<<<");
-        return mav;
+            logger.info("<<<<<<<<< End of RequestMapping <<<<<<<<<<<<<<<<<<<<<<");
+            return mav;
         }
     }
 }
