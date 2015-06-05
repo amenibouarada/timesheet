@@ -253,6 +253,31 @@ function setIdsToForm() {
     return true;
 }
 
+function checkReportExistence(href) {
+    var splitArray = href.split("/report");
+    var newWin = window.open('', '_blank');
+
+    dojo.xhrGet({
+        url: getContextPath() + "/report" + splitArray[1],
+        handleAs: "text",
+        timeout: 10000,
+        load: function (data) {
+            if (data.length != 0) {
+                newWin.location.href = href;
+            }
+            else {
+                newWin.close();
+                alert('Отчёт был удалён или перемещен в черновик. Страница будет обновлена');
+                window.location.href = location.pathname;
+            }
+        },
+        error: function (err) {
+            handleError(err.message);
+        }
+    });
+    return false;
+}
+
 function deleteSelectedReports() {
     if (!setIdsToForm()) {
         return;

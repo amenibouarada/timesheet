@@ -17,8 +17,8 @@ import org.springframework.web.servlet.ModelAndView;
 
 @Controller
 public class ReportController {
-	private static final Logger logger = LoggerFactory.getLogger(TimeSheetController.class);	 
-		
+	private static final Logger logger = LoggerFactory.getLogger(TimeSheetController.class);
+
 	@Autowired
 	CalendarService calendarService;
 	@Autowired
@@ -30,12 +30,12 @@ public class ReportController {
 	@Autowired
 	SendMailService sendMailService;
 	@Autowired
-	ProjectService projectService;  
+	ProjectService projectService;
 	@Autowired
     ReportService reportService;
 
 	@RequestMapping(value = "/report/{year}/{month}/{day}/{employeeId}", method = RequestMethod.GET)
-	public ModelAndView sendViewReports ( @PathVariable("year") Integer year,@PathVariable("month") Integer month,@PathVariable("day") Integer day, @PathVariable("employeeId") Integer employeeId, @ModelAttribute("ReportForm") TimeSheetForm tsForm, BindingResult result) {		
+	public ModelAndView sendViewReports ( @PathVariable("year") Integer year,@PathVariable("month") Integer month,@PathVariable("day") Integer day, @PathVariable("employeeId") Integer employeeId, @ModelAttribute("ReportForm") TimeSheetForm tsForm, BindingResult result) {
 		logger.info("Date for report: {}.{}", year, month);
 		logger.info("Date for report: {}", day);
 		ModelAndView mav = new ModelAndView("report");
@@ -47,11 +47,16 @@ public class ReportController {
 
         final TimeSheet timeSheet = timeSheetService.findForDateAndEmployee(year.toString() + "-" + month.toString() + "-" + day.toString(), employeeId);
 
-        mav.addObject("creationDate", (timeSheet != null && timeSheet.getCreationDate() != null) ?
+        if (timeSheet == null) {
+            return null;
+        } else {
+
+            mav.addObject("creationDate", (timeSheet.getCreationDate() != null) ?
                 DateTimeUtil.dateToString(timeSheet.getCreationDate(), DateTimeUtil.VIEW_DATE_TIME_PATTERN) : "");
         mav.addObject("report", reportService.modifyURL(sendMailService.initMessageBodyForReport(timeSheet)));
 
         logger.info("<<<<<<<<< End of RequestMapping <<<<<<<<<<<<<<<<<<<<<<");
         return mav;
+        }
     }
 }
