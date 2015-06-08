@@ -9,3 +9,16 @@
     max-width: 15px;
     margin: 5px;
 }
+
+.employmentPlanningTable{
+    margin-bottom: 10px;
+}
+
+.employmentPlanningTable td{
+    margin-bottom: 20px;
+    padding: 5px;
+}
+
+.employmentPlanningTable .bigSelect{
+    width: 280px;
+}

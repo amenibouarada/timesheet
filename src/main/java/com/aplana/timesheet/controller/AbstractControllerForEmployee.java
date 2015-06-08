@@ -2,6 +2,7 @@ package com.aplana.timesheet.controller;
 
 import com.aplana.timesheet.dao.entity.Division;
 import com.aplana.timesheet.dao.entity.Employee;
+import com.aplana.timesheet.enums.TypesOfActivityEnum;
 import com.aplana.timesheet.form.AddEmployeeForm;
 import com.aplana.timesheet.service.*;
 import com.aplana.timesheet.system.constants.TimeSheetConstants;
@@ -12,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -71,9 +73,13 @@ public abstract class AbstractControllerForEmployee extends AbstractController{
 
     protected ModelAndView fillMavForAddEmployeesForm(ModelAndView modelAndView){
         modelAndView.addObject("divisionList", divisionService.getDivisions());
+        modelAndView.addObject("projectTypeList",
+                Arrays.asList(TypesOfActivityEnum.PROJECT, TypesOfActivityEnum.PRESALE, TypesOfActivityEnum.NON_PROJECT));
+        modelAndView.addObject("projectListWithOwnerDivision", projectService.getProjectListWithOwnerDivisionJson());
         modelAndView.addObject("projectRoleList", projectRoleService.getProjectRoles());
         modelAndView.addObject("regionList", regionService.getRegions());
         modelAndView.addObject("managerList", employeeService.getManagerListJson());
+        modelAndView.addObject("managerMapJson", employeeService.getManagerListForAllEmployee());
         modelAndView.addObject("all", TimeSheetConstants.ALL_VALUES);
         return modelAndView;
     }

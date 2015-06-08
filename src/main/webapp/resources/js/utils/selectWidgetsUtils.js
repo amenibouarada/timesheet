@@ -88,7 +88,7 @@ function fillProjectList(rowIndex, projectState) {
 
 /* Заполняет список доступных проектов/пресейлов */
 // ToDo необходимо попробовать заменить на функцию fillProjectList (и саму функцию (fillProjectList) переименовать)
-function fillProjectListByDivision(division) {
+function fillProjectListByDivision(division, projectSelect, projectState) {
 
     if (division == null) {
         division = dojo.byId("divisionId");
@@ -97,28 +97,32 @@ function fillProjectListByDivision(division) {
             division.value = 0;
     }
     var divisionId = division.value;
-    var showInactiveProjects = dojo.byId("showInactiveProjects").checked;
-    var projectSelect = dojo.byId("projectId");
+    var showInactiveProjects = dojo.byId("showInactiveProjects");
+    showInactiveProjects = showInactiveProjects == undefined ? false : showInactiveProjects.checked;
+    var projectSelect = projectSelect || dojo.byId("projectId");
     dojo.removeAttr(projectSelect, "disabled");
     //Очищаем список проектов.
     projectSelect.options.length = 0;
     var hasAny = false;
     if (divisionId == 0) {
         for (var i = 0; i < fullProjectList.length; i++) {
-            if (showInactiveProjects==true || projectListWithOwnerDivision[i].active=='true') {
-                projectOption = dojo.doc.createElement("option");
-                dojo.attr(projectOption, {
-                    value: fullProjectList[i].id
-                });
-                projectOption.title = fullProjectList[i].value;
-                projectOption.innerHTML = fullProjectList[i].value;
-                projectSelect.appendChild(projectOption);
-                hasAny = true;
+            if (projectState == undefined ||
+                (projectState != undefined &&  projectListWithOwnerDivision[i].state == projectState)){
+                if (showInactiveProjects==true || projectListWithOwnerDivision[i].active=='true') {
+                    projectOption = dojo.doc.createElement("option");
+                    dojo.attr(projectOption, {
+                        value: fullProjectList[i].id
+                    });
+                    projectOption.title = fullProjectList[i].value;
+                    projectOption.innerHTML = fullProjectList[i].value;
+                    projectSelect.appendChild(projectOption);
+                    hasAny = true;
+                }
             }
         }
     } else {
-        dojo.removeAttr("projectId", "disabled");
-        dojo.removeAttr("divisionId", "disabled");
+        dojo.removeAttr(projectSelect, "disabled");
+        dojo.removeAttr(division, "disabled");
         for (var i = 0; i < projectListWithOwnerDivision.length; i++) {
             if (divisionId == projectListWithOwnerDivision[i].ownerDivisionId && (showInactiveProjects==true || projectListWithOwnerDivision[i].active=='true')) {
                 projectOption = dojo.doc.createElement("option");
@@ -231,11 +235,16 @@ function fillAvailableActivityCategoryList(rowIndex) {
  * @param divisionId        - подразделение, по которому определяется список сотрудников
  * @param managerSelect     - селект, который заполняется руководителями
  */
-function updateManagerListByDivision(currentValue, managerList, divisionId, managerSelect) {
+function updateManagerListByDivision(currentValue, managerList, division, managerSelect) {
     var optionAllValue = -1;
     // зададим значения по умолчанию
+    if (division == undefined) {
+        division = dojo.byId("divisionId");
+        if (division.value == null)
+            division.value = 0;
+    }
+    var divisionId = division.value;
     managerList = managerList || managerMapJson;
-    divisionId = divisionId || dojo.byId("divisionId").value;
     managerSelect = managerSelect || dojo.byId("managerId");
     currentValue = managerSelect.value || optionAllValue;
 

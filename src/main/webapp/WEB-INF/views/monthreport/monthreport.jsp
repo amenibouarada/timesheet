@@ -22,31 +22,18 @@
         @import "<%= getResRealPath("/resources/css/monthreport.css", application) %>";
     </style>
 
-    <script type="text/javascript" src="<%= request.getContextPath()%>/resources/js/commonJS/addEmployeesForm.js"></script>
+    <script type="text/javascript" src="<%= request.getContextPath()%>/resources/js/addEmployeesForm.js"></script>
 
     <script type="text/javascript">
+        dojo.require("dojo.parser");
         dojo.require("dojox.grid.DataGrid");
         dojo.require("dojo.data.ItemFileWriteStore");
+        dojo.require("dijit.layout.TabContainer");
+        dojo.require("dijit.layout.ContentPane");
 
-        var data = {
-            identifier: 'id',
-            items: []
-        };
-        var data_list = [
-            { employee: "normal", division: false, region: 'But are not followed by two hexadecimal', type: 29.91,
-                prType: "normal", overtime: false, premium: 'But are not followed by two hexadecimal', allAccountedOvertime: 29.91,
-                comment: "comment"}
-        ];
-        var rows = 1;
-        for(var i=0, l=data_list.length; i<rows; i++){
-            data.items.push(dojo.mixin({ id: i+1 }, data_list[i%l]));
-        }
-        var store = new dojo.data.ItemFileWriteStore({data: data});
-        var overtimeStore = store;
-
-        function addRow(){
-                     alert("Text");
-        }
+        //var monthReportStore = {};
+        var projectListWithOwnerDivision = ${projectListWithOwnerDivision};
+        var managerMapJson = ${managerList};
 
     </script>
 
@@ -58,18 +45,30 @@
     <%--<form:hidden path="<%= JSON_DATA %>"/>--%>
 
 
-    <%@include file="queryParams.jsp" %>
+    <%@include file="../components/queryParams/queryParams.jsp" %>
 
     <button id="show" style="width:150px;vertical-align: middle;" type="submit">Показать</button>
-
-    <%@include file="overtimeTable.jsp" %>
 </form:form>
+
+<button id="exportExcel">Экспорт в Эксель</button>
+
+<br>
+
+    <div data-dojo-type="dijit/layout/TabContainer" doLayout="false" id="tabContainer">
+        <div id="firstTab" data-dojo-type="dijit/layout/ContentPane" title="Табель" data-dojo-props="selected:true">
+            <%@include file="monthReportTable.jsp" %>
+        </div>
+        <div id="secondTab" data-dojo-type="dijit/layout/ContentPane" title="Переработки">
+            <%@include file="overtimeTable.jsp" %>
+        </div>
+    </div>
+
 
 <c:if test="${here != null}">
     ${here}
 </c:if>
 
-<%@include file="addEmployeesForm.jsp" %>
+<%@include file="../components/addEmployees/addEmployeesForm.jsp" %>
 
 </body>
 </html>
