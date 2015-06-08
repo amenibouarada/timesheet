@@ -4,6 +4,7 @@ import argo.jdom.JsonArrayNodeBuilder;
 import argo.jdom.JsonNodeBuilder;
 import argo.jdom.JsonNodeBuilders;
 import argo.jdom.JsonObjectNodeBuilder;
+import com.aplana.timesheet.service.json.EmployeeJSONBuilder;
 import com.aplana.timesheet.system.constants.TimeSheetConstants;
 import com.aplana.timesheet.dao.EmployeeDAO;
 import com.aplana.timesheet.dao.RegionDAO;
@@ -36,26 +37,23 @@ import static com.aplana.timesheet.util.DateTimeUtil.MAX_DATE;
 import static com.aplana.timesheet.util.DateTimeUtil.dateToString;
 
 @Service
-public class EmployeeService {
+public class EmployeeService extends EmployeeJSONBuilder {
 
     private static final Logger logger = LoggerFactory.getLogger(EmployeeService.class);
 
-    public static final String EMPLOYEE_ID      = "employee_id";
-    public static final String EMPLOYEE_NAME    = "employee_name";
-    public static final String DIVISION_ID      = "divisionId";
-    public static final String ID               = "id";
-    public static final String MANAGER_ID       = "managerId";
-    private static final String VALUE = "value";
-    private static final String DIV_ID = "divId";
-    private static final String REG_ID = "regId";
-    private static final String MAN_ID = "manId";
-    private static final String JOB_ID = "jobId";
-    private static final String DIVISION_EMPLOYEES = "divEmps";
-    private static final String DATE_BY_DEFAULT = "dateByDefault";
-    private static final String FIRST_WORK_DATE = "firstWorkDate";
-    private static final String LAST_WORK_DATE = "lastWorkDate";
-    private static final String DATE_FORMAT = "dd.MM.yyyy";
-    private static final String ACTIVE_FLAG = "active";
+    public static final String ID                   = "id";
+    public static final String MANAGER_ID           = "managerId";
+    public static final String VALUE                = "value";
+    public static final String DIV_ID               = "divId";
+    public static final String REG_ID               = "regId";
+    public static final String MAN_ID               = "manId";
+    public static final String JOB_ID               = "jobId";
+    public static final String DIVISION_EMPLOYEES   = "divEmps";
+    public static final String DATE_BY_DEFAULT      = "dateByDefault";
+    public static final String FIRST_WORK_DATE      = "firstWorkDate";
+    public static final String LAST_WORK_DATE       = "lastWorkDate";
+    public static final String DATE_FORMAT          = "dd.MM.yyyy";
+    public static final String ACTIVE_FLAG          = "active";
 
     @Autowired
     public VelocityEngine velocityEngine;
@@ -143,28 +141,8 @@ public class EmployeeService {
         return result;
     }
 
-    /**
-     * Возвращает список сотрудников как json {id, name}
-     * @param employeeList
-     * @return
-     */
-    public String getEmployeeListAsJson(List<Employee> employeeList){
-        JsonArrayNodeBuilder builder = anArrayBuilder();
-        for(Employee employee : employeeList){
-            builder.withElement(getEmployeeAsJSONBulder(employee));
-        }
-        return JsonUtil.format(builder.build());
-    }
-
-    public JsonObjectNodeBuilder getEmployeeAsJSONBulder(Employee employee){
-        JsonObjectNodeBuilder objectNodeBuilder = anObjectBuilder();
-        objectNodeBuilder.withField(EMPLOYEE_ID, aNumberBuilder(employee.getId().toString()));
-        objectNodeBuilder.withField(EMPLOYEE_NAME, aStringBuilder(employee.getName()));
-        return objectNodeBuilder;
-    }
-
     public String getAllEmployeesJSON() {
-        return getEmployeeListAsJson(employeeDAO.getAllEmployees());
+        return getEmployeeListAsJson(employeeDAO.getAllEmployees(), false);
     }
 
     /**
