@@ -159,6 +159,19 @@ public class VacationDAO {
         entityManager.remove(vacation);
     }
 
+    /**
+     * Удаляет планируемые отпуска уволенного сотрудника
+     *
+     * @param employee
+     */
+    public void deleteFiredVacations(Employee employee) {
+        final Query query = entityManager.createQuery(
+                "delete from Vacation v " +
+                        "where v.employee.id = " + employee.getId() +
+                        "and v.type = " + VacationTypesEnum.PLANNED.getId());
+        query.executeUpdate();
+    }
+
     public Long getIntersectVacationsCount(Integer employeeId, Date fromDate, Date toDate, DictionaryItem typeVacation) {
         final Query query = entityManager.createQuery(
                 "select count(*) as c " +
@@ -281,8 +294,8 @@ public class VacationDAO {
                         String.format("%d-%d-1", year, month)
                 )
         ).setParameter("employee_id", employee.getId())
-         .setParameter("status_id", VacationStatusEnum.APPROVED.getId())
-         .setParameter("region", employee.getRegion().getId());
+                .setParameter("status_id", VacationStatusEnum.APPROVED.getId())
+                .setParameter("region", employee.getRegion().getId());
 
         // если не указано, то исключаем из общего списка те отпуска, которые не должны учитываться
         if (vacationTypes == null) {
@@ -343,10 +356,10 @@ public class VacationDAO {
     public List<Vacation> getPlannedVacationsByBeginAndEndDates(Employee employee, Date beginDate, Date endDate) {
         Query query =
                 entityManager.createQuery("select v from Vacation v where v.type.id=:type and v.beginDate = :beginDate and v.endDate=:endDate and v.employee = :employee").
-                setParameter("type", VacationTypesEnum.PLANNED.getId())
-                .setParameter("beginDate", beginDate)
-                .setParameter("employee", employee)
-                .setParameter("endDate", endDate);
+                        setParameter("type", VacationTypesEnum.PLANNED.getId())
+                        .setParameter("beginDate", beginDate)
+                        .setParameter("employee", employee)
+                        .setParameter("endDate", endDate);
 
         return query.getResultList();
     }

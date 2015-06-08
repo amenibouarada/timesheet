@@ -30,6 +30,9 @@ public class EmployeeLdapService extends AbstractServiceWithTransactionManagemen
     private EmployeeService employeeService;
 
     @Autowired
+    private VacationService vacationService;
+
+    @Autowired
     private ProjectRoleService projectRoleService;
 
     @Autowired
@@ -325,6 +328,8 @@ public class EmployeeLdapService extends AbstractServiceWithTransactionManagemen
                                 }
                             }
                         }
+                        //удаляем из базы планируемые отпуска уволенного сотрудника
+                        vacationService.deleteFiredVacations(empDb);
                     }
                 }
             }
