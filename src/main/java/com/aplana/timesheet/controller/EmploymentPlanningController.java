@@ -96,7 +96,7 @@ public class EmploymentPlanningController {
                 form.getProjectRoleListId(),
                 form.getManagerId());
 
-        return employeeService.getEmployeeListAsJson(employeeList);
+        return employeeService.getEmployeeListAsJson(employeeList, true);
     }
 
     /* Возвращает JSON для форме выбора сотрудников */
