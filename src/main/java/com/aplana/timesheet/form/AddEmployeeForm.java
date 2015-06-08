@@ -8,11 +8,16 @@ import java.util.List;
  * @see <a href="http://conf.aplana.com/pages/viewpage.action?pageId=10487278">Аналитика</a>
  * creation date: 18.10.13
  */
+// ToDo сделать общую форму
 public class AddEmployeeForm {
+    private Integer divisionOwnerId;
+    private Integer projectTypeId;
+    private Integer projectId;
     private Integer divisionId;
     private Integer managerId;
     private List<Integer> projectRoleListId;
     private List<Integer> regionListId;
+
 
     public static final String ADD_FORM = "addEmployeeForm";
 
@@ -49,5 +54,29 @@ public class AddEmployeeForm {
 
     public void setRegionListId(List<Integer> regionListId) {
         this.regionListId = regionListId;
+    }
+
+    public Integer getDivisionOwnerId() {
+        return divisionOwnerId;
+    }
+
+    public void setDivisionOwnerId(Integer divisionOwnerId) {
+        this.divisionOwnerId = divisionOwnerId;
+    }
+
+    public Integer getProjectTypeId() {
+        return projectTypeId;
+    }
+
+    public void setProjectTypeId(Integer projectTypeId) {
+        this.projectTypeId = projectTypeId;
+    }
+
+    public Integer getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(Integer projectId) {
+        this.projectId = projectId;
     }
 }
