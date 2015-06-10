@@ -33,23 +33,21 @@ public class MonthReportService {
         ObjectMapper mapper = new ObjectMapper();
         CollectionType mapCollectionType = mapper.getTypeFactory().constructCollectionType(List.class, Map.class);
 
-        List<Map<String, String>> overtimes = mapper.readValue(jsonData, mapCollectionType);
+        List<Map<String, Object>> overtimes = mapper.readValue(jsonData, mapCollectionType);
 
-        for (Map<String, String> overtimeMap : overtimes){
+        for (Map<String, Object> overtimeMap : overtimes){
             Overtime overtime = new Overtime();
-            String idString = overtimeMap.get("id");
-            if (idString != ""){
-                overtime.setId(Long.parseLong(idString));
-            }
-            overtime.setEmployee(employeeDAO.find(Integer.parseInt(overtimeMap.get("employeeId"))));
-            overtime.setProject(projectDAO.find(Integer.parseInt(overtimeMap.get("projectId"))));
+            overtime.setId((Integer)overtimeMap.get("id"));
+            overtime.setEmployee(employeeDAO.find((Integer)overtimeMap.get("employeeId")));
+            overtime.setProject(projectDAO.find((Integer)overtimeMap.get("projectId")));
             overtime.setYear(year);
             overtime.setMonth(month);
-            String overtimeString = overtimeMap.get("overtime");
-            overtime.setOvertime(overtimeString == "" ? 0.0 : Double.parseDouble(overtimeString));
-            String premiumString = overtimeMap.get("premium");
-            overtime.setPremium(premiumString == "" ? 0.0 : Double.parseDouble(premiumString));
-            overtime.setComment(overtimeMap.get("comment"));
+            // ToDo можно ли упростить?
+            overtime.setOvertime(
+                    (overtimeMap.get("overtime") instanceof Integer) ? new Double((Integer)overtimeMap.get("overtime")) : (Double)overtimeMap.get("overtime"));
+            overtime.setPremium(
+                    (overtimeMap.get("premium") instanceof Integer) ? new Double((Integer)overtimeMap.get("premium")) : (Double)overtimeMap.get("premium"));
+            overtime.setComment((String)overtimeMap.get("comment"));
             overtimeDAO.save(overtime);
         }
 
@@ -59,12 +57,12 @@ public class MonthReportService {
     public boolean deleteOvertimes(String jsonData) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         CollectionType mapCollectionType = mapper.getTypeFactory().constructCollectionType(List.class, Map.class);
-        List<Map<String, String>> overtimes = mapper.readValue(jsonData, mapCollectionType);
-        List<Long> idsToDelete = new ArrayList<Long>();
-        for (Map<String, String> overtimeMap : overtimes){
-            String idString = overtimeMap.get("id");
-            if (idString != ""){
-                idsToDelete.add(Long.parseLong(idString));
+        List<Map<String, Object>> overtimes = mapper.readValue(jsonData, mapCollectionType);
+        List<Integer> idsToDelete = new ArrayList<Integer>();
+        for (Map<String, Object> overtimeMap : overtimes){
+            Integer id = (Integer)overtimeMap.get("id");
+            if (id != null){
+                idsToDelete.add(id);
             }
         }
         overtimeDAO.delete(idsToDelete);
@@ -79,24 +77,24 @@ public class MonthReportService {
 
     private String createOvertimesJSON(List<Overtime> overtimes) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
-        CollectionType mapCollectionType = mapper.getTypeFactory().constructCollectionType(List.class, Map.class);
+        //CollectionType mapCollectionType = mapper.getTypeFactory().constructCollectionType(List.class, Map.class);
 
-        List<Map<String, String>> overtimeList = new ArrayList<Map<String, String>>(overtimes.size());
+        List<Map<String, Object>> overtimeList = new ArrayList<Map<String, Object>>(overtimes.size());
         for (Overtime overtime : overtimes){
-            HashMap<String, String> overtimeMap = new HashMap<String, String>();
-            overtimeMap.put("id", new Long(overtime.getId()).toString());
+            HashMap<String, Object> overtimeMap = new HashMap<String, Object>();
+            overtimeMap.put("id", overtime.getId());
             overtimeMap.put("employee", overtime.getEmployee().getName());
-            overtimeMap.put("employeeId", overtime.getEmployee().getId().toString());
+            overtimeMap.put("employeeId", overtime.getEmployee().getId());
             overtimeMap.put("division", overtime.getEmployee().getDivision().getName());
-            overtimeMap.put("divisionId", overtime.getEmployee().getDivision().getId().toString());
+            overtimeMap.put("divisionId", overtime.getEmployee().getDivision().getId());
             overtimeMap.put("region", overtime.getEmployee().getRegion().getName());
-            overtimeMap.put("regionId", overtime.getEmployee().getRegion().getId().toString());
+            overtimeMap.put("regionId", overtime.getEmployee().getRegion().getId());
             overtimeMap.put("type", overtime.getProject().getState().getValue());
-            overtimeMap.put("typeId", overtime.getProject().getState().getId().toString());
+            overtimeMap.put("typeId", overtime.getProject().getState().getId());
             overtimeMap.put("project", overtime.getProject().getName());
-            overtimeMap.put("projectId", overtime.getProject().getId().toString());
-            overtimeMap.put("overtime", overtime.getOvertime().toString());
-            overtimeMap.put("premium", overtime.getPremium().toString());
+            overtimeMap.put("projectId", overtime.getProject().getId());
+            overtimeMap.put("overtime", overtime.getOvertime());
+            overtimeMap.put("premium", overtime.getPremium());
             overtimeMap.put("comment", overtime.getComment().toString());
             overtimeList.add(overtimeMap);
         }

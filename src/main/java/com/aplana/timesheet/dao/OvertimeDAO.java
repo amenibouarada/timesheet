@@ -18,7 +18,7 @@ public class OvertimeDAO {
     @PersistenceContext
     private EntityManager entityManager;
 
-    private static final Logger logger = LoggerFactory.getLogger(ProjectManagerDAO.class);
+    private static final Logger logger = LoggerFactory.getLogger(OvertimeDAO.class);
 
     @Transactional
     public void save(Overtime overtime)  {
@@ -29,8 +29,8 @@ public class OvertimeDAO {
 
     @Transactional
     // ToDo переделать на один запрос
-    public void delete(List<Long> ids)  {
-        for (Long id : ids){
+    public void delete(List<Integer> ids)  {
+        for (Integer id : ids){
             entityManager.remove(entityManager.find(Overtime.class, id));
         }
         entityManager.flush();
@@ -50,6 +50,7 @@ public class OvertimeDAO {
             queryString += " AND ot.employee.division.id = :divisionEmployee ";
             employeeDivSet = true;
         }
+        queryString +=  " ORDER BY ot.employee.name";
         Query query = entityManager.createQuery(queryString).setParameter("year", year).setParameter("month", month);
         if (ownerDivSet) { query.setParameter("divisionOwner", divisionOwner); }
         if (employeeDivSet) { query.setParameter("divisionEmployee", divisionEmployee); }

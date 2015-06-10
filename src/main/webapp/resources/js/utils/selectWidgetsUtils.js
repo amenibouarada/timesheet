@@ -1,3 +1,6 @@
+// предназначен для обозначения значения "Все" в выпадашках (select)
+var ALL_VALUE = 0;
+
 /* Добавляет в указанный select пустой option. */
 function insertEmptyOption(select) {
     insertEmptyOptionWithCaptionInHead(select, "");
@@ -88,6 +91,7 @@ function fillProjectList(rowIndex, projectState) {
 
 /* Заполняет список доступных проектов/пресейлов */
 // ToDo необходимо попробовать заменить на функцию fillProjectList (и саму функцию (fillProjectList) переименовать)
+// Сделать универсальным, убрать disabled места
 function fillProjectListByDivision(division, projectSelect, projectState) {
 
     if (division == null) {
@@ -124,15 +128,20 @@ function fillProjectListByDivision(division, projectSelect, projectState) {
         dojo.removeAttr(projectSelect, "disabled");
         dojo.removeAttr(division, "disabled");
         for (var i = 0; i < projectListWithOwnerDivision.length; i++) {
-            if (divisionId == projectListWithOwnerDivision[i].ownerDivisionId && (showInactiveProjects==true || projectListWithOwnerDivision[i].active=='true')) {
-                projectOption = dojo.doc.createElement("option");
-                dojo.attr(projectOption, {
-                    value: projectListWithOwnerDivision[i].id
-                });
-                projectOption.title = projectListWithOwnerDivision[i].value;
-                projectOption.innerHTML = projectListWithOwnerDivision[i].value;
-                projectSelect.appendChild(projectOption);
-                hasAny = true;
+            if (projectState == undefined ||
+                (projectState != undefined &&  projectListWithOwnerDivision[i].state == projectState))
+            {
+                if ((showInactiveProjects==true || projectListWithOwnerDivision[i].active=='true') &&
+                    divisionId == projectListWithOwnerDivision[i].ownerDivisionId) {
+                    projectOption = dojo.doc.createElement("option");
+                    dojo.attr(projectOption, {
+                        value: projectListWithOwnerDivision[i].id
+                    });
+                    projectOption.title = projectListWithOwnerDivision[i].value;
+                    projectOption.innerHTML = projectListWithOwnerDivision[i].value;
+                    projectSelect.appendChild(projectOption);
+                    hasAny = true;
+                }
             }
         }
     }

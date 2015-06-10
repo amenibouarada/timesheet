@@ -13,7 +13,7 @@ public class Overtime {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "overtime_seq")
     @SequenceGenerator(name = "overtime_seq", sequenceName = "overtime_seq", allocationSize = 10)
     @Column(nullable = false)
-    private long id;
+    private Integer id;
 
     @Column(name = "year")
     private Integer year;
@@ -40,11 +40,11 @@ public class Overtime {
     @Column(name = "comment")
     private String comment;
 
-    public long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 

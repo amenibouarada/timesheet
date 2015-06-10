@@ -1,8 +1,8 @@
 <%--
 Форма для добавления сотрудников в различные таблицы
-Необходимо в своем методе переопределить функцию addRow,
+Необходимо в своем методе переопределить функцию returnEmployees,
 которая бы получала данные с формы (additionEmployeeList) и использовала их.
-Пример получения в monthreport.jsp
+Пример получения в overtimeTable.jsp
 
 В моделе должны быть divisionList, projectRoleList, regionList, добавляются использованием
 com.aplana.timesheet.controller.AbstractControllerForEmployee.fillMavForAddEmployeesForm
@@ -17,7 +17,7 @@ com.aplana.timesheet.controller.AbstractControllerForEmployee.fillMavForAddEmplo
 
 <%@ page import="static com.aplana.timesheet.form.AddEmployeeForm.*" %>
 
-<div data-dojo-type="dijit/Dialog" data-dojo-id="employeeDialog" title="Добавить сотрудника">
+<div data-dojo-type="dijit/Dialog" data-dojo-id="addEmployeesForm_employeeDialog" title="Добавить сотрудника">
 
     <form:form commandName="<%= ADD_FORM %>">
         <table class="dijitDialogPaneContentArea no_border employmentPlanningTable">
@@ -53,7 +53,7 @@ com.aplana.timesheet.controller.AbstractControllerForEmployee.fillMavForAddEmplo
                 <td><label>Подразделение сотрудника</label></td>
                 <td>
                     <form:select id="addEmployeesForm_divisionId" path="divisionId"
-                                 onchange="updateAdditionEmployeeList(); updateAdditionEmployeeList()">
+                                 onchange="addEmployeesForm_updateManagers(); addEmployeesForm_updateAdditionEmployeeList();">
                         <form:options items="${divisionList}" itemLabel="name" itemValue="id"/>
                     </form:select>
                 <td>
@@ -62,7 +62,7 @@ com.aplana.timesheet.controller.AbstractControllerForEmployee.fillMavForAddEmplo
                 <td><label>Руководитель </label></td>
                 <td>
                     <form:select id="addEmployeesForm_managerId" path="managerId"
-                                 onchange="updateAdditionEmployeeList()">
+                                 onchange="addEmployeesForm_updateAdditionEmployeeList()">
                         <form:option label="Все руководители" value="${all}"/>
                     </form:select>
                 <td>
@@ -71,7 +71,7 @@ com.aplana.timesheet.controller.AbstractControllerForEmployee.fillMavForAddEmplo
                 <td><label>Должности </label></td>
                 <td>
                     <form:select id="addEmployeesForm_projectRoleListId" path="projectRoleListId" multiple="true"
-                                 onchange="updateAdditionEmployeeList()" style="height: 110px">
+                                 onchange="addEmployeesForm_updateAdditionEmployeeList()" style="height: 110px">
                         <form:options items="${projectRoleList}" itemLabel="name" itemValue="id"/>
                     </form:select>
                 <td>
@@ -80,7 +80,7 @@ com.aplana.timesheet.controller.AbstractControllerForEmployee.fillMavForAddEmplo
                 <td><label>Регионы </label></td>
                 <td>
                     <form:select id="addEmployeesForm_regionListId" path="regionListId" multiple="true"
-                                 onchange="updateAdditionEmployeeList()"  style="height: 200px">
+                                 onchange="addEmployeesForm_updateAdditionEmployeeList()"  style="height: 200px">
                         <form:options items="${regionList}" itemLabel="name" itemValue="id"/>
                     </form:select>
                 <td>
@@ -88,8 +88,8 @@ com.aplana.timesheet.controller.AbstractControllerForEmployee.fillMavForAddEmplo
         </table>
 
         <div class="dijitDialogPaneActionBar">
-            <button type="button" onclick="returnEmployees(); employeeDialog.hide();">Добавить</button>
-            <button type="button" onclick="employeeDialog.hide();">Отмена</button>
+            <button type="button" onclick="returnEmployees(); addEmployeesForm_employeeDialog.hide();">Добавить</button>
+            <button type="button" onclick="addEmployeesForm_employeeDialog.hide();">Отмена</button>
         </div>
 
     </form:form>
@@ -97,31 +97,39 @@ com.aplana.timesheet.controller.AbstractControllerForEmployee.fillMavForAddEmplo
 
 
 <script type="text/javascript">
+
     dojo.addOnLoad(function () {
+        addEmployeesForm_updateLists();
         var ownerDiv = getCookieValue('aplanaDivision');
         ownerDiv = ownerDiv == undefined ? 0 : ownerDiv;
         dojo.byId("addEmployeesForm_divisionOwnerId").value = ownerDiv;
         dojo.byId("addEmployeesForm_divisionId").value = ownerDiv;
+    });
+
+    function addEmployeesForm_updateLists(){
         addEmployeesForm_updateProjectList();
         addEmployeesForm_updateManagers();
-        updateAdditionEmployeeList();
-    });
+        addEmployeesForm_updateAdditionEmployeeList();
+        // Дизейблим подразделения
+        dojo.byId("addEmployeesForm_divisionOwnerId").disabled = true;
+        dojo.byId("addEmployeesForm_divisionId").disabled = true;
+    }
 
     function addEmployeesForm_updateProjectList(){
         fillProjectListByDivision(
                 dojo.byId("addEmployeesForm_divisionOwnerId"),
                 dojo.byId("addEmployeesForm_projectId"),
-                dojo.byId("addEmployeesForm_projectTypeId"));
+                dojo.byId("addEmployeesForm_projectTypeId").value);
         dojo.byId("addEmployeesForm_projectId").remove(0);
     }
 
     function addEmployeesForm_updateManagers(){
         updateManagerListByDivision(
-                undefined, undefined, dojo.byId("addEmployeesForm_divisionId"), dojo.byId("addEmployeesForm_managerId"));
+                0, managerMapJson, dojo.byId("addEmployeesForm_divisionId"), dojo.byId("addEmployeesForm_managerId"));
     }
 
     // Обновляет список сотрудников на форме добавления сотрудников
-    function updateAdditionEmployeeList() {
+    function addEmployeesForm_updateAdditionEmployeeList() {
         var divisionId = dojo.byId("addEmployeesForm_divisionId").value;
         var managerId = dojo.byId("addEmployeesForm_managerId").value;
         var projectRoleListId = getSelectValues(dojo.byId("addEmployeesForm_projectRoleListId"));
@@ -168,38 +176,6 @@ com.aplana.timesheet.controller.AbstractControllerForEmployee.fillMavForAddEmplo
                 dojo.create("option", { value: "-1", innerHTML: "Сотрудников не найдено", disabled: true}, employeeSelect);
             }
         };
-    }
-
-    function returnEmployees(){
-        var typeSelect      = dojo.byId("addEmployeesForm_projectTypeId");
-        var typeId          = typeSelect.value;
-        var type            = typeSelect.options[typeSelect.selectedIndex].text;
-        var projectSelect   = dojo.byId("addEmployeesForm_projectId");
-        var projectId       = projectSelect.value;
-        var project         = projectSelect.options[projectSelect.selectedIndex].text;
-
-        var employee_list = [];
-        var length = 0;
-        dojo.forEach( dojo.byId("addEmployeesForm_additionEmployeeList").selectedOptions, function(employee){
-            employee_list.push({
-                id:         "",
-                employeeId: employee.value,
-                employee:   employee.innerHTML,
-                divisionId: employee.attributes.div_id.value,
-                division:   employee.attributes.div_name.value,
-                regionId:   employee.attributes.reg_id.value,
-                region:     employee.attributes.reg_name.value,
-                typeId:     typeId,
-                type:       type,
-                projectId:  projectId,
-                project:    project,
-                overtime:   "",
-                premium:    "",
-                allAccountedOvertime: "",
-                comment:    ""
-            });
-        });
-        addRows(employee_list);
     }
 
 </script>
