@@ -43,26 +43,36 @@
             // установим год/месяц по умолчанию
             var currentDate = new Date();
             dojo.byId("monthreport_year").value = currentDate.getFullYear();
-            dojo.byId("monthreport_month").value = currentDate.getMonth() + 1;
+            dojo.byId("monthreport_month").value = currentDate.getMonth();
+
 
             // назначим слушителей переключения табов
             tabContainer.watch("selectedChildWidget",
                 // функция для переназначения обработчиков нажатия кнопок
+                // и отображения актуальных данных
                 function changeButtonListeners(){
                     dojo.forEach(eventConnections, dojo.disconnect);
                     eventConnections = [];
                     if (dijit.byId('tabContainer').selectedChildWidget.id == "monthReportTable_tab"){
-                        eventConnections.push(dojo.connect(showButton,   "onclick", function(){}));
+//                        overtimeTable_reloadTable();
+//                        eventConnections.push(dojo.connect(monthreport_year,  "onchange", function(){overtimeTable_reloadTable()}));
+//                        eventConnections.push(dojo.connect(monthreport_month, "onchange", function(){overtimeTable_reloadTable()}));
+
                         eventConnections.push(dojo.connect(saveButton,   "onclick", function(){}));
                         eventConnections.push(dojo.connect(exportButton, "onclick", function(){}));
                     }
                     if (dijit.byId('tabContainer').selectedChildWidget.id == "overtimeTable_tab"){
-                        eventConnections.push(dojo.connect(showButton,   "onclick", function(){overtimeTable_reloadTable()}));
+                        overtimeTable_reloadTable();
+                        eventConnections.push(dojo.connect(monthreport_year,  "onchange", function(){overtimeTable_reloadTable()}));
+                        eventConnections.push(dojo.connect(monthreport_month, "onchange", function(){overtimeTable_reloadTable()}));
                         eventConnections.push(dojo.connect(saveButton,   "onclick", function(){overtimeTable_save()}));
                         eventConnections.push(dojo.connect(exportButton, "onclick", function(){}));
                     }
                     if (dijit.byId('tabContainer').selectedChildWidget.id == "mutualWorkTable_tab"){
-                        eventConnections.push(dojo.connect(showButton,   "onclick", function(){}));
+//                        overtimeTable_reloadTable();
+//                        eventConnections.push(dojo.connect(monthreport_year,  "onchange", function(){overtimeTable_reloadTable()}));
+//                        eventConnections.push(dojo.connect(monthreport_month, "onchange", function(){overtimeTable_reloadTable()}));
+
                         eventConnections.push(dojo.connect(saveButton,   "onclick", function(){}));
                         eventConnections.push(dojo.connect(exportButton, "onclick", function(){}));
                     }
@@ -76,9 +86,44 @@
 <body>
 <h1>Табель</h1>
 
-<%@include file="../components/queryParams/queryParams.jsp" %>
+<table>
+    <tr>
+        <td>
+            <span class="label">Год:</span>
+        </td>
+        <td>
+            <select data-dojo-id="monthreport_year" id="monthreport_year">
+                <option value="2015" label="2015"/>
+                <option value="2016" label="2016"/>
+                <option value="2017" label="2017"/>
+                <option value="2018" label="2018"/>
+                <option value="2019" label="2019"/>
+                <option value="2020" label="2020"/>
+            </select>
+        </td>
+
+        <td>
+            <span class="label">Месяц:</span>
+        </td>
+        <td>
+            <%--// ToDo сделать отдельный файл для формирования выпадашки с месяцами--%>
+            <select data-dojo-id="monthreport_month" id="monthreport_month">
+                <option value="1" title="Январь">Январь</option>
+                <option value="2" title="Февраль">Февраль</option>
+                <option value="3" title="Март">Март</option>
+                <option value="4" title="Апрель">Апрель</option>
+                <option value="5" title="Май">Май</option>
+                <option value="6" title="Июнь">Июнь</option>
+                <option value="7" title="Июль">Июль</option>
+                <option value="8" title="Август">Август</option>
+                <option value="9" title="Сентябрь">Сентябрь</option>
+                <option value="10" title="Октябрь">Октябрь</option>
+                <option value="11" title="Ноябрь">Ноябрь</option>
+                <option value="12" title="Декабрь">Декабрь</option>
+            </select>
+    </tr>
+</table>
 <br>
-<button id="showButton"     data-dojo-id="showButton"     >Показать</button>
 <button id="saveButton"     data-dojo-id="saveButton"     >Сохранить</button>
 <button id="exportButton"   data-dojo-id="exportButton"   >Экспорт в Эксель</button>
 <br>

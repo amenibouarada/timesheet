@@ -1,7 +1,7 @@
 package com.aplana.timesheet.dao;
 
 
-import com.aplana.timesheet.dao.entity.Overtime;
+import com.aplana.timesheet.dao.entity.monthreport.Overtime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
@@ -43,7 +43,7 @@ public class OvertimeDAO {
         boolean ownerDivSet = false;
         boolean employeeDivSet = false;
         if (divisionOwner != null && divisionOwner > 0){
-            queryString += " AND ot.project.division.id = :divisionOwner ";
+            queryString += " AND (ot.project IS NULL OR ot.project.division.id = :divisionOwner) ";
             ownerDivSet = true;
         }
         if (divisionEmployee != null && divisionEmployee > 0){

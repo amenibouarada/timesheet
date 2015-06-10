@@ -44,7 +44,7 @@ public class MonthReportController extends AbstractControllerForEmployee {
         return mav;
     }
 
-    @RequestMapping(value = "/saveOvertimeTable")
+    @RequestMapping(value = "/saveOvertimeTable", produces = "text/plain;charset=UTF-8")
     @ResponseBody
     public String saveOvertimeTable(
             @RequestParam("year") Integer year,
@@ -55,12 +55,12 @@ public class MonthReportController extends AbstractControllerForEmployee {
             monthReportService.saveOvertimeTable(year, month, jsonData);
         }catch (Exception exc){
             exc.printStackTrace();
-            return "Bad";
+            return "Во время сохранения произошла ошибка. Пожалуйста, свяжитесть с администраторами системы.";
         }
-        return "Ok";
+        return "Сохранено успешно.";
     }
 
-    @RequestMapping(value = "/deleteOvertimes")
+    @RequestMapping(value = "/deleteOvertimes", produces = "text/plain;charset=UTF-8")
     @ResponseBody
     public String deleteOvertimes(
             @RequestParam("jsonData") String jsonData
@@ -69,9 +69,9 @@ public class MonthReportController extends AbstractControllerForEmployee {
             monthReportService.deleteOvertimes(jsonData);
         }catch (Exception exc){
             exc.printStackTrace();
-            return "Bad";
+            return "Во время удаления произошла ошибка. Пожалуйста, свяжитесть с администраторами системы.";
         }
-        return "Ok";
+        return "Строки успешно удалены";
     }
 
     @RequestMapping(value = "/getOvertimes", produces = "text/plain;charset=UTF-8")
@@ -85,7 +85,7 @@ public class MonthReportController extends AbstractControllerForEmployee {
         try {
             return monthReportService.getOvertimesJSON(year, month, divisionOwner, divisionEmployee);
         } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
             return "[]";
         }
     }

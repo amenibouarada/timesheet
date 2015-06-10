@@ -5,7 +5,7 @@
         <td><label>Подразделение владельца</label></td>
         <td>
             <select data-dojo-id="overtimeTable_divisionOwnerId" id="overtimeTable_divisionOwnerId"
-                    onchange="overtimeTable_divisionChanged()">
+                    onchange="overtimeTable_divisionChanged();">
                 <option value="0" label="Все">
                 <c:forEach items="${divisionList}" var="division">
                     <option value="${division.id}" label="${division.name}">
@@ -31,7 +31,8 @@
         onclick="overtimeTable_employeeDialogShow()">Добавить сотрудников</button>
 <button onclick="overtimeTable_deleteRows()">Удалить выделенные строки</button>
 
-<table data-dojo-id="overtimeTable" data-dojo-type="dojox.grid.DataGrid" style="height: 500px" sortInfo="2">
+<table data-dojo-id="overtimeTable" data-dojo-type="dojox.grid.DataGrid"
+       onApplyEdit="overtimeTable_cellChanged" autoHeight="true" sortInfo="2">
     <thead>
         <tr>
             <th field="id" width="20px"></th>
@@ -42,7 +43,7 @@
             <th field="project"                 width="100px"   >Проект/Пресейл</th>
             <th field="overtime"                width="100px"   editable="true" >Переработки</th>
             <th field="premium"                 width="100px"   editable="true" >Премия</th>
-            <th field="allAccountedOvertime"    width="110px"   editable="true" >Всего учтенных переработок и премий</th>
+            <th field="allAccountedOvertime"    width="110px"   >Всего учтенных переработок и премий</th>
             <th field="comment"                 width="200px"   editable="true" >Комментарий</th>
         </tr>
     </thead>
@@ -71,6 +72,9 @@
     }
 
     function overtimeTable_divisionChanged(){
+        // обновляем таблицу
+        overtimeTable_reloadTable();
+        // меняем видимость кнопки "Добавить сотрудников"
         if( overtimeTable_divisionOwnerId.value == ALL_VALUE ||
             overtimeTable_divisionEmployeeId.value == ALL_VALUE)
         {
@@ -91,7 +95,9 @@
 
     function overtimeTable_reloadTable(){
         if (overtimeTable.store.isDirty()){
-
+            if ( ! confirm("В таблице были изменения. Вы уверены, что хотите обновить данные не записав текущие?")){
+                return;
+            }
         }
         var divisionOwner = dojo.byId("overtimeTable_divisionOwnerId").value;
         var divisionEmployee = dojo.byId("overtimeTable_divisionEmployeeId").value;
@@ -161,9 +167,9 @@
     }
 
     function overtimeTable_save(){
-        // ToDo сохранять только измененные: query: {isChanged: 1}
         overtimeTable.store.fetch({query: {}, queryOptions: {deep: true},
             onComplete: function (items) {
+                overtimeTable.store.save();
                 var jsonData = itemToJSON(overtimeTable.store, items);
                 dojo.xhrPost({
                     url: "monthreport/saveOvertimeTable",
@@ -175,6 +181,7 @@
                     handleAs: "text",
                     load: function (response, ioArgs) {
                         alert(response);
+                        overtimeTable_reloadTable();
                     },
                     error: function (response, ioArgs) {
                         alert(response);
@@ -182,6 +189,11 @@
                 });
             }
         });
+    }
+
+    var overtimeTable_cellChanged = function(rowIndex){
+        var item = overtimeTable.getItem(rowIndex);
+        overtimeTable.store.setValue(item, "allAccountedOvertime", parseInt(item.overtime) + parseInt(item.premium));
     }
 
     // обрабатывает кнопку "Добавить" на форме "Добавить сотрудника"
