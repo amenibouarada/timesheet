@@ -182,6 +182,15 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
         return JsonUtil.format(builder);
     }
 
+    /**
+     * Удаляет планируемые отпуска уволенного сотрудника
+     *
+     * @param employee
+     */
+    public void deleteFiredVacations(Employee employee) {
+        vacationDAO.deleteFiredVacations(employee);
+    }
+
     public int getApprovedVacationsWorkdaysCount(Employee employee, Integer year, Integer month) {
         return vacationDAO.getApprovedVacationsWorkdaysCount(employee, year, month, null);
     }

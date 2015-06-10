@@ -14,12 +14,17 @@
     <security:http pattern="/login*" security="none"/>
     <security:http pattern="/vacation_approval/**" security="none"/>
 
+    <bean id="ajaxTimeoutRedirectFilter" class="com.aplana.timesheet.system.security.AjaxTimeoutRedirectFilter">
+        <property name="customSessionExpiredErrorCode" value="901"/>
+    </bean>
+
     <!--
         <security:http use-expressions="true"  entry-point-ref="spnegoEntryPoint">
      -->
     <security:http auto-config="true" use-expressions="true">
         <security:remember-me services-ref="rememberService"/>
         <security:intercept-url pattern="/admin/**" access="hasRole('ROLE_ADMIN')"/>
+        <security:intercept-url pattern="/**" access="isAuthenticated()" />
         <security:intercept-url pattern="/admin" access="hasRole('ROLE_ADMIN')"/>
         <security:intercept-url pattern="/managertools/**" access="hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')"/>
         <security:intercept-url pattern="/managertools" access="hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')"/>
@@ -38,6 +43,7 @@
         <security:form-login login-page="/login" default-target-url="/timesheet"
                              authentication-failure-url="/loginfailed"/>
         <security:logout logout-url="/logout" logout-success-url="/login"/>
+        <security:custom-filter ref="ajaxTimeoutRedirectFilter" after="EXCEPTION_TRANSLATION_FILTER"/>
         <!--
                 <security:custom-filter ref="spnegoAuthenticationProcessingFilter" position="BASIC_AUTH_FILTER" />
          -->
@@ -51,17 +57,17 @@
     <bean class="org.springframework.security.web.access.expression.DefaultWebSecurityExpressionHandler"/>
 
     <!-- SPNEGO
- 	
+
 	<bean id="spnegoEntryPoint" class="org.springframework.security.extensions.kerberos.web.SpnegoEntryPoint" />
-	
+
 	<bean id="spnegoAuthenticationProcessingFilter" class="org.springframework.security.extensions.kerberos.web.SpnegoAuthenticationProcessingFilter">
 		<property name="authenticationManager" ref="authenticationManager" />
 	</bean>
-	
+
 	<security:authentication-manager alias="authenticationManager">
 		<security:authentication-provider ref="kerberosServiceAuthenticationProvider" />
 	</security:authentication-manager>
-	
+
 	<bean id="kerberosServiceAuthenticationProvider" class="org.springframework.security.extensions.kerberos.KerberosServiceAuthenticationProvider">
 		<property name="ticketValidator">
 			<bean class="org.springframework.security.extensions.kerberos.SunJaasKerberosTicketValidator">
@@ -72,13 +78,13 @@
 		</property>
 		<property name="userDetailsService" ref="userDetailsService" />
 	</bean>
-	
+
 	<bean id="userSearch" class="org.springframework.security.ldap.search.FilterBasedLdapUserSearch">
 	    <constructor-arg value="cn=Users" />
 	    <constructor-arg value="(userPrincipalName={0})" />
 		<constructor-arg ref="contextSource" />
 	</bean>
-	
+
    	<bean id="userDetailsService" class="org.springframework.security.ldap.userdetails.LdapUserDetailsService">
               		<constructor-arg ref="userSearch" />
    	    <property name="userDetailsMapper" ref="myLdapUserDetailsService"/>

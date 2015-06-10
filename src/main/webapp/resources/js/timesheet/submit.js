@@ -76,10 +76,16 @@ function submitWithOvertimeCauseSet() {
     }
 
     var overtimeCause = dijit.byId("overtimeCause").get("value");
-    var overtimeRequired = dijit.byId("overtimeCause").get("required");
+    var typeOfCompensationRequired = dijit.byId("typeOfCompensation").get("required");
+    var typeOfCompensation = dijit.byId("typeOfCompensation").get("value");
 
-    if (overtimeCause == 0 && overtimeRequired == true) {
-        tooltip.show("Необходимо указать причину!");
+    if (overtimeCause == 0) {
+        tooltip.show("Необходимо указать причину работы в праздничный/выходной день!");
+        return;
+    }
+
+    if (typeOfCompensation == 0 && typeOfCompensationRequired == true) {
+        tooltip.show("Необходимо указать тип компенсации!");
         return;
     }
 
@@ -187,6 +193,13 @@ function checkDurationThenSendForm() {
                 }
             }
         });
+
+        if (isHoliday || isVacation) {
+            dijit.byId("typeOfCompensation").attr("required", true);
+        } else {
+            dijit.byId("typeOfCompensation").attr("required", false);
+        }
+
         /* не РЦК */
         var check = !isDivisionLeader &&
             /*недоработка */

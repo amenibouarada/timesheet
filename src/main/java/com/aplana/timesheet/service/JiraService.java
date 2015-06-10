@@ -38,6 +38,7 @@ public class JiraService {
     private ProjectDAO projectDAO;
 
     static final String IN_PROGRESS_STATUS = "In Progress";
+    static final String PROJECT_KEY_IS_ABSENT = "Проект не связан с проектом JIRA, напишите запрос для добавления через форму обратной связи";
 
     /* создание подключения к серверу JIRA */
     private JiraRestClient getRestClient() {
@@ -133,6 +134,8 @@ public class JiraService {
                 if (stringBuilder.length() > 0) {
                     stringBuilder.delete(0, 2);
                 }
+            } else {
+                stringBuilder.append(PROJECT_KEY_IS_ABSENT);
             }
         }
         return stringBuilder.toString();
