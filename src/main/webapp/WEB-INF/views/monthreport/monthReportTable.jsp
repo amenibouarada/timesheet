@@ -1,11 +1,52 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 
-<table data-dojo-type="dojox.grid.DataGrid" data-dojo-props="store:monthReportStore" style="height: 500px">
+<table class="dijitDialogPaneContentArea no_border employmentPlanningTable">
+    <tr>
+        <td><label>Подразделение</label></td>
+        <td>
+            <select data-dojo-id="monthReportTable_divisionId" id="monthReportTable_divisionId"
+                    onchange="monthReportTable_updateManagers(); monthReportTable_reloadTable();">
+                <option value="0" label="Все">
+                <c:forEach items="${divisionList}" var="division">
+                    <option value="${division.id}" label="${division.name}">
+                </c:forEach>
+            </select>
+        <td>
+        <td rowspan="2">
+            <label>Регионы </label><br>
+            <select data-dojo-id="monthReportTable_regionListId" id="monthReportTable_regionListId" multiple="true"
+                    onchange="monthReportTable_reloadTable()">
+                <c:forEach items="${regionList}" var="region">
+                <option value="${region.id}" label="${region.name}">
+                    </c:forEach>
+            </select>
+        </td>
+        <td rowspan="2">
+            <label>Должности</label><br>
+            <select data-dojo-id="monthReportTable_projectRoleListId" id="monthReportTable_projectRoleListId" multiple="true"
+                    onchange="monthReportTable_reloadTable()">
+                <c:forEach items="${projectRoleList}" var="projectRole">
+                <option value="${projectRole.id}" label="${projectRole.name}">
+                    </c:forEach>
+            </select>
+        </td>
+    </tr>
+    <tr>
+        <td><label>Руководитель</label></td>
+        <td>
+            <select data-dojo-id="monthReportTable_managerId" id="monthReportTable_managerId" onchange="monthReportTable_reloadTable()">
+            </select>
+        <td>
+    </tr>
+</table>
+
+
+<table  data-dojo-id="monthReportTable" data-dojo-type="dojox.grid.DataGrid" autoHeight="true">
     <thead>
     <tr>
 
         <th field="id" rowspan="2" width="20px">
-            <img src="<c:url value='/resources/img/add.gif'/>" class="create_img" title="Создать" onclick="employeeDialog.show();"/>
+            <%--<img src="<c:url value='/resources/img/add.gif'/>" class="create_img" title="Создать" onclick="employeeDialog.show();"/>--%>
         </th>
         <th field="employee" rowspan="2"               width="150px"   >Сотрудник</th>
         <th field="division" rowspan="2"               width="150px"   >Подразделение</th>
@@ -46,3 +87,56 @@
     </tr>
     </thead>
 </table>
+
+<script type="text/javascript">
+
+    dojo.addOnLoad(function(){
+        monthReportTable_updateManagers();
+        monthReportTable_createStore();
+
+        var div = getCookieValue('aplanaDivision');
+        div = div ? div : 0;
+        monthReportTable_divisionId.value = div;
+    });
+
+    function monthReportTable_createStore(){
+        var data = {
+            identifier: 'identifier',
+            items: []
+        };
+        var store = new dojo.data.ItemFileWriteStore({data: data});
+        monthReportTable.setStore(store);
+    }
+
+    function monthReportTable_updateManagers(){
+        updateManagerListByDivision(
+            0, managerMapJson, dojo.byId("monthReportTable_divisionId"), dojo.byId("monthReportTable_managerId"));
+    }
+
+    function monthReportTable_reloadTable(){
+        dojo.xhrPost({
+            url: "monthreport/getMonthReportData",
+            content: {
+//                divisionOwner: divisionOwner,
+//                divisionEmployee: divisionEmployee,
+//                year: year,
+//                month: month
+            },
+            handleAs: "text",
+            load: function (response, ioArgs) {
+//                var overtimes = dojo.fromJson(response);
+//                dojo.forEach(overtimes, function(overtime){
+//                    // уникальный идентификатор, для добавления новых строк
+//                    overtime.identifier = overtime.employeeId + "_" + overtime.projectId;
+//                });
+//                overtimeTable_addRows(overtimes);
+//                overtimeTable.store.save();
+            },
+            error: function (response, ioArgs) {
+//                alert(response);
+            }
+        });
+
+    }
+
+</script>

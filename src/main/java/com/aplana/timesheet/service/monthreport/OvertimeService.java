@@ -1,11 +1,10 @@
-package com.aplana.timesheet.service;
+package com.aplana.timesheet.service.monthreport;
 
 import com.aplana.timesheet.dao.EmployeeDAO;
-import com.aplana.timesheet.dao.OvertimeDAO;
 import com.aplana.timesheet.dao.ProjectDAO;
-import com.aplana.timesheet.dao.entity.Calendar;
-import com.aplana.timesheet.dao.entity.Overtime;
-import com.aplana.timesheet.util.DateTimeUtil;
+import com.aplana.timesheet.dao.entity.monthreport.Overtime;
+import com.aplana.timesheet.dao.monthreport.OvertimeDAO;
+import com.aplana.timesheet.enums.TypesOfActivityEnum;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.type.CollectionType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,16 +17,13 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class MonthReportService {
-
+public class OvertimeService {
     @Autowired
     private OvertimeDAO overtimeDAO;
     @Autowired
     private EmployeeDAO employeeDAO;
     @Autowired
     private ProjectDAO projectDAO;
-    @Autowired
-    private CalendarService calendarService;
 
     public boolean saveOvertimeTable(int year, int month, String jsonData) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
@@ -89,12 +85,20 @@ public class MonthReportService {
             overtimeMap.put("divisionId", overtime.getEmployee().getDivision().getId());
             overtimeMap.put("region", overtime.getEmployee().getRegion().getName());
             overtimeMap.put("regionId", overtime.getEmployee().getRegion().getId());
-            overtimeMap.put("type", overtime.getProject().getState().getValue());
-            overtimeMap.put("typeId", overtime.getProject().getState().getId());
-            overtimeMap.put("project", overtime.getProject().getName());
-            overtimeMap.put("projectId", overtime.getProject().getId());
+            if (overtime.getProject() != null){
+                overtimeMap.put("type", overtime.getProject().getState().getValue());
+                overtimeMap.put("typeId", overtime.getProject().getState().getId());
+                overtimeMap.put("project", overtime.getProject().getName());
+                overtimeMap.put("projectId", overtime.getProject().getId());
+            }else{
+                overtimeMap.put("type", TypesOfActivityEnum.NON_PROJECT.getName());
+                overtimeMap.put("typeId", TypesOfActivityEnum.NON_PROJECT.getId());
+                overtimeMap.put("project", "");
+                overtimeMap.put("projectId", null);
+            }
             overtimeMap.put("overtime", overtime.getOvertime());
             overtimeMap.put("premium", overtime.getPremium());
+            overtimeMap.put("allAccountedOvertime", overtime.getOvertime() + overtime.getPremium());
             overtimeMap.put("comment", overtime.getComment().toString());
             overtimeList.add(overtimeMap);
         }
@@ -102,10 +106,4 @@ public class MonthReportService {
         return mapper.writeValueAsString(overtimeList);
 
     }
-
-    public List<Calendar> getYearsList(){
-        return DateTimeUtil.getYearsList(calendarService);
-    }
-
-
 }

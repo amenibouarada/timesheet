@@ -1,16 +1,18 @@
 package com.aplana.timesheet.controller;
 
-import com.aplana.timesheet.dao.entity.Calendar;
 import com.aplana.timesheet.form.AddEmployeeForm;
 import com.aplana.timesheet.form.MonthReportForm;
-import com.aplana.timesheet.service.MonthReportService;
+import com.aplana.timesheet.service.monthreport.MonthReportService;
+import com.aplana.timesheet.service.monthreport.OvertimeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.io.IOException;
-import java.util.List;
 
 @Controller
 @RequestMapping(value = "/monthreport*")
@@ -18,6 +20,8 @@ public class MonthReportController extends AbstractControllerForEmployee {
 
     @Autowired
     private MonthReportService monthReportService;
+    @Autowired
+    private OvertimeService overtimeService;
 
     @RequestMapping(method = RequestMethod.GET)
     public ModelAndView showForm() {
@@ -26,25 +30,36 @@ public class MonthReportController extends AbstractControllerForEmployee {
         fillMavForAddEmployeesForm(modelAndView);
         modelAndView.addObject(MonthReportForm.FORM, new MonthReportForm());
         modelAndView.addObject(AddEmployeeForm.ADD_FORM, new AddEmployeeForm());
-        //@ModelAttribute(MonthReportForm.FORM) MonthReportForm form
-
-        final List<Calendar> yearList = monthReportService.getYearsList();
-        modelAndView.addObject("yearList", yearList);
-        modelAndView.addObject("monthList", calendarService.getMonthList(2015));// ToDo
-
 
         return modelAndView;
     }
 
-    @RequestMapping(method = RequestMethod.POST)
-    public ModelAndView showTable(@ModelAttribute(MonthReportForm.FORM) MonthReportForm form) {
-        ModelAndView mav = new ModelAndView("monthreport/monthreport");
-
-        mav.addObject("here", "TEXT!!!");
-        return mav;
+    /**************************/
+    /*     Блок "Табель"      */
+    /**************************/
+    @RequestMapping(value = "/getMonthReportData", produces = "text/plain;charset=UTF-8")
+    @ResponseBody
+    public String getMonthReport(
+//            @RequestParam("year") Integer year,
+//            @RequestParam("month") Integer month,
+//            @RequestParam("divisionOwner") Integer divisionOwner,
+//            @RequestParam("divisionEmployee") Integer divisionEmployee
+    ) {
+        monthReportService.getMonthReportData();
+        return null;
+//        try {
+//            return overtimeService.getOvertimesJSON(year, month, divisionOwner, divisionEmployee);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            return "[]";
+//        }
     }
 
-    @RequestMapping(value = "/saveOvertimeTable")
+
+    /**************************/
+    /*   Блок "Переработки"   */
+    /**************************/
+    @RequestMapping(value = "/saveOvertimeTable", produces = "text/plain;charset=UTF-8")
     @ResponseBody
     public String saveOvertimeTable(
             @RequestParam("year") Integer year,
@@ -52,26 +67,26 @@ public class MonthReportController extends AbstractControllerForEmployee {
             @RequestParam("jsonData") String jsonData
     ){
         try{
-            monthReportService.saveOvertimeTable(year, month, jsonData);
+            overtimeService.saveOvertimeTable(year, month, jsonData);
         }catch (Exception exc){
             exc.printStackTrace();
-            return "Bad";
+            return "Во время сохранения произошла ошибка. Пожалуйста, свяжитесть с администраторами системы.";
         }
-        return "Ok";
+        return "Сохранено успешно.";
     }
 
-    @RequestMapping(value = "/deleteOvertimes")
+    @RequestMapping(value = "/deleteOvertimes", produces = "text/plain;charset=UTF-8")
     @ResponseBody
     public String deleteOvertimes(
             @RequestParam("jsonData") String jsonData
     ){
         try{
-            monthReportService.deleteOvertimes(jsonData);
+            overtimeService.deleteOvertimes(jsonData);
         }catch (Exception exc){
             exc.printStackTrace();
-            return "Bad";
+            return "Во время удаления произошла ошибка. Пожалуйста, свяжитесть с администраторами системы.";
         }
-        return "Ok";
+        return "Строки успешно удалены";
     }
 
     @RequestMapping(value = "/getOvertimes", produces = "text/plain;charset=UTF-8")
@@ -83,13 +98,17 @@ public class MonthReportController extends AbstractControllerForEmployee {
             @RequestParam("divisionEmployee") Integer divisionEmployee
     ) {
         try {
-            return monthReportService.getOvertimesJSON(year, month, divisionOwner, divisionEmployee);
+            return overtimeService.getOvertimesJSON(year, month, divisionOwner, divisionEmployee);
         } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
             return "[]";
         }
     }
 
+
+    /**************************/
+    /*    Блок отчеты Excel   */
+    /**************************/
 
 
 }

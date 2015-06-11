@@ -1,5 +1,7 @@
-package com.aplana.timesheet.dao.entity;
+package com.aplana.timesheet.dao.entity.monthreport;
 
+import com.aplana.timesheet.dao.entity.Employee;
+import com.aplana.timesheet.dao.entity.Project;
 import org.hibernate.annotations.ForeignKey;
 
 import javax.persistence.*;
@@ -7,7 +9,6 @@ import javax.persistence.*;
 @Entity
 @Table(name = "overtime")
 public class Overtime {
-
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "overtime_seq")
@@ -27,7 +28,7 @@ public class Overtime {
     private Employee employee;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "project_id", nullable = false)
+    @JoinColumn(name = "project_id", nullable = true)
     @ForeignKey(name = "fk_project")
     private Project project;
 

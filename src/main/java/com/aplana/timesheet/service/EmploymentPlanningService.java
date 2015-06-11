@@ -119,7 +119,7 @@ public class EmploymentPlanningService {
         JsonArrayNodeBuilder builder = anArrayBuilder();
 
         for (Employee employee : employeePlanList.keySet()){
-            JsonObjectNodeBuilder employeePlanNodeBuilder = employeeService.getEmployeeAsJSONBulder(employee);
+            JsonObjectNodeBuilder employeePlanNodeBuilder = employeeService.getEmployeeAsJSONBulder(employee, false);
             employeePlanNodeBuilder.withField("planList", getEmployeePlanAsJSON(employeePlanList.get(employee)));
             builder.withElement(employeePlanNodeBuilder);
         }
