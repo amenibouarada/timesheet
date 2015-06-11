@@ -1,11 +1,13 @@
 package com.aplana.timesheet.service;
 
 import argo.jdom.JsonNodeBuilders;
+import com.aplana.timesheet.dao.JasperReportDAO;
 import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.dao.entity.ReportExportStatus;
 import com.aplana.timesheet.exception.JReportBuildError;
 import com.aplana.timesheet.reports.BaseReport;
 import com.aplana.timesheet.reports.TSJasperReport;
+import com.aplana.timesheet.reports.monthreport.OvertimeReport;
 import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.system.security.SecurityService;
 import com.aplana.timesheet.util.DateTimeUtil;
@@ -56,6 +58,9 @@ public class JasperReportService {
     @Autowired
     private TSPropertyProvider propertyProvider;
 
+    @Autowired
+    private JasperReportDAO jasperReportDAO;
+
     private final HashMap<String, JasperReport> compiledReports = new HashMap<String, JasperReport>();
 
     private String toUTF8String(String s) throws UnsupportedEncodingException {
@@ -93,6 +98,11 @@ public class JasperReportService {
             Map params = new HashMap();
             params.put(JRParameter.IS_IGNORE_PAGINATION, (printtype != REPORT_PRINTTYPE_PDF));
             params.put("reportParams", report);
+
+            OvertimeReport overtimeReport = new OvertimeReport();
+            overtimeReport.setYear(2014);
+            overtimeReport.setMonth(1);
+            overtimeReport.setReportDAO(jasperReportDAO);
 
             JRDataSource jrDataSource = report.prepareDataSource();
             if (jrDataSource == null) {

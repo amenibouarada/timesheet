@@ -333,6 +333,26 @@ public class DateTimeUtil {
     }
 
     /**
+     * Возвращает текущий год
+     *
+     * @return
+     */
+    public static Integer getCurrentYear() {
+        Calendar calendar = Calendar.getInstance();
+        return calendar.get(Calendar.YEAR);
+    }
+
+    /**
+     * Возвращает текущий месяц
+     *
+     * @return
+     */
+    public static Integer getCurrentMonth() {
+        Calendar calendar = Calendar.getInstance();
+        return calendar.get(Calendar.MONTH);
+    }
+
+    /**
      * Cравнивает даты, true если первая дата позже
      *
      * @param firstDate
@@ -504,6 +524,10 @@ public class DateTimeUtil {
 
     private static String[] months = new String[] {"января", "февраля", "марта", "апреля", "мая", "июня", "июля",
             "августа", "сентября", "октября", "ноября", "декабря"};
+
+    //Возвращает название месяца по его номеру в именительном падеже (для формирования отчётов)
+    public static String[] monthsNominative = new String[] {"январь", "февраль", "март", "апрель", "май", "июнь", "июль",
+            "август", "сентябрь", "октябрь", "ноябрь", "декабрь"};
 
     /**
      * Возвращает дату в виде дня и месяца (пример: 1 октября)

@@ -7,6 +7,7 @@ import com.aplana.timesheet.dao.entity.Region;
 import com.aplana.timesheet.exception.JReportBuildError;
 import com.aplana.timesheet.form.validator.ReportFormValidator;
 import com.aplana.timesheet.reports.*;
+import com.aplana.timesheet.reports.monthreport.OvertimeReport;
 import com.aplana.timesheet.service.JasperReportService;
 import com.aplana.timesheet.service.RegionService;
 import org.slf4j.Logger;
@@ -116,7 +117,20 @@ public class JasperReportController {
     }
 
     @RequestMapping(value = "/managertools/report/2", method = RequestMethod.POST)
-    public ModelAndView showReport02(
+    public void makeOvertimeReport(
+            //@RequestParam("year") Integer year,
+            //@RequestParam("month") Integer month,
+            HttpServletResponse response,
+            HttpServletRequest request
+    ) throws JReportBuildError {
+        OvertimeReport overtimeReport = new OvertimeReport();
+        overtimeReport.setYear(2014);
+        overtimeReport.setMonth(1);
+        overtimeReport.setReportDAO(reportDAO);
+
+        jasperReportService.makeReport(overtimeReport, 2, response, request);
+    }
+    /*public ModelAndView showReport02(
             @ModelAttribute("reportForm") Report02 report,
             BindingResult result,
             @RequestParam("printtype") Integer printtype,
@@ -124,7 +138,7 @@ public class JasperReportController {
             HttpServletRequest request
     ) throws JReportBuildError {
         return showReport(report, result, printtype, 2, response, request);
-    }
+    }*/
 
     @RequestMapping(value = "/managertools/report/3", method = RequestMethod.POST)
     public ModelAndView showReport03(
@@ -147,6 +161,20 @@ public class JasperReportController {
     ) throws JReportBuildError {
         return showReport(report, result, printtype, 4, response, request);
     }
+
+    /*@RequestMapping(value = "/managertools/report/make/overtime", method = RequestMethod.POST)
+    public void makeOvertimeReport(
+            @RequestParam("year") Integer year,
+            @RequestParam("month") Integer month,
+            HttpServletResponse response,
+            HttpServletRequest request
+    ) throws JReportBuildError {
+        OvertimeReport overtimeReport = new OvertimeReport();
+        overtimeReport.setYear(year);
+        overtimeReport.setMonth(month);
+        overtimeReport.setReportDAO(reportDAO);
+        jasperReportService.makeReport(overtimeReport, 2, response, request);
+    }*/
 
     @RequestMapping(value = "/managertools/report/make/4", method = RequestMethod.POST)
     public void makeReport04(@ModelAttribute("reportForm") Report04 report) throws Exception {

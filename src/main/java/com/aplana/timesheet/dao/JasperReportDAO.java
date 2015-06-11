@@ -1,6 +1,8 @@
 package com.aplana.timesheet.dao;
 
+import com.aplana.timesheet.dao.entity.Overtime;
 import com.aplana.timesheet.enums.*;
+import com.aplana.timesheet.reports.monthreport.OvertimeReport;
 import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.reports.*;
 import com.aplana.timesheet.util.DateTimeUtil;
@@ -91,6 +93,16 @@ public class JasperReportDAO {
     @Autowired
     private TSPropertyProvider propertyProvider;
 
+
+    public HibernateQueryResultDataSource getOvertimeReportData(OvertimeReport report) {
+        List<Overtime> resultList = getOvertimeResultList(report);
+
+        if (resultList != null && !resultList.isEmpty()) {
+            return new HibernateQueryResultDataSource(resultList, new String[] {"employee", "division", "region", "project", "overtime", "premium", "comment"});
+        } else {
+            return null;
+        }
+    }
 
     public HibernateQueryResultDataSource getReportData(BaseReport report) {
         List resultList     = getResultList     ( report );
@@ -811,6 +823,32 @@ public class JasperReportDAO {
 
         return query.getResultList();
     }
+
+    private List getOvertimeResultList(OvertimeReport report) {
+
+        Query query = entityManager.createNativeQuery(
+
+                "SELECT  " +
+                        "employee.name AS employee," +
+                        "division.name AS division," +
+                        "region.name AS region," +
+                        "project.name AS project," +
+                        "overtime.overtime AS overtime," +
+                        "overtime.premium AS premium," +
+                        "overtime.comment AS comment " +
+                "FROM overtime " +
+                        "INNER JOIN employee ON (overtime.employee_id = employee.id) " +
+                        "INNER JOIN region ON (employee.region = region.id) " +
+                        "INNER JOIN division ON (employee.division = division.id) " +
+                        "INNER JOIN project ON (overtime.project_id = project.id) " +
+                "WHERE year = :year and month = :month");
+
+        query.setParameter("year", 2014);
+        query.setParameter("month", 1);
+
+        return query.getResultList();
+    }
+
 
     @VisibleForTesting
     List getResultList(Report06 report) {

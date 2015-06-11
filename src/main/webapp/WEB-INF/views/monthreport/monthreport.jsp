@@ -23,7 +23,6 @@
     </style>
 
     <script type="text/javascript" src="<%= request.getContextPath()%>/resources/js/addEmployeesForm.js"></script>
-    <script type="text/javascript" src="<%= request.getContextPath()%>/resources/js/monthreport.js"></script>
 
     <script type="text/javascript">
         dojo.require("dojo.parser");
@@ -32,68 +31,67 @@
         dojo.require("dijit.layout.TabContainer");
         dojo.require("dijit.layout.ContentPane");
 
-        //var ALL_VALUE = ALL_VALUE; // присвоение глобального значения из selectWidgetValues.js
+        dojo.ready(function () {
+            dojo.require("dijit.form.DateTextBox");
+            dojo.connect(dojo.byId("make_report_button"), "onclick", dojo.byId("make_report_button"), makeReport);
+        });
 
         //var monthReportStore = {};
         var projectListWithOwnerDivision = ${projectListWithOwnerDivision};
         var managerMapJson = ${managerList};
 
-        var eventConnections = [];
-        dojo.addOnLoad(function(){
-            // установим год/месяц по умолчанию
-            var currentDate = new Date();
-            dojo.byId("monthreport_year").value = currentDate.getFullYear();
-            dojo.byId("monthreport_month").value = currentDate.getMonth() + 1;
-
-            // назначим слушителей переключения табов
-            tabContainer.watch("selectedChildWidget",
-                // функция для переназначения обработчиков нажатия кнопок
-                function changeButtonListeners(){
-                    dojo.forEach(eventConnections, dojo.disconnect);
-                    eventConnections = [];
-                    if (dijit.byId('tabContainer').selectedChildWidget.id == "monthReportTable_tab"){
-                        eventConnections.push(dojo.connect(showButton,   "onclick", function(){}));
-                        eventConnections.push(dojo.connect(saveButton,   "onclick", function(){}));
-                        eventConnections.push(dojo.connect(exportButton, "onclick", function(){}));
+        function makeReport() {
+            var year = dojo.byId("monthreport_year").value;
+            var month = dojo.byId("monthreport_month").value;
+            if (dijit.byId('tabContainer').selectedChildWidget == dijit.byId('firstTab')) {
+            }
+            else {
+                dojo.xhrPost({
+                    url: '<%= request.getContextPath()%>/managertools/report/2',
+                    handleAs: "text",
+                    content: {
+                        year: year,
+                        month: month
+                    },
+                    preventCache: false,
+                    load: function (response) {
+                    },
+                    error: function () {
+                        console.log('submitReportForm panic!');
                     }
-                    if (dijit.byId('tabContainer').selectedChildWidget.id == "overtimeTable_tab"){
-                        eventConnections.push(dojo.connect(showButton,   "onclick", function(){overtimeTable_reloadTable()}));
-                        eventConnections.push(dojo.connect(saveButton,   "onclick", function(){overtimeTable_save()}));
-                        eventConnections.push(dojo.connect(exportButton, "onclick", function(){}));
-                    }
-                    if (dijit.byId('tabContainer').selectedChildWidget.id == "mutualWorkTable_tab"){
-                        eventConnections.push(dojo.connect(showButton,   "onclick", function(){}));
-                        eventConnections.push(dojo.connect(saveButton,   "onclick", function(){}));
-                        eventConnections.push(dojo.connect(exportButton, "onclick", function(){}));
-                    }
-                }
-            );
-        });
+                });
+            }
+        }
 
     </script>
 
 </head>
 <body>
 <h1>Табель</h1>
+<form:form method="post" commandName="<%= FORM %>">
+    <form:errors path="*" cssClass="errors_box" delimiter="<br/><br/>"/>
+    <%--<form:hidden path="<%= JSON_DATA %>"/>--%>
 
-<%@include file="../components/queryParams/queryParams.jsp" %>
+
+    <%@include file="../components/queryParams/queryParams.jsp" %>
+
+    <button id="show" style="width:150px;vertical-align: middle;" type="submit">Показать</button>
+</form:form>
+
+<button type="button" id="make_report_button" style="width:210px">Экспорт в Эксель</button>
+
 <br>
-<button id="showButton"     data-dojo-id="showButton"     >Показать</button>
-<button id="saveButton"     data-dojo-id="saveButton"     >Сохранить</button>
-<button id="exportButton"   data-dojo-id="exportButton"   >Экспорт в Эксель</button>
-<br>
-<br>
-    <div data-dojo-id="tabContainer" data-dojo-type="dijit/layout/TabContainer" doLayout="false" id="tabContainer">
-        <div id="monthReportTable_tab" data-dojo-type="dijit/layout/ContentPane" title="Табель" data-dojo-props="selected:true">
+
+    <div data-dojo-type="dijit/layout/TabContainer" doLayout="false" id="tabContainer">
+        <div id="firstTab" data-dojo-type="dijit/layout/ContentPane" title="Табель" data-dojo-props="selected:true">
             <%@include file="monthReportTable.jsp" %>
         </div>
-        <div id="overtimeTable_tab" data-dojo-type="dijit/layout/ContentPane" title="Переработки">
+        <div id="secondTab" data-dojo-type="dijit/layout/ContentPane" title="Переработки">
             <%@include file="overtimeTable.jsp" %>
         </div>
-        <div id="mutualWorkTable_tab" data-dojo-type="dijit/layout/ContentPane" title="Взаимная занятость">
-            <%@include file="mutualWorkTable.jsp" %>
-        </div>
     </div>
+
+
 <c:if test="${here != null}">
     ${here}
 </c:if>
