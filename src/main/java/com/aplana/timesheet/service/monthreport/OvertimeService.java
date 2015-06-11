@@ -1,12 +1,10 @@
-package com.aplana.timesheet.service;
+package com.aplana.timesheet.service.monthreport;
 
 import com.aplana.timesheet.dao.EmployeeDAO;
-import com.aplana.timesheet.dao.OvertimeDAO;
 import com.aplana.timesheet.dao.ProjectDAO;
-import com.aplana.timesheet.dao.entity.Calendar;
 import com.aplana.timesheet.dao.entity.monthreport.Overtime;
+import com.aplana.timesheet.dao.monthreport.OvertimeDAO;
 import com.aplana.timesheet.enums.TypesOfActivityEnum;
-import com.aplana.timesheet.util.DateTimeUtil;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.type.CollectionType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,16 +17,13 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class MonthReportService {
-
+public class OvertimeService {
     @Autowired
     private OvertimeDAO overtimeDAO;
     @Autowired
     private EmployeeDAO employeeDAO;
     @Autowired
     private ProjectDAO projectDAO;
-    @Autowired
-    private CalendarService calendarService;
 
     public boolean saveOvertimeTable(int year, int month, String jsonData) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
@@ -111,10 +106,4 @@ public class MonthReportService {
         return mapper.writeValueAsString(overtimeList);
 
     }
-
-    public List<Calendar> getYearsList(){
-        return DateTimeUtil.getYearsList(calendarService);
-    }
-
-
 }

@@ -1,0 +1,459 @@
+package com.aplana.timesheet.dao.entity.monthreport;
+
+import javax.persistence.*;
+
+@Entity
+@Table(name = "month_report_data") // на самом деле это view
+public class MonthReportData {
+
+    @Id
+    private Integer id;
+
+    @Column(name = "year")
+    private Integer year;
+
+    @Column(name = "month")
+    private Integer month;
+
+    @Column(name="employee_id")
+    private Integer employeeId;
+
+    @Column(name="employee_name")
+    private String employeeName;
+
+    @Column(name="region_id")
+    private Integer regionId;
+
+    @Column(name="region_name")
+    private String regionName;
+
+    @Column(name="division_id")
+    private Integer divisionId;
+
+    @Column(name="division_name")
+    private String divisionName;
+
+    @Column(name="job_id")
+    private Integer jobId;
+
+    @Column(name="manager_id")
+    private Integer managerId;
+
+    @Column(name="ts_worked")
+    private Double ts_worked;
+
+    @Column(name="ts_worked_manual")
+    private Double ts_worked_manual;
+
+    @Column(name="ts_vacation")
+    private Double ts_vacation;
+
+    @Column(name="ts_illness")
+    private Double ts_illness;
+
+    @Column(name="ts_illness_manual")
+    private Double ts_illness_manual;
+
+    @Column(name="ts_all_paid")
+    private Double ts_all_paid;
+
+    @Column(name="ts_over_val_fin_comp")
+    private Double ts_over_val_fin_comp;
+
+    @Column(name="ts_over_val_fin_comp_manual")
+    private Double ts_over_val_fin_comp_manual;
+
+    @Column(name="ts_over_accounted")
+    private Double ts_over_accounted;
+
+    @Column(name="ts_premium")
+    private Double ts_premium;
+
+    @Column(name="ts_all_over_accounted")
+    private Double ts_all_over_accounted;
+
+    @Column(name="ts_over_done")
+    private Double ts_over_done;
+
+    @Column(name="ts_over_not_done")
+    private Double ts_over_not_done;
+
+    @Column(name="ts_over_remain")
+    private Double ts_over_remain;
+
+    @Column(name="ts_vacation_avail")
+    private Double ts_vacation_avail;
+
+    @Column(name="calc_worked_plan")
+    private Double calc_worked_plan;
+
+    @Column(name="calc_worked_fact")
+    private Double calc_worked_fact;
+
+    @Column(name="calc_vacation")
+    private Double calc_vacation;
+
+    @Column(name="calc_vacation_with")
+    private Double calc_vacation_with;
+
+    @Column(name="calc_vacation_without")
+    private Double calc_vacation_without;
+
+    @Column(name="calc_vacation_hol_paid")
+    private Double calc_vacation_hol_paid;
+
+    @Column(name="calc_illness")
+    private Double calc_illness;
+
+    @Column(name="calc_illness_with")
+    private Double calc_illness_with;
+
+    @Column(name="calc_illness_without")
+    private Double calc_illness_without;
+
+    @Column(name="calc_over")
+    private Double calc_over;
+
+    @Column(name="calc_over_hol")
+    private Double calc_over_hol;
+
+    @Column(name="calc_over_hol_paid")
+    private Double calc_over_hol_paid;
+
+    @Column(name="calc_over_work")
+    private Double calc_over_work;
+
+    @Column(name="calc_worked_ill")
+    private Double calc_worked_ill;
+
+    @Column(name="calc_worked_vac")
+    private Double calc_worked_vac;
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Integer getYear() {
+        return year;
+    }
+
+    public void setYear(Integer year) {
+        this.year = year;
+    }
+
+    public Integer getMonth() {
+        return month;
+    }
+
+    public void setMonth(Integer month) {
+        this.month = month;
+    }
+
+    public Integer getEmployeeId() {
+        return employeeId;
+    }
+
+    public void setEmployeeId(Integer employeeId) {
+        this.employeeId = employeeId;
+    }
+
+    public String getEmployeeName() {
+        return employeeName;
+    }
+
+    public void setEmployeeName(String employeeName) {
+        this.employeeName = employeeName;
+    }
+
+    public Integer getRegionId() {
+        return regionId;
+    }
+
+    public void setRegionId(Integer regionId) {
+        this.regionId = regionId;
+    }
+
+    public String getRegionName() {
+        return regionName;
+    }
+
+    public void setRegionName(String regionName) {
+        this.regionName = regionName;
+    }
+
+    public Integer getDivisionId() {
+        return divisionId;
+    }
+
+    public void setDivisionId(Integer divisionId) {
+        this.divisionId = divisionId;
+    }
+
+    public String getDivisionName() {
+        return divisionName;
+    }
+
+    public void setDivisionName(String divisionName) {
+        this.divisionName = divisionName;
+    }
+
+    public Integer getJobId() {
+        return jobId;
+    }
+
+    public void setJobId(Integer jobId) {
+        this.jobId = jobId;
+    }
+
+    public Integer getManagerId() {
+        return managerId;
+    }
+
+    public void setManagerId(Integer managerId) {
+        this.managerId = managerId;
+    }
+
+    public Double getTs_worked() {
+        return ts_worked;
+    }
+
+    public void setTs_worked(Double ts_worked) {
+        this.ts_worked = ts_worked;
+    }
+
+    public Double getTs_worked_manual() {
+        return ts_worked_manual;
+    }
+
+    public void setTs_worked_manual(Double ts_worked_manual) {
+        this.ts_worked_manual = ts_worked_manual;
+    }
+
+    public Double getTs_vacation() {
+        return ts_vacation;
+    }
+
+    public void setTs_vacation(Double ts_vacation) {
+        this.ts_vacation = ts_vacation;
+    }
+
+    public Double getTs_illness() {
+        return ts_illness;
+    }
+
+    public void setTs_illness(Double ts_illness) {
+        this.ts_illness = ts_illness;
+    }
+
+    public Double getTs_illness_manual() {
+        return ts_illness_manual;
+    }
+
+    public void setTs_illness_manual(Double ts_illness_manual) {
+        this.ts_illness_manual = ts_illness_manual;
+    }
+
+    public Double getTs_all_paid() {
+        return ts_all_paid;
+    }
+
+    public void setTs_all_paid(Double ts_all_paid) {
+        this.ts_all_paid = ts_all_paid;
+    }
+
+    public Double getTs_over_val_fin_comp() {
+        return ts_over_val_fin_comp;
+    }
+
+    public void setTs_over_val_fin_comp(Double ts_over_val_fin_comp) {
+        this.ts_over_val_fin_comp = ts_over_val_fin_comp;
+    }
+
+    public Double getTs_over_val_fin_comp_manual() {
+        return ts_over_val_fin_comp_manual;
+    }
+
+    public void setTs_over_val_fin_comp_manual(Double ts_over_val_fin_comp_manual) {
+        this.ts_over_val_fin_comp_manual = ts_over_val_fin_comp_manual;
+    }
+
+    public Double getTs_over_accounted() {
+        return ts_over_accounted;
+    }
+
+    public void setTs_over_accounted(Double ts_over_accounted) {
+        this.ts_over_accounted = ts_over_accounted;
+    }
+
+    public Double getTs_premium() {
+        return ts_premium;
+    }
+
+    public void setTs_premium(Double ts_premium) {
+        this.ts_premium = ts_premium;
+    }
+
+    public Double getTs_all_over_accounted() {
+        return ts_all_over_accounted;
+    }
+
+    public void setTs_all_over_accounted(Double ts_all_over_accounted) {
+        this.ts_all_over_accounted = ts_all_over_accounted;
+    }
+
+    public Double getTs_over_done() {
+        return ts_over_done;
+    }
+
+    public void setTs_over_done(Double ts_over_done) {
+        this.ts_over_done = ts_over_done;
+    }
+
+    public Double getTs_over_not_done() {
+        return ts_over_not_done;
+    }
+
+    public void setTs_over_not_done(Double ts_over_not_done) {
+        this.ts_over_not_done = ts_over_not_done;
+    }
+
+    public Double getTs_over_remain() {
+        return ts_over_remain;
+    }
+
+    public void setTs_over_remain(Double ts_over_remain) {
+        this.ts_over_remain = ts_over_remain;
+    }
+
+    public Double getTs_vacation_avail() {
+        return ts_vacation_avail;
+    }
+
+    public void setTs_vacation_avail(Double ts_vacation_avail) {
+        this.ts_vacation_avail = ts_vacation_avail;
+    }
+
+    public Double getCalc_worked_plan() {
+        return calc_worked_plan;
+    }
+
+    public void setCalc_worked_plan(Double calc_worked_plan) {
+        this.calc_worked_plan = calc_worked_plan;
+    }
+
+    public Double getCalc_worked_fact() {
+        return calc_worked_fact;
+    }
+
+    public void setCalc_worked_fact(Double calc_worked_fact) {
+        this.calc_worked_fact = calc_worked_fact;
+    }
+
+    public Double getCalc_vacation() {
+        return calc_vacation;
+    }
+
+    public void setCalc_vacation(Double calc_vacation) {
+        this.calc_vacation = calc_vacation;
+    }
+
+    public Double getCalc_vacation_with() {
+        return calc_vacation_with;
+    }
+
+    public void setCalc_vacation_with(Double calc_vacation_with) {
+        this.calc_vacation_with = calc_vacation_with;
+    }
+
+    public Double getCalc_vacation_without() {
+        return calc_vacation_without;
+    }
+
+    public void setCalc_vacation_without(Double calc_vacation_without) {
+        this.calc_vacation_without = calc_vacation_without;
+    }
+
+    public Double getCalc_vacation_hol_paid() {
+        return calc_vacation_hol_paid;
+    }
+
+    public void setCalc_vacation_hol_paid(Double calc_vacation_hol_paid) {
+        this.calc_vacation_hol_paid = calc_vacation_hol_paid;
+    }
+
+    public Double getCalc_illness() {
+        return calc_illness;
+    }
+
+    public void setCalc_illness(Double calc_illness) {
+        this.calc_illness = calc_illness;
+    }
+
+    public Double getCalc_illness_with() {
+        return calc_illness_with;
+    }
+
+    public void setCalc_illness_with(Double calc_illness_with) {
+        this.calc_illness_with = calc_illness_with;
+    }
+
+    public Double getCalc_illness_without() {
+        return calc_illness_without;
+    }
+
+    public void setCalc_illness_without(Double calc_illness_without) {
+        this.calc_illness_without = calc_illness_without;
+    }
+
+    public Double getCalc_over() {
+        return calc_over;
+    }
+
+    public void setCalc_over(Double calc_over) {
+        this.calc_over = calc_over;
+    }
+
+    public Double getCalc_over_hol() {
+        return calc_over_hol;
+    }
+
+    public void setCalc_over_hol(Double calc_over_hol) {
+        this.calc_over_hol = calc_over_hol;
+    }
+
+    public Double getCalc_over_hol_paid() {
+        return calc_over_hol_paid;
+    }
+
+    public void setCalc_over_hol_paid(Double calc_over_hol_paid) {
+        this.calc_over_hol_paid = calc_over_hol_paid;
+    }
+
+    public Double getCalc_over_work() {
+        return calc_over_work;
+    }
+
+    public void setCalc_over_work(Double calc_over_work) {
+        this.calc_over_work = calc_over_work;
+    }
+
+    public Double getCalc_worked_ill() {
+        return calc_worked_ill;
+    }
+
+    public void setCalc_worked_ill(Double calc_worked_ill) {
+        this.calc_worked_ill = calc_worked_ill;
+    }
+
+    public Double getCalc_worked_vac() {
+        return calc_worked_vac;
+    }
+
+    public void setCalc_worked_vac(Double calc_worked_vac) {
+        this.calc_worked_vac = calc_worked_vac;
+    }
+}
