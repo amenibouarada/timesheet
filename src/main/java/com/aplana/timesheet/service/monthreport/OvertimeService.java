@@ -73,8 +73,6 @@ public class OvertimeService {
 
     private String createOvertimesJSON(List<Overtime> overtimes) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
-        //CollectionType mapCollectionType = mapper.getTypeFactory().constructCollectionType(List.class, Map.class);
-
         List<Map<String, Object>> overtimeList = new ArrayList<Map<String, Object>>(overtimes.size());
         for (Overtime overtime : overtimes){
             HashMap<String, Object> overtimeMap = new HashMap<String, Object>();
