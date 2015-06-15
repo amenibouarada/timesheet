@@ -143,6 +143,7 @@
         var items = overtimeTable.selection.getSelected();
         var jsonData = itemToJSON(overtimeTable.store, items);
 
+        processing();
         dojo.xhrPost({
             url: "monthreport/deleteOvertimes",
             content: {
@@ -159,8 +160,10 @@
                         overtimeTable.store.save();
                     });
                 }
+                stopProcessing();
             },
             error: function (response, ioArgs) {
+                stopProcessing();
                 alert(response);
             }
         });

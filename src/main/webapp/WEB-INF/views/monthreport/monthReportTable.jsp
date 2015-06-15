@@ -30,6 +30,10 @@
                     </c:forEach>
             </select>
         </td>
+        <td>
+            <input type="checkbox" checked="true" onclick="setCalcMonthColumnVisibility(this.checked)">
+            <label>Показывать рассчетные показатели</label>
+        </td>
     </tr>
     <tr>
         <td><label>Руководитель</label></td>
@@ -41,48 +45,51 @@
 </table>
 
 
-<table  data-dojo-id="monthReportTable" data-dojo-type="dojox.grid.DataGrid" autoHeight="true">
+<table  data-dojo-id="monthReportTable" data-dojo-type="dojox.grid.DataGrid" autoHeight="true" autoWidth="true"
+        onApplyEdit="monthReportTable_cellChanged" >
     <thead>
     <tr>
+        <th field="employee"         width="150px"   >Сотрудник</th>
+        <th field="division"         width="150px"   >Подразделение</th>
+        <th field="region"           width="100px"   >Регион</th>
 
-        <th field="id" rowspan="2" width="20px">
-            <%--<img src="<c:url value='/resources/img/add.gif'/>" class="create_img" title="Создать" onclick="employeeDialog.show();"/>--%>
-        </th>
-        <th field="employee" rowspan="2"               width="150px"   >Сотрудник</th>
-        <th field="division" rowspan="2"               width="150px"   >Подразделение</th>
-        <th field="region"   rowspan="2"               width="100px"   >Регион</th>
-        <th field="ts_month"   colspan="12" >В табель за месяц</th>
-        <th field="calc_month" colspan="15" >Расчетные показатели за месяц</th>
-    </tr>
-    <tr>
-        <th field="ts_worked"              title="Количество отработанных дней (фактическое)"          >Отработано</th>
-        <th field="ts_vacation"            title="Количество дней отпуска"                             >Отпуск</th>
-        <th field="ts_illness"             title="Количество дней болезни"                             >Больничный</th>
-        <th field="ts_all_paid"            title="Количество оплаченных дней"                          >Всего оплачено</th>
-        <th field="ts_over_val_fin_comp"   title="Переработки подтвержденные финансовой компенсацией"  >Переработки - фин. компенсация</th>
-        <th field="ts_over_accounted"      title="Учтенные переработки"                                >Переработки</th>
-        <th field="ts_premium"             title="Учтенные переработки - премии"                       >Премии</th>
-        <th field="ts_all_over_accounted"  title="Общее количество учтенных переработок"               >Всего учтенных переработок</th>
-        <th field="ts_over_done"           title="Количество дней переработок подтвержденных отгулом"  >Переработки отгуленные</th>
-        <th field="ts_over_not_done"       title="Количество дней переработок доступных для отгула"    >Переработки не отгуленные</th>
-        <th field="ts_over_remain"         title="Переработки с учетом прошлых месяцев"                >Переработки оставшиеся</th>
-        <th field="ts_vacation_avail"      title="Доступный отпуск"                                    >Доступный отпуск</th>
 
-        <th field="calc_worked_plan"       title="Количество отработанных дней (плановое)"                          >Отработано (план)</th>
-        <th field="calc_worked_fact"       title="Количество отработанных дней (фактическое)"                       >Отработано (факт)</th>
-        <th field="calc_vacation"          title="Количество дней отпуска"                                          >Отпуск</th>
-        <th field="calc_vacation_with"     title="Количество дней отпуска с сохранением содержания"                 >Отпуск с сохр.</th>
-        <th field="calc_vacation_without"  title="Количество дней отпуска без сохранения содержания"                >Отпуск без сохр.</th>
-        <th field="calc_vacation_hol_paid" title="Количество дней отпуска типа <отгул>"                             >Отпуск-отгул</th>
-        <th field="calc_illness"           title="Количество рабочих дней болезни за отчетный период"               >Больничный</th>
-        <th field="calc_illness_with"      title="Количество дней болезни подтвержденных больничным листом"         >Больничный подтв.</th>
-        <th field="calc_illness_without"   title="Количество дней болезни без больничного листа"                    >Больничный без подтв.</th>
-        <th field="calc_over"              title="Общее количество переработанных дней"                             >Переработки</th>
-        <th field="calc_over_hol"          title="Количество переработанных дней в выходные и праздничные дни"      >Переработки в вых.</th>
-        <th field="calc_over_hol_paid"     title="Количество переработанных дней в выходные с компенсацией"         >Переработки в вых. с компенсацией</th>
-        <th field="calc_over_work"         title="Количество переработанных дней в рабочие дни отчетного периода"   >Переработки в раб. дни</th>
-        <th field="calc_worked_ill"        title="Количество отработанных дней за время болезни"                    >Отработано в больничный</th>
-        <th field="calc_worked_vac"        title="Количество отработанных дней в отпускные дни"                     >Отработано в отпуске</th>
+<%-- 1  --%>        <%--<th field="employee"   rowspan="2"    width="150px"     >Сотрудник</th>--%>
+<%-- 2  --%>        <%--<th field="division"   rowspan="2"    width="150px"     >Подразделение</th>--%>
+<%-- 3  --%>        <%--<th field="region"     rowspan="2"    width="100px"     >Регион</th>--%>
+                   <%--<th field="ts_month"   colspan="12"                     >В табель за месяц</th>--%>
+                   <%--<th field="calc_month" colspan="15"                     >Расчетные показатели за месяц</th>--%>
+                <%--</tr>--%>
+                <%--<tr>--%>
+
+<%-- 4  --%>        <th field="ts_worked"              width="100px" title="Количество отработанных дней (фактическое)"         editable="true" formatter="monthReportTable_colorCell" >Отработано</th>
+<%-- 5  --%>        <th field="ts_vacation"            width="100px" title="Количество дней отпуска"                             >Отпуск</th>
+<%-- 6  --%>        <th field="ts_illness"             width="100px" title="Количество дней болезни"                            editable="true" formatter="monthReportTable_colorCell"         >Больничный</th>
+<%-- 7  --%>        <th field="ts_all_paid"            width="100px" title="Количество оплаченных дней"                          >Всего оплачено</th>
+<%-- 8  --%>        <th field="ts_over_val_fin_comp"   width="100px" title="Переработки подтвержденные финансовой компенсацией" editable="true" formatter="monthReportTable_colorCell"  >Переработки - фин. компенсация</th>
+<%-- 9  --%>        <th field="ts_over_accounted"      width="100px" title="Учтенные переработки"                                >Переработки</th>
+<%-- 10 --%>        <th field="ts_premium"             width="100px" title="Учтенные переработки - премии"                       >Премии</th>
+<%-- 11 --%>        <th field="ts_all_over_accounted"  width="100px" title="Общее количество учтенных переработок"               >Всего учтенных переработок</th>
+<%-- 12 --%>        <th field="ts_over_done"           width="100px" title="Количество дней переработок подтвержденных отгулом"  >Переработки отгуленные</th>
+<%-- 13 --%>        <th field="ts_over_not_done"       width="100px" title="Количество дней переработок доступных для отгула"    >Переработки не отгуленные</th>
+<%-- 14 --%>        <th field="ts_over_remain"         width="100px" title="Переработки с учетом прошлых месяцев"                >Переработки оставшиеся</th>
+<%-- 15 --%>        <th field="ts_vacation_avail"      width="100px" title="Доступный отпуск"                                   editable="true" >Доступный отпуск</th>
+
+<%-- 16 --%>        <th field="calc_worked_plan"       width="100px" title="Количество отработанных дней (плановое)"                          >Отработано (план)</th>
+<%-- 17 --%>        <th field="calc_worked_fact"       width="100px" title="Количество отработанных дней (фактическое)"                       >Отработано (факт)</th>
+<%-- 18 --%>        <th field="calc_vacation"          width="100px" title="Количество дней отпуска"                                          >Отпуск</th>
+<%-- 19 --%>        <th field="calc_vacation_with"     width="100px" title="Количество дней отпуска с сохранением содержания"                 >Отпуск с сохр.</th>
+<%-- 20 --%>        <th field="calc_vacation_without"  width="100px" title="Количество дней отпуска без сохранения содержания"                >Отпуск без сохр.</th>
+<%-- 21 --%>        <th field="calc_vacation_hol_paid" width="100px" title="Количество дней отпуска типа <отгул>"                             >Отпуск-отгул</th>
+<%-- 22 --%>        <th field="calc_illness"           width="100px" title="Количество рабочих дней болезни за отчетный период"               >Больничный</th>
+<%-- 23 --%>        <th field="calc_illness_with"      width="100px" title="Количество дней болезни подтвержденных больничным листом"         >Больничный подтв.</th>
+<%-- 24 --%>        <th field="calc_illness_without"   width="100px" title="Количество дней болезни без больничного листа"                    >Больничный без подтв.</th>
+<%-- 25 --%>        <th field="calc_over"              width="100px" title="Общее количество переработанных дней"                             >Переработки</th>
+<%-- 26 --%>        <th field="calc_over_hol"          width="100px" title="Количество переработанных дней в выходные и праздничные дни"      >Переработки в вых.</th>
+<%-- 27 --%>        <th field="calc_over_hol_paid"     width="100px" title="Количество переработанных дней в выходные с компенсацией"         >Переработки в вых. с компенсацией</th>
+<%-- 28 --%>        <th field="calc_over_work"         width="100px" title="Количество переработанных дней в рабочие дни отчетного периода"   >Переработки в раб. дни</th>
+<%-- 29 --%>        <th field="calc_worked_ill"        width="100px" title="Количество отработанных дней за время болезни"                    >Отработано в больничный</th>
+<%-- 30 --%>        <th field="calc_worked_vac"        width="100px" title="Количество отработанных дней в отпускные дни"                     >Отработано в отпуске</th>
 
     </tr>
     </thead>
@@ -92,51 +99,111 @@
 
     dojo.addOnLoad(function(){
         monthReportTable_updateManagers();
-        monthReportTable_createStore();
 
         var div = getCookieValue('aplanaDivision');
         div = div ? div : 0;
         monthReportTable_divisionId.value = div;
+        //monthReportTable_reloadTable();
     });
+
+    // расскраска ячеек и проверка на существующее значение заполненности таблицы реальными данными, а не автовычисленными
+    var monthReportTable_colorCell = function(value, rowIndex, cell) {
+        if (value){
+            cell.customStyles.push('color:green');
+            return value;
+        }else{
+            var item = monthReportTable.getItem(rowIndex);
+            var calculatedValue = monthReportTable.store.getValue(item, cell.field + "_calculated", null);
+            cell.customStyles.push('color:red');
+            return calculatedValue;
+        }
+    }
 
     function monthReportTable_createStore(){
         var data = {
-            identifier: 'identifier',
+            identifier: 'employeeId',
             items: []
         };
         var store = new dojo.data.ItemFileWriteStore({data: data});
         monthReportTable.setStore(store);
     }
 
+
     function monthReportTable_updateManagers(){
         updateManagerListByDivision(
             0, managerMapJson, dojo.byId("monthReportTable_divisionId"), dojo.byId("monthReportTable_managerId"));
     }
 
+    function setCalcMonthColumnVisibility(visible){
+        for (var i = 16; i <= 30; i++){
+            monthReportTable.layout.setColumnVisibility(/* int */ i - 1, /* bool */ visible);
+        }
+    }
+
     function monthReportTable_reloadTable(){
+        var year = dojo.byId("monthreport_year").value;
+        var month = dojo.byId("monthreport_month").value;
+        monthReportTable_createStore();
+
+        processing();
         dojo.xhrPost({
             url: "monthreport/getMonthReportData",
             content: {
-//                divisionOwner: divisionOwner,
-//                divisionEmployee: divisionEmployee,
-//                year: year,
-//                month: month
+                division: monthReportTable_divisionId.value,
+                manager: monthReportTable_managerId.value,
+                regions: "[" + getSelectValues(monthReportTable_regionListId) + "]",
+                roles: "[" + getSelectValues(monthReportTable_projectRoleListId) + "]",
+                year: year,
+                month: month
             },
             handleAs: "text",
             load: function (response, ioArgs) {
-//                var overtimes = dojo.fromJson(response);
-//                dojo.forEach(overtimes, function(overtime){
-//                    // уникальный идентификатор, для добавления новых строк
-//                    overtime.identifier = overtime.employeeId + "_" + overtime.projectId;
-//                });
-//                overtimeTable_addRows(overtimes);
-//                overtimeTable.store.save();
+                var data = dojo.fromJson(response);
+                for(var i=0; i < data.length; i++){
+                    monthReportTable.store.newItem(data[i]);
+                }
+                monthReportTable.store.save();
+                stopProcessing();
             },
             error: function (response, ioArgs) {
-//                alert(response);
+                stopProcessing();
+                alert(response);
             }
         });
 
+    }
+
+    function monthReportTable_save(){
+        processing();
+        monthReportTable.store.fetch({query: {}, queryOptions: {deep: true},
+            onComplete: function (items) {
+                monthReportTable.store.save();
+                var jsonData = itemToJSON(monthReportTable.store, items);
+                dojo.xhrPost({
+                    url: "monthreport/saveMonthReportTable",
+                    content: {
+                        year: dojo.byId("monthreport_year").value,
+                        month: dojo.byId("monthreport_month").value,
+                        jsonData: "[" + jsonData + "]"
+                    },
+                    handleAs: "text",
+                    load: function (response, ioArgs) {
+                        stopProcessing();
+                        alert(response);
+                        monthReportTable_reloadTable();
+                    },
+                    error: function (response, ioArgs) {
+                        stopProcessing();
+                        alert(response);
+                    }
+                });
+            }
+        });
+    }
+
+    var monthReportTable_cellChanged = function(rowIndex){
+        //var item = overtimeTable.getItem(rowIndex);
+        //overtimeTable.store.setValue(item, "allAccountedOvertime", parseInt(item.overtime) + parseInt(item.premium));
     }
 
 </script>

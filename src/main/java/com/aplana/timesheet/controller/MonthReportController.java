@@ -5,6 +5,7 @@ import com.aplana.timesheet.form.MonthReportForm;
 import com.aplana.timesheet.service.monthreport.MonthReportService;
 import com.aplana.timesheet.service.monthreport.OvertimeService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.io.IOException;
+import java.util.List;
 
 @Controller
 @RequestMapping(value = "/monthreport*")
@@ -40,19 +42,35 @@ public class MonthReportController extends AbstractControllerForEmployee {
     @RequestMapping(value = "/getMonthReportData", produces = "text/plain;charset=UTF-8")
     @ResponseBody
     public String getMonthReport(
-//            @RequestParam("year") Integer year,
-//            @RequestParam("month") Integer month,
-//            @RequestParam("divisionOwner") Integer divisionOwner,
-//            @RequestParam("divisionEmployee") Integer divisionEmployee
+            @RequestParam("division") Integer division,
+            @RequestParam("manager") Integer manager,
+            @RequestParam("regions") String regions,
+            @RequestParam("roles") String roles,
+            @RequestParam("year") Integer year,
+            @RequestParam("month") Integer month
     ) {
-        monthReportService.getMonthReportData();
-        return null;
-//        try {
-//            return overtimeService.getOvertimesJSON(year, month, divisionOwner, divisionEmployee);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//            return "[]";
-//        }
+        try {
+            return monthReportService.getMonthReportData(division, manager, regions, roles, year, month);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "[]";
+        }
+    }
+
+    @RequestMapping(value = "/saveMonthReportTable", produces = "text/plain;charset=UTF-8")
+    @ResponseBody
+    public String getMonthReport(
+            @RequestParam("year") Integer year,
+            @RequestParam("month") Integer month,
+            @RequestParam("jsonData") String jsonData
+    ) {
+        try {
+            monthReportService.saveMonthReportTable(year, month, jsonData);
+        }catch (Exception exc){
+            exc.printStackTrace();
+            return "Во время сохранения произошла ошибка. Пожалуйста, свяжитесть с администраторами системы.";
+        }
+        return "Сохранено успешно.";
     }
 
 

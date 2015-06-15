@@ -32,9 +32,6 @@
         dojo.require("dijit.layout.TabContainer");
         dojo.require("dijit.layout.ContentPane");
 
-        //var ALL_VALUE = ALL_VALUE; // присвоение глобального значения из selectWidgetValues.js
-
-        //var monthReportStore = {};
         var projectListWithOwnerDivision = ${projectListWithOwnerDivision};
         var managerMapJson = ${managerList};
         
@@ -68,40 +65,37 @@
             dojo.byId("monthreport_year").value = currentDate.getFullYear();
             dojo.byId("monthreport_month").value = currentDate.getMonth();
 
-
-            
-            // назначим слушителей переключения табов
-            tabContainer.watch("selectedChildWidget",
-                // функция для переназначения обработчиков нажатия кнопок
-                // и отображения актуальных данных
-                function changeButtonListeners(){
-                    dojo.forEach(eventConnections, dojo.disconnect);
-                    eventConnections = [];
-                    if (dijit.byId('tabContainer').selectedChildWidget.id == "monthReportTable_tab"){
-//                        overtimeTable_reloadTable();
-//                        eventConnections.push(dojo.connect(monthreport_year,  "onchange", function(){overtimeTable_reloadTable()}));
-//                        eventConnections.push(dojo.connect(monthreport_month, "onchange", function(){overtimeTable_reloadTable()}));
-
-                        eventConnections.push(dojo.connect(saveButton,   "onclick", function(){}));
-                        eventConnections.push(dojo.connect(exportButton, "onclick", function(){}));
-                    }
-                    if (dijit.byId('tabContainer').selectedChildWidget.id == "overtimeTable_tab"){
-                        overtimeTable_reloadTable();
-                        eventConnections.push(dojo.connect(monthreport_year,  "onchange", function(){overtimeTable_reloadTable()}));
-                        eventConnections.push(dojo.connect(monthreport_month, "onchange", function(){overtimeTable_reloadTable()}));
-                        eventConnections.push(dojo.connect(saveButton,   "onclick", function(){overtimeTable_save()}));
-                        eventConnections.push(dojo.connect(exportButton, "onclick", function(){}));
-                    }
-                    if (dijit.byId('tabContainer').selectedChildWidget.id == "mutualWorkTable_tab"){
-//                        overtimeTable_reloadTable();
-//                        eventConnections.push(dojo.connect(monthreport_year,  "onchange", function(){overtimeTable_reloadTable()}));
-//                        eventConnections.push(dojo.connect(monthreport_month, "onchange", function(){overtimeTable_reloadTable()}));
-
-                        eventConnections.push(dojo.connect(saveButton,   "onclick", function(){}));
-                        eventConnections.push(dojo.connect(exportButton, "onclick", function(){}));
-                    }
+            // функция для переназначения обработчиков нажатия кнопок
+            // и отображения актуальных данных
+            var changeButtonListeners = function(){
+                dojo.forEach(eventConnections, dojo.disconnect);
+                eventConnections = [];
+                if (dijit.byId('tabContainer').selectedChildWidget.id == "monthReportTable_tab"){
+                    monthReportTable_reloadTable();
+                    eventConnections.push(dojo.connect(monthreport_year,  "onchange", function(){ monthReportTable_reloadTable()}));
+                    eventConnections.push(dojo.connect(monthreport_month, "onchange", function(){ monthReportTable_reloadTable()}));
+                    eventConnections.push(dojo.connect(saveButton,   "onclick", function(){ monthReportTable_save()}));
+                    eventConnections.push(dojo.connect(exportButton, "onclick", function(){}));
                 }
-            );
+                if (dijit.byId('tabContainer').selectedChildWidget.id == "overtimeTable_tab"){
+                    overtimeTable_reloadTable();
+                    eventConnections.push(dojo.connect(monthreport_year,  "onchange", function(){overtimeTable_reloadTable()}));
+                    eventConnections.push(dojo.connect(monthreport_month, "onchange", function(){overtimeTable_reloadTable()}));
+                    eventConnections.push(dojo.connect(saveButton,   "onclick", function(){overtimeTable_save()}));
+                    eventConnections.push(dojo.connect(exportButton, "onclick", function(){}));
+                }
+                if (dijit.byId('tabContainer').selectedChildWidget.id == "mutualWorkTable_tab"){
+//                        overtimeTable_reloadTable();
+//                        eventConnections.push(dojo.connect(monthreport_year,  "onchange", function(){overtimeTable_reloadTable()}));
+//                        eventConnections.push(dojo.connect(monthreport_month, "onchange", function(){overtimeTable_reloadTable()}));
+
+                    eventConnections.push(dojo.connect(saveButton,   "onclick", function(){}));
+                    eventConnections.push(dojo.connect(exportButton, "onclick", function(){}));
+                }
+            }
+            // назначим слушителей переключения табов
+            tabContainer.watch("selectedChildWidget", changeButtonListeners);
+            changeButtonListeners(); // выполним, чтобы загрузить слушателей для первой вкладки
         });
 
     </script>
