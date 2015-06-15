@@ -6,15 +6,13 @@ import javax.persistence.*;
 @Table(name = "month_report_data") // на самом деле это view
 public class MonthReportData {
 
-    @Id
-    private Integer id;
-
     @Column(name = "year")
     private Integer year;
 
     @Column(name = "month")
     private Integer month;
 
+    @Id
     @Column(name="employee_id")
     private Integer employeeId;
 
@@ -39,29 +37,29 @@ public class MonthReportData {
     @Column(name="manager_id")
     private Integer managerId;
 
+    @Column(name="ts_worked_calculated")
+    private Double ts_worked_calculated;
+
     @Column(name="ts_worked")
     private Double ts_worked;
-
-    @Column(name="ts_worked_manual")
-    private Double ts_worked_manual;
 
     @Column(name="ts_vacation")
     private Double ts_vacation;
 
+    @Column(name="ts_illness_calculated")
+    private Double ts_illness_calculated;
+
     @Column(name="ts_illness")
     private Double ts_illness;
-
-    @Column(name="ts_illness_manual")
-    private Double ts_illness_manual;
 
     @Column(name="ts_all_paid")
     private Double ts_all_paid;
 
+    @Column(name="ts_over_val_fin_comp_calculated")
+    private Double ts_over_val_fin_comp_calculated;
+
     @Column(name="ts_over_val_fin_comp")
     private Double ts_over_val_fin_comp;
-
-    @Column(name="ts_over_val_fin_comp_manual")
-    private Double ts_over_val_fin_comp_manual;
 
     @Column(name="ts_over_accounted")
     private Double ts_over_accounted;
@@ -128,14 +126,6 @@ public class MonthReportData {
 
     @Column(name="calc_worked_vac")
     private Double calc_worked_vac;
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
 
     public Integer getYear() {
         return year;
@@ -217,20 +207,20 @@ public class MonthReportData {
         this.managerId = managerId;
     }
 
+    public Double getTs_worked_calculated() {
+        return ts_worked_calculated;
+    }
+
+    public void setTs_worked_calculated(Double ts_worked_calculated) {
+        this.ts_worked_calculated = ts_worked_calculated;
+    }
+
     public Double getTs_worked() {
         return ts_worked;
     }
 
     public void setTs_worked(Double ts_worked) {
         this.ts_worked = ts_worked;
-    }
-
-    public Double getTs_worked_manual() {
-        return ts_worked_manual;
-    }
-
-    public void setTs_worked_manual(Double ts_worked_manual) {
-        this.ts_worked_manual = ts_worked_manual;
     }
 
     public Double getTs_vacation() {
@@ -241,20 +231,20 @@ public class MonthReportData {
         this.ts_vacation = ts_vacation;
     }
 
+    public Double getTs_illness_calculated() {
+        return ts_illness_calculated;
+    }
+
+    public void setTs_illness_calculated(Double ts_illness_calculated) {
+        this.ts_illness_calculated = ts_illness_calculated;
+    }
+
     public Double getTs_illness() {
         return ts_illness;
     }
 
     public void setTs_illness(Double ts_illness) {
         this.ts_illness = ts_illness;
-    }
-
-    public Double getTs_illness_manual() {
-        return ts_illness_manual;
-    }
-
-    public void setTs_illness_manual(Double ts_illness_manual) {
-        this.ts_illness_manual = ts_illness_manual;
     }
 
     public Double getTs_all_paid() {
@@ -265,20 +255,20 @@ public class MonthReportData {
         this.ts_all_paid = ts_all_paid;
     }
 
+    public Double getTs_over_val_fin_comp_calculated() {
+        return ts_over_val_fin_comp_calculated;
+    }
+
+    public void setTs_over_val_fin_comp_calculated(Double ts_over_val_fin_comp_calculated) {
+        this.ts_over_val_fin_comp_calculated = ts_over_val_fin_comp_calculated;
+    }
+
     public Double getTs_over_val_fin_comp() {
         return ts_over_val_fin_comp;
     }
 
     public void setTs_over_val_fin_comp(Double ts_over_val_fin_comp) {
         this.ts_over_val_fin_comp = ts_over_val_fin_comp;
-    }
-
-    public Double getTs_over_val_fin_comp_manual() {
-        return ts_over_val_fin_comp_manual;
-    }
-
-    public void setTs_over_val_fin_comp_manual(Double ts_over_val_fin_comp_manual) {
-        this.ts_over_val_fin_comp_manual = ts_over_val_fin_comp_manual;
     }
 
     public Double getTs_over_accounted() {
