@@ -1,6 +1,7 @@
 package com.aplana.timesheet.dao.monthreport;
 
 
+import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.dao.entity.monthreport.Overtime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,6 +55,15 @@ public class OvertimeDAO {
         Query query = entityManager.createQuery(queryString).setParameter("year", year).setParameter("month", month);
         if (ownerDivSet) { query.setParameter("divisionOwner", divisionOwner); }
         if (employeeDivSet) { query.setParameter("divisionEmployee", divisionEmployee); }
+        return query.getResultList();
+    }
+
+    public List<Overtime> getSingleOvertime(Employee currentUser, int year, int month) {
+        Query query = entityManager.
+                createQuery("FROM Overtime WHERE year = :year AND month = :month AND employee = :employee")
+                .setParameter("year", year)
+                .setParameter("month", month)
+                .setParameter("employee", currentUser);
         return query.getResultList();
     }
 }

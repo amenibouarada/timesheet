@@ -6,6 +6,7 @@
 
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
+<%@ taglib uri="http://www.springframework.org/security/tags" prefix="sec"%>
 
 <html>
 <head>
@@ -51,15 +52,19 @@
                     monthReportTable_reloadTable();
                     eventConnections.push(dojo.connect(monthreport_year,  "onchange", function(){ monthReportTable_reloadTable()}));
                     eventConnections.push(dojo.connect(monthreport_month, "onchange", function(){ monthReportTable_reloadTable()}));
-                    eventConnections.push(dojo.connect(saveButton,   "onclick", function(){ monthReportTable_save()}));
-                    eventConnections.push(dojo.connect(exportButton, "onclick", function(){}));
+                    <sec:authorize access="hasRole('ROLE_ADMIN')">
+                        eventConnections.push(dojo.connect(saveButton,   "onclick", function(){ monthReportTable_save()}));
+                        eventConnections.push(dojo.connect(exportButton, "onclick", function(){}));
+                    </sec:authorize>
                 }
                 if (dijit.byId('tabContainer').selectedChildWidget.id == "overtimeTable_tab"){
                     overtimeTable_reloadTable();
                     eventConnections.push(dojo.connect(monthreport_year,  "onchange", function(){overtimeTable_reloadTable()}));
                     eventConnections.push(dojo.connect(monthreport_month, "onchange", function(){overtimeTable_reloadTable()}));
-                    eventConnections.push(dojo.connect(saveButton,   "onclick", function(){overtimeTable_save()}));
-                    eventConnections.push(dojo.connect(exportButton, "onclick", function(){}));
+                    <sec:authorize access="hasRole('ROLE_ADMIN')">
+                        eventConnections.push(dojo.connect(saveButton,   "onclick", function(){overtimeTable_save()}));
+                        eventConnections.push(dojo.connect(exportButton, "onclick", function(){}));
+                    </sec:authorize>
                 }
                 if (dijit.byId('tabContainer').selectedChildWidget.id == "mutualWorkTable_tab"){
 //                        overtimeTable_reloadTable();
@@ -118,10 +123,12 @@
             </select>
     </tr>
 </table>
-<br>
-<button id="saveButton"     data-dojo-id="saveButton"     >Сохранить</button>
-<button id="exportButton"   data-dojo-id="exportButton"   >Экспорт в Эксель</button>
-<br>
+<sec:authorize access="hasRole('ROLE_ADMIN')">
+    <br>
+    <button id="saveButton"     data-dojo-id="saveButton"     >Сохранить</button>
+    <button id="exportButton"   data-dojo-id="exportButton"   >Экспорт в Эксель</button>
+    <br>
+</sec:authorize>
 <br>
     <div data-dojo-id="tabContainer" data-dojo-type="dijit/layout/TabContainer" doLayout="false" id="tabContainer">
         <div id="monthReportTable_tab" data-dojo-type="dijit/layout/ContentPane" title="Табель" data-dojo-props="selected:true">
@@ -130,15 +137,12 @@
         <div id="overtimeTable_tab" data-dojo-type="dijit/layout/ContentPane" title="Переработки">
             <%@include file="overtimeTable.jsp" %>
         </div>
-        <div id="mutualWorkTable_tab" data-dojo-type="dijit/layout/ContentPane" title="Взаимная занятость">
-            <%@include file="mutualWorkTable.jsp" %>
-        </div>
+        <sec:authorize access="hasRole('ROLE_ADMIN')">
+            <div id="mutualWorkTable_tab" data-dojo-type="dijit/layout/ContentPane" title="Взаимная занятость">
+                <%@include file="mutualWorkTable.jsp" %>
+            </div>
+        </sec:authorize>
     </div>
-<c:if test="${here != null}">
-    ${here}
-</c:if>
-
-<%@include file="../components/addEmployees/addEmployeesForm.jsp" %>
 
 </body>
 </html>

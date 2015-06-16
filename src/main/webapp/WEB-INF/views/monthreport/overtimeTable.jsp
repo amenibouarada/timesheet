@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 
+<sec:authorize access="hasRole('ROLE_ADMIN')">
 <table class="dijitDialogPaneContentArea no_border employmentPlanningTable">
     <tr>
         <td><label>Подразделение владельца</label></td>
@@ -30,6 +31,7 @@
 <button data-dojo-id="overtimeTable_addEmployeesButton" id="overtimeTable_addEmployeesButton"
         onclick="overtimeTable_employeeDialogShow()">Добавить сотрудников</button>
 <button onclick="overtimeTable_deleteRows()">Удалить выделенные строки</button>
+</sec:authorize>
 
 <table data-dojo-id="overtimeTable" data-dojo-type="dojox.grid.DataGrid"
        onApplyEdit="overtimeTable_cellChanged" autoHeight="true" sortInfo="2">
@@ -49,16 +51,20 @@
     </thead>
 </table>
 
+<%-- Форма добавления сотрудников --%>
+<%@include file="../components/addEmployees/addEmployeesForm.jsp" %>
+
 <script type="text/javascript">
 
     dojo.addOnLoad(function(){
         overtimeTable_createStore();
-        overtimeTable_divisionChanged();
-
-        var div = getCookieValue('aplanaDivision');
-        div = div ? div : 0;
-        dojo.byId("overtimeTable_divisionOwnerId").value = div;
-        dojo.byId("overtimeTable_divisionEmployeeId").value = div;
+        if (dojo.byId("overtimeTable_divisionOwnerId")){
+            overtimeTable_divisionChanged();
+            var div = getCookieValue('aplanaDivision');
+            div = div ? div : 0;
+            dojo.byId("overtimeTable_divisionOwnerId").value = div;
+            dojo.byId("overtimeTable_divisionEmployeeId").value = div;
+        }
     });
 
     function overtimeTable_employeeDialogShow(){
@@ -99,12 +105,12 @@
                 return;
             }
         }
-        var divisionOwner = dojo.byId("overtimeTable_divisionOwnerId").value;
-        var divisionEmployee = dojo.byId("overtimeTable_divisionEmployeeId").value;
         var year = dojo.byId("monthreport_year").value;
         var month = dojo.byId("monthreport_month").value;
-        overtimeTable_createStore();
+        var divisionOwner = dojo.byId("overtimeTable_divisionOwnerId") ? overtimeTable_divisionOwnerId.value : 0;
+        var divisionEmployee = dojo.byId("overtimeTable_divisionEmployeeId") ? overtimeTable_divisionEmployeeId.value : 0;
 
+        overtimeTable_createStore();
         dojo.xhrPost({
             url: "monthreport/getOvertimes",
             content: {

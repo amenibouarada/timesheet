@@ -2,9 +2,11 @@ package com.aplana.timesheet.service.monthreport;
 
 import com.aplana.timesheet.dao.EmployeeDAO;
 import com.aplana.timesheet.dao.ProjectDAO;
+import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.dao.entity.monthreport.Overtime;
 import com.aplana.timesheet.dao.monthreport.OvertimeDAO;
 import com.aplana.timesheet.enums.TypesOfActivityEnum;
+import com.aplana.timesheet.service.EmployeeService;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.type.CollectionType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +24,8 @@ public class OvertimeService {
     private OvertimeDAO overtimeDAO;
     @Autowired
     private EmployeeDAO employeeDAO;
+    @Autowired
+    private EmployeeService employeeService;
     @Autowired
     private ProjectDAO projectDAO;
 
@@ -66,12 +70,22 @@ public class OvertimeService {
         return true;
     }
 
-    public String getOvertimesJSON(int year, int month, Integer divisionOwner, Integer divisionEmployee) throws IOException {
-        return createOvertimesJSON(
-                overtimeDAO.getOvertimes(year, month, divisionOwner, divisionEmployee));
+    public String getOvertimes(Employee currentUser,
+                               int year, int month, Integer divisionOwner, Integer divisionEmployee) throws IOException {
+        List<Overtime> result;
+        if (employeeService.isEmployeeAdmin(currentUser.getId())){
+            result = overtimeDAO.getOvertimes(year, month, divisionOwner, divisionEmployee);
+        }else{
+            result = overtimeDAO.getSingleOvertime(currentUser, year, month);
+        }
+        return createOvertimesJSON(result);
     }
 
     private String createOvertimesJSON(List<Overtime> overtimes) throws IOException {
+        if (overtimes == null){
+            return "[]";
+        }
+
         ObjectMapper mapper = new ObjectMapper();
         List<Map<String, Object>> overtimeList = new ArrayList<Map<String, Object>>(overtimes.size());
         for (Overtime overtime : overtimes){

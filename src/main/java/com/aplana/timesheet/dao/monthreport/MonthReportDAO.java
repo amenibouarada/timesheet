@@ -26,6 +26,15 @@ public class MonthReportDAO {
 
     private static final Logger logger = LoggerFactory.getLogger(MonthReportDAO.class);
 
+    public List<MonthReportData> getSingleMonthReportData(Employee employee, Integer year, Integer month){
+        Query query = entityManager
+                .createQuery("FROM MonthReportData WHERE year = :year AND month = :month AND employeeId = :employeeId")
+                .setParameter("year", year)
+                .setParameter("month", month)
+                .setParameter("employeeId", employee.getId());
+        return query.getResultList();
+    }
+
     public List<MonthReportData> getMonthReportData(
             Integer division, Integer manager, List<Integer> regions, List<Integer> roles, Integer year, Integer month
     ){

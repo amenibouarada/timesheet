@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 
+<sec:authorize access="hasRole('ROLE_ADMIN')">
 <table class="dijitDialogPaneContentArea no_border employmentPlanningTable">
     <tr>
         <td><label>Подразделение</label></td>
@@ -43,6 +44,7 @@
         <td>
     </tr>
 </table>
+</sec:authorize>
 
 
 <table  data-dojo-id="monthReportTable" data-dojo-type="dojox.grid.DataGrid" autoHeight="true" autoWidth="true"
@@ -98,12 +100,12 @@
 <script type="text/javascript">
 
     dojo.addOnLoad(function(){
-        monthReportTable_updateManagers();
-
-        var div = getCookieValue('aplanaDivision');
-        div = div ? div : 0;
-        monthReportTable_divisionId.value = div;
-        //monthReportTable_reloadTable();
+        if (dojo.byId("monthReportTable_divisionId")){
+            monthReportTable_updateManagers();
+            var div = getCookieValue('aplanaDivision');
+            div = div ? div : 0;
+            monthReportTable_divisionId.value = div;
+        }
     });
 
     // расскраска ячеек и проверка на существующее значение заполненности таблицы реальными данными, а не автовычисленными
@@ -128,10 +130,9 @@
         monthReportTable.setStore(store);
     }
 
-
     function monthReportTable_updateManagers(){
         updateManagerListByDivision(
-            0, managerMapJson, dojo.byId("monthReportTable_divisionId"), dojo.byId("monthReportTable_managerId"));
+                0, managerMapJson, dojo.byId("monthReportTable_divisionId"), dojo.byId("monthReportTable_managerId"));
     }
 
     function setCalcMonthColumnVisibility(visible){
@@ -143,16 +144,24 @@
     function monthReportTable_reloadTable(){
         var year = dojo.byId("monthreport_year").value;
         var month = dojo.byId("monthreport_month").value;
-        monthReportTable_createStore();
+        var divisionId  = dojo.byId("monthReportTable_divisionId") ?
+                monthReportTable_divisionId.value : 0;
+        var managerId   = dojo.byId("monthReportTable_managerId") ?
+                monthReportTable_managerId.value : 0;
+        var regions     = dojo.byId("monthReportTable_regionListId") ?
+                "[" + getSelectValues(monthReportTable_regionListId) + "]" : "[]";
+        var roles       = dojo.byId("monthReportTable_projectRoleListId") ?
+                "[" + getSelectValues(monthReportTable_projectRoleListId) + "]" : "[]";
 
+        monthReportTable_createStore();
         processing();
         dojo.xhrPost({
             url: "monthreport/getMonthReportData",
             content: {
-                division: monthReportTable_divisionId.value,
-                manager: monthReportTable_managerId.value,
-                regions: "[" + getSelectValues(monthReportTable_regionListId) + "]",
-                roles: "[" + getSelectValues(monthReportTable_projectRoleListId) + "]",
+                division: divisionId,
+                manager: managerId,
+                regions: regions,
+                roles: roles,
                 year: year,
                 month: month
             },

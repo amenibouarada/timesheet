@@ -50,7 +50,7 @@ public class MonthReportController extends AbstractControllerForEmployee {
             @RequestParam("month") Integer month
     ) {
         try {
-            return monthReportService.getMonthReportData(division, manager, regions, roles, year, month);
+            return monthReportService.getMonthReportData(getCurrentUser(), division, manager, regions, roles, year, month);
         } catch (IOException e) {
             e.printStackTrace();
             return "[]";
@@ -65,7 +65,11 @@ public class MonthReportController extends AbstractControllerForEmployee {
             @RequestParam("jsonData") String jsonData
     ) {
         try {
-            monthReportService.saveMonthReportTable(year, month, jsonData);
+            if (employeeService.isEmployeeAdmin(getCurrentUser().getId())){
+                monthReportService.saveMonthReportTable(year, month, jsonData);
+            }else{
+                return "У вас нет прав на это действие";
+            }
         }catch (Exception exc){
             exc.printStackTrace();
             return "Во время сохранения произошла ошибка. Пожалуйста, свяжитесть с администраторами системы.";
@@ -85,7 +89,11 @@ public class MonthReportController extends AbstractControllerForEmployee {
             @RequestParam("jsonData") String jsonData
     ){
         try{
-            overtimeService.saveOvertimeTable(year, month, jsonData);
+            if (employeeService.isEmployeeAdmin(getCurrentUser().getId())){
+                overtimeService.saveOvertimeTable(year, month, jsonData);
+            }else{
+                return "У вас нет прав на это действие";
+            }
         }catch (Exception exc){
             exc.printStackTrace();
             return "Во время сохранения произошла ошибка. Пожалуйста, свяжитесть с администраторами системы.";
@@ -99,7 +107,11 @@ public class MonthReportController extends AbstractControllerForEmployee {
             @RequestParam("jsonData") String jsonData
     ){
         try{
-            overtimeService.deleteOvertimes(jsonData);
+            if (employeeService.isEmployeeAdmin(getCurrentUser().getId())){
+                overtimeService.deleteOvertimes(jsonData);
+            }else{
+                return "У вас нет прав на это действие";
+            }
         }catch (Exception exc){
             exc.printStackTrace();
             return "Во время удаления произошла ошибка. Пожалуйста, свяжитесть с администраторами системы.";
@@ -116,7 +128,7 @@ public class MonthReportController extends AbstractControllerForEmployee {
             @RequestParam("divisionEmployee") Integer divisionEmployee
     ) {
         try {
-            return overtimeService.getOvertimesJSON(year, month, divisionOwner, divisionEmployee);
+            return overtimeService.getOvertimes(getCurrentUser(), year, month, divisionOwner, divisionEmployee);
         } catch (IOException e) {
             e.printStackTrace();
             return "[]";

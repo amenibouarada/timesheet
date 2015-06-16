@@ -7,6 +7,7 @@ import com.aplana.timesheet.dao.entity.monthreport.MonthReportData;
 import com.aplana.timesheet.dao.entity.monthreport.MonthReportDetail;
 import com.aplana.timesheet.dao.entity.monthreport.Overtime;
 import com.aplana.timesheet.dao.monthreport.MonthReportDAO;
+import com.aplana.timesheet.service.EmployeeService;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -27,19 +28,27 @@ public class MonthReportService {
     private MonthReportDAO monthReportDAO;
     @Autowired
     private EmployeeDAO employeeDAO;
+    @Autowired
+    private EmployeeService employeeService;
 
-    public String getMonthReportData(
+    public String getMonthReportData(Employee currentUser,
             Integer division, Integer manager, String regions, String roles, Integer year, Integer month) throws IOException {
-
-        ObjectMapper mapper = new ObjectMapper();
-        List<Integer> regionList = mapper.readValue(regions, List.class);
-        List<Integer> roleList = mapper.readValue(roles, List.class);
-
-        return getMonthReportDataJSON(
-                monthReportDAO.getMonthReportData(division, manager, regionList, roleList, year, month));
+        List<MonthReportData> result;
+        if (employeeService.isEmployeeAdmin(currentUser.getId())){
+            ObjectMapper mapper = new ObjectMapper();
+            List<Integer> regionList = mapper.readValue(regions, List.class);
+            List<Integer> roleList = mapper.readValue(roles, List.class);
+            result = monthReportDAO.getMonthReportData(division, manager, regionList, roleList, year, month);
+        }else{
+            result = monthReportDAO.getSingleMonthReportData(currentUser, year, month);
+        }
+        return getMonthReportDataJSON(result);
     }
 
     private String getMonthReportDataJSON(List<MonthReportData> monthReportData) throws IOException {
+        if (monthReportData == null) {
+            return "[]";
+        }
         ObjectMapper mapper = new ObjectMapper();
 
         List<Map<String, Object>> monthReportDataList = new ArrayList<Map<String, Object>>(monthReportData.size());
