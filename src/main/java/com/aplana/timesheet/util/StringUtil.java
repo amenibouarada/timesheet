@@ -1,6 +1,10 @@
 package com.aplana.timesheet.util;
 
+import org.codehaus.jackson.map.ObjectMapper;
+
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.List;
 
 public class StringUtil {
 
@@ -21,5 +25,11 @@ public class StringUtil {
             }
         }
         return sb.toString();
+    }
+
+    public static List<Integer> stringToList(String inputString) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        List<Integer> outputList = mapper.readValue(inputString, List.class);
+        return outputList;
     }
 }

@@ -27,34 +27,47 @@ public class MonthReportDAO {
     private static final Logger logger = LoggerFactory.getLogger(MonthReportDAO.class);
 
     public List<MonthReportData> getMonthReportData(
-            Integer division, Integer manager, List<Integer> regions, List<Integer> roles, Integer year, Integer month
-    ){
+            Integer division, Integer manager, List<Integer> regions, List<Integer> roles, Integer year, Integer month, boolean nativeQuery
+    ) {
+
         String queryString = "FROM MonthReportData WHERE year = :year AND month = :month ";
+        Query query;
+        if (nativeQuery) {
+            queryString = "SELECT * FROM month_report_data WHERE year = :year AND month = :month ";
+        }
         boolean divisionSet = false;
-        boolean managerSet  = false;
-        boolean regionSet   = false;
-        boolean rolesSet    = false;
-        if (division != null && division > 0){
+        boolean managerSet = false;
+        boolean regionSet = false;
+        boolean rolesSet = false;
+        if (division != null && division > 0) {
             queryString += " AND division_id = :division ";
             divisionSet = true;
         }
-        if (manager != null && manager > 0){
+        if (manager != null && manager > 0) {
             queryString += " AND manager_id = :manager ";
             managerSet = true;
         }
-        if (regions.size() > 0 && regions.get(0) > 0){
+        if (regions.size() > 0 && regions.get(0) > 0) {
             queryString += " AND region_id in :regions ";
             regionSet = true;
         }
-        if (roles.size() > 0 && roles.get(0) > 0){
+        if (roles.size() > 0 && roles.get(0) > 0) {
             queryString += " AND job_id in :roles ";
             rolesSet = true;
         }
-        Query query = entityManager.createQuery(queryString).setParameter("year", year).setParameter("month", month);
-        if (divisionSet)    { query.setParameter("division",    division); }
-        if (managerSet)     { query.setParameter("manager",     manager); }
-        if (regionSet)      { query.setParameter("regions",     regions); }
-        if (rolesSet)       { query.setParameter("roles",       roles); }
+        if (!nativeQuery) {
+            query = entityManager.createQuery(queryString).setParameter("year", year).setParameter("month", month);
+        } else {
+            query = entityManager.createNativeQuery(queryString).setParameter("year", year).setParameter("month", month);
+        }
+        if (divisionSet) {            query.setParameter("division", division);        }
+        if (managerSet) {            query.setParameter("manager", manager);        }
+        if (regionSet) {
+            query.setParameter("regions", regions);
+        }
+        if (rolesSet) {
+            query.setParameter("roles", roles);
+        }
         return query.getResultList();
     }
 
