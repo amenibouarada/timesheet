@@ -35,7 +35,30 @@
 
         var projectListWithOwnerDivision = ${projectListWithOwnerDivision};
         var managerMapJson = ${managerList};
-
+        
+        function makeReport() {
+            var year = dojo.byId("monthreport_year").value;
+            var month = dojo.byId("monthreport_month").value;
+            if (dijit.byId('tabContainer').selectedChildWidget == dijit.byId('firstTab')) {
+            }
+            else {
+                dojo.xhrPost({
+                    url: '<%= request.getContextPath()%>/managertools/report/2',
+                    handleAs: "text",
+                    content: {
+                        year: year,
+                        month: month
+                    },
+                    preventCache: false,
+                    load: function (response) {
+                    },
+                    error: function () {
+                        console.log('submitReportForm panic!');
+                    }
+                });
+            }
+        }
+        
         var eventConnections = [];
         dojo.addOnLoad(function(){
             // установим год/месяц по умолчанию
