@@ -1,11 +1,12 @@
 package com.aplana.timesheet.controller;
 
+import com.aplana.timesheet.exception.JReportBuildError;
 import com.aplana.timesheet.form.AddEmployeeForm;
 import com.aplana.timesheet.form.MonthReportForm;
+import com.aplana.timesheet.service.monthreport.MonthReportExcelService;
 import com.aplana.timesheet.service.monthreport.MonthReportService;
 import com.aplana.timesheet.service.monthreport.OvertimeService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -13,8 +14,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.List;
 
 @Controller
 @RequestMapping(value = "/monthreport*")
@@ -22,6 +23,9 @@ public class MonthReportController extends AbstractControllerForEmployee {
 
     @Autowired
     private MonthReportService monthReportService;
+    @Autowired
+    private MonthReportExcelService monthReportExcelService;
+
     @Autowired
     private OvertimeService overtimeService;
 
@@ -140,5 +144,34 @@ public class MonthReportController extends AbstractControllerForEmployee {
     /*    Блок отчеты Excel   */
     /**************************/
 
+    @RequestMapping(value = "/makeOvertimeReport" , method = RequestMethod.POST)
+    public void makeOvertimeReport(
+            @RequestParam("year") Integer year,
+            @RequestParam("month") Integer month,
+            @RequestParam("divisionOwner") Integer divisionOwner,
+            @RequestParam("divisionEmployee") Integer divisionEmployee,
+            HttpServletResponse response
+    ) throws JReportBuildError {
+        String [] headers = monthReportExcelService.makeOvertimeReport(year, month, divisionOwner, divisionEmployee);
+        response.setContentType(headers[0]);
+        response.setHeader("Content-Disposition",headers[1]);
+        response.setHeader("Location", headers[2]);
+    }
+
+    @RequestMapping(value = "/makeMonthReport" , method = RequestMethod.POST)
+    public void makeMonthReport(
+            @RequestParam("division") Integer division,
+            @RequestParam("manager") Integer manager,
+            @RequestParam("regions") String regions,
+            @RequestParam("roles") String roles,
+            @RequestParam("year") Integer year,
+            @RequestParam("month") Integer month,
+            HttpServletResponse response
+    ) throws JReportBuildError {
+        String[] headers = monthReportExcelService.makeMonthReport(division, manager, regions, roles, year, month);
+        response.setContentType(headers[0]);
+        response.setHeader("Content-Disposition",headers[1]);
+        response.setHeader("Location", headers[2]);
+    }
 
 }

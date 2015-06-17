@@ -13,13 +13,11 @@
     <title>Табель</title>
 
     <style type="text/css">
-            /* REQUIRED STYLES!!! */
+        /* REQUIRED STYLES!!! */
         @import "<%= DOJO_PATH %>/dojox/grid/resources/Grid.css";
         @import "<%= DOJO_PATH %>/dojox/grid/resources/tundraGrid.css";
-
         @import "<%= getResRealPath("/resources/css/DataGrid.ext.css", application) %>";
         @import "<%= getResRealPath("/resources/css/planEdit.css", application) %>";
-
         @import "<%= getResRealPath("/resources/css/monthreport.css", application) %>";
     </style>
 
@@ -35,36 +33,67 @@
 
         var projectListWithOwnerDivision = ${projectListWithOwnerDivision};
         var managerMapJson = ${managerList};
-        
-        function makeReport() {
+
+        function makeReport(tabNum) {
             var year = dojo.byId("monthreport_year").value;
             var month = dojo.byId("monthreport_month").value;
-            if (dijit.byId('tabContainer').selectedChildWidget == dijit.byId('firstTab')) {
+            var divisionOwner = dojo.byId("overtimeTable_divisionOwnerId").value;
+            var divisionEmployee = dojo.byId("overtimeTable_divisionEmployeeId").value;
+
+            switch (tabNum) {
+                case 1:
+                    dojo.xhrPost({
+                        url: '<%= request.getContextPath()%>/monthreport/makeMonthReport',
+                        handleAs: "text",
+                        content: {
+                            division: monthReportTable_divisionId.value,
+                            manager: monthReportTable_managerId.value,
+                            regions: "[" + getSelectValues(monthReportTable_regionListId) + "]",
+                            roles: "[" + getSelectValues(monthReportTable_projectRoleListId) + "]",
+                            year: year,
+                            month: month
+                        },
+                        preventCache: false,
+                        load: function (response, ioargs) {
+                            window.location.href = ioargs.xhr.getResponseHeader('Location');
+                        },
+                        error: function () {
+                            console.log('submitReportForm panic!');
+                        }
+                    });
+                    break;
+                case 2:
+                    dojo.xhrPost({
+                        url: '<%= request.getContextPath()%>/monthreport/makeOvertimeReport',
+                        handleAs: "text",
+                        content: {
+                            year: year,
+                            month: month,
+                            divisionOwner: divisionOwner,
+                            divisionEmployee: divisionEmployee
+                        },
+                        preventCache: false,
+                        load: function (response, ioargs) {
+                            window.location.href = "<%= request.getContextPath()%>" + ioargs.xhr.getResponseHeader('Location');
+                        },
+                        error: function () {
+                            console.log('submitReportForm panic!');
+                        }
+                    });
+                    break;
+                case 3:
+                    break;
             }
-            else {
-                dojo.xhrPost({
-                    url: '<%= request.getContextPath()%>/managertools/report/2',
-                    handleAs: "text",
-                    content: {
-                        year: year,
-                        month: month
-                    },
-                    preventCache: false,
-                    load: function (response) {
-                    },
-                    error: function () {
-                        console.log('submitReportForm panic!');
-                    }
-                });
-            }
+
         }
-        
+
         var eventConnections = [];
-        dojo.addOnLoad(function(){
+        dojo.addOnLoad(function () {
             // установим год/месяц по умолчанию
             var currentDate = new Date();
             dojo.byId("monthreport_year").value = currentDate.getFullYear();
             dojo.byId("monthreport_month").value = currentDate.getMonth();
+
 
             // функция для переназначения обработчиков нажатия кнопок
             // и отображения актуальных данных
@@ -77,7 +106,7 @@
                     eventConnections.push(dojo.connect(monthreport_month, "onchange", function(){ monthReportTable_reloadTable()}));
                     <sec:authorize access="hasRole('ROLE_ADMIN')">
                         eventConnections.push(dojo.connect(saveButton,   "onclick", function(){ monthReportTable_save()}));
-                        eventConnections.push(dojo.connect(exportButton, "onclick", function(){}));
+                        eventConnections.push(dojo.connect(exportButton, "onclick", function(){makeReport(1)}));
                     </sec:authorize>
                 }
                 if (dijit.byId('tabContainer').selectedChildWidget.id == "overtimeTable_tab"){
@@ -86,7 +115,7 @@
                     eventConnections.push(dojo.connect(monthreport_month, "onchange", function(){overtimeTable_reloadTable()}));
                     <sec:authorize access="hasRole('ROLE_ADMIN')">
                         eventConnections.push(dojo.connect(saveButton,   "onclick", function(){overtimeTable_save()}));
-                        eventConnections.push(dojo.connect(exportButton, "onclick", function(){}));
+                        eventConnections.push(dojo.connect(exportButton, "onclick", function(){makeReport(2)}));
                     </sec:authorize>
                 }
                 if (dijit.byId('tabContainer').selectedChildWidget.id == "mutualWorkTable_tab"){

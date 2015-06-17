@@ -5,21 +5,20 @@ import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.dao.entity.monthreport.MonthReport;
 import com.aplana.timesheet.dao.entity.monthreport.MonthReportData;
 import com.aplana.timesheet.dao.entity.monthreport.MonthReportDetail;
-import com.aplana.timesheet.dao.entity.monthreport.Overtime;
 import com.aplana.timesheet.dao.monthreport.MonthReportDAO;
 import com.aplana.timesheet.service.EmployeeService;
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.type.CollectionType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.aplana.timesheet.util.StringUtil;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class MonthReportService {
@@ -38,7 +37,7 @@ public class MonthReportService {
             ObjectMapper mapper = new ObjectMapper();
             List<Integer> regionList = mapper.readValue(regions, List.class);
             List<Integer> roleList = mapper.readValue(roles, List.class);
-            result = monthReportDAO.getMonthReportData(division, manager, regionList, roleList, year, month);
+            result = monthReportDAO.getMonthReportData(division, manager, StringUtil.stringToList(regions), StringUtil.stringToList(roles), year, month, false));
         }else{
             result = monthReportDAO.getSingleMonthReportData(currentUser, year, month);
         }
