@@ -82,24 +82,35 @@ public class MonthReportExcelDAO {
         List resultList = query.getResultList();
 
         if (resultList != null && !resultList.isEmpty()) {
-            return new HibernateQueryResultDataSource(resultList, new String[] {"employee", "division", "region", "project", "overtime", "premium", "comment"});
+            return new HibernateQueryResultDataSource(resultList, new String[] {
+                    "employee", "division", "region", "project", "overtime", "premium", "comment"});
         } else {
             return null;
         }
     }
 
     private HibernateQueryResultDataSource getMonthReportData(MonthXLSReport report) throws IOException {
-        List resultList = monthReportDAO.getMonthReportData(report.getDivision(), report.getManager(), StringUtil.stringToList(report.getRegions()),
-                StringUtil.stringToList(report.getRoles()), report.getYear(), report.getMonth(), true);
+        List resultList = monthReportDAO.getMonthReportData(
+                report.getDivision(),
+                report.getManager(),
+                report.getRegions(),
+                report.getRoles(),
+                report.getYear(),
+                report.getMonth(),
+                true);
 
         if (resultList != null && !resultList.isEmpty()) {
-            return new HibernateQueryResultDataSource(resultList, new String[]{"year", "month", "employee_id", "employee_name",
-                    "region_id", "region_name", "division_id", "division_name", "job_id", "manager_id", "ts_worked_calculated", "ts_worked",
-                    "ts_vacation", "ts_illness", "ts_illness_calculated", "ts_all_paid", "ts_over_val_fin_comp_calc", "ts_over_val_fin_comp", "ts_over_accounted", "ts_premium",
-                    "ts_all_over_accounted", "ts_over_done", "ts_over_not_done", "ts_over_remain", "ts_vacation_avail",
-                    "calc_worked_plan", "calc_worked_fact", "calc_vacation", "calc_vacation_with", "calc_vacation_without",
-                    "calc_vacation_hol_paid", "calc_illness", "calc_illness_with", "calc_illness_without", "calc_over",
-                    "calc_over_hol", "calc_over_hol_paid", "calc_over_work", "calc_worked_ill", "calc_worked_vac"});
+            return new HibernateQueryResultDataSource(resultList, new String[]{
+                    "year", "month", "employee_id", "employee_name",
+                    "region_id", "region_name", "division_id", "division_name",
+                    "job_id", "manager_id", "ts_worked_calculated", "ts_worked",
+                    "ts_vacation", "ts_illness", "ts_illness_calculated", "ts_all_paid",
+                    "ts_over_val_fin_comp_calc", "ts_over_val_fin_comp", "ts_over_accounted", "ts_premium",
+                    "ts_all_over_accounted", "ts_over_done", "ts_over_not_done", "ts_over_remain",
+                    "ts_vacation_avail", "calc_worked_plan", "calc_worked_fact", "calc_vacation",
+                    "calc_vacation_with", "calc_vacation_without", "calc_vacation_hol_paid", "calc_illness",
+                    "calc_illness_with", "calc_illness_without", "calc_over", "calc_over_hol",
+                    "calc_over_hol_paid", "calc_over_work", "calc_worked_ill", "calc_worked_vac"});
         } else {
             return null;
         }

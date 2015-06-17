@@ -34,10 +34,11 @@ public class MonthReportService {
             Integer division, Integer manager, String regions, String roles, Integer year, Integer month) throws IOException {
         List<MonthReportData> result;
         if (employeeService.isEmployeeAdmin(currentUser.getId())){
-            ObjectMapper mapper = new ObjectMapper();
-            List<Integer> regionList = mapper.readValue(regions, List.class);
-            List<Integer> roleList = mapper.readValue(roles, List.class);
-            result = monthReportDAO.getMonthReportData(division, manager, StringUtil.stringToList(regions), StringUtil.stringToList(roles), year, month, false));
+            result = monthReportDAO.getMonthReportData(
+                    division, manager,
+                    StringUtil.stringToList(regions),
+                    StringUtil.stringToList(roles),
+                    year, month, false);
         }else{
             result = monthReportDAO.getSingleMonthReportData(currentUser, year, month);
         }

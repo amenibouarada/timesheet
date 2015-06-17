@@ -35,15 +35,31 @@ public class MonthReportDAO {
         return query.getResultList();
     }
 
+    /**
+     * Используется для получения списка записей таблицы "Табель"
+     * Последний параметр нужен для того, чтобы определить в каком виде необходимо получить результат
+     *
+     * @param division
+     * @param manager
+     * @param regions
+     * @param roles
+     * @param year
+     * @param month
+     * @param typeListObject - если true - то результат в виде List<Object[]>, иначе List<MonthReportData>
+     * @return
+     */
     public List<MonthReportData> getMonthReportData(
-            Integer division, Integer manager, List<Integer> regions, List<Integer> roles, Integer year, Integer month, boolean nativeQuery
+            Integer division,
+            Integer manager,
+            List<Integer> regions,
+            List<Integer> roles,
+            Integer year,
+            Integer month,
+            boolean typeListObject
     ) {
-
-        String queryString = "FROM MonthReportData WHERE year = :year AND month = :month ";
-        Query query;
-        if (nativeQuery) {
-            queryString = "SELECT * FROM month_report_data WHERE year = :year AND month = :month ";
-        }
+        String queryString = typeListObject ?
+                "SELECT * FROM month_report_data WHERE year = :year AND month = :month " :
+                "FROM MonthReportData WHERE year = :year AND month = :month ";
         boolean divisionSet = false;
         boolean managerSet = false;
         boolean regionSet = false;
@@ -64,25 +80,21 @@ public class MonthReportDAO {
             queryString += " AND job_id in :roles ";
             rolesSet = true;
         }
-        if (!nativeQuery) {
-            query = entityManager.createQuery(queryString).setParameter("year", year).setParameter("month", month);
-        } else {
-            query = entityManager.createNativeQuery(queryString).setParameter("year", year).setParameter("month", month);
-        }
-        if (divisionSet) {            query.setParameter("division", division);        }
-        if (managerSet) {            query.setParameter("manager", manager);        }
-        if (regionSet) {
-            query.setParameter("regions", regions);
-        }
-        if (rolesSet) {
-            query.setParameter("roles", roles);
-        }
+        Query query = typeListObject ?
+                entityManager.createNativeQuery(queryString).setParameter("year", year).setParameter("month", month) :
+                entityManager.createQuery(queryString).setParameter("year", year).setParameter("month", month);
+
+        if (divisionSet){ query.setParameter("division", division); }
+        if (managerSet) { query.setParameter("manager", manager);   }
+        if (regionSet)  { query.setParameter("regions", regions);   }
+        if (rolesSet)   { query.setParameter("roles", roles);       }
         return query.getResultList();
     }
 
     @Transactional
     public MonthReport findOrCreateMonthReport(Integer year, Integer month, Integer division){
-        Query query = entityManager.createQuery("FROM MonthReport WHERE year = :year AND month = :month AND division.id = :division")
+        Query query = entityManager.
+                createQuery("FROM MonthReport WHERE year = :year AND month = :month AND division.id = :division")
                 .setParameter("year", year)
                 .setParameter("month", month)
                 .setParameter("division", division);
@@ -99,7 +111,8 @@ public class MonthReportDAO {
 
     @Transactional
     public MonthReportDetail findOrCreateMonthReportDetail(MonthReport monthReport, Employee employee) {
-        Query query = entityManager.createQuery("FROM MonthReportDetail WHERE monthReport = :monthReport AND employee = :employee")
+        Query query = entityManager.
+                createQuery("FROM MonthReportDetail WHERE monthReport = :monthReport AND employee = :employee")
                 .setParameter("monthReport", monthReport)
                 .setParameter("employee", employee);
         List result = query.getResultList();

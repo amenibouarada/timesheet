@@ -39,12 +39,12 @@ public class MonthReportExcelService {
 
     private final HashMap<String, JasperReport> compiledReports = new HashMap<String, JasperReport>();
 
-    public String[] makeMonthReport(Integer division, Integer manager, String roles, String regions, Integer year, Integer month) throws JReportBuildError {
+    public String[] makeMonthReport(Integer division, Integer manager, String regions, String roles, Integer year, Integer month) throws JReportBuildError, IOException {
         MonthXLSReport monthXLSReport = new MonthXLSReport();
         monthXLSReport.setDivision(division);
         monthXLSReport.setManager(manager);
-        monthXLSReport.setRoles(roles);
-        monthXLSReport.setRegions(regions);
+        monthXLSReport.setRoles(StringUtil.stringToList(roles));
+        monthXLSReport.setRegions(StringUtil.stringToList(regions));
         monthXLSReport.setYear(year);
         monthXLSReport.setMonth(month);
         monthXLSReport.setReportDAO(monthReportExcelDAO);
@@ -66,7 +66,7 @@ public class MonthReportExcelService {
     }
 
 
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true) // ToDo а если заменить на BaseMonthReport и удалить интерфейс?
     private String[] makeMonthExcelReport(XLSJasperReport report) throws JReportBuildError {
 
         String[] headers;
@@ -74,7 +74,7 @@ public class MonthReportExcelService {
         Calendar calendar = new GregorianCalendar();
         String dateNorm = DateTimeUtil.formatDateIntoViewFormat(calendar.getTime());
 
-        String reportNameFile = report.getJRNameFile() + " " + dateNorm;
+        String reportNameFile = report.getJRNameFile() + "_" + dateNorm + ".xls";
         final String outputFile = context.getRealPath("/resources/reports/generatedReports/" + reportNameFile + ".xls");
 
         for (File reportFile : new File(context.getRealPath("/resources/reports/generatedReports/")).listFiles()) {
@@ -96,19 +96,15 @@ public class MonthReportExcelService {
             }
             JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, params, jrDataSource);
 
-            String suffix = ".xls";
-            String contentType = "application/vnd.ms-excel";
-
-
-            String contentDisposition = "attachment; filename=\"" + StringUtil.toUTF8String(reportNameFile + suffix) + "\"";
-
             JRXlsExporter xlsExporter = new JRXlsExporter();
             xlsExporter.setParameter(JRExporterParameter.JASPER_PRINT, jasperPrint);
             xlsExporter.setParameter(JExcelApiExporterParameter.IS_DETECT_CELL_TYPE, true);
             xlsExporter.setParameter(JRExporterParameter.OUTPUT_FILE_NAME, outputFile);
             xlsExporter.exportReport();
 
-            String url = "/resources/reports/generatedReports/" + reportNameFile + ".xls";
+            String url = "/resources/reports/generatedReports/" + reportNameFile;
+            String contentType = "application/vnd.ms-excel";
+            String contentDisposition = "attachment; filename=\"" + StringUtil.toUTF8String(reportNameFile) + "\"";
 
             headers = new String[]{contentType, contentDisposition, url};
 
@@ -125,11 +121,11 @@ public class MonthReportExcelService {
     public JasperReport getReport(String reportName) throws MalformedURLException, JRException {
         JasperReport report;
         if (!compiledReports.containsKey(reportName)) {
-            report = JasperCompileManager.compileReport(context.getRealPath("/resources/reports/monthreports/" + reportName + ".jrxml"));
+            report = JasperCompileManager.compileReport(
+                    context.getRealPath("/resources/reports/monthreports/" + reportName + ".jrxml"));
         } else {
             report = compiledReports.get(reportName);
         }
-
         return report;
     }
 }

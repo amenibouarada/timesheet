@@ -25,9 +25,12 @@ public class MonthReportController extends AbstractControllerForEmployee {
     private MonthReportService monthReportService;
     @Autowired
     private MonthReportExcelService monthReportExcelService;
-
     @Autowired
     private OvertimeService overtimeService;
+
+    private static String COMMON_ERROR_MESSAGE =
+            "Во время %s произошла ошибка. Пожалуйста, свяжитесть с администраторами системы.";
+    private static String NO_PERMISSION_MESSAGE = "У вас нет прав на это действие";
 
     @RequestMapping(method = RequestMethod.GET)
     public ModelAndView showForm() {
@@ -72,11 +75,11 @@ public class MonthReportController extends AbstractControllerForEmployee {
             if (employeeService.isEmployeeAdmin(getCurrentUser().getId())){
                 monthReportService.saveMonthReportTable(year, month, jsonData);
             }else{
-                return "У вас нет прав на это действие";
+                return NO_PERMISSION_MESSAGE;
             }
         }catch (Exception exc){
             exc.printStackTrace();
-            return "Во время сохранения произошла ошибка. Пожалуйста, свяжитесть с администраторами системы.";
+            return String.format(COMMON_ERROR_MESSAGE, "сохранения");
         }
         return "Сохранено успешно.";
     }
@@ -96,11 +99,11 @@ public class MonthReportController extends AbstractControllerForEmployee {
             if (employeeService.isEmployeeAdmin(getCurrentUser().getId())){
                 overtimeService.saveOvertimeTable(year, month, jsonData);
             }else{
-                return "У вас нет прав на это действие";
+                return NO_PERMISSION_MESSAGE;
             }
         }catch (Exception exc){
             exc.printStackTrace();
-            return "Во время сохранения произошла ошибка. Пожалуйста, свяжитесть с администраторами системы.";
+            return String.format(COMMON_ERROR_MESSAGE, "сохранения");
         }
         return "Сохранено успешно.";
     }
@@ -114,11 +117,11 @@ public class MonthReportController extends AbstractControllerForEmployee {
             if (employeeService.isEmployeeAdmin(getCurrentUser().getId())){
                 overtimeService.deleteOvertimes(jsonData);
             }else{
-                return "У вас нет прав на это действие";
+                return NO_PERMISSION_MESSAGE;
             }
         }catch (Exception exc){
             exc.printStackTrace();
-            return "Во время удаления произошла ошибка. Пожалуйста, свяжитесть с администраторами системы.";
+            return String.format(COMMON_ERROR_MESSAGE, "удаления");
         }
         return "Строки успешно удалены";
     }
@@ -145,33 +148,45 @@ public class MonthReportController extends AbstractControllerForEmployee {
     /**************************/
 
     @RequestMapping(value = "/makeOvertimeReport" , method = RequestMethod.POST)
-    public void makeOvertimeReport(
+    public String makeOvertimeReport(
             @RequestParam("year") Integer year,
             @RequestParam("month") Integer month,
             @RequestParam("divisionOwner") Integer divisionOwner,
             @RequestParam("divisionEmployee") Integer divisionEmployee,
-            HttpServletResponse response
-    ) throws JReportBuildError {
-        String [] headers = monthReportExcelService.makeOvertimeReport(year, month, divisionOwner, divisionEmployee);
-        response.setContentType(headers[0]);
-        response.setHeader("Content-Disposition",headers[1]);
-        response.setHeader("Location", headers[2]);
+            HttpServletResponse response)
+    {
+        try{
+            String [] headers = monthReportExcelService.makeOvertimeReport(year, month, divisionOwner, divisionEmployee);
+            response.setContentType(headers[0]);
+            response.setHeader("Content-Disposition",headers[1]);
+            response.setHeader("Location", headers[2]);
+        }catch(Exception exc){
+            logger.error("Во время создания отчёта произошла ошибка: ", exc);
+            return String.format(COMMON_ERROR_MESSAGE, "создания отчёта");
+        }
+        return "";
     }
 
     @RequestMapping(value = "/makeMonthReport" , method = RequestMethod.POST)
-    public void makeMonthReport(
+    public String makeMonthReport(
             @RequestParam("division") Integer division,
             @RequestParam("manager") Integer manager,
             @RequestParam("regions") String regions,
             @RequestParam("roles") String roles,
             @RequestParam("year") Integer year,
             @RequestParam("month") Integer month,
-            HttpServletResponse response
-    ) throws JReportBuildError {
-        String[] headers = monthReportExcelService.makeMonthReport(division, manager, regions, roles, year, month);
-        response.setContentType(headers[0]);
-        response.setHeader("Content-Disposition",headers[1]);
-        response.setHeader("Location", headers[2]);
+            HttpServletResponse response) throws JReportBuildError
+    {
+        try{
+            String [] headers = monthReportExcelService.makeMonthReport(division, manager, regions, roles, year, month);
+            response.setContentType(headers[0]);
+            response.setHeader("Content-Disposition",headers[1]);
+            response.setHeader("Location", headers[2]);
+        }catch(Exception exc){
+            logger.error("Во время создания отчёта произошла ошибка: ", exc);
+            return String.format(COMMON_ERROR_MESSAGE, "создания отчёта");
+        }
+        return "";
     }
 
 }

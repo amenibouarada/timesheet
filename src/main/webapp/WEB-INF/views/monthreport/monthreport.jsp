@@ -34,58 +34,59 @@
         var projectListWithOwnerDivision = ${projectListWithOwnerDivision};
         var managerMapJson = ${managerList};
 
+        <sec:authorize access="hasRole('ROLE_ADMIN')">
         function makeReport(tabNum) {
             var year = dojo.byId("monthreport_year").value;
             var month = dojo.byId("monthreport_month").value;
             var divisionOwner = dojo.byId("overtimeTable_divisionOwnerId").value;
             var divisionEmployee = dojo.byId("overtimeTable_divisionEmployeeId").value;
 
+            var url;
+            var content;
             switch (tabNum) {
                 case 1:
-                    dojo.xhrPost({
-                        url: '<%= request.getContextPath()%>/monthreport/makeMonthReport',
-                        handleAs: "text",
-                        content: {
-                            division: monthReportTable_divisionId.value,
-                            manager: monthReportTable_managerId.value,
-                            regions: "[" + getSelectValues(monthReportTable_regionListId) + "]",
-                            roles: "[" + getSelectValues(monthReportTable_projectRoleListId) + "]",
-                            year: year,
-                            month: month
-                        },
-                        preventCache: false,
-                        load: function (response, ioargs) {
-                            window.location.href = ioargs.xhr.getResponseHeader('Location');
-                        },
-                        error: function () {
-                            console.log('submitReportForm panic!');
-                        }
-                    });
+                    url = '<%= request.getContextPath()%>/monthreport/makeMonthReport';
+                    content = {
+                        division: monthReportTable_divisionId.value,
+                        manager: monthReportTable_managerId.value,
+                        regions: "[" + getSelectValues(monthReportTable_regionListId) + "]",
+                        roles: "[" + getSelectValues(monthReportTable_projectRoleListId) + "]",
+                        year: year,
+                        month: month
+                    };
                     break;
                 case 2:
-                    dojo.xhrPost({
-                        url: '<%= request.getContextPath()%>/monthreport/makeOvertimeReport',
-                        handleAs: "text",
-                        content: {
+                    url = '<%= request.getContextPath()%>/monthreport/makeOvertimeReport';
+                    content = {
                             year: year,
                             month: month,
                             divisionOwner: divisionOwner,
                             divisionEmployee: divisionEmployee
-                        },
-                        preventCache: false,
-                        load: function (response, ioargs) {
-                            window.location.href = "<%= request.getContextPath()%>" + ioargs.xhr.getResponseHeader('Location');
-                        },
-                        error: function () {
-                            console.log('submitReportForm panic!');
-                        }
-                    });
+                    };
                     break;
                 case 3:
+
                     break;
             }
+            dojo.xhrPost({
+                url:        url,
+                handleAs:   "text",
+                content:    content,
+                preventCache: false,
+                load: function (response, ioargs) {
+                    if (response == ""){
+                        window.location.href = ioargs.xhr.getResponseHeader('Location');
+                    }else{
+                        alert(response);
+                    }
+                },
+                error: function () {
+                    alert("Во время формирования отчёта произошла ошибка. Обратитесь к системным администраторам.");
+                }
+            });
 
         }
+        </sec:authorize>
 
         var eventConnections = [];
         dojo.addOnLoad(function () {
@@ -93,7 +94,6 @@
             var currentDate = new Date();
             dojo.byId("monthreport_year").value = currentDate.getFullYear();
             dojo.byId("monthreport_month").value = currentDate.getMonth();
-
 
             // функция для переназначения обработчиков нажатия кнопок
             // и отображения актуальных данных

@@ -1,6 +1,8 @@
 package com.aplana.timesheet.reports.monthreports;
 
 
+import java.util.List;
+
 /**
  * Created by AAfanasyev on 16.06.2015.
  */
@@ -15,9 +17,9 @@ public class MonthXLSReport extends BaseMonthReport {
 
     protected Integer manager;
 
-    protected String regions;
+    protected List<Integer> regions;
 
-    protected String roles;
+    protected List<Integer> roles;
 
     public Integer getDivision() {
         return division;
@@ -35,19 +37,19 @@ public class MonthXLSReport extends BaseMonthReport {
         this.manager = manager;
     }
 
-    public String getRegions() {
+    public List<Integer> getRegions() {
         return regions;
     }
 
-    public void setRegions(String regions) {
+    public void setRegions(List<Integer> regions) {
         this.regions = regions;
     }
 
-    public String getRoles() {
+    public List<Integer> getRoles() {
         return roles;
     }
 
-    public void setRoles(String roles) {
+    public void setRoles(List<Integer> roles) {
         this.roles = roles;
     }
 

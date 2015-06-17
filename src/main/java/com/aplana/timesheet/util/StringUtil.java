@@ -27,6 +27,14 @@ public class StringUtil {
         return sb.toString();
     }
 
+    /**
+     * Преобразует строку вида "[1, 2, 3, 4, 5]" в List с указанными числами
+     * Используется, например, при получении множественного списка подразделений в виде json-строки.
+     *
+     * @param inputString
+     * @return
+     * @throws IOException
+     */
     public static List<Integer> stringToList(String inputString) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         List<Integer> outputList = mapper.readValue(inputString, List.class);
