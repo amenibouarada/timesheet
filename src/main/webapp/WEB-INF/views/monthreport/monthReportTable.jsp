@@ -7,9 +7,9 @@
         <td>
             <select data-dojo-id="monthReportTable_divisionId" id="monthReportTable_divisionId"
                     onchange="monthReportTable_updateManagers(); monthReportTable_reloadTable();">
-                <option value="0" label="Все">
+                <option value="0" label="Все">Все</option>
                 <c:forEach items="${divisionList}" var="division">
-                    <option value="${division.id}" label="${division.name}">
+                    <option value="${division.id}" label="${division.name}">${division.name}</option>
                 </c:forEach>
             </select>
         <td>
@@ -18,8 +18,8 @@
             <select data-dojo-id="monthReportTable_regionListId" id="monthReportTable_regionListId" multiple="true"
                     onchange="monthReportTable_reloadTable()">
                 <c:forEach items="${regionList}" var="region">
-                <option value="${region.id}" label="${region.name}">
-                    </c:forEach>
+                    <option value="${region.id}" label="${region.name}">${region.name}</option>
+                </c:forEach>
             </select>
         </td>
         <td rowspan="2">
@@ -27,8 +27,8 @@
             <select data-dojo-id="monthReportTable_projectRoleListId" id="monthReportTable_projectRoleListId" multiple="true"
                     onchange="monthReportTable_reloadTable()">
                 <c:forEach items="${projectRoleList}" var="projectRole">
-                <option value="${projectRole.id}" label="${projectRole.name}">
-                    </c:forEach>
+                    <option value="${projectRole.id}" label="${projectRole.name}">${projectRole.name}</option>
+                </c:forEach>
             </select>
         </td>
         <td>
@@ -47,7 +47,7 @@
 </sec:authorize>
 
 
-<table  data-dojo-id="monthReportTable" data-dojo-type="dojox.grid.DataGrid" autoHeight="true" autoWidth="true"
+<table  data-dojo-id="monthReportTable" data-dojo-type="dojox.grid.DataGrid" height="500px" autoWidth="true"
         onApplyEdit="monthReportTable_cellChanged" >
     <thead>
     <tr>
@@ -211,8 +211,9 @@
     }
 
     var monthReportTable_cellChanged = function(rowIndex){
-        //var item = overtimeTable.getItem(rowIndex);
-        //overtimeTable.store.setValue(item, "allAccountedOvertime", parseInt(item.overtime) + parseInt(item.premium));
+        var item = monthReportTable.getItem(rowIndex);
+        monthReportTable.store.setValue(item, "ts_all_paid", parseInt(item.ts_worked) + parseInt(item.ts_vacation));
+        monthReportTable.store.setValue(item, "ts_over_not_done", parseInt(item.ts_all_over_accounted) - parseInt(item.ts_over_done) - parseInt(item.ts_over_val_fin_comp));
     }
 
 </script>

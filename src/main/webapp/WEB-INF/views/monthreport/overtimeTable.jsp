@@ -7,9 +7,9 @@
         <td>
             <select data-dojo-id="overtimeTable_divisionOwnerId" id="overtimeTable_divisionOwnerId"
                     onchange="overtimeTable_divisionChanged();">
-                <option value="0" label="Все">
+                <option value="0" label="Все">Все</option>
                 <c:forEach items="${divisionList}" var="division">
-                    <option value="${division.id}" label="${division.name}">
+                    <option value="${division.id}" label="${division.name}">${division.name}</option>
                 </c:forEach>
             </select>
         <td>
@@ -19,9 +19,9 @@
         <td>
             <select data-dojo-id="overtimeTable_divisionEmployeeId" id="overtimeTable_divisionEmployeeId"
                     onchange="overtimeTable_divisionChanged()">
-                <option value="0" label="Все">
+                <option value="0" label="Все">Все</option>
                 <c:forEach items="${divisionList}" var="division">
-                    <option value="${division.id}" label="${division.name}">
+                    <option value="${division.id}" label="${division.name}">${division.name}</option>
                 </c:forEach>
             </select>
         <td>

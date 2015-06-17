@@ -145,12 +145,12 @@
         </td>
         <td>
             <select data-dojo-id="monthreport_year" id="monthreport_year">
-                <option value="2015" label="2015"/>
-                <option value="2016" label="2016"/>
-                <option value="2017" label="2017"/>
-                <option value="2018" label="2018"/>
-                <option value="2019" label="2019"/>
-                <option value="2020" label="2020"/>
+                <option value="2015" label="2015">2015</option>
+                <option value="2016" label="2016">2016</option>
+                <option value="2017" label="2017">2017</option>
+                <option value="2018" label="2018">2018</option>
+                <option value="2019" label="2019">2019</option>
+                <option value="2020" label="2020">2020</option>
             </select>
         </td>
 
