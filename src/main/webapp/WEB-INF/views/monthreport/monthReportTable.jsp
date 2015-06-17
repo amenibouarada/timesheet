@@ -142,6 +142,12 @@
     }
 
     function monthReportTable_reloadTable(){
+        if (monthReportTable.store.isDirty()){
+            if ( ! confirm("В таблице были изменения. Вы уверены, что хотите обновить данные не записав текущие?")){
+                return;
+            }
+        }
+
         var year = dojo.byId("monthreport_year").value;
         var month = dojo.byId("monthreport_month").value;
         var divisionId  = dojo.byId("monthReportTable_divisionId") ?
