@@ -214,6 +214,9 @@ function checkVacation() {
 }
 
 function updateCountVacationDaysForPeriod() {
+    // ToDo реализовать позднее, когда появится необходимость
+    return true;
+
     var countDaysElement = dojo.byId("countDays");
     var fromDate = dojo.byId("calFromDate").value;
     var vacationType = dojo.byId("types").value;
