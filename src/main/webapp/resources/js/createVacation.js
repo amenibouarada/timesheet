@@ -165,7 +165,7 @@ function checkVacation() {
     var errorField = dojo.byId("errorField");
     if (vacationType != EnumConstants.VacationTypesEnum.WITH_PAY && vacationType != EnumConstants.VacationTypesEnum.PLANNED) {
         errorField.innerHTML = "";
-        return;
+        return true;
     }
 
     var result = true;
