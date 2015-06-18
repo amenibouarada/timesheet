@@ -161,6 +161,11 @@ function validate() {
 }
 
 function checkVacation() {
+    // ToDo реализовать позднее, когда появится необходимость
+    return true;
+
+
+
     var vacationType = dojo.byId("types").value;
     var errorField = dojo.byId("errorField");
     if (vacationType != EnumConstants.VacationTypesEnum.WITH_PAY && vacationType != EnumConstants.VacationTypesEnum.PLANNED) {
