@@ -49,9 +49,10 @@ public abstract class AbstractQuickReportGenerator <T extends QuickReport, K ext
 
                 periodical = makePeriodicalCoversOnlyOneYear(periodical, yearBeginDate, yearEndDate);    //т.к. собираем статистику только по одному году - отрсеиваем ненужные периоды и отрезаем ненужные части нужных (которые входят в отчетный год частично)
 
+                report = addDifferentPartOfPeriodicleToMounthStatistics(report, periodical);
+
                 if (periodicalIsFullyInPeriod(periodBeginDate, periodEndDate, periodical)) {    //период попадает в отчетный месяц, не выходя за его границы
                     report = addCommonPartOfPeriodicleToMounthStatistics(report, periodical);
-                    report = addDifferentPartOfPeriodicleToMounthStatistics(report, periodical);
                 }
                 else if (periodicalCrossesTheBeginningOfTheMounth(periodBeginDate, periodical)) {   //период попадает на отчетный месяц и на предыдущие
                     report = addCommonPartOfPartOfPeriodicleToMounthStatistics(report, periodical, periodBeginDate, periodical.getEndDate());
@@ -72,7 +73,6 @@ public abstract class AbstractQuickReportGenerator <T extends QuickReport, K ext
             }
 
             addMounthStatisticsToYearStatistics(report);
-
 
             return report;
 
