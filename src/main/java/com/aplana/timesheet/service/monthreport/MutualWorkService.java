@@ -39,14 +39,9 @@ public class MutualWorkService {
     @Autowired
     private JasperReportService jasperReportService;
 
-    public String getMutualWorks(Employee currentUser,
-                                 int year, int month, String regions, Integer divisionOwner, Integer divisionEmployee, Integer projectId) throws IOException {
+    public String getMutualWorks(int year, int month, String regions, Integer divisionOwner, Integer divisionEmployee, Integer projectId) throws IOException {
         List<MutualWork> result;
-        //if (employeeService.isEmployeeAdmin(currentUser.getId())){
         result = mutualWorkDAO.getMutualWorks(year, month, StringUtil.stringToList(regions), divisionOwner, divisionEmployee, projectId, false);
-        //}else{
-        //result = overtimeDAO.getSingleOvertime(currentUser, year, month);
-        //}
         return createMutualWorksJSON(result);
     }
 
@@ -81,22 +76,6 @@ public class MutualWorkService {
         }
 
         return mapper.writeValueAsString(mutualWorkList);
-    }
-
-    public boolean deleteMutualWorks(String jsonData) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        CollectionType mapCollectionType = mapper.getTypeFactory().constructCollectionType(List.class, Map.class);
-        List<Map<String, Object>> mutualWorks = mapper.readValue(jsonData, mapCollectionType);
-        List<Integer> idsToDelete = new ArrayList<Integer>();
-        for (Map<String, Object> mutualWorkMap : mutualWorks) {
-            Integer id = (Integer) mutualWorkMap.get("employee_id");
-            if (id != null) {
-                idsToDelete.add(id);
-            }
-        }
-        mutualWorkDAO.delete(idsToDelete);
-
-        return true;
     }
 
     public boolean saveMutualWorkTable(int year, int month, String jsonData) throws IOException {

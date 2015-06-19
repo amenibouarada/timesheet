@@ -129,15 +129,15 @@
                         eventConnections.push(dojo.connect(exportButton, "onclick", function(){makeReport(2)}));
                     </sec:authorize>
                 }
+                <sec:authorize access="hasRole('ROLE_ADMIN')">
                 if (dijit.byId('tabContainer').selectedChildWidget.id == "mutualWorkTable_tab"){
                         overtimeTable_reloadTable();
                         eventConnections.push(dojo.connect(monthreport_year,  "onchange", function(){mutualWorkTable_reloadTable()}));
                         eventConnections.push(dojo.connect(monthreport_month, "onchange", function(){mutualWorkTable_reloadTable()}));
-                    <sec:authorize access="hasRole('ROLE_ADMIN')">
                         eventConnections.push(dojo.connect(saveButton,   "onclick", function(){mutualWorkTable_save()}));
                         eventConnections.push(dojo.connect(exportButton, "onclick", function(){makeReport(3)}));
-                    </sec:authorize>
                 }
+                </sec:authorize>
             }
             // назначим слушителей переключения табов
             tabContainer.watch("selectedChildWidget", changeButtonListeners);

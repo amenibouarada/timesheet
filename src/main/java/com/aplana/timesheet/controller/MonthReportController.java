@@ -47,6 +47,10 @@ public class MonthReportController extends AbstractControllerForEmployee {
         return modelAndView;
     }
 
+    private boolean checkUserPermission(){
+        return employeeService.isEmployeeAdmin(getCurrentUser().getId());
+    }
+
     /**************************/
     /*     Блок "Табель"      */
     /**************************/
@@ -76,7 +80,7 @@ public class MonthReportController extends AbstractControllerForEmployee {
             @RequestParam("jsonData") String jsonData
     ) {
         try {
-            if (employeeService.isEmployeeAdmin(getCurrentUser().getId())){
+            if (checkUserPermission()){
                 monthReportService.saveMonthReportTable(year, month, jsonData);
             }else{
                 return NO_PERMISSION_MESSAGE;
@@ -100,7 +104,7 @@ public class MonthReportController extends AbstractControllerForEmployee {
             @RequestParam("jsonData") String jsonData
     ){
         try{
-            if (employeeService.isEmployeeAdmin(getCurrentUser().getId())){
+            if (checkUserPermission()){
                 overtimeService.saveOvertimeTable(year, month, jsonData);
             }else{
                 return NO_PERMISSION_MESSAGE;
@@ -118,7 +122,7 @@ public class MonthReportController extends AbstractControllerForEmployee {
             @RequestParam("jsonData") String jsonData
     ){
         try{
-            if (employeeService.isEmployeeAdmin(getCurrentUser().getId())){
+            if (checkUserPermission()){
                 overtimeService.deleteOvertimes(jsonData);
             }else{
                 return NO_PERMISSION_MESSAGE;
@@ -161,29 +165,14 @@ public class MonthReportController extends AbstractControllerForEmployee {
             @RequestParam("projectId") Integer projectId
     ) {
         try {
-            return mutualWorkService.getMutualWorks(getCurrentUser(), year, month, regions, divisionOwner, divisionEmployee, projectId);
+            if ( ! checkUserPermission()){
+                return NO_PERMISSION_MESSAGE;
+            }
+            return mutualWorkService.getMutualWorks(year, month, regions, divisionOwner, divisionEmployee, projectId);
         } catch (IOException e) {
             e.printStackTrace();
             return "[]";
         }
-    }
-
-    @RequestMapping(value = "/deleteMutualWork", produces = "text/plain;charset=UTF-8")
-    @ResponseBody
-    public String deleteMutualWorks(
-            @RequestParam("jsonData") String jsonData
-    ){
-        try{
-            if (employeeService.isEmployeeAdmin(getCurrentUser().getId())){
-                mutualWorkService.deleteMutualWorks(jsonData);
-            }else{
-                return NO_PERMISSION_MESSAGE;
-            }
-        }catch (Exception exc){
-            exc.printStackTrace();
-            return String.format(COMMON_ERROR_MESSAGE, "удаления");
-        }
-        return "Строки успешно удалены";
     }
 
     @RequestMapping(value = "/saveMutualWorkTable", produces = "text/plain;charset=UTF-8")
@@ -194,11 +183,10 @@ public class MonthReportController extends AbstractControllerForEmployee {
             @RequestParam("jsonData") String jsonData
     ){
         try{
-            if (employeeService.isEmployeeAdmin(getCurrentUser().getId())){
-                mutualWorkService.saveMutualWorkTable(year, month, jsonData);
-            }else{
+            if ( ! checkUserPermission()){
                 return NO_PERMISSION_MESSAGE;
             }
+            mutualWorkService.saveMutualWorkTable(year, month, jsonData);
         }catch (Exception exc){
             exc.printStackTrace();
             return String.format(COMMON_ERROR_MESSAGE, "сохранения");
@@ -208,7 +196,7 @@ public class MonthReportController extends AbstractControllerForEmployee {
 
     @RequestMapping(value = "/prepareReport3Data", produces = "application/octet-stream")
     @ResponseBody
-    public void prepareReport3Data(
+    public String prepareReport3Data(
             @RequestParam("beginDate") String beginDate,
             @RequestParam("endDate") String endDate,
             @RequestParam("region") Integer region,
@@ -219,7 +207,15 @@ public class MonthReportController extends AbstractControllerForEmployee {
             HttpServletResponse response,
             HttpServletRequest request
     )throws JReportBuildError, IOException {
-        mutualWorkService.prepareReport3Data(beginDate, endDate, region, divisionOwner, divisionEmployee, projectId, employeeId, response, request);
+        if ( ! checkUserPermission()){
+            return NO_PERMISSION_MESSAGE;
+        }
+        try{
+            mutualWorkService.prepareReport3Data(beginDate, endDate, region, divisionOwner, divisionEmployee, projectId, employeeId, response, request);
+        } catch (Exception exc){
+            // ToDo
+        }
+        return "";
     }
 
     /**************************/
@@ -236,20 +232,17 @@ public class MonthReportController extends AbstractControllerForEmployee {
             HttpServletResponse response)
     {
         try{
-            String [] headers;
-            if (employeeService.isEmployeeAdmin(getCurrentUser().getId())){
-                headers = monthReportExcelService.makeOvertimeReport(year, month, divisionOwner, divisionEmployee);
-            }else{
+            if ( ! checkUserPermission()){
                 return NO_PERMISSION_MESSAGE;
             }
+            String [] headers = monthReportExcelService.makeOvertimeReport(year, month, divisionOwner, divisionEmployee);
             response.setContentType(headers[0]);
             response.setHeader("Content-Disposition",headers[1]);
             response.setHeader("Location", headers[2]);
-            return "";
         }catch(Exception exc){
-            logger.error("Во время создания отчёта произошла ошибка: ", exc);
-            return String.format(COMMON_ERROR_MESSAGE, "создания отчёта") + "\nОписание проблемы: " + exc.getMessage();
+            return handleExcelReportError(exc);
         }
+        return "";
     }
 
     @RequestMapping(value = "/makeMonthReport", produces = "text/plain;charset=UTF-8")
@@ -264,18 +257,15 @@ public class MonthReportController extends AbstractControllerForEmployee {
             HttpServletResponse response) throws JReportBuildError
     {
         try{
-            String[] headers;
-            if (employeeService.isEmployeeAdmin(getCurrentUser().getId())){
-                headers = monthReportExcelService.makeMonthReport(division, manager, regions, roles, year, month);
-            }else{
+            if ( ! checkUserPermission()){
                 return NO_PERMISSION_MESSAGE;
             }
+            String [] headers = monthReportExcelService.makeMonthReport(division, manager, regions, roles, year, month);
             response.setContentType(headers[0]);
             response.setHeader("Content-Disposition",headers[1]);
             response.setHeader("Location", headers[2]);
         }catch(Exception exc){
-            logger.error("Во время создания отчёта произошла ошибка: ", exc);
-            return String.format(COMMON_ERROR_MESSAGE, "создания отчёта") + "\nОписание проблемы: " + exc.getMessage();
+            return handleExcelReportError(exc);
         }
         return "";
     }
@@ -292,19 +282,21 @@ public class MonthReportController extends AbstractControllerForEmployee {
             HttpServletResponse response) throws JReportBuildError
     {
         try{
-            String [] headers;
-            if (employeeService.isEmployeeAdmin(getCurrentUser().getId())){
-                headers = monthReportExcelService.makeMutualWorkReport(year, month, regions, divisionOwner, divisionEmployee, projectId);
-            }else{
+            if ( ! checkUserPermission()){
                 return NO_PERMISSION_MESSAGE;
             }
+            String [] headers = monthReportExcelService.makeMutualWorkReport(year, month, regions, divisionOwner, divisionEmployee, projectId);
             response.setContentType(headers[0]);
             response.setHeader("Content-Disposition",headers[1]);
             response.setHeader("Location", headers[2]);
         }catch(Exception exc){
-            logger.error("Во время создания отчёта произошла ошибка: ", exc);
-            return String.format(COMMON_ERROR_MESSAGE, "создания отчёта");
+            handleExcelReportError(exc);
         }
         return "";
+    }
+
+    private String handleExcelReportError(Exception exc){
+        logger.error("Во время создания отчёта произошла ошибка: ", exc);
+        return String.format(COMMON_ERROR_MESSAGE, "создания отчёта") + "\nОписание проблемы: " + exc.getMessage();
     }
 }

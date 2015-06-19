@@ -7,7 +7,7 @@ import javax.persistence.*;
  */
 
 @Entity
-@Table(name = "outstaffing_data") // на самом деле это view
+@Table(name = "mutual_work_data") // на самом деле это view
 public class MutualWork {
 
     @Column(name = "year")

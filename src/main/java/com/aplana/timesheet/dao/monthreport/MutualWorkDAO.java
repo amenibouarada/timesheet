@@ -33,7 +33,7 @@ public class MutualWorkDAO {
     public List<MutualWork> getMutualWorks(int year, int month, List<Integer> regions, Integer divisionOwner, Integer divisionEmployee, Integer projectId, boolean typeListObject) {
 
         String queryString = typeListObject ?
-                "SELECT * FROM outstaffing_data WHERE year = :year AND month = :month " :
+                "SELECT * FROM mutual_work_data WHERE year = :year AND month = :month " :
                 "FROM MutualWork WHERE year = :year AND month = :month ";
 
         boolean ownerDivSet = false;
@@ -79,13 +79,5 @@ public class MutualWorkDAO {
             query.setParameter("regions", regions);
         }
         return query.getResultList();
-    }
-
-    @Transactional
-    public void delete(List<Integer> ids) {
-        for (Integer employee_id : ids) {
-            entityManager.remove(entityManager.find(MutualWork.class, employee_id));
-        }
-        entityManager.flush();
     }
 }
