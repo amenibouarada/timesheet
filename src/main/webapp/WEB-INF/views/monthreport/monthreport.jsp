@@ -131,7 +131,7 @@
                 }
                 <sec:authorize access="hasRole('ROLE_ADMIN')">
                 if (dijit.byId('tabContainer').selectedChildWidget.id == "mutualWorkTable_tab"){
-                        overtimeTable_reloadTable();
+                        mutualWorkTable_reloadTable();
                         eventConnections.push(dojo.connect(monthreport_year,  "onchange", function(){mutualWorkTable_reloadTable()}));
                         eventConnections.push(dojo.connect(monthreport_month, "onchange", function(){mutualWorkTable_reloadTable()}));
                         eventConnections.push(dojo.connect(saveButton,   "onclick", function(){mutualWorkTable_save()}));
