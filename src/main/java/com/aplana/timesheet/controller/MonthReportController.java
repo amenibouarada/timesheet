@@ -43,6 +43,10 @@ public class MonthReportController extends AbstractControllerForEmployee {
         return modelAndView;
     }
 
+    private boolean checkUserPermission(){
+        return employeeService.isEmployeeAdmin(getCurrentUser().getId());
+    }
+
     /**************************/
     /*     Блок "Табель"      */
     /**************************/
@@ -72,7 +76,7 @@ public class MonthReportController extends AbstractControllerForEmployee {
             @RequestParam("jsonData") String jsonData
     ) {
         try {
-            if (employeeService.isEmployeeAdmin(getCurrentUser().getId())){
+            if (checkUserPermission()){
                 monthReportService.saveMonthReportTable(year, month, jsonData);
             }else{
                 return NO_PERMISSION_MESSAGE;
@@ -96,7 +100,7 @@ public class MonthReportController extends AbstractControllerForEmployee {
             @RequestParam("jsonData") String jsonData
     ){
         try{
-            if (employeeService.isEmployeeAdmin(getCurrentUser().getId())){
+            if (checkUserPermission()){
                 overtimeService.saveOvertimeTable(year, month, jsonData);
             }else{
                 return NO_PERMISSION_MESSAGE;
@@ -114,7 +118,7 @@ public class MonthReportController extends AbstractControllerForEmployee {
             @RequestParam("jsonData") String jsonData
     ){
         try{
-            if (employeeService.isEmployeeAdmin(getCurrentUser().getId())){
+            if (checkUserPermission()){
                 overtimeService.deleteOvertimes(jsonData);
             }else{
                 return NO_PERMISSION_MESSAGE;
@@ -157,6 +161,9 @@ public class MonthReportController extends AbstractControllerForEmployee {
             HttpServletResponse response)
     {
         try{
+            if ( ! checkUserPermission()){
+                return NO_PERMISSION_MESSAGE;
+            }
             String [] headers = monthReportExcelService.makeOvertimeReport(year, month, divisionOwner, divisionEmployee);
             response.setContentType(headers[0]);
             response.setHeader("Content-Disposition",headers[1]);
@@ -179,6 +186,9 @@ public class MonthReportController extends AbstractControllerForEmployee {
             HttpServletResponse response) throws JReportBuildError
     {
         try{
+            if ( ! checkUserPermission()){
+                return NO_PERMISSION_MESSAGE;
+            }
             String [] headers = monthReportExcelService.makeMonthReport(division, manager, regions, roles, year, month);
             response.setContentType(headers[0]);
             response.setHeader("Content-Disposition",headers[1]);
