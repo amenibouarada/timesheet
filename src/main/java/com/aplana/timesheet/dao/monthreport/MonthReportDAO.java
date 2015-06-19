@@ -101,8 +101,7 @@ public class MonthReportDAO {
         List result = query.getResultList();
         if (result.size() == 0){ // создадим новый
             MonthReport newMonthReport = new MonthReport(year, month, divisionDAO.find(division));
-            entityManager.merge(newMonthReport);
-            entityManager.flush();
+            entityManager.persist(newMonthReport);
             return newMonthReport;
         }else{
             return (MonthReport)result.get(0);
@@ -118,8 +117,7 @@ public class MonthReportDAO {
         List result = query.getResultList();
         if (result.size() == 0){ // создадим новый
             MonthReportDetail newMonthReportDetail = new MonthReportDetail(monthReport, employee);
-            entityManager.merge(newMonthReportDetail);
-            entityManager.flush();
+            entityManager.persist(newMonthReportDetail);
             return newMonthReportDetail;
         }else{
             return (MonthReportDetail)result.get(0);

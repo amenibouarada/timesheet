@@ -113,24 +113,28 @@ public class MonthReportService {
             MonthReportDetail monthReportDetail = monthReportDAO.findOrCreateMonthReportDetail(monthReport, employee);
             monthReportDetail.setMonthReport(monthReport);
             monthReportDetail.setEmployee(employee);
-            // ToDo упростить
-            monthReportDetail.setTsWorked(
-                    (monthReportMap.get("ts_worked") instanceof Integer) ? new Double((Integer)monthReportMap.get("ts_worked")) : (Double)monthReportMap.get("ts_worked")
-            );
-            monthReportDetail.setTsIllness(
-                    (monthReportMap.get("ts_illness") instanceof Integer) ? new Double((Integer)monthReportMap.get("ts_illness")) : (Double)monthReportMap.get("ts_illness")
-            );
-            monthReportDetail.setTsOverValFinComp(
-                    (monthReportMap.get("ts_over_val_fin_comp") instanceof Integer) ? new Double((Integer) monthReportMap.get("ts_over_val_fin_comp")) : (Double) monthReportMap.get("ts_over_val_fin_comp")
-            );
-            monthReportDetail.setTsVacationAvail(
-                    (monthReportMap.get("ts_vacation_avail") instanceof Integer) ? new Double((Integer)monthReportMap.get("ts_vacation_avail")) : (Double)monthReportMap.get("ts_vacation_avail")
-            );
+            monthReportDetail.setTsWorked(          getDoubleValue(monthReportMap.get("ts_worked")));
+            monthReportDetail.setTsIllness(         getDoubleValue(monthReportMap.get("ts_illness")));
+            monthReportDetail.setTsOverValFinComp(  getDoubleValue(monthReportMap.get("ts_over_val_fin_comp")));
+            monthReportDetail.setTsVacationAvail(   getDoubleValue(monthReportMap.get("ts_vacation_avail")));
 
             monthReportDAO.save(monthReportDetail);
         }
 
         return true;
+    }
+
+    private Double getDoubleValue(Object value){
+        if (value instanceof Integer){
+            return new Double((Integer)value);
+        }
+        if (value instanceof String){
+            if (value == "null"){
+                return null;
+            }
+            return new Double((String)value);
+        }
+        return (Double)value;
     }
 
 }
