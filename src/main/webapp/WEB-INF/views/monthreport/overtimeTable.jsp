@@ -137,11 +137,15 @@
 
     function overtimeTable_addRows(overtime_list){
         for(var i=0; i < overtime_list.length; i++){
-            try{
-                overtimeTable.store.newItem(overtime_list[i]);
-            }catch(exc){
-                // ToDo сделать нормальную проверку, на то, что сотрудник уже добавлен
-            }
+            var newItem = overtime_list[i];
+            overtimeTable.store.fetch( {query: {identifier: newItem.identifier}, queryOptions: {deep: true},
+                onComplete: function (items) {
+                    if (items.length == 0){ // ранее не было, добавляем
+                        overtimeTable.store.newItem(newItem);
+                        return;
+                    }
+                }
+            }) ;
         }
     }
 
