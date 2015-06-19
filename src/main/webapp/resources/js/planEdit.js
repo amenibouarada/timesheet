@@ -71,6 +71,8 @@ function recalcColumns(myStoreObject, inRowIndex) {
     myStoreObject.items[inRowIndex][SUMMARY + _PLAN][0] = Math.round(monthPlan * percent_of_charge / 100) + "/" + monthPlan;
 }
 
+
+// ToDo перенести в общие методы
 function updateManagerList(id) {
     if (id == null) {
         id = dojo.byId(DIVISION_ID).value;

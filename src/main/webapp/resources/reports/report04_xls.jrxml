@@ -24,17 +24,15 @@
 		<groupHeader>
 			<band height="13">
 				<textField>
-					<reportElement uuid="3ac522bf-7e44-4c02-9f27-cd830fdf400b" style="Group Header 1" x="0" y="0" width="179" height="13"/>
-					<textElement/>
+					<reportElement style="Group Header 1" x="0" y="0" width="179" height="13" uuid="3ac522bf-7e44-4c02-9f27-cd830fdf400b"/>
 					<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement uuid="74d81f66-27fa-49c3-9ff7-bfe2c7914782" style="Group Header 1" x="179" y="0" width="107" height="13"/>
-					<textElement/>
+					<reportElement style="Group Header 1" x="179" y="0" width="107" height="13" uuid="74d81f66-27fa-49c3-9ff7-bfe2c7914782"/>
 					<textFieldExpression><![CDATA[$F{role}]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement uuid="ac375746-2193-4435-a9d6-4d261035fd22" style="Group Header 1" x="286" y="0" width="169" height="13"/>
+					<reportElement style="Group Header 1" x="286" y="0" width="169" height="13" uuid="ac375746-2193-4435-a9d6-4d261035fd22"/>
 					<textElement textAlignment="Center"/>
 					<textFieldExpression><![CDATA[$F{region_name}]]></textFieldExpression>
 				</textField>
@@ -44,17 +42,17 @@
 	<title>
 		<band height="125" splitType="Stretch">
 			<staticText>
-				<reportElement uuid="e176eae3-8e13-4c8b-900a-0ea89219d71c" style="Title" x="0" y="0" width="555" height="77"/>
+				<reportElement style="Title" x="0" y="0" width="555" height="77" uuid="e176eae3-8e13-4c8b-900a-0ea89219d71c"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle"/>
 				<text><![CDATA[Отчет №4. Сотрудники, не отправившие отчет]]></text>
 			</staticText>
 			<textField>
-				<reportElement uuid="96a2b191-242e-4ea8-91e2-30359f66fa24" style="SubTitle" x="0" y="77" width="555" height="24"/>
+				<reportElement style="SubTitle" x="0" y="77" width="555" height="24" uuid="96a2b191-242e-4ea8-91e2-30359f66fa24"/>
 				<textElement textAlignment="Center"/>
 				<textFieldExpression><![CDATA["Регион : "+ $P{reportParams}.wellFormedRegionList()]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement uuid="cc50cbf7-759f-458d-98a8-d74ca4cc3889" style="SubTitle" x="0" y="101" width="555" height="24"/>
+				<reportElement style="SubTitle" x="0" y="101" width="555" height="24" uuid="cc50cbf7-759f-458d-98a8-d74ca4cc3889"/>
 				<textElement textAlignment="Center"/>
 				<textFieldExpression><![CDATA["с " + DateTimeUtil.formatDateString($P{reportParams}.getBeginDate()) +
 " по " + DateTimeUtil.formatDateString($P{reportParams}.getEndDate())]]></textFieldExpression>
@@ -67,22 +65,20 @@
 	<columnHeader>
 		<band height="13" splitType="Stretch">
 			<staticText>
-				<reportElement uuid="666f9751-4e11-4d41-8559-2cdb8683501f" style="Column header" x="0" y="0" width="179" height="13"/>
-				<textElement/>
+				<reportElement style="Column header" x="0" y="0" width="179" height="13" uuid="666f9751-4e11-4d41-8559-2cdb8683501f"/>
 				<text><![CDATA[Сотрудник]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="e5b65ba5-f077-43f9-94c3-0783569fcd1e" style="Column header" x="179" y="0" width="107" height="13"/>
-				<textElement/>
+				<reportElement style="Column header" x="179" y="0" width="107" height="13" uuid="e5b65ba5-f077-43f9-94c3-0783569fcd1e"/>
 				<text><![CDATA[Роль]]></text>
 			</staticText>
-            <staticText>
-				<reportElement uuid="40124c18-d007-470b-befd-f869c224b5b7" style="Column header" x="286" y="0" width="169" height="13"/>
+			<staticText>
+				<reportElement style="Column header" x="286" y="0" width="169" height="13" uuid="40124c18-d007-470b-befd-f869c224b5b7"/>
 				<textElement textAlignment="Center"/>
 				<text><![CDATA[Регион]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="40124c18-d007-470b-befd-f869c224b5b7" style="Column header" x="455" y="0" width="100" height="13"/>
+				<reportElement style="Column header" x="455" y="0" width="100" height="13" uuid="40124c18-d007-470b-befd-f869c224b5b7"/>
 				<textElement textAlignment="Center"/>
 				<text><![CDATA[Дни]]></text>
 			</staticText>
@@ -91,22 +87,20 @@
 	<detail>
 		<band height="13">
 			<textField>
-				<reportElement uuid="7a7e6366-f415-4c0a-a4b5-ff5dd916d517" style="Detail" x="0" y="0" width="179" height="13"/>
-				<textElement/>
+				<reportElement style="Detail" x="0" y="0" width="179" height="13" uuid="7a7e6366-f415-4c0a-a4b5-ff5dd916d517"/>
 				<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement uuid="45695fec-f37f-41d4-81fa-99e0ec759649" style="Detail" x="179" y="0" width="107" height="13"/>
-				<textElement/>
+				<reportElement style="Detail" x="179" y="0" width="107" height="13" uuid="45695fec-f37f-41d4-81fa-99e0ec759649"/>
 				<textFieldExpression><![CDATA[$F{role}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement uuid="ac375746-2193-4435-a9d6-4d261035fd22" style="Detail" x="286" y="0" width="169" height="13"/>
+				<reportElement style="Detail" x="286" y="0" width="169" height="13" uuid="ac375746-2193-4435-a9d6-4d261035fd22"/>
 				<textElement textAlignment="Center"/>
 				<textFieldExpression><![CDATA[$F{region_name}]]></textFieldExpression>
 			</textField>
 			<textField pattern="dd.MM.yyyy">
-				<reportElement uuid="ac375746-2193-4435-a9d6-4d261035fd22" style="Detail" x="455" y="0" width="100" height="13"/>
+				<reportElement style="Detail" x="455" y="0" width="100" height="13" uuid="ac375746-2193-4435-a9d6-4d261035fd22"/>
 				<textElement textAlignment="Center"/>
 				<textFieldExpression><![CDATA[$F{date}]]></textFieldExpression>
 			</textField>

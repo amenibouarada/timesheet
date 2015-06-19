@@ -813,6 +813,7 @@ function refreshEmployeeGrid(employeeId, yearStart, monthStart, yearEnd, monthEn
     grid.render();
 }
 
+// ToDo использовать метод из addEmployeesForm.js
 // Обновляет список сотрудников на форме добавления сотрудников
 function updateAdditionEmployeeList() {
     var divisionId = dojo.byId("divisionId").value;

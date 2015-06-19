@@ -90,8 +90,6 @@ public class JasperReportDAO {
     private EntityManager entityManager;
     @Autowired
     private TSPropertyProvider propertyProvider;
-
-
     public HibernateQueryResultDataSource getReportData(BaseReport report) {
         List resultList     = getResultList     ( report );
 

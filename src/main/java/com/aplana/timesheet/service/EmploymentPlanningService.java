@@ -61,11 +61,13 @@ public class EmploymentPlanningService {
         modelAndView.addObject("yearList", yearList);
         modelAndView.addObject("monthList", calendarService.getMonthList(2013));
         modelAndView.addObject("projectList", getProjects(currentUser.getDivision().getId(), date));
-        modelAndView.addObject("divisionList", divisionService.getDivisions());
-        modelAndView.addObject("managerList", employeeService.getManagerListJson());
-        modelAndView.addObject("projectRoleList", projectRoleService.getProjectRoles());
-        modelAndView.addObject("regionList", regionService.getRegions());
-        modelAndView.addObject("all", ALL);
+        modelAndView.addObject("divisionList", divisionService.getDivisions());   // ToDo заполнение этих полей вынести в
+        modelAndView.addObject("managerList", employeeService.getManagerListJson());   // ToDo
+        modelAndView.addObject("projectRoleList", projectRoleService.getProjectRoles());// ToDo отдельный сервис
+        modelAndView.addObject("regionList", regionService.getRegions());                 //   ToDo и отнаследоваться
+        modelAndView.addObject("all", ALL);    // ToDo
+        // Todo com.aplana.timesheet.controller.AbstractControllerForEmployee.fillMavForAddEmployeesForm
+
 
         AddEmployeeForm addEmployeeForm = new AddEmployeeForm();
         addEmployeeForm.setDivisionId(1);
@@ -117,7 +119,7 @@ public class EmploymentPlanningService {
         JsonArrayNodeBuilder builder = anArrayBuilder();
 
         for (Employee employee : employeePlanList.keySet()){
-            JsonObjectNodeBuilder employeePlanNodeBuilder = employeeService.getEmployeeAsJSONBulder(employee);
+            JsonObjectNodeBuilder employeePlanNodeBuilder = employeeService.getEmployeeAsJSONBulder(employee, false);
             employeePlanNodeBuilder.withField("planList", getEmployeePlanAsJSON(employeePlanList.get(employee)));
             builder.withElement(employeePlanNodeBuilder);
         }

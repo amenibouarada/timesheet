@@ -10,6 +10,7 @@ import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.system.security.SecurityService;
 import com.aplana.timesheet.util.DateTimeUtil;
 import com.aplana.timesheet.util.JsonUtil;
+import com.aplana.timesheet.util.StringUtil;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.export.*;
 import org.apache.commons.io.IOUtils;
@@ -58,27 +59,9 @@ public class JasperReportService {
 
     private final HashMap<String, JasperReport> compiledReports = new HashMap<String, JasperReport>();
 
-    private String toUTF8String(String s) throws UnsupportedEncodingException {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < s.length(); i++) {
-            char c = s.charAt(i);
-            if (c >= 0 && c <= 255 && !Character.isWhitespace(c)) {
-                sb.append(c);
-            } else {
-                byte[] b;
-                b = Character.toString(c).getBytes("utf-8");
-                for (byte aB : b) {
-                    int k = aB;
-                    if (k < 0) k += 256;
-                    sb.append("%").append(Integer.toHexString(k).toUpperCase());
-                }
-            }
-        }
-        return sb.toString();
-    }
-
     @Transactional(readOnly = true)
-    public boolean makeReport(TSJasperReport report, int printtype, HttpServletResponse response, HttpServletRequest httpServletRequest) throws JReportBuildError {
+    public boolean makeReport(TSJasperReport report, int printtype, boolean typeOfResult, HttpServletResponse response,
+                              HttpServletRequest httpServletRequest) throws JReportBuildError {
 
         report.checkParams();
 
@@ -87,6 +70,7 @@ public class JasperReportService {
         String dateNorm = DateTimeUtil.formatDateIntoViewFormat(calendar.getTime());
 
         String reportNameFile = report.getJRNameFile() + " " + dateNorm;
+
         try {
             JasperReport jasperReport = getReport(reportName + (printtype == REPORT_PRINTTYPE_XLS ? "_xls" : ""));
 
@@ -123,7 +107,7 @@ public class JasperReportService {
             response.setContentType(contentType);
             if (printtype != REPORT_PRINTTYPE_HTML) {
                 String agent = httpServletRequest.getHeader("user-agent");
-                String contentDisposition = "attachment; filename=\"" + toUTF8String(reportNameFile + suffix) + "\"";
+                String contentDisposition = "attachment; filename=\"" + StringUtil.toUTF8String(reportNameFile + suffix) + "\"";
                 if (agent.contains("Firefox")) {
                     contentDisposition = "attachment; filename=\"" + MimeUtility.encodeText(reportNameFile + suffix, "UTF8", "B") + "\"";
                 }
@@ -131,7 +115,7 @@ public class JasperReportService {
                 response.setHeader("Content-Disposition", contentDisposition);
             } else {
                 String agent = httpServletRequest.getHeader("user-agent");
-                String contentDisposition = "filename=\"" + toUTF8String(reportNameFile + suffix) + "\"";
+                String contentDisposition = "filename=\"" + StringUtil.toUTF8String(reportNameFile + suffix) + "\"";
                 if (agent.contains("Firefox")) {
                     contentDisposition = "filename=\"" + MimeUtility.encodeText(reportNameFile + suffix, "UTF8", "B") + "\"";
                 }
@@ -172,9 +156,20 @@ public class JasperReportService {
                     JRXlsExporter xlsExporter = new JRXlsExporter();
                     xlsExporter.setParameter(JRExporterParameter.JASPER_PRINT, jasperPrint);
                     xlsExporter.setParameter(JExcelApiExporterParameter.IS_DETECT_CELL_TYPE, true);
-                    xlsExporter.setParameter(JRExporterParameter.OUTPUT_STREAM, outputStream);
+                    // ToDo попробовать реализовать общий класс с методами MonthReportExcelService
+                    if (typeOfResult) {
+                        final String outputFile = context.getRealPath("/resources/reports/generatedReports/report3ForMutualWork" + dateNorm + ".xls");
+                        for (File reportFile : new File(context.getRealPath("/resources/reports/generatedReports/")).listFiles()) {
+                            if (reportFile.isFile()) {
+                                reportFile.delete();
+                            }
+                        }
+                        xlsExporter.setParameter(JRExporterParameter.OUTPUT_FILE_NAME, outputFile);
+                        response.setHeader("Location", "/resources/reports/generatedReports/report3ForMutualWork" + dateNorm + ".xls");
+                    } else {
+                        xlsExporter.setParameter(JRExporterParameter.OUTPUT_STREAM, outputStream);
+                    }
                     xlsExporter.exportReport();
-
                     break;
                 }
             }
@@ -332,7 +327,7 @@ public class JasperReportService {
         response.setContentType("application/vnd.ms-excel");
 
         String agent = request.getHeader("user-agent");
-        String contentDisposition = "attachment; filename=\"" + toUTF8String(reportExportStatus.getReportName() + suffix) + "\"";
+        String contentDisposition = "attachment; filename=\"" + StringUtil.toUTF8String(reportExportStatus.getReportName() + suffix) + "\"";
         if (agent.contains("Firefox")) {
             contentDisposition = "attachment; filename=\"" + MimeUtility.encodeText(reportExportStatus.getReportName() + suffix, "UTF8", "B") + "\"";
         }

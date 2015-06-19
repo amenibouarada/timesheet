@@ -286,12 +286,3 @@ function fillProjectListByDivChange(division) {
     validateAndAddNewOption(hasAny, division, projectSelect);
     projectSelect.value = 0;
 }
-
-function validateAndAddNewOption(hasAny, divisionId, select) {
-    if (hasAny || divisionId == 0) {
-        insertEmptyOptionWithCaptionInHead(select, "Все");
-    } else {
-        insertEmptyOptionWithCaptionInHead(select, "Пусто");
-        dojo.attr(select, {disabled: "disabled"});
-    }
-}

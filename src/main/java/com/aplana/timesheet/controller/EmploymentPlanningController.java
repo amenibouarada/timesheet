@@ -85,6 +85,7 @@ public class EmploymentPlanningController {
     }
 
     /* Возвращает JSON для форме выбора сотрудников */
+//    ToDo поменять адрес запроса и переместить в EmployeeController
     @RequestMapping(value="/employmentPlanning/getAddEmployeeListAsJSON", produces = "text/plain;charset=UTF-8")
     @ResponseBody
     public String showAddEmployeeList(@ModelAttribute(AddEmployeeForm.ADD_FORM) AddEmployeeForm form) {
@@ -95,7 +96,7 @@ public class EmploymentPlanningController {
                 form.getProjectRoleListId(),
                 form.getManagerId());
 
-        return employeeService.getEmployeeListAsJson(employeeList);
+        return employeeService.getEmployeeListAsJson(employeeList, true);
     }
 
     /* Возвращает JSON для форме выбора сотрудников */

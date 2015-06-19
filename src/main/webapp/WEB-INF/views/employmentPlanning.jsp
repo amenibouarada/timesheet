@@ -2,6 +2,7 @@
 
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%--ToDo тоже удалить--%>
 <%@ page import="static com.aplana.timesheet.form.AddEmployeeForm.*" %>
 <%@ page import="static com.aplana.timesheet.util.ResourceUtils.getResRealPath" %>
 <%@ page import="static com.aplana.timesheet.system.constants.TimeSheetConstants.DOJO_PATH" %>
@@ -126,6 +127,7 @@
     </div>
 </div>
 
+<%--ToDo брать этот кусок из общих jsp--%>
 <div data-dojo-type="dijit/Dialog" data-dojo-id="employeeDialog" title="Добавить сотрудника">
 
     <form:form commandName="<%= ADD_FORM %>">

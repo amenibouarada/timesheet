@@ -1,0 +1,336 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="OvertimeReport" pageWidth="920" pageHeight="1000" orientation="Landscape" columnWidth="880" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="6ae905b3-cfb1-47a7-bda5-eeede374788b">
+	<property name="net.sf.jasperreports.print.keep.full.text" value="true"/>
+	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.x" value="108"/>
+	<property name="ireport.y" value="0"/>
+	<import value="com.aplana.timesheet.util.DateTimeUtil"/>
+	<style name="Normal" isDefault="true" fontSize="8" pdfEncoding="Cp1251"/>
+	<style name="Title" style="Normal" fontName="Arial" fontSize="26"/>
+	<style name="SubTitle" style="Normal" forecolor="#666666"/>
+	<style name="SubTitle 2" style="Normal" forecolor="#666666"/>
+	<style name="Group Header 1" style="Normal" forecolor="#666666"/>
+	<style name="Group Header 2" style="Normal" forecolor="#666666" isBold="true"/>
+	<style name="Group Header 3" style="Normal" forecolor="#000000" isBold="true"/>
+	<style name="Column header" style="Normal" forecolor="#666666" isBold="true"/>
+	<style name="Detail" style="Normal" backcolor="#FF0000"/>
+	<parameter name="reportParams" class="com.aplana.timesheet.reports.monthreports.OvertimeReport"/>
+	<field name="division" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="employee" class="java.lang.String"/>
+	<field name="region" class="java.lang.String"/>
+	<field name="project" class="java.lang.String"/>
+	<field name="overtime" class="java.math.BigDecimal"/>
+	<field name="premium" class="java.math.BigDecimal"/>
+	<field name="comment" class="java.lang.String"/>
+	<variable name="total" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{overtime}.add($F{premium})]]></variableExpression>
+		<initialValueExpression><![CDATA[$F{overtime}]]></initialValueExpression>
+	</variable>
+	<group name="Group1">
+		<groupExpression><![CDATA[]]></groupExpression>
+		<groupHeader>
+			<band height="26">
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="0" y="0" width="142" height="26" uuid="8b91353a-0909-4287-9fb0-3ac1c9fe353b"/>
+					<box>
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="142" y="0" width="143" height="26" uuid="080b8cb8-f4f6-418f-90b0-3298e979d12d"/>
+					<box>
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="285" y="0" width="74" height="26" uuid="d694ba4f-439d-4438-a0b7-dc6235f318c8"/>
+					<box>
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="359" y="0" width="175" height="26" uuid="ece521b7-76b9-4960-a4ad-3568bcaf47f5"/>
+					<box>
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="534" y="0" width="70" height="26" uuid="085db2d5-fe95-4b0f-8360-f9eb355a47f2"/>
+					<box>
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="604" y="0" width="76" height="26" uuid="ca2dbc3e-f0ab-448a-ae73-f94aaa10192f"/>
+					<box>
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="680" y="0" width="100" height="26" uuid="c5535938-7c16-454d-8ee9-942d5e476ed6"/>
+					<box>
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="780" y="0" width="100" height="26" uuid="330de2b3-bc5a-4896-86ce-77aa7ba6deac"/>
+					<box>
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+				</textField>
+			</band>
+		</groupHeader>
+	</group>
+	<title>
+		<band height="79" splitType="Stretch">
+			<staticText>
+				<reportElement style="Title" x="0" y="0" width="880" height="53" uuid="e176eae3-8e13-4c8b-900a-0ea89219d71c"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Переработки сотрудников]]></text>
+			</staticText>
+			<textField>
+				<reportElement style="SubTitle" x="178" y="53" width="583" height="26" forecolor="#3333FF" uuid="ad4b1cfa-4166-4d3e-85d1-bbeb44768027"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["за " + DateTimeUtil.monthsNominative[$P{reportParams}.getMonth()-1] + " " + Integer.toString($P{reportParams}.getYear()) + " года"]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="37" splitType="Stretch">
+			<staticText>
+				<reportElement style="Column header" x="142" y="0" width="143" height="37" forecolor="#000000" uuid="e5b65ba5-f077-43f9-94c3-0783569fcd1e"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[Подразделение]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="Column header" x="285" y="0" width="74" height="37" forecolor="#000000" uuid="40124c18-d007-470b-befd-f869c224b5b7"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[Регион]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="359" y="0" width="175" height="37" uuid="6b0ebecd-3b49-47e0-8c70-80d83b0eb6d2"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Проект/Пресейл]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="534" y="0" width="70" height="37" uuid="eff20369-2e4f-4434-b61e-49eb7df8ed02"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Переработки]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="680" y="0" width="100" height="37" uuid="3420e35b-370c-4cd6-9489-2697d5d5e221"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Всего учтённых переработок  и премий]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="780" y="0" width="100" height="37" uuid="979136aa-67f4-41e3-83c8-cb2b2754eed7"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Комментарий]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="604" y="0" width="76" height="37" uuid="6974b48a-a65d-42fb-98e9-2db0bedccb72"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Премия]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="Column header" x="0" y="0" width="142" height="37" forecolor="#000000" uuid="666f9751-4e11-4d41-8559-2cdb8683501f"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[Сотрудник]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="26">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="0" y="0" width="142" height="26" uuid="0c3357c3-a5a2-469d-ad05-4bd12bd8903a"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{employee}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="142" y="0" width="143" height="26" uuid="44f5ca84-3f41-4797-8480-70376103b7f1"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{division}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="285" y="0" width="74" height="26" uuid="ad26f0a9-1486-4f70-ba37-7f54938832c2"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{region}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="359" y="0" width="175" height="26" uuid="0c3bc9bb-1917-4506-b030-422861bc8d75"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{project}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="534" y="0" width="70" height="26" uuid="e12151cb-dc7b-4bb4-9cf2-bd7fba2cd804"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{overtime}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="604" y="0" width="76" height="26" uuid="0ec14fd5-2024-4fbf-9965-682d6f95ee1f"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{premium}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="780" y="0" width="100" height="26" uuid="a45dc0c5-93ac-4c57-ac50-217a05672460"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{comment}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="680" y="0" width="100" height="26" uuid="3a36a3b4-80fa-4583-a3f1-218e8e6df449"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[String.valueOf($V{total})]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
+</jasperReport>
