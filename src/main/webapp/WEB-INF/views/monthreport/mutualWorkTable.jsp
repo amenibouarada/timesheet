@@ -5,7 +5,7 @@
         <td><label>Подразделение владельца</label></td>
         <td>
             <select data-dojo-id="mutualWorkTable_divisionOwnerId" id="mutualWorkTable_divisionOwnerId"
-                    onchange="mutualWorkTable_divisionChanged();">
+                    onchange="mutualWorkTable_divisionChanged(); mutualWorkTable_reloadTable();">
                 <option value="0" label="Все">Все</option>
                     <c:forEach items="${divisionList}" var="division">
                 <option value="${division.id}" label="${division.name}">${division.name}</option>
@@ -93,8 +93,6 @@
     function mutualWorkTable_divisionChanged() {
         //ToDo изменить вызываемый метод
         fillProject(dojo.byId("mutualWorkTable_divisionOwnerId"), dojo.byId("mutualWorkTable_projectId"));
-        // обновляем таблицу
-        mutualWorkTable_reloadTable();
     }
 
     function mutualWorkTable_createStore() {
