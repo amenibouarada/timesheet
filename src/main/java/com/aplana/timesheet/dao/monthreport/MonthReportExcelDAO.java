@@ -37,7 +37,7 @@ public class MonthReportExcelDAO {
         throw new IllegalArgumentException();
     }
 
-    private HibernateQueryResultDataSource getOvertimeReportData(OvertimeReport report) {
+    private HibernateQueryResultDataSource getOvertimeReportData(OvertimeReport report) throws IOException {
 
         String queryString = "SELECT " +
                 "employee.name AS employee," +
@@ -81,11 +81,16 @@ public class MonthReportExcelDAO {
 
         List resultList = query.getResultList();
 
-        if (resultList != null && !resultList.isEmpty()) {
+
+        if (resultList == null) {
+            return null;
+        } else {
+            if (resultList.isEmpty()){
+                // TODO заменить на свой экзепшен
+                throw new IOException("Нет данных для отображения");
+            }
             return new HibernateQueryResultDataSource(resultList, new String[] {
                     "employee", "division", "region", "project", "overtime", "premium", "comment"});
-        } else {
-            return null;
         }
     }
 

@@ -147,7 +147,8 @@ public class MonthReportController extends AbstractControllerForEmployee {
     /*    Блок отчеты Excel   */
     /**************************/
 
-    @RequestMapping(value = "/makeOvertimeReport" , method = RequestMethod.POST)
+    @RequestMapping(value = "/makeOvertimeReport", produces = "text/plain;charset=UTF-8")
+    @ResponseBody
     public String makeOvertimeReport(
             @RequestParam("year") Integer year,
             @RequestParam("month") Integer month,
@@ -162,12 +163,13 @@ public class MonthReportController extends AbstractControllerForEmployee {
             response.setHeader("Location", headers[2]);
         }catch(Exception exc){
             logger.error("Во время создания отчёта произошла ошибка: ", exc);
-            return String.format(COMMON_ERROR_MESSAGE, "создания отчёта");
+            return String.format(COMMON_ERROR_MESSAGE, "создания отчёта") + "\nОписание проблемы: " + exc.getMessage();
         }
         return "";
     }
 
-    @RequestMapping(value = "/makeMonthReport" , method = RequestMethod.POST)
+    @RequestMapping(value = "/makeMonthReport", produces = "text/plain;charset=UTF-8")
+    @ResponseBody
     public String makeMonthReport(
             @RequestParam("division") Integer division,
             @RequestParam("manager") Integer manager,
@@ -184,7 +186,7 @@ public class MonthReportController extends AbstractControllerForEmployee {
             response.setHeader("Location", headers[2]);
         }catch(Exception exc){
             logger.error("Во время создания отчёта произошла ошибка: ", exc);
-            return String.format(COMMON_ERROR_MESSAGE, "создания отчёта");
+            return String.format(COMMON_ERROR_MESSAGE, "создания отчёта") + "\nОписание проблемы: " + exc.getMessage();
         }
         return "";
     }

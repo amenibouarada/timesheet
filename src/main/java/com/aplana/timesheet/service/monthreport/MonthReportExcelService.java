@@ -53,7 +53,9 @@ public class MonthReportExcelService {
         return headers;
     }
 
-    public String[] makeOvertimeReport(Integer year, Integer month, Integer divisionOwner, Integer divisionEmployee) throws JReportBuildError {
+    public String[] makeOvertimeReport(Integer year, Integer month, Integer divisionOwner, Integer divisionEmployee)
+            throws JReportBuildError, IOException
+    {
         OvertimeReport overtimeReport = new OvertimeReport();
         overtimeReport.setYear(year);
         overtimeReport.setMonth(month);
@@ -67,7 +69,7 @@ public class MonthReportExcelService {
 
 
     @Transactional(readOnly = true) // ToDo а если заменить на BaseMonthReport и удалить интерфейс?
-    private String[] makeMonthExcelReport(XLSJasperReport report) throws JReportBuildError {
+    private String[] makeMonthExcelReport(XLSJasperReport report) throws JReportBuildError, IOException {
 
         String[] headers;
         String reportName = report.getJRName();
@@ -75,7 +77,7 @@ public class MonthReportExcelService {
         String dateNorm = DateTimeUtil.formatDateIntoViewFormat(calendar.getTime());
 
         String reportNameFile = report.getJRNameFile() + "_" + dateNorm + ".xls";
-        final String outputFile = context.getRealPath("/resources/reports/generatedReports/" + reportNameFile + ".xls");
+        final String outputFile = context.getRealPath("/resources/reports/generatedReports/" + reportNameFile);
 
         for (File reportFile : new File(context.getRealPath("/resources/reports/generatedReports/")).listFiles()) {
             if (reportFile.isFile()) {
@@ -113,7 +115,7 @@ public class MonthReportExcelService {
         } catch (MalformedURLException e) {
             throw new JReportBuildError("Error forming report " + reportName, e);
         } catch (IOException e) {
-            throw new JReportBuildError("Error forming report " + reportName, e);
+            throw e;
         }
         return headers;
     }
