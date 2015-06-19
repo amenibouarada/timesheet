@@ -100,6 +100,7 @@
 <script type="text/javascript">
 
     dojo.addOnLoad(function(){
+        monthReportTable_createStore();
         if (dojo.byId("monthReportTable_divisionId")){
             monthReportTable_updateManagers();
             var div = getCookieValue('aplanaDivision');
@@ -109,16 +110,19 @@
     });
 
     // расскраска ячеек и проверка на существующее значение заполненности таблицы реальными данными, а не автовычисленными
+    // и добавляю подсказку
     var monthReportTable_colorCell = function(value, rowIndex, cell) {
+        var item = monthReportTable.getItem(rowIndex);
+        var calculatedValue = monthReportTable.store.getValue(item, cell.field + "_calculated", null);
+        var dispValue = "";
         if (value){
             cell.customStyles.push('color:green');
-            return value;
+            dispValue = value;
         }else{
-            var item = monthReportTable.getItem(rowIndex);
-            var calculatedValue = monthReportTable.store.getValue(item, cell.field + "_calculated", null);
             cell.customStyles.push('color:red');
-            return calculatedValue;
+            dispValue = calculatedValue;
         }
+        return "<span title='Значение по умолчанию: " + calculatedValue + "'>" + dispValue + "</span>"
     }
 
     function monthReportTable_createStore(){
@@ -142,7 +146,7 @@
     }
 
     function monthReportTable_reloadTable(){
-        if (monthReportTable.store.isDirty()){
+        if (monthReportTable.store && monthReportTable.store.isDirty()){
             if ( ! confirm("В таблице были изменения. Вы уверены, что хотите обновить данные не записав текущие?")){
                 return;
             }
