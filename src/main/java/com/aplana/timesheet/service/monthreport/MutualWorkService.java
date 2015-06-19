@@ -1,11 +1,17 @@
 package com.aplana.timesheet.service.monthreport;
 
+import com.aplana.timesheet.dao.EmployeeDAO;
 import com.aplana.timesheet.dao.JasperReportDAO;
+import com.aplana.timesheet.dao.ProjectDAO;
+import com.aplana.timesheet.dao.entity.Employee;
+import com.aplana.timesheet.dao.entity.Project;
+import com.aplana.timesheet.dao.entity.monthreport.MutualWork;
 import com.aplana.timesheet.dao.entity.monthreport.MutualWorkData;
 import com.aplana.timesheet.dao.monthreport.MutualWorkDAO;
 import com.aplana.timesheet.exception.JReportBuildError;
 import com.aplana.timesheet.reports.Report03;
 import com.aplana.timesheet.service.JasperReportService;
+import com.aplana.timesheet.util.NumberUtils;
 import com.aplana.timesheet.util.StringUtil;
 
 import org.codehaus.jackson.map.ObjectMapper;
@@ -29,11 +35,10 @@ import java.util.Map;
 @Service
 public class MutualWorkService {
 
-    @Autowired
-    private MutualWorkDAO mutualWorkDAO;
-
-    @Autowired
-    private JasperReportDAO reportDAO;
+    @Autowired private MutualWorkDAO    mutualWorkDAO;
+    @Autowired private JasperReportDAO  reportDAO;
+    @Autowired private EmployeeDAO      employeeDAO;
+    @Autowired private ProjectDAO       projectDAO;
 
     @Autowired
     private JasperReportService jasperReportService;
@@ -85,32 +90,20 @@ public class MutualWorkService {
         List<Map<String, Object>> mutualWorks = mapper.readValue(jsonData, mapCollectionType);
 
         for (Map<String, Object> mutualWorkMap : mutualWorks) {
-            MutualWorkData mutualWorkData = new MutualWorkData();
-            mutualWorkData.setYear(year);
-            mutualWorkData.setMonth(month);
-            mutualWorkData.setDivisionEmployeeId((Integer) mutualWorkMap.get("employeeId"));
-            mutualWorkData.setDivisionEmployeeName((String) mutualWorkMap.get("employeeName"));
-            mutualWorkData.setDivisionOwnerId((Integer) mutualWorkMap.get("divisionOwnerId"));
-            mutualWorkData.setDivisionOwnerName((String) mutualWorkMap.get("divisionOwnerName"));
-            mutualWorkData.setProjectId((Integer) mutualWorkMap.get("projectId"));
-            mutualWorkData.setProjectName((String) mutualWorkMap.get("projectName"));
-            mutualWorkData.setProjectTypeId((Integer) mutualWorkMap.get("projectTypeId"));
-            mutualWorkData.setProjectTypeName((String) mutualWorkMap.get("projectTypeName"));
-            mutualWorkData.setRegionId((Integer) mutualWorkMap.get("regionId"));
-            mutualWorkData.setRegionName((String) mutualWorkMap.get("regionName"));
-            mutualWorkData.setWorkDays((mutualWorkMap.get("workDays") instanceof Integer) ?
-                    new Double((Integer) mutualWorkMap.get("workDays")) : (Double) mutualWorkMap.get("workDays"));
-            mutualWorkData.setOvertimes((mutualWorkMap.get("overtimes") instanceof Integer) ?
-                    new Double((Integer) mutualWorkMap.get("overtimes")) : (Double) mutualWorkMap.get("overtimes"));
-            mutualWorkData.setCoefficient((mutualWorkMap.get("coefficient") instanceof Integer) ?
-                    new Double((Integer) mutualWorkMap.get("coefficient")) : (Double) mutualWorkMap.get("coefficient"));
-            mutualWorkData.setWorkDaysCalc((mutualWorkMap.get("workDaysCalc") instanceof Integer) ?
-                    new Double((Integer) mutualWorkMap.get("workDaysCalc")) : (Double) mutualWorkMap.get("workDaysCalc"));
-            mutualWorkData.setOvertimesCalc((mutualWorkMap.get("overtimesCalc") instanceof Integer) ?
-                    new Double((Integer) mutualWorkMap.get("overtimesCalc")) : (Double) mutualWorkMap.get("overtimesCalc"));
-            mutualWorkData.setComment((String) mutualWorkMap.get("comment"));
+            Project project = projectDAO.find((Integer) mutualWorkMap.get("projectId"));
+            Employee employee = employeeDAO.find((Integer)mutualWorkMap.get("employeeId"));
+            MutualWork mutualWork = mutualWorkDAO.findOrCreateMutualWork(employee, project);
 
-            mutualWorkDAO.save(mutualWorkData);
+            mutualWork.setYear(year);
+            mutualWork.setMonth(month);
+            mutualWork.setEmployee(employee);
+            mutualWork.setProject(project);
+            mutualWork.setWorkDays(     NumberUtils.getDoubleValue(mutualWorkMap.get("workDays")));
+            mutualWork.setOvertimes(NumberUtils.getDoubleValue(mutualWorkMap.get("overtimes")));
+            mutualWork.setCoefficient(NumberUtils.getDoubleValue(mutualWorkMap.get("coefficient")));
+            mutualWork.setComment((String) mutualWorkMap.get("comment"));
+
+            mutualWorkDAO.save(mutualWork);
         }
 
         return true;

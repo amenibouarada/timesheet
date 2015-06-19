@@ -1,5 +1,8 @@
 package com.aplana.timesheet.dao.monthreport;
 
+import com.aplana.timesheet.dao.entity.Employee;
+import com.aplana.timesheet.dao.entity.Project;
+import com.aplana.timesheet.dao.entity.monthreport.MutualWork;
 import com.aplana.timesheet.dao.entity.monthreport.MutualWorkData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,10 +27,10 @@ public class MutualWorkDAO {
     private static final Logger logger = LoggerFactory.getLogger(MutualWorkDAO.class);
 
     @Transactional
-    public void save(MutualWorkData mutualWorkData) {
-        entityManager.merge(mutualWorkData);
+    public void save(MutualWork mutualWork) {
+        entityManager.merge(mutualWork);
         entityManager.flush();
-        logger.debug("Flushed mutualWorkData object employee_id = {}", mutualWorkData.getEmployeeId());
+        logger.debug("Flushed mutualWork object id = {}", mutualWork.getId());
     }
 
     public List<MutualWorkData> getMutualWorkData(int year, int month, List<Integer> regions, Integer divisionOwner, Integer divisionEmployee, Integer projectId, boolean typeListObject) {
@@ -80,4 +83,21 @@ public class MutualWorkDAO {
         }
         return query.getResultList();
     }
+
+    @Transactional
+    public MutualWork findOrCreateMutualWork(Employee employee, Project project){
+        Query query = entityManager.
+                createQuery("FROM MutualWork WHERE employee = :employee AND project = :project")
+                .setParameter("employee", employee)
+                .setParameter("project", project);
+        List result = query.getResultList();
+        if (result.size() == 0){ // создадим новый
+            MutualWork newMutualWork = new MutualWork();
+            entityManager.persist(newMutualWork);
+            return newMutualWork;
+        }else{
+            return (MutualWork)result.get(0);
+        }
+    }
+
 }
