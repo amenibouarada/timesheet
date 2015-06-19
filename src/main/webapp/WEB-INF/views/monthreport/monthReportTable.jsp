@@ -222,8 +222,12 @@
 
     var monthReportTable_cellChanged = function(rowIndex){
         var item = monthReportTable.getItem(rowIndex);
-        monthReportTable.store.setValue(item, "ts_all_paid", parseInt(item.ts_worked) + parseInt(item.ts_vacation));
-        monthReportTable.store.setValue(item, "ts_over_not_done", parseInt(item.ts_all_over_accounted) - parseInt(item.ts_over_done) - parseInt(item.ts_over_val_fin_comp));
+        if (item.ts_worked[0]){ // проверка, что поле, от которого зависит значение - содержит реальное значение, а не по умолчанию
+            monthReportTable.store.setValue(item, "ts_all_paid", parseInt(item.ts_worked) + parseInt(item.ts_vacation));
+        }
+        if(item.ts_over_val_fin_comp[0]){ // проверка, что поле, от которого зависит значение - содержит реальное значение, а не по умолчанию
+            monthReportTable.store.setValue(item, "ts_over_not_done", parseInt(item.ts_all_over_accounted) - parseInt(item.ts_over_done) - parseInt(item.ts_over_val_fin_comp));
+        }
     }
 
 </script>
