@@ -427,7 +427,7 @@
         <profile>
             <id>test</id>
             <properties>
-                <skipTests>${skipTests}</skipTests>
+                <skipTests>true</skipTests>
             </properties>
         </profile>
     </profiles>
