@@ -8,7 +8,7 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "mutual_work_data") // на самом деле это view
-public class MutualWork {
+public class MutualWorkData {
 
     @Id
     @Column(name = "identifier")

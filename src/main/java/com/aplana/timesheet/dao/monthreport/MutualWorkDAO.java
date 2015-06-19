@@ -1,6 +1,6 @@
 package com.aplana.timesheet.dao.monthreport;
 
-import com.aplana.timesheet.dao.entity.monthreport.MutualWork;
+import com.aplana.timesheet.dao.entity.monthreport.MutualWorkData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
@@ -24,17 +24,17 @@ public class MutualWorkDAO {
     private static final Logger logger = LoggerFactory.getLogger(MutualWorkDAO.class);
 
     @Transactional
-    public void save(MutualWork mutualWork) {
-        entityManager.merge(mutualWork);
+    public void save(MutualWorkData mutualWorkData) {
+        entityManager.merge(mutualWorkData);
         entityManager.flush();
-        logger.debug("Flushed mutualWork object employee_id = {}", mutualWork.getEmployeeId());
+        logger.debug("Flushed mutualWorkData object employee_id = {}", mutualWorkData.getEmployeeId());
     }
 
-    public List<MutualWork> getMutualWorks(int year, int month, List<Integer> regions, Integer divisionOwner, Integer divisionEmployee, Integer projectId, boolean typeListObject) {
+    public List<MutualWorkData> getMutualWorkData(int year, int month, List<Integer> regions, Integer divisionOwner, Integer divisionEmployee, Integer projectId, boolean typeListObject) {
 
         String queryString = typeListObject ?
                 "SELECT * FROM mutual_work_data WHERE year = :year AND month = :month " :
-                "FROM MutualWork WHERE year = :year AND month = :month ";
+                "FROM MutualWorkData WHERE year = :year AND month = :month ";
 
         boolean ownerDivSet = false;
         boolean employeeDivSet = false;

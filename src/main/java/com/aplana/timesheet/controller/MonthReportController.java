@@ -168,7 +168,7 @@ public class MonthReportController extends AbstractControllerForEmployee {
             if ( ! checkUserPermission()){
                 return NO_PERMISSION_MESSAGE;
             }
-            return mutualWorkService.getMutualWorks(year, month, regions, divisionOwner, divisionEmployee, projectId);
+            return mutualWorkService.getMutualWorkData(year, month, regions, divisionOwner, divisionEmployee, projectId);
         } catch (IOException e) {
             e.printStackTrace();
             return "[]";

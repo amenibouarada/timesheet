@@ -12,7 +12,6 @@ import org.springframework.stereotype.Repository;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -113,7 +112,7 @@ public class MonthReportExcelDAO {
     }
 
     private HibernateQueryResultDataSource getMutualWorkReportData(MutualWorkReport report) throws JReportBuildError {
-        List resultList = mutualWorkDAO.getMutualWorks(
+        List resultList = mutualWorkDAO.getMutualWorkData(
                 report.getYear(),
                 report.getMonth(),
                 report.getRegions(),
