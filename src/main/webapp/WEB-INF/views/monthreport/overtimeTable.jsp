@@ -110,6 +110,7 @@
         var divisionOwner = dojo.byId("overtimeTable_divisionOwnerId") ? overtimeTable_divisionOwnerId.value : 0;
         var divisionEmployee = dojo.byId("overtimeTable_divisionEmployeeId") ? overtimeTable_divisionEmployeeId.value : 0;
 
+        processing();
         overtimeTable_createStore();
         dojo.xhrPost({
             url: "monthreport/getOvertimes",
@@ -121,6 +122,7 @@
             },
             handleAs: "text",
             load: function (response, ioArgs) {
+                stopProcessing();
                 var overtimes = dojo.fromJson(response);
                 dojo.forEach(overtimes, function(overtime){
                     // уникальный идентификатор, для добавления новых строк
@@ -130,6 +132,7 @@
                 overtimeTable.store.save();
             },
             error: function (response, ioArgs) {
+                stopProcessing();
                 alert(response);
             }
         });
