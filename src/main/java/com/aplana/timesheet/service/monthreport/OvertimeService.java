@@ -7,6 +7,7 @@ import com.aplana.timesheet.dao.entity.monthreport.Overtime;
 import com.aplana.timesheet.dao.monthreport.OvertimeDAO;
 import com.aplana.timesheet.enums.TypesOfActivityEnum;
 import com.aplana.timesheet.service.EmployeeService;
+import com.aplana.timesheet.util.NumberUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.type.CollectionType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,11 +43,8 @@ public class OvertimeService {
             overtime.setProject(projectDAO.find((Integer)overtimeMap.get("projectId")));
             overtime.setYear(year);
             overtime.setMonth(month);
-            // ToDo можно ли упростить?
-            overtime.setOvertime(
-                    (overtimeMap.get("overtime") instanceof Integer) ? new Double((Integer)overtimeMap.get("overtime")) : (Double)overtimeMap.get("overtime"));
-            overtime.setPremium(
-                    (overtimeMap.get("premium") instanceof Integer) ? new Double((Integer)overtimeMap.get("premium")) : (Double)overtimeMap.get("premium"));
+            overtime.setOvertime( NumberUtils.getDoubleValue(overtimeMap.get("overtime")));
+            overtime.setPremium(  NumberUtils.getDoubleValue(overtimeMap.get("premium")));
             overtime.setComment((String)overtimeMap.get("comment"));
             overtimeDAO.save(overtime);
         }
