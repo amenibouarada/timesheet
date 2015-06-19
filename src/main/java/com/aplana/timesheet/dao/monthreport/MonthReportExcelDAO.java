@@ -112,6 +112,24 @@ public class MonthReportExcelDAO {
                     "calc_over_hol_paid", "calc_over_work", "calc_worked_ill", "calc_worked_vac"});
     }
 
+    private HibernateQueryResultDataSource getMutualWorkReportData(MutualWorkReport report) throws JReportBuildError {
+        List resultList = mutualWorkDAO.getMutualWorks(
+                report.getYear(),
+                report.getMonth(),
+                report.getRegions(),
+                report.getDivisionOwner(),
+                report.getDivisionEmployee(),
+                report.getProjectId(),
+                true);
+
+        return checkResultSetAndGetData(resultList, new String[] {
+                    "year", "month", "division_owner_id", "division_owner_name",
+                    "project_id", "project_name", "project_type_id", "project_type_name",
+                    "employee_id", "employee_name", "division_employee_id", "division_employee_name",
+                    "region_id", "region_name", "work_days", "overtimes",
+                    "coefficient", "work_days_calc", "overtimes_calc", "comment"});
+    }
+
     private HibernateQueryResultDataSource checkResultSetAndGetData(List resultList, String[] fields) throws JReportBuildError {
         if (resultList == null) {
             throw new JReportBuildError("Во время выполнения запроса к БД произошла ошибка.");

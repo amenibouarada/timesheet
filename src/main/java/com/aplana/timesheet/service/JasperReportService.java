@@ -70,13 +70,6 @@ public class JasperReportService {
         String dateNorm = DateTimeUtil.formatDateIntoViewFormat(calendar.getTime());
 
         String reportNameFile = report.getJRNameFile() + " " + dateNorm;
-        final String outputFile = context.getRealPath("/resources/reports/generatedReports/report3ForMutualWork" + dateNorm + ".xls");
-
-        for (File reportFile : new File(context.getRealPath("/resources/reports/generatedReports/")).listFiles()) {
-            if (reportFile.isFile()) {
-                reportFile.delete();
-            }
-        }
 
         try {
             JasperReport jasperReport = getReport(reportName + (printtype == REPORT_PRINTTYPE_XLS ? "_xls" : ""));
@@ -163,14 +156,20 @@ public class JasperReportService {
                     JRXlsExporter xlsExporter = new JRXlsExporter();
                     xlsExporter.setParameter(JRExporterParameter.JASPER_PRINT, jasperPrint);
                     xlsExporter.setParameter(JExcelApiExporterParameter.IS_DETECT_CELL_TYPE, true);
+                    // ToDo попробовать реализовать общий класс с методами MonthReportExcelService
                     if (typeOfResult) {
+                        final String outputFile = context.getRealPath("/resources/reports/generatedReports/report3ForMutualWork" + dateNorm + ".xls");
+                        for (File reportFile : new File(context.getRealPath("/resources/reports/generatedReports/")).listFiles()) {
+                            if (reportFile.isFile()) {
+                                reportFile.delete();
+                            }
+                        }
                         xlsExporter.setParameter(JRExporterParameter.OUTPUT_FILE_NAME, outputFile);
+                        response.setHeader("Location", "/resources/reports/generatedReports/report3ForMutualWork" + dateNorm + ".xls");
                     } else {
                         xlsExporter.setParameter(JRExporterParameter.OUTPUT_STREAM, outputStream);
                     }
                     xlsExporter.exportReport();
-                    response.setHeader("Location", "/resources/reports/generatedReports/report3ForMutualWork" + dateNorm + ".xls");
-
                     break;
                 }
             }

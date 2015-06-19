@@ -13,7 +13,7 @@
             </select>
         <td>
 
-        <td rowspan="2">
+        <td rowspan="3">
             <label>Регионы </label><br>
             <select data-dojo-id="mutualWorkTable_regionListId" id="mutualWorkTable_regionListId" multiple="true"
                     onchange="mutualWorkTable_reloadTable()">
@@ -25,18 +25,6 @@
         </td>
     </tr>
     <tr>
-        <td><label>Подразделение сотрудника</label></td>
-        <td>
-            <select data-dojo-id="mutualWorkTable_divisionEmployeeId" id="mutualWorkTable_divisionEmployeeId"
-                    onchange="mutualWorkTable_divisionChanged()">
-                <option value="0" label="Все">Все</option>
-                    <c:forEach items="${divisionList}" var="division">
-                <option value="${division.id}" label="${division.name}">${division.name}</option>
-                </c:forEach>
-            </select>
-        <td>
-    </tr>
-    <tr>
         <td><label>Проект</label></td>
         <td>
             <select id="mutualWorkTable_projectId" name="mutualWorkTable_projectId" class = "without_dojo"
@@ -45,12 +33,23 @@
             </select>
         </td>
     </tr>
+    <tr>
+        <td><label>Подразделение сотрудника</label></td>
+        <td>
+            <select data-dojo-id="mutualWorkTable_divisionEmployeeId" id="mutualWorkTable_divisionEmployeeId"
+                    onchange="mutualWorkTable_reloadTable()">
+                <option value="0" label="Все">Все</option>
+                    <c:forEach items="${divisionList}" var="division">
+                <option value="${division.id}" label="${division.name}">${division.name}</option>
+                </c:forEach>
+            </select>
+        <td>
+    </tr>
 </table>
 
 
 
-<table data-dojo-id="mutualWorkTable" data-dojo-type="dojox.grid.DataGrid"
-       onApplyEdit="mutualWorkTable_cellChanged" autoHeight="true">
+<table data-dojo-id="mutualWorkTable" data-dojo-type="dojox.grid.DataGrid" autoHeight="true">
     <thead>
     <tr>
         <th field="divisionOwnerName" width="200px">Центр-владелец</th>
@@ -74,7 +73,6 @@
 <script type="text/javascript">
 
     var projectListWithOwnerDivision = ${projectListWithOwnerDivision};
-    var fullProjectList = ${projectListWithOwnerDivision};
 
     dojo.addOnLoad(function () {
         mutualWorkTable_createStore();
@@ -84,16 +82,16 @@
         div = div ? div : 0;
         dojo.byId("mutualWorkTable_divisionOwnerId").value = div;
         dojo.byId("mutualWorkTable_divisionEmployeeId").value = div;
+        //ToDo изменить вызываемый метод
         fillProject(dojo.byId("mutualWorkTable_divisionOwnerId"), dojo.byId("mutualWorkTable_projectId"));
-
     });
 
     var addImage = function(value, rowIndex, cell) {
-
         return "<a href='#' onclick='getReport3("+rowIndex+")'><img src='/resources/img/view.png' width='25' height='25'/></a>";
     }
 
     function mutualWorkTable_divisionChanged() {
+        //ToDo изменить вызываемый метод
         fillProject(dojo.byId("mutualWorkTable_divisionOwnerId"), dojo.byId("mutualWorkTable_projectId"));
         // обновляем таблицу
         mutualWorkTable_reloadTable();
@@ -116,14 +114,14 @@
         }
         var divisionOwner = dojo.byId("mutualWorkTable_divisionOwnerId").value;
         var divisionEmployee = dojo.byId("mutualWorkTable_divisionEmployeeId").value;
-        var regions = dojo.byId("mutualWorkTable_regionListId") ?
-        "[" + getSelectValues(mutualWorkTable_regionListId) + "]" : "[]";
+        var regions = "[" + getSelectValues(mutualWorkTable_regionListId) + "]";
         var year = dojo.byId("monthreport_year").value;
         var month = dojo.byId("monthreport_month").value;
         var projectId = dojo.byId("mutualWorkTable_projectId").value;
 
         mutualWorkTable_createStore();
 
+        processing();
         dojo.xhrPost({
             url: "monthreport/getMutualWorks",
             content: {
@@ -136,31 +134,24 @@
             },
             handleAs: "text",
             load: function (response, ioArgs) {
+                stopProcessing();
                 var mutualWorks = dojo.fromJson(response);
                 dojo.forEach(mutualWorks, function (mutualWork) {
                     // уникальный идентификатор, для добавления новых строк
                     mutualWork.identifier = mutualWork.employeeId + "_" + mutualWork.projectId;
+                    mutualWorkTable.store.newItem(mutualWork);
                 });
-                mutualWorkTable_addRows(mutualWorks);
                 mutualWorkTable.store.save();
             },
             error: function (response, ioArgs) {
+                stopProcessing();
                 alert(response);
             }
         });
     }
 
-    function mutualWorkTable_addRows(mutualWork_list) {
-        for (var i = 0; i < mutualWork_list.length; i++) {
-            try {
-                mutualWorkTable.store.newItem(mutualWork_list[i]);
-            } catch (exc) {
-                // ToDo сделать нормальную проверку, на то, что сотрудник уже добавлен
-            }
-        }
-    }
-
     function mutualWorkTable_save() {
+        processing();
         mutualWorkTable.store.fetch({
             query: {}, queryOptions: {deep: true},
             onComplete: function (items) {
@@ -175,20 +166,18 @@
                     },
                     handleAs: "text",
                     load: function (response, ioArgs) {
+                        stopProcessing();
                         alert(response);
                         mutualWorkTable_reloadTable();
                     },
                     error: function (response, ioArgs) {
+                        stopProcessing();
                         alert(response);
                     }
                 });
             }
         });
     }
-
-    var mutualWorkTable_cellChanged = function (rowIndex) {
-        var item = mutualWorkTable.getItem(rowIndex);
-    };
 
     function getReport3(rowIndex) {
         processing();
@@ -199,6 +188,8 @@
         var employeeId = parseInt(item.employeeId);
         var year = dojo.byId("monthreport_year").value;
         var month = dojo.byId("monthreport_month").value;
+
+        //ToDo создать новые методы, выполняющие эти методы в DateTimeUtils
         var projectId = parseInt(item.projectId);
         var firstDate = new Date(year, month + 1, 1);
         var firstDay = firstDate.getDate();

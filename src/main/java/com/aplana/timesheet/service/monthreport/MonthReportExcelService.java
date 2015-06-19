@@ -89,8 +89,8 @@ public class MonthReportExcelService {
         return headers;
     }
 
-    @Transactional(readOnly = true) // ToDo а если заменить на BaseMonthReport и удалить интерфейс?
-    private String[] makeMonthExcelReport(XLSJasperReport report) throws JReportBuildError, IOException {
+    @Transactional(readOnly = true)
+    private String[] makeMonthExcelReport(BaseMonthReport report) throws JReportBuildError, IOException {
 
         String[] headers;
         String reportName = report.getJRName();
