@@ -36,6 +36,7 @@
 
         <sec:authorize access="hasRole('ROLE_ADMIN')">
         function makeReport(tabNum) {
+            processing();
             var year = dojo.byId("monthreport_year").value;
             var month = dojo.byId("monthreport_month").value;
             var divisionOwner = dojo.byId("overtimeTable_divisionOwnerId").value;
@@ -74,6 +75,7 @@
                 content:    content,
                 preventCache: false,
                 load: function (response, ioargs) {
+                    stopProcessing();
                     if (response == ""){
                         window.location.href = ioargs.xhr.getResponseHeader('Location');
                     }else{
@@ -81,6 +83,7 @@
                     }
                 },
                 error: function () {
+                    stopProcessing();
                     alert("Во время формирования отчёта произошла ошибка. Обратитесь к системным администраторам.");
                 }
             });
