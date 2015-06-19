@@ -7,6 +7,7 @@ import com.aplana.timesheet.dao.entity.monthreport.MonthReportData;
 import com.aplana.timesheet.dao.entity.monthreport.MonthReportDetail;
 import com.aplana.timesheet.dao.monthreport.MonthReportDAO;
 import com.aplana.timesheet.service.EmployeeService;
+import com.aplana.timesheet.util.NumberUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.type.CollectionType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -113,28 +114,14 @@ public class MonthReportService {
             MonthReportDetail monthReportDetail = monthReportDAO.findOrCreateMonthReportDetail(monthReport, employee);
             monthReportDetail.setMonthReport(monthReport);
             monthReportDetail.setEmployee(employee);
-            monthReportDetail.setTsWorked(          getDoubleValue(monthReportMap.get("ts_worked")));
-            monthReportDetail.setTsIllness(         getDoubleValue(monthReportMap.get("ts_illness")));
-            monthReportDetail.setTsOverValFinComp(  getDoubleValue(monthReportMap.get("ts_over_val_fin_comp")));
-            monthReportDetail.setTsVacationAvail(   getDoubleValue(monthReportMap.get("ts_vacation_avail")));
+            monthReportDetail.setTsWorked(          NumberUtils.getDoubleValue(monthReportMap.get("ts_worked")));
+            monthReportDetail.setTsIllness(         NumberUtils.getDoubleValue(monthReportMap.get("ts_illness")));
+            monthReportDetail.setTsOverValFinComp(  NumberUtils.getDoubleValue(monthReportMap.get("ts_over_val_fin_comp")));
+            monthReportDetail.setTsVacationAvail(   NumberUtils.getDoubleValue(monthReportMap.get("ts_vacation_avail")));
 
             monthReportDAO.save(monthReportDetail);
         }
 
         return true;
     }
-
-    private Double getDoubleValue(Object value){
-        if (value instanceof Integer){
-            return new Double((Integer)value);
-        }
-        if (value instanceof String){
-            if (value == "null"){
-                return null;
-            }
-            return new Double((String)value);
-        }
-        return (Double)value;
-    }
-
 }
