@@ -59,11 +59,11 @@
     dojo.addOnLoad(function(){
         overtimeTable_createStore();
         if (dojo.byId("overtimeTable_divisionOwnerId")){
-            overtimeTable_divisionChanged();
             var div = getCookieValue('aplanaDivision');
             div = div ? div : 0;
             dojo.byId("overtimeTable_divisionOwnerId").value = div;
             dojo.byId("overtimeTable_divisionEmployeeId").value = div;
+            overtimeTable_divisionChanged();
         }
     });
 
