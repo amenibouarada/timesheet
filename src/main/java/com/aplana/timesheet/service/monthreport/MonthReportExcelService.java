@@ -2,9 +2,9 @@ package com.aplana.timesheet.service.monthreport;
 
 import com.aplana.timesheet.dao.monthreport.MonthReportExcelDAO;
 import com.aplana.timesheet.exception.JReportBuildError;
+import com.aplana.timesheet.reports.monthreports.BaseMonthReport;
 import com.aplana.timesheet.reports.monthreports.MonthXLSReport;
 import com.aplana.timesheet.reports.monthreports.OvertimeReport;
-import com.aplana.timesheet.reports.monthreports.XLSJasperReport;
 import com.aplana.timesheet.util.DateTimeUtil;
 import com.aplana.timesheet.util.StringUtil;
 import net.sf.jasperreports.engine.*;
@@ -39,7 +39,9 @@ public class MonthReportExcelService {
 
     private final HashMap<String, JasperReport> compiledReports = new HashMap<String, JasperReport>();
 
-    public String[] makeMonthReport(Integer division, Integer manager, String regions, String roles, Integer year, Integer month) throws JReportBuildError, IOException {
+    public String[] makeMonthReport(Integer division, Integer manager, String regions, String roles, Integer year, Integer month)
+            throws JReportBuildError, IOException
+    {
         MonthXLSReport monthXLSReport = new MonthXLSReport();
         monthXLSReport.setDivision(division);
         monthXLSReport.setManager(manager);
@@ -67,9 +69,8 @@ public class MonthReportExcelService {
         return headers;
     }
 
-
-    @Transactional(readOnly = true) // ToDo а если заменить на BaseMonthReport и удалить интерфейс?
-    private String[] makeMonthExcelReport(XLSJasperReport report) throws JReportBuildError, IOException {
+    @Transactional(readOnly = true)
+    private String[] makeMonthExcelReport(BaseMonthReport report) throws JReportBuildError, IOException {
 
         String[] headers;
         String reportName = report.getJRName();
@@ -79,6 +80,7 @@ public class MonthReportExcelService {
         String reportNameFile = report.getJRNameFile() + "_" + dateNorm + ".xls";
         final String outputFile = context.getRealPath("/resources/reports/generatedReports/" + reportNameFile);
 
+        // ToDo решить в какой момент удалять файлы
         for (File reportFile : new File(context.getRealPath("/resources/reports/generatedReports/")).listFiles()) {
             if (reportFile.isFile()) {
                 reportFile.delete();
@@ -110,12 +112,14 @@ public class MonthReportExcelService {
 
             headers = new String[]{contentType, contentDisposition, url};
 
+        } catch (JReportBuildError e){
+            throw e;
         } catch (JRException e) {
             throw new JReportBuildError("Error forming report " + reportName, e);
         } catch (MalformedURLException e) {
             throw new JReportBuildError("Error forming report " + reportName, e);
         } catch (IOException e) {
-            throw e;
+            throw new JReportBuildError("Error forming report " + reportName, e);
         }
         return headers;
     }

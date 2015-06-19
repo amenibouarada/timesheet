@@ -4,6 +4,7 @@ import com.aplana.timesheet.reports.monthreports.BaseMonthReport;
 import com.aplana.timesheet.reports.monthreports.MonthXLSReport;
 import com.aplana.timesheet.reports.monthreports.OvertimeReport;
 import com.aplana.timesheet.util.HibernateQueryResultDataSource;
+import com.aplana.timesheet.exception.JReportBuildError;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.aplana.timesheet.util.StringUtil;
 import org.springframework.stereotype.Repository;
@@ -27,7 +28,7 @@ public class MonthReportExcelDAO {
     @Autowired
     private MonthReportDAO monthReportDAO;
 
-    public HibernateQueryResultDataSource getReportData(BaseMonthReport baseMonthReport) throws IOException {
+    public HibernateQueryResultDataSource getReportData(BaseMonthReport baseMonthReport) throws JReportBuildError {
 
         if (baseMonthReport instanceof OvertimeReport) {
             return getOvertimeReportData((OvertimeReport) baseMonthReport);
@@ -37,7 +38,7 @@ public class MonthReportExcelDAO {
         throw new IllegalArgumentException();
     }
 
-    private HibernateQueryResultDataSource getOvertimeReportData(OvertimeReport report) throws IOException {
+    private HibernateQueryResultDataSource getOvertimeReportData(OvertimeReport report) throws JReportBuildError {
 
         String queryString = "SELECT " +
                 "employee.name AS employee," +
@@ -79,22 +80,11 @@ public class MonthReportExcelDAO {
             query.setParameter("divisionEmployee", report.getDivisionEmployee());
         }
 
-        List resultList = query.getResultList();
-
-
-        if (resultList == null) {
-            return null;
-        } else {
-            if (resultList.isEmpty()){
-                // TODO заменить на свой экзепшен
-                throw new IOException("Нет данных для отображения");
-            }
-            return new HibernateQueryResultDataSource(resultList, new String[] {
-                    "employee", "division", "region", "project", "overtime", "premium", "comment"});
-        }
+        return checkResultSetAndGetData(query.getResultList(), new String[] {
+                "employee", "division", "region", "project", "overtime", "premium", "comment"});
     }
 
-    private HibernateQueryResultDataSource getMonthReportData(MonthXLSReport report) throws IOException {
+    private HibernateQueryResultDataSource getMonthReportData(MonthXLSReport report) throws JReportBuildError {
         List resultList = monthReportDAO.getMonthReportData(
                 report.getDivision(),
                 report.getManager(),
@@ -104,8 +94,7 @@ public class MonthReportExcelDAO {
                 report.getMonth(),
                 true);
 
-        if (resultList != null && !resultList.isEmpty()) {
-            return new HibernateQueryResultDataSource(resultList, new String[]{
+        return checkResultSetAndGetData(resultList, new String[] {
                     "year", "month", "employee_id", "employee_name",
                     "region_id", "region_name", "division_id", "division_name",
                     "job_id", "manager_id", "ts_worked_calculated", "ts_worked",
@@ -116,9 +105,15 @@ public class MonthReportExcelDAO {
                     "calc_vacation_with", "calc_vacation_without", "calc_vacation_hol_paid", "calc_illness",
                     "calc_illness_with", "calc_illness_without", "calc_over", "calc_over_hol",
                     "calc_over_hol_paid", "calc_over_work", "calc_worked_ill", "calc_worked_vac"});
-        } else {
-            return null;
-        }
+    }
 
+    private HibernateQueryResultDataSource checkResultSetAndGetData(List resultList, String[] fields) throws JReportBuildError {
+        if (resultList == null) {
+            throw new JReportBuildError("Во время выполнения запроса к БД произошла ошибка.");
+        }
+        if (resultList.isEmpty()){
+            throw new JReportBuildError("Нет данных для отображения.");
+        }
+        return new HibernateQueryResultDataSource(resultList, fields);
     }
 }

@@ -162,8 +162,7 @@ public class MonthReportController extends AbstractControllerForEmployee {
             response.setHeader("Content-Disposition",headers[1]);
             response.setHeader("Location", headers[2]);
         }catch(Exception exc){
-            logger.error("Во время создания отчёта произошла ошибка: ", exc);
-            return String.format(COMMON_ERROR_MESSAGE, "создания отчёта") + "\nОписание проблемы: " + exc.getMessage();
+            return handleExcelReportError(exc);
         }
         return "";
     }
@@ -185,10 +184,14 @@ public class MonthReportController extends AbstractControllerForEmployee {
             response.setHeader("Content-Disposition",headers[1]);
             response.setHeader("Location", headers[2]);
         }catch(Exception exc){
-            logger.error("Во время создания отчёта произошла ошибка: ", exc);
-            return String.format(COMMON_ERROR_MESSAGE, "создания отчёта") + "\nОписание проблемы: " + exc.getMessage();
+            return handleExcelReportError(exc);
         }
         return "";
+    }
+
+    private String handleExcelReportError(Exception exc){
+        logger.error("Во время создания отчёта произошла ошибка: ", exc);
+        return String.format(COMMON_ERROR_MESSAGE, "создания отчёта") + "\nОписание проблемы: " + exc.getMessage();
     }
 
 }

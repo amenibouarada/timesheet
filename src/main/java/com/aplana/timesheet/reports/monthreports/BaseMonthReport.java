@@ -1,6 +1,7 @@
 package com.aplana.timesheet.reports.monthreports;
 
 import com.aplana.timesheet.dao.monthreport.MonthReportExcelDAO;
+import com.aplana.timesheet.exception.JReportBuildError;
 import net.sf.jasperreports.engine.JRDataSource;
 
 import java.io.IOException;
@@ -8,18 +9,25 @@ import java.io.IOException;
 /**
  * Created by AAfanasyev on 16.06.2015.
  */
-public abstract class BaseMonthReport implements XLSJasperReport {
+public abstract class BaseMonthReport{
 
     protected MonthReportExcelDAO monthReportExcelDAO;
-
-    @Override
-    public void setReportDAO(MonthReportExcelDAO monthReportExcelDAO) {
-        this.monthReportExcelDAO = monthReportExcelDAO;
-    }
 
     protected Integer year;
 
     protected Integer month;
+
+    public abstract String getJRName();
+
+    public abstract String getJRNameFile();
+
+    public JRDataSource prepareDataSource() throws JReportBuildError {
+      return monthReportExcelDAO.getReportData(this);
+    }
+
+    public void setReportDAO(MonthReportExcelDAO monthReportExcelDAO) {
+        this.monthReportExcelDAO = monthReportExcelDAO;
+    }
 
     public Integer getYear() {
         return year;
@@ -37,8 +45,4 @@ public abstract class BaseMonthReport implements XLSJasperReport {
         this.month = month;
     }
 
-    @Override
-    public JRDataSource prepareDataSource() throws IOException {
-      return monthReportExcelDAO.getReportData(this);
-    }
 }
