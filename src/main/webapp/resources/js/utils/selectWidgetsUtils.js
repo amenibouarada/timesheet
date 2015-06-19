@@ -89,6 +89,57 @@ function fillProjectList(rowIndex, projectState) {
     sortSelectOptions(projectSelect);
 }
 
+//TODO: Впредь использовать универсальную функцию заполнения списка проектов, доработав fillProjectListByDivision
+function fillProject(division, projectSelect) {
+
+    if (division.value == null)
+        division.value = 0;
+
+    var divisionId = division.value;
+    var hasAny = false;
+
+    //Очищаем список проектов.
+    projectSelect.options.length = 0;
+    if (divisionId == 0) {
+        for (var i = 0; i < projectListWithOwnerDivision.length; i++) {
+
+            if (projectListWithOwnerDivision[i].active == 'true') {
+                projectOption = dojo.doc.createElement("option");
+                dojo.attr(projectOption, {
+                    value: projectListWithOwnerDivision[i].id
+                });
+                projectOption.title = projectListWithOwnerDivision[i].value;
+                projectOption.innerHTML = projectListWithOwnerDivision[i].value;
+                projectSelect.appendChild(projectOption);
+                hasAny = true;
+            }
+        }
+    } else {
+        dojo.removeAttr(projectSelect, "disabled");
+        dojo.removeAttr(division, "disabled");
+        for (var i = 0; i < projectListWithOwnerDivision.length; i++) {
+
+                if ((projectListWithOwnerDivision[i].active == 'true') &&
+                    divisionId == projectListWithOwnerDivision[i].ownerDivisionId) {
+                    projectOption = dojo.doc.createElement("option");
+                    dojo.attr(projectOption, {
+                        value: projectListWithOwnerDivision[i].id
+                    });
+                    projectOption.title = projectListWithOwnerDivision[i].value;
+                    projectOption.innerHTML = projectListWithOwnerDivision[i].value;
+                    projectSelect.appendChild(projectOption);
+                    hasAny = true;
+                }
+
+        }
+    }
+    sortSelectOptions(projectSelect);
+    validateAndAddNewOption(hasAny, divisionId, projectSelect);
+    projectSelect.value = 0;
+
+}
+
+
 /* Заполняет список доступных проектов/пресейлов */
 // ToDo необходимо попробовать заменить на функцию fillProjectList (и саму функцию (fillProjectList) переименовать)
 // Сделать универсальным, убрать disabled места

@@ -5,6 +5,7 @@ import com.aplana.timesheet.form.AddEmployeeForm;
 import com.aplana.timesheet.form.MonthReportForm;
 import com.aplana.timesheet.service.monthreport.MonthReportExcelService;
 import com.aplana.timesheet.service.monthreport.MonthReportService;
+import com.aplana.timesheet.service.monthreport.MutualWorkService;
 import com.aplana.timesheet.service.monthreport.OvertimeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
@@ -27,6 +29,8 @@ public class MonthReportController extends AbstractControllerForEmployee {
     private MonthReportExcelService monthReportExcelService;
     @Autowired
     private OvertimeService overtimeService;
+    @Autowired
+    private MutualWorkService mutualWorkService;
 
     private static String COMMON_ERROR_MESSAGE =
             "Во время %s произошла ошибка. Пожалуйста, свяжитесть с администраторами системы.";
@@ -146,6 +150,81 @@ public class MonthReportController extends AbstractControllerForEmployee {
         }
     }
 
+    /*********************************/
+    /*   Блок "Взаимная занятость"   */
+    /********************************/
+
+    @RequestMapping(value = "/getMutualWorks", produces = "text/plain;charset=UTF-8")
+    @ResponseBody
+    public String getMutualWorks(
+            @RequestParam("year") Integer year,
+            @RequestParam("month") Integer month,
+            @RequestParam("regions") String regions,
+            @RequestParam("divisionOwner") Integer divisionOwner,
+            @RequestParam("divisionEmployee") Integer divisionEmployee,
+            @RequestParam("projectId") Integer projectId
+    ) {
+        try {
+            return mutualWorkService.getMutualWorks(getCurrentUser(), year, month, regions, divisionOwner, divisionEmployee, projectId);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "[]";
+        }
+    }
+
+    @RequestMapping(value = "/deleteMutualWork", produces = "text/plain;charset=UTF-8")
+    @ResponseBody
+    public String deleteMutualWorks(
+            @RequestParam("jsonData") String jsonData
+    ){
+        try{
+            if (employeeService.isEmployeeAdmin(getCurrentUser().getId())){
+                mutualWorkService.deleteMutualWorks(jsonData);
+            }else{
+                return NO_PERMISSION_MESSAGE;
+            }
+        }catch (Exception exc){
+            exc.printStackTrace();
+            return String.format(COMMON_ERROR_MESSAGE, "удаления");
+        }
+        return "Строки успешно удалены";
+    }
+
+    @RequestMapping(value = "/saveMutualWorkTable", produces = "text/plain;charset=UTF-8")
+    @ResponseBody
+    public String saveMutualWorkTable(
+            @RequestParam("year") Integer year,
+            @RequestParam("month") Integer month,
+            @RequestParam("jsonData") String jsonData
+    ){
+        try{
+            if (employeeService.isEmployeeAdmin(getCurrentUser().getId())){
+                mutualWorkService.saveMutualWorkTable(year, month, jsonData);
+            }else{
+                return NO_PERMISSION_MESSAGE;
+            }
+        }catch (Exception exc){
+            exc.printStackTrace();
+            return String.format(COMMON_ERROR_MESSAGE, "сохранения");
+        }
+        return "Сохранено успешно.";
+    }
+
+    @RequestMapping(value = "/prepareReport3Data", produces = "application/octet-stream")
+    @ResponseBody
+    public void prepareReport3Data(
+            @RequestParam("beginDate") String beginDate,
+            @RequestParam("endDate") String endDate,
+            @RequestParam("region") Integer region,
+            @RequestParam("divisionOwner") Integer divisionOwner,
+            @RequestParam("divisionEmployee") Integer divisionEmployee,
+            @RequestParam("projectId") Integer projectId,
+            @RequestParam("employeeId") Integer employeeId,
+            HttpServletResponse response,
+            HttpServletRequest request
+    )throws JReportBuildError, IOException {
+        mutualWorkService.prepareReport3Data(beginDate, endDate, region, divisionOwner, divisionEmployee, projectId, employeeId, response, request);
+    }
 
     /**************************/
     /*    Блок отчеты Excel   */
@@ -168,10 +247,10 @@ public class MonthReportController extends AbstractControllerForEmployee {
             response.setContentType(headers[0]);
             response.setHeader("Content-Disposition",headers[1]);
             response.setHeader("Location", headers[2]);
+            return "";
         }catch(Exception exc){
             return handleExcelReportError(exc);
         }
-        return "";
     }
 
     @RequestMapping(value = "/makeMonthReport", produces = "text/plain;charset=UTF-8")
@@ -204,4 +283,31 @@ public class MonthReportController extends AbstractControllerForEmployee {
         return String.format(COMMON_ERROR_MESSAGE, "создания отчёта") + "\nОписание проблемы: " + exc.getMessage();
     }
 
+    @RequestMapping(value = "/makeMutualWorkReport" , produces = "text/plain;charset=UTF-8", method = RequestMethod.POST)
+    @ResponseBody
+    public String makeMutualWorkReport(
+            @RequestParam("year") Integer year,
+            @RequestParam("month") Integer month,
+            @RequestParam("regions") String regions,
+            @RequestParam("divisionOwner") Integer divisionOwner,
+            @RequestParam("divisionEmployee") Integer divisionEmployee,
+            @RequestParam("projectId") Integer projectId,
+            HttpServletResponse response) throws JReportBuildError
+    {
+        try{
+            String [] headers;
+            if (employeeService.isEmployeeAdmin(getCurrentUser().getId())){
+                headers = monthReportExcelService.makeMutualWorkReport(year, month, regions, divisionOwner, divisionEmployee, projectId);
+            }else{
+                return NO_PERMISSION_MESSAGE;
+            }
+            response.setContentType(headers[0]);
+            response.setHeader("Content-Disposition",headers[1]);
+            response.setHeader("Location", headers[2]);
+        }catch(Exception exc){
+            logger.error("Во время создания отчёта произошла ошибка: ", exc);
+            return String.format(COMMON_ERROR_MESSAGE, "создания отчёта");
+        }
+        return "";
+    }
 }

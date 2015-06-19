@@ -3,10 +3,10 @@ package com.aplana.timesheet.dao.monthreport;
 import com.aplana.timesheet.reports.monthreports.BaseMonthReport;
 import com.aplana.timesheet.reports.monthreports.MonthXLSReport;
 import com.aplana.timesheet.reports.monthreports.OvertimeReport;
+import com.aplana.timesheet.reports.monthreports.MutualWorkReport;
 import com.aplana.timesheet.util.HibernateQueryResultDataSource;
 import com.aplana.timesheet.exception.JReportBuildError;
 import org.springframework.beans.factory.annotation.Autowired;
-import com.aplana.timesheet.util.StringUtil;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
@@ -28,12 +28,17 @@ public class MonthReportExcelDAO {
     @Autowired
     private MonthReportDAO monthReportDAO;
 
+    @Autowired
+    private MutualWorkDAO mutualWorkDAO;
+
     public HibernateQueryResultDataSource getReportData(BaseMonthReport baseMonthReport) throws JReportBuildError {
 
         if (baseMonthReport instanceof OvertimeReport) {
             return getOvertimeReportData((OvertimeReport) baseMonthReport);
         } else if (baseMonthReport instanceof MonthXLSReport) {
             return getMonthReportData((MonthXLSReport) baseMonthReport);
+        } else if (baseMonthReport instanceof MutualWorkReport) {
+            return getMutualWorkReportData((MutualWorkReport) baseMonthReport);
         }
         throw new IllegalArgumentException();
     }
