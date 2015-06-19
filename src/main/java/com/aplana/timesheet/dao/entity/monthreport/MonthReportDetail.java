@@ -37,13 +37,6 @@ public class MonthReportDetail {
     @Column(name = "ts_vacation_avail")
     private Double tsVacationAvail;
 
-    public MonthReportDetail() {}
-
-    public MonthReportDetail(MonthReport monthReport, Employee employee) {
-        this.monthReport = monthReport;
-        this.employee = employee;
-    }
-
     public Integer getId() {
         return id;
     }
