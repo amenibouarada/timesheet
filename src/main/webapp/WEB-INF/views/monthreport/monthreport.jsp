@@ -66,7 +66,15 @@
                     };
                     break;
                 case 3:
-
+                    url = '<%= request.getContextPath()%>/monthreport/makeMutualWorkReport';
+                    content = {
+                        divisionOwner: divisionOwner,
+                        divisionEmployee: divisionEmployee,
+                        projectId: dojo.byId("mutualWorkTable_projectId").value,
+                        regions: "[" + getSelectValues(mutualWorkTable_regionListId) + "]",
+                        year: year,
+                        month: month
+                    };
                     break;
             }
             dojo.xhrPost({
@@ -122,12 +130,13 @@
                     </sec:authorize>
                 }
                 if (dijit.byId('tabContainer').selectedChildWidget.id == "mutualWorkTable_tab"){
-//                        overtimeTable_reloadTable();
-//                        eventConnections.push(dojo.connect(monthreport_year,  "onchange", function(){overtimeTable_reloadTable()}));
-//                        eventConnections.push(dojo.connect(monthreport_month, "onchange", function(){overtimeTable_reloadTable()}));
-
-                    eventConnections.push(dojo.connect(saveButton,   "onclick", function(){}));
-                    eventConnections.push(dojo.connect(exportButton, "onclick", function(){}));
+                        overtimeTable_reloadTable();
+                        eventConnections.push(dojo.connect(monthreport_year,  "onchange", function(){mutualWorkTable_reloadTable()}));
+                        eventConnections.push(dojo.connect(monthreport_month, "onchange", function(){mutualWorkTable_reloadTable()}));
+                    <sec:authorize access="hasRole('ROLE_ADMIN')">
+                        eventConnections.push(dojo.connect(saveButton,   "onclick", function(){mutualWorkTable_save()}));
+                        eventConnections.push(dojo.connect(exportButton, "onclick", function(){makeReport(3)}));
+                    </sec:authorize>
                 }
             }
             // назначим слушителей переключения табов

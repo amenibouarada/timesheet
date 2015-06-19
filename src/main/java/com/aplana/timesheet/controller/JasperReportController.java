@@ -74,7 +74,7 @@ public class JasperReportController {
             return getModelAndViewForErrors( report, numberReport, result.getAllErrors() );
         }
 
-        if (jasperReportService.makeReport(report, printtype, response, request)) {
+        if (jasperReportService.makeReport(report, printtype, false, response, request)) {
 	        if (printtype == JasperReportService.REPORT_PRINTTYPE_HTML) {
 	            mav = new ModelAndView("empty");
 	            mav.addObject("NoPageFormat", "true");

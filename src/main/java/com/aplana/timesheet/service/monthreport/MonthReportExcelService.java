@@ -2,9 +2,7 @@ package com.aplana.timesheet.service.monthreport;
 
 import com.aplana.timesheet.dao.monthreport.MonthReportExcelDAO;
 import com.aplana.timesheet.exception.JReportBuildError;
-import com.aplana.timesheet.reports.monthreports.MonthXLSReport;
-import com.aplana.timesheet.reports.monthreports.OvertimeReport;
-import com.aplana.timesheet.reports.monthreports.XLSJasperReport;
+import com.aplana.timesheet.reports.monthreports.*;
 import com.aplana.timesheet.util.DateTimeUtil;
 import com.aplana.timesheet.util.StringUtil;
 import net.sf.jasperreports.engine.*;
@@ -67,9 +65,30 @@ public class MonthReportExcelService {
         return headers;
     }
 
+    public String[] makeMutualWorkReport(
+            Integer year,
+            Integer month,
+            String regions,
+            Integer divisionOwner,
+            Integer divisionEmployee,
+            Integer projectId) throws JReportBuildError, IOException
+    {
+        MutualWorkReport mutualWorkReport = new MutualWorkReport();
+        mutualWorkReport.setYear(year);
+        mutualWorkReport.setMonth(month);
+        mutualWorkReport.setRegions(StringUtil.stringToList(regions));
+        mutualWorkReport.setDivisionOwner(divisionOwner);
+        mutualWorkReport.setDivisionEmployee(divisionEmployee);
+        mutualWorkReport.setProjectId(projectId);
+
+        mutualWorkReport.setReportDAO(monthReportExcelDAO);
+        String[] headers = makeMonthExcelReport(mutualWorkReport);
+
+        return headers;
+    }
 
     @Transactional(readOnly = true) // ToDo а если заменить на BaseMonthReport и удалить интерфейс?
-    private String[] makeMonthExcelReport(XLSJasperReport report) throws JReportBuildError, IOException {
+    private String[] makeMonthExcelReport(/*BaseMonthReport report*/XLSJasperReport report) throws JReportBuildError, IOException {
 
         String[] headers;
         String reportName = report.getJRName();

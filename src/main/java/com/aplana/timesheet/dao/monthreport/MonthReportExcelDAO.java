@@ -3,9 +3,9 @@ package com.aplana.timesheet.dao.monthreport;
 import com.aplana.timesheet.reports.monthreports.BaseMonthReport;
 import com.aplana.timesheet.reports.monthreports.MonthXLSReport;
 import com.aplana.timesheet.reports.monthreports.OvertimeReport;
+import com.aplana.timesheet.reports.monthreports.MutualWorkReport;
 import com.aplana.timesheet.util.HibernateQueryResultDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import com.aplana.timesheet.util.StringUtil;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
@@ -27,12 +27,17 @@ public class MonthReportExcelDAO {
     @Autowired
     private MonthReportDAO monthReportDAO;
 
+    @Autowired
+    private MutualWorkDAO mutualWorkDAO;
+
     public HibernateQueryResultDataSource getReportData(BaseMonthReport baseMonthReport) throws IOException {
 
         if (baseMonthReport instanceof OvertimeReport) {
             return getOvertimeReportData((OvertimeReport) baseMonthReport);
         } else if (baseMonthReport instanceof MonthXLSReport) {
             return getMonthReportData((MonthXLSReport) baseMonthReport);
+        } else if (baseMonthReport instanceof MutualWorkReport) {
+            return getMutualWorkReportData((MutualWorkReport) baseMonthReport);
         }
         throw new IllegalArgumentException();
     }
@@ -120,5 +125,26 @@ public class MonthReportExcelDAO {
             return null;
         }
 
+    }
+
+    private HibernateQueryResultDataSource getMutualWorkReportData(MutualWorkReport report) throws IOException {
+        List resultList = mutualWorkDAO.getMutualWorks(
+                report.getYear(),
+                report.getMonth(),
+                report.getRegions(),
+                report.getDivisionOwner(),
+                report.getDivisionEmployee(),
+                report.getProjectId(),
+                true);
+
+        if (resultList != null && !resultList.isEmpty()) {
+            return new HibernateQueryResultDataSource(resultList, new String[]{
+                    "year", "month", "division_owner_id", "division_owner_name", "project_id", "project_name",
+                    "project_type_id", "project_type_name", "employee_id", "employee_name", "division_employee_id", "division_employee_name",
+                    "region_id", "region_name", "work_days", "overtimes", "coefficient", "work_days_calc",
+                    "overtimes_calc", "comment"});
+        } else {
+            return null;
+        }
     }
 }
