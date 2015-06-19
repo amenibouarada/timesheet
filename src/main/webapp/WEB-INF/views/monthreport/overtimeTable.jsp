@@ -34,7 +34,7 @@
 </sec:authorize>
 
 <table data-dojo-id="overtimeTable" data-dojo-type="dojox.grid.DataGrid"
-       onApplyEdit="overtimeTable_cellChanged" autoHeight="true" sortInfo="2">
+       onApplyEdit="overtimeTable_cellChanged" height="500px" sortInfo="2">
     <thead>
         <tr>
             <th field="id" width="20px"></th>

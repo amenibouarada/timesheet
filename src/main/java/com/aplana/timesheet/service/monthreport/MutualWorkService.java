@@ -54,6 +54,7 @@ public class MutualWorkService {
         List<Map<String, Object>> mutualWorkList = new ArrayList<Map<String, Object>>(mutualWorks.size());
         for (MutualWork mutualWork : mutualWorks) {
             HashMap<String, Object> mutualWorkMap = new HashMap<String, Object>();
+            mutualWorkMap.put("identifier", mutualWork.getIdentifier());
             mutualWorkMap.put("divisionOwnerId", mutualWork.getDivisionOwnerId());
             mutualWorkMap.put("divisionOwnerName", mutualWork.getDivisionOwnerName());
             mutualWorkMap.put("projectId", mutualWork.getProjectId());

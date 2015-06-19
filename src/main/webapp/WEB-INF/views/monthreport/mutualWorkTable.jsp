@@ -49,7 +49,7 @@
 
 
 
-<table data-dojo-id="mutualWorkTable" data-dojo-type="dojox.grid.DataGrid" autoHeight="true">
+<table data-dojo-id="mutualWorkTable" data-dojo-type="dojox.grid.DataGrid" height="500px">
     <thead>
     <tr>
         <th field="divisionOwnerName" width="200px">Центр-владелец</th>
@@ -137,8 +137,6 @@
                 stopProcessing();
                 var mutualWorks = dojo.fromJson(response);
                 dojo.forEach(mutualWorks, function (mutualWork) {
-                    // уникальный идентификатор, для добавления новых строк
-                    mutualWork.identifier = mutualWork.employeeId + "_" + mutualWork.projectId;
                     mutualWorkTable.store.newItem(mutualWork);
                 });
                 mutualWorkTable.store.save();
