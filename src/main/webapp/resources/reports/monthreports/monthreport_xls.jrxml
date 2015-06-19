@@ -2,8 +2,9 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="MonthReport" pageWidth="2343" pageHeight="1000" orientation="Landscape" columnWidth="2303" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="6ae905b3-cfb1-47a7-bda5-eeede374788b">
 	<property name="net.sf.jasperreports.print.keep.full.text" value="true"/>
 	<property name="ireport.zoom" value="1.5"/>
-	<property name="ireport.x" value="1170"/>
+	<property name="ireport.x" value="1292"/>
 	<property name="ireport.y" value="0"/>
+	<import value="com.aplana.timesheet.util.DateTimeUtil"/>
 	<style name="Normal" isDefault="true" fontSize="8" pdfEncoding="Cp1251"/>
 	<style name="Title" style="Normal" fontName="Arial" fontSize="26"/>
 	<style name="SubTitle" style="Normal" forecolor="#666666"/>
@@ -53,6 +54,13 @@
 				</textElement>
 				<text><![CDATA[Табель сотрудников]]></text>
 			</staticText>
+			<textField>
+				<reportElement style="SubTitle" x="735" y="53" width="832" height="37" forecolor="#3333FF" uuid="c9acbc77-0e13-4480-a47e-099ff66e5f53"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["за " + DateTimeUtil.monthsNominative[$P{reportParams}.getMonth()-1] + " " + Integer.toString($P{reportParams}.getYear()) + " года"]]></textFieldExpression>
+			</textField>
 		</band>
 	</title>
 	<pageHeader>
