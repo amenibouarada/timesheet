@@ -58,7 +58,7 @@
                         <td colspan="2" align="right"><form:checkbox path="showInactiveProjects" name="showInactiveProjects"
                                                                      id="showInactiveProjects"
                                                                      cssClass="checkbox_without_dojo"
-                                                                     onchange="fillProjectListByDivision(dojo.byId('divisionOwnerId').value, dojo.byId('projectId'), null)"
+                                                                     onchange="fillProjectListByDivision(dojo.byId('divisionId').value, dojo.byId('projectId'), null)"
                                                                      label="${showInactiveLabel}"/></td>
 					</tr>
 					<tr>
