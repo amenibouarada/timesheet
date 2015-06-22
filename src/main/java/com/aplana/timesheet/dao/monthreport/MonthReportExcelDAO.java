@@ -122,7 +122,7 @@ public class MonthReportExcelDAO {
                 true);
 
         return checkResultSetAndGetData(resultList, new String[] {
-                    "year", "month", "division_owner_id", "division_owner_name",
+                    "identifier", "year", "month", "division_owner_id", "division_owner_name",
                     "project_id", "project_name", "project_type_id", "project_type_name",
                     "employee_id", "employee_name", "division_employee_id", "division_employee_name",
                     "region_id", "region_name", "work_days", "overtimes",
