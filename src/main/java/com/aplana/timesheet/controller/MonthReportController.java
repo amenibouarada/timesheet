@@ -7,6 +7,8 @@ import com.aplana.timesheet.service.monthreport.MonthReportExcelService;
 import com.aplana.timesheet.service.monthreport.MonthReportService;
 import com.aplana.timesheet.service.monthreport.MutualWorkService;
 import com.aplana.timesheet.service.monthreport.OvertimeService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,6 +24,8 @@ import java.io.IOException;
 @Controller
 @RequestMapping(value = "/monthreport*")
 public class MonthReportController extends AbstractControllerForEmployee {
+
+    private static final Logger logger = LoggerFactory.getLogger(MonthReportController.class);
 
     @Autowired
     private MonthReportService monthReportService;
@@ -67,14 +71,15 @@ public class MonthReportController extends AbstractControllerForEmployee {
         try {
             return monthReportService.getMonthReportData(getCurrentUser(), division, manager, regions, roles, year, month);
         } catch (IOException e) {
-            e.printStackTrace();
+            // ToDo поправить обработку исключений. Вынеся отдельные повторяющиеся сообщения в константы
+            logger.error("Во время запроса данных для табеля произошла ошибка!", e);
             return "[]";
         }
     }
 
     @RequestMapping(value = "/saveMonthReportTable", produces = "text/plain;charset=UTF-8")
     @ResponseBody
-    public String getMonthReport(
+    public String saveMonthReport(
             @RequestParam("year") Integer year,
             @RequestParam("month") Integer month,
             @RequestParam("jsonData") String jsonData
@@ -86,7 +91,7 @@ public class MonthReportController extends AbstractControllerForEmployee {
                 return NO_PERMISSION_MESSAGE;
             }
         }catch (Exception exc){
-            exc.printStackTrace();
+            logger.error("Во время сохранения табеля произошла ошибка!", exc);
             return String.format(COMMON_ERROR_MESSAGE, "сохранения");
         }
         return "Сохранено успешно.";
@@ -110,7 +115,7 @@ public class MonthReportController extends AbstractControllerForEmployee {
                 return NO_PERMISSION_MESSAGE;
             }
         }catch (Exception exc){
-            exc.printStackTrace();
+            logger.error("Во время сохранения таблицы переработок произошла ошибка!", exc);
             return String.format(COMMON_ERROR_MESSAGE, "сохранения");
         }
         return "Сохранено успешно.";
@@ -128,7 +133,7 @@ public class MonthReportController extends AbstractControllerForEmployee {
                 return NO_PERMISSION_MESSAGE;
             }
         }catch (Exception exc){
-            exc.printStackTrace();
+            logger.error("Во время удаления данных из таблицы переработок произошла ошибка!", exc);
             return String.format(COMMON_ERROR_MESSAGE, "удаления");
         }
         return "Строки успешно удалены";
@@ -145,7 +150,7 @@ public class MonthReportController extends AbstractControllerForEmployee {
         try {
             return overtimeService.getOvertimes(getCurrentUser(), year, month, divisionOwner, divisionEmployee);
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Во время запроса данных для таблицы переработок произошла ошибка!", e);
             return "[]";
         }
     }
@@ -170,7 +175,7 @@ public class MonthReportController extends AbstractControllerForEmployee {
             }
             return mutualWorkService.getMutualWorkData(year, month, regions, divisionOwner, divisionEmployee, projectId);
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Во время запроса данных для таблицы 'Взаимная занятость' произошла ошибка!", e);
             return "[]";
         }
     }
@@ -188,7 +193,7 @@ public class MonthReportController extends AbstractControllerForEmployee {
             }
             mutualWorkService.saveMutualWorkTable(year, month, jsonData);
         }catch (Exception exc){
-            exc.printStackTrace();
+            logger.error("Во время сохранения данных таблицы 'Взаимная занятость' произошла ошибка!", exc);
             return String.format(COMMON_ERROR_MESSAGE, "сохранения");
         }
         return "Сохранено успешно.";
@@ -213,7 +218,8 @@ public class MonthReportController extends AbstractControllerForEmployee {
         try{
             mutualWorkService.prepareReport3Data(beginDate, endDate, region, divisionOwner, divisionEmployee, projectId, employeeId, response, request);
         } catch (Exception exc){
-            // ToDo
+            logger.error("Во время подготовки отчёта 'Отчет №3. Сводный отчет затраченного времени по проекту с детализацией' произошла ошибка!", exc);
+            return String.format(COMMON_ERROR_MESSAGE, "подготовки отчёта 'Отчет №3. Сводный отчет затраченного времени по проекту с детализацией'");
         }
         return "";
     }
