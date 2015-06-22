@@ -183,14 +183,9 @@
         var year = dojo.byId("monthreport_year").value;
         var month = dojo.byId("monthreport_month").value;
 
-        //ToDo создать новые методы, выполняющие эти методы в DateTimeUtils
         var projectId = parseInt(item.projectId);
-        var firstDate = new Date(year, month + 1, 1);
-        var firstDay = firstDate.getDate();
-        var lastDate = new Date(year, month + 1, 0);
-        var lastDay = lastDate.getDate();
-        var beginDate = year + "-" + month + "-" + firstDay;
-        var endDate =  year + "-" + month + "-" + lastDay;
+        var beginDate = year + "-" + month + "-" + getFirstDayOfMonth(year, month);
+        var endDate =  year + "-" + month + "-" + getLastDayOfMonth(year, month);
 
 
         dojo.xhrPost({
