@@ -83,6 +83,6 @@ function setDefaultValuesForReport2And3(){
     reportForm.emplDivisionId.value = 0;
     reportForm.employeeId.value = 0;
     reportForm.projectId.value = 0;
-    fillProjectListByDivision(reportForm.divisionId);
+    fillProjectListByDivision(reportForm.divisionId.value, reportForm.projectId, null);
     fillEmployeeListByDivision(reportForm.emplDivisionId);
 }
