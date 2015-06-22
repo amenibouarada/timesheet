@@ -94,9 +94,9 @@ function fillProjectList(rowIndex, projectState) {
 
 function fillProjectListByDivision(division, projectSelect, projectState) {
 
-    if (division.value == null)
+    if (division.value == null) {
         division.value = 0;
-
+    }
 
     var showInactiveProjects = dojo.byId("showInactiveProjects");
     showInactiveProjects = showInactiveProjects == undefined ? false : showInactiveProjects.checked;
@@ -139,7 +139,7 @@ function fillProjectListByDivision(division, projectSelect, projectState) {
         }
     }
     sortSelectOptions(projectSelect);
-    validateAndAddNewOption(hasAny, divisionId, projectSelect);
+    validateAndAddNewOption(hasAny, division, projectSelect);
     /* выбираем по умолчанию пункт "Все" */
     projectSelect.value = 0;
 }
