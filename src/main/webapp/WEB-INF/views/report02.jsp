@@ -49,7 +49,7 @@
 						<td><form:select id="divisionId" name="divisionOwnerId" cssClass="without_dojo"
 									 onmouseover="tooltip.show(getTitle(this));"
 									 onmouseout="tooltip.hide();" path="divisionOwnerId"
-									 onchange="fillProjectListByDivision(this)"
+									 onchange="fillProjectListByDivision(this.value, dojo.byId('projectId'), null)"
 									 oninit="">
 								<form:option label="Все" value="0"/>
 								<form:options items="${divisionList}" itemLabel="name" itemValue="id"/>
@@ -58,7 +58,7 @@
                         <td colspan="2" align="right"><form:checkbox path="showInactiveProjects" name="showInactiveProjects"
                                                                      id="showInactiveProjects"
                                                                      cssClass="checkbox_without_dojo"
-                                                                     onchange="fillProjectListByDivision()"
+                                                                     onchange="fillProjectListByDivision(dojo.byId('divisionOwnerId').value, dojo.byId('projectId'), null)"
                                                                      label="${showInactiveLabel}"/></td>
 					</tr>
 					<tr>

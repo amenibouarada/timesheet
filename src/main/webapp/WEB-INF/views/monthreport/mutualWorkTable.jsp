@@ -82,8 +82,7 @@
         div = div ? div : 0;
         dojo.byId("mutualWorkTable_divisionOwnerId").value = div;
         dojo.byId("mutualWorkTable_divisionEmployeeId").value = div;
-        //ToDo изменить вызываемый метод
-        fillProject(dojo.byId("mutualWorkTable_divisionOwnerId"), dojo.byId("mutualWorkTable_projectId"));
+        fillProjectListByDivision(dojo.byId("mutualWorkTable_divisionOwnerId").value, dojo.byId("mutualWorkTable_projectId"), null);
     });
 
     var addImage = function(value, rowIndex, cell) {
@@ -91,8 +90,7 @@
     }
 
     function mutualWorkTable_divisionChanged() {
-        //ToDo изменить вызываемый метод
-        fillProject(dojo.byId("mutualWorkTable_divisionOwnerId"), dojo.byId("mutualWorkTable_projectId"));
+        fillProjectListByDivision(dojo.byId("mutualWorkTable_divisionOwnerId").value, dojo.byId("mutualWorkTable_projectId"), null);
     }
 
     function mutualWorkTable_createStore() {

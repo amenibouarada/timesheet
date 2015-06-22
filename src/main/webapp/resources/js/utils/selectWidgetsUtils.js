@@ -89,38 +89,26 @@ function fillProjectList(rowIndex, projectState) {
     sortSelectOptions(projectSelect);
 }
 
-//TODO: Впредь использовать универсальную функцию заполнения списка проектов, доработав fillProjectListByDivision
-function fillProject(division, projectSelect) {
+
+/* Заполняет список доступных проектов/пресейлов для "Взаимной занятости" и формирования отчётов */
+
+function fillProjectListByDivision(division, projectSelect, projectState) {
 
     if (division.value == null)
         division.value = 0;
 
-    var divisionId = division.value;
-    var hasAny = false;
+
+    var showInactiveProjects = dojo.byId("showInactiveProjects");
+    showInactiveProjects = showInactiveProjects == undefined ? false : showInactiveProjects.checked;
 
     //Очищаем список проектов.
     projectSelect.options.length = 0;
-    if (divisionId == 0) {
+    var hasAny = false;
+    if (division == 0) {
         for (var i = 0; i < projectListWithOwnerDivision.length; i++) {
-
-            if (projectListWithOwnerDivision[i].active == 'true') {
-                projectOption = dojo.doc.createElement("option");
-                dojo.attr(projectOption, {
-                    value: projectListWithOwnerDivision[i].id
-                });
-                projectOption.title = projectListWithOwnerDivision[i].value;
-                projectOption.innerHTML = projectListWithOwnerDivision[i].value;
-                projectSelect.appendChild(projectOption);
-                hasAny = true;
-            }
-        }
-    } else {
-        dojo.removeAttr(projectSelect, "disabled");
-        dojo.removeAttr(division, "disabled");
-        for (var i = 0; i < projectListWithOwnerDivision.length; i++) {
-
-                if ((projectListWithOwnerDivision[i].active == 'true') &&
-                    divisionId == projectListWithOwnerDivision[i].ownerDivisionId) {
+             if (projectState == undefined || projectState == null ||
+                (projectState != undefined && projectListWithOwnerDivision[i].state == projectState)) {
+                if (showInactiveProjects == true || projectListWithOwnerDivision[i].active == 'true') {
                     projectOption = dojo.doc.createElement("option");
                     dojo.attr(projectOption, {
                         value: projectListWithOwnerDivision[i].id
@@ -130,60 +118,14 @@ function fillProject(division, projectSelect) {
                     projectSelect.appendChild(projectOption);
                     hasAny = true;
                 }
-
-        }
-    }
-    sortSelectOptions(projectSelect);
-    validateAndAddNewOption(hasAny, divisionId, projectSelect);
-    projectSelect.value = 0;
-
-}
-
-
-/* Заполняет список доступных проектов/пресейлов */
-// ToDo необходимо попробовать заменить на функцию fillProjectList (и саму функцию (fillProjectList) переименовать)
-// Сделать универсальным, убрать disabled места
-function fillProjectListByDivision(division, projectSelect, projectState) {
-
-    if (division == null) {
-        division = dojo.byId("divisionId");
-
-        if (division.value == null)
-            division.value = 0;
-    }
-    var divisionId = division.value;
-    var showInactiveProjects = dojo.byId("showInactiveProjects");
-    showInactiveProjects = showInactiveProjects == undefined ? false : showInactiveProjects.checked;
-    var projectSelect = projectSelect || dojo.byId("projectId");
-    dojo.removeAttr(projectSelect, "disabled");
-    //Очищаем список проектов.
-    projectSelect.options.length = 0;
-    var hasAny = false;
-    if (divisionId == 0) {
-        for (var i = 0; i < fullProjectList.length; i++) {
-            if (projectState == undefined ||
-                (projectState != undefined &&  projectListWithOwnerDivision[i].state == projectState)){
-                if (showInactiveProjects==true || projectListWithOwnerDivision[i].active=='true') {
-                    projectOption = dojo.doc.createElement("option");
-                    dojo.attr(projectOption, {
-                        value: fullProjectList[i].id
-                    });
-                    projectOption.title = fullProjectList[i].value;
-                    projectOption.innerHTML = fullProjectList[i].value;
-                    projectSelect.appendChild(projectOption);
-                    hasAny = true;
-                }
             }
         }
     } else {
-        dojo.removeAttr(projectSelect, "disabled");
-        dojo.removeAttr(division, "disabled");
         for (var i = 0; i < projectListWithOwnerDivision.length; i++) {
-            if (projectState == undefined ||
-                (projectState != undefined &&  projectListWithOwnerDivision[i].state == projectState))
-            {
-                if ((showInactiveProjects==true || projectListWithOwnerDivision[i].active=='true') &&
-                    divisionId == projectListWithOwnerDivision[i].ownerDivisionId) {
+            if (projectState == undefined || projectState == null ||
+                (projectState != undefined && projectListWithOwnerDivision[i].state == projectState)) {
+                if ((showInactiveProjects == true || projectListWithOwnerDivision[i].active == 'true') &&
+                    division == projectListWithOwnerDivision[i].ownerDivisionId) {
                     projectOption = dojo.doc.createElement("option");
                     dojo.attr(projectOption, {
                         value: projectListWithOwnerDivision[i].id
@@ -199,7 +141,7 @@ function fillProjectListByDivision(division, projectSelect, projectState) {
     sortSelectOptions(projectSelect);
     validateAndAddNewOption(hasAny, divisionId, projectSelect);
     /* выбираем по умолчанию пункт "Все" */
-    projectSelect.value=0;
+    projectSelect.value = 0;
 }
 
 function validateAndAddNewOption(hasAny, divisionId, select){
