@@ -92,4 +92,17 @@ public class MonthReportDetail {
     public void setTsVacationAvail(Double tsVacationAvail) {
         this.tsVacationAvail = tsVacationAvail;
     }
+
+    @Override
+    public String toString() {
+        return "MonthReportDetail{" +
+                "id=" + id +
+                ", monthReport=" + monthReport +
+                ", employee=" + employee +
+                ", tsWorked=" + tsWorked +
+                ", tsIllness=" + tsIllness +
+                ", tsOverValFinComp=" + tsOverValFinComp +
+                ", tsVacationAvail=" + tsVacationAvail +
+                '}';
+    }
 }

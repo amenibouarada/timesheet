@@ -10,6 +10,8 @@ import com.aplana.timesheet.service.EmployeeService;
 import com.aplana.timesheet.util.NumberUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.type.CollectionType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.aplana.timesheet.util.StringUtil;
@@ -23,6 +25,8 @@ import java.util.List;
 
 @Service
 public class MonthReportService {
+
+    private static final Logger logger = LoggerFactory.getLogger(MonthReportService.class);
 
     @Autowired
     private MonthReportDAO monthReportDAO;
@@ -101,6 +105,7 @@ public class MonthReportService {
     }
 
     public boolean saveMonthReportTable(int year, int month, String jsonData) throws IOException {
+        logger.debug("Старт сохранения таблицы 'Табель'");
         ObjectMapper mapper = new ObjectMapper();
         CollectionType mapCollectionType = mapper.getTypeFactory().constructCollectionType(List.class, Map.class);
 
@@ -119,9 +124,11 @@ public class MonthReportService {
             monthReportDetail.setTsOverValFinComp(  NumberUtils.getDoubleValue(monthReportMap.get("ts_over_val_fin_comp")));
             monthReportDetail.setTsVacationAvail(   NumberUtils.getDoubleValue(monthReportMap.get("ts_vacation_avail")));
 
+            logger.debug("Сохранение записи в таблицу month_report_detail: " + monthReportDetail.toString());
             monthReportDAO.save(monthReportDetail);
         }
 
+        logger.debug("Завершение сохранения таблицы 'Табель'");
         return true;
     }
 }
