@@ -116,7 +116,7 @@ public class MonthReportDAO {
                 .setParameter("employee", employee);
         List result = query.getResultList();
         if (result.size() == 0){ // создадим новый
-            MonthReportDetail newMonthReportDetail = new MonthReportDetail();
+            MonthReportDetail newMonthReportDetail = new MonthReportDetail(monthReport, employee);
             entityManager.persist(newMonthReportDetail);
             return newMonthReportDetail;
         }else{
