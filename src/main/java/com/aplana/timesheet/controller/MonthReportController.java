@@ -51,10 +51,6 @@ public class MonthReportController extends AbstractControllerForEmployee {
         return modelAndView;
     }
 
-    private boolean checkUserPermission(){
-        return employeeService.isEmployeeAdmin(getCurrentUser().getId());
-    }
-
     /**************************/
     /*     Блок "Табель"      */
     /**************************/
@@ -85,7 +81,7 @@ public class MonthReportController extends AbstractControllerForEmployee {
             @RequestParam("jsonData") String jsonData
     ) {
         try {
-            if (checkUserPermission()){
+            if (employeeService.isEmployeeHasPermissionsToMonthReportManage(getCurrentUser())){
                 monthReportService.saveMonthReportTable(year, month, jsonData);
             }else{
                 return NO_PERMISSION_MESSAGE;
@@ -109,7 +105,7 @@ public class MonthReportController extends AbstractControllerForEmployee {
             @RequestParam("jsonData") String jsonData
     ){
         try{
-            if (checkUserPermission()){
+            if (employeeService.isEmployeeHasPermissionsToMonthReportManage(getCurrentUser())){
                 overtimeService.saveOvertimeTable(year, month, jsonData);
             }else{
                 return NO_PERMISSION_MESSAGE;
@@ -127,7 +123,7 @@ public class MonthReportController extends AbstractControllerForEmployee {
             @RequestParam("jsonData") String jsonData
     ){
         try{
-            if (checkUserPermission()){
+            if (employeeService.isEmployeeHasPermissionsToMonthReportManage(getCurrentUser())){
                 overtimeService.deleteOvertimes(jsonData);
             }else{
                 return NO_PERMISSION_MESSAGE;
@@ -170,7 +166,7 @@ public class MonthReportController extends AbstractControllerForEmployee {
             @RequestParam("projectId") Integer projectId
     ) {
         try {
-            if ( ! checkUserPermission()){
+            if ( ! employeeService.isEmployeeHasPermissionsToMonthReportManage(getCurrentUser())){
                 return NO_PERMISSION_MESSAGE;
             }
             return mutualWorkService.getMutualWorkData(year, month, regions, divisionOwner, divisionEmployee, projectId);
@@ -188,7 +184,7 @@ public class MonthReportController extends AbstractControllerForEmployee {
             @RequestParam("jsonData") String jsonData
     ){
         try{
-            if ( ! checkUserPermission()){
+            if ( ! employeeService.isEmployeeHasPermissionsToMonthReportManage(getCurrentUser())){
                 return NO_PERMISSION_MESSAGE;
             }
             mutualWorkService.saveMutualWorkTable(year, month, jsonData);
@@ -212,7 +208,7 @@ public class MonthReportController extends AbstractControllerForEmployee {
             HttpServletResponse response,
             HttpServletRequest request
     )throws JReportBuildError, IOException {
-        if ( ! checkUserPermission()){
+        if ( ! employeeService.isEmployeeHasPermissionsToMonthReportManage(getCurrentUser())){
             return NO_PERMISSION_MESSAGE;
         }
         try{
@@ -238,7 +234,7 @@ public class MonthReportController extends AbstractControllerForEmployee {
             HttpServletResponse response)
     {
         try{
-            if ( ! checkUserPermission()){
+            if ( ! employeeService.isEmployeeHasPermissionsToMonthReportManage(getCurrentUser())){
                 return NO_PERMISSION_MESSAGE;
             }
             String [] headers = monthReportExcelService.makeOvertimeReport(year, month, divisionOwner, divisionEmployee);
@@ -263,7 +259,7 @@ public class MonthReportController extends AbstractControllerForEmployee {
             HttpServletResponse response) throws JReportBuildError
     {
         try{
-            if ( ! checkUserPermission()){
+            if ( ! employeeService.isEmployeeHasPermissionsToMonthReportManage(getCurrentUser())){
                 return NO_PERMISSION_MESSAGE;
             }
             String [] headers = monthReportExcelService.makeMonthReport(division, manager, regions, roles, year, month);
@@ -288,7 +284,7 @@ public class MonthReportController extends AbstractControllerForEmployee {
             HttpServletResponse response) throws JReportBuildError
     {
         try{
-            if ( ! checkUserPermission()){
+            if ( ! employeeService.isEmployeeHasPermissionsToMonthReportManage(getCurrentUser())){
                 return NO_PERMISSION_MESSAGE;
             }
             String [] headers = monthReportExcelService.makeMutualWorkReport(year, month, regions, divisionOwner, divisionEmployee, projectId);

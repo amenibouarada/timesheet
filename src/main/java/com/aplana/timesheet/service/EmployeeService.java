@@ -288,6 +288,11 @@ public class EmployeeService extends EmployeeJSONBuilder {
         return employeeDAO.getWorkDaysOnIllnessWorked(employee, beginDate, endDate);
     }
 
+    public boolean isEmployeeHasPermissionsToMonthReportManage(Employee employee){
+        return isEmployeeHasPermissions(employee, PermissionsEnum.ADMIN_PERMISSION) ||
+                isEmployeeHasPermissions(employee, PermissionsEnum.MONTH_REPORT_PERMISSION);
+    }
+
     public boolean isEmployeeAdmin(Integer employeeId) {
         return isEmployeeHasPermissions(employeeId, PermissionsEnum.ADMIN_PERMISSION);
     }
@@ -295,6 +300,10 @@ public class EmployeeService extends EmployeeJSONBuilder {
     public boolean isEmployeeHasPermissions(Integer employeeId, final PermissionsEnum permissions) {
         final Employee employee = find(employeeId);
 
+        return isEmployeeHasPermissions(employee, permissions);
+    }
+
+    public boolean isEmployeeHasPermissions(Employee employee, final PermissionsEnum permissions) {
         return Iterables.any(employee.getPermissions(), new Predicate<Permission>() {
             @Override
             public boolean apply(@Nullable Permission permission) {

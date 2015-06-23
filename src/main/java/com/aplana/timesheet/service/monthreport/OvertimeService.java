@@ -71,7 +71,7 @@ public class OvertimeService {
     public String getOvertimes(Employee currentUser,
                                int year, int month, Integer divisionOwner, Integer divisionEmployee) throws IOException {
         List<Overtime> result;
-        if (employeeService.isEmployeeAdmin(currentUser.getId())){
+        if (employeeService.isEmployeeHasPermissionsToMonthReportManage(currentUser)){
             result = overtimeDAO.getOvertimes(year, month, divisionOwner, divisionEmployee);
         }else{
             result = overtimeDAO.getSingleOvertime(currentUser, year, month);

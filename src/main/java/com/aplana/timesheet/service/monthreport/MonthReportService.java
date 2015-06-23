@@ -38,7 +38,7 @@ public class MonthReportService {
     public String getMonthReportData(Employee currentUser,
             Integer division, Integer manager, String regions, String roles, Integer year, Integer month) throws IOException {
         List<MonthReportData> result;
-        if (employeeService.isEmployeeAdmin(currentUser.getId())){
+        if (employeeService.isEmployeeHasPermissionsToMonthReportManage(currentUser)){
             result = monthReportDAO.getMonthReportData(
                     division, manager,
                     StringUtil.stringToList(regions),

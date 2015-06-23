@@ -34,7 +34,7 @@
         var projectListWithOwnerDivision = ${projectListWithOwnerDivision};
         var managerMapJson = ${managerList};
 
-        <sec:authorize access="hasRole('ROLE_ADMIN')">
+        <sec:authorize access="hasAnyRole('ROLE_ADMIN', 'ROLE_MONTH_REPORT_MANAGER')">
         function makeReport(tabNum) {
             processing();
             var year = dojo.byId("monthreport_year").value;
@@ -115,7 +115,7 @@
                     monthReportTable_reloadTable();
                     eventConnections.push(dojo.connect(monthreport_year,  "onchange", function(){ monthReportTable_reloadTable()}));
                     eventConnections.push(dojo.connect(monthreport_month, "onchange", function(){ monthReportTable_reloadTable()}));
-                    <sec:authorize access="hasRole('ROLE_ADMIN')">
+                    <sec:authorize access="hasAnyRole('ROLE_ADMIN', 'ROLE_MONTH_REPORT_MANAGER')">
                         eventConnections.push(dojo.connect(saveButton,   "onclick", function(){ monthReportTable_save()}));
                         eventConnections.push(dojo.connect(exportButton, "onclick", function(){makeReport(1)}));
                     </sec:authorize>
@@ -124,12 +124,12 @@
                     overtimeTable_reloadTable();
                     eventConnections.push(dojo.connect(monthreport_year,  "onchange", function(){overtimeTable_reloadTable()}));
                     eventConnections.push(dojo.connect(monthreport_month, "onchange", function(){overtimeTable_reloadTable()}));
-                    <sec:authorize access="hasRole('ROLE_ADMIN')">
+                    <sec:authorize access="hasAnyRole('ROLE_ADMIN', 'ROLE_MONTH_REPORT_MANAGER')">
                         eventConnections.push(dojo.connect(saveButton,   "onclick", function(){overtimeTable_save()}));
                         eventConnections.push(dojo.connect(exportButton, "onclick", function(){makeReport(2)}));
                     </sec:authorize>
                 }
-                <sec:authorize access="hasRole('ROLE_ADMIN')">
+                <sec:authorize access="hasAnyRole('ROLE_ADMIN', 'ROLE_MONTH_REPORT_MANAGER')">
                 if (dijit.byId('tabContainer').selectedChildWidget.id == "mutualWorkTable_tab"){
                         mutualWorkTable_reloadTable();
                         eventConnections.push(dojo.connect(monthreport_year,  "onchange", function(){mutualWorkTable_reloadTable()}));
@@ -187,7 +187,7 @@
             </select>
     </tr>
 </table>
-<sec:authorize access="hasRole('ROLE_ADMIN')">
+<sec:authorize access="hasAnyRole('ROLE_ADMIN', 'ROLE_MONTH_REPORT_MANAGER')">
     <br>
     <button id="saveButton"     data-dojo-id="saveButton"     >Сохранить</button>
     <button id="exportButton"   data-dojo-id="exportButton"   >Экспорт в Эксель</button>
@@ -201,7 +201,7 @@
         <div id="overtimeTable_tab" data-dojo-type="dijit/layout/ContentPane" title="Переработки">
             <%@include file="overtimeTable.jsp" %>
         </div>
-        <sec:authorize access="hasRole('ROLE_ADMIN')">
+        <sec:authorize access="hasAnyRole('ROLE_ADMIN', 'ROLE_MONTH_REPORT_MANAGER')">
             <div id="mutualWorkTable_tab" data-dojo-type="dijit/layout/ContentPane" title="Взаимная занятость">
                 <%@include file="mutualWorkTable.jsp" %>
             </div>
