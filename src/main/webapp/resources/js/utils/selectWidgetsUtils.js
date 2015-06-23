@@ -104,6 +104,7 @@ function fillProjectListByDivision(division, projectSelect, projectState) {
     //Очищаем список проектов.
     projectSelect.options.length = 0;
     var hasAny = false;
+    dojo.removeAttr(projectSelect, "disabled");
     if (division == 0) {
         for (var i = 0; i < projectListWithOwnerDivision.length; i++) {
              if (projectState == undefined || projectState == null ||
@@ -121,6 +122,7 @@ function fillProjectListByDivision(division, projectSelect, projectState) {
             }
         }
     } else {
+        dojo.removeAttr(projectSelect, "disabled");
         for (var i = 0; i < projectListWithOwnerDivision.length; i++) {
             if (projectState == undefined || projectState == null ||
                 (projectState != undefined && projectListWithOwnerDivision[i].state == projectState)) {
