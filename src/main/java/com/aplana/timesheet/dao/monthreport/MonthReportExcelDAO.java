@@ -1,5 +1,7 @@
 package com.aplana.timesheet.dao.monthreport;
 
+import com.aplana.timesheet.dao.AbstractReportDAO;
+import com.aplana.timesheet.reports.AbstractReport;
 import com.aplana.timesheet.reports.monthreports.BaseMonthReport;
 import com.aplana.timesheet.reports.monthreports.MonthXLSReport;
 import com.aplana.timesheet.reports.monthreports.OvertimeReport;
@@ -19,7 +21,29 @@ import java.util.List;
  */
 
 @Repository
-public class MonthReportExcelDAO {
+public class MonthReportExcelDAO extends AbstractReportDAO {
+
+    static {
+
+        fieldsMap.put(OvertimeReport.class, new String[]{  "employee", "division", "region", "project", "overtime", "premium", "comment"});
+
+        fieldsMap.put(MonthXLSReport.class, new String[]{  "year", "month", "employee_id", "employee_name",
+                                                           "region_id", "region_name", "division_id", "division_name",
+                                                           "job_id", "manager_id", "ts_worked_calculated", "ts_worked",
+                                                           "ts_vacation", "ts_illness", "ts_illness_calculated", "ts_all_paid",
+                                                           "ts_over_val_fin_comp_calc", "ts_over_val_fin_comp", "ts_over_accounted", "ts_premium",
+                                                           "ts_all_over_accounted", "ts_over_done", "ts_over_not_done", "ts_over_remain",
+                                                           "ts_vacation_avail", "calc_worked_plan", "calc_worked_fact", "calc_vacation",
+                                                           "calc_vacation_with", "calc_vacation_without", "calc_vacation_hol_paid", "calc_illness",
+                                                           "calc_illness_with", "calc_illness_without", "calc_over", "calc_over_hol",
+                                                           "calc_over_hol_paid", "calc_over_work", "calc_worked_ill", "calc_worked_vac"});
+
+        fieldsMap.put(MutualWorkReport.class, new String[]{"identifier", "year", "month", "division_owner_id", "division_owner_name",
+                                                           "project_id", "project_name", "project_type_id", "project_type_name",
+                                                           "employee_id", "employee_name", "division_employee_id", "division_employee_name",
+                                                           "region_id", "region_name", "work_days", "overtimes",
+                                                           "coefficient", "work_days_calc", "overtimes_calc", "comment"});
+    }
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -30,19 +54,21 @@ public class MonthReportExcelDAO {
     @Autowired
     private MutualWorkDAO mutualWorkDAO;
 
-    public HibernateQueryResultDataSource getReportData(BaseMonthReport baseMonthReport) throws JReportBuildError {
-
+    public List getResultList(AbstractReport baseMonthReport) throws JReportBuildError {
         if (baseMonthReport instanceof OvertimeReport) {
-            return getOvertimeReportData((OvertimeReport) baseMonthReport);
+            OvertimeReport report = (OvertimeReport) baseMonthReport;
+            return getOvertimeReportData(report);
         } else if (baseMonthReport instanceof MonthXLSReport) {
-            return getMonthReportData((MonthXLSReport) baseMonthReport);
+            MonthXLSReport report = (MonthXLSReport) baseMonthReport;
+            return getMonthReportData(report);
         } else if (baseMonthReport instanceof MutualWorkReport) {
-            return getMutualWorkReportData((MutualWorkReport) baseMonthReport);
+            MutualWorkReport report = (MutualWorkReport) baseMonthReport;
+            return getMutualWorkReportData(report);
         }
         throw new IllegalArgumentException();
     }
 
-    private HibernateQueryResultDataSource getOvertimeReportData(OvertimeReport report) throws JReportBuildError {
+    private List getOvertimeReportData(OvertimeReport report) throws JReportBuildError {
 
         String queryString = "SELECT " +
                 "employee.name AS employee," +
@@ -84,11 +110,10 @@ public class MonthReportExcelDAO {
             query.setParameter("divisionEmployee", report.getDivisionEmployee());
         }
 
-        return checkResultSetAndGetData(query.getResultList(), new String[] {
-                "employee", "division", "region", "project", "overtime", "premium", "comment"});
+        return query.getResultList();
     }
 
-    private HibernateQueryResultDataSource getMonthReportData(MonthXLSReport report) throws JReportBuildError {
+    private List getMonthReportData(MonthXLSReport report) throws JReportBuildError {
         List resultList = monthReportDAO.getMonthReportData(
                 report.getDivision(),
                 report.getManager(),
@@ -98,20 +123,10 @@ public class MonthReportExcelDAO {
                 report.getMonth(),
                 true);
 
-        return checkResultSetAndGetData(resultList, new String[] {
-                    "year", "month", "employee_id", "employee_name",
-                    "region_id", "region_name", "division_id", "division_name",
-                    "job_id", "manager_id", "ts_worked_calculated", "ts_worked",
-                    "ts_vacation", "ts_illness", "ts_illness_calculated", "ts_all_paid",
-                    "ts_over_val_fin_comp_calc", "ts_over_val_fin_comp", "ts_over_accounted", "ts_premium",
-                    "ts_all_over_accounted", "ts_over_done", "ts_over_not_done", "ts_over_remain",
-                    "ts_vacation_avail", "calc_worked_plan", "calc_worked_fact", "calc_vacation",
-                    "calc_vacation_with", "calc_vacation_without", "calc_vacation_hol_paid", "calc_illness",
-                    "calc_illness_with", "calc_illness_without", "calc_over", "calc_over_hol",
-                    "calc_over_hol_paid", "calc_over_work", "calc_worked_ill", "calc_worked_vac"});
+        return resultList;
     }
 
-    private HibernateQueryResultDataSource getMutualWorkReportData(MutualWorkReport report) throws JReportBuildError {
+    private List getMutualWorkReportData(MutualWorkReport report) throws JReportBuildError {
         List resultList = mutualWorkDAO.getMutualWorkData(
                 report.getYear(),
                 report.getMonth(),
@@ -121,12 +136,7 @@ public class MonthReportExcelDAO {
                 report.getProjectId(),
                 true);
 
-        return checkResultSetAndGetData(resultList, new String[] {
-                    "identifier", "year", "month", "division_owner_id", "division_owner_name",
-                    "project_id", "project_name", "project_type_id", "project_type_name",
-                    "employee_id", "employee_name", "division_employee_id", "division_employee_name",
-                    "region_id", "region_name", "work_days", "overtimes",
-                    "coefficient", "work_days_calc", "overtimes_calc", "comment"});
+        return resultList;
     }
 
     private HibernateQueryResultDataSource checkResultSetAndGetData(List resultList, String[] fields) throws JReportBuildError {

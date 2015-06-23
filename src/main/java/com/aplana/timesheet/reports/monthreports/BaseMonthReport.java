@@ -1,15 +1,20 @@
 package com.aplana.timesheet.reports.monthreports;
 
+import com.aplana.timesheet.dao.AbstractReportDAO;
 import com.aplana.timesheet.dao.monthreport.MonthReportExcelDAO;
 import com.aplana.timesheet.exception.JReportBuildError;
+import com.aplana.timesheet.reports.AbstractReport;
+import com.aplana.timesheet.reports.TSJasperReport;
 import net.sf.jasperreports.engine.JRDataSource;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Created by AAfanasyev on 16.06.2015.
  */
-public abstract class BaseMonthReport{
+public abstract class BaseMonthReport extends AbstractReport implements TSJasperReport{
 
     protected MonthReportExcelDAO monthReportExcelDAO;
 
@@ -17,16 +22,16 @@ public abstract class BaseMonthReport{
 
     protected Integer month;
 
-    public abstract String getJRName();
+    @Autowired
+    protected AbstractReportDAO reportDAO;
 
-    public abstract String getJRNameFile();
-
-    public JRDataSource prepareDataSource() throws JReportBuildError {
-      return monthReportExcelDAO.getReportData(this);
+    public void setReportDAO(AbstractReportDAO reportDAO) {
+        this.reportDAO = reportDAO;
     }
 
-    public void setReportDAO(MonthReportExcelDAO monthReportExcelDAO) {
-        this.monthReportExcelDAO = monthReportExcelDAO;
+    @Override
+    public JRDataSource prepareDataSource() throws JReportBuildError {
+        return reportDAO.getReportData(this);
     }
 
     public Integer getYear() {

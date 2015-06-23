@@ -1,5 +1,6 @@
 package com.aplana.timesheet.reports;
 
+import com.aplana.timesheet.dao.JasperReportDAO;
 import com.aplana.timesheet.enums.Report07PeriodTypeEnum;
 import net.sf.jasperreports.engine.JRDataSource;
 
@@ -11,7 +12,7 @@ public class Report07 extends BaseReport{
 
     @Override
     public JRDataSource prepareDataSource() {
-        return reportDAO.getReport07Data(this);
+        return new JasperReportDAO().getReport07Data(this);
     }
 
     @Override

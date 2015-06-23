@@ -1,18 +1,21 @@
 package com.aplana.timesheet.reports;
 
+import com.aplana.timesheet.dao.AbstractReportDAO;
 import com.aplana.timesheet.dao.JasperReportDAO;
+import com.aplana.timesheet.exception.JReportBuildError;
 import net.sf.jasperreports.engine.JRDataSource;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
 import static com.aplana.timesheet.util.DateTimeUtil.*;
 
-public abstract class BaseReport implements TSJasperReport {
+public abstract class BaseReport extends AbstractReport implements TSJasperReport {
 
-    protected JasperReportDAO reportDAO;
+    @Autowired
+    protected AbstractReportDAO reportDAO;
 
-    @Override
-    public void setReportDAO(JasperReportDAO reportDAO) {
+    public void setReportDAO(AbstractReportDAO reportDAO) {
         this.reportDAO = reportDAO;
     }
 
@@ -123,7 +126,7 @@ public abstract class BaseReport implements TSJasperReport {
 	}
 
     @Override
-    public JRDataSource prepareDataSource() {
+    public JRDataSource prepareDataSource() throws JReportBuildError {
         return reportDAO.getReportData(this);
     }
 }

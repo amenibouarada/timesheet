@@ -9,7 +9,7 @@ import java.util.List;
 
 public class MonthXLSReport extends BaseMonthReport {
 
-    public static final String jrName = "monthreport_xls";
+    public static final String jrName = "/monthreports/monthreport";
 
     public static final String jrNameFile = "MonthReport";
 
@@ -25,7 +25,8 @@ public class MonthXLSReport extends BaseMonthReport {
         return division;
     }
 
-    public void setDivision(Integer division) {
+    @Override
+    public void setDivisionOwnerId (Integer division) {
         this.division = division;
     }
 
@@ -59,5 +60,10 @@ public class MonthXLSReport extends BaseMonthReport {
 
     public String getJRNameFile() {
         return jrNameFile;
+    }
+
+    @Override
+    public void checkParams() {
+
     }
 }
