@@ -64,34 +64,34 @@
                 <%--</tr>--%>
                 <%--<tr>--%>
 
-<%-- 4  --%>        <th field="ts_worked"              width="100px" title="Количество отработанных дней (фактическое)"         editable="true" formatter="monthReportTable_colorCell" >Отработано</th>
-<%-- 5  --%>        <th field="ts_vacation"            width="100px" title="Количество дней отпуска"                             >Отпуск</th>
-<%-- 6  --%>        <th field="ts_illness"             width="100px" title="Количество дней болезни"                            editable="true" formatter="monthReportTable_colorCell"         >Больничный</th>
-<%-- 7  --%>        <th field="ts_all_paid"            width="100px" title="Количество оплаченных дней"                          >Всего оплачено</th>
-<%-- 8  --%>        <th field="ts_over_val_fin_comp"   width="100px" title="Переработки подтвержденные финансовой компенсацией" editable="true" formatter="monthReportTable_colorCell"  >Переработки - фин. компенсация</th>
-<%-- 9  --%>        <th field="ts_over_accounted"      width="100px" title="Учтенные переработки"                                >Переработки</th>
-<%-- 10 --%>        <th field="ts_premium"             width="100px" title="Учтенные переработки - премии"                       >Премии</th>
-<%-- 11 --%>        <th field="ts_all_over_accounted"  width="100px" title="Общее количество учтенных переработок"               >Всего учтенных переработок</th>
-<%-- 12 --%>        <th field="ts_over_done"           width="100px" title="Количество дней переработок подтвержденных отгулом"  >Переработки отгуленные</th>
-<%-- 13 --%>        <th field="ts_over_not_done"       width="100px" title="Количество дней переработок доступных для отгула"    >Переработки не отгуленные</th>
-<%-- 14 --%>        <th field="ts_over_remain"         width="100px" title="Переработки с учетом прошлых месяцев"                >Переработки оставшиеся</th>
-<%-- 15 --%>        <th field="ts_vacation_avail"      width="100px" title="Доступный отпуск"                                   editable="true" >Доступный отпуск</th>
+<%-- 4  --%>        <th field="ts_worked"              width="50px" title="Количество отработанных дней (фактическое)"         editable="true" formatter="monthReportTable_colorCell" >Отработано</th>
+<%-- 5  --%>        <th field="ts_vacation"            width="50px" title="Количество дней отпуска"                             >Отпуск</th>
+<%-- 6  --%>        <th field="ts_illness"             width="50px" title="Количество дней болезни"                            editable="true" formatter="monthReportTable_colorCell"         >Больничный</th>
+<%-- 7  --%>        <th field="ts_all_paid"            width="50px" title="Количество оплаченных дней"                          >Всего оплачено</th>
+<%-- 8  --%>        <th field="ts_over_val_fin_comp"   width="50px" title="Переработки подтвержденные финансовой компенсацией" editable="true" formatter="monthReportTable_colorCell"  >Переработки - фин. компенсация</th>
+<%-- 9  --%>        <th field="ts_over_accounted"      width="50px" title="Учтенные переработки"                                >Переработки</th>
+<%-- 10 --%>        <th field="ts_premium"             width="50px" title="Учтенные переработки - премии"                       >Премии</th>
+<%-- 11 --%>        <th field="ts_all_over_accounted"  width="50px" title="Общее количество учтенных переработок"               >Всего учтенных переработок</th>
+<%-- 12 --%>        <th field="ts_over_done"           width="50px" title="Количество дней переработок подтвержденных отгулом"  >Переработки отгуленные</th>
+<%-- 13 --%>        <th field="ts_over_not_done"       width="50px" title="Количество дней переработок доступных для отгула"    >Переработки не отгуленные</th>
+<%-- 14 --%>        <th field="ts_over_remain"         width="50px" title="Переработки с учетом прошлых месяцев"                >Переработки оставшиеся</th>
+<%-- 15 --%>        <th field="ts_vacation_avail"      width="50px" title="Доступный отпуск"                                   editable="true" >Доступный отпуск</th>
 
-<%-- 16 --%>        <th field="calc_worked_plan"       width="100px" title="Количество отработанных дней (плановое)"                          >Отработано (план)</th>
-<%-- 17 --%>        <th field="calc_worked_fact"       width="100px" title="Количество отработанных дней (фактическое)"                       >Отработано (факт)</th>
-<%-- 18 --%>        <th field="calc_vacation"          width="100px" title="Количество дней отпуска"                                          >Отпуск</th>
-<%-- 19 --%>        <th field="calc_vacation_with"     width="100px" title="Количество дней отпуска с сохранением содержания"                 >Отпуск с сохр.</th>
-<%-- 20 --%>        <th field="calc_vacation_without"  width="100px" title="Количество дней отпуска без сохранения содержания"                >Отпуск без сохр.</th>
-<%-- 21 --%>        <th field="calc_vacation_hol_paid" width="100px" title="Количество дней отпуска типа <отгул>"                             >Отпуск-отгул</th>
-<%-- 22 --%>        <th field="calc_illness"           width="100px" title="Количество рабочих дней болезни за отчетный период"               >Больничный</th>
-<%-- 23 --%>        <th field="calc_illness_with"      width="100px" title="Количество дней болезни подтвержденных больничным листом"         >Больничный подтв.</th>
-<%-- 24 --%>        <th field="calc_illness_without"   width="100px" title="Количество дней болезни без больничного листа"                    >Больничный без подтв.</th>
-<%-- 25 --%>        <th field="calc_over"              width="100px" title="Общее количество переработанных дней"                             >Переработки</th>
-<%-- 26 --%>        <th field="calc_over_hol"          width="100px" title="Количество переработанных дней в выходные и праздничные дни"      >Переработки в вых.</th>
-<%-- 27 --%>        <th field="calc_over_hol_paid"     width="100px" title="Количество переработанных дней в выходные с компенсацией"         >Переработки в вых. с компенсацией</th>
-<%-- 28 --%>        <th field="calc_over_work"         width="100px" title="Количество переработанных дней в рабочие дни отчетного периода"   >Переработки в раб. дни</th>
-<%-- 29 --%>        <th field="calc_worked_ill"        width="100px" title="Количество отработанных дней за время болезни"                    >Отработано в больничный</th>
-<%-- 30 --%>        <th field="calc_worked_vac"        width="100px" title="Количество отработанных дней в отпускные дни"                     >Отработано в отпуске</th>
+<%-- 16 --%>        <th field="calc_worked_plan"       width="50px" title="Количество отработанных дней (плановое)"                          >Отработано (план)</th>
+<%-- 17 --%>        <th field="calc_worked_fact"       width="50px" title="Количество отработанных дней (фактическое)"                       >Отработано (факт)</th>
+<%-- 18 --%>        <th field="calc_vacation"          width="50px" title="Количество дней отпуска"                                          >Отпуск</th>
+<%-- 19 --%>        <th field="calc_vacation_with"     width="50px" title="Количество дней отпуска с сохранением содержания"                 >Отпуск с сохр.</th>
+<%-- 20 --%>        <th field="calc_vacation_without"  width="50px" title="Количество дней отпуска без сохранения содержания"                >Отпуск без сохр.</th>
+<%-- 21 --%>        <th field="calc_vacation_hol_paid" width="50px" title="Количество дней отпуска типа <отгул>"                             >Отпуск-отгул</th>
+<%-- 22 --%>        <th field="calc_illness"           width="50px" title="Количество рабочих дней болезни за отчетный период"               >Больничный</th>
+<%-- 23 --%>        <th field="calc_illness_with"      width="50px" title="Количество дней болезни подтвержденных больничным листом"         >Больничный подтв.</th>
+<%-- 24 --%>        <th field="calc_illness_without"   width="50px" title="Количество дней болезни без больничного листа"                    >Больничный без подтв.</th>
+<%-- 25 --%>        <th field="calc_over"              width="50px" title="Общее количество переработанных дней"                             >Переработки</th>
+<%-- 26 --%>        <th field="calc_over_hol"          width="50px" title="Количество переработанных дней в выходные и праздничные дни"      >Переработки в вых.</th>
+<%-- 27 --%>        <th field="calc_over_hol_paid"     width="50px" title="Количество переработанных дней в выходные с компенсацией"         >Переработки в вых. с компенсацией</th>
+<%-- 28 --%>        <th field="calc_over_work"         width="50px" title="Количество переработанных дней в рабочие дни отчетного периода"   >Переработки в раб. дни</th>
+<%-- 29 --%>        <th field="calc_worked_ill"        width="50px" title="Количество отработанных дней за время болезни"                    >Отработано в больничный</th>
+<%-- 30 --%>        <th field="calc_worked_vac"        width="50px" title="Количество отработанных дней в отпускные дни"                     >Отработано в отпуске</th>
 
     </tr>
     </thead>
