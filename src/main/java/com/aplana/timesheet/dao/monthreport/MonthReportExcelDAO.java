@@ -138,14 +138,4 @@ public class MonthReportExcelDAO extends AbstractReportDAO {
 
         return resultList;
     }
-
-    private HibernateQueryResultDataSource checkResultSetAndGetData(List resultList, String[] fields) throws JReportBuildError {
-        if (resultList == null) {
-            throw new JReportBuildError("Во время выполнения запроса к БД произошла ошибка.");
-        }
-        if (resultList.isEmpty()){
-            throw new JReportBuildError("Нет данных для отображения.");
-        }
-        return new HibernateQueryResultDataSource(resultList, fields);
-    }
 }

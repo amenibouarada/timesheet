@@ -12,7 +12,8 @@ public class Report07 extends BaseReport{
 
     @Override
     public JRDataSource prepareDataSource() {
-        return new JasperReportDAO().getReport07Data(this);
+        JasperReportDAO JReportDAO = (JasperReportDAO) reportDAO;
+        return JReportDAO.getReport07Data(this);
     }
 
     @Override

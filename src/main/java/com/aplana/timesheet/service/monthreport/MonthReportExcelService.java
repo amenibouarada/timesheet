@@ -28,12 +28,6 @@ public class MonthReportExcelService {
     @Autowired
     JasperReportService jasperReportService;
 
-    @SuppressWarnings("SpringJavaAutowiringInspection")
-    @Autowired
-    private ServletContext context;
-
-    private final HashMap<String, JasperReport> compiledReports = new HashMap<String, JasperReport>();
-
     public void makeMonthReport(
             Integer division,
             Integer manager,

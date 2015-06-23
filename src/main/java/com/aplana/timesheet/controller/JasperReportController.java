@@ -212,6 +212,7 @@ public class JasperReportController {
             HttpServletResponse response,
             HttpServletRequest request
     ) throws JReportBuildError {
+        report.setReportDAO(reportDAO);
         return showReport(report, result, printtype, 7, response, request);
     }
 

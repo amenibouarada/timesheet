@@ -24,7 +24,10 @@ public abstract class AbstractReportDAO {
 
     public HibernateQueryResultDataSource getReportData(AbstractReport report) throws JReportBuildError{
 
-        if (getResultList(report) != null && !getResultList(report).isEmpty()) {
+        if (getResultList(report) == null) {
+            throw new JReportBuildError("Во время выполнения запроса к БД произошла ошибка.");
+        }
+        if (!getResultList(report).isEmpty()){
             return new HibernateQueryResultDataSource(getResultList(report), fieldsMap.get(report.getClass()));
         } else {
             return null;

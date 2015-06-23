@@ -15,6 +15,7 @@ public abstract class BaseReport extends AbstractReport implements TSJasperRepor
     @Autowired
     protected AbstractReportDAO reportDAO;
 
+    @Override
     public void setReportDAO(AbstractReportDAO reportDAO) {
         this.reportDAO = reportDAO;
     }
