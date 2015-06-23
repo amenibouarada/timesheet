@@ -124,7 +124,7 @@ com.aplana.timesheet.controller.AbstractControllerForEmployee.fillMavForAddEmplo
 
     function addEmployeesForm_updateProjectList(){
         fillProjectListByDivision(
-                dojo.byId("addEmployeesForm_divisionOwnerId"),
+                dojo.byId("addEmployeesForm_divisionOwnerId").value,
                 dojo.byId("addEmployeesForm_projectId"),
                 dojo.byId("addEmployeesForm_projectTypeId").value);
         dojo.byId("addEmployeesForm_projectId").remove(0);
