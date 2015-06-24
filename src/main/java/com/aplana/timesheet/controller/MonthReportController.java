@@ -1,5 +1,6 @@
 package com.aplana.timesheet.controller;
 
+import com.aplana.timesheet.enums.MonthReportStatusEnum;
 import com.aplana.timesheet.exception.JReportBuildError;
 import com.aplana.timesheet.form.AddEmployeeForm;
 import com.aplana.timesheet.form.MonthReportForm;
@@ -300,5 +301,63 @@ public class MonthReportController extends AbstractControllerForEmployee {
     private String handleExcelReportError(Exception exc){
         logger.error("Во время создания отчёта произошла ошибка: ", exc);
         return String.format(COMMON_ERROR_MESSAGE, "создания отчёта") + "\nОписание проблемы: " + exc.getMessage();
+    }
+
+    /**************************/
+    /*      Статус табеля     */
+    /**************************/
+    @RequestMapping(value = "/getStatus", produces = "text/plain;charset=UTF-8")
+    @ResponseBody
+    public String getMonthReportStatus(
+            @RequestParam("year") Integer year,
+            @RequestParam("month") Integer month
+    ) {
+        Integer status;
+        try {
+            status = monthReportService.getMonthReportStatus(year, month).getId();
+        } catch (Exception e) {
+            // ToDo поправить обработку исключений. Вынеся отдельные повторяющиеся сообщения в константы
+            logger.error("Во время запроса данных для табеля произошла ошибка!", e);
+            status = MonthReportStatusEnum.NOT_CREATED.getId();
+        }
+        return status.toString();
+    }
+
+    @RequestMapping(value = "/closeMonthReport", produces = "text/plain;charset=UTF-8")
+    @ResponseBody
+    public String closeMonthReport(
+            @RequestParam("year") Integer year,
+            @RequestParam("month") Integer month
+    ) {
+        try {
+            if (monthReportService.closeMonthReport(year, month)){
+                return "Табель успешно закрыт";
+            }else{
+                return "НЕТ!!!";
+            }
+        } catch (Exception e) {
+            // ToDo поправить обработку исключений. Вынеся отдельные повторяющиеся сообщения в константы
+            logger.error("Во время запроса данных для табеля произошла ошибка!", e);
+            return "[]";
+        }
+    }
+
+    @RequestMapping(value = "/openMonthReport", produces = "text/plain;charset=UTF-8")
+    @ResponseBody
+    public String openMonthReport(
+            @RequestParam("year") Integer year,
+            @RequestParam("month") Integer month
+    ) {
+        try {
+            if (monthReportService.openMonthReport(year, month)){
+                return "Табель успешно открыт";
+            }else{
+                return "НЕТ!!!";
+            }
+        } catch (Exception e) {
+            // ToDo поправить обработку исключений. Вынеся отдельные повторяющиеся сообщения в константы
+            logger.error("Во время запроса данных для табеля произошла ошибка!", e);
+            return "[]";
+        }
     }
 }

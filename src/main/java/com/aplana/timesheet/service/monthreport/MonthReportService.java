@@ -6,6 +6,7 @@ import com.aplana.timesheet.dao.entity.monthreport.MonthReport;
 import com.aplana.timesheet.dao.entity.monthreport.MonthReportData;
 import com.aplana.timesheet.dao.entity.monthreport.MonthReportDetail;
 import com.aplana.timesheet.dao.monthreport.MonthReportDAO;
+import com.aplana.timesheet.enums.MonthReportStatusEnum;
 import com.aplana.timesheet.service.EmployeeService;
 import com.aplana.timesheet.util.NumberUtils;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -113,7 +114,7 @@ public class MonthReportService {
 
         for (Map<String, Object> monthReportMap : monthReportData){
             Integer division = (Integer)monthReportMap.get("divisionId");
-            MonthReport monthReport = monthReportDAO.findOrCreateMonthReport(year, month, division);
+            MonthReport monthReport = monthReportDAO.findOrCreateMonthReport(year, month);
             Employee employee = employeeDAO.find((Integer)monthReportMap.get("employeeId"));
 
             MonthReportDetail monthReportDetail = monthReportDAO.findOrCreateMonthReportDetail(monthReport, employee);
@@ -130,5 +131,18 @@ public class MonthReportService {
 
         logger.debug("Завершение сохранения таблицы 'Табель'");
         return true;
+    }
+
+    public MonthReportStatusEnum getMonthReportStatus(int year, int month){
+        Integer status = monthReportDAO.getMonthReportStatus(year, month);
+        return status == null ? MonthReportStatusEnum.NOT_CREATED : MonthReportStatusEnum.getById(status);
+    }
+
+    public boolean closeMonthReport(Integer year, Integer month) {
+        return monthReportDAO.setMonthReportStatus(year, month, MonthReportStatusEnum.CLOSED.getId());
+    }
+
+    public boolean openMonthReport(Integer year, Integer month) {
+        return monthReportDAO.setMonthReportStatus(year, month, MonthReportStatusEnum.OPEN.getId());
     }
 }

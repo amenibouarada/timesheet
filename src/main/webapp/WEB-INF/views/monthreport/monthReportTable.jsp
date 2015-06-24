@@ -210,6 +210,7 @@
                         stopProcessing();
                         alert(response);
                         monthReportTable_reloadTable();
+                        monthReport_updateStatus();
                     },
                     error: function (response, ioArgs) {
                         stopProcessing();
