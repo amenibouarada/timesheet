@@ -37,6 +37,7 @@ public class MonthReportController extends AbstractControllerForEmployee {
     private static String COMMON_ERROR_MESSAGE =
             "Во время %s произошла ошибка. Пожалуйста, свяжитесть с администраторами системы.";
     private static String NO_PERMISSION_MESSAGE = "У вас нет прав на это действие";
+    private static String SAVE_SUCCESS_MESSAGE = "Успешно сохранено";
 
     @RequestMapping(method = RequestMethod.GET)
     public ModelAndView showForm() {
@@ -47,6 +48,12 @@ public class MonthReportController extends AbstractControllerForEmployee {
         modelAndView.addObject(AddEmployeeForm.ADD_FORM, new AddEmployeeForm());
 
         return modelAndView;
+    }
+
+    private String handleCommonException(String procedure, Exception exc){
+        String message = String.format(COMMON_ERROR_MESSAGE, procedure)  + "\nОписание проблемы: " + exc.getMessage();
+        logger.error(message, exc);
+        return message;
     }
 
     /**************************/
@@ -64,10 +71,8 @@ public class MonthReportController extends AbstractControllerForEmployee {
     ) {
         try {
             return monthReportService.getMonthReportData(getCurrentUser(), division, manager, regions, roles, year, month);
-        } catch (IOException e) {
-            // ToDo поправить обработку исключений. Вынеся отдельные повторяющиеся сообщения в константы
-            logger.error("Во время запроса данных для табеля произошла ошибка!", e);
-            return "[]";
+        } catch (IOException exc) {
+            return handleCommonException("запроса данных для табеля", exc);
         }
     }
 
@@ -79,16 +84,14 @@ public class MonthReportController extends AbstractControllerForEmployee {
             @RequestParam("jsonData") String jsonData
     ) {
         try {
-            if (employeeService.isEmployeeHasPermissionsToMonthReportManage(getCurrentUser())){
-                monthReportService.saveMonthReportTable(year, month, jsonData);
-            }else{
+            if ( ! employeeService.isEmployeeHasPermissionsToMonthReportManage(getCurrentUser())){
                 return NO_PERMISSION_MESSAGE;
             }
+            monthReportService.saveMonthReportTable(year, month, jsonData);
         }catch (Exception exc){
-            logger.error("Во время сохранения табеля произошла ошибка!", exc);
-            return String.format(COMMON_ERROR_MESSAGE, "сохранения");
+            return handleCommonException("сохранения табеля", exc);
         }
-        return "Сохранено успешно.";
+        return SAVE_SUCCESS_MESSAGE;
     }
 
 
@@ -103,16 +106,14 @@ public class MonthReportController extends AbstractControllerForEmployee {
             @RequestParam("jsonData") String jsonData
     ){
         try{
-            if (employeeService.isEmployeeHasPermissionsToMonthReportManage(getCurrentUser())){
-                overtimeService.saveOvertimeTable(year, month, jsonData);
-            }else{
+            if ( ! employeeService.isEmployeeHasPermissionsToMonthReportManage(getCurrentUser())){
                 return NO_PERMISSION_MESSAGE;
             }
+            overtimeService.saveOvertimeTable(year, month, jsonData);
         }catch (Exception exc){
-            logger.error("Во время сохранения таблицы переработок произошла ошибка!", exc);
-            return String.format(COMMON_ERROR_MESSAGE, "сохранения");
+            return handleCommonException("сохранения таблицы переработок", exc);
         }
-        return "Сохранено успешно.";
+        return SAVE_SUCCESS_MESSAGE;
     }
 
     @RequestMapping(value = "/deleteOvertimes", produces = "text/plain;charset=UTF-8")
@@ -127,8 +128,7 @@ public class MonthReportController extends AbstractControllerForEmployee {
                 return NO_PERMISSION_MESSAGE;
             }
         }catch (Exception exc){
-            logger.error("Во время удаления данных из таблицы переработок произошла ошибка!", exc);
-            return String.format(COMMON_ERROR_MESSAGE, "удаления");
+            return handleCommonException("удаления данных из таблицы переработок", exc);
         }
         return "Строки успешно удалены";
     }
@@ -143,9 +143,8 @@ public class MonthReportController extends AbstractControllerForEmployee {
     ) {
         try {
             return overtimeService.getOvertimes(getCurrentUser(), year, month, divisionOwner, divisionEmployee);
-        } catch (IOException e) {
-            logger.error("Во время запроса данных для таблицы переработок произошла ошибка!", e);
-            return "[]";
+        } catch (IOException exc) {
+            return handleCommonException("запроса данных для таблицы переработок", exc);
         }
     }
 
@@ -168,9 +167,8 @@ public class MonthReportController extends AbstractControllerForEmployee {
                 return NO_PERMISSION_MESSAGE;
             }
             return mutualWorkService.getMutualWorkData(year, month, regions, divisionOwner, divisionEmployee, projectId);
-        } catch (IOException e) {
-            logger.error("Во время запроса данных для таблицы 'Взаимная занятость' произошла ошибка!", e);
-            return "[]";
+        } catch (IOException exc) {
+            return handleCommonException("запроса данных для таблицы 'Взаимная занятость'", exc);
         }
     }
 
@@ -187,10 +185,9 @@ public class MonthReportController extends AbstractControllerForEmployee {
             }
             mutualWorkService.saveMutualWorkTable(year, month, jsonData);
         }catch (Exception exc){
-            logger.error("Во время сохранения данных таблицы 'Взаимная занятость' произошла ошибка!", exc);
-            return String.format(COMMON_ERROR_MESSAGE, "сохранения");
+            return handleCommonException("сохранения данных таблицы 'Взаимная занятость'", exc);
         }
-        return "Сохранено успешно.";
+        return SAVE_SUCCESS_MESSAGE;
     }
 
     @RequestMapping(value = "/prepareReport3Data/{divisionOwner}/{divisionEmployee}/{region}/{employeeId}/{projectId}/{beginDate}/{endDate}")
@@ -204,22 +201,17 @@ public class MonthReportController extends AbstractControllerForEmployee {
             @PathVariable("employeeId") Integer employeeId,
             HttpServletResponse response,
             HttpServletRequest request
-    )throws JReportBuildError, IOException {
-        ModelAndView mav = new ModelAndView("/monthreport/monthreport");
-        if ( ! employeeService.isEmployeeHasPermissionsToMonthReportManage(getCurrentUser())){
-            ModelAndView errorMav = new ModelAndView("/errors/commonErrors");
-            errorMav.addObject("cause", NO_PERMISSION_MESSAGE);
-            return errorMav;
-        }
+    )throws JReportBuildError, IOException
+    {
         try{
+            if ( ! employeeService.isEmployeeHasPermissionsToMonthReportManage(getCurrentUser())){
+                return getExcelReportNoPermissionMAV();
+            }
             mutualWorkService.prepareReport3Data(beginDate, endDate, region, divisionOwner, divisionEmployee, projectId, employeeId, response, request);
         } catch (Exception exc){
-            logger.error("Во время подготовки отчёта 'Отчет №3. Сводный отчет затраченного времени по проекту с детализацией' произошла ошибка!", exc);
-            ModelAndView errorMav = new ModelAndView("/errors/commonErrors");
-            errorMav.addObject("cause", String.format(COMMON_ERROR_MESSAGE, "подготовки отчёта 'Отчет №3. Сводный отчет затраченного времени по проекту с детализацией'"));
-            return errorMav;
+            return createErrorMAV(handleCommonException("подготовки отчёта 'Отчет №3. Сводный отчет затраченного времени по проекту с детализацией'", exc));
         }
-        return mav;
+        return new ModelAndView("/monthreport/monthreport");
     }
 
     /**************************/
@@ -233,22 +225,17 @@ public class MonthReportController extends AbstractControllerForEmployee {
             @PathVariable("divisionOwner") Integer divisionOwner,
             @PathVariable("divisionEmployee") Integer divisionEmployee,
             HttpServletResponse response,
-            HttpServletRequest request) throws JReportBuildError, IOException {
-
-            ModelAndView mav = new ModelAndView("/monthreport/monthreport");
+            HttpServletRequest request) throws JReportBuildError, IOException
+    {
         try{
             if ( ! employeeService.isEmployeeHasPermissionsToMonthReportManage(getCurrentUser())){
-                ModelAndView errorMav = new ModelAndView("/errors/commonErrors");
-                errorMav.addObject("cause", NO_PERMISSION_MESSAGE);
-                return errorMav;
+                return getExcelReportNoPermissionMAV();
             }
             monthReportExcelService.makeOvertimeReport(year, month, divisionOwner, divisionEmployee, request, response);
         }catch(Exception exc){
-            ModelAndView errorMav = new ModelAndView("/errors/commonErrors");
-            errorMav.addObject("cause", handleExcelReportError(exc));
-            return errorMav;
+            return handleExcelReportError(exc);
         }
-        return mav;
+        return new ModelAndView("/monthreport/monthreport");
     }
 
     @RequestMapping(value = "/makeMonthReport/{division}/{manager}/{regions}/{roles}/{year}/{month}")
@@ -260,22 +247,17 @@ public class MonthReportController extends AbstractControllerForEmployee {
             @PathVariable("year") Integer year,
             @PathVariable("month") Integer month,
             HttpServletResponse response,
-            HttpServletRequest request) throws JReportBuildError, IOException {
-
-        ModelAndView mav = new ModelAndView("/monthreport/monthreport");
+            HttpServletRequest request) throws JReportBuildError, IOException
+    {
         try {
             if ( ! employeeService.isEmployeeHasPermissionsToMonthReportManage(getCurrentUser())) {
-                ModelAndView errorMav = new ModelAndView("/errors/commonErrors");
-                errorMav.addObject("cause", NO_PERMISSION_MESSAGE);
-                return errorMav;
+                return getExcelReportNoPermissionMAV();
             }
             monthReportExcelService.makeMonthReport(division, manager, regions, roles, year, month, request, response);
         } catch (Exception exc) {
-            ModelAndView errorMav = new ModelAndView("/errors/commonErrors");
-            errorMav.addObject("cause", handleExcelReportError(exc));
-            return errorMav;
+            return handleExcelReportError(exc);
         }
-        return mav;
+        return new ModelAndView("/monthreport/monthreport");
     }
 
     @RequestMapping(value = "/makeMutualWorkReport/{year}/{month}/{regions}/{divisionOwner}/{divisionEmployee}/{projectId}")
@@ -287,27 +269,31 @@ public class MonthReportController extends AbstractControllerForEmployee {
             @PathVariable("divisionEmployee") Integer divisionEmployee,
             @PathVariable("projectId") Integer projectId,
             HttpServletResponse response,
-            HttpServletRequest request) throws JReportBuildError, IOException {
-
-            ModelAndView mav = new ModelAndView("/monthreport/monthreport");
+            HttpServletRequest request) throws JReportBuildError, IOException
+    {
         try{
             if ( ! employeeService.isEmployeeHasPermissionsToMonthReportManage(getCurrentUser())){
-                ModelAndView errorMav = new ModelAndView("/errors/commonErrors");
-                errorMav.addObject("cause", NO_PERMISSION_MESSAGE);
-                return errorMav;
+                return getExcelReportNoPermissionMAV();
             }
             monthReportExcelService.makeMutualWorkReport(year, month, regions, divisionOwner, divisionEmployee, projectId, response, request);
         }catch(Exception exc){
-            ModelAndView errorMav = new ModelAndView("/errors/commonErrors");
-            errorMav.addObject("cause", handleExcelReportError(exc));
-            return errorMav;
+            return handleExcelReportError(exc);
         }
-        return mav;
+        return new ModelAndView("/monthreport/monthreport");
     }
 
-    private String handleExcelReportError(Exception exc){
-        logger.error("Во время создания отчёта произошла ошибка: ", exc);
-        return String.format(COMMON_ERROR_MESSAGE, "создания отчёта") + "\nОписание проблемы: " + exc.getMessage();
+    private ModelAndView getExcelReportNoPermissionMAV(){
+        return createErrorMAV(NO_PERMISSION_MESSAGE);
+    }
+
+    private ModelAndView handleExcelReportError(Exception exc){
+        return createErrorMAV(handleCommonException("создания отчёта", exc));
+    }
+
+    private ModelAndView createErrorMAV(String cause){
+        ModelAndView errorMav = new ModelAndView("/errors/commonErrors");
+        errorMav.addObject("cause", cause);
+        return errorMav;
     }
 
     /**************************/
@@ -318,16 +304,22 @@ public class MonthReportController extends AbstractControllerForEmployee {
     public String getMonthReportStatus(
             @RequestParam("year") Integer year,
             @RequestParam("month") Integer month
-    ) {
-        Integer status;
+    ){
         try {
-            status = monthReportService.getMonthReportStatus(year, month).getId();
-        } catch (Exception e) {
-            // ToDo поправить обработку исключений. Вынеся отдельные повторяющиеся сообщения в константы
-            logger.error("Во время запроса данных для табеля произошла ошибка!", e);
-            status = MonthReportStatusEnum.NOT_CREATED.getId();
+            return new Integer( monthReportService.getMonthReportStatus(year, month).getId()).toString();
+        } catch (Exception exc) {
+            return handleCommonException("получения статуса табеля", exc);
         }
-        return status.toString();
+    }
+
+    @RequestMapping(value = "/getMonthReportStatusesForYear", produces = "text/plain;charset=UTF-8")
+    @ResponseBody
+    public String getMonthReportStatusesForYear(@RequestParam("year") Integer year) {
+        try {
+            return monthReportService.getMonthReportStatusesForYear(year);
+        } catch (Exception exc) {
+            return handleCommonException("получения статусов табелей по месяцам года", exc);
+        }
     }
 
     @RequestMapping(value = "/closeMonthReport", produces = "text/plain;charset=UTF-8")
@@ -337,16 +329,14 @@ public class MonthReportController extends AbstractControllerForEmployee {
             @RequestParam("month") Integer month
     ) {
         try {
-            if (monthReportService.closeMonthReport(year, month)){
-                return "Табель успешно закрыт";
-            }else{
-                return "НЕТ!!!";
+            if ( ! employeeService.isEmployeeHasPermissionsToCloseOpenMonthReport(getCurrentUser())){
+                return NO_PERMISSION_MESSAGE;
             }
-        } catch (Exception e) {
-            // ToDo поправить обработку исключений. Вынеся отдельные повторяющиеся сообщения в константы
-            logger.error("Во время запроса данных для табеля произошла ошибка!", e);
-            return "[]";
+            monthReportService.closeMonthReport(year, month);
+        } catch (Exception exc) {
+            return handleCommonException("закрытия табеля", exc);
         }
+        return "Табель успешно закрыт";
     }
 
     @RequestMapping(value = "/openMonthReport", produces = "text/plain;charset=UTF-8")
@@ -356,28 +346,13 @@ public class MonthReportController extends AbstractControllerForEmployee {
             @RequestParam("month") Integer month
     ) {
         try {
-            if (monthReportService.openMonthReport(year, month)){
-                return "Табель успешно открыт";
-            }else{
-                return "НЕТ!!!";
+            if ( ! employeeService.isEmployeeHasPermissionsToCloseOpenMonthReport(getCurrentUser())){
+                return NO_PERMISSION_MESSAGE;
             }
-        } catch (Exception e) {
-            // ToDo поправить обработку исключений. Вынеся отдельные повторяющиеся сообщения в константы
-            logger.error("Во время запроса данных для табеля произошла ошибка!", e);
-            return "[]";
+            monthReportService.openMonthReport(year, month);
+        } catch (Exception exc) {
+            return handleCommonException("открытия табеля", exc);
         }
+        return "Табель успешно открыт";
     }
-
-    @RequestMapping(value = "/getMonthReportStatusesForYear", produces = "text/plain;charset=UTF-8")
-    @ResponseBody
-    public String getMonthReportStatusesForYear(@RequestParam("year") Integer year) {
-        try {
-            return monthReportService.getMonthReportStatusesForYear(year);
-        } catch (Exception e) {
-            // ToDo поправить обработку исключений. Вынеся отдельные повторяющиеся сообщения в константы
-            logger.error("Во время запроса данных для табеля произошла ошибка!", e);
-            return "[]";
-        }
-    }
-
 }
