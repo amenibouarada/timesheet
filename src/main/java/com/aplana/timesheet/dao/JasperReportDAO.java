@@ -88,7 +88,7 @@ public class JasperReportDAO extends AbstractReportDAO {
     @Autowired
     private TSPropertyProvider propertyProvider;
 
-    public List getResultList(AbstractReport baseReport ) throws JReportBuildError {
+    public List getResultList(TSJasperReport baseReport ) throws JReportBuildError {
         //TODO выпилить это, заменить на иерархию классов
         if ( baseReport instanceof Report01 ) {
             Report01 report = ( Report01 ) baseReport;

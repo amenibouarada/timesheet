@@ -1,7 +1,7 @@
 package com.aplana.timesheet.dao;
 
 import com.aplana.timesheet.exception.JReportBuildError;
-import com.aplana.timesheet.reports.AbstractReport;
+import com.aplana.timesheet.reports.TSJasperReport;
 import com.aplana.timesheet.util.HibernateQueryResultDataSource;
 import org.springframework.stereotype.Repository;
 
@@ -22,7 +22,7 @@ public abstract class AbstractReportDAO {
 
     public static Map<Class, String[]> fieldsMap = new HashMap<Class, String[]>(6);
 
-    public HibernateQueryResultDataSource getReportData(AbstractReport report) throws JReportBuildError{
+    public HibernateQueryResultDataSource getReportData(TSJasperReport report) throws JReportBuildError{
 
         if (getResultList(report) == null) {
             throw new JReportBuildError("Во время выполнения запроса к БД произошла ошибка.");
@@ -34,5 +34,5 @@ public abstract class AbstractReportDAO {
         }
     }
 
-    public abstract List getResultList(AbstractReport abstractReport) throws JReportBuildError;
+    public abstract List getResultList(TSJasperReport report) throws JReportBuildError;
 }

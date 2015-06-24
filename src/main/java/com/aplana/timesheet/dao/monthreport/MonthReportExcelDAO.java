@@ -1,7 +1,7 @@
 package com.aplana.timesheet.dao.monthreport;
 
 import com.aplana.timesheet.dao.AbstractReportDAO;
-import com.aplana.timesheet.reports.AbstractReport;
+import com.aplana.timesheet.reports.TSJasperReport;
 import com.aplana.timesheet.reports.monthreports.BaseMonthReport;
 import com.aplana.timesheet.reports.monthreports.MonthXLSReport;
 import com.aplana.timesheet.reports.monthreports.OvertimeReport;
@@ -54,7 +54,7 @@ public class MonthReportExcelDAO extends AbstractReportDAO {
     @Autowired
     private MutualWorkDAO mutualWorkDAO;
 
-    public List getResultList(AbstractReport baseMonthReport) throws JReportBuildError {
+    public List getResultList(TSJasperReport baseMonthReport) throws JReportBuildError {
         if (baseMonthReport instanceof OvertimeReport) {
             OvertimeReport report = (OvertimeReport) baseMonthReport;
             return getOvertimeReportData(report);
