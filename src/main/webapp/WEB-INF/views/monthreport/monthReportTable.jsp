@@ -115,7 +115,6 @@
         }else{
             cell.customStyles.push('color:red');
             dispValue = calculatedValue;
-            monthReportTable.store.setValue(item, cell.field, null);
         }
         return "<span title='Значение по умолчанию: " + calculatedValue + "'>" + dispValue + "</span>"
     }
