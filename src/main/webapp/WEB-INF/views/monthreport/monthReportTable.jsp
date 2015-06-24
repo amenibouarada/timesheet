@@ -46,56 +46,9 @@
 </table>
 </sec:authorize>
 
-
-<table  data-dojo-id="monthReportTable" data-dojo-type="dojox.grid.DataGrid" height="500px" autoWidth="true"
-        onApplyEdit="monthReportTable_cellChanged" >
-    <thead>
-    <tr>
-        <th field="employee"         width="150px"   >Сотрудник</th>
-        <th field="division"         width="150px"   >Подразделение</th>
-        <th field="region"           width="100px"   >Регион</th>
-
-
-<%-- 1  --%>        <%--<th field="employee"   rowspan="2"    width="150px"     >Сотрудник</th>--%>
-<%-- 2  --%>        <%--<th field="division"   rowspan="2"    width="150px"     >Подразделение</th>--%>
-<%-- 3  --%>        <%--<th field="region"     rowspan="2"    width="100px"     >Регион</th>--%>
-                   <%--<th field="ts_month"   colspan="12"                     >В табель за месяц</th>--%>
-                   <%--<th field="calc_month" colspan="15"                     >Расчетные показатели за месяц</th>--%>
-                <%--</tr>--%>
-                <%--<tr>--%>
-
-<%-- 4  --%>        <th field="ts_worked"              width="100px" title="Количество отработанных дней (фактическое)"         editable="true" formatter="monthReportTable_colorCell" >Отработано</th>
-<%-- 5  --%>        <th field="ts_vacation"            width="100px" title="Количество дней отпуска"                             >Отпуск</th>
-<%-- 6  --%>        <th field="ts_illness"             width="100px" title="Количество дней болезни"                            editable="true" formatter="monthReportTable_colorCell"         >Больничный</th>
-<%-- 7  --%>        <th field="ts_all_paid"            width="100px" title="Количество оплаченных дней"                          >Всего оплачено</th>
-<%-- 8  --%>        <th field="ts_over_val_fin_comp"   width="100px" title="Переработки подтвержденные финансовой компенсацией" editable="true" formatter="monthReportTable_colorCell"  >Переработки - фин. компенсация</th>
-<%-- 9  --%>        <th field="ts_over_accounted"      width="100px" title="Учтенные переработки"                                >Переработки</th>
-<%-- 10 --%>        <th field="ts_premium"             width="100px" title="Учтенные переработки - премии"                       >Премии</th>
-<%-- 11 --%>        <th field="ts_all_over_accounted"  width="100px" title="Общее количество учтенных переработок"               >Всего учтенных переработок</th>
-<%-- 12 --%>        <th field="ts_over_done"           width="100px" title="Количество дней переработок подтвержденных отгулом"  >Переработки отгуленные</th>
-<%-- 13 --%>        <th field="ts_over_not_done"       width="100px" title="Количество дней переработок доступных для отгула"    >Переработки не отгуленные</th>
-<%-- 14 --%>        <th field="ts_over_remain"         width="100px" title="Переработки с учетом прошлых месяцев"                >Переработки оставшиеся</th>
-<%-- 15 --%>        <th field="ts_vacation_avail"      width="100px" title="Доступный отпуск"                                   editable="true" >Доступный отпуск</th>
-
-<%-- 16 --%>        <th field="calc_worked_plan"       width="100px" title="Количество отработанных дней (плановое)"                          >Отработано (план)</th>
-<%-- 17 --%>        <th field="calc_worked_fact"       width="100px" title="Количество отработанных дней (фактическое)"                       >Отработано (факт)</th>
-<%-- 18 --%>        <th field="calc_vacation"          width="100px" title="Количество дней отпуска"                                          >Отпуск</th>
-<%-- 19 --%>        <th field="calc_vacation_with"     width="100px" title="Количество дней отпуска с сохранением содержания"                 >Отпуск с сохр.</th>
-<%-- 20 --%>        <th field="calc_vacation_without"  width="100px" title="Количество дней отпуска без сохранения содержания"                >Отпуск без сохр.</th>
-<%-- 21 --%>        <th field="calc_vacation_hol_paid" width="100px" title="Количество дней отпуска типа <отгул>"                             >Отпуск-отгул</th>
-<%-- 22 --%>        <th field="calc_illness"           width="100px" title="Количество рабочих дней болезни за отчетный период"               >Больничный</th>
-<%-- 23 --%>        <th field="calc_illness_with"      width="100px" title="Количество дней болезни подтвержденных больничным листом"         >Больничный подтв.</th>
-<%-- 24 --%>        <th field="calc_illness_without"   width="100px" title="Количество дней болезни без больничного листа"                    >Больничный без подтв.</th>
-<%-- 25 --%>        <th field="calc_over"              width="100px" title="Общее количество переработанных дней"                             >Переработки</th>
-<%-- 26 --%>        <th field="calc_over_hol"          width="100px" title="Количество переработанных дней в выходные и праздничные дни"      >Переработки в вых.</th>
-<%-- 27 --%>        <th field="calc_over_hol_paid"     width="100px" title="Количество переработанных дней в выходные с компенсацией"         >Переработки в вых. с компенсацией</th>
-<%-- 28 --%>        <th field="calc_over_work"         width="100px" title="Количество переработанных дней в рабочие дни отчетного периода"   >Переработки в раб. дни</th>
-<%-- 29 --%>        <th field="calc_worked_ill"        width="100px" title="Количество отработанных дней за время болезни"                    >Отработано в больничный</th>
-<%-- 30 --%>        <th field="calc_worked_vac"        width="100px" title="Количество отработанных дней в отпускные дни"                     >Отработано в отпуске</th>
-
-    </tr>
-    </thead>
-</table>
+<div data-dojo-id="monthReportTable" data-dojo-type="dojox.grid.DataGrid" height="500px"
+     onApplyEdit="monthReportTable_cellChanged" structure="gridlayout">
+</div>
 
 <script type="text/javascript">
 
@@ -109,9 +62,50 @@
         }
     });
 
+    var gridlayout = [
+        {
+            cells: [[
+                {field: "employee", name: "Сотрудник", width: "150px", editable: true}
+            ]], noscroll: true
+        },
+        {
+            cells: [[
+                {field: "division"              , name: "Подразделение", width: "180px"},
+                {field: "region"                , name: "Регион", width: "100px"},
+                {field: "ts_worked"             , name: "Отработано",  editable: true, formatter: monthReportTable_colorCell, width: "100px", layoutIndex: 5},
+                {field: "ts_vacation"           , name: "Отпуск", width: "100px"},
+                {field: "ts_illness"            , name: "Больничный", editable: true, formatter: monthReportTable_colorCell, width: "100px"},
+                {field: "ts_all_paid"           , name: "Всего оплачено", width: "100px"},
+                {field: "ts_over_val_fin_comp"  , name: "Переработки - фин. компенсация", editable: true, formatter: monthReportTable_colorCell, width: "100px"},
+                {field: "ts_over_accounted"     , name: "Переработки", width: "100px"},
+                {field: "ts_premium"            , name: "Премии", width: "100px"},
+                {field: "ts_all_over_accounted" , name: "Всего учтенных переработок", width: "100px"},
+                {field: "ts_over_done"          , name: "Переработки отгуленные", width: "100px"},
+                {field: "ts_over_not_done"      , name: "Переработки не отгуленные", width: "100px"},
+                {field: "ts_over_remain"        , name: "Переработки оставшиеся", width: "100px"},
+                {field: "ts_vacation_avail"     , name: "Доступный отпуск", width: "100px"},
+                {field: "calc_worked_plan"      , name: "Отработано (план)", width: "100px"},
+                {field: "calc_worked_fact"      , name: "Отработано (факт)", width: "100px"},
+                {field: "calc_vacation"         , name: "Отпуск", width: "100px"},
+                {field: "calc_vacation_with"    , name: "Отпуск с сохр.", width: "100px"},
+                {field: "calc_vacation_without" , name: "Отпуск без сохр.", width: "100px"},
+                {field: "calc_vacation_hol_paid", name: "Отпуск-отгул", width: "100px"},
+                {field: "calc_illness"          , name: "Больничный", width: "100px"},
+                {field: "calc_illness_with"     , name: "Больничный подтв.", width: "100px"},
+                {field: "calc_illness_without"  , name: "Больничный без подтв.", width: "100px"},
+                {field: "calc_over"             , name: "Переработки", width: "100px"},
+                {field: "calc_over_hol"         , name: "Переработки в вых.", width: "100px"},
+                {field: "calc_over_hol_paid"    , name: "Переработки в вых. с компенсацией", width: "100px"},
+                {field: "calc_over_work"        , name: "Переработки в раб. дни", width: "100px"},
+                {field: "calc_worked_ill"       , name: "Отработано в больничный", width: "100px"},
+                {field: "calc_worked_vac"       , name: "Отработано в отпуске", width: "100px"}
+            ]]
+        }
+    ];
+
     // расскраска ячеек и проверка на существующее значение заполненности таблицы реальными данными, а не автовычисленными
     // и добавляю подсказку
-    var monthReportTable_colorCell = function(value, rowIndex, cell) {
+    function monthReportTable_colorCell(value, rowIndex, cell) {
         var item = monthReportTable.getItem(rowIndex);
         var calculatedValue = monthReportTable.store.getValue(item, cell.field + "_calculated", null);
         var dispValue = "";
