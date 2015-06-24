@@ -147,10 +147,14 @@
 
                         // ToDo добавить про редактирование ячеек
                     }else if(status == statusList.notCreated.id){
-                        monthReport_closeButton.style.visibility = "hidden";
+                        if (monthReport_closeButton){ // кнопка может быть не видна для некоторых ролей
+                            monthReport_closeButton.style.visibility = "hidden";
+                        }
                         monthReport_saveButton.style.visibility  = "visible";
                     }else{
-                        monthReport_closeButton.style.visibility = "visible";
+                        if (monthReport_closeButton){ // кнопка может быть не видна для некоторых ролей
+                            monthReport_closeButton.style.visibility = "visible";
+                        }
                         monthReport_saveButton.style.visibility  = "visible";
                     }
                 },
