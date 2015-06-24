@@ -60,7 +60,7 @@ public class JasperReportService {
     private final HashMap<String, JasperReport> compiledReports = new HashMap<String, JasperReport>();
 
     @Transactional(readOnly = true)
-    public boolean makeReport(TSJasperReport report, int printtype, boolean typeOfResult, HttpServletResponse response,
+    public boolean makeReport(TSJasperReport report, int printtype, HttpServletResponse response,
                               HttpServletRequest httpServletRequest) throws JReportBuildError {
 
         report.checkParams();
@@ -156,19 +156,7 @@ public class JasperReportService {
                     JRXlsExporter xlsExporter = new JRXlsExporter();
                     xlsExporter.setParameter(JRExporterParameter.JASPER_PRINT, jasperPrint);
                     xlsExporter.setParameter(JExcelApiExporterParameter.IS_DETECT_CELL_TYPE, true);
-                    // ToDo попробовать реализовать общий класс с методами MonthReportExcelService
-                    if (typeOfResult) {
-                        final String outputFile = context.getRealPath("/resources/reports/generatedReports/report3ForMutualWork" + dateNorm + ".xls");
-                        for (File reportFile : new File(context.getRealPath("/resources/reports/generatedReports/")).listFiles()) {
-                            if (reportFile.isFile()) {
-                                reportFile.delete();
-                            }
-                        }
-                        xlsExporter.setParameter(JRExporterParameter.OUTPUT_FILE_NAME, outputFile);
-                        response.setHeader("Location", "/resources/reports/generatedReports/report3ForMutualWork" + dateNorm + ".xls");
-                    } else {
-                        xlsExporter.setParameter(JRExporterParameter.OUTPUT_STREAM, outputStream);
-                    }
+                    xlsExporter.setParameter(JRExporterParameter.OUTPUT_STREAM, outputStream);
                     xlsExporter.exportReport();
                     break;
                 }
@@ -264,6 +252,9 @@ public class JasperReportService {
                     }
                     ReportExportStatus reportExportStatusFinded = reportExportStatusService.find(employee, reportNameFile, formHashCode);
                     sendMailService.performNotificationOnExportReportComplete(reportExportStatusFinded);
+                } catch (JReportBuildError e) {
+                    logger.error("Error forming report " + reportName);
+                    logger.error(e.getMessage());
                 } catch (JRException e) {
                     logger.error("Error forming report " + reportName);
                     logger.error(e.getMessage());

@@ -52,63 +52,34 @@
             processing();
             var year = dojo.byId("monthreport_year").value;
             var month = dojo.byId("monthreport_month").value;
-            var divisionOwner = dojo.byId("overtimeTable_divisionOwnerId").value;
-            var divisionEmployee = dojo.byId("overtimeTable_divisionEmployeeId").value;
 
-            var url;
-            var content;
             switch (tabNum) {
                 case 1:
-                    url = '<%= request.getContextPath()%>/monthreport/makeMonthReport';
-                    content = {
-                        division: monthReportTable_divisionId.value,
-                        manager: monthReportTable_managerId.value,
-                        regions: "[" + getSelectValues(monthReportTable_regionListId) + "]",
-                        roles: "[" + getSelectValues(monthReportTable_projectRoleListId) + "]",
-                        year: year,
-                        month: month
-                    };
+                    var division = monthReportTable_divisionId.value;
+                    var manager = monthReportTable_managerId.value;
+                    var regions = "[" + getSelectValues(monthReportTable_regionListId) + "]";
+                    var roles = "[" + getSelectValues(monthReportTable_projectRoleListId) + "]";
+                    var year = year;
+                    var month = month;
+                    window.location = "<%= request.getContextPath()%>/monthreport/makeMonthReport/" + division + "/" +
+                                       manager + "/" + regions + "/" + roles + "/" + year + "/" + month;
                     break;
                 case 2:
-                    url = '<%= request.getContextPath()%>/monthreport/makeOvertimeReport';
-                    content = {
-                            year: year,
-                            month: month,
-                            divisionOwner: divisionOwner,
-                            divisionEmployee: divisionEmployee
-                    };
+                    var divisionOwner = dojo.byId("overtimeTable_divisionOwnerId").value;
+                    var divisionEmployee = dojo.byId("overtimeTable_divisionEmployeeId").value;
+                    window.location = "<%= request.getContextPath()%>/monthreport/makeOvertimeReport/" + year + "/" +
+                                      month + "/" + divisionOwner + "/" + divisionEmployee;
                     break;
                 case 3:
-                    url = '<%= request.getContextPath()%>/monthreport/makeMutualWorkReport';
-                    content = {
-                        divisionOwner: divisionOwner,
-                        divisionEmployee: divisionEmployee,
-                        projectId: dojo.byId("mutualWorkTable_projectId").value,
-                        regions: "[" + getSelectValues(mutualWorkTable_regionListId) + "]",
-                        year: year,
-                        month: month
-                    };
+                    var divisionOwner = dojo.byId("mutualWorkTable_divisionOwnerId").value;
+                    var divisionEmployee = dojo.byId("mutualWorkTable_divisionEmployeeId").value;
+                    var projectId = dojo.byId("mutualWorkTable_projectId").value;
+                    var regions = "[" + getSelectValues(mutualWorkTable_regionListId) + "]";
+                    window.location = "<%= request.getContextPath()%>/monthreport/makeMutualWorkReport/" + year + "/" +
+                                      month + "/" + regions + "/" + divisionOwner + "/" + divisionEmployee + "/" + projectId;
                     break;
             }
-            dojo.xhrPost({
-                url:        url,
-                handleAs:   "text",
-                content:    content,
-                preventCache: false,
-                load: function (response, ioargs) {
-                    stopProcessing();
-                    if (response == ""){
-                        window.location.href = ioargs.xhr.getResponseHeader('Location');
-                    }else{
-                        alert(response);
-                    }
-                },
-                error: function () {
-                    stopProcessing();
-                    alert("Во время формирования отчёта произошла ошибка. Обратитесь к системным администраторам.");
-                }
-            });
-
+            stopProcessing();
         }
         </sec:authorize>
 

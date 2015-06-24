@@ -7,7 +7,7 @@ import java.util.List;
  */
 public class MutualWorkReport extends BaseMonthReport{
 
-    public static final String jrName = "mutualworkreport_xls";
+    public static final String jrName = "/monthreports/mutualworkreport";
 
     public static final String jrNameFile = "MutualWorkReport";
 
@@ -23,7 +23,8 @@ public class MutualWorkReport extends BaseMonthReport{
         return divisionOwner;
     }
 
-    public void setDivisionOwner(Integer divisionOwner) {
+    @Override
+    public void setDivisionOwnerId (Integer divisionOwner) {
         this.divisionOwner = divisionOwner;
     }
 
@@ -57,6 +58,11 @@ public class MutualWorkReport extends BaseMonthReport{
 
     public void setProjectId(Integer projectId) {
         this.projectId = projectId;
+    }
+
+    @Override
+    public void checkParams() {
+
     }
 
 }

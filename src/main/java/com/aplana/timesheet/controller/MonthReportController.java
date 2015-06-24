@@ -12,10 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
@@ -196,106 +193,113 @@ public class MonthReportController extends AbstractControllerForEmployee {
         return "Сохранено успешно.";
     }
 
-    @RequestMapping(value = "/prepareReport3Data", produces = "application/octet-stream")
-    @ResponseBody
-    public String prepareReport3Data(
-            @RequestParam("beginDate") String beginDate,
-            @RequestParam("endDate") String endDate,
-            @RequestParam("region") Integer region,
-            @RequestParam("divisionOwner") Integer divisionOwner,
-            @RequestParam("divisionEmployee") Integer divisionEmployee,
-            @RequestParam("projectId") Integer projectId,
-            @RequestParam("employeeId") Integer employeeId,
+    @RequestMapping(value = "/prepareReport3Data/{divisionOwner}/{divisionEmployee}/{region}/{employeeId}/{projectId}/{beginDate}/{endDate}")
+    public ModelAndView prepareReport3Data(
+            @PathVariable("beginDate") String beginDate,
+            @PathVariable("endDate") String endDate,
+            @PathVariable("region") Integer region,
+            @PathVariable("divisionOwner") Integer divisionOwner,
+            @PathVariable("divisionEmployee") Integer divisionEmployee,
+            @PathVariable("projectId") Integer projectId,
+            @PathVariable("employeeId") Integer employeeId,
             HttpServletResponse response,
             HttpServletRequest request
     )throws JReportBuildError, IOException {
-        if ( ! employeeService.isEmployeeHasPermissionsToMonthReportManage(getCurrentUser())){
+        if ( ! checkUserPermission()){
             return NO_PERMISSION_MESSAGE;
         }
         try{
             mutualWorkService.prepareReport3Data(beginDate, endDate, region, divisionOwner, divisionEmployee, projectId, employeeId, response, request);
         } catch (Exception exc){
             logger.error("Во время подготовки отчёта 'Отчет №3. Сводный отчет затраченного времени по проекту с детализацией' произошла ошибка!", exc);
-            return String.format(COMMON_ERROR_MESSAGE, "подготовки отчёта 'Отчет №3. Сводный отчет затраченного времени по проекту с детализацией'");
+            ModelAndView errorMav = new ModelAndView("/errors/commonErrors");
+            errorMav.addObject("cause", String.format(COMMON_ERROR_MESSAGE, "подготовки отчёта 'Отчет №3. Сводный отчет затраченного времени по проекту с детализацией'"));
+            return errorMav;
         }
-        return "";
+        return mav;
     }
 
     /**************************/
     /*    Блок отчеты Excel   */
     /**************************/
 
-    @RequestMapping(value = "/makeOvertimeReport", produces = "text/plain;charset=UTF-8")
-    @ResponseBody
-    public String makeOvertimeReport(
-            @RequestParam("year") Integer year,
-            @RequestParam("month") Integer month,
-            @RequestParam("divisionOwner") Integer divisionOwner,
-            @RequestParam("divisionEmployee") Integer divisionEmployee,
-            HttpServletResponse response)
-    {
+    @RequestMapping(value = "/makeOvertimeReport/{year}/{month}/{divisionOwner}/{divisionEmployee}")
+    public ModelAndView makeOvertimeReport(
+            @PathVariable("year") Integer year,
+            @PathVariable("month") Integer month,
+            @PathVariable("divisionOwner") Integer divisionOwner,
+            @PathVariable("divisionEmployee") Integer divisionEmployee,
+            HttpServletResponse response,
+            HttpServletRequest request) throws JReportBuildError, IOException {
+
+            ModelAndView mav = new ModelAndView("/monthreport/monthreport");
         try{
             if ( ! employeeService.isEmployeeHasPermissionsToMonthReportManage(getCurrentUser())){
-                return NO_PERMISSION_MESSAGE;
+                ModelAndView errorMav = new ModelAndView("/errors/commonErrors");
+                errorMav.addObject("cause", NO_PERMISSION_MESSAGE);
+                return errorMav;
             }
-            String [] headers = monthReportExcelService.makeOvertimeReport(year, month, divisionOwner, divisionEmployee);
-            response.setContentType(headers[0]);
-            response.setHeader("Content-Disposition",headers[1]);
-            response.setHeader("Location", headers[2]);
+            monthReportExcelService.makeOvertimeReport(year, month, divisionOwner, divisionEmployee, request, response);
         }catch(Exception exc){
-            return handleExcelReportError(exc);
+            ModelAndView errorMav = new ModelAndView("/errors/commonErrors");
+            errorMav.addObject("cause", handleExcelReportError(exc));
+            return errorMav;
         }
-        return "";
+        return mav;
     }
 
-    @RequestMapping(value = "/makeMonthReport", produces = "text/plain;charset=UTF-8")
-    @ResponseBody
-    public String makeMonthReport(
-            @RequestParam("division") Integer division,
-            @RequestParam("manager") Integer manager,
-            @RequestParam("regions") String regions,
-            @RequestParam("roles") String roles,
-            @RequestParam("year") Integer year,
-            @RequestParam("month") Integer month,
-            HttpServletResponse response) throws JReportBuildError
-    {
-        try{
-            if ( ! employeeService.isEmployeeHasPermissionsToMonthReportManage(getCurrentUser())){
-                return NO_PERMISSION_MESSAGE;
+    @RequestMapping(value = "/makeMonthReport/{division}/{manager}/{regions}/{roles}/{year}/{month}")
+    public ModelAndView makeMonthReport(
+            @PathVariable("division") Integer division,
+            @PathVariable("manager") Integer manager,
+            @PathVariable("regions") String regions,
+            @PathVariable("roles") String roles,
+            @PathVariable("year") Integer year,
+            @PathVariable("month") Integer month,
+            HttpServletResponse response,
+            HttpServletRequest request) throws JReportBuildError, IOException {
+
+        ModelAndView mav = new ModelAndView("/monthreport/monthreport");
+        try {
+            if ( ! employeeService.isEmployeeHasPermissionsToMonthReportManage(getCurrentUser())) {
+                ModelAndView errorMav = new ModelAndView("/errors/commonErrors");
+                errorMav.addObject("cause", NO_PERMISSION_MESSAGE);
+                return errorMav;
             }
-            String [] headers = monthReportExcelService.makeMonthReport(division, manager, regions, roles, year, month);
-            response.setContentType(headers[0]);
-            response.setHeader("Content-Disposition",headers[1]);
-            response.setHeader("Location", headers[2]);
-        }catch(Exception exc){
-            return handleExcelReportError(exc);
+            monthReportExcelService.makeMonthReport(division, manager, regions, roles, year, month, request, response);
+        } catch (Exception exc) {
+            ModelAndView errorMav = new ModelAndView("/errors/commonErrors");
+            errorMav.addObject("cause", handleExcelReportError(exc));
+            return errorMav;
         }
-        return "";
+        return mav;
     }
 
-    @RequestMapping(value = "/makeMutualWorkReport" , produces = "text/plain;charset=UTF-8", method = RequestMethod.POST)
-    @ResponseBody
-    public String makeMutualWorkReport(
-            @RequestParam("year") Integer year,
-            @RequestParam("month") Integer month,
-            @RequestParam("regions") String regions,
-            @RequestParam("divisionOwner") Integer divisionOwner,
-            @RequestParam("divisionEmployee") Integer divisionEmployee,
-            @RequestParam("projectId") Integer projectId,
-            HttpServletResponse response) throws JReportBuildError
-    {
+    @RequestMapping(value = "/makeMutualWorkReport/{year}/{month}/{regions}/{divisionOwner}/{divisionEmployee}/{projectId}")
+    public ModelAndView makeMutualWorkReport(
+            @PathVariable("year") Integer year,
+            @PathVariable("month") Integer month,
+            @PathVariable("regions") String regions,
+            @PathVariable("divisionOwner") Integer divisionOwner,
+            @PathVariable("divisionEmployee") Integer divisionEmployee,
+            @PathVariable("projectId") Integer projectId,
+            HttpServletResponse response,
+            HttpServletRequest request) throws JReportBuildError, IOException {
+
+            ModelAndView mav = new ModelAndView("/monthreport/monthreport");
         try{
             if ( ! employeeService.isEmployeeHasPermissionsToMonthReportManage(getCurrentUser())){
-                return NO_PERMISSION_MESSAGE;
+                ModelAndView errorMav = new ModelAndView("/errors/commonErrors");
+                errorMav.addObject("cause", NO_PERMISSION_MESSAGE);
+                return errorMav;
             }
-            String [] headers = monthReportExcelService.makeMutualWorkReport(year, month, regions, divisionOwner, divisionEmployee, projectId);
-            response.setContentType(headers[0]);
-            response.setHeader("Content-Disposition",headers[1]);
-            response.setHeader("Location", headers[2]);
+            monthReportExcelService.makeMutualWorkReport(year, month, regions, divisionOwner, divisionEmployee, projectId, response, request);
         }catch(Exception exc){
-            handleExcelReportError(exc);
+            ModelAndView errorMav = new ModelAndView("/errors/commonErrors");
+            errorMav.addObject("cause", handleExcelReportError(exc));
+            return errorMav;
         }
-        return "";
+        return mav;
     }
 
     private String handleExcelReportError(Exception exc){

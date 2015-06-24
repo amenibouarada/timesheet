@@ -6,7 +6,7 @@ package com.aplana.timesheet.reports.monthreports;
 
 public class OvertimeReport extends BaseMonthReport {
 
-    public static final String jrName = "overtimereport_xls";
+    public static final String jrName = "/monthreports/overtimereport";
 
     public static final String jrNameFile = "OvertimeReport";
 
@@ -18,7 +18,8 @@ public class OvertimeReport extends BaseMonthReport {
         return divisionOwner;
     }
 
-    public void setDivisionOwner(Integer divisionOwner) {
+    @Override
+    public void setDivisionOwnerId(Integer divisionOwner) {
         this.divisionOwner = divisionOwner;
     }
 
@@ -36,5 +37,10 @@ public class OvertimeReport extends BaseMonthReport {
 
     public String getJRNameFile() {
         return jrNameFile;
+    }
+
+    @Override
+    public void checkParams() {
+
     }
 }

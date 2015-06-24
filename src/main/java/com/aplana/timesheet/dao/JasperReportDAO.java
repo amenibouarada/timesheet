@@ -1,6 +1,7 @@
 package com.aplana.timesheet.dao;
 
 import com.aplana.timesheet.enums.*;
+import com.aplana.timesheet.exception.JReportBuildError;
 import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.reports.*;
 import com.aplana.timesheet.util.DateTimeUtil;
@@ -28,12 +29,10 @@ import static com.aplana.timesheet.enums.VacationStatusEnum.APPROVED;
 import static com.aplana.timesheet.enums.IllnessTypesEnum.ILLNESS;
 
 @Repository
-public class JasperReportDAO {
+public class JasperReportDAO extends AbstractReportDAO {
 
     public static final String HOURS_WITH_PERCENTS = ", ч. (%)";
     private DecimalFormat doubleFormat = new DecimalFormat("#.##");
-
-    private static Map<Class, String[]> fieldsMap = new HashMap<Class, String[]>( 6 );
 
     static {
         //может быть это вынести в сам класс Reports? kss - нет, это мапинг полей datasource для отчета, его логично делать там же, где формируются данные.
@@ -86,21 +85,10 @@ public class JasperReportDAO {
     private static final Integer ILLNESS_DAY_WITH_REASON    = 4; // только для 3 отчета - подтвержденная болезнь
     private static final Integer TRIP_DAY                   = 5;
 
-    @PersistenceContext
-    private EntityManager entityManager;
     @Autowired
     private TSPropertyProvider propertyProvider;
-    public HibernateQueryResultDataSource getReportData(BaseReport report) {
-        List resultList     = getResultList     ( report );
 
-        if (resultList != null && !resultList.isEmpty()) {
-            return new HibernateQueryResultDataSource(resultList, fieldsMap.get( report.getClass() ) );
-        } else {
-            return null;
-        }
-    }
-
-    private List getResultList( BaseReport baseReport ) {
+    public List getResultList(AbstractReport baseReport ) throws JReportBuildError {
         //TODO выпилить это, заменить на иерархию классов
         if ( baseReport instanceof Report01 ) {
             Report01 report = ( Report01 ) baseReport;

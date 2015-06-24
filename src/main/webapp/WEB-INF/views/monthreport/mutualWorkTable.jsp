@@ -185,29 +185,12 @@
 
         var projectId = parseInt(item.projectId);
         var beginDate = year + "-" + month + "-" + getFirstDayOfMonth(year, month);
-        var endDate =  year + "-" + month + "-" + getLastDayOfMonth(year, month);
+        var endDate = year + "-" + month + "-" + getLastDayOfMonth(year, month);
 
-
-        dojo.xhrPost({
-            url: "monthreport/prepareReport3Data",
-            content: {
-                divisionOwner: divisionOwner,
-                divisionEmployee: divisionEmployee,
-                projectId: projectId,
-                region: region,
-                beginDate: beginDate,
-                endDate: endDate,
-                employeeId: employeeId
-            },
-            handleAs: "text",
-            load: function (response, ioArgs) {
-                stopProcessing();
-                window.location.href = ioArgs.xhr.getResponseHeader('Location');
-            },
-            error: function (response, ioArgs) {
-
-            }
-        });
+        window.location = "<%= request.getContextPath()%>/monthreport/prepareReport3Data/" + divisionOwner + "/" +
+                          divisionEmployee + "/" + region + "/" + employeeId + "/" + projectId + "/" + beginDate + "/" +
+                          endDate;
+        stopProcessing();
     }
 
 </script>

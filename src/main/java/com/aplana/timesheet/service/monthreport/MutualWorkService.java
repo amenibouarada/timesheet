@@ -135,6 +135,6 @@ public class MutualWorkService {
         report.setEndDate(endDate);
         report.setReportDAO(reportDAO);
 
-        jasperReportService.makeReport(report, 2, true, response, request);
+        jasperReportService.makeReport(report, jasperReportService.REPORT_PRINTTYPE_XLS, response, request);
     }
 }
