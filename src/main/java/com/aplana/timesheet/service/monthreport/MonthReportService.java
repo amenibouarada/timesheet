@@ -145,4 +145,9 @@ public class MonthReportService {
     public boolean openMonthReport(Integer year, Integer month) {
         return monthReportDAO.setMonthReportStatus(year, month, MonthReportStatusEnum.OPEN.getId());
     }
+
+    public String getMonthReportStatusesForYear(Integer year) throws IOException {
+        List<Object> result = monthReportDAO.getMonthReportStatusesForYear(year);
+        return new ObjectMapper().writeValueAsString(result);
+    }
 }

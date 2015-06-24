@@ -47,6 +47,41 @@
         var projectListWithOwnerDivision = ${projectListWithOwnerDivision};
         var managerMapJson = ${managerList};
 
+        function monthReport_colorizeMonthOption(){
+            dojo.xhrPost({
+                url:        "<%= request.getContextPath()%>/monthreport/getMonthReportStatusesForYear",
+                handleAs:   "text",
+                content:    {
+                    year: monthreport_year.value
+                },
+                preventCache: false,
+                load: function (response, ioargs) {
+                    // сперва очистим, потом расскрасим
+                    for (var i = 1; i <= 12; i++){
+                        dojo.byId("monthreport_month_option_" + i).style.backgroundColor = "white";
+                    }
+                    var monthStatuses = dojo.fromJson(response);
+                    monthStatuses.forEach(function(item){
+                        var month = item[0];
+                        var status = item[1];
+                        var option = dojo.byId("monthreport_month_option_" + month);
+                        switch (status){
+                            case statusList.closed.id:
+                                option.style.backgroundColor = "green";
+                                break;
+                            case statusList.open.id:
+                                option.style.backgroundColor = "red";
+                                break;
+                        }
+                    });
+                    //monthReport_updateStatus();
+                },
+                error: function () {
+                    alert(response);
+                }
+            });
+        }
+
         <sec:authorize access="hasAnyRole('ROLE_ADMIN', 'ROLE_MONTH_REPORT_MANAGER')">
         function makeReport(tabNum) {
             processing();
@@ -90,6 +125,7 @@
             dojo.byId("monthreport_year").value = currentDate.getFullYear();
             dojo.byId("monthreport_month").value = currentDate.getMonth();
             monthReport_updateStatus();
+            monthReport_colorizeMonthOption();
 
             // функция для переназначения обработчиков нажатия кнопок
             // и отображения актуальных данных
@@ -143,17 +179,22 @@
                     monthReportStatus.innerHTML = status != "" ? monthreport_getStatusById(status).name : "не удалось получить статус";
                     var editable = true;
                     if (status == statusList.closed.id){
-                        monthReport_openButton.style.visibility = "hidden";
+                        if (monthReport_closeButton){ // кнопка может быть не видна для некоторых ролей
+                            monthReport_closeButton.style.visibility = "hidden";
+                            monthReport_openButton.style.visibility = "visible";
+                        }
                         monthReport_saveButton.style.visibility = "hidden";
                         editable = false;
                     }else if(status == statusList.notCreated.id){
                         if (monthReport_closeButton){ // кнопка может быть не видна для некоторых ролей
                             monthReport_closeButton.style.visibility = "hidden";
+                            monthReport_openButton.style.visibility = "hidden";
                         }
                         monthReport_saveButton.style.visibility  = "visible";
                     }else{
                         if (monthReport_closeButton){ // кнопка может быть не видна для некоторых ролей
                             monthReport_closeButton.style.visibility = "visible";
+                            monthReport_openButton.style.visibility = "hidden";
                         }
                         monthReport_saveButton.style.visibility  = "visible";
                     }
@@ -165,6 +206,7 @@
                     monthReportStatus.innerHTML = "не удалось получить статус";
                 }
             });
+            monthReport_colorizeMonthOption();
         }
 
         <sec:authorize access="hasRole('ROLE_MONTH_REPORT_MANAGER')">
@@ -217,18 +259,18 @@
         <td>
             <%--// ToDo сделать отдельный файл для формирования выпадашки с месяцами--%>
             <select data-dojo-id="monthreport_month" id="monthreport_month" onchange="monthReport_updateStatus();">
-                <option value="1" title="Январь">Январь</option>
-                <option value="2" title="Февраль">Февраль</option>
-                <option value="3" title="Март">Март</option>
-                <option value="4" title="Апрель">Апрель</option>
-                <option value="5" title="Май">Май</option>
-                <option value="6" title="Июнь">Июнь</option>
-                <option value="7" title="Июль">Июль</option>
-                <option value="8" title="Август">Август</option>
-                <option value="9" title="Сентябрь">Сентябрь</option>
-                <option value="10" title="Октябрь">Октябрь</option>
-                <option value="11" title="Ноябрь">Ноябрь</option>
-                <option value="12" title="Декабрь">Декабрь</option>
+                <option id="monthreport_month_option_1"  value="1"  title="Январь">Январь</option>
+                <option id="monthreport_month_option_2"  value="2"  title="Февраль">Февраль</option>
+                <option id="monthreport_month_option_3"  value="3"  title="Март">Март</option>
+                <option id="monthreport_month_option_4"  value="4"  title="Апрель">Апрель</option>
+                <option id="monthreport_month_option_5"  value="5"  title="Май">Май</option>
+                <option id="monthreport_month_option_6"  value="6"  title="Июнь">Июнь</option>
+                <option id="monthreport_month_option_7"  value="7"  title="Июль">Июль</option>
+                <option id="monthreport_month_option_8"  value="8"  title="Август">Август</option>
+                <option id="monthreport_month_option_9"  value="9"  title="Сентябрь">Сентябрь</option>
+                <option id="monthreport_month_option_10" value="10" title="Октябрь">Октябрь</option>
+                <option id="monthreport_month_option_11" value="11" title="Ноябрь">Ноябрь</option>
+                <option id="monthreport_month_option_12" value="12" title="Декабрь">Декабрь</option>
             </select>
         </td>
         <td>

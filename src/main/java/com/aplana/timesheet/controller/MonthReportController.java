@@ -367,4 +367,17 @@ public class MonthReportController extends AbstractControllerForEmployee {
             return "[]";
         }
     }
+
+    @RequestMapping(value = "/getMonthReportStatusesForYear", produces = "text/plain;charset=UTF-8")
+    @ResponseBody
+    public String getMonthReportStatusesForYear(@RequestParam("year") Integer year) {
+        try {
+            return monthReportService.getMonthReportStatusesForYear(year);
+        } catch (Exception e) {
+            // ToDo поправить обработку исключений. Вынеся отдельные повторяющиеся сообщения в константы
+            logger.error("Во время запроса данных для табеля произошла ошибка!", e);
+            return "[]";
+        }
+    }
+
 }
