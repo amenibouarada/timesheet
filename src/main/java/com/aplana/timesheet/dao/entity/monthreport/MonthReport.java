@@ -1,6 +1,7 @@
 package com.aplana.timesheet.dao.entity.monthreport;
 
 import com.aplana.timesheet.dao.entity.Division;
+import com.aplana.timesheet.enums.MonthReportStatusEnum;
 import org.hibernate.annotations.ForeignKey;
 
 import javax.persistence.*;
@@ -21,20 +22,15 @@ public class MonthReport {
     @Column(name = "month")
     private Integer month;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "division_id", nullable = false)
-    @ForeignKey(name = "month_report_fk_division")
-    private Division division;
-
     @Column(name = "status")
     private Integer status;
 
     public MonthReport() { }
 
-    public MonthReport(Integer year, Integer month, Division division) {
+    public MonthReport(Integer year, Integer month) {
         this.year = year;
         this.month = month;
-        this.division = division;
+        this.setStatus(MonthReportStatusEnum.OPEN.getId());
     }
 
     public Integer getStatus() {
@@ -67,13 +63,5 @@ public class MonthReport {
 
     public void setMonth(Integer month) {
         this.month = month;
-    }
-
-    public Division getDivision() {
-        return division;
-    }
-
-    public void setDivision(Division division) {
-        this.division = division;
     }
 }
