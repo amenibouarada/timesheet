@@ -65,7 +65,7 @@
     var gridlayout = [
         {
             cells: [[
-                {field: "employee", name: "Сотрудник", width: "150px", editable: true}
+                {field: "employee", name: "Сотрудник", width: "150px"}
             ]], noscroll: true
         },
         {
