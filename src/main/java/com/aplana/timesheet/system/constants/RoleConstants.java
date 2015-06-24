@@ -14,4 +14,6 @@ public class RoleConstants {
 
     public static final String VIEW_ILLNESS_BUSINESS_TRIP = "VIEW_ILLNESS_BUSINESS_TRIP";
     public static final String CHANGE_ILLNESS_BUSINESS_TRIP = "CHANGE_ILLNESS_BUSINESS_TRIP";
+
+    public static final String ROLE_MONTH_REPORT_MANAGER = "ROLE_MONTH_REPORT_MANAGER";
 }

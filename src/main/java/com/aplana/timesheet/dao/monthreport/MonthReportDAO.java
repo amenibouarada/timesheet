@@ -91,20 +91,28 @@ public class MonthReportDAO {
         return query.getResultList();
     }
 
-    @Transactional
-    public MonthReport findOrCreateMonthReport(Integer year, Integer month, Integer division){
+    private MonthReport findMonthReportYearMonth(Integer year, Integer month){
         Query query = entityManager.
-                createQuery("FROM MonthReport WHERE year = :year AND month = :month AND division.id = :division")
+                createQuery("FROM MonthReport WHERE year = :year AND month = :month")
                 .setParameter("year", year)
-                .setParameter("month", month)
-                .setParameter("division", division);
+                .setParameter("month", month);
         List result = query.getResultList();
-        if (result.size() == 0){ // создадим новый
-            MonthReport newMonthReport = new MonthReport(year, month, divisionDAO.find(division));
+        if (result.size() == 0){
+            return null;
+        }else{
+            return (MonthReport)result.get(0);
+        }
+    }
+
+    @Transactional
+    public MonthReport findOrCreateMonthReport(Integer year, Integer month){
+        MonthReport monthReport = findMonthReportYearMonth(year, month);
+        if (monthReport == null){ // создадим новый
+            MonthReport newMonthReport = new MonthReport(year, month);
             entityManager.persist(newMonthReport);
             return newMonthReport;
         }else{
-            return (MonthReport)result.get(0);
+            return monthReport;
         }
     }
 
@@ -131,4 +139,18 @@ public class MonthReportDAO {
         logger.debug("Flushed monthReportDetail object id = {}", monthReportDetail.getId());
     }
 
+    public Integer getMonthReportStatus(int year, int month){
+        MonthReport monthReport = findMonthReportYearMonth(year, month);
+        return monthReport == null ? null : monthReport.getStatus();
+    }
+
+    @Transactional
+    public boolean setMonthReportStatus(Integer year, Integer month, Integer status) {
+        MonthReport monthReport = findMonthReportYearMonth(year, month);
+        monthReport.setStatus(status);
+        entityManager.merge(monthReport);
+        entityManager.flush();
+        logger.debug("Updated status monthReport object id = {}", monthReport.getId());
+        return true;
+    }
 }

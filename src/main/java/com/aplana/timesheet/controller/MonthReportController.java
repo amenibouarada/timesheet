@@ -1,5 +1,6 @@
 package com.aplana.timesheet.controller;
 
+import com.aplana.timesheet.enums.MonthReportStatusEnum;
 import com.aplana.timesheet.exception.JReportBuildError;
 import com.aplana.timesheet.form.AddEmployeeForm;
 import com.aplana.timesheet.form.MonthReportForm;
@@ -48,10 +49,6 @@ public class MonthReportController extends AbstractControllerForEmployee {
         return modelAndView;
     }
 
-    private boolean checkUserPermission(){
-        return employeeService.isEmployeeAdmin(getCurrentUser().getId());
-    }
-
     /**************************/
     /*     Блок "Табель"      */
     /**************************/
@@ -82,7 +79,7 @@ public class MonthReportController extends AbstractControllerForEmployee {
             @RequestParam("jsonData") String jsonData
     ) {
         try {
-            if (checkUserPermission()){
+            if (employeeService.isEmployeeHasPermissionsToMonthReportManage(getCurrentUser())){
                 monthReportService.saveMonthReportTable(year, month, jsonData);
             }else{
                 return NO_PERMISSION_MESSAGE;
@@ -106,7 +103,7 @@ public class MonthReportController extends AbstractControllerForEmployee {
             @RequestParam("jsonData") String jsonData
     ){
         try{
-            if (checkUserPermission()){
+            if (employeeService.isEmployeeHasPermissionsToMonthReportManage(getCurrentUser())){
                 overtimeService.saveOvertimeTable(year, month, jsonData);
             }else{
                 return NO_PERMISSION_MESSAGE;
@@ -124,7 +121,7 @@ public class MonthReportController extends AbstractControllerForEmployee {
             @RequestParam("jsonData") String jsonData
     ){
         try{
-            if (checkUserPermission()){
+            if (employeeService.isEmployeeHasPermissionsToMonthReportManage(getCurrentUser())){
                 overtimeService.deleteOvertimes(jsonData);
             }else{
                 return NO_PERMISSION_MESSAGE;
@@ -167,7 +164,7 @@ public class MonthReportController extends AbstractControllerForEmployee {
             @RequestParam("projectId") Integer projectId
     ) {
         try {
-            if ( ! checkUserPermission()){
+            if ( ! employeeService.isEmployeeHasPermissionsToMonthReportManage(getCurrentUser())){
                 return NO_PERMISSION_MESSAGE;
             }
             return mutualWorkService.getMutualWorkData(year, month, regions, divisionOwner, divisionEmployee, projectId);
@@ -185,7 +182,7 @@ public class MonthReportController extends AbstractControllerForEmployee {
             @RequestParam("jsonData") String jsonData
     ){
         try{
-            if ( ! checkUserPermission()){
+            if ( ! employeeService.isEmployeeHasPermissionsToMonthReportManage(getCurrentUser())){
                 return NO_PERMISSION_MESSAGE;
             }
             mutualWorkService.saveMutualWorkTable(year, month, jsonData);
@@ -209,7 +206,7 @@ public class MonthReportController extends AbstractControllerForEmployee {
             HttpServletRequest request
     )throws JReportBuildError, IOException {
         ModelAndView mav = new ModelAndView("/monthreport/monthreport");
-        if ( ! checkUserPermission()){
+        if ( ! employeeService.isEmployeeHasPermissionsToMonthReportManage(getCurrentUser())){
             ModelAndView errorMav = new ModelAndView("/errors/commonErrors");
             errorMav.addObject("cause", NO_PERMISSION_MESSAGE);
             return errorMav;
@@ -240,7 +237,7 @@ public class MonthReportController extends AbstractControllerForEmployee {
 
             ModelAndView mav = new ModelAndView("/monthreport/monthreport");
         try{
-            if ( ! checkUserPermission()){
+            if ( ! employeeService.isEmployeeHasPermissionsToMonthReportManage(getCurrentUser())){
                 ModelAndView errorMav = new ModelAndView("/errors/commonErrors");
                 errorMav.addObject("cause", NO_PERMISSION_MESSAGE);
                 return errorMav;
@@ -265,9 +262,9 @@ public class MonthReportController extends AbstractControllerForEmployee {
             HttpServletResponse response,
             HttpServletRequest request) throws JReportBuildError, IOException {
 
-            ModelAndView mav = new ModelAndView("/monthreport/monthreport");
+        ModelAndView mav = new ModelAndView("/monthreport/monthreport");
         try {
-            if (!checkUserPermission()) {
+            if ( ! employeeService.isEmployeeHasPermissionsToMonthReportManage(getCurrentUser())) {
                 ModelAndView errorMav = new ModelAndView("/errors/commonErrors");
                 errorMav.addObject("cause", NO_PERMISSION_MESSAGE);
                 return errorMav;
@@ -294,7 +291,7 @@ public class MonthReportController extends AbstractControllerForEmployee {
 
             ModelAndView mav = new ModelAndView("/monthreport/monthreport");
         try{
-            if ( ! checkUserPermission()){
+            if ( ! employeeService.isEmployeeHasPermissionsToMonthReportManage(getCurrentUser())){
                 ModelAndView errorMav = new ModelAndView("/errors/commonErrors");
                 errorMav.addObject("cause", NO_PERMISSION_MESSAGE);
                 return errorMav;
@@ -311,5 +308,63 @@ public class MonthReportController extends AbstractControllerForEmployee {
     private String handleExcelReportError(Exception exc){
         logger.error("Во время создания отчёта произошла ошибка: ", exc);
         return String.format(COMMON_ERROR_MESSAGE, "создания отчёта") + "\nОписание проблемы: " + exc.getMessage();
+    }
+
+    /**************************/
+    /*      Статус табеля     */
+    /**************************/
+    @RequestMapping(value = "/getStatus", produces = "text/plain;charset=UTF-8")
+    @ResponseBody
+    public String getMonthReportStatus(
+            @RequestParam("year") Integer year,
+            @RequestParam("month") Integer month
+    ) {
+        Integer status;
+        try {
+            status = monthReportService.getMonthReportStatus(year, month).getId();
+        } catch (Exception e) {
+            // ToDo поправить обработку исключений. Вынеся отдельные повторяющиеся сообщения в константы
+            logger.error("Во время запроса данных для табеля произошла ошибка!", e);
+            status = MonthReportStatusEnum.NOT_CREATED.getId();
+        }
+        return status.toString();
+    }
+
+    @RequestMapping(value = "/closeMonthReport", produces = "text/plain;charset=UTF-8")
+    @ResponseBody
+    public String closeMonthReport(
+            @RequestParam("year") Integer year,
+            @RequestParam("month") Integer month
+    ) {
+        try {
+            if (monthReportService.closeMonthReport(year, month)){
+                return "Табель успешно закрыт";
+            }else{
+                return "НЕТ!!!";
+            }
+        } catch (Exception e) {
+            // ToDo поправить обработку исключений. Вынеся отдельные повторяющиеся сообщения в константы
+            logger.error("Во время запроса данных для табеля произошла ошибка!", e);
+            return "[]";
+        }
+    }
+
+    @RequestMapping(value = "/openMonthReport", produces = "text/plain;charset=UTF-8")
+    @ResponseBody
+    public String openMonthReport(
+            @RequestParam("year") Integer year,
+            @RequestParam("month") Integer month
+    ) {
+        try {
+            if (monthReportService.openMonthReport(year, month)){
+                return "Табель успешно открыт";
+            }else{
+                return "НЕТ!!!";
+            }
+        } catch (Exception e) {
+            // ToDo поправить обработку исключений. Вынеся отдельные повторяющиеся сообщения в константы
+            logger.error("Во время запроса данных для табеля произошла ошибка!", e);
+            return "[]";
+        }
     }
 }

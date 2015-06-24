@@ -1,8 +1,8 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 
 <%@ page import="static com.aplana.timesheet.util.ResourceUtils.getResRealPath" %>
-<%@ page import="static com.aplana.timesheet.form.MonthReportForm.*" %>
 <%@ page import="static com.aplana.timesheet.system.constants.TimeSheetConstants.DOJO_PATH" %>
+<%@ page import="static com.aplana.timesheet.enums.MonthReportStatusEnum.*" %>
 
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
@@ -21,7 +21,6 @@
         @import "<%= getResRealPath("/resources/css/monthreport.css", application) %>";
     </style>
 
-    <script type="text/javascript" src="<%= request.getContextPath()%>/resources/js/addEmployeesForm.js"></script>
     <script type="text/javascript" src="<%= request.getContextPath()%>/resources/js/monthreport.js"></script>
 
     <script type="text/javascript">
@@ -31,10 +30,24 @@
         dojo.require("dijit.layout.TabContainer");
         dojo.require("dijit.layout.ContentPane");
 
+        var statusList = {
+            open:       {id: <%=OPEN.getId()%>,         name: '<%=OPEN.getName()%>'},
+            closed:     {id: <%=CLOSED.getId()%>,       name: '<%=CLOSED.getName()%>'},
+            inWork:     {id: <%=IN_WORK.getId()%>,      name: '<%=IN_WORK.getName()%>'},
+            notCreated: {id: <%=NOT_CREATED.getId()%>,  name: '<%=NOT_CREATED.getName()%>'}
+        };
+
+        function monthreport_getStatusById(/* int */ id){
+            if (statusList.open.id == id){ return statusList.open; }
+            if (statusList.closed.id == id){ return statusList.closed; }
+            if (statusList.inWork.id == id){ return statusList.inWork; }
+            if (statusList.notCreated.id == id){ return statusList.notCreated; }
+        }
+
         var projectListWithOwnerDivision = ${projectListWithOwnerDivision};
         var managerMapJson = ${managerList};
 
-        <sec:authorize access="hasRole('ROLE_ADMIN')">
+        <sec:authorize access="hasAnyRole('ROLE_ADMIN', 'ROLE_MONTH_REPORT_MANAGER')">
         function makeReport(tabNum) {
             processing();
             var year = dojo.byId("monthreport_year").value;
@@ -76,6 +89,7 @@
             var currentDate = new Date();
             dojo.byId("monthreport_year").value = currentDate.getFullYear();
             dojo.byId("monthreport_month").value = currentDate.getMonth();
+            monthReport_updateStatus();
 
             // функция для переназначения обработчиков нажатия кнопок
             // и отображения актуальных данных
@@ -86,27 +100,27 @@
                     monthReportTable_reloadTable();
                     eventConnections.push(dojo.connect(monthreport_year,  "onchange", function(){ monthReportTable_reloadTable()}));
                     eventConnections.push(dojo.connect(monthreport_month, "onchange", function(){ monthReportTable_reloadTable()}));
-                    <sec:authorize access="hasRole('ROLE_ADMIN')">
-                        eventConnections.push(dojo.connect(saveButton,   "onclick", function(){ monthReportTable_save()}));
-                        eventConnections.push(dojo.connect(exportButton, "onclick", function(){makeReport(1)}));
+                    <sec:authorize access="hasAnyRole('ROLE_ADMIN', 'ROLE_MONTH_REPORT_MANAGER')">
+                        eventConnections.push(dojo.connect(monthReport_saveButton,   "onclick", function(){ monthReportTable_save()}));
+                        eventConnections.push(dojo.connect(monthReport_exportButton, "onclick", function(){makeReport(1)}));
                     </sec:authorize>
                 }
                 if (dijit.byId('tabContainer').selectedChildWidget.id == "overtimeTable_tab"){
                     overtimeTable_reloadTable();
                     eventConnections.push(dojo.connect(monthreport_year,  "onchange", function(){overtimeTable_reloadTable()}));
                     eventConnections.push(dojo.connect(monthreport_month, "onchange", function(){overtimeTable_reloadTable()}));
-                    <sec:authorize access="hasRole('ROLE_ADMIN')">
-                        eventConnections.push(dojo.connect(saveButton,   "onclick", function(){overtimeTable_save()}));
-                        eventConnections.push(dojo.connect(exportButton, "onclick", function(){makeReport(2)}));
+                    <sec:authorize access="hasAnyRole('ROLE_ADMIN', 'ROLE_MONTH_REPORT_MANAGER')">
+                        eventConnections.push(dojo.connect(monthReport_saveButton,   "onclick", function(){overtimeTable_save()}));
+                        eventConnections.push(dojo.connect(monthReport_exportButton, "onclick", function(){makeReport(2)}));
                     </sec:authorize>
                 }
-                <sec:authorize access="hasRole('ROLE_ADMIN')">
+                <sec:authorize access="hasAnyRole('ROLE_ADMIN', 'ROLE_MONTH_REPORT_MANAGER')">
                 if (dijit.byId('tabContainer').selectedChildWidget.id == "mutualWorkTable_tab"){
                         mutualWorkTable_reloadTable();
                         eventConnections.push(dojo.connect(monthreport_year,  "onchange", function(){mutualWorkTable_reloadTable()}));
                         eventConnections.push(dojo.connect(monthreport_month, "onchange", function(){mutualWorkTable_reloadTable()}));
-                        eventConnections.push(dojo.connect(saveButton,   "onclick", function(){mutualWorkTable_save()}));
-                        eventConnections.push(dojo.connect(exportButton, "onclick", function(){makeReport(3)}));
+                        eventConnections.push(dojo.connect(monthReport_saveButton,   "onclick", function(){mutualWorkTable_save()}));
+                        eventConnections.push(dojo.connect(monthReport_exportButton, "onclick", function(){makeReport(3)}));
                 }
                 </sec:authorize>
             }
@@ -115,6 +129,63 @@
             changeButtonListeners(); // выполним, чтобы загрузить слушателей для первой вкладки
         });
 
+        function monthReport_updateStatus(){
+            dojo.xhrPost({
+                url:        "<%= request.getContextPath()%>/monthreport/getStatus",
+                handleAs:   "text",
+                content:    {
+                                year: monthreport_year.value,
+                                month: monthreport_month.value
+                            },
+                preventCache: false,
+                load: function (response, ioargs) {
+                    var status = response;
+                    monthReportStatus.innerHTML = status != "" ? monthreport_getStatusById(status).name : "не удалось получить статус";
+                    if (status == statusList.closed.id){
+                        monthReport_openButton.style.visibility = "hidden";
+                        monthReport_saveButton.style.visibility = "hidden";
+
+                        // ToDo добавить про редактирование ячеек
+                    }else if(status == statusList.notCreated.id){
+                        monthReport_closeButton.style.visibility = "hidden";
+                        monthReport_saveButton.style.visibility  = "visible";
+                    }else{
+                        monthReport_closeButton.style.visibility = "visible";
+                        monthReport_saveButton.style.visibility  = "visible";
+                    }
+                },
+                error: function () {
+                    monthReportStatus.innerHTML = "не удалось получить статус";
+                }
+            });
+        }
+
+        <sec:authorize access="hasRole('ROLE_MONTH_REPORT_MANAGER')">
+        function monthReport_changeStatus(url){
+            dojo.xhrPost({
+                url:        url,
+                handleAs:   "text",
+                content:    {
+                    year: monthreport_year.value,
+                    month: monthreport_month.value
+                },
+                preventCache: false,
+                load: function (response, ioargs) {
+                    alert(response);
+                    monthReport_updateStatus();
+                },
+                error: function () {
+                    alert(response);
+                }
+            });
+        }
+        function monthReport_close(){
+            monthReport_changeStatus("<%= request.getContextPath()%>/monthreport/closeMonthReport");
+        }
+        function monthReport_open(){
+            monthReport_changeStatus("<%= request.getContextPath()%>/monthreport/openMonthReport");
+        }
+        </sec:authorize>
     </script>
 
 </head>
@@ -127,13 +198,9 @@
             <span class="label">Год:</span>
         </td>
         <td>
-            <select data-dojo-id="monthreport_year" id="monthreport_year">
+            <select data-dojo-id="monthreport_year" id="monthreport_year" onchange="monthReport_updateStatus();">
                 <option value="2015" label="2015">2015</option>
                 <option value="2016" label="2016">2016</option>
-                <option value="2017" label="2017">2017</option>
-                <option value="2018" label="2018">2018</option>
-                <option value="2019" label="2019">2019</option>
-                <option value="2020" label="2020">2020</option>
             </select>
         </td>
 
@@ -142,7 +209,7 @@
         </td>
         <td>
             <%--// ToDo сделать отдельный файл для формирования выпадашки с месяцами--%>
-            <select data-dojo-id="monthreport_month" id="monthreport_month">
+            <select data-dojo-id="monthreport_month" id="monthreport_month" onchange="monthReport_updateStatus();">
                 <option value="1" title="Январь">Январь</option>
                 <option value="2" title="Февраль">Февраль</option>
                 <option value="3" title="Март">Март</option>
@@ -156,12 +223,28 @@
                 <option value="11" title="Ноябрь">Ноябрь</option>
                 <option value="12" title="Декабрь">Декабрь</option>
             </select>
+        </td>
+        <td>
+            <span class="label">Статус:</span>
+        </td>
+        <td>
+            <div id="monthReportStatus" data-dojo-id="monthReportStatus" style="font-weight: bold"></div>
+        </td>
+        <sec:authorize access="hasRole('ROLE_MONTH_REPORT_MANAGER')">
+        <td>
+            <button data-dojo-id="monthReport_closeButton" id="monthReport_closeButton" style="margin-left: 15px; visibility: hidden;"
+                    onclick="monthReport_close();">Закрыть табель</button>
+            <button data-dojo-id="monthReport_openButton" id="monthReport_openButton"  style="margin-left: 15px; visibility: hidden;"
+                    onclick="monthReport_open();">Открыть табель</button>
+        </td>
+        </sec:authorize>
+
     </tr>
 </table>
-<sec:authorize access="hasRole('ROLE_ADMIN')">
+<sec:authorize access="hasAnyRole('ROLE_ADMIN', 'ROLE_MONTH_REPORT_MANAGER')">
     <br>
-    <button id="saveButton"     data-dojo-id="saveButton"     >Сохранить</button>
-    <button id="exportButton"   data-dojo-id="exportButton"   >Экспорт в Эксель</button>
+    <button id="monthReport_saveButton"     data-dojo-id="monthReport_saveButton"     >Сохранить</button>
+    <button id="monthReport_exportButton"   data-dojo-id="monthReport_exportButton"   >Экспорт в Эксель</button>
     <br>
 </sec:authorize>
 <br>
@@ -172,7 +255,7 @@
         <div id="overtimeTable_tab" data-dojo-type="dijit/layout/ContentPane" title="Переработки">
             <%@include file="overtimeTable.jsp" %>
         </div>
-        <sec:authorize access="hasRole('ROLE_ADMIN')">
+        <sec:authorize access="hasAnyRole('ROLE_ADMIN', 'ROLE_MONTH_REPORT_MANAGER')">
             <div id="mutualWorkTable_tab" data-dojo-type="dijit/layout/ContentPane" title="Взаимная занятость">
                 <%@include file="mutualWorkTable.jsp" %>
             </div>

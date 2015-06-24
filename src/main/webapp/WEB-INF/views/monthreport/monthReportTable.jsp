@@ -1,6 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 
-<sec:authorize access="hasRole('ROLE_ADMIN')">
+<sec:authorize access="hasAnyRole('ROLE_ADMIN', 'ROLE_MONTH_REPORT_MANAGER')">
 <table class="dijitDialogPaneContentArea no_border employmentPlanningTable">
     <tr>
         <td><label>Подразделение</label></td>
@@ -204,6 +204,7 @@
                         stopProcessing();
                         alert(response);
                         monthReportTable_reloadTable();
+                        monthReport_updateStatus();
                     },
                     error: function (response, ioArgs) {
                         stopProcessing();
