@@ -109,12 +109,13 @@
         var item = monthReportTable.getItem(rowIndex);
         var calculatedValue = monthReportTable.store.getValue(item, cell.field + "_calculated", null);
         var dispValue = "";
-        if (value){
+        if (value && value != "null"){
             cell.customStyles.push('color:green');
             dispValue = value;
         }else{
             cell.customStyles.push('color:red');
             dispValue = calculatedValue;
+            monthReportTable.store.setValue(item, cell.field, null);
         }
         return "<span title='Значение по умолчанию: " + calculatedValue + "'>" + dispValue + "</span>"
     }
@@ -217,10 +218,10 @@
 
     var monthReportTable_cellChanged = function(rowIndex){
         var item = monthReportTable.getItem(rowIndex);
-        if (item.ts_worked[0]){ // проверка, что поле, от которого зависит значение - содержит реальное значение, а не по умолчанию
+        if (item.ts_worked[0] && item.ts_worked[0] != "null"){ // проверка, что поле, от которого зависит значение - содержит реальное значение, а не по умолчанию
             monthReportTable.store.setValue(item, "ts_all_paid", parseInt(item.ts_worked) + parseInt(item.ts_vacation));
         }
-        if(item.ts_over_val_fin_comp[0]){ // проверка, что поле, от которого зависит значение - содержит реальное значение, а не по умолчанию
+        if(item.ts_over_val_fin_comp[0] && item.ts_over_val_fin_comp[0] != "null"){ // проверка, что поле, от которого зависит значение - содержит реальное значение, а не по умолчанию
             monthReportTable.store.setValue(item, "ts_over_not_done", parseInt(item.ts_all_over_accounted) - parseInt(item.ts_over_done) - parseInt(item.ts_over_val_fin_comp));
         }
     }
