@@ -141,11 +141,11 @@
                 load: function (response, ioargs) {
                     var status = response;
                     monthReportStatus.innerHTML = status != "" ? monthreport_getStatusById(status).name : "не удалось получить статус";
+                    var editable = true;
                     if (status == statusList.closed.id){
                         monthReport_openButton.style.visibility = "hidden";
                         monthReport_saveButton.style.visibility = "hidden";
-
-                        // ToDo добавить про редактирование ячеек
+                        editable = false;
                     }else if(status == statusList.notCreated.id){
                         if (monthReport_closeButton){ // кнопка может быть не видна для некоторых ролей
                             monthReport_closeButton.style.visibility = "hidden";
@@ -157,6 +157,9 @@
                         }
                         monthReport_saveButton.style.visibility  = "visible";
                     }
+                    monthReportTable.layout.cells[3].editable = editable;
+                    monthReportTable.layout.cells[5].editable = editable;
+                    monthReportTable.layout.cells[7].editable = editable;
                 },
                 error: function () {
                     monthReportStatus.innerHTML = "не удалось получить статус";

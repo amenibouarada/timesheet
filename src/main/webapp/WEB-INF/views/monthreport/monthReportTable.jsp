@@ -65,40 +65,40 @@
     var gridlayout = [
         {
             cells: [[
-                {field: "employee", name: "Сотрудник", width: "150px"}
+/* 0  */                {field: "employee", name: "Сотрудник", width: "150px"}
             ]], noscroll: true
         },
         {
             cells: [[
-                {field: "division"              , name: "Подразделение", width: "180px"},
-                {field: "region"                , name: "Регион", width: "100px"},
-                {field: "ts_worked"             , name: "Отработано",  editable: true, formatter: monthReportTable_colorCell, width: "100px", layoutIndex: 5},
-                {field: "ts_vacation"           , name: "Отпуск", width: "100px"},
-                {field: "ts_illness"            , name: "Больничный", editable: true, formatter: monthReportTable_colorCell, width: "100px"},
-                {field: "ts_all_paid"           , name: "Всего оплачено", width: "100px"},
-                {field: "ts_over_val_fin_comp"  , name: "Переработки - фин. компенсация", editable: true, formatter: monthReportTable_colorCell, width: "100px"},
-                {field: "ts_over_accounted"     , name: "Переработки", width: "100px"},
-                {field: "ts_premium"            , name: "Премии", width: "100px"},
-                {field: "ts_all_over_accounted" , name: "Всего учтенных переработок", width: "100px"},
-                {field: "ts_over_done"          , name: "Переработки отгуленные", width: "100px"},
-                {field: "ts_over_not_done"      , name: "Переработки не отгуленные", width: "100px"},
-                {field: "ts_over_remain"        , name: "Переработки оставшиеся", width: "100px"},
-                {field: "ts_vacation_avail"     , name: "Доступный отпуск", width: "100px"},
-                {field: "calc_worked_plan"      , name: "Отработано (план)", width: "100px"},
-                {field: "calc_worked_fact"      , name: "Отработано (факт)", width: "100px"},
-                {field: "calc_vacation"         , name: "Отпуск", width: "100px"},
-                {field: "calc_vacation_with"    , name: "Отпуск с сохр.", width: "100px"},
-                {field: "calc_vacation_without" , name: "Отпуск без сохр.", width: "100px"},
-                {field: "calc_vacation_hol_paid", name: "Отпуск-отгул", width: "100px"},
-                {field: "calc_illness"          , name: "Больничный", width: "100px"},
-                {field: "calc_illness_with"     , name: "Больничный подтв.", width: "100px"},
-                {field: "calc_illness_without"  , name: "Больничный без подтв.", width: "100px"},
-                {field: "calc_over"             , name: "Переработки", width: "100px"},
-                {field: "calc_over_hol"         , name: "Переработки в вых.", width: "100px"},
-                {field: "calc_over_hol_paid"    , name: "Переработки в вых. с компенсацией", width: "100px"},
-                {field: "calc_over_work"        , name: "Переработки в раб. дни", width: "100px"},
-                {field: "calc_worked_ill"       , name: "Отработано в больничный", width: "100px"},
-                {field: "calc_worked_vac"       , name: "Отработано в отпуске", width: "100px"}
+/* 1  */                {field: "division"              , name: "Подразделение",                    width: "180px"},
+/* 2  */                {field: "region"                , name: "Регион",                           width: "100px"},
+/* 3  */                {field: "ts_worked"             , name: "Отработано",                       width: "50px", editable: true, formatter: monthReportTable_colorCell},
+/* 4  */                {field: "ts_vacation"           , name: "Отпуск",                           width: "50px"},
+/* 5  */                {field: "ts_illness"            , name: "Больничный",                       width: "50px", editable: true, formatter: monthReportTable_colorCell},
+/* 6  */                {field: "ts_all_paid"           , name: "Всего оплачено",                   width: "50px"},
+/* 7  */                {field: "ts_over_val_fin_comp"  , name: "Переработки - фин. компенсация",   width: "50px", editable: true, formatter: monthReportTable_colorCell},
+/* 8  */                {field: "ts_over_accounted"     , name: "Переработки",                      width: "50px"},
+/* 9  */                {field: "ts_premium"            , name: "Премии",                           width: "50px"},
+/* 10 */                {field: "ts_all_over_accounted" , name: "Всего учтенных переработок",       width: "50px"},
+/* 11 */                {field: "ts_over_done"          , name: "Переработки отгуленные",           width: "50px"},
+/* 12 */                {field: "ts_over_not_done"      , name: "Переработки не отгуленные",        width: "50px"},
+/* 13 */                {field: "ts_over_remain"        , name: "Переработки оставшиеся",           width: "50px"},
+/* 14 */                {field: "ts_vacation_avail"     , name: "Доступный отпуск",                 width: "50px"},
+/* 15 */                {field: "calc_worked_plan"      , name: "Отработано (план)",                width: "50px"},
+/* 16 */                {field: "calc_worked_fact"      , name: "Отработано (факт)",                width: "50px"},
+/* 17 */                {field: "calc_vacation"         , name: "Отпуск",                           width: "50px"},
+/* 18 */                {field: "calc_vacation_with"    , name: "Отпуск с сохр.",                   width: "50px"},
+/* 19 */                {field: "calc_vacation_without" , name: "Отпуск без сохр.",                 width: "50px"},
+/* 20 */                {field: "calc_vacation_hol_paid", name: "Отпуск-отгул",                     width: "50px"},
+/* 21 */                {field: "calc_illness"          , name: "Больничный",                       width: "50px"},
+/* 22 */                {field: "calc_illness_with"     , name: "Больничный подтв.",                width: "50px"},
+/* 23 */                {field: "calc_illness_without"  , name: "Больничный без подтв.",            width: "50px"},
+/* 24 */                {field: "calc_over"             , name: "Переработки",                      width: "50px"},
+/* 25 */                {field: "calc_over_hol"         , name: "Переработки в вых.",               width: "50px"},
+/* 26 */                {field: "calc_over_hol_paid"    , name: "Переработки в вых. с компенсацией",width: "50px"},
+/* 27 */                {field: "calc_over_work"        , name: "Переработки в раб. дни",           width: "50px"},
+/* 28 */                {field: "calc_worked_ill"       , name: "Отработано в больничный",          width: "50px"},
+/* 29 */                {field: "calc_worked_vac"       , name: "Отработано в отпуске",             width: "50px"}
             ]]
         }
     ];
