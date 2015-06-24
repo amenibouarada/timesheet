@@ -205,8 +205,11 @@ public class MonthReportController extends AbstractControllerForEmployee {
             HttpServletResponse response,
             HttpServletRequest request
     )throws JReportBuildError, IOException {
-        if ( ! checkUserPermission()){
-            return NO_PERMISSION_MESSAGE;
+        ModelAndView mav = new ModelAndView("/monthreport/monthreport");
+        if ( ! employeeService.isEmployeeHasPermissionsToMonthReportManage(getCurrentUser())){
+            ModelAndView errorMav = new ModelAndView("/errors/commonErrors");
+            errorMav.addObject("cause", NO_PERMISSION_MESSAGE);
+            return errorMav;
         }
         try{
             mutualWorkService.prepareReport3Data(beginDate, endDate, region, divisionOwner, divisionEmployee, projectId, employeeId, response, request);
