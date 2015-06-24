@@ -10,7 +10,7 @@ import java.util.List;
 
 import static com.aplana.timesheet.util.DateTimeUtil.*;
 
-public abstract class BaseReport extends AbstractReport implements TSJasperReport {
+public abstract class BaseReport implements TSJasperReport {
 
     @Autowired
     protected AbstractReportDAO reportDAO;

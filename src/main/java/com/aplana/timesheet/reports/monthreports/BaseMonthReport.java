@@ -3,7 +3,6 @@ package com.aplana.timesheet.reports.monthreports;
 import com.aplana.timesheet.dao.AbstractReportDAO;
 import com.aplana.timesheet.dao.monthreport.MonthReportExcelDAO;
 import com.aplana.timesheet.exception.JReportBuildError;
-import com.aplana.timesheet.reports.AbstractReport;
 import com.aplana.timesheet.reports.TSJasperReport;
 import net.sf.jasperreports.engine.JRDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +13,7 @@ import java.util.List;
 /**
  * Created by AAfanasyev on 16.06.2015.
  */
-public abstract class BaseMonthReport extends AbstractReport implements TSJasperReport{
+public abstract class BaseMonthReport implements TSJasperReport{
 
     protected MonthReportExcelDAO monthReportExcelDAO;
 
