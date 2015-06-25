@@ -11,6 +11,7 @@ import com.aplana.timesheet.dao.monthreport.MutualWorkDAO;
 import com.aplana.timesheet.exception.JReportBuildError;
 import com.aplana.timesheet.reports.Report03;
 import com.aplana.timesheet.service.JasperReportService;
+import com.aplana.timesheet.system.constants.TimeSheetConstants;
 import com.aplana.timesheet.util.NumberUtils;
 import com.aplana.timesheet.util.StringUtil;
 
@@ -92,12 +93,8 @@ public class MutualWorkService {
         for (Map<String, Object> mutualWorkMap : mutualWorks) {
             Project project = projectDAO.find((Integer) mutualWorkMap.get("projectId"));
             Employee employee = employeeDAO.find((Integer)mutualWorkMap.get("employeeId"));
-            MutualWork mutualWork = mutualWorkDAO.findOrCreateMutualWork(employee, project);
+            MutualWork mutualWork = mutualWorkDAO.findOrCreateMutualWork(employee, project, year, month);
 
-            mutualWork.setYear(year);
-            mutualWork.setMonth(month);
-            mutualWork.setEmployee(employee);
-            mutualWork.setProject(project);
             mutualWork.setWorkDays(     NumberUtils.getDoubleValue(mutualWorkMap.get("workDays")));
             mutualWork.setOvertimes(NumberUtils.getDoubleValue(mutualWorkMap.get("overtimes")));
             mutualWork.setCoefficient(NumberUtils.getDoubleValue(mutualWorkMap.get("coefficient")));

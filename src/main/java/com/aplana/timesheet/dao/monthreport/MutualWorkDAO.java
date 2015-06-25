@@ -85,14 +85,20 @@ public class MutualWorkDAO {
     }
 
     @Transactional
-    public MutualWork findOrCreateMutualWork(Employee employee, Project project){
+    public MutualWork findOrCreateMutualWork(Employee employee, Project project, Integer year, Integer month){
         Query query = entityManager.
-                createQuery("FROM MutualWork WHERE employee = :employee AND project = :project")
+                createQuery("FROM MutualWork WHERE employee = :employee AND project = :project AND year = :year AND month = :month")
                 .setParameter("employee", employee)
-                .setParameter("project", project);
+                .setParameter("project", project)
+                .setParameter("year", year)
+                .setParameter("month", month);
         List result = query.getResultList();
         if (result.size() == 0){ // создадим новый
             MutualWork newMutualWork = new MutualWork();
+            newMutualWork.setEmployee(employee);
+            newMutualWork.setProject(project);
+            newMutualWork.setYear(year);
+            newMutualWork.setMonth(month);
             entityManager.persist(newMutualWork);
             return newMutualWork;
         }else{
