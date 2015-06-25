@@ -30,4 +30,9 @@ public class TimeSheetConstants {
      * Например, когда в Select-e (выпадашка) нет выбранных значений
      */
     public static final Integer NOT_CHOOSED = -1;
+
+    /**
+     * Значение по умолчанию для коэффициента "Взаимной занятости"
+     */
+    public static final double MUTUAL_WORK_COEFFICIENT = 1.15;
 }
