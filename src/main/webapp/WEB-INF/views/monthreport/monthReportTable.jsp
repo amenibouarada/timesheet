@@ -60,6 +60,19 @@
             div = div ? div : 0;
             monthReportTable_divisionId.value = div;
         }
+
+        var prevValue;
+        var fieldName;
+        monthReportTable.onStartEdit = function (inCell, inRowIndex) {
+            fieldName = inCell.field;
+            prevValue = monthReportTable.store.getValue(monthReportTable.getItem(inRowIndex), fieldName);
+        }
+
+        monthReportTable.onApplyCellEdit = function (inValue, inRowIndex, inFieldIndex) {
+            if (isNaN(Number(inValue))) {
+                monthReportTable.store.setValue(monthReportTable.getItem(inRowIndex), fieldName, prevValue);
+            }
+        }
     });
 
     var gridlayout = [

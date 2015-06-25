@@ -83,6 +83,19 @@
         dojo.byId("mutualWorkTable_divisionOwnerId").value = div;
         dojo.byId("mutualWorkTable_divisionEmployeeId").value = div;
         fillProjectListByDivision(dojo.byId("mutualWorkTable_divisionOwnerId").value, dojo.byId("mutualWorkTable_projectId"), null);
+
+        var prevValue;
+        var fieldName;
+        mutualWorkTable.onStartEdit = function (inCell, inRowIndex) {
+            fieldName = inCell.field;
+            prevValue = mutualWorkTable.store.getValue(mutualWorkTable.getItem(inRowIndex), fieldName);
+        }
+
+        mutualWorkTable.onApplyCellEdit = function (inValue, inRowIndex, inFieldIndex) {
+            if (isNaN(Number(inValue))) {
+                mutualWorkTable.store.setValue(mutualWorkTable.getItem(inRowIndex), fieldName, prevValue);
+            }
+        }
     });
 
     var addImage = function(value, rowIndex, cell) {
@@ -91,6 +104,14 @@
 
     function mutualWorkTable_divisionChanged() {
         fillProjectListByDivision(dojo.byId("mutualWorkTable_divisionOwnerId").value, dojo.byId("mutualWorkTable_projectId"), null);
+    }
+
+    function getStore() {
+        var data = {
+            identifier: 'identifier',
+            items: []
+        };
+        return data;
     }
 
     function mutualWorkTable_createStore() {
