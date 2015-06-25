@@ -65,6 +65,19 @@
             dojo.byId("overtimeTable_divisionEmployeeId").value = div;
             overtimeTable_divisionChanged();
         }
+
+        var prevValue;
+        var fieldName;
+        overtimeTable.onStartEdit = function (inCell, inRowIndex) {
+            fieldName = inCell.field;
+            prevValue = overtimeTable.store.getValue(overtimeTable.getItem(inRowIndex), fieldName);
+        }
+
+        overtimeTable.onApplyCellEdit = function (inValue, inRowIndex, inFieldIndex) {
+            if (isNaN(Number(inValue))) {
+                overtimeTable.store.setValue(overtimeTable.getItem(inRowIndex), fieldName, prevValue);
+            }
+        }
     });
 
     function overtimeTable_employeeDialogShow(){
