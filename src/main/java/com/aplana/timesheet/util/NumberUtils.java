@@ -7,7 +7,7 @@ public class NumberUtils {
             return new Double((Integer)value);
         }
         if (value instanceof String){
-            if (value == "null"){
+            if (value.equals("null")){
                 return null;
             }
             return new Double((String)value);

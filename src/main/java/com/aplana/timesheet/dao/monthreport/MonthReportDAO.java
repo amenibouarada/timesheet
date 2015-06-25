@@ -153,4 +153,11 @@ public class MonthReportDAO {
         logger.debug("Updated status monthReport object id = {}", monthReport.getId());
         return true;
     }
+
+    public List<Object> getMonthReportStatusesForYear(Integer year) {
+        Query query = entityManager.
+                createQuery("SELECT month, status FROM MonthReport WHERE year = :year ORDER BY year")
+                .setParameter("year", year);
+        return query.getResultList();
+    }
 }

@@ -288,6 +288,10 @@ public class EmployeeService extends EmployeeJSONBuilder {
         return employeeDAO.getWorkDaysOnIllnessWorked(employee, beginDate, endDate);
     }
 
+    public boolean isEmployeeHasPermissionsToCloseOpenMonthReport(Employee employee){
+        return isEmployeeHasPermissions(employee, PermissionsEnum.MONTH_REPORT_PERMISSION);
+    }
+
     public boolean isEmployeeHasPermissionsToMonthReportManage(Employee employee){
         return isEmployeeHasPermissions(employee, PermissionsEnum.ADMIN_PERMISSION) ||
                 isEmployeeHasPermissions(employee, PermissionsEnum.MONTH_REPORT_PERMISSION);

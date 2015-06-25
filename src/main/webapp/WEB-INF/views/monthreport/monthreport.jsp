@@ -47,6 +47,78 @@
         var projectListWithOwnerDivision = ${projectListWithOwnerDivision};
         var managerMapJson = ${managerList};
 
+        /**
+         * Функция для выполнения ajax-запросов
+         * Получает стандартные параметры, для запросов, отличается логикой обработки запросов
+         * Если ожидается текстовый ответ, то он выводится пользователю, если же после вывода этого сообщения необходимо
+         * выполнить какие-то действие, то будет вызвана функция handler без параметров.
+         * Если ожидается ответ в виде json-объекта, то будет попытка преобразовать полученное сообщение в json-объект,
+         * в случае успеха, будет запущена функция handler с единственным параметром - полученным и преобразованном json-параметром
+         * Если ожидается ответ в виде json-объекта, но преобразование не удалось, то в этом случае полученный ответ
+         * будет выведен как текстовое сообщение пользователю
+         * Если во время выполнения запроса произошла ошибка, то пользователю отобразится текст указанный в параметре errorMessage
+         *
+         * @param url - адрес на который будет отправлен запрос
+         * @param responseType - тип, который ожидается получить
+         * @param content - параметры запроса
+         * @param errorMessage - сообщение, которое отобразится пользователю при ошибке
+         * @param handler - обработчик полученного сообщения
+        */
+        function makeAjaxRequest(url, content, responseType, errorMessage, handler){
+            dojo.xhrPost({
+                url:        url,
+                handleAs:   "text",
+                content:    content,
+                preventCache: false,
+                load: function (response, ioargs) {
+                    if (responseType == "text"){
+                        alert(response);
+                        handler();
+                        return
+                    }
+                    if (responseType == "json"){
+                        try{
+                            handler(dojo.fromJson(response));
+                        }catch(exc){
+                            console.log(exc);
+                            alert(response);
+                        }
+                    }
+                },
+                error: function() {
+                    alert(errorMessage);
+                }
+            });
+        }
+
+        function monthReport_colorizeMonthOption(){
+            makeAjaxRequest(
+                    "<%= request.getContextPath()%>/monthreport/getMonthReportStatusesForYear",
+                    { year: monthreport_year.value },
+                    "json",
+                    "При запросе статусов табелей за год произошла ошибка",
+                    function (response) {
+                        // сперва очистим, потом расскрасим
+                        for (var i = 1; i <= 12; i++){
+                            dojo.byId("monthreport_month_option_" + i).style.backgroundColor = "white";
+                        }
+                        response.forEach(function(item){
+                            var month = item[0];
+                            var status = item[1];
+                            var option = dojo.byId("monthreport_month_option_" + month);
+                            switch (status){
+                                case statusList.closed.id:
+                                    option.style.backgroundColor = "green";
+                                    break;
+                                case statusList.open.id:
+                                    option.style.backgroundColor = "red";
+                                    break;
+                            }
+                        });
+                    }
+            );
+        }
+
         <sec:authorize access="hasAnyRole('ROLE_ADMIN', 'ROLE_MONTH_REPORT_MANAGER')">
         function makeReport(tabNum) {
             processing();
@@ -90,6 +162,7 @@
             dojo.byId("monthreport_year").value = currentDate.getFullYear();
             dojo.byId("monthreport_month").value = currentDate.getMonth();
             monthReport_updateStatus();
+            monthReport_colorizeMonthOption();
 
             // функция для переназначения обработчиков нажатия кнопок
             // и отображения актуальных данных
@@ -130,58 +203,54 @@
         });
 
         function monthReport_updateStatus(){
-            dojo.xhrPost({
-                url:        "<%= request.getContextPath()%>/monthreport/getStatus",
-                handleAs:   "text",
-                content:    {
-                                year: monthreport_year.value,
-                                month: monthreport_month.value
-                            },
-                preventCache: false,
-                load: function (response, ioargs) {
-                    var status = response;
-                    monthReportStatus.innerHTML = status != "" ? monthreport_getStatusById(status).name : "не удалось получить статус";
-                    if (status == statusList.closed.id){
-                        monthReport_openButton.style.visibility = "hidden";
-                        monthReport_saveButton.style.visibility = "hidden";
+            makeAjaxRequest(
+                    "<%= request.getContextPath()%>/monthreport/getStatus",
+                    {year: monthreport_year.value, month: monthreport_month.value},
+                    "json",
+                    "Не удалось получить статус",
+                    function (status) {
+                        monthReportStatus.innerHTML = status !== "" ? monthreport_getStatusById(status).name : "не удалось получить статус";
+                        var editable = true;
+                        if (status == statusList.closed.id){
+                            if (monthReport_closeButton){ // кнопка может быть не видна для некоторых ролей
+                                monthReport_closeButton.style.visibility = "hidden";
+                                monthReport_openButton.style.visibility = "visible";
+                            }
+                            monthReport_saveButton.style.visibility = "hidden";
+                            editable = false;
+                        }else if(status == statusList.notCreated.id){
+                            if (monthReport_closeButton){ // кнопка может быть не видна для некоторых ролей
+                                monthReport_closeButton.style.visibility = "hidden";
+                                monthReport_openButton.style.visibility = "hidden";
+                            }
+                            monthReport_saveButton.style.visibility  = "visible";
+                        }else{
+                            if (monthReport_closeButton){ // кнопка может быть не видна для некоторых ролей
+                                monthReport_closeButton.style.visibility = "visible";
+                                monthReport_openButton.style.visibility = "hidden";
+                            }
+                            monthReport_saveButton.style.visibility  = "visible";
+                        }
+                        monthReportTable.layout.cells[3].editable = editable;
+                        monthReportTable.layout.cells[5].editable = editable;
+                        monthReportTable.layout.cells[7].editable = editable;
 
-                        // ToDo добавить про редактирование ячеек
-                    }else if(status == statusList.notCreated.id){
-                        if (monthReport_closeButton){ // кнопка может быть не видна для некоторых ролей
-                            monthReport_closeButton.style.visibility = "hidden";
-                        }
-                        monthReport_saveButton.style.visibility  = "visible";
-                    }else{
-                        if (monthReport_closeButton){ // кнопка может быть не видна для некоторых ролей
-                            monthReport_closeButton.style.visibility = "visible";
-                        }
-                        monthReport_saveButton.style.visibility  = "visible";
+                        monthReport_colorizeMonthOption();
                     }
-                },
-                error: function () {
-                    monthReportStatus.innerHTML = "не удалось получить статус";
-                }
-            });
+            )
         }
 
         <sec:authorize access="hasRole('ROLE_MONTH_REPORT_MANAGER')">
         function monthReport_changeStatus(url){
-            dojo.xhrPost({
-                url:        url,
-                handleAs:   "text",
-                content:    {
-                    year: monthreport_year.value,
-                    month: monthreport_month.value
-                },
-                preventCache: false,
-                load: function (response, ioargs) {
-                    alert(response);
-                    monthReport_updateStatus();
-                },
-                error: function () {
-                    alert(response);
-                }
-            });
+            makeAjaxRequest(
+                    url,
+                    { year: monthreport_year.value, month: monthreport_month.value },
+                    "text",
+                    "Не удалось изменить статус табеля",
+                    function (){
+                        monthReport_updateStatus();
+                    }
+            );
         }
         function monthReport_close(){
             monthReport_changeStatus("<%= request.getContextPath()%>/monthreport/closeMonthReport");
@@ -214,18 +283,18 @@
         <td>
             <%--// ToDo сделать отдельный файл для формирования выпадашки с месяцами--%>
             <select data-dojo-id="monthreport_month" id="monthreport_month" onchange="monthReport_updateStatus();">
-                <option value="1" title="Январь">Январь</option>
-                <option value="2" title="Февраль">Февраль</option>
-                <option value="3" title="Март">Март</option>
-                <option value="4" title="Апрель">Апрель</option>
-                <option value="5" title="Май">Май</option>
-                <option value="6" title="Июнь">Июнь</option>
-                <option value="7" title="Июль">Июль</option>
-                <option value="8" title="Август">Август</option>
-                <option value="9" title="Сентябрь">Сентябрь</option>
-                <option value="10" title="Октябрь">Октябрь</option>
-                <option value="11" title="Ноябрь">Ноябрь</option>
-                <option value="12" title="Декабрь">Декабрь</option>
+                <option id="monthreport_month_option_1"  value="1"  title="Январь">Январь</option>
+                <option id="monthreport_month_option_2"  value="2"  title="Февраль">Февраль</option>
+                <option id="monthreport_month_option_3"  value="3"  title="Март">Март</option>
+                <option id="monthreport_month_option_4"  value="4"  title="Апрель">Апрель</option>
+                <option id="monthreport_month_option_5"  value="5"  title="Май">Май</option>
+                <option id="monthreport_month_option_6"  value="6"  title="Июнь">Июнь</option>
+                <option id="monthreport_month_option_7"  value="7"  title="Июль">Июль</option>
+                <option id="monthreport_month_option_8"  value="8"  title="Август">Август</option>
+                <option id="monthreport_month_option_9"  value="9"  title="Сентябрь">Сентябрь</option>
+                <option id="monthreport_month_option_10" value="10" title="Октябрь">Октябрь</option>
+                <option id="monthreport_month_option_11" value="11" title="Ноябрь">Ноябрь</option>
+                <option id="monthreport_month_option_12" value="12" title="Декабрь">Декабрь</option>
             </select>
         </td>
         <td>
