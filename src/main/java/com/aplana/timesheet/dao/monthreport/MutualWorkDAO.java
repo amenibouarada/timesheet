@@ -81,6 +81,7 @@ public class MutualWorkDAO {
         if (regionSet) {
             query.setParameter("regions", regions);
         }
+        logger.debug("getMutualWorkData List<MutualWorkData> result size = {}", query.getResultList().size());
         return query.getResultList();
     }
 
@@ -100,8 +101,11 @@ public class MutualWorkDAO {
             newMutualWork.setYear(year);
             newMutualWork.setMonth(month);
             entityManager.persist(newMutualWork);
+            logger.debug("findOrCreateMutualWork MutualWork id = {}", newMutualWork.getId());
+            logger.info("findOrCreateMutualWork created newMutualWork");
             return newMutualWork;
         }else{
+            logger.debug("findOrCreateMutualWork List<MutualWork> result size = {}", result.size());
             return (MutualWork)result.get(0);
         }
     }

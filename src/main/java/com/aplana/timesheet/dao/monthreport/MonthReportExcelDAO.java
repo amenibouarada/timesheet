@@ -2,12 +2,12 @@ package com.aplana.timesheet.dao.monthreport;
 
 import com.aplana.timesheet.dao.AbstractReportDAO;
 import com.aplana.timesheet.reports.TSJasperReport;
-import com.aplana.timesheet.reports.monthreports.BaseMonthReport;
 import com.aplana.timesheet.reports.monthreports.MonthXLSReport;
 import com.aplana.timesheet.reports.monthreports.OvertimeReport;
 import com.aplana.timesheet.reports.monthreports.MutualWorkReport;
-import com.aplana.timesheet.util.HibernateQueryResultDataSource;
 import com.aplana.timesheet.exception.JReportBuildError;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -44,6 +44,8 @@ public class MonthReportExcelDAO extends AbstractReportDAO {
                                                            "region_id", "region_name", "work_days", "overtimes",
                                                            "coefficient", "work_days_calc", "overtimes_calc", "comment"});
     }
+
+    private static final Logger logger = LoggerFactory.getLogger(MonthReportExcelDAO.class);
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -109,7 +111,7 @@ public class MonthReportExcelDAO extends AbstractReportDAO {
         if (employeeDivSet) {
             query.setParameter("divisionEmployee", report.getDivisionEmployee());
         }
-
+        logger.debug("getOvertimeReportData result size = {}", query.getResultList().size());
         return query.getResultList();
     }
 
@@ -122,7 +124,7 @@ public class MonthReportExcelDAO extends AbstractReportDAO {
                 report.getYear(),
                 report.getMonth(),
                 true);
-
+        logger.debug("getMonthReportData result size = {}", resultList.size());
         return resultList;
     }
 
@@ -135,7 +137,7 @@ public class MonthReportExcelDAO extends AbstractReportDAO {
                 report.getDivisionEmployee(),
                 report.getProjectId(),
                 true);
-
+        logger.debug("getMutualWorkReportData result size = {}", resultList.size());
         return resultList;
     }
 }

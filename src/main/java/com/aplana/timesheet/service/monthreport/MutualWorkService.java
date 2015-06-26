@@ -18,6 +18,8 @@ import com.aplana.timesheet.util.StringUtil;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.type.CollectionType;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,6 +37,8 @@ import java.util.Map;
 
 @Service
 public class MutualWorkService {
+
+    private static final Logger logger = LoggerFactory.getLogger(MutualWorkService.class);
 
     @Autowired private MutualWorkDAO    mutualWorkDAO;
     @Autowired private JasperReportDAO  reportDAO;
@@ -85,6 +89,7 @@ public class MutualWorkService {
     }
 
     public boolean saveMutualWorkTable(int year, int month, String jsonData) throws IOException {
+        logger.debug("Старт сохранения таблицы 'Взаимная занятость'");
         ObjectMapper mapper = new ObjectMapper();
         CollectionType mapCollectionType = mapper.getTypeFactory().constructCollectionType(List.class, Map.class);
 
@@ -99,10 +104,10 @@ public class MutualWorkService {
             mutualWork.setOvertimes(NumberUtils.getDoubleValue(mutualWorkMap.get("overtimes")));
             mutualWork.setCoefficient(NumberUtils.getDoubleValue(mutualWorkMap.get("coefficient")));
             mutualWork.setComment((String) mutualWorkMap.get("comment"));
-
+            logger.debug("Сохранение записи в таблицу mutual_work: " + mutualWork.toString());
             mutualWorkDAO.save(mutualWork);
         }
-
+        logger.debug("Завершение сохранения таблицы 'Взаимная занятость'");
         return true;
     }
 
