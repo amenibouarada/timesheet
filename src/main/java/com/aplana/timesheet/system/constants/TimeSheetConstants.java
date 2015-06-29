@@ -32,7 +32,8 @@ public class TimeSheetConstants {
     public static final Integer NOT_CHOOSED = -1;
 
     /**
-     * Значение по умолчанию для коэффициента "Взаимной занятости"
+     * Коэффицинт учёта переработок при взаимной занятости
+     * Для заполнения столбца по умолчанию в таблице "Взаимная занятость", на форме "Учет табеля"
      */
-    public static final double MUTUAL_WORK_COEFFICIENT = 1.15;
+    public static final double MUTUAL_WORK_OVERTIME_COEF = 1.15;
 }
