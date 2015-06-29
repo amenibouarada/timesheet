@@ -81,7 +81,7 @@
                             handler(dojo.fromJson(response));
                         }catch(exc){
                             console.log(exc);
-                            alert(response);
+                            //alert(response);
                         }
                     }
                 },
@@ -156,6 +156,7 @@
         </sec:authorize>
 
         var eventConnections = [];
+
         dojo.addOnLoad(function () {
             // установим год/месяц по умолчанию
             var currentDate = new Date();
@@ -166,34 +167,58 @@
 
             // функция для переназначения обработчиков нажатия кнопок
             // и отображения актуальных данных
-            var changeButtonListeners = function(){
+            var changeButtonListeners = function () {
                 dojo.forEach(eventConnections, dojo.disconnect);
                 eventConnections = [];
-                if (dijit.byId('tabContainer').selectedChildWidget.id == "monthReportTable_tab"){
+                if (dijit.byId('tabContainer').selectedChildWidget.id == "monthReportTable_tab") {
                     monthReportTable_reloadTable();
-                    eventConnections.push(dojo.connect(monthreport_year,  "onchange", function(){ monthReportTable_reloadTable()}));
-                    eventConnections.push(dojo.connect(monthreport_month, "onchange", function(){ monthReportTable_reloadTable()}));
+                    eventConnections.push(dojo.connect(monthreport_year, "onchange", function () {
+                        monthReportTable_reloadTable()
+                    }));
+                    eventConnections.push(dojo.connect(monthreport_month, "onchange", function () {
+                        monthReportTable_reloadTable()
+                    }));
                     <sec:authorize access="hasAnyRole('ROLE_ADMIN', 'ROLE_MONTH_REPORT_MANAGER')">
-                        eventConnections.push(dojo.connect(monthReport_saveButton,   "onclick", function(){ monthReportTable_save()}));
-                        eventConnections.push(dojo.connect(monthReport_exportButton, "onclick", function(){makeReport(1)}));
+                    eventConnections.push(dojo.connect(monthReport_saveButton, "onclick", function () {
+                        monthReportTable_save()
+                    }));
+                    eventConnections.push(dojo.connect(monthReport_exportButton, "onclick", function () {
+                        makeReport(1)
+                    }));
                     </sec:authorize>
                 }
-                if (dijit.byId('tabContainer').selectedChildWidget.id == "overtimeTable_tab"){
+                if (dijit.byId('tabContainer').selectedChildWidget.id == "overtimeTable_tab") {
                     overtimeTable_reloadTable();
-                    eventConnections.push(dojo.connect(monthreport_year,  "onchange", function(){overtimeTable_reloadTable()}));
-                    eventConnections.push(dojo.connect(monthreport_month, "onchange", function(){overtimeTable_reloadTable()}));
+                    eventConnections.push(dojo.connect(monthreport_year, "onchange", function () {
+                        overtimeTable_reloadTable()
+                    }));
+                    eventConnections.push(dojo.connect(monthreport_month, "onchange", function () {
+                        overtimeTable_reloadTable()
+                    }));
                     <sec:authorize access="hasAnyRole('ROLE_ADMIN', 'ROLE_MONTH_REPORT_MANAGER')">
-                        eventConnections.push(dojo.connect(monthReport_saveButton,   "onclick", function(){overtimeTable_save()}));
-                        eventConnections.push(dojo.connect(monthReport_exportButton, "onclick", function(){makeReport(2)}));
+                    eventConnections.push(dojo.connect(monthReport_saveButton, "onclick", function () {
+                        overtimeTable_save()
+                    }));
+                    eventConnections.push(dojo.connect(monthReport_exportButton, "onclick", function () {
+                        makeReport(2)
+                    }));
                     </sec:authorize>
                 }
                 <sec:authorize access="hasAnyRole('ROLE_ADMIN', 'ROLE_MONTH_REPORT_MANAGER')">
-                if (dijit.byId('tabContainer').selectedChildWidget.id == "mutualWorkTable_tab"){
-                        mutualWorkTable_reloadTable();
-                        eventConnections.push(dojo.connect(monthreport_year,  "onchange", function(){mutualWorkTable_reloadTable()}));
-                        eventConnections.push(dojo.connect(monthreport_month, "onchange", function(){mutualWorkTable_reloadTable()}));
-                        eventConnections.push(dojo.connect(monthReport_saveButton,   "onclick", function(){mutualWorkTable_save()}));
-                        eventConnections.push(dojo.connect(monthReport_exportButton, "onclick", function(){makeReport(3)}));
+                if (dijit.byId('tabContainer').selectedChildWidget.id == "mutualWorkTable_tab") {
+                    mutualWorkTable_reloadTable();
+                    eventConnections.push(dojo.connect(monthreport_year, "onchange", function () {
+                        mutualWorkTable_reloadTable()
+                    }));
+                    eventConnections.push(dojo.connect(monthreport_month, "onchange", function () {
+                        mutualWorkTable_reloadTable()
+                    }));
+                    eventConnections.push(dojo.connect(monthReport_saveButton, "onclick", function () {
+                        mutualWorkTable_save()
+                    }));
+                    eventConnections.push(dojo.connect(monthReport_exportButton, "onclick", function () {
+                        makeReport(3)
+                    }));
                 }
                 </sec:authorize>
             }
@@ -201,6 +226,23 @@
             tabContainer.watch("selectedChildWidget", changeButtonListeners);
             changeButtonListeners(); // выполним, чтобы загрузить слушателей для первой вкладки
         });
+
+        function validateCells(currentTable, allowStringField) {
+            var prevValue;
+            var fieldName;
+            currentTable.onStartEdit = function (inCell, inRowIndex) {
+                fieldName = inCell.field;
+                prevValue = currentTable.store.getValue(currentTable.getItem(inRowIndex), fieldName);
+            }
+
+            currentTable.onApplyCellEdit = function (inValue, inRowIndex, inFieldIndex) {
+                if (inFieldIndex != allowStringField) {
+                    if (isNaN(Number(inValue))) {
+                        currentTable.store.setValue(currentTable.getItem(inRowIndex), fieldName, prevValue);
+                    }
+                }
+            }
+        }
 
         function monthReport_updateStatus(){
             makeAjaxRequest(

@@ -23,23 +23,31 @@ public class Overtime {
     private Integer month;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "employee_id", nullable = false)
+    @JoinColumn(name = "employee_id")
     @ForeignKey(name = "fk_employee")
     private Employee employee;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "project_id", nullable = true)
+    @JoinColumn(name = "project_id")
     @ForeignKey(name = "fk_project")
     private Project project;
 
-    @Column(name = "overtime",columnDefinition = "decimal(4,2) null")
+    @Column(name = "overtime")
     private Double overtime;
 
-    @Column(name = "premium",columnDefinition = "decimal(4,2) null")
+    @Column(name = "premium")
     private Double premium;
 
     @Column(name = "comment")
     private String comment;
+
+    public Double getPremium() {
+        return premium;
+    }
+
+    public void setPremium(Double premium) {
+        this.premium = premium;
+    }
 
     public Integer getId() {
         return id;
@@ -87,14 +95,6 @@ public class Overtime {
 
     public void setOvertime(Double overtime) {
         this.overtime = overtime;
-    }
-
-    public Double getPremium() {
-        return premium;
-    }
-
-    public void setPremium(Double premium) {
-        this.premium = premium;
     }
 
     public String getComment() {
