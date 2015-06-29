@@ -88,6 +88,7 @@ public class MonthReportDAO {
         if (managerSet) { query.setParameter("manager", manager);   }
         if (regionSet)  { query.setParameter("regions", regions);   }
         if (rolesSet)   { query.setParameter("roles", roles);       }
+        logger.debug("getMonthReportData List<MonthReportData> result size = {}", query.getResultList().size());
         return query.getResultList();
     }
 
@@ -98,8 +99,11 @@ public class MonthReportDAO {
                 .setParameter("month", month);
         List result = query.getResultList();
         if (result.size() == 0){
+            logger.debug("findMonthReportYearMonth List<MonthReport> result size = {}", query.getResultList().size());
+            logger.info("findMonthReportYearMonth returned null");
             return null;
         }else{
+            logger.debug("findMonthReportYearMonth List<MonthReport> result size = {}", query.getResultList().size());
             return (MonthReport)result.get(0);
         }
     }
@@ -110,8 +114,11 @@ public class MonthReportDAO {
         if (monthReport == null){ // создадим новый
             MonthReport newMonthReport = new MonthReport(year, month);
             entityManager.persist(newMonthReport);
+            logger.debug("findOrCreateMonthReport MonthReport id = {}", newMonthReport.getId());
+            logger.info("findMonthReportYearMonth created newMonthReport");
             return newMonthReport;
         }else{
+            logger.debug("findOrCreateMonthReport MonthReport id = {}", monthReport.getId());
             return monthReport;
         }
     }
@@ -126,8 +133,11 @@ public class MonthReportDAO {
         if (result.size() == 0){ // создадим новый
             MonthReportDetail newMonthReportDetail = new MonthReportDetail(monthReport, employee);
             entityManager.persist(newMonthReportDetail);
+            logger.debug("findOrCreateMonthReportDetail List<MonthReportDetail> result size = {}", query.getResultList().size());
+            logger.info("findOrCreateMonthReportDetail created newMonthReportDetail");
             return newMonthReportDetail;
         }else{
+            logger.debug("findOrCreateMonthReportDetail List<MonthReportDetail> result size = {}", query.getResultList().size());
             return (MonthReportDetail)result.get(0);
         }
     }
@@ -158,6 +168,7 @@ public class MonthReportDAO {
         Query query = entityManager.
                 createQuery("SELECT month, status FROM MonthReport WHERE year = :year ORDER BY year")
                 .setParameter("year", year);
+        logger.debug("getMonthReportStatusesForYear List<Object> result size = {}", query.getResultList().size());
         return query.getResultList();
     }
 }
