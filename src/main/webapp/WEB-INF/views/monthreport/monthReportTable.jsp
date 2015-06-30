@@ -161,31 +161,26 @@
 
         monthReportTable_createStore();
         processing();
-        dojo.xhrPost({
-            url: "monthreport/getMonthReportData",
-            content: {
-                division: divisionId,
-                manager: managerId,
-                regions: regions,
-                roles: roles,
-                year: year,
-                month: month
-            },
-            handleAs: "text",
-            load: function (response, ioArgs) {
-                var data = dojo.fromJson(response);
-                for(var i=0; i < data.length; i++){
-                    monthReportTable.store.newItem(data[i]);
+        makeAjaxRequest(
+                "<%= request.getContextPath()%>/monthreport/getMonthReportData",
+                {
+                    division: divisionId,
+                    manager: managerId,
+                    regions: regions,
+                    roles: roles,
+                    year: year,
+                    month: month
+                },
+                "json",
+                "Во время запроса данных для табеля произошла ошибка. Пожалуйста, свяжитесть с администраторами системы.",
+                function (data) {
+                    for (var i = 0; i < data.length; i++) {
+                        monthReportTable.store.newItem(data[i]);
+                    }
+                    monthReportTable.store.save();
+                    stopProcessing();
                 }
-                monthReportTable.store.save();
-                stopProcessing();
-            },
-            error: function (response, ioArgs) {
-                stopProcessing();
-                alert(response);
-            }
-        });
-
+        );
     }
 
     function monthReportTable_save(){
@@ -194,25 +189,21 @@
             onComplete: function (items) {
                 monthReportTable.store.save();
                 var jsonData = itemToJSON(monthReportTable.store, items);
-                dojo.xhrPost({
-                    url: "monthreport/saveMonthReportTable",
-                    content: {
-                        year: dojo.byId("monthreport_year").value,
-                        month: dojo.byId("monthreport_month").value,
-                        jsonData: "[" + jsonData + "]"
-                    },
-                    handleAs: "text",
-                    load: function (response, ioArgs) {
-                        stopProcessing();
-                        alert(response);
-                        monthReportTable_reloadTable();
-                        monthReport_updateStatus();
-                    },
-                    error: function (response, ioArgs) {
-                        stopProcessing();
-                        alert(response);
-                    }
-                });
+                makeAjaxRequest(
+                        "<%= request.getContextPath()%>/monthreport/saveMonthReportTable",
+                        {
+                            year: dojo.byId("monthreport_year").value,
+                            month: dojo.byId("monthreport_month").value,
+                            jsonData: "[" + jsonData + "]"
+                        },
+                        "text",
+                        "Во время сохранения табеля произошла ошибка. Пожалуйста, свяжитесть с администраторами системы.",
+                        function () {
+                            monthReportTable_reloadTable();
+                            monthReport_updateStatus();
+                            stopProcessing();
+                        }
+                );
             }
         });
     }

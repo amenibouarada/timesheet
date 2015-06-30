@@ -134,30 +134,26 @@
 
         processing();
         overtimeTable_createStore();
-        dojo.xhrPost({
-            url: "monthreport/getOvertimes",
-            content: {
-                divisionOwner: divisionOwner,
-                divisionEmployee: divisionEmployee,
-                year: year,
-                month: month
-            },
-            handleAs: "text",
-            load: function (response, ioArgs) {
-                stopProcessing();
-                var overtimes = dojo.fromJson(response);
-                dojo.forEach(overtimes, function(overtime){
-                    // уникальный идентификатор, для добавления новых строк
-                    overtime.identifier = overtime.employee_id + "_" + overtime.project_id;
-                });
-                overtimeTable_addRows(overtimes);
-                overtimeTable.store.save();
-            },
-            error: function (response, ioArgs) {
-                stopProcessing();
-                alert(response);
-            }
-        });
+        makeAjaxRequest(
+                "<%= request.getContextPath()%>/monthreport/getOvertimes",
+                {
+                    divisionOwner: divisionOwner,
+                    divisionEmployee: divisionEmployee,
+                    year: year,
+                    month: month
+                },
+                "json",
+                "Во время запроса данных для таблицы 'Переработки' произошла ошибка. Пожалуйста, свяжитесть с администраторами системы.",
+                function (data) {
+                    stopProcessing();
+                    dojo.forEach(data, function(overtime){
+                        // уникальный идентификатор, для добавления новых строк
+                        overtime.identifier = overtime.employee_id + "_" + overtime.project_id;
+                    });
+                    overtimeTable_addRows(data);
+                    overtimeTable.store.save();
+                }
+        );
     }
 
     function overtimeTable_addRows(overtime_list){
@@ -179,29 +175,25 @@
         var jsonData = itemToJSON(overtimeTable.store, items);
 
         processing();
-        dojo.xhrPost({
-            url: "monthreport/deleteOvertimes",
-            content: {
-                jsonData: "[" + jsonData + "]"
-            },
-            handleAs: "text",
-            load: function (response, ioArgs) {
-                alert(response);
-                if(items.length){
-                    dojo.forEach(items, function(selectedItem){
-                        if(selectedItem !== null){
-                            overtimeTable.store.deleteItem(selectedItem);
-                        }
-                        overtimeTable.store.save();
-                    });
+        makeAjaxRequest(
+                "<%= request.getContextPath()%>/monthreport/deleteOvertimes",
+                {
+                    jsonData: "[" + jsonData + "]"
+                },
+                "text",
+                "Во время удаления данных из таблицы 'Переработки' произошла ошибка. Пожалуйста, свяжитесть с администраторами системы.",
+                function () {
+                    if(items.length){
+                        dojo.forEach(items, function(selectedItem){
+                            if(selectedItem !== null){
+                                overtimeTable.store.deleteItem(selectedItem);
+                            }
+                            overtimeTable.store.save();
+                        });
+                    }
+                    stopProcessing();
                 }
-                stopProcessing();
-            },
-            error: function (response, ioArgs) {
-                stopProcessing();
-                alert(response);
-            }
-        });
+        );
     }
 
     function overtimeTable_save(){
@@ -210,24 +202,20 @@
             onComplete: function (items) {
                 overtimeTable.store.save();
                 var jsonData = itemToJSON(overtimeTable.store, items);
-                dojo.xhrPost({
-                    url: "monthreport/saveOvertimeTable",
-                    content: {
-                        year: dojo.byId("monthreport_year").value,
-                        month: dojo.byId("monthreport_month").value,
-                        jsonData: "[" + jsonData + "]"
-                    },
-                    handleAs: "text",
-                    load: function (response, ioArgs) {
-                        stopProcessing();
-                        alert(response);
-                        overtimeTable_reloadTable();
-                    },
-                    error: function (response, ioArgs) {
-                        stopProcessing();
-                        alert(response);
-                    }
-                });
+                makeAjaxRequest(
+                        "<%= request.getContextPath()%>/monthreport/saveOvertimeTable",
+                        {
+                            year: dojo.byId("monthreport_year").value,
+                            month: dojo.byId("monthreport_month").value,
+                            jsonData: "[" + jsonData + "]"
+                        },
+                        "text",
+                        "Во время сохранения таблицы 'Переработки' произошла ошибка. Пожалуйста, свяжитесть с администраторами системы.",
+                        function () {
+                            stopProcessing();
+                            overtimeTable_reloadTable();
+                        }
+                );
             }
         });
     }

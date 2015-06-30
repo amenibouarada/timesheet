@@ -81,12 +81,13 @@
                             handler(dojo.fromJson(response));
                         }catch(exc){
                             console.log(exc);
-                            //alert(response);
+                            alert(response);
                         }
                     }
                 },
                 error: function() {
                     alert(errorMessage);
+                    stopProcessing();
                 }
             });
         }

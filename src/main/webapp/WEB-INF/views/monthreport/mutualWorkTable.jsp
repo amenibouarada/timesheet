@@ -153,30 +153,26 @@
         mutualWorkTable_createStore();
 
         processing();
-        dojo.xhrPost({
-            url: "monthreport/getMutualWorks",
-            content: {
-                divisionOwner: divisionOwner,
-                divisionEmployee: divisionEmployee,
-                projectId: projectId,
-                regions: regions,
-                year: year,
-                month: month
-            },
-            handleAs: "text",
-            load: function (response, ioArgs) {
-                stopProcessing();
-                var mutualWorks = dojo.fromJson(response);
-                dojo.forEach(mutualWorks, function (mutualWork) {
-                    mutualWorkTable.store.newItem(mutualWork);
-                });
-                mutualWorkTable.store.save();
-            },
-            error: function (response, ioArgs) {
-                stopProcessing();
-                alert(response);
-            }
-        });
+        makeAjaxRequest(
+                "<%= request.getContextPath()%>/monthreport/getMutualWorks",
+                {
+                    divisionOwner: divisionOwner,
+                    divisionEmployee: divisionEmployee,
+                    projectId: projectId,
+                    regions: regions,
+                    year: year,
+                    month: month
+                },
+                "json",
+                "Во время запроса данных для таблицы 'Взаимная занятость' произошла ошибка. Пожалуйста, свяжитесть с администраторами системы.",
+                function (data) {
+                    stopProcessing();
+                    dojo.forEach(data, function (data) {
+                        mutualWorkTable.store.newItem(data);
+                    });
+                    mutualWorkTable.store.save();
+                }
+        );
     }
 
     function mutualWorkTable_addRows(mutualWork_list) {
@@ -199,29 +195,25 @@
         var jsonData = itemToJSON(mutualWorkTable.store, items);
 
         processing();
-        dojo.xhrPost({
-            url: "monthreport/deleteMutualWorks",
-            content: {
-                jsonData: "[" + jsonData + "]"
-            },
-            handleAs: "text",
-            load: function (response, ioArgs) {
-                alert(response);
-                if(items.length){
-                    dojo.forEach(items, function(selectedItem){
-                        if(selectedItem !== null){
-                            mutualWorkTable.store.deleteItem(selectedItem);
-                        }
-                        mutualWorkTable.store.save();
-                    });
+        makeAjaxRequest(
+                "<%= request.getContextPath()%>/monthreport/deleteMutualWorks",
+                {
+                    jsonData: "[" + jsonData + "]"
+                },
+                "text",
+                "Во время удаления данных из таблицы 'Взаимная занятость' произошла ошибка. Пожалуйста, свяжитесть с администраторами системы.",
+                function () {
+                    if(items.length){
+                        dojo.forEach(items, function(selectedItem){
+                            if(selectedItem !== null){
+                                mutualWorkTable.store.deleteItem(selectedItem);
+                            }
+                            mutualWorkTable.store.save();
+                        });
+                    }
+                    stopProcessing();
                 }
-                stopProcessing();
-            },
-            error: function (response, ioArgs) {
-                stopProcessing();
-                alert(response);
-            }
-        });
+        );
     }
 
     function mutualWorkTable_save() {
@@ -231,24 +223,20 @@
             onComplete: function (items) {
                 mutualWorkTable.store.save();
                 var jsonData = itemToJSON(mutualWorkTable.store, items);
-                dojo.xhrPost({
-                    url: "monthreport/saveMutualWorkTable",
-                    content: {
-                        year: dojo.byId("monthreport_year").value,
-                        month: dojo.byId("monthreport_month").value,
-                        jsonData: "[" + jsonData + "]"
-                    },
-                    handleAs: "text",
-                    load: function (response, ioArgs) {
-                        stopProcessing();
-                        alert(response);
-                        mutualWorkTable_reloadTable();
-                    },
-                    error: function (response, ioArgs) {
-                        stopProcessing();
-                        alert(response);
-                    }
-                });
+                makeAjaxRequest(
+                        "<%= request.getContextPath()%>/monthreport/saveMutualWorkTable",
+                        {
+                            year: dojo.byId("monthreport_year").value,
+                            month: dojo.byId("monthreport_month").value,
+                            jsonData: "[" + jsonData + "]"
+                        },
+                        "text",
+                        "Во время сохранения таблицы 'Взаимная занятость' произошла ошибка. Пожалуйста, свяжитесть с администраторами системы.",
+                        function () {
+                            stopProcessing();
+                            mutualWorkTable_reloadTable();
+                        }
+                );
             }
         });
     }
@@ -277,7 +265,6 @@
    var mutualWorkTable_returnEmployees = function(){
         var typeSelect      = dojo.byId("addEmployeesForm_projectTypeId");
         var typeId          = parseInt(typeSelect.value);
-        var divisionOwnerSelect = dojo.byId("addEmployeesForm_divisionOwnerId");
         var type            = typeSelect.options[typeSelect.selectedIndex].text;
         var projectSelect   = dojo.byId("addEmployeesForm_projectId");
         var projectId       = projectSelect.value;
