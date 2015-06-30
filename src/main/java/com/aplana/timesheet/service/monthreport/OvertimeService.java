@@ -115,6 +115,7 @@ public class OvertimeService {
             overtimeMap.put("premium", overtimeData.getPremium());
             overtimeMap.put("total_accounted_overtime", overtimeData.getTotal_accounted_overtime());
             overtimeMap.put("comment", overtimeData.getComment());
+            overtimeMap.put("id", overtimeData.getId());
             overtimeList.add(overtimeMap);
         }
 

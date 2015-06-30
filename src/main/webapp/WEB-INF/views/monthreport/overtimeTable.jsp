@@ -29,7 +29,7 @@
 </table>
 
 <button data-dojo-id="overtimeTable_addEmployeesButton" id="overtimeTable_addEmployeesButton"
-        onclick="addNewEmployeesOT()">Добавить сотрудников</button>
+        onclick="overtimeTable_addNewEmployees()">Добавить сотрудников</button>
 <button onclick="overtimeTable_deleteRows()">Удалить выделенные строки</button>
 </sec:authorize>
 
@@ -65,10 +65,10 @@
             overtimeTable_divisionChanged();
         }
 
-        validateCells(overtimeTable, "comment");
+        monthReport_cellsValidator(overtimeTable, "comment");
     });
 
-    function addNewEmployeesOT(){
+    function overtimeTable_addNewEmployees(){
         overtimeTable_employeeDialogShow();
         returnEmployees = overtimeTable_returnEmployees;
     }

@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="OvertimeReport" pageWidth="1400" pageHeight="1000" orientation="Landscape" columnWidth="1360" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="6ae905b3-cfb1-47a7-bda5-eeede374788b">
 	<property name="net.sf.jasperreports.print.keep.full.text" value="true"/>
 	<property name="ireport.zoom" value="1.5"/>
-	<property name="ireport.x" value="0"/>
+	<property name="ireport.x" value="877"/>
 	<property name="ireport.y" value="0"/>
 	<import value="com.aplana.timesheet.util.DateTimeUtil"/>
 	<style name="Normal" isDefault="true" fontSize="8" pdfEncoding="Cp1251"/>
@@ -408,17 +408,6 @@
 				<textElement textAlignment="Center"/>
 				<textFieldExpression><![CDATA[$F{overtimes}]]></textFieldExpression>
 			</textField>
-			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
-				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="833" y="0" width="88" height="26" uuid="3a36a3b4-80fa-4583-a3f1-218e8e6df449"/>
-				<box>
-					<topPen lineWidth="0.75"/>
-					<leftPen lineWidth="0.75"/>
-					<bottomPen lineWidth="0.75"/>
-					<rightPen lineWidth="0.75"/>
-				</box>
-				<textElement textAlignment="Center"/>
-				<textFieldExpression><![CDATA[$F{work_days}]]></textFieldExpression>
-			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="1007" y="0" width="85" height="26" uuid="ce0a0d8f-0882-4b7a-9f67-171590394437"/>
 				<box>
@@ -462,6 +451,17 @@
 				</box>
 				<textElement textAlignment="Center"/>
 				<textFieldExpression><![CDATA[$F{comment}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="833" y="0" width="88" height="26" uuid="42bb1b87-7e9e-4569-b9d3-e459cc10f40f"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{work_days}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>
