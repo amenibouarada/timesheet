@@ -61,7 +61,7 @@
             monthReportTable_divisionId.value = div;
         }
 
-        validateCells(monthReportTable);
+        monthReport_cellsValidator(monthReportTable);
     });
 
     var gridlayout = [

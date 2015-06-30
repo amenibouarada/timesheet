@@ -135,7 +135,7 @@ public class OvertimeData {
         return division_employee_name;
     }
 
-    public void setDivision_employee_name(String division_name) {
+    public void setDivision_employee_name(String division_employee_name) {
         this.division_employee_name = division_employee_name;
     }
 

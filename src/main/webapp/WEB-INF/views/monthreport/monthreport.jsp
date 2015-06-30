@@ -227,7 +227,7 @@
             changeButtonListeners(); // выполним, чтобы загрузить слушателей для первой вкладки
         });
 
-        function validateCells(currentTable, allowStringField) {
+        function monthReport_cellsValidator(currentTable, allowStringField) {
             var prevValue;
             var fieldName;
             currentTable.onStartEdit = function (inCell, inRowIndex) {
@@ -236,11 +236,12 @@
             }
 
             currentTable.onApplyCellEdit = function (inValue, inRowIndex, inFieldIndex) {
+                // Проверяем, является ли для данного поля допустимым строковое значение
                 if (inFieldIndex != allowStringField) {
                     if (isNaN(Number(inValue))) {
                         currentTable.store.setValue(currentTable.getItem(inRowIndex), fieldName, prevValue);
                     }
-                }
+                }else if (inValue == "null") {currentTable.store.setValue(currentTable.getItem(inRowIndex), fieldName, "");}
             }
         }
 

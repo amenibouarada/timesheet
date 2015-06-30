@@ -48,7 +48,7 @@
 </table>
 
 <button data-dojo-id="mutualWorkTable_addEmployeesButton" id="mutualWorkTable_addEmployeesButton"
-        onclick="addNewEmployeesMW()">Добавить сотрудников</button>
+        onclick="mutualWorkTable_addNewEmployees()">Добавить сотрудников</button>
 <button onclick="mutualWorkTable_deleteRows()">Удалить выделенные строки</button>
 
 <table data-dojo-id="mutualWorkTable" data-dojo-type="dojox.grid.DataGrid" height="500px">
@@ -86,10 +86,10 @@
         dojo.byId("mutualWorkTable_divisionEmployeeId").value = div;
         fillProjectListByDivision(dojo.byId("mutualWorkTable_divisionOwnerId").value, dojo.byId("mutualWorkTable_projectId"), null);
 
-        validateCells(mutualWorkTable, "comment");
+        monthReport_cellsValidator(mutualWorkTable, "comment");
     });
 
-    function addNewEmployeesMW(){
+    function mutualWorkTable_addNewEmployees(){
         mutualWorkTable_employeeDialogShow();
         returnEmployees = mutualWorkTable_returnEmployees;
     }
@@ -278,8 +278,6 @@
         var typeSelect      = dojo.byId("addEmployeesForm_projectTypeId");
         var typeId          = parseInt(typeSelect.value);
         var divisionOwnerSelect = dojo.byId("addEmployeesForm_divisionOwnerId");
-        var divisionOwnerId = parseInt(divisionOwnerSelect.value);
-        var divisionOwnerName   = divisionOwnerSelect.options[divisionOwnerSelect.selectedIndex].text;
         var type            = typeSelect.options[typeSelect.selectedIndex].text;
         var projectSelect   = dojo.byId("addEmployeesForm_projectId");
         var projectId       = projectSelect.value;
