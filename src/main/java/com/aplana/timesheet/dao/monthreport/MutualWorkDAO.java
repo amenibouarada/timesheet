@@ -33,6 +33,14 @@ public class MutualWorkDAO {
         logger.debug("Flushed mutualWork object id = {}", mutualWork.getId());
     }
 
+    @Transactional
+    public void delete(List<Integer> ids)  {
+        for (Integer id : ids){
+            entityManager.remove(entityManager.find(MutualWork.class, id));
+        }
+        entityManager.flush();
+    }
+
     public List<MutualWorkData> getMutualWorkData(int year, int month, List<Integer> regions, Integer divisionOwner, Integer divisionEmployee, Integer projectId, boolean typeListObject) {
 
         String queryString = typeListObject ?

@@ -194,6 +194,36 @@
         }
     }
 
+    function mutualWorkTable_deleteRows(){
+        var items = mutualWorkTable.selection.getSelected();
+        var jsonData = itemToJSON(mutualWorkTable.store, items);
+
+        processing();
+        dojo.xhrPost({
+            url: "monthreport/deleteMutualWorks",
+            content: {
+                jsonData: "[" + jsonData + "]"
+            },
+            handleAs: "text",
+            load: function (response, ioArgs) {
+                alert(response);
+                if(items.length){
+                    dojo.forEach(items, function(selectedItem){
+                        if(selectedItem !== null){
+                            mutualWorkTable.store.deleteItem(selectedItem);
+                        }
+                        mutualWorkTable.store.save();
+                    });
+                }
+                stopProcessing();
+            },
+            error: function (response, ioArgs) {
+                stopProcessing();
+                alert(response);
+            }
+        });
+    }
+
     function mutualWorkTable_save() {
         processing();
         mutualWorkTable.store.fetch({

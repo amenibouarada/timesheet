@@ -190,6 +190,23 @@ public class MonthReportController extends AbstractControllerForEmployee {
         return SAVE_SUCCESS_MESSAGE;
     }
 
+    @RequestMapping(value = "/deleteMutualWorks", produces = "text/plain;charset=UTF-8")
+    @ResponseBody
+    public String deleteMutualWorks(
+            @RequestParam("jsonData") String jsonData
+    ){
+        try{
+            if (employeeService.isEmployeeHasPermissionsToMonthReportManage(getCurrentUser())){
+                mutualWorkService.deleteMutualWorks(jsonData);
+            }else{
+                return NO_PERMISSION_MESSAGE;
+            }
+        }catch (Exception exc){
+            return handleCommonException("удаления данных из таблицы 'Взаимная занятость'", exc);
+        }
+        return "Строки успешно удалены";
+    }
+
     @RequestMapping(value = "/prepareReport3Data/{divisionOwner}/{divisionEmployee}/{region}/{employeeId}/{projectId}/{beginDate}/{endDate}")
     public ModelAndView prepareReport3Data(
             @PathVariable("beginDate") String beginDate,

@@ -48,6 +48,22 @@ public class MutualWorkService {
     @Autowired
     private JasperReportService jasperReportService;
 
+    public boolean deleteMutualWorks(String jsonData) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        CollectionType mapCollectionType = mapper.getTypeFactory().constructCollectionType(List.class, Map.class);
+        List<Map<String, Object>> mutualWorks = mapper.readValue(jsonData, mapCollectionType);
+        List<Integer> idsToDelete = new ArrayList<Integer>();
+        for (Map<String, Object> mutualWorkMap : mutualWorks){
+            Integer id = (Integer)mutualWorkMap.get("id");
+            if (id != null){
+                idsToDelete.add(id);
+            }
+        }
+        mutualWorkDAO.delete(idsToDelete);
+
+        return true;
+    }
+
     public String getMutualWorkData(int year, int month, String regions, Integer divisionOwner, Integer divisionEmployee, Integer projectId) throws IOException {
         List<MutualWorkData> result;
         result = mutualWorkDAO.getMutualWorkData(year, month, StringUtil.stringToList(regions), divisionOwner, divisionEmployee, projectId, false);
@@ -82,6 +98,7 @@ public class MutualWorkService {
             mutualWorkMap.put("workDaysCalc", mutualWorkData.getWorkDaysCalc());
             mutualWorkMap.put("overtimesCalc", mutualWorkData.getOvertimesCalc());
             mutualWorkMap.put("comment", mutualWorkData.getComment());
+            mutualWorkMap.put("id", mutualWorkData.getId());
             mutualWorkList.add(mutualWorkMap);
         }
 
