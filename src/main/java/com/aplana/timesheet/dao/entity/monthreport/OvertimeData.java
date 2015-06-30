@@ -64,6 +64,9 @@ public class OvertimeData {
     @Column(name = "comment")
     private String comment;
 
+    @Column(name = "id")
+    private Integer id;
+
     public String getIdentifier() {
         return identifier;
     }
@@ -214,5 +217,13 @@ public class OvertimeData {
 
     public void setComment(String comment) {
         this.comment = comment;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 }

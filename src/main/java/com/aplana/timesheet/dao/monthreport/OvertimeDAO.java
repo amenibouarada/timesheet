@@ -34,7 +34,7 @@ public class OvertimeDAO {
     // ToDo переделать на один запрос
     public void delete(List<Integer> ids)  {
         for (Integer id : ids){
-            entityManager.remove(entityManager.find(OvertimeData.class, id));
+            entityManager.remove(entityManager.find(Overtime.class, id));
         }
         entityManager.flush();
     }
