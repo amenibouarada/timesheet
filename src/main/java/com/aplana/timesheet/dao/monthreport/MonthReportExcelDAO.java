@@ -25,7 +25,8 @@ public class MonthReportExcelDAO extends AbstractReportDAO {
 
     static {
 
-        fieldsMap.put(OvertimeReport.class, new String[]{  "employee", "division", "region", "project", "overtime", "premium", "comment"});
+        fieldsMap.put(OvertimeReport.class, new String[]{ "identifier", "year", "month", "employee_id", "employee_name", "region_id", "region_name", "division_employee_id", "division_employee_name", "project_id", "project_name", "project_type_id", "division_owner_name", "division_owner_id",
+                "project_type_name", "overtime", "premium", "total_accounted_overtime", "comment"});
 
         fieldsMap.put(MonthXLSReport.class, new String[]{  "year", "month", "employee_id", "employee_name",
                                                            "region_id", "region_name", "division_id", "division_name",
@@ -47,14 +48,14 @@ public class MonthReportExcelDAO extends AbstractReportDAO {
 
     private static final Logger logger = LoggerFactory.getLogger(MonthReportExcelDAO.class);
 
-    @PersistenceContext
-    private EntityManager entityManager;
-
     @Autowired
     private MonthReportDAO monthReportDAO;
 
     @Autowired
     private MutualWorkDAO mutualWorkDAO;
+
+    @Autowired
+    private OvertimeDAO overtimeDAO;
 
     public List getResultList(TSJasperReport baseMonthReport) throws JReportBuildError {
         if (baseMonthReport instanceof OvertimeReport) {
@@ -70,49 +71,15 @@ public class MonthReportExcelDAO extends AbstractReportDAO {
         throw new IllegalArgumentException();
     }
 
-    private List getOvertimeReportData(OvertimeReport report) throws JReportBuildError {
-
-        String queryString = "SELECT " +
-                "employee.name AS employee," +
-                "division.name AS division," +
-                "region.name AS region," +
-                "project.name AS project," +
-                "overtime.overtime AS overtime," +
-                "overtime.premium AS premium," +
-                "overtime.comment AS comment " +
-                "FROM overtime " +
-                "INNER JOIN employee ON (overtime.employee_id = employee.id) " +
-                "INNER JOIN region ON (employee.region = region.id) " +
-                "INNER JOIN division ON (employee.division = division.id) " +
-                "INNER JOIN project ON (overtime.project_id = project.id) " +
-                "WHERE year = :year and month = :month";
-
-        boolean ownerDivSet = false;
-        boolean employeeDivSet = false;
-
-        if (report.getDivisionOwner() != null && report.getDivisionOwner() > 0) {
-            queryString += " AND (overtime.project_id IS NULL OR division.id = :divisionOwner) ";
-            ownerDivSet = true;
-        }
-        if (report.getDivisionEmployee() != null && report.getDivisionEmployee() > 0) {
-            queryString += " AND division.id = :divisionEmployee ";
-            employeeDivSet = true;
-        }
-        queryString += " ORDER BY employee.name";
-
-        Query query = entityManager.createNativeQuery(queryString);
-
-        query.setParameter("year", report.getYear());
-        query.setParameter("month", report.getMonth());
-
-        if (ownerDivSet) {
-            query.setParameter("divisionOwner", report.getDivisionOwner());
-        }
-        if (employeeDivSet) {
-            query.setParameter("divisionEmployee", report.getDivisionEmployee());
-        }
-        logger.debug("getOvertimeReportData result size = {}", query.getResultList().size());
-        return query.getResultList();
+    private List getOvertimeReportData (OvertimeReport report) throws JReportBuildError {
+        List resultList = overtimeDAO.getOvertimes(
+                report.getYear(),
+                report.getMonth(),
+                report.getDivisionOwner(),
+                report.getDivisionEmployee(),
+                true);
+        logger.debug("getMonthReportData result size = {}", resultList.size());
+        return resultList;
     }
 
     private List getMonthReportData(MonthXLSReport report) throws JReportBuildError {

@@ -78,7 +78,7 @@ public class MutualWorkService {
             mutualWorkMap.put("regionName", mutualWorkData.getRegionName());
             mutualWorkMap.put("workDays", mutualWorkData.getWorkDays());
             mutualWorkMap.put("overtimes", mutualWorkData.getOvertimes());
-            mutualWorkMap.put("coefficient", TimeSheetConstants.MUTUAL_WORK_COEFFICIENT);
+            mutualWorkMap.put("coefficient", TimeSheetConstants.MUTUAL_WORK_OVERTIME_COEF);
             mutualWorkMap.put("workDaysCalc", mutualWorkData.getWorkDaysCalc());
             mutualWorkMap.put("overtimesCalc", mutualWorkData.getOvertimesCalc());
             mutualWorkMap.put("comment", mutualWorkData.getComment());

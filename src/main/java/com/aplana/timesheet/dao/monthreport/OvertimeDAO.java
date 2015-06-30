@@ -2,7 +2,9 @@ package com.aplana.timesheet.dao.monthreport;
 
 
 import com.aplana.timesheet.dao.entity.Employee;
+import com.aplana.timesheet.dao.entity.Project;
 import com.aplana.timesheet.dao.entity.monthreport.Overtime;
+import com.aplana.timesheet.dao.entity.monthreport.OvertimeData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
@@ -32,40 +34,67 @@ public class OvertimeDAO {
     // ToDo переделать на один запрос
     public void delete(List<Integer> ids)  {
         for (Integer id : ids){
-            entityManager.remove(entityManager.find(Overtime.class, id));
+            entityManager.remove(entityManager.find(OvertimeData.class, id));
         }
         entityManager.flush();
     }
 
-    public List<Overtime> getOvertimes(int year, int month, Integer divisionOwner, Integer divisionEmployee){
-        String queryString = "FROM Overtime AS ot " +
-                       "WHERE ot.year = :year AND " +
-                       "ot.month = :month ";
+    public List<OvertimeData> getOvertimes(int year, int month, Integer divisionOwner, Integer divisionEmployee, boolean typeListObject){
+        String queryString = typeListObject ?
+                "SELECT * FROM overtime_data where year = :year and month = :month" :
+                "FROM OvertimeData WHERE year = :year AND month = :month ";
         boolean ownerDivSet = false;
         boolean employeeDivSet = false;
         if (divisionOwner != null && divisionOwner > 0){
-            queryString += " AND (ot.project IS NULL OR ot.project.division.id = :divisionOwner) ";
+            queryString += " AND division_owner_id = :divisionOwner ";
             ownerDivSet = true;
         }
         if (divisionEmployee != null && divisionEmployee > 0){
-            queryString += " AND ot.employee.division.id = :divisionEmployee ";
+            queryString += " AND division_employee_id = :divisionEmployee ";
             employeeDivSet = true;
         }
-        queryString +=  " ORDER BY ot.employee.name";
-        Query query = entityManager.createQuery(queryString).setParameter("year", year).setParameter("month", month);
+        queryString +=  " ORDER BY employee_name";
+        Query query = typeListObject ?
+                entityManager.createNativeQuery(queryString).setParameter("year", year).setParameter("month", month) :
+                entityManager.createQuery(queryString).setParameter("year", year).setParameter("month", month);
         if (ownerDivSet) { query.setParameter("divisionOwner", divisionOwner); }
         if (employeeDivSet) { query.setParameter("divisionEmployee", divisionEmployee); }
         logger.debug("getOvertimes List<Overtime> result size = {}", query.getResultList().size());
         return query.getResultList();
     }
 
-    public List<Overtime> getSingleOvertime(Employee currentUser, int year, int month) {
+    public List<OvertimeData> getSingleOvertime(Employee currentUser, int year, int month) {
         Query query = entityManager.
-                createQuery("FROM Overtime WHERE year = :year AND month = :month AND employee = :employee")
+                createQuery("FROM OvertimeData WHERE year = :year AND month = :month AND employee_id = :employee_id")
                 .setParameter("year", year)
                 .setParameter("month", month)
                 .setParameter("employee", currentUser);
         logger.debug("getSingleOvertime List<Overtime> result size = {}", query.getResultList().size());
         return query.getResultList();
+    }
+
+    @Transactional
+    public Overtime findOrCreateOvertime(Employee employee, Project project, Integer year, Integer month){
+        Query query = entityManager.
+                createQuery("FROM Overtime WHERE employee = :employee AND project = :project AND year = :year AND month = :month")
+                .setParameter("employee", employee)
+                .setParameter("project", project)
+                .setParameter("year", year)
+                .setParameter("month", month);
+        List result = query.getResultList();
+        if (result.size() == 0){ // создадим новый
+            Overtime newOvertime = new Overtime();
+            newOvertime.setEmployee(employee);
+            newOvertime.setProject(project);
+            newOvertime.setYear(year);
+            newOvertime.setMonth(month);
+            entityManager.persist(newOvertime);
+            logger.debug("findOrCreateOvertime Overtime id = {}", newOvertime.getId());
+            logger.info("findOrCreateOvertime created newOvertime");
+            return newOvertime;
+        }else{
+            logger.debug("findOrCreateOvertime List<Overtime> result size = {}", result.size());
+            return (Overtime)result.get(0);
+        }
     }
 }

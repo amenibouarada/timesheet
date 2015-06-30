@@ -47,22 +47,24 @@
     </tr>
 </table>
 
-
+<button data-dojo-id="mutualWorkTable_addEmployeesButton" id="mutualWorkTable_addEmployeesButton"
+        onclick="addNewEmployeesMW()">Добавить сотрудников</button>
+<button onclick="mutualWorkTable_deleteRows()">Удалить выделенные строки</button>
 
 <table data-dojo-id="mutualWorkTable" data-dojo-type="dojox.grid.DataGrid" height="500px">
     <thead>
     <tr>
-        <th field="divisionOwnerName" width="200px">Центр-владелец</th>
-        <th field="projectName" width="200px">Проект/Пресейл</th>
-        <th field="projectTypeName" width="100px">Тип</th>
+        <th field="divisionOwnerName" width="180px">Центр-владелец</th>
+        <th field="projectName" width="180px">Проект/Пресейл</th>
+        <th field="projectTypeName" width="75px">Тип</th>
         <th field="employeeName" width="150px">Сотрудник</th>
         <th field="divisionEmployeeName" width="200px">Центр сотрудника</th>
         <th field="regionName" width="100px">Регион</th>
-        <th field="workDays" width="100px" editable="true">Рабочие дни</th>
-        <th field="overtimes" width="100px" editable="true">Переработки</th>
-        <th field="coefficient" width="100px" editable="true">Коэффициент</th>
-        <th field="workDaysCalc" width="100px">Расч. раб. дни</th>
-        <th field="overtimesCalc" width="100px">Расч. переработки</th>
+        <th field="workDays" width="50px" editable="true">Рабочие дни</th>
+        <th field="overtimes" width="50px" editable="true">Переработки</th>
+        <th field="coefficient" width="50px" editable="true">Коэффициент</th>
+        <th field="workDaysCalc" width="50px">Расч. раб. дни</th>
+        <th field="overtimesCalc" width="50px">Расч. переработки</th>
         <th field="image" width = "75px" formatter = "addImage">Детальная информация</th>
         <th field="comment" width="100px" editable="true">Комментарий</th>
     </tr>
@@ -84,19 +86,23 @@
         dojo.byId("mutualWorkTable_divisionEmployeeId").value = div;
         fillProjectListByDivision(dojo.byId("mutualWorkTable_divisionOwnerId").value, dojo.byId("mutualWorkTable_projectId"), null);
 
-        var prevValue;
-        var fieldName;
-        mutualWorkTable.onStartEdit = function (inCell, inRowIndex) {
-            fieldName = inCell.field;
-            prevValue = mutualWorkTable.store.getValue(mutualWorkTable.getItem(inRowIndex), fieldName);
-        }
-
-        mutualWorkTable.onApplyCellEdit = function (inValue, inRowIndex, inFieldIndex) {
-            if (isNaN(Number(inValue))) {
-                mutualWorkTable.store.setValue(mutualWorkTable.getItem(inRowIndex), fieldName, prevValue);
-            }
-        }
+        validateCells(mutualWorkTable, "comment");
     });
+
+    function addNewEmployeesMW(){
+        mutualWorkTable_employeeDialogShow();
+        returnEmployees = mutualWorkTable_returnEmployees;
+    }
+
+    function mutualWorkTable_employeeDialogShow(){
+        // изменение значений на форме "Добавить сотрудника"
+        dojo.byId("addEmployeesForm_divisionOwnerId").value = mutualWorkTable_divisionOwnerId.value;
+        dojo.byId("addEmployeesForm_divisionId").value = mutualWorkTable_divisionEmployeeId.value;
+        // значения изменились - необходимо запустить функции, обработчики изменений
+        addEmployeesForm_updateLists();
+        // Открыть форму добавления сотрудников
+        addEmployeesForm_employeeDialog.show();
+    }
 
     var addImage = function(value, rowIndex, cell) {
         return "<a href='#' onclick='getReport3("+rowIndex+")'><img src='/resources/img/view.png' width='25' height='25'/></a>";
@@ -124,7 +130,15 @@
     }
 
     function mutualWorkTable_reloadTable() {
+        // меняем видимость кнопки "Добавить сотрудников"
+        if (mutualWorkTable_divisionOwnerId.value == ALL_VALUE ||
+                mutualWorkTable_divisionEmployeeId.value == ALL_VALUE) {
+            mutualWorkTable_addEmployeesButton.disabled = true;
+        } else {
+            mutualWorkTable_addEmployeesButton.disabled = false;
+        }
         if (mutualWorkTable.store.isDirty()) {
+
             if (!confirm("В таблице были изменения. Вы уверены, что хотите обновить данные не записав текущие?")) {
                 return;
             }
@@ -163,6 +177,21 @@
                 alert(response);
             }
         });
+    }
+
+    function mutualWorkTable_addRows(mutualWork_list) {
+        for (var i = 0; i < mutualWork_list.length; i++) {
+            var newItem = mutualWork_list[i];
+            mutualWorkTable.store.fetch({
+                query: {identifier: newItem.identifier}, queryOptions: {deep: true},
+                onComplete: function (items) {
+                    if (items.length == 0) { // ранее не было, добавляем
+                        mutualWorkTable.store.newItem(newItem);
+                        return;
+                    }
+                }
+            });
+        }
     }
 
     function mutualWorkTable_save() {
@@ -212,6 +241,52 @@
                           divisionEmployee + "/" + region + "/" + employeeId + "/" + projectId + "/" + beginDate + "/" +
                           endDate;
         stopProcessing();
+    }
+
+    // обрабатывает кнопку "Добавить" на форме "Добавить сотрудника"
+   var mutualWorkTable_returnEmployees = function(){
+        var typeSelect      = dojo.byId("addEmployeesForm_projectTypeId");
+        var typeId          = parseInt(typeSelect.value);
+        var divisionOwnerSelect = dojo.byId("addEmployeesForm_divisionOwnerId");
+        var divisionOwnerId = parseInt(divisionOwnerSelect.value);
+        var divisionOwnerName   = divisionOwnerSelect.options[divisionOwnerSelect.selectedIndex].text;
+        var type            = typeSelect.options[typeSelect.selectedIndex].text;
+        var projectSelect   = dojo.byId("addEmployeesForm_projectId");
+        var projectId       = projectSelect.value;
+        var project = "";
+        if (projectId != ""){
+            project = projectSelect.options[projectSelect.selectedIndex].text;
+            projectId = parseInt(projectId);
+        }else{
+            projectId = null;
+        }
+        var employee_list = [];
+        var length = 0;
+        dojo.forEach( dojo.byId("addEmployeesForm_additionEmployeeList").selectedOptions, function(employee){
+            employee_list.push({
+                identifier: employee.value + "_" + projectId, // уникальный идентификатор, для добавления новых строк
+                id:         null,
+                employeeId: parseInt(employee.value),
+                employeeName:   employee.innerHTML,
+                divisionEmployeeId: parseInt(employee.attributes.div_id.value),
+                divisionEmployeeName:   employee.attributes.div_name.value,
+                divisionOwnerId: parseInt(employee.attributes.div_id.value),
+                divisionOwnerName:   employee.attributes.div_name.value,
+                regionId:   parseInt(employee.attributes.reg_id.value),
+                regionName:     employee.attributes.reg_name.value,
+                projectTypeName:   type,
+                projectTypeId:   typeId,
+                projectId:  projectId,
+                projectName:    project,
+                workDays: 0.0,
+                overtimes:   0.0,
+                coefficient:    0.0,
+                workDaysCalc: 0.0,
+                overtimesCalc: 0.0,
+                comment:    ""
+            });
+        });
+        mutualWorkTable_addRows(employee_list);
     }
 
 </script>

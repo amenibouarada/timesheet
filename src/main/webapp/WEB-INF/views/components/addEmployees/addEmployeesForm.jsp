@@ -105,6 +105,8 @@ com.aplana.timesheet.controller.AbstractControllerForEmployee.fillMavForAddEmplo
 
 <script type="text/javascript">
 
+    var returnEmployees;
+
     dojo.addOnLoad(function () {
         addEmployeesForm_updateLists();
         var ownerDiv = getCookieValue('aplanaDivision');

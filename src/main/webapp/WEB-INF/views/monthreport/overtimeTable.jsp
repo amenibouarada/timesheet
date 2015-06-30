@@ -29,24 +29,23 @@
 </table>
 
 <button data-dojo-id="overtimeTable_addEmployeesButton" id="overtimeTable_addEmployeesButton"
-        onclick="overtimeTable_employeeDialogShow()">Добавить сотрудников</button>
+        onclick="addNewEmployeesOT()">Добавить сотрудников</button>
 <button onclick="overtimeTable_deleteRows()">Удалить выделенные строки</button>
 </sec:authorize>
 
 <table data-dojo-id="overtimeTable" data-dojo-type="dojox.grid.DataGrid"
-       onApplyEdit="overtimeTable_cellChanged" height="500px" sortInfo="2">
+       onApplyEdit="overtimeTable_cellChanged" height="500px" sortInfo="1">
     <thead>
         <tr>
-            <th field="id" width="20px"></th>
-            <th field="employee"                width="150px"   >Сотрудник</th>
-            <th field="division"                width="150px"   >Подразделение</th>
-            <th field="region"                  width="100px"   >Регион</th>
-            <th field="type"                    width="150px"   >Тип</th>
-            <th field="project"                 width="100px"   >Проект/Пресейл</th>
-            <th field="overtime"                width="100px"   editable="true" >Переработки</th>
-            <th field="premium"                 width="100px"   editable="true" >Премия</th>
-            <th field="allAccountedOvertime"    width="110px"   >Всего учтенных переработок и премий</th>
-            <th field="comment"                 width="200px"   editable="true" >Комментарий</th>
+            <th field="employee_name"                width="150px"                                                       >Сотрудник</th>
+            <th field="division_employee_name"       width="150px"                                                       >Подразделение</th>
+            <th field="region_name"                  width="100px"                                                       >Регион</th>
+            <th field="project_type_name"            width="100px"                                                       >Тип</th>
+            <th field="project_name"                 width="100px"                                                       >Проект/Пресейл</th>
+            <th field="overtime"                     width="50px"   editable="true" formatter= "overtimeTable_colorCell" >Переработки</th>
+            <th field="premium"                      width="50px"   editable="true" formatter= "overtimeTable_colorCell" >Премия</th>
+            <th field="total_accounted_overtime"     width="50px"                                                        >Всего учтенных переработок и премий</th>
+            <th field="comment"                      width="100px"  editable="true"                                      >Комментарий</th>
         </tr>
     </thead>
 </table>
@@ -66,19 +65,29 @@
             overtimeTable_divisionChanged();
         }
 
-        var prevValue;
-        var fieldName;
-        overtimeTable.onStartEdit = function (inCell, inRowIndex) {
-            fieldName = inCell.field;
-            prevValue = overtimeTable.store.getValue(overtimeTable.getItem(inRowIndex), fieldName);
-        }
-
-        overtimeTable.onApplyCellEdit = function (inValue, inRowIndex, inFieldIndex) {
-            if (isNaN(Number(inValue))) {
-                overtimeTable.store.setValue(overtimeTable.getItem(inRowIndex), fieldName, prevValue);
-            }
-        }
+        validateCells(overtimeTable, "comment");
     });
+
+    function addNewEmployeesOT(){
+        overtimeTable_employeeDialogShow();
+        returnEmployees = overtimeTable_returnEmployees;
+    }
+
+    // раскраска ячеек и проверка на существующее значение заполненности таблицы реальными данными, а не автовычисленными
+    // и добавляю подсказку
+    var overtimeTable_colorCell = function(value, rowIndex, cell) {
+        var item = overtimeTable.getItem(rowIndex);
+        var calculatedValue = overtimeTable.store.getValue(item, cell.field, null);
+        var dispValue = "";
+        if (value && value != "null"){
+            cell.customStyles.push('color:green');
+            dispValue = value;
+        }else{
+            cell.customStyles.push('color:red');
+            dispValue = calculatedValue != null ? calculatedValue : 0;
+        }
+        return "<span title='Значение по умолчанию: " + calculatedValue + "'>" + dispValue + "</span>"
+    }
 
     function overtimeTable_employeeDialogShow(){
         // изменение значений на форме "Добавить сотрудника"
@@ -139,7 +148,7 @@
                 var overtimes = dojo.fromJson(response);
                 dojo.forEach(overtimes, function(overtime){
                     // уникальный идентификатор, для добавления новых строк
-                    overtime.identifier = overtime.employeeId + "_" + overtime.projectId;
+                    overtime.identifier = overtime.employee_id + "_" + overtime.project_id;
                 });
                 overtimeTable_addRows(overtimes);
                 overtimeTable.store.save();
@@ -196,6 +205,7 @@
     }
 
     function overtimeTable_save(){
+        processing();
         overtimeTable.store.fetch({query: {}, queryOptions: {deep: true},
             onComplete: function (items) {
                 overtimeTable.store.save();
@@ -209,10 +219,12 @@
                     },
                     handleAs: "text",
                     load: function (response, ioArgs) {
+                        stopProcessing();
                         alert(response);
                         overtimeTable_reloadTable();
                     },
                     error: function (response, ioArgs) {
+                        stopProcessing();
                         alert(response);
                     }
                 });
@@ -226,7 +238,7 @@
     }
 
     // обрабатывает кнопку "Добавить" на форме "Добавить сотрудника"
-    function returnEmployees(){
+    var overtimeTable_returnEmployees = function(){
         var typeSelect      = dojo.byId("addEmployeesForm_projectTypeId");
         var typeId          = parseInt(typeSelect.value);
         var type            = typeSelect.options[typeSelect.selectedIndex].text;
@@ -245,19 +257,19 @@
             employee_list.push({
                 identifier: employee.value + "_" + projectId, // уникальный идентификатор, для добавления новых строк
                 id:         null,
-                employeeId: parseInt(employee.value),
-                employee:   employee.innerHTML,
-                divisionId: parseInt(employee.attributes.div_id.value),
-                division:   employee.attributes.div_name.value,
-                regionId:   parseInt(employee.attributes.reg_id.value),
-                region:     employee.attributes.reg_name.value,
-                typeId:     typeId,
-                type:       type,
-                projectId:  projectId,
-                project:    project,
+                employee_id: parseInt(employee.value),
+                employee_name:   employee.innerHTML,
+                division_employee_id: parseInt(employee.attributes.div_id.value),
+                division_employee_name:   employee.attributes.div_name.value,
+                region_id:   parseInt(employee.attributes.reg_id.value),
+                region_name:     employee.attributes.reg_name.value,
+                project_type_name:   typeId,
+                project_type_id:   type,
+                project_id:  projectId,
+                project_name:    project,
                 overtime:   0.0,
                 premium:    0.0,
-                allAccountedOvertime: 0.0,
+                total_accounted_overtime: 0.0,
                 comment:    ""
             });
         });
