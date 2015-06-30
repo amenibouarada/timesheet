@@ -113,7 +113,6 @@ public class MonthReportService {
         List<Map<String, Object>> monthReportData = mapper.readValue(jsonData, mapCollectionType);
 
         for (Map<String, Object> monthReportMap : monthReportData){
-            Integer division = (Integer)monthReportMap.get("divisionId");
             MonthReport monthReport = monthReportDAO.findOrCreateMonthReport(year, month);
             Employee employee = employeeDAO.find((Integer)monthReportMap.get("employeeId"));
 

@@ -13,11 +13,8 @@
     <title>Табель</title>
 
     <style type="text/css">
-        /* REQUIRED STYLES!!! */
-        @import "<%= DOJO_PATH %>/dojox/grid/resources/Grid.css";
         @import "<%= DOJO_PATH %>/dojox/grid/resources/tundraGrid.css";
         @import "<%= getResRealPath("/resources/css/DataGrid.ext.css", application) %>";
-        @import "<%= getResRealPath("/resources/css/planEdit.css", application) %>";
         @import "<%= getResRealPath("/resources/css/monthreport.css", application) %>";
     </style>
 
