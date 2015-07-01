@@ -202,11 +202,13 @@
             onComplete: function (items) {
                 overtimeTable.store.save();
                 var jsonData = itemToJSON(overtimeTable.store, items);
+                var divisionOwner = dojo.byId("overtimeTable_divisionOwnerId") ? overtimeTable_divisionOwnerId.value : 0;
                 makeAjaxRequest(
                         "<%= request.getContextPath()%>/monthreport/saveOvertimeTable",
                         {
                             year: dojo.byId("monthreport_year").value,
                             month: dojo.byId("monthreport_month").value,
+                            divisionOwner : divisionOwner,
                             jsonData: "[" + jsonData + "]"
                         },
                         "text",

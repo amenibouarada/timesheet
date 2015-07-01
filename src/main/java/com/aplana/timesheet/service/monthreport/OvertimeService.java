@@ -36,7 +36,7 @@ public class OvertimeService {
 
     private static final Logger logger = LoggerFactory.getLogger(OvertimeService.class);
 
-    public boolean saveOvertimeTable(int year, int month, String jsonData) throws IOException {
+    public boolean saveOvertimeTable(int year, int month, int divisionOwner, String jsonData) throws IOException {
         logger.debug("Старт сохранения таблицы 'Переработки'");
         ObjectMapper mapper = new ObjectMapper();
         CollectionType mapCollectionType = mapper.getTypeFactory().constructCollectionType(List.class, Map.class);
@@ -46,7 +46,7 @@ public class OvertimeService {
         for (Map<String, Object> overtimeMap : overtimes){
             Project project = projectDAO.find((Integer) overtimeMap.get("project_id"));
             Employee employee = employeeDAO.find((Integer)overtimeMap.get("employee_id"));
-            Overtime overtime = overtimeDAO.findOrCreateOvertime(employee, project, year, month);
+            Overtime overtime = overtimeDAO.findOrCreateOvertime(employee, project, year, month, divisionOwner);
 
             overtime.setOvertime(NumberUtils.getDoubleValue(overtimeMap.get("overtime")));
             overtime.setPremium(NumberUtils.getDoubleValue(overtimeMap.get("premium")));
@@ -120,6 +120,5 @@ public class OvertimeService {
         }
 
         return mapper.writeValueAsString(overtimeList);
-
     }
 }

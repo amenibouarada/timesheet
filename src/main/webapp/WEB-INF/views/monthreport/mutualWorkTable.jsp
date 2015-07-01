@@ -223,11 +223,13 @@
             onComplete: function (items) {
                 mutualWorkTable.store.save();
                 var jsonData = itemToJSON(mutualWorkTable.store, items);
+                var divisionOwner = dojo.byId("mutualWorkTable_divisionOwnerId") ? mutualWorkTable_divisionOwnerId.value : 0;
                 makeAjaxRequest(
                         "<%= request.getContextPath()%>/monthreport/saveMutualWorkTable",
                         {
                             year: dojo.byId("monthreport_year").value,
                             month: dojo.byId("monthreport_month").value,
+                            divisionOwner: divisionOwner,
                             jsonData: "[" + jsonData + "]"
                         },
                         "text",
@@ -263,11 +265,14 @@
 
     // обрабатывает кнопку "Добавить" на форме "Добавить сотрудника"
    var mutualWorkTable_returnEmployees = function(){
-        var typeSelect      = dojo.byId("addEmployeesForm_projectTypeId");
-        var typeId          = parseInt(typeSelect.value);
-        var type            = typeSelect.options[typeSelect.selectedIndex].text;
-        var projectSelect   = dojo.byId("addEmployeesForm_projectId");
-        var projectId       = projectSelect.value;
+        var typeSelect            = dojo.byId("addEmployeesForm_projectTypeId");
+        var typeId                = parseInt(typeSelect.value);
+        var type                  = typeSelect.options[typeSelect.selectedIndex].text;
+        var projectSelect         = dojo.byId("addEmployeesForm_projectId");
+        var projectId             = projectSelect.value;
+        var divisionOwnerSelect   = dojo.byId("addEmployeesForm_divisionOwnerId");
+        var divisionOwnerId       = parseInt(divisionOwnerSelect.value);
+        var divisionOwnerName     = divisionOwnerSelect.options[divisionOwnerSelect.selectedIndex].text;
         var project = "";
         if (projectId != ""){
             project = projectSelect.options[projectSelect.selectedIndex].text;
@@ -285,8 +290,8 @@
                 employeeName:   employee.innerHTML,
                 divisionEmployeeId: parseInt(employee.attributes.div_id.value),
                 divisionEmployeeName:   employee.attributes.div_name.value,
-                divisionOwnerId: parseInt(employee.attributes.div_id.value),
-                divisionOwnerName:   employee.attributes.div_name.value,
+                divisionOwnerId: divisionOwnerId,
+                divisionOwnerName:   divisionOwnerName,
                 regionId:   parseInt(employee.attributes.reg_id.value),
                 regionName:     employee.attributes.reg_name.value,
                 projectTypeName:   type,

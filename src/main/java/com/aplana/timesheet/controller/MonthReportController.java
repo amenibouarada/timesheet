@@ -103,13 +103,14 @@ public class MonthReportController extends AbstractControllerForEmployee {
     public String saveOvertimeTable(
             @RequestParam("year") Integer year,
             @RequestParam("month") Integer month,
+            @RequestParam("divisionOwner") Integer divisionOwner,
             @RequestParam("jsonData") String jsonData
     ){
         try{
             if ( ! employeeService.isEmployeeHasPermissionsToMonthReportManage(getCurrentUser())){
                 return NO_PERMISSION_MESSAGE;
             }
-            overtimeService.saveOvertimeTable(year, month, jsonData);
+            overtimeService.saveOvertimeTable(year, month, divisionOwner, jsonData);
         }catch (Exception exc){
             return handleCommonException("сохранения таблицы переработок", exc);
         }
@@ -177,13 +178,14 @@ public class MonthReportController extends AbstractControllerForEmployee {
     public String saveMutualWorkTable(
             @RequestParam("year") Integer year,
             @RequestParam("month") Integer month,
+            @RequestParam("divisionOwner") Integer divisionOwner,
             @RequestParam("jsonData") String jsonData
     ){
         try{
             if ( ! employeeService.isEmployeeHasPermissionsToMonthReportManage(getCurrentUser())){
                 return NO_PERMISSION_MESSAGE;
             }
-            mutualWorkService.saveMutualWorkTable(year, month, jsonData);
+            mutualWorkService.saveMutualWorkTable(year, month, divisionOwner, jsonData);
         }catch (Exception exc){
             return handleCommonException("сохранения данных таблицы 'Взаимная занятость'", exc);
         }
