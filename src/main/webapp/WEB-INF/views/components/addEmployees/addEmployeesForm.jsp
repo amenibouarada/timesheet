@@ -79,6 +79,7 @@ com.aplana.timesheet.controller.AbstractControllerForEmployee.fillMavForAddEmplo
                 <td>
                     <form:select id="addEmployeesForm_projectRoleListId" path="projectRoleListId" multiple="true"
                                  onchange="addEmployeesForm_updateAdditionEmployeeList()" style="height: 110px">
+                        <form:option value="-1" label="Все">Все должности</form:option>
                         <form:options items="${projectRoleList}" itemLabel="name" itemValue="id"/>
                     </form:select>
                 <td>
@@ -88,6 +89,7 @@ com.aplana.timesheet.controller.AbstractControllerForEmployee.fillMavForAddEmplo
                 <td>
                     <form:select id="addEmployeesForm_regionListId" path="regionListId" multiple="true"
                                  onchange="addEmployeesForm_updateAdditionEmployeeList()"  style="height: 200px">
+                        <form:option value="-1" label="Все">Все регионы</form:option>
                         <form:options items="${regionList}" itemLabel="name" itemValue="id"/>
                     </form:select>
                 <td>

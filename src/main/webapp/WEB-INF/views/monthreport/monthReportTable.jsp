@@ -17,6 +17,7 @@
             <label>Регионы </label><br>
             <select data-dojo-id="monthReportTable_regionListId" id="monthReportTable_regionListId" multiple="true"
                     onchange="monthReportTable_reloadTable()">
+                <option value="0" label="Все">Все</option>
                 <c:forEach items="${regionList}" var="region">
                     <option value="${region.id}" label="${region.name}">${region.name}</option>
                 </c:forEach>
@@ -26,6 +27,7 @@
             <label>Должности</label><br>
             <select data-dojo-id="monthReportTable_projectRoleListId" id="monthReportTable_projectRoleListId" multiple="true"
                     onchange="monthReportTable_reloadTable()">
+                <option value="0" label="Все">Все должности</option>
                 <c:forEach items="${projectRoleList}" var="projectRole">
                     <option value="${projectRole.id}" label="${projectRole.name}">${projectRole.name}</option>
                 </c:forEach>
