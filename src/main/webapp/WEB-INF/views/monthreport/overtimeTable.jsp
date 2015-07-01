@@ -233,7 +233,7 @@
         var projectSelect   = dojo.byId("addEmployeesForm_projectId");
         var projectId       = projectSelect.value;
         var project = "";
-        if (projectId != ""){
+        if (projectId != "" && parseInt(projectId) != -1){
             project = projectSelect.options[projectSelect.selectedIndex].text;
             projectId = parseInt(projectId);
         }else{
@@ -251,8 +251,8 @@
                 division_employee_name:   employee.attributes.div_name.value,
                 region_id:   parseInt(employee.attributes.reg_id.value),
                 region_name:     employee.attributes.reg_name.value,
-                project_type_name:   typeId,
-                project_type_id:   type,
+                project_type_name:   type,
+                project_type_id:   typeId,
                 project_id:  projectId,
                 project_name:    project,
                 overtime:   0.0,

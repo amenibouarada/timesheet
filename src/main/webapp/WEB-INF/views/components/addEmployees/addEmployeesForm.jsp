@@ -97,7 +97,7 @@ com.aplana.timesheet.controller.AbstractControllerForEmployee.fillMavForAddEmplo
         </table>
 
         <div class="dijitDialogPaneActionBar">
-            <button type="button" onclick="returnEmployees(); addEmployeesForm_employeeDialog.hide();">Добавить</button>
+            <button type="button" onclick="addEmployeesForm_checkAndReturnEmployees();" onmouseout="tooltip.hide();">Добавить</button>
             <button type="button" onclick="addEmployeesForm_employeeDialog.hide();">Отмена</button>
         </div>
 
@@ -117,6 +117,19 @@ com.aplana.timesheet.controller.AbstractControllerForEmployee.fillMavForAddEmplo
         dojo.byId("addEmployeesForm_divisionId").value = ownerDiv;
     });
 
+    function addEmployeesForm_checkAndReturnEmployees() {
+        if (dojo.byId("addEmployeesForm_projectId").value == -1 && dojo.byId("addEmployeesForm_projectTypeId").value != EnumConstants.TypesOfActivityEnum.NON_PROJECT) {
+            tooltip.show("Необходимо выбрать пресейл, либо непроектную задачу");
+            return;
+        }
+        if (dojo.byId("addEmployeesForm_additionEmployeeList").selectedOptions.length == 0) {
+            tooltip.show("Необходимо выбрать сотрудника или сотрудников");
+            return;
+        }
+        returnEmployees();
+        addEmployeesForm_employeeDialog.hide();
+    }
+
     function addEmployeesForm_updateLists(){
         addEmployeesForm_updateProjectList();
         addEmployeesForm_updateManagers();
@@ -131,7 +144,9 @@ com.aplana.timesheet.controller.AbstractControllerForEmployee.fillMavForAddEmplo
                 dojo.byId("addEmployeesForm_divisionOwnerId").value,
                 dojo.byId("addEmployeesForm_projectId"),
                 dojo.byId("addEmployeesForm_projectTypeId").value);
-        dojo.byId("addEmployeesForm_projectId").remove(0);
+        if (dojo.byId("addEmployeesForm_projectId").options[0].value != -1) {
+            dojo.byId("addEmployeesForm_projectId").remove(0);
+        }
     }
 
     function addEmployeesForm_updateManagers(){
