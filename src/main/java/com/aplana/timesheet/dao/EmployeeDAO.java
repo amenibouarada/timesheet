@@ -2,6 +2,7 @@ package com.aplana.timesheet.dao;
 
 import com.aplana.timesheet.dao.entity.*;
 import com.aplana.timesheet.enums.TypesOfTimeSheetEnum;
+import com.aplana.timesheet.system.constants.TimeSheetConstants;
 import com.aplana.timesheet.util.DateTimeUtil;
 import com.google.common.collect.Iterables;
 import org.apache.commons.lang.time.DateUtils;
@@ -490,7 +491,7 @@ public class EmployeeDAO {
         Integer beginDateYear = 1900;
         Integer endDateMonth = 1;
         Integer endDateYear = 2100;
-        Date twoWeekEarlyDate = DateUtils.addDays(beginDate, -LOOKUP_DAYS); // получаем дату на 2 недели назад
+        Date twoWeekEarlyDate = DateUtils.addDays(beginDate, -TimeSheetConstants.LOOKUP_DAYS); // получаем дату на 2 недели назад
         if (lookPreviousTwoWeekTimesheet){
             if (beginDate != null){
                 beginDateMonth = DateTimeUtil.getMonth(beginDate) + 1; // в БД нумерация с 1
