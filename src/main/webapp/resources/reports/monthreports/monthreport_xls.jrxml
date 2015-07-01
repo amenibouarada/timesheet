@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Табель сотрудников" pageWidth="2343" pageHeight="1000" orientation="Landscape" columnWidth="2303" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="6ae905b3-cfb1-47a7-bda5-eeede374788b">
 	<property name="net.sf.jasperreports.print.keep.full.text" value="true"/>
 	<property name="ireport.zoom" value="1.5"/>
-	<property name="ireport.x" value="1292"/>
+	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
 	<import value="com.aplana.timesheet.util.DateTimeUtil"/>
 	<style name="Normal" isDefault="true" fontSize="8" pdfEncoding="Cp1251"/>
@@ -423,9 +423,9 @@
 		</band>
 	</columnHeader>
 	<detail>
-		<band height="27">
+		<band height="15">
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="0" y="0" width="142" height="27" uuid="0c3357c3-a5a2-469d-ad05-4bd12bd8903a"/>
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="0" y="0" width="142" height="15" uuid="0c3357c3-a5a2-469d-ad05-4bd12bd8903a"/>
 				<box>
 					<topPen lineWidth="0.75"/>
 					<leftPen lineWidth="0.75"/>
@@ -436,7 +436,7 @@
 				<textFieldExpression><![CDATA[$F{employee_name}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="142" y="0" width="143" height="27" uuid="44f5ca84-3f41-4797-8480-70376103b7f1"/>
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="142" y="0" width="143" height="15" uuid="44f5ca84-3f41-4797-8480-70376103b7f1"/>
 				<box>
 					<topPen lineWidth="0.75"/>
 					<leftPen lineWidth="0.75"/>
@@ -447,7 +447,7 @@
 				<textFieldExpression><![CDATA[$F{division_name}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="285" y="0" width="74" height="27" uuid="ad26f0a9-1486-4f70-ba37-7f54938832c2"/>
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="285" y="0" width="74" height="15" uuid="ad26f0a9-1486-4f70-ba37-7f54938832c2"/>
 				<box>
 					<topPen lineWidth="0.75"/>
 					<leftPen lineWidth="0.75"/>
@@ -458,7 +458,7 @@
 				<textFieldExpression><![CDATA[$F{region_name}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="359" y="0" width="72" height="27" uuid="c12b2177-bf92-4b8e-bb6c-918740a3f794"/>
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="359" y="0" width="72" height="15" uuid="c12b2177-bf92-4b8e-bb6c-918740a3f794"/>
 				<box>
 					<topPen lineWidth="0.75"/>
 					<leftPen lineWidth="0.75"/>
@@ -469,7 +469,7 @@
 				<textFieldExpression><![CDATA[$F{ts_worked_calculated}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="431" y="0" width="72" height="27" uuid="2821c1e7-cf15-47ce-b023-0e85f3907471"/>
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="431" y="0" width="72" height="15" uuid="2821c1e7-cf15-47ce-b023-0e85f3907471"/>
 				<box>
 					<topPen lineWidth="0.75"/>
 					<leftPen lineWidth="0.75"/>
@@ -480,7 +480,7 @@
 				<textFieldExpression><![CDATA[$F{ts_vacation}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="503" y="0" width="72" height="27" uuid="d632933b-e22a-46ff-8f85-d82c8a21885b"/>
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="503" y="0" width="72" height="15" uuid="d632933b-e22a-46ff-8f85-d82c8a21885b"/>
 				<box>
 					<topPen lineWidth="0.75"/>
 					<leftPen lineWidth="0.75"/>
@@ -491,7 +491,7 @@
 				<textFieldExpression><![CDATA[$F{ts_illness}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="575" y="0" width="72" height="27" uuid="9e35365c-8199-482d-ab0e-f9690e14b9eb"/>
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="575" y="0" width="72" height="15" uuid="9e35365c-8199-482d-ab0e-f9690e14b9eb"/>
 				<box>
 					<topPen lineWidth="0.75"/>
 					<leftPen lineWidth="0.75"/>
@@ -502,7 +502,7 @@
 				<textFieldExpression><![CDATA[$F{ts_all_paid}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="647" y="0" width="72" height="27" uuid="9c768da3-fff9-4040-ba68-76f76354baa4"/>
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="647" y="0" width="72" height="15" uuid="9c768da3-fff9-4040-ba68-76f76354baa4"/>
 				<box>
 					<topPen lineWidth="0.75"/>
 					<leftPen lineWidth="0.75"/>
@@ -513,7 +513,7 @@
 				<textFieldExpression><![CDATA[$F{ts_over_val_fin_comp_calc}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="719" y="0" width="72" height="27" uuid="b3f51302-bd6b-4c6d-a117-7e8980228e80"/>
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="719" y="0" width="72" height="15" uuid="b3f51302-bd6b-4c6d-a117-7e8980228e80"/>
 				<box>
 					<topPen lineWidth="0.75"/>
 					<leftPen lineWidth="0.75"/>
@@ -524,7 +524,7 @@
 				<textFieldExpression><![CDATA[$F{ts_over_accounted}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="791" y="0" width="72" height="27" uuid="dd489917-477f-4d69-b154-77b7197c4c98"/>
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="791" y="0" width="72" height="15" uuid="dd489917-477f-4d69-b154-77b7197c4c98"/>
 				<box>
 					<topPen lineWidth="0.75"/>
 					<leftPen lineWidth="0.75"/>
@@ -535,7 +535,7 @@
 				<textFieldExpression><![CDATA[$F{ts_premium}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="863" y="0" width="72" height="27" uuid="c921f22f-378a-4caf-8bc1-61384438a395"/>
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="863" y="0" width="72" height="15" uuid="c921f22f-378a-4caf-8bc1-61384438a395"/>
 				<box>
 					<topPen lineWidth="0.75"/>
 					<leftPen lineWidth="0.75"/>
@@ -546,7 +546,7 @@
 				<textFieldExpression><![CDATA[$F{ts_all_over_accounted}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="935" y="0" width="72" height="27" uuid="96e96d5b-a5be-4e35-86ca-56f3fb492822"/>
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="935" y="0" width="72" height="15" uuid="96e96d5b-a5be-4e35-86ca-56f3fb492822"/>
 				<box>
 					<topPen lineWidth="0.75"/>
 					<leftPen lineWidth="0.75"/>
@@ -557,7 +557,7 @@
 				<textFieldExpression><![CDATA[$F{ts_over_done}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="1007" y="0" width="72" height="27" uuid="76963281-0f62-4174-9ed0-d342bf5425a3"/>
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="1007" y="0" width="72" height="15" uuid="76963281-0f62-4174-9ed0-d342bf5425a3"/>
 				<box>
 					<topPen lineWidth="0.75"/>
 					<leftPen lineWidth="0.75"/>
@@ -568,7 +568,7 @@
 				<textFieldExpression><![CDATA[$F{ts_over_not_done}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="1079" y="0" width="72" height="27" uuid="f5e6b567-0cb0-4632-9e7b-6d69985df946"/>
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="1079" y="0" width="72" height="15" uuid="f5e6b567-0cb0-4632-9e7b-6d69985df946"/>
 				<box>
 					<topPen lineWidth="0.75"/>
 					<leftPen lineWidth="0.75"/>
@@ -579,7 +579,7 @@
 				<textFieldExpression><![CDATA[$F{ts_over_remain}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="1151" y="0" width="72" height="27" uuid="43ef1036-2988-474d-aec0-a510fe3324a9"/>
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="1151" y="0" width="72" height="15" uuid="43ef1036-2988-474d-aec0-a510fe3324a9"/>
 				<box>
 					<topPen lineWidth="0.75"/>
 					<leftPen lineWidth="0.75"/>
@@ -590,7 +590,7 @@
 				<textFieldExpression><![CDATA[$F{ts_vacation_avail}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="1295" y="0" width="72" height="27" uuid="db4730c7-ebf0-4c8b-96fb-fb02df5fe8e8"/>
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="1295" y="0" width="72" height="15" uuid="db4730c7-ebf0-4c8b-96fb-fb02df5fe8e8"/>
 				<box>
 					<topPen lineWidth="0.75"/>
 					<leftPen lineWidth="0.75"/>
@@ -601,7 +601,7 @@
 				<textFieldExpression><![CDATA[$F{calc_worked_fact}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="1367" y="0" width="72" height="27" uuid="2d1bcdcf-0d1a-4c58-a8f2-e48cea9c14de"/>
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="1367" y="0" width="72" height="15" uuid="2d1bcdcf-0d1a-4c58-a8f2-e48cea9c14de"/>
 				<box>
 					<topPen lineWidth="0.75"/>
 					<leftPen lineWidth="0.75"/>
@@ -612,7 +612,7 @@
 				<textFieldExpression><![CDATA[$F{calc_vacation}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="1511" y="0" width="72" height="27" uuid="310d3b44-b37b-4408-90ef-ddead9199726"/>
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="1511" y="0" width="72" height="15" uuid="310d3b44-b37b-4408-90ef-ddead9199726"/>
 				<box>
 					<topPen lineWidth="0.75"/>
 					<leftPen lineWidth="0.75"/>
@@ -623,7 +623,7 @@
 				<textFieldExpression><![CDATA[$F{calc_vacation_without}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="1583" y="0" width="72" height="27" uuid="9f379941-aa9d-42f4-90ec-224fc364c7a1"/>
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="1583" y="0" width="72" height="15" uuid="9f379941-aa9d-42f4-90ec-224fc364c7a1"/>
 				<box>
 					<topPen lineWidth="0.75"/>
 					<leftPen lineWidth="0.75"/>
@@ -634,7 +634,7 @@
 				<textFieldExpression><![CDATA[$F{calc_vacation_hol_paid}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="1799" y="0" width="72" height="27" uuid="78430aba-ddef-4d5c-8f47-439a5e37ceac"/>
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="1799" y="0" width="72" height="15" uuid="78430aba-ddef-4d5c-8f47-439a5e37ceac"/>
 				<box>
 					<topPen lineWidth="0.75"/>
 					<leftPen lineWidth="0.75"/>
@@ -645,7 +645,7 @@
 				<textFieldExpression><![CDATA[$F{calc_illness_without}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="1943" y="0" width="72" height="27" uuid="b71caf26-a4a2-4755-86f4-8f3c428710b9"/>
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="1943" y="0" width="72" height="15" uuid="b71caf26-a4a2-4755-86f4-8f3c428710b9"/>
 				<box>
 					<topPen lineWidth="0.75"/>
 					<leftPen lineWidth="0.75"/>
@@ -656,7 +656,7 @@
 				<textFieldExpression><![CDATA[$F{calc_over_hol}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="2015" y="0" width="72" height="27" uuid="36db2d5f-d6af-446b-902c-234c51eafccb"/>
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="2015" y="0" width="72" height="15" uuid="36db2d5f-d6af-446b-902c-234c51eafccb"/>
 				<box>
 					<topPen lineWidth="0.75"/>
 					<leftPen lineWidth="0.75"/>
@@ -667,7 +667,7 @@
 				<textFieldExpression><![CDATA[$F{calc_over_hol_paid}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="2231" y="0" width="72" height="27" uuid="762d024f-3285-4124-8a9f-37516f988d0f"/>
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="2231" y="0" width="72" height="15" uuid="762d024f-3285-4124-8a9f-37516f988d0f"/>
 				<box>
 					<topPen lineWidth="0.75"/>
 					<leftPen lineWidth="0.75"/>
@@ -678,7 +678,7 @@
 				<textFieldExpression><![CDATA[$F{calc_worked_vac}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="1223" y="0" width="72" height="27" uuid="46717fa0-dac0-4d74-96c4-636359d6f0b6"/>
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="1223" y="0" width="72" height="15" uuid="46717fa0-dac0-4d74-96c4-636359d6f0b6"/>
 				<box>
 					<topPen lineWidth="0.75"/>
 					<leftPen lineWidth="0.75"/>
@@ -689,7 +689,7 @@
 				<textFieldExpression><![CDATA[$F{calc_worked_plan}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="1727" y="0" width="72" height="27" uuid="c6763705-1be6-4a84-b84d-88e2c3fe158f"/>
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="1727" y="0" width="72" height="15" uuid="c6763705-1be6-4a84-b84d-88e2c3fe158f"/>
 				<box>
 					<topPen lineWidth="0.75"/>
 					<leftPen lineWidth="0.75"/>
@@ -700,7 +700,7 @@
 				<textFieldExpression><![CDATA[$F{calc_illness_with}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="2087" y="0" width="72" height="27" uuid="a88014b3-7a58-4730-8e95-575583779bb3"/>
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="2087" y="0" width="72" height="15" uuid="a88014b3-7a58-4730-8e95-575583779bb3"/>
 				<box>
 					<topPen lineWidth="0.75"/>
 					<leftPen lineWidth="0.75"/>
@@ -711,7 +711,7 @@
 				<textFieldExpression><![CDATA[$F{calc_over_work}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="1655" y="0" width="72" height="27" uuid="4e5611f4-3131-4dd3-bc88-8d4a54bb6b9c"/>
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="1655" y="0" width="72" height="15" uuid="4e5611f4-3131-4dd3-bc88-8d4a54bb6b9c"/>
 				<box>
 					<topPen lineWidth="0.75"/>
 					<leftPen lineWidth="0.75"/>
@@ -722,7 +722,7 @@
 				<textFieldExpression><![CDATA[$F{calc_illness}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="2159" y="0" width="72" height="27" uuid="79258ea8-1bd0-4942-8a23-9aa0adeaa1ce"/>
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="2159" y="0" width="72" height="15" uuid="79258ea8-1bd0-4942-8a23-9aa0adeaa1ce"/>
 				<box>
 					<topPen lineWidth="0.75"/>
 					<leftPen lineWidth="0.75"/>
@@ -733,7 +733,7 @@
 				<textFieldExpression><![CDATA[$F{calc_worked_ill}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="1439" y="0" width="72" height="27" uuid="54dab092-cc1e-4c1b-949e-5abff7a16bd9"/>
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="1439" y="0" width="72" height="15" uuid="54dab092-cc1e-4c1b-949e-5abff7a16bd9"/>
 				<box>
 					<topPen lineWidth="0.75"/>
 					<leftPen lineWidth="0.75"/>
@@ -744,7 +744,7 @@
 				<textFieldExpression><![CDATA[$F{calc_vacation_with}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="1871" y="0" width="72" height="27" uuid="1225e13b-6b08-43e1-a374-35784a37ba98"/>
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="1871" y="0" width="72" height="15" uuid="1225e13b-6b08-43e1-a374-35784a37ba98"/>
 				<box>
 					<topPen lineWidth="0.75"/>
 					<leftPen lineWidth="0.75"/>
