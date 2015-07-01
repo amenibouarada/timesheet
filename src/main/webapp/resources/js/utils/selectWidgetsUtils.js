@@ -150,7 +150,7 @@ function validateAndAddNewOption(hasAny, divisionId, select){
     if (hasAny || divisionId == 0){
         insertEmptyOptionWithCaptionInHead(select, "Все");
     }else{
-        insertEmptyOptionWithCaptionInHead(select, "Пусто");
+        insertEmptyOptionWithCaptionInHead(select, "Пусто", -1);
         dojo.attr(select, {disabled:"disabled"});
     }
 }

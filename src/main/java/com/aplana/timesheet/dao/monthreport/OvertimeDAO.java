@@ -74,27 +74,30 @@ public class OvertimeDAO {
     }
 
     @Transactional
-    public Overtime findOrCreateOvertime(Employee employee, Project project, Integer year, Integer month){
-        Query query = entityManager.
-                createQuery("FROM Overtime WHERE employee = :employee AND project = :project AND year = :year AND month = :month")
-                .setParameter("employee", employee)
-                .setParameter("project", project)
-                .setParameter("year", year)
-                .setParameter("month", month);
+    public Overtime findOrCreateOvertime(Employee employee, Project project, Integer year, Integer month, Integer divisionOwner) {
+        String queryString = "FROM Overtime WHERE employee = :employee AND year = :year AND month = :month";
+        boolean projectSet = false;
+        if (project != null) {
+            queryString += " AND project = :project";
+            projectSet = true;
+        }
+        Query query = entityManager.createQuery(queryString).setParameter("employee", employee).setParameter("year", year).setParameter("month", month);
+        if (projectSet) {query.setParameter("project", project);}
         List result = query.getResultList();
-        if (result.size() == 0){ // создадим новый
+        if (result.size() == 0) { // создадим новый
             Overtime newOvertime = new Overtime();
             newOvertime.setEmployee(employee);
             newOvertime.setProject(project);
             newOvertime.setYear(year);
             newOvertime.setMonth(month);
+            newOvertime.setDivision_owner_id(divisionOwner);
             entityManager.persist(newOvertime);
             logger.debug("findOrCreateOvertime Overtime id = {}", newOvertime.getId());
             logger.info("findOrCreateOvertime created newOvertime");
             return newOvertime;
-        }else{
+        } else {
             logger.debug("findOrCreateOvertime List<Overtime> result size = {}", result.size());
-            return (Overtime)result.get(0);
+            return (Overtime) result.get(0);
         }
     }
 }

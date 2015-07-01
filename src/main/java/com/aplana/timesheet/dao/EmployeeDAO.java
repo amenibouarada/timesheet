@@ -566,11 +566,11 @@ public class EmployeeDAO {
         );
 
         if (regionIds != null && !regionIds.contains(ALL_REGIONS)){
-            queryString.append(" and (e.region.id in :region_ids)");
+            queryString.append(" and (e.region.id in (:region_ids))");
             parameters.put("region_ids", regionIds);
         }
         if (projectRoleIds != null && !projectRoleIds.contains(ALL_PROJECT_ROLES)){
-            queryString.append(" and (e.job.id in :project_role_ids)");
+            queryString.append(" and (e.job.id in (:project_role_ids))");
             parameters.put("project_role_ids", projectRoleIds);
         }
         if (managerId != null && managerId >= 1){

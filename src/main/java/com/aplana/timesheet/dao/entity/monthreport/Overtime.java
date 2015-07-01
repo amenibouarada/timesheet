@@ -41,13 +41,8 @@ public class Overtime {
     @Column(name = "comment")
     private String comment;
 
-    public Double getPremium() {
-        return premium;
-    }
-
-    public void setPremium(Double premium) {
-        this.premium = premium;
-    }
+    @Column(name = "division_owner_id")
+    private Integer division_owner_id;
 
     public Integer getId() {
         return id;
@@ -97,11 +92,27 @@ public class Overtime {
         this.overtime = overtime;
     }
 
+    public Double getPremium() {
+        return premium;
+    }
+
+    public void setPremium(Double premium) {
+        this.premium = premium;
+    }
+
     public String getComment() {
         return comment;
     }
 
     public void setComment(String comment) {
         this.comment = comment;
+    }
+
+    public Integer getDivision_owner_id() {
+        return division_owner_id;
+    }
+
+    public void setDivision_owner_id(Integer division_owner_id) {
+        this.division_owner_id = division_owner_id;
     }
 }

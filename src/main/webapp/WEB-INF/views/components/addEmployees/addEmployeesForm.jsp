@@ -79,6 +79,7 @@ com.aplana.timesheet.controller.AbstractControllerForEmployee.fillMavForAddEmplo
                 <td>
                     <form:select id="addEmployeesForm_projectRoleListId" path="projectRoleListId" multiple="true"
                                  onchange="addEmployeesForm_updateAdditionEmployeeList()" style="height: 110px">
+                        <form:option value="-1" label="Все">Все должности</form:option>
                         <form:options items="${projectRoleList}" itemLabel="name" itemValue="id"/>
                     </form:select>
                 <td>
@@ -88,6 +89,7 @@ com.aplana.timesheet.controller.AbstractControllerForEmployee.fillMavForAddEmplo
                 <td>
                     <form:select id="addEmployeesForm_regionListId" path="regionListId" multiple="true"
                                  onchange="addEmployeesForm_updateAdditionEmployeeList()"  style="height: 200px">
+                        <form:option value="-1" label="Все">Все регионы</form:option>
                         <form:options items="${regionList}" itemLabel="name" itemValue="id"/>
                     </form:select>
                 <td>
@@ -95,7 +97,7 @@ com.aplana.timesheet.controller.AbstractControllerForEmployee.fillMavForAddEmplo
         </table>
 
         <div class="dijitDialogPaneActionBar">
-            <button type="button" onclick="returnEmployees(); addEmployeesForm_employeeDialog.hide();">Добавить</button>
+            <button type="button" onclick="addEmployeesForm_checkAndReturnEmployees();" onmouseout="tooltip.hide();">Добавить</button>
             <button type="button" onclick="addEmployeesForm_employeeDialog.hide();">Отмена</button>
         </div>
 
@@ -115,6 +117,19 @@ com.aplana.timesheet.controller.AbstractControllerForEmployee.fillMavForAddEmplo
         dojo.byId("addEmployeesForm_divisionId").value = ownerDiv;
     });
 
+    function addEmployeesForm_checkAndReturnEmployees() {
+        if (dojo.byId("addEmployeesForm_projectId").value == -1 && dojo.byId("addEmployeesForm_projectTypeId").value != EnumConstants.TypesOfActivityEnum.NON_PROJECT) {
+            tooltip.show("Необходимо выбрать пресейл, либо непроектную задачу");
+            return;
+        }
+        if (dojo.byId("addEmployeesForm_additionEmployeeList").selectedOptions.length == 0) {
+            tooltip.show("Необходимо выбрать сотрудника или сотрудников");
+            return;
+        }
+        returnEmployees();
+        addEmployeesForm_employeeDialog.hide();
+    }
+
     function addEmployeesForm_updateLists(){
         addEmployeesForm_updateProjectList();
         addEmployeesForm_updateManagers();
@@ -129,7 +144,9 @@ com.aplana.timesheet.controller.AbstractControllerForEmployee.fillMavForAddEmplo
                 dojo.byId("addEmployeesForm_divisionOwnerId").value,
                 dojo.byId("addEmployeesForm_projectId"),
                 dojo.byId("addEmployeesForm_projectTypeId").value);
-        dojo.byId("addEmployeesForm_projectId").remove(0);
+        if (dojo.byId("addEmployeesForm_projectId").options[0].value != -1) {
+            dojo.byId("addEmployeesForm_projectId").remove(0);
+        }
     }
 
     function addEmployeesForm_updateManagers(){
@@ -141,8 +158,10 @@ com.aplana.timesheet.controller.AbstractControllerForEmployee.fillMavForAddEmplo
     function addEmployeesForm_updateAdditionEmployeeList() {
         var divisionId = dojo.byId("addEmployeesForm_divisionId").value;
         var managerId = dojo.byId("addEmployeesForm_managerId").value;
-        var projectRoleListId = getSelectValues(dojo.byId("addEmployeesForm_projectRoleListId"));
-        var regionListId = getSelectValues(dojo.byId("addEmployeesForm_regionListId"));
+        var regionListId     = dojo.byId("addEmployeesForm_regionListId") ?
+        "[" + getSelectValues(addEmployeesForm_regionListId) + "]" : "[]";
+        var projectRoleListId       = dojo.byId("addEmployeesForm_projectRoleListId") ?
+        "[" + getSelectValues(addEmployeesForm_projectRoleListId) + "]" : "[]";
 
         // Делает ajax запрос, возвращающий сотрудников по центру/руководителю/должности/региону,
         processing();

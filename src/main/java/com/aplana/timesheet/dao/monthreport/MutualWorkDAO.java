@@ -94,27 +94,30 @@ public class MutualWorkDAO {
     }
 
     @Transactional
-    public MutualWork findOrCreateMutualWork(Employee employee, Project project, Integer year, Integer month){
-        Query query = entityManager.
-                createQuery("FROM MutualWork WHERE employee = :employee AND project = :project AND year = :year AND month = :month")
-                .setParameter("employee", employee)
-                .setParameter("project", project)
-                .setParameter("year", year)
-                .setParameter("month", month);
+    public MutualWork findOrCreateMutualWork(Employee employee, Project project, Integer year, Integer month, Integer divisionOwner) {
+        String queryString = "FROM MutualWork WHERE employee = :employee AND year = :year AND month = :month";
+        boolean projectSet = false;
+        if (project != null) {
+            queryString += " AND project = :project";
+            projectSet = true;
+        }
+        Query query = entityManager.createQuery(queryString).setParameter("employee", employee).setParameter("year", year).setParameter("month", month);
+        if (projectSet) {query.setParameter("project", project);}
         List result = query.getResultList();
-        if (result.size() == 0){ // создадим новый
+        if (result.size() == 0) { // создадим новый
             MutualWork newMutualWork = new MutualWork();
             newMutualWork.setEmployee(employee);
             newMutualWork.setProject(project);
             newMutualWork.setYear(year);
             newMutualWork.setMonth(month);
+            newMutualWork.setDivision_owner_id(divisionOwner);
             entityManager.persist(newMutualWork);
             logger.debug("findOrCreateMutualWork MutualWork id = {}", newMutualWork.getId());
             logger.info("findOrCreateMutualWork created newMutualWork");
             return newMutualWork;
-        }else{
+        } else {
             logger.debug("findOrCreateMutualWork List<MutualWork> result size = {}", result.size());
-            return (MutualWork)result.get(0);
+            return (MutualWork) result.get(0);
         }
     }
 

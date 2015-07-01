@@ -105,7 +105,7 @@ public class MutualWorkService {
         return mapper.writeValueAsString(mutualWorkList);
     }
 
-    public boolean saveMutualWorkTable(int year, int month, String jsonData) throws IOException {
+    public boolean saveMutualWorkTable(int year, int month, int divisionOwner, String jsonData) throws IOException {
         logger.debug("Старт сохранения таблицы 'Взаимная занятость'");
         ObjectMapper mapper = new ObjectMapper();
         CollectionType mapCollectionType = mapper.getTypeFactory().constructCollectionType(List.class, Map.class);
@@ -115,7 +115,7 @@ public class MutualWorkService {
         for (Map<String, Object> mutualWorkMap : mutualWorks) {
             Project project = projectDAO.find((Integer) mutualWorkMap.get("projectId"));
             Employee employee = employeeDAO.find((Integer)mutualWorkMap.get("employeeId"));
-            MutualWork mutualWork = mutualWorkDAO.findOrCreateMutualWork(employee, project, year, month);
+            MutualWork mutualWork = mutualWorkDAO.findOrCreateMutualWork(employee, project, year, month, divisionOwner);
 
             mutualWork.setWorkDays(     NumberUtils.getDoubleValue(mutualWorkMap.get("workDays")));
             mutualWork.setOvertimes(NumberUtils.getDoubleValue(mutualWorkMap.get("overtimes")));
