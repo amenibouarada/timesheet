@@ -66,7 +66,7 @@ function fillProjectList(rowIndex, projectState) {
             return (projectsOfDiv.divId == division);
         }), function (projectsOfDiv) {
             dojo.forEach(dojo.filter(projectsOfDiv.divProjs, function (project) {
-                return ((+project.state === projectState) && (project.active == 'true'));
+                return ((project.state === projectState) && (project.active == 'true'));
             }), function (project) {
                 var projectOption = dojo.doc.createElement("option");
                 dojo.attr(projectOption, {
