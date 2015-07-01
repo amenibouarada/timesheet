@@ -490,7 +490,7 @@ public class EmployeeDAO {
         Integer beginDateYear = 1900;
         Integer endDateMonth = 1;
         Integer endDateYear = 2100;
-        Date twoWeekEarlyDate = DateUtils.addDays(beginDate, -14); // получаем дату на 2 недели назад
+        Date twoWeekEarlyDate = DateUtils.addDays(beginDate, -LOOKUP_DAYS); // получаем дату на 2 недели назад
         if (lookPreviousTwoWeekTimesheet){
             if (beginDate != null){
                 beginDateMonth = DateTimeUtil.getMonth(beginDate) + 1; // в БД нумерация с 1

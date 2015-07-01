@@ -1,5 +1,6 @@
 package com.aplana.timesheet.system.properties;
 
+import com.aplana.timesheet.system.constants.TimeSheetConstants;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -194,7 +195,7 @@ public class TSPropertyProvider {
      * заявления на отпуск менеджеров проектов, по которым сотрудник списывал занятость в этом промежутке времени
      */
     public Integer getBeforeVacationDays() {
-        return readIntProperty("vacations.before.vacation.days", 14);
+        return readIntProperty("vacations.before.vacation.days", TimeSheetConstants.LOOKUP_DAYS);
     }
 
     public Integer getVacationCreateThreshold() {

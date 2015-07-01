@@ -36,4 +36,10 @@ public class TimeSheetConstants {
      * Для заполнения столбца по умолчанию в таблице "Взаимная занятость", на форме "Учет табеля"
      */
     public static final double MUTUAL_WORK_OVERTIME_COEF = 1.15;
+
+    /**
+     *  Количество дней за которое мы просматриваем списания занятости назад от текущей даты
+     *  при создании согласования отпуска
+     */
+    public static final int LOOKUP_DAYS = 14;
 }
