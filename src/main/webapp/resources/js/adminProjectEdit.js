@@ -316,27 +316,6 @@ function createManager() {
     }
     roleCell.appendChild(roleSelect);
 
-    /*------------------------*/
-    /*   Чекбокс "Главный"    */
-    /*------------------------*/
-
-    var masterCell = newManager.insertCell(3);
-    var masterInput = dojo.doc.createElement("input");
-    dojo.attr(masterInput, {
-        id: "projectManagers" + newManagerIndex + ".master1",
-        name: "projectManagers[" + newManagerIndex + "].master",
-        type: "checkbox"
-    });
-    masterCell.appendChild(masterInput);
-
-    var _masterInput = dojo.doc.createElement("input");
-    dojo.attr(_masterInput, {
-        name: "_projectManagers[" + newManagerIndex + "].master",
-        type: "hidden",
-        value: "on"
-    });
-    masterCell.appendChild(_masterInput);
-
     /*----------------------------------*/
     /*   Чекбокс "Признак активности"   */
     /*----------------------------------*/
@@ -357,6 +336,27 @@ function createManager() {
         value: "on"
     });
     activeCell.appendChild(_activeInput);
+
+    /*------------------------*/
+    /*   Чекбокс "Главный"    */
+    /*------------------------*/
+
+    var masterCell = newManager.insertCell(3);
+    var masterInput = dojo.doc.createElement("input");
+    dojo.attr(masterInput, {
+        id: "projectManagers" + newManagerIndex + ".master1",
+        name: "projectManagers[" + newManagerIndex + "].master",
+        type: "checkbox"
+    });
+    masterCell.appendChild(masterInput);
+
+    var _masterInput = dojo.doc.createElement("input");
+    dojo.attr(_masterInput, {
+        name: "_projectManagers[" + newManagerIndex + "].master",
+        type: "hidden",
+        value: "on"
+    });
+    masterCell.appendChild(_masterInput);
 }
 
 function createBillable() {
