@@ -70,6 +70,7 @@
                 content:    content,
                 preventCache: false,
                 load: function (response, ioargs) {
+                    stopProcessing();
                     if (responseType == "text"){
                         alert(response);
                         handler();
@@ -85,10 +86,10 @@
                     }
                 },
                 error: function() {
+                    stopProcessing();
                     alert(errorMessage);
                 }
             });
-            stopProcessing();
         }
 
         function monthReport_colorizeMonthOption(){
