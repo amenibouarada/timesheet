@@ -76,6 +76,7 @@ public class ActiveProjectService {
         if (project.getManager() != null) {
             ids.add(project.getManager().getId());
         }
+        // ToDo заменить константы 30
         HashMap<Employee, List<ProjectRole>> employees = projectService.getEmployesWhoWasOnProjectByDates(DateUtils.addDays(new Date(), -30), new Date(), project, ids);
         List<Employee> employeesPlan = employeeProjectPlanService.getEmployeesWhoWillWorkOnProject(projectId, new Date(), DateUtils.addDays(new Date(), 30));
 

@@ -8,6 +8,7 @@ import java.util.Date;
  * @author dsysterov
  * @version 1.0
  */
+// Зачем нужен этот класс, если есть EmployeeProjectBillable
 public class AdminProjectBillableForm {
     private Integer id;
     private Integer employee;
