@@ -127,7 +127,14 @@
     }
 
     var addImage = function(value, rowIndex, cell) {
-        return "<a href='#' onclick='getReport3("+rowIndex+")'><img src='/resources/img/view.png' width='25' height='25'/></a>";
+        //Если у сотрудника присутствует поле id - показатель того, что запись была добавлена вручную, либо id = 0 -
+        //показатель того, что запись только что добавлена в store - делаем фон "лупы" непрозрачным, убираем кликабельность.
+       if (mutualWorkTable.getItem(rowIndex).id != '' || mutualWorkTable.getItem(rowIndex).id == 0) {
+           cell.customStyles.push('opacity: 0.2;');
+           return "<img src='/resources/img/view.png' width='25' height='25'/>";
+       } else {
+           return "<a href='#' onclick='getReport3(" + rowIndex + ")'><img src='/resources/img/view.png' width='25' height='25'/></a>";
+       }
     }
 
     function mutualWorkTable_divisionChanged() {
@@ -305,7 +312,7 @@
         dojo.forEach( dojo.byId("addEmployeesForm_additionEmployeeList").selectedOptions, function(employee){
             employee_list.push({
                 identifier: employee.value + "_" + projectId, // уникальный идентификатор, для добавления новых строк
-                id:         null,
+                id:         0,
                 employeeId: parseInt(employee.value),
                 employeeName:   employee.innerHTML,
                 divisionEmployeeId: parseInt(employee.attributes.div_id.value),
