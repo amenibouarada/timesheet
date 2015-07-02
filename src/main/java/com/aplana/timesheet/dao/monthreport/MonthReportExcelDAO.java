@@ -27,8 +27,9 @@ public class MonthReportExcelDAO extends AbstractReportDAO {
 
         fieldsMap.put(OvertimeReport.class, new String[]{ "identifier", "year", "month", "employee_id", "employee_name",
                                                           "region_id", "region_name", "division_employee_id", "division_employee_name",
-                                                          "project_id", "project_name", "project_type_id", "division_owner_name", "division_owner_id",
-                                                          "project_type_name", "overtime", "premium", "total_accounted_overtime", "comment", "id"});
+                                                          "project_id", "project_name", "project_type_id", "division_owner_name",
+                                                          "division_owner_id", "project_type_name", "overtime", "overtime_calculated",
+                                                          "premium", "total_accounted_overtime", "comment", "id"});
 
         fieldsMap.put(MonthXLSReport.class, new String[]{  "year", "month", "employee_id", "employee_name",
                                                            "region_id", "region_name", "division_id", "division_name",

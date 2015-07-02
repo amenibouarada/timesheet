@@ -2,6 +2,7 @@
 
 <%@ page import="static com.aplana.timesheet.util.ResourceUtils.getResRealPath" %>
 <%@ page import="static com.aplana.timesheet.system.constants.TimeSheetConstants.DOJO_PATH" %>
+<%@ page import="static com.aplana.timesheet.system.constants.TimeSheetConstants.MUTUAL_WORK_OVERTIME_COEF" %>
 <%@ page import="static com.aplana.timesheet.enums.MonthReportStatusEnum.*" %>
 
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
@@ -225,6 +226,7 @@
             changeButtonListeners(); // выполним, чтобы загрузить слушателей для первой вкладки
         });
 
+        //Функция для валидации введённых пользователем значений
         function monthReport_cellsValidator(currentTable, allowStringField) {
             var prevValue;
             var fieldName;

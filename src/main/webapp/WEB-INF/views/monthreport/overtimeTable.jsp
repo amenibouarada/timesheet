@@ -77,16 +77,17 @@
     // и добавляю подсказку
     var overtimeTable_colorCell = function(value, rowIndex, cell) {
         var item = overtimeTable.getItem(rowIndex);
-        var calculatedValue = overtimeTable.store.getValue(item, cell.field, null);
+        var calculatedValue = overtimeTable.store.getValue(item, cell.field + "_calculated", null);
         var dispValue = "";
-        if (value && value != "null"){
-            cell.customStyles.push('color:green');
-            dispValue = value;
-        }else{
+        if (value == calculatedValue){
             cell.customStyles.push('color:red');
-            dispValue = calculatedValue != null ? calculatedValue : 0;
+            dispValue = value != null ? value : '';
+        }else{
+            cell.customStyles.push('color:green');
+            dispValue = value != null ? value : '';
         }
-        return "<span title='Значение по умолчанию: " + calculatedValue + "'>" + dispValue + "</span>"
+        var defaultValue = calculatedValue != null ? calculatedValue : '0';
+        return "<span title='Значение по умолчанию: " + defaultValue + "'>" + dispValue + "</span>"
     }
 
     function overtimeTable_employeeDialogShow(){

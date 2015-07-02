@@ -112,6 +112,7 @@ public class OvertimeService {
                 overtimeMap.put("project_name", "");
             }
             overtimeMap.put("overtime", overtimeData.getOvertime());
+            overtimeMap.put("overtime_calculated", overtimeData.getOvertime_calculated());
             overtimeMap.put("premium", overtimeData.getPremium());
             overtimeMap.put("total_accounted_overtime", overtimeData.getTotal_accounted_overtime());
             overtimeMap.put("comment", overtimeData.getComment());

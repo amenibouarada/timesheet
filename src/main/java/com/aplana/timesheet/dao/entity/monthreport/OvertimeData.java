@@ -55,6 +55,9 @@ public class OvertimeData {
     @Column(name = "overtime")
     private Double overtime;
 
+    @Column(name = "overtime_calculated")
+    private Double overtime_calculated;
+
     @Column(name = "premium")
     private Double premium;
 
@@ -193,6 +196,14 @@ public class OvertimeData {
 
     public void setOvertime(Double overtime) {
         this.overtime = overtime;
+    }
+
+    public Double getOvertime_calculated() {
+        return overtime_calculated;
+    }
+
+    public void setOvertime_calculated(Double overtime_calculated) {
+        this.overtime_calculated = overtime_calculated;
     }
 
     public Double getPremium() {
