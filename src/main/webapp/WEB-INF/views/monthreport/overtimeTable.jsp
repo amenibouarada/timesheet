@@ -64,8 +64,15 @@
             dojo.byId("overtimeTable_divisionEmployeeId").value = div;
             overtimeTable_divisionChanged();
         }
-
         monthReport_cellsValidator(overtimeTable, "comment");
+
+        //При редактировании подсчитывается и устанавливается значение поля
+        //"Всего учтенных переработок и премий"
+        overtimeTable.onApplyCellEdit = function (inValue, inRowIndex, inFieldIndex) {
+            var totalOvertime = parseFloat(overtimeTable.store.getValue(overtimeTable.getItem(inRowIndex), "overtime")) +
+                                parseFloat(overtimeTable.store.getValue(overtimeTable.getItem(inRowIndex), "premium"));
+            overtimeTable.store.setValue(overtimeTable.getItem(inRowIndex), "total_accounted_overtime", totalOvertime.toPrecision(3));
+        }
     });
 
     function overtimeTable_addNewEmployees(){
