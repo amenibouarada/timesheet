@@ -89,9 +89,13 @@ function fillProjectList(rowIndex, projectState) {
     sortSelectOptions(projectSelect);
 }
 
-
-/* Заполняет список доступных проектов/пресейлов для "Взаимной занятости" и формирования отчётов */
-
+/**
+ * Заполняет список доступных проектов/пресейлов для "Взаимной занятости" и формирования отчётов
+ * @param division подразделение, по которому определяется список проектов
+ * @param projectSelect селект, который заполняется проектами
+ * @param projectState тип проекта (проект, пресейл ...)
+ * @param disableAll true или false - признак того, будет ли в списке проектов option со значением "Все" и возможность выбрать все проекты
+ */
 function fillProjectListByDivision(division, projectSelect, projectState, disableAll) {
 
     if (division.value == null) {
