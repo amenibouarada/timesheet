@@ -156,11 +156,8 @@ com.aplana.timesheet.controller.AbstractControllerForEmployee.fillMavForAddEmplo
     function addEmployeesForm_updateAdditionEmployeeList() {
         var divisionId = dojo.byId("addEmployeesForm_divisionId").value;
         var managerId = dojo.byId("addEmployeesForm_managerId").value;
-        var regionListId     = dojo.byId("addEmployeesForm_regionListId") ?
-        "[" + getSelectValues(addEmployeesForm_regionListId) + "]" : "[]";
-        var projectRoleListId       = dojo.byId("addEmployeesForm_projectRoleListId") ?
-        "[" + getSelectValues(addEmployeesForm_projectRoleListId) + "]" : "[]";
-
+        var projectRoleListId = getSelectValues(dojo.byId("addEmployeesForm_projectRoleListId"));
+        var regionListId = getSelectValues(dojo.byId("addEmployeesForm_regionListId"));
         // Делает ajax запрос, возвращающий сотрудников по центру/руководителю/должности/региону,
         processing();
         dojo.xhrGet({

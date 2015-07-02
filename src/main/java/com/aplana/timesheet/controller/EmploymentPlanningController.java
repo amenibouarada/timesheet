@@ -15,7 +15,6 @@ import com.aplana.timesheet.service.EmployeeService;
 import com.aplana.timesheet.service.EmploymentPlanningService;
 import com.aplana.timesheet.service.ProjectService;
 import com.aplana.timesheet.util.DateTimeUtil;
-import com.aplana.timesheet.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +22,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
-import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -90,12 +88,12 @@ public class EmploymentPlanningController {
 //    ToDo поменять адрес запроса и переместить в EmployeeController
     @RequestMapping(value="/employmentPlanning/getAddEmployeeListAsJSON", produces = "text/plain;charset=UTF-8")
     @ResponseBody
-    public String showAddEmployeeList(@ModelAttribute(AddEmployeeForm.ADD_FORM) AddEmployeeForm form) throws IOException{
+    public String showAddEmployeeList(@ModelAttribute(AddEmployeeForm.ADD_FORM) AddEmployeeForm form) {
         List<Employee> employeeList = employeeService.getDivisionEmployeesByManager(
                 form.getDivisionId(),
                 new Date(),
-                StringUtil.stringToList(form.getRegionListId()),
-                StringUtil.stringToList(form.getProjectRoleListId()),
+                form.getRegionListId(),
+                form.getProjectRoleListId(),
                 form.getManagerId());
 
         return employeeService.getEmployeeListAsJson(employeeList, true);
@@ -148,7 +146,7 @@ public class EmploymentPlanningController {
     @RequestMapping(value="/employmentPlanning/setProjectDataAsJSON", produces = "text/plain;charset=UTF-8")
     @ResponseBody
     public String saveProjectData(@RequestParam("employeeId") Integer employeeId,
-                                   @RequestParam("jsonData") String jsonData) throws InvalidSyntaxException {
+                                  @RequestParam("jsonData") String jsonData) throws InvalidSyntaxException {
         employeeProjectPlanService.saveProjectData(jsonData, employeeId);
         return "+OK";
     }
