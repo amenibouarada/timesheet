@@ -180,25 +180,29 @@
     function overtimeTable_deleteRows(){
         var items = overtimeTable.selection.getSelected();
         var jsonData = itemToJSON(overtimeTable.store, items);
-
-        makeAjaxRequest(
-                "<%= request.getContextPath()%>/monthreport/deleteOvertimes",
-                {
-                    jsonData: "[" + jsonData + "]"
-                },
-                "text",
-                "Во время удаления данных из таблицы 'Переработки' произошла ошибка. Пожалуйста, свяжитесть с администраторами системы.",
-                function () {
-                    if(items.length){
-                        dojo.forEach(items, function(selectedItem){
-                            if(selectedItem !== null){
-                                overtimeTable.store.deleteItem(selectedItem);
-                            }
-                            overtimeTable.store.save();
-                        });
+        var c = confirm("Вы уверены, что хотите удалить выделенные строки?");
+        if (c == true) {
+            makeAjaxRequest(
+                    "<%= request.getContextPath()%>/monthreport/deleteOvertimes",
+                    {
+                        jsonData: "[" + jsonData + "]"
+                    },
+                    "text",
+                    "Во время удаления данных из таблицы 'Переработки' произошла ошибка. Пожалуйста, свяжитесть с администраторами системы.",
+                    function () {
+                        if (items.length) {
+                            dojo.forEach(items, function (selectedItem) {
+                                if (selectedItem !== null) {
+                                    overtimeTable.store.deleteItem(selectedItem);
+                                }
+                                overtimeTable.store.save();
+                            });
+                        }
                     }
-                }
-        );
+            );
+        } else {
+            return;
+        }
     }
 
     function overtimeTable_save(){

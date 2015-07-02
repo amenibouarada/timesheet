@@ -213,25 +213,29 @@
     function mutualWorkTable_deleteRows(){
         var items = mutualWorkTable.selection.getSelected();
         var jsonData = itemToJSON(mutualWorkTable.store, items);
-
-        makeAjaxRequest(
-                "<%= request.getContextPath()%>/monthreport/deleteMutualWorks",
-                {
-                    jsonData: "[" + jsonData + "]"
-                },
-                "text",
-                "Во время удаления данных из таблицы 'Взаимная занятость' произошла ошибка. Пожалуйста, свяжитесть с администраторами системы.",
-                function () {
-                    if(items.length){
-                        dojo.forEach(items, function(selectedItem){
-                            if(selectedItem !== null){
-                                mutualWorkTable.store.deleteItem(selectedItem);
-                            }
-                            mutualWorkTable.store.save();
-                        });
+        var c = confirm("Вы уверены, что хотите удалить выделенные строки?");
+        if (c == true) {
+            makeAjaxRequest(
+                    "<%= request.getContextPath()%>/monthreport/deleteMutualWorks",
+                    {
+                        jsonData: "[" + jsonData + "]"
+                    },
+                    "text",
+                    "Во время удаления данных из таблицы 'Взаимная занятость' произошла ошибка. Пожалуйста, свяжитесть с администраторами системы.",
+                    function () {
+                        if (items.length) {
+                            dojo.forEach(items, function (selectedItem) {
+                                if (selectedItem !== null) {
+                                    mutualWorkTable.store.deleteItem(selectedItem);
+                                }
+                                mutualWorkTable.store.save();
+                            });
+                        }
                     }
-                }
-        );
+            );
+        } else {
+            return;
+        }
     }
 
     function mutualWorkTable_save() {
