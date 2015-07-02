@@ -70,7 +70,7 @@
 
     function overtimeTable_addNewEmployees(){
         overtimeTable_employeeDialogShow();
-        returnEmployees = overtimeTable_returnEmployees;
+        addEmployeesForm_returnEmployees = overtimeTable_returnEmployees;
     }
 
     // раскраска ячеек и проверка на существующее значение заполненности таблицы реальными данными, а не автовычисленными

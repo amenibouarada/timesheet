@@ -107,7 +107,7 @@ com.aplana.timesheet.controller.AbstractControllerForEmployee.fillMavForAddEmplo
 
 <script type="text/javascript">
 
-    var returnEmployees;
+    var addEmployeesForm_returnEmployees;
 
     dojo.addOnLoad(function () {
         addEmployeesForm_updateLists();
@@ -126,7 +126,7 @@ com.aplana.timesheet.controller.AbstractControllerForEmployee.fillMavForAddEmplo
             tooltip.show("Необходимо выбрать сотрудника или сотрудников");
             return;
         }
-        returnEmployees();
+        addEmployeesForm_returnEmployees();
         addEmployeesForm_employeeDialog.hide();
     }
 

@@ -91,7 +91,7 @@
 
     function mutualWorkTable_addNewEmployees(){
         mutualWorkTable_employeeDialogShow();
-        returnEmployees = mutualWorkTable_returnEmployees;
+        addEmployeesForm_returnEmployees = mutualWorkTable_returnEmployees;
     }
 
     // раскраска ячеек и проверка на существующее значение заполненности таблицы реальными данными, а не автовычисленными
