@@ -174,7 +174,6 @@
 
         mutualWorkTable_createStore();
 
-        processing();
         makeAjaxRequest(
                 "<%= request.getContextPath()%>/monthreport/getMutualWorks",
                 {
@@ -188,7 +187,6 @@
                 "json",
                 "Во время запроса данных для таблицы 'Взаимная занятость' произошла ошибка. Пожалуйста, свяжитесть с администраторами системы.",
                 function (data) {
-                    stopProcessing();
                     dojo.forEach(data, function (data) {
                         mutualWorkTable.store.newItem(data);
                     });
@@ -216,7 +214,6 @@
         var items = mutualWorkTable.selection.getSelected();
         var jsonData = itemToJSON(mutualWorkTable.store, items);
 
-        processing();
         makeAjaxRequest(
                 "<%= request.getContextPath()%>/monthreport/deleteMutualWorks",
                 {
@@ -233,13 +230,11 @@
                             mutualWorkTable.store.save();
                         });
                     }
-                    stopProcessing();
                 }
         );
     }
 
     function mutualWorkTable_save() {
-        processing();
         mutualWorkTable.store.fetch({
             query: {}, queryOptions: {deep: true},
             onComplete: function (items) {
@@ -257,7 +252,6 @@
                         "text",
                         "Во время сохранения таблицы 'Взаимная занятость' произошла ошибка. Пожалуйста, свяжитесть с администраторами системы.",
                         function () {
-                            stopProcessing();
                             mutualWorkTable_reloadTable();
                         }
                 );

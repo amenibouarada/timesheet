@@ -133,7 +133,6 @@
         var divisionOwner = dojo.byId("overtimeTable_divisionOwnerId") ? overtimeTable_divisionOwnerId.value : 0;
         var divisionEmployee = dojo.byId("overtimeTable_divisionEmployeeId") ? overtimeTable_divisionEmployeeId.value : 0;
 
-        processing();
         overtimeTable_createStore();
         makeAjaxRequest(
                 "<%= request.getContextPath()%>/monthreport/getOvertimes",
@@ -146,7 +145,6 @@
                 "json",
                 "Во время запроса данных для таблицы 'Переработки' произошла ошибка. Пожалуйста, свяжитесть с администраторами системы.",
                 function (data) {
-                    stopProcessing();
                     dojo.forEach(data, function(overtime){
                         // уникальный идентификатор, для добавления новых строк
                         overtime.identifier = overtime.employee_id + "_" + overtime.project_id;
@@ -175,7 +173,6 @@
         var items = overtimeTable.selection.getSelected();
         var jsonData = itemToJSON(overtimeTable.store, items);
 
-        processing();
         makeAjaxRequest(
                 "<%= request.getContextPath()%>/monthreport/deleteOvertimes",
                 {
@@ -192,13 +189,11 @@
                             overtimeTable.store.save();
                         });
                     }
-                    stopProcessing();
                 }
         );
     }
 
     function overtimeTable_save(){
-        processing();
         overtimeTable.store.fetch({query: {}, queryOptions: {deep: true},
             onComplete: function (items) {
                 overtimeTable.store.save();
@@ -215,7 +210,6 @@
                         "text",
                         "Во время сохранения таблицы 'Переработки' произошла ошибка. Пожалуйста, свяжитесть с администраторами системы.",
                         function () {
-                            stopProcessing();
                             overtimeTable_reloadTable();
                         }
                 );

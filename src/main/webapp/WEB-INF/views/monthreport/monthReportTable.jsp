@@ -162,7 +162,6 @@
                 "[" + getSelectValues(monthReportTable_projectRoleListId) + "]" : "[]";
 
         monthReportTable_createStore();
-        processing();
         makeAjaxRequest(
                 "<%= request.getContextPath()%>/monthreport/getMonthReportData",
                 {
@@ -180,13 +179,11 @@
                         monthReportTable.store.newItem(data[i]);
                     }
                     monthReportTable.store.save();
-                    stopProcessing();
                 }
         );
     }
 
     function monthReportTable_save(){
-        processing();
         monthReportTable.store.fetch({query: {}, queryOptions: {deep: true},
             onComplete: function (items) {
                 monthReportTable.store.save();
@@ -203,7 +200,6 @@
                         function () {
                             monthReportTable_reloadTable();
                             monthReport_updateStatus();
-                            stopProcessing();
                         }
                 );
             }

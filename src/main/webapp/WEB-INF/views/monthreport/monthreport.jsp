@@ -63,6 +63,7 @@
          * @param handler - обработчик полученного сообщения
         */
         function makeAjaxRequest(url, content, responseType, errorMessage, handler){
+            processing();
             dojo.xhrPost({
                 url:        url,
                 handleAs:   "text",
@@ -85,9 +86,9 @@
                 },
                 error: function() {
                     alert(errorMessage);
-                    stopProcessing();
                 }
             });
+            stopProcessing();
         }
 
         function monthReport_colorizeMonthOption(){
