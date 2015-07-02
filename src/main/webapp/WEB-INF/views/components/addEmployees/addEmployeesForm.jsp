@@ -118,7 +118,7 @@ com.aplana.timesheet.controller.AbstractControllerForEmployee.fillMavForAddEmplo
     });
 
     function addEmployeesForm_checkAndReturnEmployees() {
-        if (dojo.byId("addEmployeesForm_projectId").value == -1 && dojo.byId("addEmployeesForm_projectTypeId").value != EnumConstants.TypesOfActivityEnum.NON_PROJECT) {
+        if (dojo.byId("addEmployeesForm_projectId").value == 0 && dojo.byId("addEmployeesForm_projectTypeId").value != EnumConstants.TypesOfActivityEnum.NON_PROJECT) {
             tooltip.show("Необходимо выбрать пресейл, либо непроектную задачу");
             return;
         }
@@ -143,10 +143,8 @@ com.aplana.timesheet.controller.AbstractControllerForEmployee.fillMavForAddEmplo
         fillProjectListByDivision(
                 dojo.byId("addEmployeesForm_divisionOwnerId").value,
                 dojo.byId("addEmployeesForm_projectId"),
-                dojo.byId("addEmployeesForm_projectTypeId").value);
-        if (dojo.byId("addEmployeesForm_projectId").options[0].value != -1) {
-            dojo.byId("addEmployeesForm_projectId").remove(0);
-        }
+                dojo.byId("addEmployeesForm_projectTypeId").value,
+                true);
     }
 
     function addEmployeesForm_updateManagers(){

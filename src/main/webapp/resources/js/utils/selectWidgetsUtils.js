@@ -92,7 +92,7 @@ function fillProjectList(rowIndex, projectState) {
 
 /* Заполняет список доступных проектов/пресейлов для "Взаимной занятости" и формирования отчётов */
 
-function fillProjectListByDivision(division, projectSelect, projectState) {
+function fillProjectListByDivision(division, projectSelect, projectState, disableAll) {
 
     if (division.value == null) {
         division.value = 0;
@@ -141,16 +141,18 @@ function fillProjectListByDivision(division, projectSelect, projectState) {
         }
     }
     sortSelectOptions(projectSelect);
-    validateAndAddNewOption(hasAny, division, projectSelect);
+    validateAndAddNewOption(hasAny, division, projectSelect, disableAll);
     /* выбираем по умолчанию пункт "Все" */
     projectSelect.value = 0;
 }
 
-function validateAndAddNewOption(hasAny, divisionId, select){
-    if (hasAny || divisionId == 0){
-        insertEmptyOptionWithCaptionInHead(select, "Все");
+function validateAndAddNewOption(hasAny, divisionId, select, disableAll){
+    if (hasAny || divisionId  == 0){
+        if (!disableAll) {
+            insertEmptyOptionWithCaptionInHead(select, "Все");
+        }
     }else{
-        insertEmptyOptionWithCaptionInHead(select, "Пусто", -1);
+        insertEmptyOptionWithCaptionInHead(select, "Пусто");
         dojo.attr(select, {disabled:"disabled"});
     }
 }
