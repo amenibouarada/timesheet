@@ -357,9 +357,9 @@
         </td>
         <sec:authorize access="hasRole('ROLE_MONTH_REPORT_MANAGER')">
         <td>
-            <button data-dojo-id="monthReport_closeButton" id="monthReport_closeButton" style="margin-left: 15px; visibility: hidden;"
+            <button data-dojo-id="monthReport_closeButton" id="monthReport_closeButton" style="margin-left: 15px; position: relative; visibility: hidden;"
                     onclick="monthReport_close();">Закрыть табель</button>
-            <button data-dojo-id="monthReport_openButton" id="monthReport_openButton"  style="margin-left: 15px; visibility: hidden;"
+            <button data-dojo-id="monthReport_openButton" id="monthReport_openButton" style="margin-left: 15px; position: relative; left: -146px; visibility: hidden;"
                     onclick="monthReport_open();">Открыть табель</button>
         </td>
         </sec:authorize>
