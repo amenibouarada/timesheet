@@ -2,6 +2,7 @@
 
 <%@ page import="static com.aplana.timesheet.util.ResourceUtils.getResRealPath" %>
 <%@ page import="static com.aplana.timesheet.system.constants.TimeSheetConstants.DOJO_PATH" %>
+<%@ page import="static com.aplana.timesheet.system.constants.TimeSheetConstants.MUTUAL_WORK_OVERTIME_COEF" %>
 <%@ page import="static com.aplana.timesheet.enums.MonthReportStatusEnum.*" %>
 
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
@@ -62,6 +63,7 @@
          * @param handler - обработчик полученного сообщения
         */
         function makeAjaxRequest(url, content, responseType, errorMessage, handler){
+            processing();
             dojo.xhrPost({
                 url:        url,
                 handleAs:   "text",
@@ -84,9 +86,9 @@
                 },
                 error: function() {
                     alert(errorMessage);
-                    stopProcessing();
                 }
             });
+            stopProcessing();
         }
 
         function monthReport_colorizeMonthOption(){
@@ -225,6 +227,7 @@
             changeButtonListeners(); // выполним, чтобы загрузить слушателей для первой вкладки
         });
 
+        //Функция для валидации введённых пользователем значений
         function monthReport_cellsValidator(currentTable, allowStringField) {
             var prevValue;
             var fieldName;
@@ -240,6 +243,14 @@
                         currentTable.store.setValue(currentTable.getItem(inRowIndex), fieldName, prevValue);
                     }
                 }else if (inValue == "null") {currentTable.store.setValue(currentTable.getItem(inRowIndex), fieldName, "");}
+
+                //При редактировании подсчитывается и устанавливается значение поля
+                //"Всего учтенных переработок и премий"
+                if (currentTable == overtimeTable) {
+                    var totalOvertime = parseFloat(currentTable.store.getValue(currentTable.getItem(inRowIndex), "overtime")) +
+                            parseFloat(currentTable.store.getValue(currentTable.getItem(inRowIndex), "premium"));
+                    currentTable.store.setValue(currentTable.getItem(inRowIndex), "total_accounted_overtime", totalOvertime.toPrecision(3));
+                }
             }
         }
 

@@ -45,6 +45,7 @@
             <th field="overtime"                     width="50px"   editable="true" formatter= "overtimeTable_colorCell" >Переработки</th>
             <th field="premium"                      width="50px"   editable="true" formatter= "overtimeTable_colorCell" >Премия</th>
             <th field="total_accounted_overtime"     width="50px"                                                        >Всего учтенных переработок и премий</th>
+            <th field="overtime_calculated"          width="50px"                                                        >Расч. переработки</th>
             <th field="comment"                      width="100px"  editable="true"                                      >Комментарий</th>
         </tr>
     </thead>
@@ -64,29 +65,29 @@
             dojo.byId("overtimeTable_divisionEmployeeId").value = div;
             overtimeTable_divisionChanged();
         }
-
         monthReport_cellsValidator(overtimeTable, "comment");
     });
 
     function overtimeTable_addNewEmployees(){
         overtimeTable_employeeDialogShow();
-        returnEmployees = overtimeTable_returnEmployees;
+        addEmployeesForm_returnEmployees = overtimeTable_returnEmployees;
     }
 
     // раскраска ячеек и проверка на существующее значение заполненности таблицы реальными данными, а не автовычисленными
     // и добавляю подсказку
     var overtimeTable_colorCell = function(value, rowIndex, cell) {
         var item = overtimeTable.getItem(rowIndex);
-        var calculatedValue = overtimeTable.store.getValue(item, cell.field, null);
+        var calculatedValue = overtimeTable.store.getValue(item, cell.field + "_calculated", null);
         var dispValue = "";
-        if (value && value != "null"){
-            cell.customStyles.push('color:green');
-            dispValue = value;
-        }else{
+        if (value == calculatedValue){
             cell.customStyles.push('color:red');
-            dispValue = calculatedValue != null ? calculatedValue : 0;
+            dispValue = value != null ? value : '';
+        }else{
+            cell.customStyles.push('color:green');
+            dispValue = value != null ? value : '';
         }
-        return "<span title='Значение по умолчанию: " + calculatedValue + "'>" + dispValue + "</span>"
+        var defaultValue = calculatedValue != null ? calculatedValue : '0';
+        return "<span title='Значение по умолчанию: " + defaultValue + "'>" + dispValue + "</span>"
     }
 
     function overtimeTable_employeeDialogShow(){
@@ -132,7 +133,6 @@
         var divisionOwner = dojo.byId("overtimeTable_divisionOwnerId") ? overtimeTable_divisionOwnerId.value : 0;
         var divisionEmployee = dojo.byId("overtimeTable_divisionEmployeeId") ? overtimeTable_divisionEmployeeId.value : 0;
 
-        processing();
         overtimeTable_createStore();
         makeAjaxRequest(
                 "<%= request.getContextPath()%>/monthreport/getOvertimes",
@@ -145,7 +145,6 @@
                 "json",
                 "Во время запроса данных для таблицы 'Переработки' произошла ошибка. Пожалуйста, свяжитесть с администраторами системы.",
                 function (data) {
-                    stopProcessing();
                     dojo.forEach(data, function(overtime){
                         // уникальный идентификатор, для добавления новых строк
                         overtime.identifier = overtime.employee_id + "_" + overtime.project_id;
@@ -173,31 +172,32 @@
     function overtimeTable_deleteRows(){
         var items = overtimeTable.selection.getSelected();
         var jsonData = itemToJSON(overtimeTable.store, items);
-
-        processing();
-        makeAjaxRequest(
-                "<%= request.getContextPath()%>/monthreport/deleteOvertimes",
-                {
-                    jsonData: "[" + jsonData + "]"
-                },
-                "text",
-                "Во время удаления данных из таблицы 'Переработки' произошла ошибка. Пожалуйста, свяжитесть с администраторами системы.",
-                function () {
-                    if(items.length){
-                        dojo.forEach(items, function(selectedItem){
-                            if(selectedItem !== null){
-                                overtimeTable.store.deleteItem(selectedItem);
-                            }
-                            overtimeTable.store.save();
-                        });
+        var c = confirm("Вы уверены, что хотите удалить выделенные строки?");
+        if (c == true) {
+            makeAjaxRequest(
+                    "<%= request.getContextPath()%>/monthreport/deleteOvertimes",
+                    {
+                        jsonData: "[" + jsonData + "]"
+                    },
+                    "text",
+                    "Во время удаления данных из таблицы 'Переработки' произошла ошибка. Пожалуйста, свяжитесть с администраторами системы.",
+                    function () {
+                        if (items.length) {
+                            dojo.forEach(items, function (selectedItem) {
+                                if (selectedItem !== null) {
+                                    overtimeTable.store.deleteItem(selectedItem);
+                                }
+                                overtimeTable.store.save();
+                            });
+                        }
                     }
-                    stopProcessing();
-                }
-        );
+            );
+        } else {
+            return;
+        }
     }
 
     function overtimeTable_save(){
-        processing();
         overtimeTable.store.fetch({query: {}, queryOptions: {deep: true},
             onComplete: function (items) {
                 overtimeTable.store.save();
@@ -214,7 +214,6 @@
                         "text",
                         "Во время сохранения таблицы 'Переработки' произошла ошибка. Пожалуйста, свяжитесть с администраторами системы.",
                         function () {
-                            stopProcessing();
                             overtimeTable_reloadTable();
                         }
                 );

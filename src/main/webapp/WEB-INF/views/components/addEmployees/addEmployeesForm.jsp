@@ -107,7 +107,7 @@ com.aplana.timesheet.controller.AbstractControllerForEmployee.fillMavForAddEmplo
 
 <script type="text/javascript">
 
-    var returnEmployees;
+    var addEmployeesForm_returnEmployees;
 
     dojo.addOnLoad(function () {
         addEmployeesForm_updateLists();
@@ -118,7 +118,7 @@ com.aplana.timesheet.controller.AbstractControllerForEmployee.fillMavForAddEmplo
     });
 
     function addEmployeesForm_checkAndReturnEmployees() {
-        if (dojo.byId("addEmployeesForm_projectId").value == -1 && dojo.byId("addEmployeesForm_projectTypeId").value != EnumConstants.TypesOfActivityEnum.NON_PROJECT) {
+        if (dojo.byId("addEmployeesForm_projectId").value == 0 && dojo.byId("addEmployeesForm_projectTypeId").value != EnumConstants.TypesOfActivityEnum.NON_PROJECT) {
             tooltip.show("Необходимо выбрать пресейл, либо непроектную задачу");
             return;
         }
@@ -126,7 +126,7 @@ com.aplana.timesheet.controller.AbstractControllerForEmployee.fillMavForAddEmplo
             tooltip.show("Необходимо выбрать сотрудника или сотрудников");
             return;
         }
-        returnEmployees();
+        addEmployeesForm_returnEmployees();
         addEmployeesForm_employeeDialog.hide();
     }
 
@@ -143,10 +143,8 @@ com.aplana.timesheet.controller.AbstractControllerForEmployee.fillMavForAddEmplo
         fillProjectListByDivision(
                 dojo.byId("addEmployeesForm_divisionOwnerId").value,
                 dojo.byId("addEmployeesForm_projectId"),
-                dojo.byId("addEmployeesForm_projectTypeId").value);
-        if (dojo.byId("addEmployeesForm_projectId").options[0].value != -1) {
-            dojo.byId("addEmployeesForm_projectId").remove(0);
-        }
+                dojo.byId("addEmployeesForm_projectTypeId").value,
+                true);
     }
 
     function addEmployeesForm_updateManagers(){
@@ -158,11 +156,8 @@ com.aplana.timesheet.controller.AbstractControllerForEmployee.fillMavForAddEmplo
     function addEmployeesForm_updateAdditionEmployeeList() {
         var divisionId = dojo.byId("addEmployeesForm_divisionId").value;
         var managerId = dojo.byId("addEmployeesForm_managerId").value;
-        var regionListId     = dojo.byId("addEmployeesForm_regionListId") ?
-        "[" + getSelectValues(addEmployeesForm_regionListId) + "]" : "[]";
-        var projectRoleListId       = dojo.byId("addEmployeesForm_projectRoleListId") ?
-        "[" + getSelectValues(addEmployeesForm_projectRoleListId) + "]" : "[]";
-
+        var projectRoleListId = getSelectValues(dojo.byId("addEmployeesForm_projectRoleListId"));
+        var regionListId = getSelectValues(dojo.byId("addEmployeesForm_regionListId"));
         // Делает ajax запрос, возвращающий сотрудников по центру/руководителю/должности/региону,
         processing();
         dojo.xhrGet({

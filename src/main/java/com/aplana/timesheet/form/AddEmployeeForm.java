@@ -15,8 +15,8 @@ public class AddEmployeeForm {
     private Integer projectId;
     private Integer divisionId;
     private Integer managerId;
-    private String projectRoleListId;
-    private String regionListId;
+    private List<Integer> projectRoleListId;
+    private List<Integer> regionListId;
 
 
     public static final String ADD_FORM = "addEmployeeForm";
@@ -40,19 +40,19 @@ public class AddEmployeeForm {
         this.managerId = managerId;
     }
 
-    public String getProjectRoleListId() {
+    public List<Integer> getProjectRoleListId() {
         return projectRoleListId;
     }
 
-    public void setProjectRoleListId(String projectRoleListId) {
+    public void setProjectRoleListId(List<Integer> projectRoleListId) {
         this.projectRoleListId = projectRoleListId;
     }
 
-    public String getRegionListId() {
+    public List<Integer> getRegionListId() {
         return regionListId;
     }
 
-    public void setRegionListId(String regionListId) {
+    public void setRegionListId(List<Integer> regionListId) {
         this.regionListId = regionListId;
     }
 

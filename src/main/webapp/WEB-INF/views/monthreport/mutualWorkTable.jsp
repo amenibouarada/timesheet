@@ -60,9 +60,9 @@
         <th field="employeeName" width="150px">Сотрудник</th>
         <th field="divisionEmployeeName" width="200px">Центр сотрудника</th>
         <th field="regionName" width="100px">Регион</th>
-        <th field="workDays" width="50px" editable="true">Рабочие дни</th>
-        <th field="overtimes" width="50px" editable="true">Переработки</th>
-        <th field="coefficient" width="50px" editable="true">Коэффициент</th>
+        <th field="workDays" width="50px" editable="true" formatter= "mutualWorkTable_colorCell">Рабочие дни</th>
+        <th field="overtimes" width="50px" editable="true" formatter= "mutualWorkTable_colorCell">Переработки</th>
+        <th field="coefficient" width="50px" editable="true" formatter= "mutualWorkTable_colorCell">Коэффициент</th>
         <th field="workDaysCalc" width="50px">Расч. раб. дни</th>
         <th field="overtimesCalc" width="50px">Расч. переработки</th>
         <th field="image" width = "75px" formatter = "addImage">Детальная информация</th>
@@ -91,7 +91,29 @@
 
     function mutualWorkTable_addNewEmployees(){
         mutualWorkTable_employeeDialogShow();
-        returnEmployees = mutualWorkTable_returnEmployees;
+        addEmployeesForm_returnEmployees = mutualWorkTable_returnEmployees;
+    }
+
+    // раскраска ячеек и проверка на существующее значение заполненности таблицы реальными данными, а не автовычисленными
+    // и добавляю подсказку
+    var mutualWorkTable_colorCell = function(value, rowIndex, cell) {
+        var item = mutualWorkTable.getItem(rowIndex);
+        var calculatedValue;
+        if (cell.field == "coefficient") {
+            calculatedValue = '<%= MUTUAL_WORK_OVERTIME_COEF %>';
+        } else {
+            calculatedValue = mutualWorkTable.store.getValue(item, cell.field + "Calc", null);
+        }
+        var dispValue = "";
+        if (value == calculatedValue){
+            cell.customStyles.push('color:red');
+            dispValue = value != null ? value : '';
+        }else{
+            cell.customStyles.push('color:green');
+            dispValue = value != null ? value : '';
+        }
+        var defaultValue = calculatedValue != null ? calculatedValue : '0';
+        return "<span title='Значение по умолчанию: " + defaultValue + "'>" + dispValue + "</span>"
     }
 
     function mutualWorkTable_employeeDialogShow(){
@@ -152,7 +174,6 @@
 
         mutualWorkTable_createStore();
 
-        processing();
         makeAjaxRequest(
                 "<%= request.getContextPath()%>/monthreport/getMutualWorks",
                 {
@@ -166,7 +187,6 @@
                 "json",
                 "Во время запроса данных для таблицы 'Взаимная занятость' произошла ошибка. Пожалуйста, свяжитесть с администраторами системы.",
                 function (data) {
-                    stopProcessing();
                     dojo.forEach(data, function (data) {
                         mutualWorkTable.store.newItem(data);
                     });
@@ -193,31 +213,32 @@
     function mutualWorkTable_deleteRows(){
         var items = mutualWorkTable.selection.getSelected();
         var jsonData = itemToJSON(mutualWorkTable.store, items);
-
-        processing();
-        makeAjaxRequest(
-                "<%= request.getContextPath()%>/monthreport/deleteMutualWorks",
-                {
-                    jsonData: "[" + jsonData + "]"
-                },
-                "text",
-                "Во время удаления данных из таблицы 'Взаимная занятость' произошла ошибка. Пожалуйста, свяжитесть с администраторами системы.",
-                function () {
-                    if(items.length){
-                        dojo.forEach(items, function(selectedItem){
-                            if(selectedItem !== null){
-                                mutualWorkTable.store.deleteItem(selectedItem);
-                            }
-                            mutualWorkTable.store.save();
-                        });
+        var c = confirm("Вы уверены, что хотите удалить выделенные строки?");
+        if (c == true) {
+            makeAjaxRequest(
+                    "<%= request.getContextPath()%>/monthreport/deleteMutualWorks",
+                    {
+                        jsonData: "[" + jsonData + "]"
+                    },
+                    "text",
+                    "Во время удаления данных из таблицы 'Взаимная занятость' произошла ошибка. Пожалуйста, свяжитесть с администраторами системы.",
+                    function () {
+                        if (items.length) {
+                            dojo.forEach(items, function (selectedItem) {
+                                if (selectedItem !== null) {
+                                    mutualWorkTable.store.deleteItem(selectedItem);
+                                }
+                                mutualWorkTable.store.save();
+                            });
+                        }
                     }
-                    stopProcessing();
-                }
-        );
+            );
+        } else {
+            return;
+        }
     }
 
     function mutualWorkTable_save() {
-        processing();
         mutualWorkTable.store.fetch({
             query: {}, queryOptions: {deep: true},
             onComplete: function (items) {
@@ -235,7 +256,6 @@
                         "text",
                         "Во время сохранения таблицы 'Взаимная занятость' произошла ошибка. Пожалуйста, свяжитесть с администраторами системы.",
                         function () {
-                            stopProcessing();
                             mutualWorkTable_reloadTable();
                         }
                 );
