@@ -199,8 +199,9 @@
     function mutualWorkTable_deleteRows(){
         var items = mutualWorkTable.selection.getSelected();
         var jsonData = itemToJSON(mutualWorkTable.store, items);
-        var c = confirm("Вы уверены, что хотите удалить выделенные строки?");
-        if (c == true) {
+        if (!confirm("Вы уверены, что хотите удалить выделенные строки?")) {
+            return;
+        }
             makeAjaxRequest(
                     "<%= request.getContextPath()%>/monthreport/deleteMutualWorks",
                     {
@@ -219,9 +220,6 @@
                         }
                     }
             );
-        } else {
-            return;
-        }
     }
 
     function mutualWorkTable_save() {

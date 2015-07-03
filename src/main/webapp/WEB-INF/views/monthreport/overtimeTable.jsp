@@ -155,8 +155,9 @@
     function overtimeTable_deleteRows(){
         var items = overtimeTable.selection.getSelected();
         var jsonData = itemToJSON(overtimeTable.store, items);
-        var c = confirm("Вы уверены, что хотите удалить выделенные строки?");
-        if (c == true) {
+        if (!confirm("Вы уверены, что хотите удалить выделенные строки?")) {
+            return;
+        }
             makeAjaxRequest(
                     "<%= request.getContextPath()%>/monthreport/deleteOvertimes",
                     {
@@ -175,9 +176,6 @@
                         }
                     }
             );
-        } else {
-            return;
-        }
     }
 
     function overtimeTable_save(){
