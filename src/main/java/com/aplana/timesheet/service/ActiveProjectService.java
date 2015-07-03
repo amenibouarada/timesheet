@@ -5,7 +5,9 @@ import com.aplana.timesheet.enums.ProjectRolesEnum;
 import com.aplana.timesheet.form.ActiveProjectsForm;
 import com.aplana.timesheet.system.security.SecurityService;
 import com.aplana.timesheet.system.security.entity.TimeSheetUser;
+import com.google.common.base.Function;
 import com.google.common.base.Joiner;
+import com.google.common.collect.Iterables;
 import org.apache.commons.lang.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,21 +23,18 @@ import java.util.*;
 @Service
 public class ActiveProjectService {
 
+    private static final int NUMBER_OF_DAY_FOR_LOOKUP = 30;
+
     @Autowired
     ProjectService projectService;
-
     @Autowired
     ProjectRoleService projectRoleService;
-
     @Autowired
     ProjectManagerService projectManagerService;
-
     @Autowired
     DivisionService divisionService;
-
     @Autowired
     private EmployeeProjectPlanService employeeProjectPlanService;
-
     @Autowired
     private SecurityService securityService;
 
@@ -52,50 +51,56 @@ public class ActiveProjectService {
         mav.addObject("divisionId", divisionId);
         Project project = projectService.find(projectId);
         //Заполняем главных аналитиков и тимлидеров
-        List<Integer> ids = new ArrayList<Integer>();
+        final List<Integer> excludeIds = new ArrayList<Integer>();
         List<ProjectManager> masterAnalystsList = projectManagerService.getListMasterManagersByRole(ProjectRolesEnum.ANALYST.getId(), project);
         List<ProjectManager> teamleadersList = projectManagerService.getListMasterManagersByRole(ProjectRolesEnum.DEVELOPER.getId(), project);
         StringBuilder masterAnalysts = new StringBuilder();
         StringBuilder teamleaders = new StringBuilder();
-        if (masterAnalystsList.size() == 1) {
-            ProjectManager projectManager = masterAnalystsList.get(0);
-            masterAnalysts.append(projectManager.getEmployee().getName());
-            ids.add(projectManager.getEmployee().getId());
-        } else {
-            masterAnalysts.append(Joiner.on(", ").join(masterAnalystsList));
-        }
 
-        if (teamleadersList.size() == 1) {
-            teamleaders.append(teamleadersList.get(0).getEmployee().getName());
-            ids.add(teamleadersList.get(0).getEmployee().getId());
-        } else {
-            teamleaders.append(Joiner.on(", ").join(teamleadersList));
+        Function<ProjectManager, String> transformManagerFunc = new Function<ProjectManager, String>(){
+            @Override
+            public String apply(ProjectManager input) {
+                excludeIds.add(input.getEmployee().getId());
+                return input.getEmployee().getName();
+            }
+        };
+        Iterable<String> masterAnalystNameList = Iterables.transform(masterAnalystsList, transformManagerFunc);
+        masterAnalysts.append(Joiner.on(", ").join(masterAnalystNameList));
+        Iterable<String> teamleadersNameList = Iterables.transform(teamleadersList, transformManagerFunc);
+        teamleaders.append(Joiner.on(", ").join(teamleadersNameList));
+
+        // РП проекта тоже исключим
+        if (project.getManager() != null) {
+            excludeIds.add(project.getManager().getId());
         }
 
         // Получение списка рабочих на проекте, и рабочих которых планируется привлечь
-        if (project.getManager() != null) {
-            ids.add(project.getManager().getId());
-        }
-        // ToDo заменить константы 30
-        HashMap<Employee, List<ProjectRole>> employees = projectService.getEmployesWhoWasOnProjectByDates(DateUtils.addDays(new Date(), -30), new Date(), project, ids);
-        List<Employee> employeesPlan = employeeProjectPlanService.getEmployeesWhoWillWorkOnProject(projectId, new Date(), DateUtils.addDays(new Date(), 30));
+        HashMap<Employee, List<ProjectRole>> employees = projectService.getEmployesWhoWasOnProjectByDates(
+                DateUtils.addDays(new Date(), -NUMBER_OF_DAY_FOR_LOOKUP), new Date(), project, excludeIds);
+        List<Employee> employeesPlan = employeeProjectPlanService.getEmployeesWhoWillWorkOnProject(
+                projectId, new Date(), DateUtils.addDays(new Date(), NUMBER_OF_DAY_FOR_LOOKUP));
 
         HashMap<HashMap<String, String>,Integer> employeesStrings = new HashMap<HashMap<String, String>,Integer>();
+
         // Формируется мапа с именем пользователя, списком его ролей и приоритетом для сортировки
+        Function<ProjectRole, String> transformRolesFunc = new Function<ProjectRole, String>(){
+            @Override
+            public String apply(ProjectRole input) {
+                return input.getName();
+            }
+        };
         for (Employee employee : employees.keySet()) {
-            String name = employee.getName();
             StringBuilder roles = new StringBuilder();
-
-            roles.append(Joiner.on(", ").join(employees.get(employee)));
-
+            Iterable<String> roleNameList = Iterables.transform(employees.get(employee), transformRolesFunc);
+            roles.append(Joiner.on(", ").join(roleNameList));
             if (roles.length() == 0) {
                 roles.append(employee.getJob().getName());
             }
-
             HashMap<String, String> map = new HashMap<String, String>();
-            map.put(name, roles.toString());
+            map.put(employee.getName(), roles.toString());
             employeesStrings.put(map, getSortedRole(employees.get(employee)));
         }
+
         //добавляются "запланированные" рабочие
         for (Employee employee : employeesPlan) {
             if (!employeesStrings.containsKey(employee.getName())) {

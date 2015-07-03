@@ -97,7 +97,7 @@ public class ProjectManagerDAO {
         Query query = entityManager.createQuery(
                 "select p from ProjectManager p where p.projectRole.id = :roleId and " +
                         "p.project = :project and " +
-                        "p.active = true order by p.id")
+                        "p.active = true and p.master = true order by p.id")
                 .setParameter("roleId", roleId)
                 .setParameter("project", project);
 
