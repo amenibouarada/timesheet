@@ -30,10 +30,4 @@ public class TimeSheetConstants {
      * Например, когда в Select-e (выпадашка) нет выбранных значений
      */
     public static final Integer NOT_CHOOSED = -1;
-
-    /**
-     * Коэффицинт учёта переработок при взаимной занятости
-     * Для заполнения столбца по умолчанию в таблице "Взаимная занятость", на форме "Учет табеля"
-     */
-    public static final double MUTUAL_WORK_OVERTIME_COEF = 1.15;
 }

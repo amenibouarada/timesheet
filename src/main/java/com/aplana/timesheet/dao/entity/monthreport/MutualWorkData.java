@@ -68,6 +68,9 @@ public class MutualWorkData {
     @Column(name = "coefficient")
     private Double coefficient;
 
+    @Column(name = "coefficient_calculated")
+    private Double coefficientCalc;
+
     @Column(name = "work_days_calc")
     private Double workDaysCalc;
 
@@ -227,6 +230,14 @@ public class MutualWorkData {
 
     public void setCoefficient(Double coefficient) {
         this.coefficient = coefficient;
+    }
+
+    public Double getCoefficientCalc() {
+        return coefficientCalc;
+    }
+
+    public void setCoefficientCalc(Double coefficientCalc) {
+        this.coefficientCalc = coefficientCalc;
     }
 
     public Double getWorkDaysCalc() {
