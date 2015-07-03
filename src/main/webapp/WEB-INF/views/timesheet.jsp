@@ -75,7 +75,6 @@
         <div style="margin-top: 10px;"><span>Комментарий</span></div>
         <div data-dojo-type="dijit.form.ValidationTextBox"
              data-dojo-prop="missingMessage:'Комментарий для причины 'Другое' является обязательным!'"
-             maxLength="256"
              wrap="soft" id="overtimeCauseComment" rows="10" style="width: 99%;margin-top: 3px;"
              placeHolder="Напишите причину, если нет подходящей в списке (макс. 256 символов)"
              tooltip="комментарий">
