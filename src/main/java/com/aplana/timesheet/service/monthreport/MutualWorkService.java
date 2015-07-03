@@ -80,6 +80,7 @@ public class MutualWorkService {
         for (MutualWorkData mutualWorkData : mutualWorkDataList) {
             HashMap<String, Object> mutualWorkMap = new HashMap<String, Object>();
             mutualWorkMap.put("identifier", mutualWorkData.getIdentifier());
+            mutualWorkMap.put("mutualWorkId", mutualWorkData.getMutualWorkId());
             mutualWorkMap.put("divisionOwnerId", mutualWorkData.getDivisionOwnerId());
             mutualWorkMap.put("divisionOwnerName", mutualWorkData.getDivisionOwnerName());
             mutualWorkMap.put("projectId", mutualWorkData.getProjectId());
@@ -98,7 +99,6 @@ public class MutualWorkService {
             mutualWorkMap.put("workDaysCalc", mutualWorkData.getWorkDaysCalc());
             mutualWorkMap.put("overtimesCalc", mutualWorkData.getOvertimesCalc());
             mutualWorkMap.put("comment", mutualWorkData.getComment());
-            mutualWorkMap.put("id", mutualWorkData.getId());
             mutualWorkList.add(mutualWorkMap);
         }
 

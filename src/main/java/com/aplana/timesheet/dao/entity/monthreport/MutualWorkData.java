@@ -14,6 +14,9 @@ public class MutualWorkData {
     @Column(name = "identifier")
     private String identifier;
 
+    @Column(name = "mutual_work_id")
+    private Integer mutualWorkId;
+
     @Column(name = "year")
     private Integer year;
 
@@ -74,15 +77,20 @@ public class MutualWorkData {
     @Column(name = "comment")
     private String comment;
 
-    @Column(name = "id")
-    private Integer id;
-
     public String getIdentifier() {
         return identifier;
     }
 
     public void setIdentifier(String identifier) {
         this.identifier = identifier;
+    }
+
+    public Integer getMutualWorkId() {
+        return mutualWorkId;
+    }
+
+    public void setMutualWorkId(Integer mutualWorkId) {
+        this.mutualWorkId = mutualWorkId;
     }
 
     public Integer getYear() {
@@ -243,13 +251,5 @@ public class MutualWorkData {
 
     public void setComment(String comment) {
         this.comment = comment;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
     }
 }

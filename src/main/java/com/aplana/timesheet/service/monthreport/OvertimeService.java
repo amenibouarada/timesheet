@@ -94,6 +94,7 @@ public class OvertimeService {
         for (OvertimeData overtimeData : overtimes){
             HashMap<String, Object> overtimeMap = new HashMap<String, Object>();
             overtimeMap.put("identifier", overtimeData.getIdentifier());
+            overtimeMap.put("overtime_id", overtimeData.getOvertime_id());
             overtimeMap.put("employee_id", overtimeData.getEmployee_id());
             overtimeMap.put("employee_name", overtimeData.getEmployee_name());
             overtimeMap.put("division_employee_id", overtimeData.getDivision_employee_id());
@@ -116,7 +117,6 @@ public class OvertimeService {
             overtimeMap.put("premium", overtimeData.getPremium());
             overtimeMap.put("total_accounted_overtime", overtimeData.getTotal_accounted_overtime());
             overtimeMap.put("comment", overtimeData.getComment());
-            overtimeMap.put("id", overtimeData.getId());
             overtimeList.add(overtimeMap);
         }
 
