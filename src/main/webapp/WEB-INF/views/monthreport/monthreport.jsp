@@ -92,6 +92,26 @@
             });
         }
 
+        // раскраска ячеек и проверка на существующее значение заполненности таблицы реальными данными, а не автовычисленными
+        // и добавляю подсказку
+        function monthReport_colorCell(value, rowIndex, cell) {
+            var item = this.grid.getItem(rowIndex);
+            var calculatedValue;
+            calculatedValue = this.grid.store.getValue(item, cell.field + "_calculated", null) !=null ?
+                              this.grid.store.getValue(item, cell.field + "_calculated", null) :
+                              this.grid.store.getValue(item, cell.field + "Calc", null);
+            var dispValue = "";
+            if (value == calculatedValue){
+                cell.customStyles.push('color:red');
+                dispValue = value != null ? value : '';
+            }else{
+                cell.customStyles.push('color:green');
+                dispValue = value != null ? value : '';
+            }
+            var defaultValue = calculatedValue != null ? calculatedValue : '0';
+            return "<span title='Значение по умолчанию: " + defaultValue + "'>" + dispValue + "</span>"
+        }
+
         function monthReport_colorizeMonthOption(){
             makeAjaxRequest(
                     "<%= request.getContextPath()%>/monthreport/getMonthReportStatusesForYear",

@@ -60,9 +60,9 @@
         <th field="employeeName" width="150px">Сотрудник</th>
         <th field="divisionEmployeeName" width="200px">Центр сотрудника</th>
         <th field="regionName" width="100px">Регион</th>
-        <th field="workDays" width="50px" editable="true" formatter= "mutualWorkTable_colorCell">Рабочие дни</th>
-        <th field="overtimes" width="50px" editable="true" formatter= "mutualWorkTable_colorCell">Переработки</th>
-        <th field="coefficient" width="50px" editable="true" formatter= "mutualWorkTable_colorCell">Коэффициент</th>
+        <th field="workDays" width="50px" editable="true" formatter= "monthReport_colorCell">Рабочие дни</th>
+        <th field="overtimes" width="50px" editable="true" formatter= "monthReport_colorCell">Переработки</th>
+        <th field="coefficient" width="50px" editable="true" formatter= "monthReport_colorCell">Коэффициент</th>
         <th field="workDaysCalc" width="50px">Расч. раб. дни</th>
         <th field="overtimesCalc" width="50px">Расч. переработки</th>
         <th field="image" width = "75px" formatter = "addImage">Детальная информация</th>
@@ -94,28 +94,6 @@
         addEmployeesForm_returnEmployees = mutualWorkTable_returnEmployees;
     }
 
-    // раскраска ячеек и проверка на существующее значение заполненности таблицы реальными данными, а не автовычисленными
-    // и добавляю подсказку
-    var mutualWorkTable_colorCell = function(value, rowIndex, cell) {
-        var item = mutualWorkTable.getItem(rowIndex);
-        var calculatedValue;
-        if (cell.field == "coefficient") {
-            calculatedValue = '<%= MUTUAL_WORK_OVERTIME_COEF %>';
-        } else {
-            calculatedValue = mutualWorkTable.store.getValue(item, cell.field + "Calc", null);
-        }
-        var dispValue = "";
-        if (value == calculatedValue){
-            cell.customStyles.push('color:red');
-            dispValue = value != null ? value : '';
-        }else{
-            cell.customStyles.push('color:green');
-            dispValue = value != null ? value : '';
-        }
-        var defaultValue = calculatedValue != null ? calculatedValue : '0';
-        return "<span title='Значение по умолчанию: " + defaultValue + "'>" + dispValue + "</span>"
-    }
-
     function mutualWorkTable_employeeDialogShow(){
         // изменение значений на форме "Добавить сотрудника"
         dojo.byId("addEmployeesForm_divisionOwnerId").value = mutualWorkTable_divisionOwnerId.value;
@@ -127,9 +105,10 @@
     }
 
     var addImage = function(value, rowIndex, cell) {
-        //Если у сотрудника присутствует поле id - показатель того, что запись была добавлена вручную, либо id = 0 -
-        //показатель того, что запись только что добавлена в store - делаем фон "лупы" непрозрачным, убираем кликабельность.
-       if (mutualWorkTable.getItem(rowIndex).id != '' || mutualWorkTable.getItem(rowIndex).id == 0) {
+        //Если у сотрудника присутствует поле mutualWorkId (из таблицы mutual_work в базе данных) - показатель того,
+        // что запись была добавлена вручную, то детальный отчет создать невозможно, поэтому делаем фон "лупы" непрозрачным, убираем кликабельность.
+        // подробнее - APLANATS-1935
+       if (mutualWorkTable.getItem(rowIndex).mutualWorkId != '') {
            cell.customStyles.push('opacity: 0.2;');
            return "<img src='/resources/img/view.png' width='25' height='25'/>";
        } else {
@@ -312,7 +291,7 @@
         dojo.forEach( dojo.byId("addEmployeesForm_additionEmployeeList").selectedOptions, function(employee){
             employee_list.push({
                 identifier: employee.value + "_" + projectId, // уникальный идентификатор, для добавления новых строк
-                id:         0,
+                mutualWorkId:        '[]',
                 employeeId: parseInt(employee.value),
                 employeeName:   employee.innerHTML,
                 divisionEmployeeId: parseInt(employee.attributes.div_id.value),

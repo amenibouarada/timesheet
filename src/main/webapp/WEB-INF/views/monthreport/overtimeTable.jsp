@@ -42,8 +42,8 @@
             <th field="region_name"                  width="100px"                                                       >Регион</th>
             <th field="project_type_name"            width="100px"                                                       >Тип</th>
             <th field="project_name"                 width="100px"                                                       >Проект/Пресейл</th>
-            <th field="overtime"                     width="50px"   editable="true" formatter= "overtimeTable_colorCell" >Переработки</th>
-            <th field="premium"                      width="50px"   editable="true" formatter= "overtimeTable_colorCell" >Премия</th>
+            <th field="overtime"                     width="50px"   editable="true" formatter= "monthReport_colorCell"   >Переработки</th>
+            <th field="premium"                      width="50px"   editable="true" formatter= "monthReport_colorCell"   >Премия</th>
             <th field="total_accounted_overtime"     width="50px"                                                        >Всего учтенных переработок и премий</th>
             <th field="overtime_calculated"          width="50px"                                                        >Расч. переработки</th>
             <th field="comment"                      width="100px"  editable="true"                                      >Комментарий</th>
@@ -71,23 +71,6 @@
     function overtimeTable_addNewEmployees(){
         overtimeTable_employeeDialogShow();
         addEmployeesForm_returnEmployees = overtimeTable_returnEmployees;
-    }
-
-    // раскраска ячеек и проверка на существующее значение заполненности таблицы реальными данными, а не автовычисленными
-    // и добавляю подсказку
-    var overtimeTable_colorCell = function(value, rowIndex, cell) {
-        var item = overtimeTable.getItem(rowIndex);
-        var calculatedValue = overtimeTable.store.getValue(item, cell.field + "_calculated", null);
-        var dispValue = "";
-        if (value == calculatedValue){
-            cell.customStyles.push('color:red');
-            dispValue = value != null ? value : '';
-        }else{
-            cell.customStyles.push('color:green');
-            dispValue = value != null ? value : '';
-        }
-        var defaultValue = calculatedValue != null ? calculatedValue : '0';
-        return "<span title='Значение по умолчанию: " + defaultValue + "'>" + dispValue + "</span>"
     }
 
     function overtimeTable_employeeDialogShow(){
@@ -245,7 +228,7 @@
         dojo.forEach( dojo.byId("addEmployeesForm_additionEmployeeList").selectedOptions, function(employee){
             employee_list.push({
                 identifier: employee.value + "_" + projectId, // уникальный идентификатор, для добавления новых строк
-                id:         null,
+                overtime_id:         null,
                 employee_id: parseInt(employee.value),
                 employee_name:   employee.innerHTML,
                 division_employee_id: parseInt(employee.attributes.div_id.value),
