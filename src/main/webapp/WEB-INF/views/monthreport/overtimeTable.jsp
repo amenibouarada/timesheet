@@ -45,7 +45,7 @@
             <th field="overtime"                     width="50px"   editable="true" formatter= "monthReport_colorCell"   >Переработки</th>
             <th field="premium"                      width="50px"   editable="true" formatter= "monthReport_colorCell"   >Премия</th>
             <th field="total_accounted_overtime"     width="50px"                                                        >Всего учтенных переработок и премий</th>
-            <th field="overtime_calculated"          width="50px"                                                        >Расч. переработки</th>
+            <th field="overtime_calc"                width="50px"                                                        >Расч. переработки</th>
             <th field="comment"                      width="100px"  editable="true"                                      >Комментарий</th>
         </tr>
     </thead>

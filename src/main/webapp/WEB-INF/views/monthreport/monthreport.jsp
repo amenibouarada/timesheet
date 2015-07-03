@@ -2,7 +2,6 @@
 
 <%@ page import="static com.aplana.timesheet.util.ResourceUtils.getResRealPath" %>
 <%@ page import="static com.aplana.timesheet.system.constants.TimeSheetConstants.DOJO_PATH" %>
-<%@ page import="static com.aplana.timesheet.system.constants.TimeSheetConstants.MUTUAL_WORK_OVERTIME_COEF" %>
 <%@ page import="static com.aplana.timesheet.enums.MonthReportStatusEnum.*" %>
 
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
