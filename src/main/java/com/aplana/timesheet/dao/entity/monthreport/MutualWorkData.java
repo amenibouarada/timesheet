@@ -68,7 +68,7 @@ public class MutualWorkData {
     @Column(name = "coefficient")
     private Double coefficient;
 
-    @Column(name = "coefficient_calculated")
+    @Column(name = "coefficient_calc")
     private Double coefficientCalc;
 
     @Column(name = "work_days_calc")

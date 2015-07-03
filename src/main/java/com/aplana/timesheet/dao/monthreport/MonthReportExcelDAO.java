@@ -46,7 +46,7 @@ public class MonthReportExcelDAO extends AbstractReportDAO {
                                                            "project_id", "project_name", "project_type_id", "project_type_name",
                                                            "employee_id", "employee_name", "division_employee_id", "division_employee_name",
                                                            "region_id", "region_name", "work_days", "overtimes",
-                                                           "coefficient", "coefficient_calculated", "work_days_calc", "overtimes_calc", "comment"});
+                                                           "coefficient", "work_days_calc", "overtimes_calc", "coefficient_calc", "comment"});
     }
 
     private static final Logger logger = LoggerFactory.getLogger(MonthReportExcelDAO.class);
