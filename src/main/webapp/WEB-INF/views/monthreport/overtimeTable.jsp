@@ -206,7 +206,8 @@
 
     var overtimeTable_cellChanged = function(rowIndex){
         var item = overtimeTable.getItem(rowIndex);
-        overtimeTable.store.setValue(item, "allAccountedOvertime", parseInt(item.overtime) + parseInt(item.premium));
+        var prem = item.premium != '' ? item.premium : '0'
+        overtimeTable.store.setValue(item, "total_accounted_overtime", (parseFloat(item.overtime) + parseFloat(prem)).toPrecision(3));
     }
 
     // обрабатывает кнопку "Добавить" на форме "Добавить сотрудника"

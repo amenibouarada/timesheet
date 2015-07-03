@@ -264,14 +264,6 @@
                         currentTable.store.setValue(currentTable.getItem(inRowIndex), fieldName, prevValue);
                     }
                 }else if (inValue == "null") {currentTable.store.setValue(currentTable.getItem(inRowIndex), fieldName, "");}
-
-                //При редактировании подсчитывается и устанавливается значение поля
-                //"Всего учтенных переработок и премий"
-                if (currentTable == overtimeTable) {
-                    var totalOvertime = parseFloat(currentTable.store.getValue(currentTable.getItem(inRowIndex), "overtime")) +
-                            parseFloat(currentTable.store.getValue(currentTable.getItem(inRowIndex), "premium"));
-                    currentTable.store.setValue(currentTable.getItem(inRowIndex), "total_accounted_overtime", totalOvertime.toPrecision(3));
-                }
             }
         }
 
