@@ -107,7 +107,9 @@ com.aplana.timesheet.controller.AbstractControllerForEmployee.fillMavForAddEmplo
 
 <script type="text/javascript">
 
-    var addEmployeesForm_returnEmployees;
+    var addEmployeesForm_returnEmployees = function() {
+        console.log("Function addEmployeesForm_returnEmployees must be redefined");
+    };
 
     dojo.addOnLoad(function () {
         addEmployeesForm_updateLists();

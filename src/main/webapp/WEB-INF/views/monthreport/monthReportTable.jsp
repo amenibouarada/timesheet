@@ -209,10 +209,10 @@
     var monthReportTable_cellChanged = function(rowIndex){
         var item = monthReportTable.getItem(rowIndex);
         if (item.ts_worked[0] && item.ts_worked[0] != "null"){ // проверка, что поле, от которого зависит значение - содержит реальное значение, а не по умолчанию
-            monthReportTable.store.setValue(item, "ts_all_paid", parseInt(item.ts_worked) + parseInt(item.ts_vacation));
+            monthReportTable.store.setValue(item, "ts_all_paid", (parseFloat(item.ts_worked) + parseFloat(item.ts_vacation)).toPrecision(3));
         }
         if(item.ts_over_val_fin_comp[0] && item.ts_over_val_fin_comp[0] != "null"){ // проверка, что поле, от которого зависит значение - содержит реальное значение, а не по умолчанию
-            monthReportTable.store.setValue(item, "ts_over_not_done", parseInt(item.ts_all_over_accounted) - parseInt(item.ts_over_done) - parseInt(item.ts_over_val_fin_comp));
+            monthReportTable.store.setValue(item, "ts_over_not_done", (parseFloat(item.ts_all_over_accounted) - parseFloat(item.ts_over_done) - parseFloat(item.ts_over_val_fin_comp)).toPrecision(3));
         }
     }
 

@@ -75,6 +75,11 @@ function submitWithOvertimeCauseSet() {
         return;
     }
 
+    if (required == true && comment.length > 256) {
+        tooltip.show("Комментарий к причинам недоработок/переработок/работы в выходной день должен быть не более 256 символов");
+        return;
+    }
+
     var overtimeCause = dijit.byId("overtimeCause").get("value");
     var typeOfCompensationRequired = dijit.byId("typeOfCompensation").get("required");
     var typeOfCompensation = dijit.byId("typeOfCompensation").get("value");

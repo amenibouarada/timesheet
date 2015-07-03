@@ -2,7 +2,6 @@
 
 <%@ page import="static com.aplana.timesheet.util.ResourceUtils.getResRealPath" %>
 <%@ page import="static com.aplana.timesheet.system.constants.TimeSheetConstants.DOJO_PATH" %>
-<%@ page import="static com.aplana.timesheet.system.constants.TimeSheetConstants.MUTUAL_WORK_OVERTIME_COEF" %>
 <%@ page import="static com.aplana.timesheet.enums.MonthReportStatusEnum.*" %>
 
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
@@ -70,6 +69,7 @@
                 content:    content,
                 preventCache: false,
                 load: function (response, ioargs) {
+                    stopProcessing();
                     if (responseType == "text"){
                         alert(response);
                         handler();
@@ -85,10 +85,30 @@
                     }
                 },
                 error: function() {
+                    stopProcessing();
                     alert(errorMessage);
                 }
             });
-            stopProcessing();
+        }
+
+        // раскраска ячеек и проверка на существующее значение заполненности таблицы реальными данными, а не автовычисленными
+        // и добавляю подсказку
+        function monthReport_colorCell(value, rowIndex, cell) {
+            var item = this.grid.getItem(rowIndex);
+            var calculatedValue;
+            calculatedValue = this.grid.store.getValue(item, cell.field + "_calculated", null) !=null ?
+                              this.grid.store.getValue(item, cell.field + "_calculated", null) :
+                              this.grid.store.getValue(item, cell.field + "Calc", null);
+            var dispValue = "";
+            if (value == calculatedValue){
+                cell.customStyles.push('color:red');
+                dispValue = value != null ? value : '';
+            }else{
+                cell.customStyles.push('color:green');
+                dispValue = value != null ? value : '';
+            }
+            var defaultValue = calculatedValue != null ? calculatedValue : '0';
+            return "<span title='Значение по умолчанию: " + defaultValue + "'>" + dispValue + "</span>"
         }
 
         function monthReport_colorizeMonthOption(){
@@ -243,14 +263,6 @@
                         currentTable.store.setValue(currentTable.getItem(inRowIndex), fieldName, prevValue);
                     }
                 }else if (inValue == "null") {currentTable.store.setValue(currentTable.getItem(inRowIndex), fieldName, "");}
-
-                //При редактировании подсчитывается и устанавливается значение поля
-                //"Всего учтенных переработок и премий"
-                if (currentTable == overtimeTable) {
-                    var totalOvertime = parseFloat(currentTable.store.getValue(currentTable.getItem(inRowIndex), "overtime")) +
-                            parseFloat(currentTable.store.getValue(currentTable.getItem(inRowIndex), "premium"));
-                    currentTable.store.setValue(currentTable.getItem(inRowIndex), "total_accounted_overtime", totalOvertime.toPrecision(3));
-                }
             }
         }
 

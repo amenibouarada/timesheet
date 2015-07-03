@@ -14,6 +14,9 @@ public class MutualWorkData {
     @Column(name = "identifier")
     private String identifier;
 
+    @Column(name = "mutual_work_id")
+    private Integer mutualWorkId;
+
     @Column(name = "year")
     private Integer year;
 
@@ -65,6 +68,9 @@ public class MutualWorkData {
     @Column(name = "coefficient")
     private Double coefficient;
 
+    @Column(name = "coefficient_calc")
+    private Double coefficientCalc;
+
     @Column(name = "work_days_calc")
     private Double workDaysCalc;
 
@@ -74,15 +80,20 @@ public class MutualWorkData {
     @Column(name = "comment")
     private String comment;
 
-    @Column(name = "id")
-    private Integer id;
-
     public String getIdentifier() {
         return identifier;
     }
 
     public void setIdentifier(String identifier) {
         this.identifier = identifier;
+    }
+
+    public Integer getMutualWorkId() {
+        return mutualWorkId;
+    }
+
+    public void setMutualWorkId(Integer mutualWorkId) {
+        this.mutualWorkId = mutualWorkId;
     }
 
     public Integer getYear() {
@@ -221,6 +232,14 @@ public class MutualWorkData {
         this.coefficient = coefficient;
     }
 
+    public Double getCoefficientCalc() {
+        return coefficientCalc;
+    }
+
+    public void setCoefficientCalc(Double coefficientCalc) {
+        this.coefficientCalc = coefficientCalc;
+    }
+
     public Double getWorkDaysCalc() {
         return workDaysCalc;
     }
@@ -243,13 +262,5 @@ public class MutualWorkData {
 
     public void setComment(String comment) {
         this.comment = comment;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
     }
 }

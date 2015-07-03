@@ -10,6 +10,9 @@ public class OvertimeData {
     @Column(name = "identifier")
     private String identifier;
 
+    @Column(name = "overtime_id")
+    private Integer overtime_id;
+
     @Column(name = "year")
     private Integer year;
 
@@ -55,8 +58,8 @@ public class OvertimeData {
     @Column(name = "overtime")
     private Double overtime;
 
-    @Column(name = "overtime_calculated")
-    private Double overtime_calculated;
+    @Column(name = "overtime_calc")
+    private Double overtime_calc;
 
     @Column(name = "premium")
     private Double premium;
@@ -67,15 +70,20 @@ public class OvertimeData {
     @Column(name = "comment")
     private String comment;
 
-    @Column(name = "id")
-    private Integer id;
-
     public String getIdentifier() {
         return identifier;
     }
 
     public void setIdentifier(String identifier) {
         this.identifier = identifier;
+    }
+
+    public Integer getOvertime_id() {
+        return overtime_id;
+    }
+
+    public void setOvertime_id(Integer overtime_id) {
+        this.overtime_id = overtime_id;
     }
 
     public Integer getYear() {
@@ -199,11 +207,11 @@ public class OvertimeData {
     }
 
     public Double getOvertime_calculated() {
-        return overtime_calculated;
+        return overtime_calc;
     }
 
-    public void setOvertime_calculated(Double overtime_calculated) {
-        this.overtime_calculated = overtime_calculated;
+    public void setOvertime_calc(Double overtime_calc) {
+        this.overtime_calc = overtime_calc;
     }
 
     public Double getPremium() {
@@ -228,13 +236,5 @@ public class OvertimeData {
 
     public void setComment(String comment) {
         this.comment = comment;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
     }
 }
