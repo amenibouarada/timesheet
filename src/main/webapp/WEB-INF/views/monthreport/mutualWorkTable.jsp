@@ -105,14 +105,14 @@
     }
 
     var addImage = function(value, rowIndex, cell) {
-        //Если у сотрудника присутствует поле mutualWorkId (из таблицы mutual_work в базе данных) - показатель того,
+        // Если у сотрудника присутствует поле mutual_work_id (из таблицы mutual_work в базе данных) - показатель того,
         // что запись была добавлена вручную, то детальный отчет создать невозможно, поэтому делаем фон "лупы" непрозрачным, убираем кликабельность.
         // подробнее - APLANATS-1935
-       if (mutualWorkTable.getItem(rowIndex).mutual_work_id != '') {
+       if (mutualWorkTable.getItem(rowIndex).mutual_work_id[0] == null) {
+           return "<a href='#' onclick='getReport3(" + rowIndex + ")'><img src='/resources/img/view.png' width='25' height='25'/></a>";
+       } else {
            cell.customStyles.push('opacity: 0.2;');
            return "<img src='/resources/img/view.png' width='25' height='25'/>";
-       } else {
-           return "<a href='#' onclick='getReport3(" + rowIndex + ")'><img src='/resources/img/view.png' width='25' height='25'/></a>";
        }
     }
 
@@ -288,7 +288,7 @@
         dojo.forEach( dojo.byId("addEmployeesForm_additionEmployeeList").selectedOptions, function(employee){
             employee_list.push({
                 identifier: employee.value + "_" + projectId, // уникальный идентификатор, для добавления новых строк
-                mutual_work_id:        0,
+                mutual_work_id:        0,   // присваиваем данному полю значение 0 для того, чтобы "затенять" лупу у только что добавленной записи.
                 employee_id: parseInt(employee.value),
                 employee_name:   employee.innerHTML,
                 division_employee_id: parseInt(employee.attributes.div_id.value),
