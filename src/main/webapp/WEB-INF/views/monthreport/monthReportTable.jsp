@@ -128,6 +128,8 @@
     }
 
     function monthReportTable_reloadTable(){
+        //дизактивируем кнопку "Сохранить"
+        monthReport_saveButton.disabled = true;
         if (monthReportTable.store && monthReportTable.store.isDirty()){
             if ( ! confirm("В таблице были изменения. Вы уверены, что хотите обновить данные не записав текущие?")){
                 return;
@@ -163,6 +165,8 @@
                         monthReportTable.store.newItem(data[i]);
                     }
                     monthReportTable.store.save();
+                    //делаем кнопку "Сохранить" активной
+                    monthReport_saveButton.disabled = false;
                 }
         );
     }
