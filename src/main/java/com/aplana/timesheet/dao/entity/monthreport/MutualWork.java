@@ -33,7 +33,7 @@ public class MutualWork {
     private Project project;
 
     @Column(name = "work_days")
-    private Double workDays;
+    private Double work_days;
 
     @Column(name = "overtimes")
     private Double overtimes;
@@ -87,12 +87,12 @@ public class MutualWork {
         this.project = project;
     }
 
-    public Double getWorkDays() {
-        return workDays;
+    public Double getWork_days() {
+        return work_days;
     }
 
-    public void setWorkDays(Double workDays) {
-        this.workDays = workDays;
+    public void setWork_days(Double work_days) {
+        this.work_days = work_days;
     }
 
     public Double getOvertimes() {

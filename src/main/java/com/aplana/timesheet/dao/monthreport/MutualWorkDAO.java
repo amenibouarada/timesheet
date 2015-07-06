@@ -53,27 +53,24 @@ public class MutualWorkDAO {
         boolean regionSet = false;
 
         if (divisionOwner != null && divisionOwner > 0) {
-            queryString += typeListObject ? " AND division_owner_id = :divisionOwner " :
-                    " AND divisionOwnerId = :divisionOwner ";
+            queryString += " AND division_owner_id = :divisionOwner ";
             ownerDivSet = true;
         }
         if (divisionEmployee != null && divisionEmployee > 0) {
-            queryString += typeListObject ? " AND division_employee_id = :divisionEmployee " :
-                    " AND divisionEmployeeId = :divisionEmployee ";
+            queryString += " AND division_employee_id = :divisionEmployee ";
             employeeDivSet = true;
         }
         if (projectId != null && projectId > 0) {
-            queryString += typeListObject ? " AND project_id = :projectId " :
-                    " AND projectId = :projectId ";
+            queryString += " AND project_id = :projectId ";
+
             projectSet = true;
         }
         if (regions.size() > 0 && regions.get(0) > 0) {
-            queryString += typeListObject ? " AND region_id in :regions " :
-                    " AND regionId in :regions ";
+            queryString += " AND region_id in :regions ";
             regionSet = true;
         }
 
-        queryString += typeListObject ? " ORDER BY employee_name" : " ORDER BY employeeName";
+        queryString += " ORDER BY employee_name";
         Query query = typeListObject ?
                 entityManager.createNativeQuery(queryString).setParameter("year", year).setParameter("month", month) :
                 entityManager.createQuery(queryString).setParameter("year", year).setParameter("month", month);

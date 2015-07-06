@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Отчет по взаимной занятости" pageWidth="1400" pageHeight="1000" orientation="Landscape" columnWidth="1360" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="6ae905b3-cfb1-47a7-bda5-eeede374788b">
 	<property name="net.sf.jasperreports.print.keep.full.text" value="true"/>
 	<property name="ireport.zoom" value="1.5"/>
-	<property name="ireport.x" value="877"/>
+	<property name="ireport.x" value="755"/>
 	<property name="ireport.y" value="0"/>
 	<import value="com.aplana.timesheet.util.DateTimeUtil"/>
 	<style name="Normal" isDefault="true" fontSize="8" pdfEncoding="Cp1251"/>
@@ -24,9 +24,13 @@
 	<field name="work_days" class="java.math.BigDecimal"/>
 	<field name="overtimes" class="java.math.BigDecimal"/>
 	<field name="coefficient" class="java.math.BigDecimal"/>
-	<field name="work_days_calc" class="java.math.BigDecimal"/>
-	<field name="overtimes_calc" class="java.math.BigDecimal"/>
+	<field name="work_days_calculated" class="java.math.BigDecimal"/>
+	<field name="overtimes_calculated" class="java.math.BigDecimal"/>
 	<field name="comment" class="java.lang.String"/>
+	<field name="coefficient_calculated" class="java.math.BigDecimal"/>
+	<variable name="coeff" class="java.math.BigDecimal">
+		<variableExpression><![CDATA[($F{coefficient} != null) ? $F{coefficient} : $F{coefficient_calculated}]]></variableExpression>
+	</variable>
 	<group name="Group1">
 		<groupExpression><![CDATA[]]></groupExpression>
 		<groupHeader>
@@ -409,17 +413,6 @@
 				<textFieldExpression><![CDATA[$F{overtimes}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="1006" y="0" width="86" height="15" uuid="ce0a0d8f-0882-4b7a-9f67-171590394437"/>
-				<box>
-					<topPen lineWidth="0.75"/>
-					<leftPen lineWidth="0.75"/>
-					<bottomPen lineWidth="0.75"/>
-					<rightPen lineWidth="0.75"/>
-				</box>
-				<textElement textAlignment="Center"/>
-				<textFieldExpression><![CDATA[$F{coefficient}]]></textFieldExpression>
-			</textField>
-			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="1092" y="0" width="82" height="15" uuid="e0353fdc-eb20-4dfa-a49e-2bb25bfd3333"/>
 				<box>
 					<topPen lineWidth="0.75"/>
@@ -428,7 +421,7 @@
 					<rightPen lineWidth="0.75"/>
 				</box>
 				<textElement textAlignment="Center"/>
-				<textFieldExpression><![CDATA[$F{work_days_calc}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{work_days_calculated}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="1174" y="0" width="84" height="15" uuid="0aa09228-bae8-495f-b91a-15d2c767781c"/>
@@ -439,7 +432,7 @@
 					<rightPen lineWidth="0.75"/>
 				</box>
 				<textElement textAlignment="Center"/>
-				<textFieldExpression><![CDATA[$F{overtimes_calc}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{overtimes_calculated}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="1258" y="0" width="102" height="15" uuid="6f8679bc-1a22-4c72-8b5b-6d2007921b25"/>
@@ -462,6 +455,17 @@
 				</box>
 				<textElement textAlignment="Center"/>
 				<textFieldExpression><![CDATA[$F{work_days}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="1006" y="0" width="86" height="15" uuid="83c52a23-118c-4600-a508-b9710b2cb54c"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$V{coeff}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>

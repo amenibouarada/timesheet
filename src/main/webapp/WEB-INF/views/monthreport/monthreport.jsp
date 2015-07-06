@@ -95,20 +95,16 @@
         // и добавляю подсказку
         function monthReport_colorCell(value, rowIndex, cell) {
             var item = this.grid.getItem(rowIndex);
-            var calculatedValue;
-            calculatedValue = this.grid.store.getValue(item, cell.field + "_calculated", null) !=null ?
-                              this.grid.store.getValue(item, cell.field + "_calculated", null) :
-                              this.grid.store.getValue(item, cell.field + "Calc", null);
+            var calculatedValue = this.grid.store.getValue(item, cell.field + "_calculated", null);
             var dispValue = "";
-            if (value == calculatedValue){
-                cell.customStyles.push('color:red');
+            if (value && value != "null"){
+                cell.customStyles.push('color:blue');
                 dispValue = value != null ? value : '';
             }else{
-                cell.customStyles.push('color:green');
-                dispValue = value != null ? value : '';
+                cell.customStyles.push('color:red');
+                dispValue = calculatedValue != null ? calculatedValue : '';
             }
-            var defaultValue = calculatedValue != null ? calculatedValue : '0';
-            return "<span title='Значение по умолчанию: " + defaultValue + "'>" + dispValue + "</span>"
+            return "<span title='Значение по умолчанию: " + calculatedValue + "'>" + dispValue + "</span>"
         }
 
         function monthReport_colorizeMonthOption(){

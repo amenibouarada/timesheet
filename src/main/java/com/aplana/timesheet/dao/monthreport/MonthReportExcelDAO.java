@@ -28,7 +28,7 @@ public class MonthReportExcelDAO extends AbstractReportDAO {
         fieldsMap.put(OvertimeReport.class, new String[]{ "identifier", "overtime_id", "year", "month", "employee_id", "employee_name",
                                                           "region_id", "region_name", "division_employee_id", "division_employee_name",
                                                           "project_id", "project_name", "project_type_id", "division_owner_name",
-                                                          "division_owner_id", "project_type_name", "overtime", "overtime_calc",
+                                                          "division_owner_id", "project_type_name", "overtime", "overtime_calculated",
                                                           "premium", "total_accounted_overtime", "comment"});
 
         fieldsMap.put(MonthXLSReport.class, new String[]{  "year", "month", "employee_id", "employee_name",
@@ -45,8 +45,8 @@ public class MonthReportExcelDAO extends AbstractReportDAO {
         fieldsMap.put(MutualWorkReport.class, new String[]{"identifier", "mutual_work_id", "year", "month", "division_owner_id", "division_owner_name",
                                                            "project_id", "project_name", "project_type_id", "project_type_name",
                                                            "employee_id", "employee_name", "division_employee_id", "division_employee_name",
-                                                           "region_id", "region_name", "work_days", "work_days_calc", "overtimes", "overtimes_calc",
-                                                           "coefficient", "coefficient_calc", "comment"});
+                                                           "region_id", "region_name", "work_days", "work_days_calculated", "overtimes", "overtimes_calculated",
+                                                           "coefficient", "coefficient_calculated", "comment"});
     }
 
     private static final Logger logger = LoggerFactory.getLogger(MonthReportExcelDAO.class);
