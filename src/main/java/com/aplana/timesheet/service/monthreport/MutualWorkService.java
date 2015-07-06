@@ -80,25 +80,25 @@ public class MutualWorkService {
         for (MutualWorkData mutualWorkData : mutualWorkDataList) {
             HashMap<String, Object> mutualWorkMap = new HashMap<String, Object>();
             mutualWorkMap.put("identifier", mutualWorkData.getIdentifier());
-            mutualWorkMap.put("mutualWorkId", mutualWorkData.getMutualWorkId());
-            mutualWorkMap.put("divisionOwnerId", mutualWorkData.getDivisionOwnerId());
-            mutualWorkMap.put("divisionOwnerName", mutualWorkData.getDivisionOwnerName());
-            mutualWorkMap.put("projectId", mutualWorkData.getProjectId());
-            mutualWorkMap.put("projectName", mutualWorkData.getProjectName());
-            mutualWorkMap.put("projectTypeId", mutualWorkData.getProjectTypeId());
-            mutualWorkMap.put("projectTypeName", mutualWorkData.getProjectTypeName());
-            mutualWorkMap.put("employeeId", mutualWorkData.getEmployeeId());
-            mutualWorkMap.put("employeeName", mutualWorkData.getEmployeeName());
-            mutualWorkMap.put("divisionEmployeeId", mutualWorkData.getDivisionEmployeeId());
-            mutualWorkMap.put("divisionEmployeeName", mutualWorkData.getDivisionEmployeeName());
-            mutualWorkMap.put("regionId", mutualWorkData.getRegionId());
-            mutualWorkMap.put("regionName", mutualWorkData.getRegionName());
-            mutualWorkMap.put("workDays", mutualWorkData.getWorkDays());
+            mutualWorkMap.put("mutual_work_id", mutualWorkData.getMutualWorkId());
+            mutualWorkMap.put("division_owner_id", mutualWorkData.getDivision_owner_id());
+            mutualWorkMap.put("division_owner_name", mutualWorkData.getDivision_owner_name());
+            mutualWorkMap.put("project_id", mutualWorkData.getProject_id());
+            mutualWorkMap.put("project_name", mutualWorkData.getProject_name());
+            mutualWorkMap.put("project_type_id", mutualWorkData.getProject_type_id());
+            mutualWorkMap.put("project_type_name", mutualWorkData.getProject_type_name());
+            mutualWorkMap.put("employee_id", mutualWorkData.getEmployee_id());
+            mutualWorkMap.put("employee_name", mutualWorkData.getEmployee_name());
+            mutualWorkMap.put("division_employee_id", mutualWorkData.getDivision_employee_id());
+            mutualWorkMap.put("division_employee_name", mutualWorkData.getDivision_employee_name());
+            mutualWorkMap.put("region_id", mutualWorkData.getRegion_id());
+            mutualWorkMap.put("region_name", mutualWorkData.getRegion_name());
+            mutualWorkMap.put("work_days", mutualWorkData.getWork_days());
             mutualWorkMap.put("overtimes", mutualWorkData.getOvertimes());
             mutualWorkMap.put("coefficient", mutualWorkData.getCoefficient());
-            mutualWorkMap.put("coefficientCalc", mutualWorkData.getCoefficientCalc());
-            mutualWorkMap.put("workDaysCalc", mutualWorkData.getWorkDaysCalc());
-            mutualWorkMap.put("overtimesCalc", mutualWorkData.getOvertimesCalc());
+            mutualWorkMap.put("coefficient_calculated", mutualWorkData.getCoefficient_calculated());
+            mutualWorkMap.put("work_days_calculated", mutualWorkData.getWork_days_calculated());
+            mutualWorkMap.put("overtimes_calculated", mutualWorkData.getOvertimes_calculated());
             mutualWorkMap.put("comment", mutualWorkData.getComment());
             mutualWorkList.add(mutualWorkMap);
         }
@@ -114,11 +114,11 @@ public class MutualWorkService {
         List<Map<String, Object>> mutualWorks = mapper.readValue(jsonData, mapCollectionType);
 
         for (Map<String, Object> mutualWorkMap : mutualWorks) {
-            Project project = projectDAO.find((Integer) mutualWorkMap.get("projectId"));
-            Employee employee = employeeDAO.find((Integer)mutualWorkMap.get("employeeId"));
+            Project project = projectDAO.find((Integer) mutualWorkMap.get("project_id"));
+            Employee employee = employeeDAO.find((Integer)mutualWorkMap.get("employee_id"));
             MutualWork mutualWork = mutualWorkDAO.findOrCreateMutualWork(employee, project, year, month, divisionOwner);
 
-            mutualWork.setWorkDays(     NumberUtils.getDoubleValue(mutualWorkMap.get("workDays")));
+            mutualWork.setWork_days(     NumberUtils.getDoubleValue(mutualWorkMap.get("work_days")));
             mutualWork.setOvertimes(NumberUtils.getDoubleValue(mutualWorkMap.get("overtimes")));
             mutualWork.setCoefficient(NumberUtils.getDoubleValue(mutualWorkMap.get("coefficient")));
             mutualWork.setComment((String) mutualWorkMap.get("comment"));

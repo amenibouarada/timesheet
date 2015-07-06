@@ -54,17 +54,17 @@
 <table data-dojo-id="mutualWorkTable" data-dojo-type="dojox.grid.DataGrid" height="500px">
     <thead>
     <tr>
-        <th field="divisionOwnerName" width="180px">Центр-владелец</th>
-        <th field="projectName" width="180px">Проект/Пресейл</th>
-        <th field="projectTypeName" width="75px">Тип</th>
-        <th field="employeeName" width="150px">Сотрудник</th>
-        <th field="divisionEmployeeName" width="200px">Центр сотрудника</th>
-        <th field="regionName" width="100px">Регион</th>
-        <th field="workDays" width="50px" editable="true" formatter= "monthReport_colorCell">Рабочие дни</th>
+        <th field="division_owner_name" width="180px">Центр-владелец</th>
+        <th field="project_name" width="180px">Проект/Пресейл</th>
+        <th field="project_type_name" width="75px">Тип</th>
+        <th field="employee_name" width="150px">Сотрудник</th>
+        <th field="division_employee_name" width="200px">Центр сотрудника</th>
+        <th field="region_name" width="100px">Регион</th>
+        <th field="work_days" width="50px" editable="true" formatter= "monthReport_colorCell">Рабочие дни</th>
         <th field="overtimes" width="50px" editable="true" formatter= "monthReport_colorCell">Переработки</th>
         <th field="coefficient" width="50px" editable="true" formatter= "monthReport_colorCell">Коэффициент</th>
-        <th field="workDaysCalc" width="50px">Расч. раб. дни</th>
-        <th field="overtimesCalc" width="50px">Расч. переработки</th>
+        <th field="work_days" width="50px">Расч. раб. дни</th>
+        <th field="overtimes" width="50px">Расч. переработки</th>
         <th field="image" width = "75px" formatter = "addImage">Детальная информация</th>
         <th field="comment" width="100px" editable="true">Комментарий</th>
     </tr>
@@ -108,7 +108,7 @@
         //Если у сотрудника присутствует поле mutualWorkId (из таблицы mutual_work в базе данных) - показатель того,
         // что запись была добавлена вручную, то детальный отчет создать невозможно, поэтому делаем фон "лупы" непрозрачным, убираем кликабельность.
         // подробнее - APLANATS-1935
-       if (mutualWorkTable.getItem(rowIndex).mutualWorkId != '') {
+       if (mutualWorkTable.getItem(rowIndex).mutualWorkId) {
            cell.customStyles.push('opacity: 0.2;');
            return "<img src='/resources/img/view.png' width='25' height='25'/>";
        } else {
@@ -250,17 +250,16 @@
     function getReport3(rowIndex) {
         processing();
         var item = mutualWorkTable.getItem(rowIndex);
-        var divisionOwner = parseInt(item.divisionOwnerId);
-        var divisionEmployee = parseInt(item.divisionEmployeeId);
-        var region = parseInt(item.regionId);
-        var employeeId = parseInt(item.employeeId);
+        var divisionOwner = parseInt(item.division_owner_id);
+        var divisionEmployee = parseInt(item.division_employee_id);
+        var region = parseInt(item.region_id);
+        var employeeId = parseInt(item.employee_id);
         var year = dojo.byId("monthreport_year").value;
         var month = dojo.byId("monthreport_month").value;
 
-        var projectId = parseInt(item.projectId);
+        var projectId = parseInt(item.project_id);
         var beginDate = year + "-" + month + "-" + getFirstDayOfMonth(year, month);
         var endDate = year + "-" + month + "-" + getLastDayOfMonth(year, month);
-
         window.location = "<%= request.getContextPath()%>/monthreport/prepareReport3Data/" + divisionOwner + "/" +
                           divisionEmployee + "/" + region + "/" + employeeId + "/" + projectId + "/" + beginDate + "/" +
                           endDate;
@@ -289,24 +288,24 @@
         dojo.forEach( dojo.byId("addEmployeesForm_additionEmployeeList").selectedOptions, function(employee){
             employee_list.push({
                 identifier: employee.value + "_" + projectId, // уникальный идентификатор, для добавления новых строк
-                mutualWorkId:        '[]',
-                employeeId: parseInt(employee.value),
-                employeeName:   employee.innerHTML,
-                divisionEmployeeId: parseInt(employee.attributes.div_id.value),
-                divisionEmployeeName:   employee.attributes.div_name.value,
-                divisionOwnerId: divisionOwnerId,
-                divisionOwnerName:   divisionOwnerName,
-                regionId:   parseInt(employee.attributes.reg_id.value),
-                regionName:     employee.attributes.reg_name.value,
-                projectTypeName:   type,
-                projectTypeId:   typeId,
-                projectId:  projectId,
-                projectName:    project,
-                workDays: 0.0,
+                mutual_work_id:        null,
+                employee_id: parseInt(employee.value),
+                employee_name:   employee.innerHTML,
+                division_employee_id: parseInt(employee.attributes.div_id.value),
+                division_employee_name:   employee.attributes.div_name.value,
+                division_owner_id: divisionOwnerId,
+                division_owner_name:   divisionOwnerName,
+                region_id:   parseInt(employee.attributes.reg_id.value),
+                region_name:     employee.attributes.reg_name.value,
+                project_type_name:   type,
+                project_type_id:   typeId,
+                project_id:  projectId,
+                project_name:    project,
+                work_days: 0.0,
                 overtimes:   0.0,
                 coefficient:    0.0,
-                workDaysCalc: 0.0,
-                overtimesCalc: 0.0,
+                work_days_calculated: 0.0,
+                overtimes_calculated: 0.0,
                 comment:    ""
             });
         });

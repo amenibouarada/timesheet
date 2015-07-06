@@ -76,11 +76,11 @@
             cells: [[
 /* 1  */                {field: "division"              , name: "Подразделение",                    width: "180px"},
 /* 2  */                {field: "region"                , name: "Регион",                           width: "100px"},
-/* 3  */                {field: "ts_worked"             , name: "Отработано",                       width: "50px", editable: true, formatter: monthReportTable_colorCell},
+/* 3  */                {field: "ts_worked"             , name: "Отработано",                       width: "50px", editable: true, formatter: monthReport_colorCell},
 /* 4  */                {field: "ts_vacation"           , name: "Отпуск",                           width: "50px"},
-/* 5  */                {field: "ts_illness"            , name: "Больничный",                       width: "50px", editable: true, formatter: monthReportTable_colorCell},
+/* 5  */                {field: "ts_illness"            , name: "Больничный",                       width: "50px", editable: true, formatter: monthReport_colorCell},
 /* 6  */                {field: "ts_all_paid"           , name: "Всего оплачено",                   width: "50px"},
-/* 7  */                {field: "ts_over_val_fin_comp"  , name: "Переработки - фин. компенсация",   width: "50px", editable: true, formatter: monthReportTable_colorCell},
+/* 7  */                {field: "ts_over_val_fin_comp"  , name: "Переработки - фин. компенсация",   width: "50px", editable: true, formatter: monthReport_colorCell},
 /* 8  */                {field: "ts_over_accounted"     , name: "Переработки",                      width: "50px"},
 /* 9  */                {field: "ts_premium"            , name: "Премии",                           width: "50px"},
 /* 10 */                {field: "ts_all_over_accounted" , name: "Всего учтенных переработок",       width: "50px"},
@@ -106,22 +106,6 @@
             ]]
         }
     ];
-
-    // расскраска ячеек и проверка на существующее значение заполненности таблицы реальными данными, а не автовычисленными
-    // и добавляю подсказку
-    function monthReportTable_colorCell(value, rowIndex, cell) {
-        var item = monthReportTable.getItem(rowIndex);
-        var calculatedValue = monthReportTable.store.getValue(item, cell.field + "_calculated", null);
-        var dispValue = "";
-        if (value && value != "null"){
-            cell.customStyles.push('color:green');
-            dispValue = value;
-        }else{
-            cell.customStyles.push('color:red');
-            dispValue = calculatedValue;
-        }
-        return "<span title='Значение по умолчанию: " + calculatedValue + "'>" + dispValue + "</span>"
-    }
 
     function monthReportTable_createStore(){
         var data = {
