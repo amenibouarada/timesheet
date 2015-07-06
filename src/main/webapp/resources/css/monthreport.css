@@ -22,3 +22,11 @@
 .employmentPlanningTable .bigSelect{
     width: 280px;
 }
+
+.monthReportOpenClose {
+    position: absolute;
+    left: 335px;
+    top: 192px;
+    height: 25px;
+    visibility: hidden;
+}
