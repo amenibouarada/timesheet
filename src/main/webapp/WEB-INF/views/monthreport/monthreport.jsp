@@ -98,7 +98,7 @@
             var calculatedValue = this.grid.store.getValue(item, cell.field + "_calculated", null);
             var dispValue = "";
             if (value && value != "null"){
-                cell.customStyles.push('color:blue');
+                cell.customStyles.push('color:green');
                 dispValue = value != null ? value : '';
             }else{
                 cell.customStyles.push('color:red');

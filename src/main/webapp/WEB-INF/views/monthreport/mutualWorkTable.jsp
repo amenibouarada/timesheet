@@ -108,7 +108,7 @@
         //Если у сотрудника присутствует поле mutualWorkId (из таблицы mutual_work в базе данных) - показатель того,
         // что запись была добавлена вручную, то детальный отчет создать невозможно, поэтому делаем фон "лупы" непрозрачным, убираем кликабельность.
         // подробнее - APLANATS-1935
-       if (mutualWorkTable.getItem(rowIndex).mutualWorkId) {
+       if (mutualWorkTable.getItem(rowIndex).mutual_work_id != '') {
            cell.customStyles.push('opacity: 0.2;');
            return "<img src='/resources/img/view.png' width='25' height='25'/>";
        } else {
@@ -288,7 +288,7 @@
         dojo.forEach( dojo.byId("addEmployeesForm_additionEmployeeList").selectedOptions, function(employee){
             employee_list.push({
                 identifier: employee.value + "_" + projectId, // уникальный идентификатор, для добавления новых строк
-                mutual_work_id:        null,
+                mutual_work_id:        0,
                 employee_id: parseInt(employee.value),
                 employee_name:   employee.innerHTML,
                 division_employee_id: parseInt(employee.attributes.div_id.value),
