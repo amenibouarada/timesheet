@@ -285,7 +285,6 @@ function refreshDailyTimesheetData(data) {
 
     // Заполнение планов работы на будущее
 
-    var currentPlan = dojoxDecode(current.plan);
     var nextWorkDate = current.nextWorkDate;
     var nextDayEffort = current.effort;
     var nextDaySummary = next.workSummary;
@@ -298,9 +297,10 @@ function refreshDailyTimesheetData(data) {
         dojo.byId("effortInNextDay").value = nextDayEffort;
     }
 
-    dojo.byId('plan').value =
-        (currentPlan != null && currentPlan.length != 0) ? currentPlan :
+    var currentPlan = (current.plan != null && current.plan.length != 0) ? current.plan :
             (nextDaySummary != null && nextDaySummary.length != 0) ? nextDaySummary : "";
+
+    dojo.byId('plan').value = dojoxDecode(currentPlan);
 
     dojo.attr("effortInNextDay", {
         disabled: isFinal
