@@ -139,7 +139,9 @@
 
     function mutualWorkTable_reloadTable() {
         //дизактивируем кнопку "Сохранить"
-        monthReport_saveButton.disabled = true;
+        if (dojo.byId("monthReport_saveButton")) {
+            monthReport_saveButton.disabled = true;
+        }
         // меняем видимость кнопки "Добавить сотрудников"
         if (mutualWorkTable_divisionOwnerId.value == ALL_VALUE ||
                 mutualWorkTable_divisionEmployeeId.value == ALL_VALUE) {
@@ -180,7 +182,9 @@
                     });
                     mutualWorkTable.store.save();
                     //делаем кнопку "Сохранить" активной
-                    monthReport_saveButton.disabled = false;
+                    if (dojo.byId("monthReport_saveButton")) {
+                        monthReport_saveButton.disabled = false;
+                    }
                 }
         );
     }

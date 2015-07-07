@@ -271,26 +271,34 @@
                     function (status) {
                         monthReportStatus.innerHTML = status !== "" ? monthreport_getStatusById(status).name : "не удалось получить статус";
                         var editable = true;
+                        <sec:authorize access="hasAnyRole('ROLE_ADMIN', 'ROLE_MONTH_REPORT_MANAGER')">
                         if (status == statusList.closed.id){
                             if (monthReport_closeButton){ // кнопка может быть не видна для некоторых ролей
                                 monthReport_closeButton.style.visibility = "hidden";
                                 monthReport_openButton.style.visibility = "visible";
                             }
-                            monthReport_saveButton.style.visibility = "hidden";
+                            if (monthReport_saveButton) {
+                                monthReport_saveButton.style.visibility = "hidden";
+                            }
                             editable = false;
                         }else if(status == statusList.notCreated.id){
                             if (monthReport_closeButton){ // кнопка может быть не видна для некоторых ролей
                                 monthReport_closeButton.style.visibility = "hidden";
                                 monthReport_openButton.style.visibility = "hidden";
                             }
-                            monthReport_saveButton.style.visibility  = "visible";
+                            if (monthReport_saveButton) {
+                                monthReport_saveButton.style.visibility = "visible";
+                            }
                         }else{
                             if (monthReport_closeButton){ // кнопка может быть не видна для некоторых ролей
                                 monthReport_closeButton.style.visibility = "visible";
                                 monthReport_openButton.style.visibility = "hidden";
                             }
-                            monthReport_saveButton.style.visibility  = "visible";
+                            if (monthReport_saveButton) {
+                                monthReport_saveButton.style.visibility = "visible";
+                            }
                         }
+                        </sec:authorize>
                         monthReportTable.layout.cells[3].editable = editable;
                         monthReportTable.layout.cells[5].editable = editable;
                         monthReportTable.layout.cells[7].editable = editable;

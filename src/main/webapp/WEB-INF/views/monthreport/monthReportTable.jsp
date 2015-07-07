@@ -35,7 +35,7 @@
         </td>
         <td>
             <input type="checkbox" checked="true" onclick="setCalcMonthColumnVisibility(this.checked)">
-            <label>Показывать рассчетные показатели</label>
+            <label>Показывать расчетные показатели</label>
         </td>
     </tr>
     <tr>
@@ -129,7 +129,9 @@
 
     function monthReportTable_reloadTable(){
         //дизактивируем кнопку "Сохранить"
-        monthReport_saveButton.disabled = true;
+        if (dojo.byId("monthReport_saveButton")) {
+            monthReport_saveButton.disabled = true;
+        }
         if (monthReportTable.store && monthReportTable.store.isDirty()){
             if ( ! confirm("В таблице были изменения. Вы уверены, что хотите обновить данные не записав текущие?")){
                 return;
@@ -166,7 +168,9 @@
                     }
                     monthReportTable.store.save();
                     //делаем кнопку "Сохранить" активной
-                    monthReport_saveButton.disabled = false;
+                    if (dojo.byId("monthReport_saveButton")) {
+                        monthReport_saveButton.disabled = false;
+                    }
                 }
         );
     }

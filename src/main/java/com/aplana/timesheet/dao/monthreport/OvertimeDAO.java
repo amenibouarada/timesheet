@@ -68,7 +68,7 @@ public class OvertimeDAO {
                 createQuery("FROM OvertimeData WHERE year = :year AND month = :month AND employee_id = :employee_id")
                 .setParameter("year", year)
                 .setParameter("month", month)
-                .setParameter("employee", currentUser);
+                .setParameter("employee_id", currentUser.getId());
         logger.debug("getSingleOvertime List<Overtime> result size = {}", query.getResultList().size());
         return query.getResultList();
     }
