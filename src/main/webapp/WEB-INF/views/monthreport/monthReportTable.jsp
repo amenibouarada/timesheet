@@ -35,7 +35,7 @@
         </td>
         <td>
             <input type="checkbox" checked="true" onclick="setCalcMonthColumnVisibility(this.checked)">
-            <label>Показывать рассчетные показатели</label>
+            <label>Показывать расчетные показатели</label>
         </td>
     </tr>
     <tr>
