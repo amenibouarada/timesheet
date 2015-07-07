@@ -191,8 +191,8 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
         vacationDAO.deleteFiredVacations(employee);
     }
 
-    public int getApprovedVacationsWorkdaysCount(Employee employee, Integer year, Integer month) {
-        return vacationDAO.getApprovedVacationsWorkdaysCount(employee, year, month, null);
+    public int getApprovedVacationsWorkdaysCount(Employee employee, Integer year, Integer month, boolean toCurrentDate) {
+        return vacationDAO.getApprovedVacationsWorkdaysCount(employee, year, month, null, toCurrentDate);
     }
 
     public Double getVacationsWorkdaysCount(Employee employee, Integer year, Integer month) {

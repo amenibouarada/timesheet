@@ -675,7 +675,7 @@ public class PlanEditService {
         Double sumInvestFact      = 0.0;
         Double sumCommerceFact    = 0.0;
         Double illnessFact = illnessService.getIllnessWorkdaysCount(employee, year, month) * TimeSheetConstants.WORK_DAY_DURATION;
-        Double vacationFact = vacationService.getApprovedVacationsWorkdaysCount(employee, year, month) * TimeSheetConstants.WORK_DAY_DURATION;
+        Double vacationFact = vacationService.getApprovedVacationsWorkdaysCount(employee, year, month, false) * TimeSheetConstants.WORK_DAY_DURATION;
 
         Double illnessFactPercent = getPercent(illnessFact, summaryPlan);
         Double vacationFactPercent = getPercent(vacationFact, summaryPlan);
