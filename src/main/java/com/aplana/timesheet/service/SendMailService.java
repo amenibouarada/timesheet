@@ -81,47 +81,33 @@ public class SendMailService {
                 }
             });
 
-    private final Function<ProjectManager, String> GET_EMAIL_FROM_MANAGER
-            = new Function<ProjectManager, String>() {
-        @Nullable
-        @Override
-        public String apply(@Nullable ProjectManager projectManager) {
-            return projectManager.getEmployee().getEmail();
-        }
-    };
-
     private final Function<ProjectActivityInfo, String> GET_EMAILS_OF_INTERESTED_MANAGERS_FROM_PROJECT_FOR_CURRENT_ROLE
             = new Function<ProjectActivityInfo, String>() {
-        @Nullable
-        @Override
+        @Nullable @Override
         public String apply(@Nullable ProjectActivityInfo input) {
-            final ProjectRolesEnum roleInCurrentProject = input.getProjectRole();
-
-            final Project project = projectService.find(input.getProjectId());
-
-            return Joiner.on(",").join(
-                    Iterables.transform(
-                            Iterables.filter(
-                                    projectService.getManagers(projectService.find(input.getProjectId())),
-                                    new Predicate<ProjectManager>() {
-                                        @Override
-                                        public boolean apply(@Nullable ProjectManager manager) {
-                                            if (manager == null || manager.getProjectRole() == null) {
-                                                return false;
-                                            }
-                                            if (manager.getEmployee().getId().equals(project.getManager().getId())) {
-                                                return true;
-                                            }
-                                            if (EnumsUtils.tryFindById(manager.getProjectRole().getId(), ProjectRolesEnum.class) == ProjectRolesEnum.HEAD) {
-                                                return true;
-                                            }
-                                            return (manager.getProjectRole().getId().equals(roleInCurrentProject.getId()));
-
-                                        }
-                                    }),
-                            GET_EMAIL_FROM_MANAGER
-                    )
-            );
+            ProjectRolesEnum roleInCurrentProject = input.getProjectRole();
+            List<String> emails = new ArrayList<String>();
+            List<ProjectManager> projectManagers = projectService.getManagers(projectService.find(input.getProjectId()));
+            for (ProjectManager manager : projectManagers){
+                if (manager == null || manager.getProjectRole() == null) {
+                    continue;
+                }
+                // если текущий менеджер - руководитель
+                if (manager.getProjectRole().getId().equals(ProjectRolesEnum.HEAD.getId())){
+                    emails.add(manager.getEmployee().getEmail());
+                }
+                // Если роли совпали (менеджера и списывающего), и если менеджер главный (разрабаотчик, тестировщик и т.д.),
+                // то добавляем в список адресов на рассылку, т.е.:
+                // - если списывает разработчик - то отправляем тимлиду
+                // - если списывает аналитик - то отправляем ведущему аналитику проекта
+                // - аналогично: главный системный инженер, главный тестировщик
+                if  (manager.isMaster() &&
+                     manager.getProjectRole().getId().equals(roleInCurrentProject.getId()))
+                {
+                        emails.add(manager.getEmployee().getEmail());
+                }
+            }
+            return Joiner.on(",").join(emails);
         }
     };
 
