@@ -84,6 +84,8 @@
         <h1><fmt:message key="title.adminpanel"/></h1>
 
         <br/>
+        <div id="messageBox" style="text-align: left!important; width: 90%;padding: 4px;"></div>
+        <br/>
 
         <table>
             <%--Уведомления--%>
