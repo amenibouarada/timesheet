@@ -63,8 +63,8 @@
         <th field="work_days" width="50px" editable="true" formatter= "monthReport_colorCell">Рабочие дни</th>
         <th field="overtimes" width="50px" editable="true" formatter= "monthReport_colorCell">Переработки</th>
         <th field="coefficient" width="50px" editable="true" formatter= "monthReport_colorCell">Коэффициент</th>
-        <th field="work_days" width="50px">Расч. раб. дни</th>
-        <th field="overtimes" width="50px">Расч. переработки</th>
+        <th field="work_days_calculated" width="50px">Расч. раб. дни</th>
+        <th field="overtimes_calculated" width="50px">Расч. переработки</th>
         <th field="image" width = "75px" formatter = "addImage">Детальная информация</th>
         <th field="comment" width="100px" editable="true">Комментарий</th>
     </tr>
