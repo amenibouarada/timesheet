@@ -68,7 +68,7 @@ public class EmployeeReportService {
         }
         /* отпуска */
         BigDecimal vacationWorkDaysHours = BigDecimal.valueOf(
-                vacationService.getApprovedVacationsWorkdaysCount(employee, year, month) * TimeSheetConstants.WORK_DAY_DURATION);
+                vacationService.getApprovedVacationsWorkdaysCount(employee, year, month, true) * TimeSheetConstants.WORK_DAY_DURATION);
         sumFactH = sumFactH.add(vacationWorkDaysHours);
         /* болезни */
         int illnessWorkdaysCount = illnessService.getIllnessWorkdaysCount(employee, year, month);

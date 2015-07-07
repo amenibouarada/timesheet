@@ -272,10 +272,12 @@ public class VacationDAO {
      * @param year
      * @param month
      * @param vacationTypes - типы отпусков, которые необходимо учитывать
+     * @param toCurrentDate - параметр, указывающий, считать все дни отпуска за текущий месяц или только до текущей даты
      * @return
      */
     public int getApprovedVacationsWorkdaysCount(Employee employee, Integer year, Integer month,
-                                         List<VacationTypesEnum> vacationTypes) {
+                                         List<VacationTypesEnum> vacationTypes, boolean toCurrentDate) {
+        Date curDate = new Date();
         String textQuery = "select" +
                 "        (count(c) - count(h)) as days" +
                 "    from" +
@@ -287,6 +289,9 @@ public class VacationDAO {
                 "        and v.status_id = :status_id" +
                 "        and {ts '%1$s'} between date_trunc('month', v.begin_Date) and date_trunc('month', v.end_Date)" +
                 "        and v.type_id in :types_id";
+        if (toCurrentDate) {
+            textQuery += " and v.begin_date <= :cur_date and c.caldate <= :cur_date";
+        }
 
         final Query query = entityManager.createNativeQuery(
                 String.format(
@@ -296,6 +301,9 @@ public class VacationDAO {
         ).setParameter("employee_id", employee.getId())
                 .setParameter("status_id", VacationStatusEnum.APPROVED.getId())
                 .setParameter("region", employee.getRegion().getId());
+        if (toCurrentDate) {
+            query.setParameter("cur_date", curDate);
+        }
 
         // если не указано, то исключаем из общего списка те отпуска, которые не должны учитываться
         if (vacationTypes == null) {

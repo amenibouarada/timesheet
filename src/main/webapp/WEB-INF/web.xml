@@ -65,7 +65,7 @@
 
     <filter-mapping>
         <filter-name>AjaxTimeoutRedirectFilter</filter-name>
-        <url-pattern>/*</url-pattern>
+        <url-pattern>/timesheet</url-pattern>
     </filter-mapping>
 
     <filter>
