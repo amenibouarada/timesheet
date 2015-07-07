@@ -122,6 +122,11 @@ public class CreateVacationController {
         return vacationService.checkVacationCountDaysJSON(beginDate, endDate, employeeId, vacationTypeId);
     }
 
+    private boolean isMotherhoodVacation(CreateVacationForm createVacationForm){
+        return (createVacationForm.getVacationType().equals(VacationTypesEnum.CHILDBEARING.getId())) ||
+               (createVacationForm.getVacationType().equals(VacationTypesEnum.CHILDCARE.getId()));
+    }
+
     @RequestMapping(value = "/validateAndCreateVacation/{employeeId}/{approved}", method = RequestMethod.POST)
     public ModelAndView validateAndCreateVacation(
             @PathVariable("employeeId") Integer employeeId,
@@ -132,7 +137,8 @@ public class CreateVacationController {
         final Employee employee = employeeService.find(employeeId);
         final Employee curEmployee = securityService.getSecurityPrincipal().getEmployee();
         final boolean isApprovedVacation =
-                (employeeService.isEmployeeAdmin(curEmployee.getId()) && BooleanUtils.toBoolean(approved));
+                employeeService.isEmployeeAdmin(curEmployee.getId()) &&
+                (BooleanUtils.toBoolean(approved) || isMotherhoodVacation(createVacationForm));
 
         createVacationFormValidator.validate(createVacationForm, bindingResult, isApprovedVacation);
 

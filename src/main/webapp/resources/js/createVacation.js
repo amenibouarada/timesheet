@@ -13,7 +13,6 @@ dojo.ready(function () {
     dojo.connect(dojo.byId("divisionId"), "onchange", dojo.byId("divisionId"), updateEmployeeSelect);
     dojo.connect(dojo.byId("divisionId"), "onchange", dojo.byId("divisionId"), updateExitToWorkAndCountVacationDay);
     dojo.connect(dojo.byId("vacationType"), "onchange", dojo.byId("vacationType"), updateExitToWorkAndCountVacationDay);
-    dojo.connect(dojo.byId("vacationType"), "onchange", dojo.byId("vacationType"), updateSubmitButton);
     dojo.connect(dojo.byId("vacationType"), "onchange", dojo.byId("vacationType"), updateCountVacationDaysForPeriod);
     dojo.on(dijit.byId("calFromDate"), "change", updateExitToWorkAndCountVacationDay);
     dojo.on(dijit.byId("calFromDate"), "change", updateCountVacationDaysForPeriod);
@@ -311,15 +310,6 @@ function cancel() {
 function openCreateVacationRules() {
 
     window.open(rulesUrl);
-}
-
-function updateSubmitButton() {
-    if (dojo.byId('types').value == childBearId || dojo.byId('types').value == childCareId) {
-        dojo.byId('createVacationId').setAttribute("onclick", "javascript: createVacation(true)");
-    } else {
-        dojo.byId('createVacationId').setAttribute("onclick", "javascript: createVacation(false)");
-    }
-
 }
 
 function updateEmployeeSelect() {
