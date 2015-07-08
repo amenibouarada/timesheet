@@ -50,7 +50,7 @@ function onCalDateChange(calDateObj) {
     }
 }
 
-function confirmCalDateChange() {
+function confirmCalDateChangeWithReload() {
     var dialog = dijit.byId("dialogChangeDate");
     dialog.hide();
 
@@ -61,6 +61,11 @@ function confirmCalDateChange() {
         isErrorPage = false;
     }
     currentDate = dijit.byId('calDate').get("value");
+}
+
+function confirmCalDateChangeWithSave(){
+    var dialog = dijit.byId("dialogChangeDate");
+    dialog.hide();
 }
 
 function cancelCalDateChange() {
