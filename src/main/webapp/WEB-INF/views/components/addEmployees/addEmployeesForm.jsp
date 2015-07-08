@@ -27,6 +27,19 @@ com.aplana.timesheet.controller.AbstractControllerForEmployee.fillMavForAddEmplo
 <div data-dojo-type="dijit/Dialog" data-dojo-id="addEmployeesForm_employeeDialog" title="Добавить сотрудника">
 
     <form:form commandName="<%= ADD_FORM %>">
+        <label style="margin-left: 5px">Год</label>
+        <form:select id="addEmployeesForm_year" path="year"
+                     onchange="addEmployeesForm_updateAdditionEmployeeList();"
+                     style="margin: 10px 50px 10px 145px; width: 200px;">
+            <form:options items="${yearsList}" itemLabel="year" itemValue="year"/>
+        </form:select>
+
+        <label style="margin-left: 5px">Месяц</label>
+        <form:select id="addEmployeesForm_month" path="month"
+                     onchange="addEmployeesForm_updateAdditionEmployeeList();"
+                     style="margin: 10px 0px 10px 95px; width: 200px;">
+            <form:options items="${monthsList}" itemLabel="monthTxt" itemValue="month"/>
+        </form:select>
         <table class="dijitDialogPaneContentArea no_border employmentPlanningTable">
             <tr>
                 <td><label>Центр владельца проекта</label></td>
@@ -38,7 +51,7 @@ com.aplana.timesheet.controller.AbstractControllerForEmployee.fillMavForAddEmplo
                 </td>
                 <td rowspan="7"><label>Сотрудники </label>
                     <select id="addEmployeesForm_additionEmployeeList" multiple="true" style="height: 450px"/>
-                <td>
+                </td>
             </tr>
 
             <tr>
@@ -160,6 +173,8 @@ com.aplana.timesheet.controller.AbstractControllerForEmployee.fillMavForAddEmplo
         var managerId = dojo.byId("addEmployeesForm_managerId").value;
         var projectRoleListId = getSelectValues(dojo.byId("addEmployeesForm_projectRoleListId"));
         var regionListId = getSelectValues(dojo.byId("addEmployeesForm_regionListId"));
+        var year = getSelectValues(dojo.byId("addEmployeesForm_year"));
+        var month = getSelectValues(dojo.byId("addEmployeesForm_month"));
         // Делает ajax запрос, возвращающий сотрудников по центру/руководителю/должности/региону,
         processing();
         dojo.xhrGet({
@@ -168,7 +183,9 @@ com.aplana.timesheet.controller.AbstractControllerForEmployee.fillMavForAddEmplo
                 divisionId: divisionId,
                 managerId: managerId,
                 projectRoleListId: projectRoleListId,
-                regionListId: regionListId
+                regionListId: regionListId,
+                year: year,
+                month: month
             },
             handleAs: "text",
             load: function (response, ioArgs) {

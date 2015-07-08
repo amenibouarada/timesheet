@@ -554,15 +554,13 @@ public class EmployeeDAO {
 
     // Если manager_Id == null или <1, то ищет без учета менеджера
     public List<Employee> getDivisionEmployeesByManager(
-            Integer divisionId, Date date, List<Integer> regionIds, List<Integer> projectRoleIds, Integer managerId) {
-
+            Integer divisionId, Date date, List<Integer> regionIds, List<Integer> projectRoleIds, Integer managerId, Integer year, Integer month) {
+        Date lastDayOfMonth = DateTimeUtil.getLastDayOfMonth(month, year);
         Map<String, Object> parameters = new HashMap<String, Object>();
         parameters.put("div_id", divisionId);
-        parameters.put("date", date);
 
         StringBuilder queryString = new StringBuilder(
-                "from Employee e where e.division.id = :div_id" +
-                " and (:date >= e.startDate and (e.endDate is null or :date <= e.endDate))"
+                "from Employee e where e.division.id = :div_id"
         );
 
         if (regionIds != null && !regionIds.contains(ALL_REGIONS)){
@@ -577,6 +575,12 @@ public class EmployeeDAO {
             queryString.append(" and (e.manager.id = :manager_Id or e.manager2.id = :manager_Id)");
             parameters.put("manager_Id",managerId);
         }
+        if (year != null && month != null){
+            parameters.put("date", lastDayOfMonth);
+        } else {
+            parameters.put("date", date);
+        }
+        queryString.append(" and (:date >= e.startDate and (e.endDate is null or :date <= e.endDate))");
         queryString.append(" order by e.name");
         final Query query = entityManager.createQuery(queryString.toString());
         for (Map.Entry entry : parameters.entrySet()){
