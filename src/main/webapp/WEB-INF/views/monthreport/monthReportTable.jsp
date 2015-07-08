@@ -62,7 +62,7 @@
             div = div ? div : 0;
             monthReportTable_divisionId.value = div;
         }
-
+        monthReportTable_reloadTable();
         monthReport_cellsValidator(monthReportTable);
     });
 

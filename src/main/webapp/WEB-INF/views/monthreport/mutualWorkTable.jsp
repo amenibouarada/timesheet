@@ -85,7 +85,7 @@
         dojo.byId("mutualWorkTable_divisionOwnerId").value = div;
         dojo.byId("mutualWorkTable_divisionEmployeeId").value = div;
         fillProjectListByDivision(dojo.byId("mutualWorkTable_divisionOwnerId").value, dojo.byId("mutualWorkTable_projectId"), null);
-
+        mutualWorkTable_reloadTable();
         monthReport_cellsValidator(mutualWorkTable, "comment");
     });
 

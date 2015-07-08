@@ -187,7 +187,6 @@
                 dojo.forEach(eventConnections, dojo.disconnect);
                 eventConnections = [];
                 if (dijit.byId('tabContainer').selectedChildWidget.id == "monthReportTable_tab") {
-                    monthReportTable_reloadTable();
                     eventConnections.push(dojo.connect(monthreport_year, "onchange", function () {
                         monthReportTable_reloadTable()
                     }));
@@ -204,7 +203,6 @@
                     </sec:authorize>
                 }
                 if (dijit.byId('tabContainer').selectedChildWidget.id == "overtimeTable_tab") {
-                    overtimeTable_reloadTable();
                     eventConnections.push(dojo.connect(monthreport_year, "onchange", function () {
                         overtimeTable_reloadTable()
                     }));
@@ -222,7 +220,6 @@
                 }
                 <sec:authorize access="hasAnyRole('ROLE_ADMIN', 'ROLE_MONTH_REPORT_MANAGER')">
                 if (dijit.byId('tabContainer').selectedChildWidget.id == "mutualWorkTable_tab") {
-                    mutualWorkTable_reloadTable();
                     eventConnections.push(dojo.connect(monthreport_year, "onchange", function () {
                         mutualWorkTable_reloadTable()
                     }));
