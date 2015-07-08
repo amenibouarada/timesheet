@@ -271,34 +271,35 @@
                     function (status) {
                         monthReportStatus.innerHTML = status !== "" ? monthreport_getStatusById(status).name : "не удалось получить статус";
                         var editable = true;
-                        <sec:authorize access="hasAnyRole('ROLE_ADMIN', 'ROLE_MONTH_REPORT_MANAGER')">
+                        var closeButton = dojo.byId("monthReport_closeButton");
+                        var openButton = dojo.byId("monthReport_openButton");
+                        var saveButton = dojo.byId("monthReport_saveButton");
                         if (status == statusList.closed.id){
-                            if (monthReport_closeButton){ // кнопка может быть не видна для некоторых ролей
-                                monthReport_closeButton.style.visibility = "hidden";
-                                monthReport_openButton.style.visibility = "visible";
+                            if (closeButton){ // кнопка может быть не видна для некоторых ролей
+                                closeButton.style.visibility = "hidden";
+                                openButton.style.visibility = "visible";
                             }
-                            if (monthReport_saveButton) {
-                                monthReport_saveButton.style.visibility = "hidden";
+                            if (saveButton) {
+                                saveButton.style.visibility = "hidden";
                             }
                             editable = false;
                         }else if(status == statusList.notCreated.id){
-                            if (monthReport_closeButton){ // кнопка может быть не видна для некоторых ролей
-                                monthReport_closeButton.style.visibility = "hidden";
-                                monthReport_openButton.style.visibility = "hidden";
+                            if (closeButton){ // кнопка может быть не видна для некоторых ролей
+                                closeButton.style.visibility = "hidden";
+                                openButton.style.visibility = "hidden";
                             }
-                            if (monthReport_saveButton) {
-                                monthReport_saveButton.style.visibility = "visible";
+                            if (saveButton) {
+                                saveButton.style.visibility = "visible";
                             }
                         }else{
-                            if (monthReport_closeButton){ // кнопка может быть не видна для некоторых ролей
-                                monthReport_closeButton.style.visibility = "visible";
-                                monthReport_openButton.style.visibility = "hidden";
+                            if (closeButton){ // кнопка может быть не видна для некоторых ролей
+                                closeButton.style.visibility = "visible";
+                                openButton.style.visibility = "hidden";
                             }
-                            if (monthReport_saveButton) {
-                                monthReport_saveButton.style.visibility = "visible";
+                            if (saveButton) {
+                                saveButton.style.visibility = "visible";
                             }
                         }
-                        </sec:authorize>
                         monthReportTable.layout.cells[3].editable = editable;
                         monthReportTable.layout.cells[5].editable = editable;
                         monthReportTable.layout.cells[7].editable = editable;
@@ -306,6 +307,21 @@
                         monthReport_colorizeMonthOption();
                     }
             )
+        }
+
+        //Функция для изменения состояния кнопки "Сохранить". Необходима для того, чтобы невозможно было инициировать сохранение
+        // до завершения формирования таблицы.
+        // Параметр requredState - требуемое состояние кнопки (true - сделать активной, false - сделать неактивной)
+        function monthReport_saveButtonChangeState(requiredState) {
+            var saveButton = dojo.byId("monthReport_saveButton");
+            if (saveButton) {
+                if (requiredState == true) {
+                    saveButton.disabled = false;
+                }
+                if (requiredState == false) {
+                    saveButton.disabled = true;
+                }
+            }
         }
 
         <sec:authorize access="hasRole('ROLE_MONTH_REPORT_MANAGER')">

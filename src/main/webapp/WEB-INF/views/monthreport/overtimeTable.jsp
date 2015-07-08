@@ -107,9 +107,7 @@
 
     function overtimeTable_reloadTable(){
         //дизактивируем кнопку "Сохранить"
-        if (dojo.byId("monthReport_saveButton")) {
-            monthReport_saveButton.disabled = true;
-        }
+        monthReport_saveButtonChangeState(false);
         if (overtimeTable.store.isDirty()){
             if ( ! confirm("В таблице были изменения. Вы уверены, что хотите обновить данные не записав текущие?")){
                 return;
@@ -139,9 +137,7 @@
                     overtimeTable_addRows(data);
                     overtimeTable.store.save();
                     //делаем кнопку "Сохранить" активной
-                    if (dojo.byId("monthReport_saveButton")) {
-                        monthReport_saveButton.disabled = false;
-                    }
+                    monthReport_saveButtonChangeState(true);
                 }
         );
     }

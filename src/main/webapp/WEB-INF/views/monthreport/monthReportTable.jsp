@@ -129,9 +129,7 @@
 
     function monthReportTable_reloadTable(){
         //дизактивируем кнопку "Сохранить"
-        if (dojo.byId("monthReport_saveButton")) {
-            monthReport_saveButton.disabled = true;
-        }
+        monthReport_saveButtonChangeState(false);
         if (monthReportTable.store && monthReportTable.store.isDirty()){
             if ( ! confirm("В таблице были изменения. Вы уверены, что хотите обновить данные не записав текущие?")){
                 return;
@@ -168,9 +166,7 @@
                     }
                     monthReportTable.store.save();
                     //делаем кнопку "Сохранить" активной
-                    if (dojo.byId("monthReport_saveButton")) {
-                        monthReport_saveButton.disabled = false;
-                    }
+                    monthReport_saveButtonChangeState(true);
                 }
         );
     }
