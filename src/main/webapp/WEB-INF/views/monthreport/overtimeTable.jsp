@@ -65,7 +65,6 @@
             dojo.byId("overtimeTable_divisionEmployeeId").value = div;
             overtimeTable_divisionChanged();
         }
-        overtimeTable_reloadTable();
         monthReport_cellsValidator(overtimeTable, "comment");
     });
 

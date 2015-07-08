@@ -54,18 +54,6 @@
 
 <script type="text/javascript">
 
-    dojo.addOnLoad(function(){
-        monthReportTable_createStore();
-        if (dojo.byId("monthReportTable_divisionId")){
-            monthReportTable_updateManagers();
-            var div = getCookieValue('aplanaDivision');
-            div = div ? div : 0;
-            monthReportTable_divisionId.value = div;
-        }
-        monthReportTable_reloadTable();
-        monthReport_cellsValidator(monthReportTable);
-    });
-
     var gridlayout = [
         {
             cells: [[

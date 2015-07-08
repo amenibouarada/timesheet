@@ -181,12 +181,23 @@
             monthReport_updateStatus();
             monthReport_colorizeMonthOption();
 
+            // Поскольку вкладка "Табель" загружается первой и по умолчанию, то выполняем инициирующие операции для этой вкладки
+            monthReportTable_createStore();
+            if (dojo.byId("monthReportTable_divisionId")){
+                monthReportTable_updateManagers();
+                var div = getCookieValue('aplanaDivision');
+                div = div ? div : 0;
+                monthReportTable_divisionId.value = div;
+            }
+            monthReport_cellsValidator(monthReportTable);
+
             // функция для переназначения обработчиков нажатия кнопок
             // и отображения актуальных данных
             var changeButtonListeners = function () {
                 dojo.forEach(eventConnections, dojo.disconnect);
                 eventConnections = [];
                 if (dijit.byId('tabContainer').selectedChildWidget.id == "monthReportTable_tab") {
+                    monthReportTable_reloadTable();
                     eventConnections.push(dojo.connect(monthreport_year, "onchange", function () {
                         monthReportTable_reloadTable()
                     }));
@@ -203,6 +214,7 @@
                     </sec:authorize>
                 }
                 if (dijit.byId('tabContainer').selectedChildWidget.id == "overtimeTable_tab") {
+                    overtimeTable_reloadTable();
                     eventConnections.push(dojo.connect(monthreport_year, "onchange", function () {
                         overtimeTable_reloadTable()
                     }));
@@ -220,6 +232,7 @@
                 }
                 <sec:authorize access="hasAnyRole('ROLE_ADMIN', 'ROLE_MONTH_REPORT_MANAGER')">
                 if (dijit.byId('tabContainer').selectedChildWidget.id == "mutualWorkTable_tab") {
+                    mutualWorkTable_reloadTable();
                     eventConnections.push(dojo.connect(monthreport_year, "onchange", function () {
                         mutualWorkTable_reloadTable()
                     }));
