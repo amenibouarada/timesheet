@@ -89,14 +89,18 @@ public class EmploymentPlanningController {
     @RequestMapping(value="/employmentPlanning/getAddEmployeeListAsJSON", produces = "text/plain;charset=UTF-8")
     @ResponseBody
     public String showAddEmployeeList(@ModelAttribute(AddEmployeeForm.ADD_FORM) AddEmployeeForm form) {
+        Date date;
+        if (form.getYear() == null || form.getMonth() == null) {
+            date = new Date();
+        } else {
+            date = DateTimeUtil.getLastDayOfAnyMonth(form.getYear(), form.getMonth());
+        }
         List<Employee> employeeList = employeeService.getDivisionEmployeesByManager(
                 form.getDivisionId(),
-                new Date(),
+                date,
                 form.getRegionListId(),
                 form.getProjectRoleListId(),
-                form.getManagerId(),
-                form.getYear(),
-                form.getMonth());
+                form.getManagerId());
 
         return employeeService.getEmployeeListAsJson(employeeList, true);
     }
