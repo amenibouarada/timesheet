@@ -646,11 +646,11 @@ public class EmployeeLdapService extends AbstractServiceWithTransactionManagemen
     }
 
     private void findAndFillJobField(EmployeeLdap employeeLdap, StringBuffer errors, Employee employee) {
-        ProjectRole job = projectRoleService.find(employeeLdap.getTitle());
-        if (job != null) {
-            employee.setJob(job);
-        } else {
-            employee.setJob(projectRoleService.getUndefinedRole());
+        try{
+            employee.setJob(projectRoleService.findJobForCreateEmployee(employeeLdap.getTitle()));
+        }catch(Exception exc){
+            errors.append("Role not found and didn't set fo employee " + employeeLdap.getEmail());
+            logger.error("Some exception happened while adding project role to employee" + employeeLdap.getEmail(), exc);
         }
     }
 

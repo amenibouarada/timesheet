@@ -3,6 +3,7 @@ package com.aplana.timesheet.service;
 import argo.jdom.JsonArrayNodeBuilder;
 import com.aplana.timesheet.dao.ProjectRoleDAO;
 import com.aplana.timesheet.dao.entity.ProjectRole;
+import com.aplana.timesheet.enums.ProjectRolesEnum;
 import com.aplana.timesheet.util.JsonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,16 +39,11 @@ public class ProjectRoleService {
     public ProjectRole find(String title) {
 		return projectRoleDAO.find(title);
 	}
+
 	/** Возвращает активные проектные роли. */
     @Transactional(readOnly = true)
     public List<ProjectRole> getProjectRoles() {
 		return projectRoleDAO.getProjectRoles();
-	}
-	
-	/** Возвращает объект роли, которая не определена. */
-	public ProjectRole getUndefinedRole() { //TODO заменить вызовы на установку enum'a
-        //роль не определена
-        return projectRoleDAO.findByCode("ND");
 	}
 
     public String getProjectRoleListJson(Iterable<ProjectRole> projectRoleList) {
@@ -62,6 +58,15 @@ public class ProjectRoleService {
         }
 
         return JsonUtil.format(builder);
+    }
+
+    public ProjectRole findJobForCreateEmployee(String ldapRoleTitle) {
+        ProjectRole job = find(ldapRoleTitle);
+        if (job != null) {
+            return job;
+        } else {
+            return projectRoleDAO.find(ProjectRolesEnum.ANALYST.getId());
+        }
     }
 
 }
