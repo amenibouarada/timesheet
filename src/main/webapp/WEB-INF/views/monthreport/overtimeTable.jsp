@@ -69,18 +69,10 @@
     });
 
     function overtimeTable_addNewEmployees(){
-        overtimeTable_employeeDialogShow();
+        var divisionOwnerId = dojo.byId("overtimeTable_divisionOwnerId").value;
+        var divisionEmployeeId = dojo.byId("overtimeTable_divisionEmployeeId").value;
+        monthReport_employeeDialogShow(divisionOwnerId, divisionEmployeeId);
         addEmployeesForm_returnEmployees = overtimeTable_returnEmployees;
-    }
-
-    function overtimeTable_employeeDialogShow(){
-        // изменение значений на форме "Добавить сотрудника"
-        dojo.byId("addEmployeesForm_divisionOwnerId").value = overtimeTable_divisionOwnerId.value;
-        dojo.byId("addEmployeesForm_divisionId").value = overtimeTable_divisionEmployeeId.value;
-        // значения изменились - необходимо запустить функции, обработчики изменений
-        addEmployeesForm_updateLists();
-        // Открыть форму добавления сотрудников
-        addEmployeesForm_employeeDialog.show();
     }
 
     function overtimeTable_divisionChanged(){
