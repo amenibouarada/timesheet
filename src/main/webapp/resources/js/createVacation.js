@@ -63,9 +63,9 @@ dojo.declare("DateTextBox", com.aplana.dijit.ext.DateTextBox, {
             return true;
         } else {
             if (hasRoleAdmin) {
-                return (date <= new Date());
-            } else {
                 return false;
+            } else {
+                return (date <= new Date());
             }
         }
     }

@@ -320,9 +320,7 @@ public class WithLdapSyncService {
 
         employee.setRegion(region);
 
-        employee.setJob(
-                Optional.fromNullable(projectRoleDAO.find(employeeFromLdap.getTitle()))
-                        .or(projectRoleService.getUndefinedRole()));
+        employee.setJob(projectRoleService.findJobForCreateEmployee(employeeFromLdap.getTitle()));
 
         employee.setPermissions(Sets.newHashSet(projectRolePermissionsDAO.getProjectRolePermission(employee.getJob())));
 
