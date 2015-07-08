@@ -8,9 +8,7 @@ function somethingChanged() {
 
 function onEmployeeChange(employeeObj) {
     setDefaultEmployeeJob(-1);
-    if (selectedCalDate == '') {
-        setDefaultDate()
-    }
+    setDefaultDate();
 }
 
 /**
@@ -30,11 +28,17 @@ function onCalDateChange(calDateObj) {
     var sameDateOnChangeEventFired = (currentDate.getTime() == dijit.byId('calDate').get("value").getTime());
 
     if (!sameDateOnChangeEventFired) {
-        if (!isFinalForm && (tablePartNotEmpty() || planBoxNotEmpty())) {
+        if (!isFinalForm && (tablePartNotEmpty() || planBoxNotEmpty()) &&
+            (selectedCalDate == '')) // если дата пришла с контроллера, то не запускаем диалог, иначе показываем
+        {
             var dialog = dijit.byId("dialogChangeDate");
             dojo.style(dialog.closeButtonNode, "display", "none");
             dialog.show();
         } else {
+            if (selectedCalDate != ''){
+                dijit.byId('calDate').set("value", getDateByString(selectedCalDate));
+                selectedCalDate = ''; // чтоб при следующей смене дат - диалог всё же отображался
+            }
             refreshDailyTimesheetData(requestDailyTimesheetData(calDateObj.value, dojo.byId('employeeId').value));
 
             if (isErrorPage) {
