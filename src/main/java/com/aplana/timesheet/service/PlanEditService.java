@@ -539,7 +539,9 @@ public class PlanEditService {
                 date,
                 getRegionIds(form),
                 getProjectRoleIds(form),
-                managerId
+                managerId,
+                null,
+                null
         );
         if (managerId != null && managerId >= 1) {
             Employee manager = employeeService.find(managerId);

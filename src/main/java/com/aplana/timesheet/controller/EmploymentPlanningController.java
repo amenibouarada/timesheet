@@ -94,7 +94,9 @@ public class EmploymentPlanningController {
                 new Date(),
                 form.getRegionListId(),
                 form.getProjectRoleListId(),
-                form.getManagerId());
+                form.getManagerId(),
+                form.getYear(),
+                form.getMonth());
 
         return employeeService.getEmployeeListAsJson(employeeList, true);
     }

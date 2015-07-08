@@ -10,6 +10,9 @@ import java.util.List;
  */
 // ToDo сделать общую форму
 public class AddEmployeeForm {
+    private Integer year;
+    private Integer month;
+    private String monthTxt;
     private Integer divisionOwnerId;
     private Integer projectTypeId;
     private Integer projectId;
@@ -17,7 +20,6 @@ public class AddEmployeeForm {
     private Integer managerId;
     private List<Integer> projectRoleListId;
     private List<Integer> regionListId;
-
 
     public static final String ADD_FORM = "addEmployeeForm";
 
@@ -78,5 +80,29 @@ public class AddEmployeeForm {
 
     public void setProjectId(Integer projectId) {
         this.projectId = projectId;
+    }
+
+    public Integer getYear() {
+        return year;
+    }
+
+    public void setYear(Integer year) {
+        this.year = year;
+    }
+
+    public Integer getMonth() {
+        return month;
+    }
+
+    public void setMonth(Integer month) {
+        this.month = month;
+    }
+
+    public String getMonthTxt() {
+        return monthTxt;
+    }
+
+    public void setMonthTxt(String monthTxt) {
+        this.monthTxt = monthTxt;
     }
 }

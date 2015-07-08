@@ -1,5 +1,6 @@
 package com.aplana.timesheet.controller;
 
+import com.aplana.timesheet.dao.entity.Calendar;
 import com.aplana.timesheet.dao.entity.Division;
 import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.enums.TypesOfActivityEnum;
@@ -72,6 +73,9 @@ public abstract class AbstractControllerForEmployee extends AbstractController{
     }
 
     protected ModelAndView fillMavForAddEmployeesForm(ModelAndView modelAndView){
+        List<Calendar> yearsList = DateTimeUtil.getYearsList(calendarService);
+        modelAndView.addObject("yearsList", yearsList);
+        modelAndView.addObject("monthsList", calendarService.getMonthList(yearsList.get(0).getYear()));
         modelAndView.addObject("divisionList", divisionService.getDivisions());
         modelAndView.addObject("projectTypeList",
                 Arrays.asList(TypesOfActivityEnum.PROJECT, TypesOfActivityEnum.PRESALE, TypesOfActivityEnum.NON_PROJECT));

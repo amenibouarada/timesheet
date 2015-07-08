@@ -98,6 +98,10 @@
         // изменение значений на форме "Добавить сотрудника"
         dojo.byId("addEmployeesForm_divisionOwnerId").value = mutualWorkTable_divisionOwnerId.value;
         dojo.byId("addEmployeesForm_divisionId").value = mutualWorkTable_divisionEmployeeId.value;
+        dojo.byId("addEmployeesForm_year").value = monthreport_year.value;
+        dojo.byId("addEmployeesForm_month").value = monthreport_month.value;
+        dojo.byId("addEmployeesForm_year").disabled = true;
+        dojo.byId("addEmployeesForm_month").disabled = true;
         // значения изменились - необходимо запустить функции, обработчики изменений
         addEmployeesForm_updateLists();
         // Открыть форму добавления сотрудников
