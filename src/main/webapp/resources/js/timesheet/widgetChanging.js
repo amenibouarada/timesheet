@@ -8,7 +8,9 @@ function somethingChanged() {
 
 function onEmployeeChange(employeeObj) {
     setDefaultEmployeeJob(-1);
-    setDefaultDate()
+    if (selectedCalDate == '') {
+        setDefaultDate()
+    }
 }
 
 /**

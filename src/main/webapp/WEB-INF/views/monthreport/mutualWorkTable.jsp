@@ -85,7 +85,7 @@
         dojo.byId("mutualWorkTable_divisionOwnerId").value = div;
         dojo.byId("mutualWorkTable_divisionEmployeeId").value = div;
         fillProjectListByDivision(dojo.byId("mutualWorkTable_divisionOwnerId").value, dojo.byId("mutualWorkTable_projectId"), null);
-
+        mutualWorkTable_reloadTable();
         monthReport_cellsValidator(mutualWorkTable, "comment");
     });
 
@@ -139,9 +139,7 @@
 
     function mutualWorkTable_reloadTable() {
         //дизактивируем кнопку "Сохранить"
-        if (dojo.byId("monthReport_saveButton")) {
-            monthReport_saveButton.disabled = true;
-        }
+        monthReport_saveButtonChangeState(false);
         // меняем видимость кнопки "Добавить сотрудников"
         if (mutualWorkTable_divisionOwnerId.value == ALL_VALUE ||
                 mutualWorkTable_divisionEmployeeId.value == ALL_VALUE) {
@@ -182,9 +180,7 @@
                     });
                     mutualWorkTable.store.save();
                     //делаем кнопку "Сохранить" активной
-                    if (dojo.byId("monthReport_saveButton")) {
-                        monthReport_saveButton.disabled = false;
-                    }
+                    monthReport_saveButtonChangeState(true);
                 }
         );
     }
