@@ -216,20 +216,6 @@ public class DateTimeUtil {
     }
 
     /**
-     * Возвращает последний день месяца
-     *
-     * @param month
-     * @param year
-     * @return last day of month in MM/dd/YYYY format
-     */
-    public static Date getLastDayOfMonth(int month, int year) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(year, month - 1, 1);
-        calendar.set(Calendar.DATE, calendar.getActualMaximum(Calendar.DATE));
-        return calendar.getTime();
-    }
-
-    /**
      * Возвращает текущий день
      *
      * @return String
@@ -306,6 +292,20 @@ public class DateTimeUtil {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(targetDate);
         calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
+        return calendar.getTime();
+    }
+
+    /**
+     * Возвращает последний день месяца по году и месяцу
+     *
+     * @param month
+     * @param year
+     * @return last day of month in MM/dd/YYYY format
+     */
+    public static Date getLastDayOfAnyMonth(int year, int month) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(year, month - 1, 1);
+        calendar.set(Calendar.DATE, calendar.getActualMaximum(Calendar.DATE));
         return calendar.getTime();
     }
 

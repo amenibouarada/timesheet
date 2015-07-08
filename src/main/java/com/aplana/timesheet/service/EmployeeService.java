@@ -316,9 +316,9 @@ public class EmployeeService extends EmployeeJSONBuilder {
         });
     }
 
-    public List<Employee> getDivisionEmployeesByManager(Integer divisionId, Date date, List<Integer> regionIds, List<Integer> projectRoleIds, Integer managerId, Integer year, Integer month) {
+    public List<Employee> getDivisionEmployeesByManager(Integer divisionId, Date date, List<Integer> regionIds, List<Integer> projectRoleIds, Integer managerId) {
         List<Employee> employees =
-                getSubManagersEmployee(divisionId, date, regionIds, projectRoleIds, managerId, year, month);
+                getSubManagersEmployee(divisionId, date, regionIds, projectRoleIds, managerId);
 
         Collections.sort(employees, new Comparator<Employee>() {
             @Override
@@ -333,14 +333,14 @@ public class EmployeeService extends EmployeeJSONBuilder {
     // возвращает список сотрудников по переданным параметром,
     // а также рекурсивно всех подчиненных у найденных сотрудников
     public List<Employee> getSubManagersEmployee(
-            Integer divisionId, Date date, List<Integer> regionIds, List<Integer> projectRoleIds, Integer managerId, Integer year, Integer month){
+            Integer divisionId, Date date, List<Integer> regionIds, List<Integer> projectRoleIds, Integer managerId){
 
-        Set<Employee> employeesByManager = new HashSet<Employee>(employeeDAO.getDivisionEmployeesByManager(divisionId, date, regionIds, projectRoleIds, managerId, year, month));
+        Set<Employee> employeesByManager = new HashSet<Employee>(employeeDAO.getDivisionEmployeesByManager(divisionId, date, regionIds, projectRoleIds, managerId));
         Set<Employee> employeesBySubManagers = new HashSet<Employee>();
         for (Employee employee : employeesByManager) {
             if (!(employeesBySubManagers.contains(employee))) {
                 employeesBySubManagers.add(employee);
-                employeesBySubManagers.addAll(getSubManagersEmployee(divisionId, date, regionIds, projectRoleIds, employee.getId(), year, month));
+                employeesBySubManagers.addAll(getSubManagersEmployee(divisionId, date, regionIds, projectRoleIds, employee.getId()));
             }
         }
         employeesByManager.addAll(employeesBySubManagers);
