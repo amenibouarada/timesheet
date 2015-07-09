@@ -16,6 +16,9 @@ function onEmployeeChange(employeeObj) {
  * @param calDateObj
  */
 function onCalDateChange(calDateObj) {
+    if (dateDiffInDay(getDateByString(selectedCalDate), new Date) < 1){
+        selectedCalDate = "";
+    }
     calDateObj.constraints.min = getFirstWorkDate(getEmployeeData());
     var lastWorkDate = getLastWorkDate(getEmployeeData());
     if (lastWorkDate != null && lastWorkDate != "") {
