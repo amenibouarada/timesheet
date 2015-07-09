@@ -99,12 +99,10 @@
 </div>
 
 <div id="dialogChangeDate" data-dojo-type="dijit.Dialog" title="" style="display: none;">
-    <div data-dojo-type="dijit.layout.ContentPane" style="width: 480px; height: 130px;">
-        Дата изменилась. В отчете имеются несохраненные изменения.<br/>
-        <b>Продолжить</b> с загрузкой новых данных: Данные сборсятся и заполнятся новыми данными (например из черновика или пусто, если данных нет)<br/>
-        <b>Сохранить</b> введенные значения: Данные введенные на данный момент останутся, данные из черновика не загрузятся<br/>
-        <b>Отмена</b>: Дата не изменися, данные сохранятся
-        <br/>
+    <div data-dojo-type="dijit.layout.ContentPane" style="width: 400px; height: 75px;">
+        Дата изменилась. Выберите одно из действий:<br/>
+        <b>Продолжить</b> без переноса введенных данных на новую дату <br/>
+        <b>Перенести</b> введенные данные на новую дату<br/>
         <button id="confirmDateChangeWithReload" style="margin-top: 10px; margin-left: 10px; width: 120px;"
                 onclick="confirmCalDateChangeWithReload()">
             Продолжить
@@ -113,7 +111,6 @@
                 onclick="confirmCalDateChangeWithSave()">
             Сохранить
         </button>
-
         <button id="cancelDateChange" style="margin-top: 10px; margin-left: 10px; width: 120px;"
                 onclick="cancelCalDateChange()">
             Отмена
