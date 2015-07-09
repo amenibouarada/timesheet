@@ -27,30 +27,40 @@ com.aplana.timesheet.controller.AbstractControllerForEmployee.fillMavForAddEmplo
 <div data-dojo-type="dijit/Dialog" data-dojo-id="addEmployeesForm_employeeDialog" title="Добавить сотрудника">
 
     <form:form commandName="<%= ADD_FORM %>">
-        <label style="margin-left: 5px">Год</label>
-        <form:select id="addEmployeesForm_year" path="year"
-                     onchange="addEmployeesForm_updateAdditionEmployeeList();"
-                     style="margin: 10px 50px 10px 145px; width: 200px;">
-            <form:options items="${yearsList}" itemLabel="year" itemValue="year"/>
-        </form:select>
-
-        <label style="margin-left: 5px">Месяц</label>
-        <form:select id="addEmployeesForm_month" path="month"
-                     onchange="addEmployeesForm_updateAdditionEmployeeList();"
-                     style="margin: 10px 0px 10px 95px; width: 200px;">
-            <form:options items="${monthsList}" itemLabel="monthTxt" itemValue="month"/>
-        </form:select>
         <table class="dijitDialogPaneContentArea no_border employmentPlanningTable">
+            <tr>
+                <td><label>Год</label></td>
+                <td>
+                    <form:select id="addEmployeesForm_year" path="year"
+                                 onchange="addEmployeesForm_updateAdditionEmployeeList();"
+                                 style="width: 200px;">
+                        <form:options items="${yearsList}" itemLabel="year" itemValue="year"/>
+                    </form:select>
+                </td>
+                <td rowspan="9"><label>Сотрудники </label>
+                    <select id="addEmployeesForm_additionEmployeeList" multiple="true" style="height: 515px"/>
+                </td>
+            </tr>
+
+            <tr>
+                <td><label>Месяц</label></td>
+                <td>
+                    <form:select id="addEmployeesForm_month" path="month"
+                                 onchange="addEmployeesForm_updateAdditionEmployeeList();"
+                                 style="width: 200px;">
+                        <form:options items="${monthsList}" itemLabel="monthTxt" itemValue="month"/>
+                    </form:select>
+                </td>
+            </tr>
+
             <tr>
                 <td><label>Центр владельца проекта</label></td>
                 <td>
                     <form:select id="addEmployeesForm_divisionOwnerId" path="divisionOwnerId"
-                                 onchange="addEmployeesForm_updateProjectList()">
+                                 onchange="addEmployeesForm_updateProjectList()"
+                                 style="width: 200px;">
                         <form:options items="${divisionList}" itemLabel="name" itemValue="id"/>
                     </form:select>
-                </td>
-                <td rowspan="7"><label>Сотрудники </label>
-                    <select id="addEmployeesForm_additionEmployeeList" multiple="true" style="height: 450px"/>
                 </td>
             </tr>
 
@@ -58,7 +68,8 @@ com.aplana.timesheet.controller.AbstractControllerForEmployee.fillMavForAddEmplo
                 <td><label>Тип</label></td>
                 <td>
                     <form:select id="addEmployeesForm_projectTypeId" path="projectTypeId"
-                                 onchange="addEmployeesForm_updateProjectList()">
+                                 onchange="addEmployeesForm_updateProjectList()"
+                                 style="width: 200px;">
                         <form:options items="${projectTypeList}" itemLabel="name" itemValue="id"/>
                     </form:select>
                 </td>
@@ -66,14 +77,15 @@ com.aplana.timesheet.controller.AbstractControllerForEmployee.fillMavForAddEmplo
             <tr>
                 <td><label>Проект</label></td>
                 <td>
-                    <form:select id="addEmployeesForm_projectId" path="projectId" onchange=""></form:select>
+                    <form:select id="addEmployeesForm_projectId" path="projectId" onchange="" style="width: 200px;"></form:select>
                 </td>
             </tr>
             <tr>
                 <td><label>Подразделение сотрудника</label></td>
                 <td>
                     <form:select id="addEmployeesForm_divisionId" path="divisionId"
-                                 onchange="addEmployeesForm_updateManagers(); addEmployeesForm_updateAdditionEmployeeList();">
+                                 onchange="addEmployeesForm_updateManagers(); addEmployeesForm_updateAdditionEmployeeList();"
+                                 style="width: 200px;">
                         <form:options items="${divisionList}" itemLabel="name" itemValue="id"/>
                     </form:select>
                 <td>
@@ -82,7 +94,8 @@ com.aplana.timesheet.controller.AbstractControllerForEmployee.fillMavForAddEmplo
                 <td><label>Руководитель </label></td>
                 <td>
                     <form:select id="addEmployeesForm_managerId" path="managerId"
-                                 onchange="addEmployeesForm_updateAdditionEmployeeList()">
+                                 onchange="addEmployeesForm_updateAdditionEmployeeList()"
+                                 style="width: 200px;">
                         <form:option label="Все руководители" value="${all}"/>
                     </form:select>
                 <td>
@@ -91,7 +104,7 @@ com.aplana.timesheet.controller.AbstractControllerForEmployee.fillMavForAddEmplo
                 <td><label>Должности </label></td>
                 <td>
                     <form:select id="addEmployeesForm_projectRoleListId" path="projectRoleListId" multiple="true"
-                                 onchange="addEmployeesForm_updateAdditionEmployeeList()" style="height: 110px">
+                                 onchange="addEmployeesForm_updateAdditionEmployeeList()" style="height: 110px; width: 200px;">
                         <form:option value="-1" label="Все">Все должности</form:option>
                         <form:options items="${projectRoleList}" itemLabel="name" itemValue="id"/>
                     </form:select>
@@ -101,7 +114,7 @@ com.aplana.timesheet.controller.AbstractControllerForEmployee.fillMavForAddEmplo
                 <td><label>Регионы </label></td>
                 <td>
                     <form:select id="addEmployeesForm_regionListId" path="regionListId" multiple="true"
-                                 onchange="addEmployeesForm_updateAdditionEmployeeList()"  style="height: 200px">
+                                 onchange="addEmployeesForm_updateAdditionEmployeeList()"  style="height: 200px; width: 200px;">
                         <form:option value="-1" label="Все">Все регионы</form:option>
                         <form:options items="${regionList}" itemLabel="name" itemValue="id"/>
                     </form:select>
