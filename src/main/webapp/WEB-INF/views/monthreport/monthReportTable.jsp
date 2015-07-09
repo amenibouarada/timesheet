@@ -75,7 +75,7 @@
 /* 11 */                {field: "ts_over_done"          , name: "Переработки отгуленные",           width: "50px"},
 /* 12 */                {field: "ts_over_not_done"      , name: "Переработки не отгуленные",        width: "50px"},
 /* 13 */                {field: "ts_over_remain"        , name: "Переработки оставшиеся",           width: "50px"},
-/* 14 */                {field: "ts_vacation_avail"     , name: "Доступный отпуск",                 width: "50px"},
+/* 14 */                {field: "ts_vacation_avail"     , name: "Доступный отпуск",                 width: "50px", editable: true},
 /* 15 */                {field: "calc_worked_plan"      , name: "Отработано (план)",                width: "50px"},
 /* 16 */                {field: "calc_worked_fact"      , name: "Отработано (факт)",                width: "50px"},
 /* 17 */                {field: "calc_vacation"         , name: "Отпуск",                           width: "50px"},
