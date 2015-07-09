@@ -178,7 +178,7 @@ com.aplana.timesheet.controller.AbstractControllerForEmployee.fillMavForAddEmplo
         // Делает ajax запрос, возвращающий сотрудников по центру/руководителю/должности/региону,
         processing();
         dojo.xhrGet({
-            url: "/employmentPlanning/getAddEmployeeListAsJSON",
+            url: "/employee/getAddEmployeeListAsJSON",
             content: {
                 divisionId: divisionId,
                 managerId: managerId,

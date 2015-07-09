@@ -85,27 +85,6 @@ public class EmploymentPlanningController {
     }
 
     /* Возвращает JSON для форме выбора сотрудников */
-//    ToDo поменять адрес запроса и переместить в EmployeeController
-    @RequestMapping(value="/employmentPlanning/getAddEmployeeListAsJSON", produces = "text/plain;charset=UTF-8")
-    @ResponseBody
-    public String showAddEmployeeList(@ModelAttribute(AddEmployeeForm.ADD_FORM) AddEmployeeForm form) {
-        Date date;
-        if (form.getYear() == null || form.getMonth() == null) {
-            date = new Date();
-        } else {
-            date = DateTimeUtil.getLastDayOfAnyMonth(form.getYear(), form.getMonth());
-        }
-        List<Employee> employeeList = employeeService.getDivisionEmployeesByManager(
-                form.getDivisionId(),
-                date,
-                form.getRegionListId(),
-                form.getProjectRoleListId(),
-                form.getManagerId());
-
-        return employeeService.getEmployeeListAsJson(employeeList, true);
-    }
-
-    /* Возвращает JSON для форме выбора сотрудников */
     @RequestMapping(value="/employmentPlanning/getProjectByDivisionAsJSON", produces = "text/plain;charset=UTF-8")
     @ResponseBody
     public String showAddEmployeeList(
