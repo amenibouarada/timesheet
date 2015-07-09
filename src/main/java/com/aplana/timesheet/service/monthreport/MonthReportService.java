@@ -75,7 +75,7 @@ public class MonthReportService {
             detailMap.put("ts_all_paid",                        detail.getTs_all_paid());
             detailMap.put("ts_over_val_fin_comp_calculated",    detail.getTs_over_val_fin_comp_calculated());
             detailMap.put("ts_over_val_fin_comp",               detail.getTs_over_val_fin_comp());
-            detailMap.put("ts_over_accounted",                  detail.getTs_all_over_accounted());
+            detailMap.put("ts_over_accounted",                  detail.getTs_over_accounted());
             detailMap.put("ts_premium",                         detail.getTs_premium());
             detailMap.put("ts_all_over_accounted",              detail.getTs_all_over_accounted());
             detailMap.put("ts_over_done",                       detail.getTs_over_done());
