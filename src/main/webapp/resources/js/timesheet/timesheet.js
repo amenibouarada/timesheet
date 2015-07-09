@@ -120,13 +120,14 @@ function getEmployeeData() {
 }
 
 function updateEmployeeSelect() {
+    var showFiredEmployees = getCookieValue('SHOW_ALLUSER') == 'active' ? true : false;
     var divisionId = timeSheetForm.divisionId.target == null ? timeSheetForm.divisionId.value : timeSheetForm.divisionId.target.value;
     if (!divisionId || +divisionId == 0) {
         refreshEmployeeSelect([]);
         checkIsVacationDay();
     } else {
         dojo.xhrGet({
-            url: getContextPath() + "/employee/employeeListWithLastWorkday/" + divisionId + "/true/true",
+            url: getContextPath() + "/employee/employeeListWithLastWorkday/" + divisionId + "/" + showFiredEmployees + "/true",
             handleAs: "json",
             timeout: 10000,
             sync: true,
