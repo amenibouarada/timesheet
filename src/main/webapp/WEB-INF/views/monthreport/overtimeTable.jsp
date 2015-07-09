@@ -42,8 +42,8 @@
             <th field="region_name"                  width="100px"                                                       >Регион</th>
             <th field="project_type_name"            width="100px"                                                       >Тип</th>
             <th field="project_name"                 width="100px"                                                       >Проект/Пресейл</th>
-            <th field="overtime"                     width="50px"   editable="true" formatter= "monthReport_colorCell"   >Переработки</th>
-            <th field="premium"                      width="50px"   editable="true" formatter= "monthReport_colorCell"   >Премия</th>
+            <th field="overtime"                     width="50px"   editable="true" formatter= "monthReport_colorCell"   >Переработки отработанные</th>
+            <th field="premium"                      width="50px"   editable="true" formatter= "monthReport_colorCell"   >Переработки дополнительные</th>
             <th field="total_accounted_overtime"     width="50px"                                                        >Всего учтенных переработок и премий</th>
             <th field="overtime_calculated"          width="50px"                                                        >Расч. переработки</th>
             <th field="comment"                      width="100px"  editable="true"                                      >Комментарий</th>
