@@ -48,7 +48,7 @@
 </table>
 </sec:authorize>
 
-<div data-dojo-id="monthReportTable" data-dojo-type="dojox.grid.DataGrid" height="500px"
+<div data-dojo-id="monthReportTable" data-dojo-type="dojox.grid.DataGrid" height="430px"
      onApplyEdit="monthReportTable_cellChanged" structure="gridlayout">
 </div>
 
