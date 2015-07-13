@@ -42,8 +42,8 @@
             <th field="region_name"                  width="100px"                                                       >Регион</th>
             <th field="project_type_name"            width="100px"                                                       >Тип</th>
             <th field="project_name"                 width="100px"                                                       >Проект/Пресейл</th>
-            <th field="overtime"                     width="50px"   editable="true" formatter= "monthReport_colorCell"   >Переработки</th>
-            <th field="premium"                      width="50px"   editable="true" formatter= "monthReport_colorCell"   >Премия</th>
+            <th field="overtime"                     width="50px"   editable="true" formatter= "monthReport_colorCell"   >Переработки отработанные</th>
+            <th field="premium"                      width="50px"   editable="true" formatter= "monthReport_colorCell"   >Переработки дополнительные</th>
             <th field="total_accounted_overtime"     width="50px"                                                        >Всего учтенных переработок и премий</th>
             <th field="overtime_calculated"          width="50px"                                                        >Расч. переработки</th>
             <th field="comment"                      width="100px"  editable="true"                                      >Комментарий</th>
@@ -65,23 +65,14 @@
             dojo.byId("overtimeTable_divisionEmployeeId").value = div;
             overtimeTable_divisionChanged();
         }
-        overtimeTable_reloadTable();
         monthReport_cellsValidator(overtimeTable, "comment");
     });
 
     function overtimeTable_addNewEmployees(){
-        overtimeTable_employeeDialogShow();
+        var divisionOwnerId = dojo.byId("overtimeTable_divisionOwnerId").value;
+        var divisionEmployeeId = dojo.byId("overtimeTable_divisionEmployeeId").value;
+        monthReport_employeeDialogShow(divisionOwnerId, divisionEmployeeId);
         addEmployeesForm_returnEmployees = overtimeTable_returnEmployees;
-    }
-
-    function overtimeTable_employeeDialogShow(){
-        // изменение значений на форме "Добавить сотрудника"
-        dojo.byId("addEmployeesForm_divisionOwnerId").value = overtimeTable_divisionOwnerId.value;
-        dojo.byId("addEmployeesForm_divisionId").value = overtimeTable_divisionEmployeeId.value;
-        // значения изменились - необходимо запустить функции, обработчики изменений
-        addEmployeesForm_updateLists();
-        // Открыть форму добавления сотрудников
-        addEmployeesForm_employeeDialog.show();
     }
 
     function overtimeTable_divisionChanged(){

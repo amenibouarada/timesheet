@@ -48,23 +48,11 @@
 </table>
 </sec:authorize>
 
-<div data-dojo-id="monthReportTable" data-dojo-type="dojox.grid.DataGrid" height="500px"
+<div data-dojo-id="monthReportTable" data-dojo-type="dojox.grid.DataGrid" height="430px"
      onApplyEdit="monthReportTable_cellChanged" structure="gridlayout">
 </div>
 
 <script type="text/javascript">
-
-    dojo.addOnLoad(function(){
-        monthReportTable_createStore();
-        if (dojo.byId("monthReportTable_divisionId")){
-            monthReportTable_updateManagers();
-            var div = getCookieValue('aplanaDivision');
-            div = div ? div : 0;
-            monthReportTable_divisionId.value = div;
-        }
-        monthReportTable_reloadTable();
-        monthReport_cellsValidator(monthReportTable);
-    });
 
     var gridlayout = [
         {
@@ -87,7 +75,7 @@
 /* 11 */                {field: "ts_over_done"          , name: "Переработки отгуленные",           width: "50px"},
 /* 12 */                {field: "ts_over_not_done"      , name: "Переработки не отгуленные",        width: "50px"},
 /* 13 */                {field: "ts_over_remain"        , name: "Переработки оставшиеся",           width: "50px"},
-/* 14 */                {field: "ts_vacation_avail"     , name: "Доступный отпуск",                 width: "50px"},
+/* 14 */                {field: "ts_vacation_avail"     , name: "Доступный отпуск",                 width: "50px", editable: true},
 /* 15 */                {field: "calc_worked_plan"      , name: "Отработано (план)",                width: "50px"},
 /* 16 */                {field: "calc_worked_fact"      , name: "Отработано (факт)",                width: "50px"},
 /* 17 */                {field: "calc_vacation"         , name: "Отпуск",                           width: "50px"},

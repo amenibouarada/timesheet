@@ -1,12 +1,16 @@
 package com.aplana.timesheet.controller;
 
+import com.aplana.timesheet.dao.entity.Employee;
+import com.aplana.timesheet.form.AddEmployeeForm;
 import com.aplana.timesheet.service.EmployeeService;
+import com.aplana.timesheet.util.DateTimeUtil;
 import com.aplana.timesheet.util.JsonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
+import java.util.Date;
+import java.util.List;
 
 import static argo.jdom.JsonNodeFactories.*;
 
@@ -39,5 +43,25 @@ public class EmployeeController {
                                                                 @PathVariable("filterFired") Boolean filterFired,
                                                                 @PathVariable("addDetails") Boolean addDetails) {
         return employeeService.getEmployeeListWithLastWorkdayForDivisionJson(divisionId,filterFired, addDetails);
+    }
+
+    /* Возвращает JSON для формы выбора сотрудников */
+    @RequestMapping(value="/employee/getAddEmployeeListAsJSON", produces = "text/plain;charset=UTF-8")
+    @ResponseBody
+    public String showAddEmployeeList(@ModelAttribute(AddEmployeeForm.ADD_FORM) AddEmployeeForm form) {
+        Date date;
+        if (form.getYear() == null || form.getMonth() == null) {
+            date = new Date();
+        } else {
+            date = DateTimeUtil.getLastDayOfAnyMonth(form.getYear(), form.getMonth());
+        }
+        List<Employee> employeeList = employeeService.getDivisionEmployeesByManager(
+                form.getDivisionId(),
+                date,
+                form.getRegionListId(),
+                form.getProjectRoleListId(),
+                form.getManagerId());
+
+        return employeeService.getEmployeeListAsJson(employeeList, true);
     }
 }

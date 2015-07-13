@@ -85,27 +85,15 @@
         dojo.byId("mutualWorkTable_divisionOwnerId").value = div;
         dojo.byId("mutualWorkTable_divisionEmployeeId").value = div;
         fillProjectListByDivision(dojo.byId("mutualWorkTable_divisionOwnerId").value, dojo.byId("mutualWorkTable_projectId"), null);
-        mutualWorkTable_reloadTable();
+
         monthReport_cellsValidator(mutualWorkTable, "comment");
     });
 
     function mutualWorkTable_addNewEmployees(){
-        mutualWorkTable_employeeDialogShow();
+        var divisionOwnerId = dojo.byId("mutualWorkTable_divisionOwnerId").value;
+        var divisionEmployeeId = dojo.byId("mutualWorkTable_divisionEmployeeId").value;
+        monthReport_employeeDialogShow(divisionOwnerId, divisionEmployeeId);
         addEmployeesForm_returnEmployees = mutualWorkTable_returnEmployees;
-    }
-
-    function mutualWorkTable_employeeDialogShow(){
-        // изменение значений на форме "Добавить сотрудника"
-        dojo.byId("addEmployeesForm_divisionOwnerId").value = mutualWorkTable_divisionOwnerId.value;
-        dojo.byId("addEmployeesForm_divisionId").value = mutualWorkTable_divisionEmployeeId.value;
-        dojo.byId("addEmployeesForm_year").value = monthreport_year.value;
-        dojo.byId("addEmployeesForm_month").value = monthreport_month.value;
-        dojo.byId("addEmployeesForm_year").disabled = true;
-        dojo.byId("addEmployeesForm_month").disabled = true;
-        // значения изменились - необходимо запустить функции, обработчики изменений
-        addEmployeesForm_updateLists();
-        // Открыть форму добавления сотрудников
-        addEmployeesForm_employeeDialog.show();
     }
 
     var addImage = function(value, rowIndex, cell) {
