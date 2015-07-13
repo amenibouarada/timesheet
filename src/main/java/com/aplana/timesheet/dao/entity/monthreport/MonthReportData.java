@@ -43,53 +43,11 @@ public class MonthReportData {
     @Column(name="ts_worked")
     private Double ts_worked;
 
-    @Column(name="ts_vacation")
-    private Double ts_vacation;
+    @Column(name="overtimes_paid_current")
+    private Double overtimes_paid_current;
 
-    @Column(name="ts_illness_calculated")
-    private Double ts_illness_calculated;
-
-    @Column(name="ts_illness")
-    private Double ts_illness;
-
-    @Column(name="ts_all_paid")
-    private Double ts_all_paid;
-
-    @Column(name="ts_over_val_fin_comp_calculated")
-    private Double ts_over_val_fin_comp_calculated;
-
-    @Column(name="ts_over_val_fin_comp")
-    private Double ts_over_val_fin_comp;
-
-    @Column(name="ts_over_accounted")
-    private Double ts_over_accounted;
-
-    @Column(name="ts_premium")
-    private Double ts_premium;
-
-    @Column(name="ts_all_over_accounted")
-    private Double ts_all_over_accounted;
-
-    @Column(name="ts_over_done")
-    private Double ts_over_done;
-
-    @Column(name="ts_over_not_done")
-    private Double ts_over_not_done;
-
-    @Column(name="ts_over_remain")
-    private Double ts_over_remain;
-
-    @Column(name="ts_vacation_avail")
-    private Double ts_vacation_avail;
-
-    @Column(name="calc_worked_plan")
-    private Double calc_worked_plan;
-
-    @Column(name="calc_worked_fact")
-    private Double calc_worked_fact;
-
-    @Column(name="calc_vacation")
-    private Double calc_vacation;
+    @Column(name="overtimes_paid_previous")
+    private Double overtimes_paid_previous;
 
     @Column(name="calc_vacation_with")
     private Double calc_vacation_with;
@@ -100,6 +58,36 @@ public class MonthReportData {
     @Column(name="calc_vacation_hol_paid")
     private Double calc_vacation_hol_paid;
 
+    @Column(name="ts_illness_calculated")
+    private Double ts_illness_calculated;
+
+    @Column(name="ts_illness")
+    private Double ts_illness;
+
+    @Column(name="ts_all_paid")
+    private Double ts_all_paid;
+
+    @Column(name="ts_all_over_accounted")
+    private Double ts_all_over_accounted;
+
+    @Column(name="ts_vacation_avail")
+    private Double ts_vacation_avail;
+
+    @Column(name="ts_over_remain_calculated")
+    private Double ts_over_remain_calculated;
+
+    @Column(name="ts_over_remain")
+    private Double ts_over_remain;
+
+    @Column(name="calc_worked_vac")
+    private Double calc_worked_vac;
+
+    @Column(name="ts_vacation")
+    private Double ts_vacation;
+
+    @Column(name="overtimes_acc_current")
+    private Double overtimes_acc_current;
+
     @Column(name="calc_illness")
     private Double calc_illness;
 
@@ -109,23 +97,14 @@ public class MonthReportData {
     @Column(name="calc_illness_without")
     private Double calc_illness_without;
 
-    @Column(name="calc_over")
-    private Double calc_over;
-
-    @Column(name="calc_over_hol")
-    private Double calc_over_hol;
-
-    @Column(name="calc_over_hol_paid")
-    private Double calc_over_hol_paid;
-
-    @Column(name="calc_over_work")
-    private Double calc_over_work;
-
     @Column(name="calc_worked_ill")
     private Double calc_worked_ill;
 
-    @Column(name="calc_worked_vac")
-    private Double calc_worked_vac;
+    @Column(name="calc_worked_plan")
+    private Double calc_worked_plan;
+
+    @Column(name="calc_worked_fact")
+    private Double calc_worked_fact;
 
     public Integer getYear() {
         return year;
@@ -223,132 +202,20 @@ public class MonthReportData {
         this.ts_worked = ts_worked;
     }
 
-    public Double getTs_vacation() {
-        return ts_vacation;
+    public Double getOvertimes_paid_current() {
+        return overtimes_paid_current;
     }
 
-    public void setTs_vacation(Double ts_vacation) {
-        this.ts_vacation = ts_vacation;
+    public void setOvertimes_paid_current(Double overtimes_paid_current) {
+        this.overtimes_paid_current = overtimes_paid_current;
     }
 
-    public Double getTs_illness_calculated() {
-        return ts_illness_calculated;
+    public Double getOvertimes_paid_previous() {
+        return overtimes_paid_previous;
     }
 
-    public void setTs_illness_calculated(Double ts_illness_calculated) {
-        this.ts_illness_calculated = ts_illness_calculated;
-    }
-
-    public Double getTs_illness() {
-        return ts_illness;
-    }
-
-    public void setTs_illness(Double ts_illness) {
-        this.ts_illness = ts_illness;
-    }
-
-    public Double getTs_all_paid() {
-        return ts_all_paid;
-    }
-
-    public void setTs_all_paid(Double ts_all_paid) {
-        this.ts_all_paid = ts_all_paid;
-    }
-
-    public Double getTs_over_val_fin_comp_calculated() {
-        return ts_over_val_fin_comp_calculated;
-    }
-
-    public void setTs_over_val_fin_comp_calculated(Double ts_over_val_fin_comp_calculated) {
-        this.ts_over_val_fin_comp_calculated = ts_over_val_fin_comp_calculated;
-    }
-
-    public Double getTs_over_val_fin_comp() {
-        return ts_over_val_fin_comp;
-    }
-
-    public void setTs_over_val_fin_comp(Double ts_over_val_fin_comp) {
-        this.ts_over_val_fin_comp = ts_over_val_fin_comp;
-    }
-
-    public Double getTs_over_accounted() {
-        return ts_over_accounted;
-    }
-
-    public void setTs_over_accounted(Double ts_over_accounted) {
-        this.ts_over_accounted = ts_over_accounted;
-    }
-
-    public Double getTs_premium() {
-        return ts_premium;
-    }
-
-    public void setTs_premium(Double ts_premium) {
-        this.ts_premium = ts_premium;
-    }
-
-    public Double getTs_all_over_accounted() {
-        return ts_all_over_accounted;
-    }
-
-    public void setTs_all_over_accounted(Double ts_all_over_accounted) {
-        this.ts_all_over_accounted = ts_all_over_accounted;
-    }
-
-    public Double getTs_over_done() {
-        return ts_over_done;
-    }
-
-    public void setTs_over_done(Double ts_over_done) {
-        this.ts_over_done = ts_over_done;
-    }
-
-    public Double getTs_over_not_done() {
-        return ts_over_not_done;
-    }
-
-    public void setTs_over_not_done(Double ts_over_not_done) {
-        this.ts_over_not_done = ts_over_not_done;
-    }
-
-    public Double getTs_over_remain() {
-        return ts_over_remain;
-    }
-
-    public void setTs_over_remain(Double ts_over_remain) {
-        this.ts_over_remain = ts_over_remain;
-    }
-
-    public Double getTs_vacation_avail() {
-        return ts_vacation_avail;
-    }
-
-    public void setTs_vacation_avail(Double ts_vacation_avail) {
-        this.ts_vacation_avail = ts_vacation_avail;
-    }
-
-    public Double getCalc_worked_plan() {
-        return calc_worked_plan;
-    }
-
-    public void setCalc_worked_plan(Double calc_worked_plan) {
-        this.calc_worked_plan = calc_worked_plan;
-    }
-
-    public Double getCalc_worked_fact() {
-        return calc_worked_fact;
-    }
-
-    public void setCalc_worked_fact(Double calc_worked_fact) {
-        this.calc_worked_fact = calc_worked_fact;
-    }
-
-    public Double getCalc_vacation() {
-        return calc_vacation;
-    }
-
-    public void setCalc_vacation(Double calc_vacation) {
-        this.calc_vacation = calc_vacation;
+    public void setOvertimes_paid_previous(Double overtimes_paid_previous) {
+        this.overtimes_paid_previous = overtimes_paid_previous;
     }
 
     public Double getCalc_vacation_with() {
@@ -375,6 +242,86 @@ public class MonthReportData {
         this.calc_vacation_hol_paid = calc_vacation_hol_paid;
     }
 
+    public Double getTs_illness_calculated() {
+        return ts_illness_calculated;
+    }
+
+    public void setTs_illness_calculated(Double ts_illness_calculated) {
+        this.ts_illness_calculated = ts_illness_calculated;
+    }
+
+    public Double getTs_illness() {
+        return ts_illness;
+    }
+
+    public void setTs_illness(Double ts_illness) {
+        this.ts_illness = ts_illness;
+    }
+
+    public Double getTs_all_paid() {
+        return ts_all_paid;
+    }
+
+    public void setTs_all_paid(Double ts_all_paid) {
+        this.ts_all_paid = ts_all_paid;
+    }
+
+    public Double getTs_all_over_accounted() {
+        return ts_all_over_accounted;
+    }
+
+    public void setTs_all_over_accounted(Double ts_all_over_accounted) {
+        this.ts_all_over_accounted = ts_all_over_accounted;
+    }
+
+    public Double getTs_vacation_avail() {
+        return ts_vacation_avail;
+    }
+
+    public void setTs_vacation_avail(Double ts_vacation_avail) {
+        this.ts_vacation_avail = ts_vacation_avail;
+    }
+
+    public Double getTs_over_remain_calculated() {
+        return ts_over_remain_calculated;
+    }
+
+    public void setTs_over_remain_calculated(Double ts_over_remain_calculated) {
+        this.ts_over_remain_calculated = ts_over_remain_calculated;
+    }
+
+    public Double getTs_over_remain() {
+        return ts_over_remain;
+    }
+
+    public void setTs_over_remain(Double ts_over_remain) {
+        this.ts_over_remain = ts_over_remain;
+    }
+
+    public Double getCalc_worked_vac() {
+        return calc_worked_vac;
+    }
+
+    public void setCalc_worked_vac(Double calc_worked_vac) {
+        this.calc_worked_vac = calc_worked_vac;
+    }
+
+    public Double getTs_vacation() {
+        return ts_vacation;
+    }
+
+    public void setTs_vacation(Double ts_vacation) {
+        this.ts_vacation = ts_vacation;
+    }
+
+    public Double getOvertimes_acc_current() {
+        return overtimes_acc_current;
+    }
+
+    public void setOvertimes_acc_current(Double overtimes_acc_current) {
+        this.overtimes_acc_current = overtimes_acc_current;
+    }
+
     public Double getCalc_illness() {
         return calc_illness;
     }
@@ -399,38 +346,6 @@ public class MonthReportData {
         this.calc_illness_without = calc_illness_without;
     }
 
-    public Double getCalc_over() {
-        return calc_over;
-    }
-
-    public void setCalc_over(Double calc_over) {
-        this.calc_over = calc_over;
-    }
-
-    public Double getCalc_over_hol() {
-        return calc_over_hol;
-    }
-
-    public void setCalc_over_hol(Double calc_over_hol) {
-        this.calc_over_hol = calc_over_hol;
-    }
-
-    public Double getCalc_over_hol_paid() {
-        return calc_over_hol_paid;
-    }
-
-    public void setCalc_over_hol_paid(Double calc_over_hol_paid) {
-        this.calc_over_hol_paid = calc_over_hol_paid;
-    }
-
-    public Double getCalc_over_work() {
-        return calc_over_work;
-    }
-
-    public void setCalc_over_work(Double calc_over_work) {
-        this.calc_over_work = calc_over_work;
-    }
-
     public Double getCalc_worked_ill() {
         return calc_worked_ill;
     }
@@ -439,11 +354,19 @@ public class MonthReportData {
         this.calc_worked_ill = calc_worked_ill;
     }
 
-    public Double getCalc_worked_vac() {
-        return calc_worked_vac;
+    public Double getCalc_worked_plan() {
+        return calc_worked_plan;
     }
 
-    public void setCalc_worked_vac(Double calc_worked_vac) {
-        this.calc_worked_vac = calc_worked_vac;
+    public void setCalc_worked_plan(Double calc_worked_plan) {
+        this.calc_worked_plan = calc_worked_plan;
+    }
+
+    public Double getCalc_worked_fact() {
+        return calc_worked_fact;
+    }
+
+    public void setCalc_worked_fact(Double calc_worked_fact) {
+        this.calc_worked_fact = calc_worked_fact;
     }
 }

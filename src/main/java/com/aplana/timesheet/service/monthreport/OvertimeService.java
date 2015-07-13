@@ -50,6 +50,7 @@ public class OvertimeService {
 
             overtime.setOvertime(NumberUtils.getDoubleValue(overtimeMap.get("overtime")));
             overtime.setPremium(NumberUtils.getDoubleValue(overtimeMap.get("premium")));
+            overtime.setFin_compensated_overtime(NumberUtils.getDoubleValue(overtimeMap.get("fin_compensated_overtime")));
             overtime.setComment((String)overtimeMap.get("comment"));
             logger.debug("Сохранение записи в таблицу overtime: " + overtime.toString());
             overtimeDAO.save(overtime);
@@ -116,6 +117,8 @@ public class OvertimeService {
             overtimeMap.put("overtime_calculated", overtimeData.getOvertime_calculated());
             overtimeMap.put("premium", overtimeData.getPremium());
             overtimeMap.put("total_accounted_overtime", overtimeData.getTotal_accounted_overtime());
+            overtimeMap.put("fin_compensated_overtime", overtimeData.getFin_compensated_overtime());
+            overtimeMap.put("fin_compensated_overtime_calculated", overtimeData.getFin_compensated_overtime_calculated());
             overtimeMap.put("comment", overtimeData.getComment());
             overtimeList.add(overtimeMap);
         }

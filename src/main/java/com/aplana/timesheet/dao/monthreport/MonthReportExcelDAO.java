@@ -25,22 +25,22 @@ public class MonthReportExcelDAO extends AbstractReportDAO {
 
     static {
 
-        fieldsMap.put(OvertimeReport.class, new String[]{ "identifier", "overtime_id", "year", "month", "employee_id", "employee_name",
-                                                          "region_id", "region_name", "division_employee_id", "division_employee_name",
-                                                          "project_id", "project_name", "project_type_id", "division_owner_name",
-                                                          "division_owner_id", "project_type_name", "overtime", "overtime_calculated",
-                                                          "premium", "total_accounted_overtime", "comment"});
+        fieldsMap.put(OvertimeReport.class, new String[]{  "identifier", "overtime_id", "year", "month", "employee_id", "employee_name",
+                                                           "region_id", "region_name", "division_employee_id", "division_employee_name",
+                                                           "project_id", "project_name", "project_type_id", "division_owner_name",
+                                                           "division_owner_id", "project_type_name", "overtime", "overtime_calculated",
+                                                           "premium", "total_accounted_overtime", "fin_compensated_overtime",
+                                                           "fin_compensated_overtime_calculated", "comment"});
 
         fieldsMap.put(MonthXLSReport.class, new String[]{  "year", "month", "employee_id", "employee_name",
                                                            "region_id", "region_name", "division_id", "division_name",
                                                            "job_id", "manager_id", "ts_worked_calculated", "ts_worked",
-                                                           "ts_vacation", "ts_illness", "ts_illness_calculated", "ts_all_paid",
-                                                           "ts_over_val_fin_comp_calc", "ts_over_val_fin_comp", "ts_over_accounted", "ts_premium",
-                                                           "ts_all_over_accounted", "ts_over_done", "ts_over_not_done", "ts_over_remain",
-                                                           "ts_vacation_avail", "calc_worked_plan", "calc_worked_fact", "calc_vacation",
-                                                           "calc_vacation_with", "calc_vacation_without", "calc_vacation_hol_paid", "calc_illness",
-                                                           "calc_illness_with", "calc_illness_without", "calc_over", "calc_over_hol",
-                                                           "calc_over_hol_paid", "calc_over_work", "calc_worked_ill", "calc_worked_vac"});
+                                                           "overtimes_paid_current", "overtimes_paid_previous", "calc_vacation_with",
+                                                           "calc_vacation_without", "calc_vacation_hol_paid", "ts_illness_calculated",
+                                                           "ts_illness", "ts_all_paid", "ts_all_over_accounted", "ts_vacation_avail", "ts_over_remain_calculated",
+                                                           "ts_over_remain", "calc_worked_vac", "ts_vacation", "overtimes_acc_current",
+                                                           "calc_illness", "calc_illness_with", "calc_illness_without", "calc_worked_ill",
+                                                           "calc_worked_plan", "calc_worked_fact"});
 
         fieldsMap.put(MutualWorkReport.class, new String[]{"identifier", "mutual_work_id", "year", "month", "division_owner_id", "division_owner_name",
                                                            "project_id", "project_name", "project_type_id", "project_type_name",

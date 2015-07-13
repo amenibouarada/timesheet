@@ -1,6 +1,5 @@
 package com.aplana.timesheet.dao.entity.monthreport;
 
-import com.aplana.timesheet.dao.entity.Division;
 import com.aplana.timesheet.dao.entity.Employee;
 import org.hibernate.annotations.ForeignKey;
 
@@ -28,14 +27,17 @@ public class MonthReportDetail {
     @Column(name = "ts_worked")
     private Double tsWorked;
 
+    @Column(name = "overtimes_paid_previous")
+    private Double overtimesPaidPrevious;
+
     @Column(name = "ts_illness")
     private Double tsIllness;
 
-    @Column(name = "ts_over_val_fin_comp")
-    private Double tsOverValFinComp;
-
     @Column(name = "ts_vacation_avail")
     private Double tsVacationAvail;
+
+    @Column(name = "ts_over_remain")
+    private Double tsOverRemain;
 
     public MonthReportDetail() {}
 
@@ -76,20 +78,20 @@ public class MonthReportDetail {
         this.tsWorked = tsWorked;
     }
 
+    public Double getOvertimesPaidPrevious() {
+        return overtimesPaidPrevious;
+    }
+
+    public void setOvertimesPaidPrevious(Double overtimesPaidPrevious) {
+        this.overtimesPaidPrevious = overtimesPaidPrevious;
+    }
+
     public Double getTsIllness() {
         return tsIllness;
     }
 
     public void setTsIllness(Double tsIllness) {
         this.tsIllness = tsIllness;
-    }
-
-    public Double getTsOverValFinComp() {
-        return tsOverValFinComp;
-    }
-
-    public void setTsOverValFinComp(Double tsOverValFinComp) {
-        this.tsOverValFinComp = tsOverValFinComp;
     }
 
     public Double getTsVacationAvail() {
@@ -100,6 +102,14 @@ public class MonthReportDetail {
         this.tsVacationAvail = tsVacationAvail;
     }
 
+    public Double getTsOverRemain() {
+        return tsOverRemain;
+    }
+
+    public void setTsOverRemain(Double tsOverRemain) {
+        this.tsOverRemain = tsOverRemain;
+    }
+
     @Override
     public String toString() {
         return "MonthReportDetail{" +
@@ -107,9 +117,10 @@ public class MonthReportDetail {
                 ", monthReport=" + monthReport +
                 ", employee=" + employee +
                 ", tsWorked=" + tsWorked +
+                ", overtimesPaidPrevious=" + overtimesPaidPrevious +
                 ", tsIllness=" + tsIllness +
-                ", tsOverValFinComp=" + tsOverValFinComp +
                 ", tsVacationAvail=" + tsVacationAvail +
+                ", tsOverRemain=" + tsOverRemain +
                 '}';
     }
 }

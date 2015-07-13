@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Отчет по переработкам" pageWidth="920" pageHeight="1000" orientation="Landscape" columnWidth="880" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="6ae905b3-cfb1-47a7-bda5-eeede374788b">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Отчет по переработкам" pageWidth="1020" pageHeight="1000" orientation="Landscape" columnWidth="980" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="6ae905b3-cfb1-47a7-bda5-eeede374788b">
 	<property name="net.sf.jasperreports.print.keep.full.text" value="true"/>
 	<property name="ireport.zoom" value="1.5"/>
-	<property name="ireport.x" value="157"/>
+	<property name="ireport.x" value="260"/>
 	<property name="ireport.y" value="0"/>
 	<import value="com.aplana.timesheet.util.DateTimeUtil"/>
 	<style name="Normal" isDefault="true" fontSize="8" pdfEncoding="Cp1251"/>
@@ -25,6 +25,15 @@
 	<field name="premium" class="java.math.BigDecimal"/>
 	<field name="comment" class="java.lang.String"/>
 	<field name="total_accounted_overtime" class="java.math.BigDecimal"/>
+	<field name="fin_compensated_overtime" class="java.math.BigDecimal"/>
+	<field name="overtime_calculated" class="java.math.BigDecimal"/>
+	<field name="fin_compensated_overtime_calculated" class="java.math.BigDecimal"/>
+	<variable name="overt" class="java.math.BigDecimal">
+		<variableExpression><![CDATA[($F{overtime} != null) ? $F{overtime} : $F{overtime_calculated}]]></variableExpression>
+	</variable>
+	<variable name="fincomp" class="java.math.BigDecimal">
+		<variableExpression><![CDATA[($F{fin_compensated_overtime} != null) ? $F{fin_compensated_overtime} : $F{fin_compensated_overtime_calculated}]]></variableExpression>
+	</variable>
 	<group name="Group1">
 		<groupExpression><![CDATA[]]></groupExpression>
 		<groupHeader>
@@ -100,7 +109,17 @@
 					<textElement textAlignment="Center"/>
 				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="780" y="0" width="100" height="26" uuid="330de2b3-bc5a-4896-86ce-77aa7ba6deac"/>
+					<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="880" y="0" width="100" height="26" uuid="330de2b3-bc5a-4896-86ce-77aa7ba6deac"/>
+					<box>
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="780" y="0" width="100" height="26" uuid="ae62d630-3dc4-4bb4-899a-b3415536cf9b"/>
 					<box>
 						<topPen lineWidth="0.0"/>
 						<leftPen lineWidth="0.75"/>
@@ -115,14 +134,14 @@
 	<title>
 		<band height="79" splitType="Stretch">
 			<staticText>
-				<reportElement style="Title" x="0" y="0" width="880" height="53" uuid="e176eae3-8e13-4c8b-900a-0ea89219d71c"/>
+				<reportElement style="Title" x="0" y="0" width="980" height="53" uuid="e176eae3-8e13-4c8b-900a-0ea89219d71c"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font isBold="true"/>
 				</textElement>
 				<text><![CDATA[Переработки сотрудников]]></text>
 			</staticText>
 			<textField>
-				<reportElement style="SubTitle" x="142" y="53" width="583" height="26" forecolor="#3333FF" uuid="ad4b1cfa-4166-4d3e-85d1-bbeb44768027"/>
+				<reportElement style="SubTitle" x="184" y="53" width="583" height="26" forecolor="#3333FF" uuid="ad4b1cfa-4166-4d3e-85d1-bbeb44768027"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="12" isBold="true"/>
 				</textElement>
@@ -181,7 +200,7 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font isBold="true"/>
 				</textElement>
-				<text><![CDATA[Переработки]]></text>
+				<text><![CDATA[Переработки, отработанные дни]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="680" y="0" width="100" height="37" uuid="3420e35b-370c-4cd6-9489-2697d5d5e221"/>
@@ -194,10 +213,10 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font isBold="true"/>
 				</textElement>
-				<text><![CDATA[Всего учтённых переработок  и премий]]></text>
+				<text><![CDATA[Всего переработок]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="780" y="0" width="100" height="37" uuid="979136aa-67f4-41e3-83c8-cb2b2754eed7"/>
+				<reportElement x="880" y="0" width="100" height="37" uuid="979136aa-67f4-41e3-83c8-cb2b2754eed7"/>
 				<box>
 					<topPen lineWidth="0.75"/>
 					<leftPen lineWidth="0.75"/>
@@ -220,7 +239,7 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font isBold="true"/>
 				</textElement>
-				<text><![CDATA[Премия]]></text>
+				<text><![CDATA[Переработки, дополнительные дни]]></text>
 			</staticText>
 			<staticText>
 				<reportElement style="Column header" x="0" y="0" width="142" height="37" forecolor="#000000" uuid="666f9751-4e11-4d41-8559-2cdb8683501f"/>
@@ -232,6 +251,19 @@
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle"/>
 				<text><![CDATA[Сотрудник]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="780" y="0" width="100" height="37" uuid="d71efc47-d1cd-4aa1-8f4e-06922e04e8e8"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Из них финансово компенсируемые]]></text>
 			</staticText>
 		</band>
 	</columnHeader>
@@ -290,7 +322,7 @@
 					<rightPen lineWidth="0.75"/>
 				</box>
 				<textElement textAlignment="Center"/>
-				<textFieldExpression><![CDATA[$F{overtime}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{overt}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="604" y="0" width="76" height="15" uuid="0ec14fd5-2024-4fbf-9965-682d6f95ee1f"/>
@@ -304,7 +336,7 @@
 				<textFieldExpression><![CDATA[$F{premium}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="780" y="0" width="100" height="15" uuid="a45dc0c5-93ac-4c57-ac50-217a05672460"/>
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="880" y="0" width="100" height="15" uuid="a45dc0c5-93ac-4c57-ac50-217a05672460"/>
 				<box>
 					<topPen lineWidth="0.75"/>
 					<leftPen lineWidth="0.75"/>
@@ -324,6 +356,17 @@
 				</box>
 				<textElement textAlignment="Center"/>
 				<textFieldExpression><![CDATA[$F{total_accounted_overtime}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="780" y="0" width="100" height="15" uuid="0c515ac1-f592-4e56-9671-5c82af23044d"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$V{fincomp}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>

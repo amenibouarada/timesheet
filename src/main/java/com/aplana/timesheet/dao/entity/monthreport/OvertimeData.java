@@ -67,6 +67,12 @@ public class OvertimeData {
     @Column(name = "total_accounted_overtime")
     private Double total_accounted_overtime;
 
+    @Column(name = "fin_compensated_overtime")
+    private Double fin_compensated_overtime;
+
+    @Column(name = "fin_compensated_overtime_calculated")
+    private Double fin_compensated_overtime_calculated;
+
     @Column(name = "comment")
     private String comment;
 
@@ -228,6 +234,22 @@ public class OvertimeData {
 
     public void setTotal_accounted_overtime(Double total_accounted_overtime) {
         this.total_accounted_overtime = total_accounted_overtime;
+    }
+
+    public Double getFin_compensated_overtime() {
+        return fin_compensated_overtime;
+    }
+
+    public void setFin_compensated_overtime(Double fin_compensated_overtime) {
+        this.fin_compensated_overtime = fin_compensated_overtime;
+    }
+
+    public Double getFin_compensated_overtime_calculated() {
+        return fin_compensated_overtime_calculated;
+    }
+
+    public void setFin_compensated_overtime_calculated(Double fin_compensated_overtime_calculated) {
+        this.fin_compensated_overtime_calculated = fin_compensated_overtime_calculated;
     }
 
     public String getComment() {
