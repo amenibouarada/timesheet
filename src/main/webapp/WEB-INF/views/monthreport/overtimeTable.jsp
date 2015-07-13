@@ -56,23 +56,6 @@
 
 <script type="text/javascript">
 
-    var overtimeTable_tooltips = ["Сотрудник", "Подразделение", "Регион", "Проект/Пресейл", "Тип", "Переработки, отработанные дни",
-                    "Переработки, дополнительные дни", "Всего переработок", "Из них финансово компенсируемые", "Комментарий"
-    ];
-
-    dojo.addOnLoad(function(){
-        overtimeTable_createStore();
-        if (dojo.byId("overtimeTable_divisionOwnerId")){
-            var div = getCookieValue('aplanaDivision');
-            div = div ? div : 0;
-            dojo.byId("overtimeTable_divisionOwnerId").value = div;
-            dojo.byId("overtimeTable_divisionEmployeeId").value = div;
-            overtimeTable_divisionChanged();
-        }
-        monthReport_cellsValidator(overtimeTable, "comment");
-        createTooltips(overtimeTable_tooltips, overtimeTable);
-    });
-
     function overtimeTable_addNewEmployees(){
         var divisionOwnerId = dojo.byId("overtimeTable_divisionOwnerId").value;
         var divisionEmployeeId = dojo.byId("overtimeTable_divisionEmployeeId").value;

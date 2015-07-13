@@ -76,25 +76,6 @@
 
     var projectListWithOwnerDivision = ${projectListWithOwnerDivision};
 
-    var mutualWorkTable_tooltips = ["Центр-владелец", "Проект/Пресейл", "Тип", "Сотрудник", "Центр сотрудника", "Регион",
-        "Рабочие дни", "Переработки", "Коэффициент", "Расч. раб. дни", "Расч. переработки",
-        "Детальная информация", "Комментарий"
-    ];
-
-    dojo.addOnLoad(function () {
-        mutualWorkTable_createStore();
-        mutualWorkTable_divisionChanged();
-
-        var div = getCookieValue('aplanaDivision');
-        div = div ? div : 0;
-        dojo.byId("mutualWorkTable_divisionOwnerId").value = div;
-        dojo.byId("mutualWorkTable_divisionEmployeeId").value = div;
-        fillProjectListByDivision(dojo.byId("mutualWorkTable_divisionOwnerId").value, dojo.byId("mutualWorkTable_projectId"), null);
-
-        monthReport_cellsValidator(mutualWorkTable, "comment");
-        createTooltips(mutualWorkTable_tooltips, mutualWorkTable);
-    });
-
     function mutualWorkTable_addNewEmployees(){
         var divisionOwnerId = dojo.byId("mutualWorkTable_divisionOwnerId").value;
         var divisionEmployeeId = dojo.byId("mutualWorkTable_divisionEmployeeId").value;

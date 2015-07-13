@@ -44,6 +44,29 @@
         var projectListWithOwnerDivision = ${projectListWithOwnerDivision};
         var managerMapJson = ${managerList};
 
+        //Массив всплывающих подсказок для таблицы "Табель"
+        var monthReportTable_tooltips = ["Сотрудник", "Подразделение", "Регион", "Отработано", "Оплаченные переработки этого месяца",
+            "Переработки, не отгуленные за прошедшие периоды на начало месяца", "Отпуск с сохранением фактический",
+            "Отпуск без сохранения фактический", "Переработки, отгуленные в этом месяце", "Количество рабочих дней болезни за месяц",
+            "Всего оплаченных рабочих дней", "Всего оплаченных переработок", "Накопленный отпуск на конец месяца за вычетом отпуска за свой счет, отгуленного в этом месяце ",
+            "Переработки, не оплаченные и не отгуленные за прошедшие периоды на начало месяца плюс переработки не отгуленные ",
+            "Количество часов, списанных во время отпуска с сохранением содержания или отгула", "Отпуск, начисленный в этом месяце",
+            "Переработки, начисленные в отгул в этом месяце", "Количество рабочих дней болезни итого",
+            "Количество рабочих дней болезни с больничным", "Количество рабочих дней болезни без подтверждения",
+            "Количество часов, списанных во время болезни", "Отработано по плану", "Отработано фактически"
+        ];
+
+       //Массив всплывающих подсказок для таблицы "Переработки"
+        var overtimeTable_tooltips = ["Сотрудник", "Подразделение", "Регион", "Проект/Пресейл", "Тип", "Переработки, отработанные дни",
+            "Переработки, дополнительные дни", "Всего переработок", "Из них финансово компенсируемые", "Комментарий"
+        ];
+
+        //Массив всплывающих подсказок для таблицы "Взаимная занятость"
+        var mutualWorkTable_tooltips = ["Центр-владелец", "Проект/Пресейл", "Тип", "Сотрудник", "Центр сотрудника", "Регион",
+            "Рабочие дни", "Переработки", "Коэффициент", "Расч. раб. дни", "Расч. переработки",
+            "Детальная информация", "Комментарий"
+        ];
+
         /**
          * Функция для выполнения ajax-запросов
          * Получает стандартные параметры, для запросов, отличается логикой обработки запросов
@@ -192,22 +215,17 @@
         var eventConnections = [];
 
         dojo.addOnLoad(function () {
+            //Инициализируем вложенные таблицы
+            monthReport_initMonthReportTable();
+            monthReport_initOvertimeTable();
+            monthReport_initMutualWorkTable();
+
             // установим год/месяц по умолчанию
             var currentDate = new Date();
             dojo.byId("monthreport_year").value = currentDate.getFullYear();
             dojo.byId("monthreport_month").value = currentDate.getMonth();
             monthReport_updateStatus();
             monthReport_colorizeMonthOption();
-
-            // Поскольку вкладка "Табель" загружается первой и по умолчанию, то выполняем инициирующие операции для этой вкладки
-            monthReportTable_createStore();
-            if (dojo.byId("monthReportTable_divisionId")){
-                monthReportTable_updateManagers();
-                var div = getCookieValue('aplanaDivision');
-                div = div ? div : 0;
-                monthReportTable_divisionId.value = div;
-            }
-            monthReport_cellsValidator(monthReportTable);
 
             // функция для переназначения обработчиков нажатия кнопок
             // и отображения актуальных данных
@@ -270,6 +288,49 @@
             tabContainer.watch("selectedChildWidget", changeButtonListeners);
             changeButtonListeners(); // выполним, чтобы загрузить слушателей для первой вкладки
         });
+
+        //Инициализация таблицы "Табель"
+        function monthReport_initMonthReportTable() {
+            // Поскольку вкладка "Табель" загружается первой и по умолчанию, то выполняем инициирующие операции для этой вкладки
+            monthReportTable_createStore();
+            if (dojo.byId("monthReportTable_divisionId")){
+                monthReportTable_updateManagers();
+                var div = getCookieValue('aplanaDivision');
+                div = div ? div : 0;
+                monthReportTable_divisionId.value = div;
+            }
+            monthReport_cellsValidator(monthReportTable);
+            createTooltips(monthReportTable_tooltips, monthReportTable);
+        }
+
+        //Инициализация таблицы "Переработки"
+        function monthReport_initOvertimeTable() {
+            overtimeTable_createStore();
+            if (dojo.byId("overtimeTable_divisionOwnerId")){
+                var div = getCookieValue('aplanaDivision');
+                div = div ? div : 0;
+                dojo.byId("overtimeTable_divisionOwnerId").value = div;
+                dojo.byId("overtimeTable_divisionEmployeeId").value = div;
+                overtimeTable_divisionChanged();
+            }
+            monthReport_cellsValidator(overtimeTable, "comment");
+            createTooltips(overtimeTable_tooltips, overtimeTable);
+        }
+
+        //Инициализация таблицы "Взаиммная занятость"
+        function monthReport_initMutualWorkTable() {
+            mutualWorkTable_createStore();
+            mutualWorkTable_divisionChanged();
+
+            var div = getCookieValue('aplanaDivision');
+            div = div ? div : 0;
+            dojo.byId("mutualWorkTable_divisionOwnerId").value = div;
+            dojo.byId("mutualWorkTable_divisionEmployeeId").value = div;
+            fillProjectListByDivision(dojo.byId("mutualWorkTable_divisionOwnerId").value, dojo.byId("mutualWorkTable_projectId"), null);
+
+            monthReport_cellsValidator(mutualWorkTable, "comment");
+            createTooltips(mutualWorkTable_tooltips, mutualWorkTable);
+        }
 
         //Функция для валидации введённых пользователем значений
         function monthReport_cellsValidator(currentTable, allowStringField) {
