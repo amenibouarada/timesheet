@@ -76,6 +76,11 @@
 
     var projectListWithOwnerDivision = ${projectListWithOwnerDivision};
 
+    var mutualWorkTable_tooltips = ["Центр-владелец", "Проект/Пресейл", "Тип", "Сотрудник", "Центр сотрудника", "Регион",
+        "Рабочие дни", "Переработки", "Коэффициент", "Расч. раб. дни", "Расч. переработки",
+        "Детальная информация", "Комментарий"
+    ];
+
     dojo.addOnLoad(function () {
         mutualWorkTable_createStore();
         mutualWorkTable_divisionChanged();
@@ -87,6 +92,7 @@
         fillProjectListByDivision(dojo.byId("mutualWorkTable_divisionOwnerId").value, dojo.byId("mutualWorkTable_projectId"), null);
 
         monthReport_cellsValidator(mutualWorkTable, "comment");
+        createTooltips(mutualWorkTable_tooltips, mutualWorkTable);
     });
 
     function mutualWorkTable_addNewEmployees(){

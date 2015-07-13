@@ -107,6 +107,24 @@
             return "<span title='Значение по умолчанию: " + calculatedValue + "'>" + dispValue + "</span>"
         }
 
+        // Создаёт всплывающие подсказки для заголовков таблиц
+        function createTooltips(tooltips, grid) {
+            var showTooltip = function (e) {
+                var msg;
+                if (e.rowIndex < 0) { // Это заголовок
+                    msg = tooltips[e.cell.index];
+                }
+                if (msg) {
+                    dijit.showTooltip(msg, e.cellNode);
+                }
+            };
+            var hideTooltip = function (e) {
+                dijit.hideTooltip(e.cellNode);
+            };
+            dojo.connect(grid, "onHeaderCellMouseOver", showTooltip);
+            dojo.connect(grid, "onHeaderCellMouseOut", hideTooltip);
+        }
+
         function monthReport_colorizeMonthOption(){
             makeAjaxRequest(
                     "<%= request.getContextPath()%>/monthreport/getMonthReportStatusesForYear",

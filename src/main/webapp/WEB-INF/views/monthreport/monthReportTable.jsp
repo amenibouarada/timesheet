@@ -33,10 +33,6 @@
                 </c:forEach>
             </select>
         </td>
-        <td>
-            <input type="checkbox" checked="true" onclick="setCalcMonthColumnVisibility(this.checked)">
-            <label>Показывать расчетные показатели</label>
-        </td>
     </tr>
     <tr>
         <td><label>Руководитель</label></td>
@@ -54,6 +50,25 @@
 
 <script type="text/javascript">
 
+    var monthReportTable_tooltips = ["Сотрудник", "Подразделение", "Регион", "Отработано", "Оплаченные переработки этого месяца",
+                    "Переработки, не отгуленные за прошедшие периоды на начало месяца", "Отпуск с сохранением фактический",
+                    "Отпуск без сохранения фактический", "Переработки, отгуленные в этом месяце", "Количество рабочих дней болезни за месяц",
+                    "Всего оплаченных рабочих дней", "Всего оплаченных переработок", "Накопленный отпуск на конец месяца за вычетом отпуска за свой счет, отгуленного в этом месяце ",
+                    "Переработки, не оплаченные и не отгуленные за прошедшие периоды на начало месяца плюс переработки не отгуленные ",
+                    "Количество часов, списанных во время отпуска с сохранением содержания или отгула", "Отпуск, начисленный в этом месяце",
+                    "Переработки, начисленные в отгул в этом месяце", "Количество рабочих дней болезни итого",
+                    "Количество рабочих дней болезни с больничным", "Количество рабочих дней болезни без подтверждения",
+                    "Количество часов, списанных во время болезни", "Отработано по плану", "Отработано фактически"
+    ];
+
+    dojo.addOnLoad(function() {
+        createTooltips(monthReportTable_tooltips, monthReportTable);
+    });
+
+
+    // TODO: Реализовать группировку колонок заголовка в соответствии с обозначенными ниже группами.
+    // TODO: Сделать возможность включения групп колонок : по умолчанию включена группа Управленческий табель, все друугие выключены
+
     var gridlayout = [
         {
             cells: [[
@@ -62,35 +77,43 @@
         },
         {
             cells: [[
-/* 1  */                {field: "division"              , name: "Подразделение",                    width: "180px"},
-/* 2  */                {field: "region"                , name: "Регион",                           width: "100px"},
-/* 3  */                {field: "ts_worked"             , name: "Отработано",                       width: "50px", editable: true, formatter: monthReport_colorCell},
-/* 4  */                {field: "ts_vacation"           , name: "Отпуск",                           width: "50px"},
-/* 5  */                {field: "ts_illness"            , name: "Больничный",                       width: "50px", editable: true, formatter: monthReport_colorCell},
-/* 6  */                {field: "ts_all_paid"           , name: "Всего оплачено",                   width: "50px"},
-/* 7  */                {field: "ts_over_val_fin_comp"  , name: "Переработки - фин. компенсация",   width: "50px", editable: true, formatter: monthReport_colorCell},
-/* 8  */                {field: "ts_over_accounted"     , name: "Переработки",                      width: "50px"},
-/* 9  */                {field: "ts_premium"            , name: "Премии",                           width: "50px"},
-/* 10 */                {field: "ts_all_over_accounted" , name: "Всего учтенных переработок",       width: "50px"},
-/* 11 */                {field: "ts_over_done"          , name: "Переработки отгуленные",           width: "50px"},
-/* 12 */                {field: "ts_over_not_done"      , name: "Переработки не отгуленные",        width: "50px"},
-/* 13 */                {field: "ts_over_remain"        , name: "Переработки оставшиеся",           width: "50px"},
-/* 14 */                {field: "ts_vacation_avail"     , name: "Доступный отпуск",                 width: "50px", editable: true},
-/* 15 */                {field: "calc_worked_plan"      , name: "Отработано (план)",                width: "50px"},
-/* 16 */                {field: "calc_worked_fact"      , name: "Отработано (факт)",                width: "50px"},
-/* 17 */                {field: "calc_vacation"         , name: "Отпуск",                           width: "50px"},
-/* 18 */                {field: "calc_vacation_with"    , name: "Отпуск с сохр.",                   width: "50px"},
-/* 19 */                {field: "calc_vacation_without" , name: "Отпуск без сохр.",                 width: "50px"},
-/* 20 */                {field: "calc_vacation_hol_paid", name: "Отпуск-отгул",                     width: "50px"},
-/* 21 */                {field: "calc_illness"          , name: "Больничный",                       width: "50px"},
-/* 22 */                {field: "calc_illness_with"     , name: "Больничный подтв.",                width: "50px"},
-/* 23 */                {field: "calc_illness_without"  , name: "Больничный без подтв.",            width: "50px"},
-/* 24 */                {field: "calc_over"             , name: "Переработки",                      width: "50px"},
-/* 25 */                {field: "calc_over_hol"         , name: "Переработки в вых.",               width: "50px"},
-/* 26 */                {field: "calc_over_hol_paid"    , name: "Переработки в вых. с компенсацией",width: "50px"},
-/* 27 */                {field: "calc_over_work"        , name: "Переработки в раб. дни",           width: "50px"},
-/* 28 */                {field: "calc_worked_ill"       , name: "Отработано в больничный",          width: "50px"},
-/* 29 */                {field: "calc_worked_vac"       , name: "Отработано в отпуске",             width: "50px"}
+
+/* 1  */     {field: "division"                 , name: "Подразделение",                                     width: "180px"},
+/* 2  */     {field: "region"                   , name: "Регион",                                            width: "100px"},
+
+                    // Группа "Управленческий табель"
+
+/* 3  */     {field: "ts_worked"                , name: "Отработано",                                        width: "50px", editable: true, formatter: monthReport_colorCell},
+/* 4  */     {field: "overtimes_paid_current"   , name: "Оплач. переработки этого месяца",                   width: "50px"},
+/* 5  */     {field: "overtimes_paid_previous"  , name: "Оплач. переработки пред.периодов",                  width: "50px", editable: true},
+/* 6  */     {field: "calc_vacation_with"       , name: "Отпуск с сохранением фактический",                  width: "50px"},
+/* 7  */     {field: "calc_vacation_without"    , name: "Отпуск без сохранения",                             width: "50px"},
+/* 8  */     {field: "calc_vacation_hol_paid"   , name: "Переработки, отгуленные в этом месяце",             width: "50px"},
+/* 9  */     {field: "ts_illness"               , name: "Больничные дни за этот месяц",                      width: "50px", editable: true, formatter: monthReport_colorCell},
+/* 10 */     {field: "ts_all_paid"              , name: "Всего оплачено рабочих дней",                       width: "50px"},
+/* 11 */     {field: "ts_all_over_accounted"    , name: "Всего оплачено переработок",                        width: "50px"},
+
+                    // Группа "Отпуска и отгулы"
+
+/* 12 */     {field: "ts_vacation_avail"        , name: "Доступный на конец месяца отпуск",                  width: "50px", editable: true},
+/* 13 */     {field: "ts_over_remain"           , name: "Доступные на конец месяца для отгула переработки",  width: "50px", editable: true, formatter: monthReport_colorCell},
+/* 14 */     {field: "calc_worked_vac"          , name: "Работа в отпуске/отгуле в этом месяце",             width: "50px"},
+/* 15 */     {field: "ts_vacation"              , name: "Отпуск, начисленный в этом месяце",                 width: "50px"},
+/* 16 */     {field: "overtimes_acc_current"    , name: "Перер, начисленные в отгул в этом месяце",          width: "50px"},
+
+                    // Группа "Больничные"
+
+/* 17 */     {field: "calc_illness"             , name: "Больничные итого",                                  width: "50px"},
+/* 18 */     {field: "calc_illness_with"        , name: "Больничные с подтв.",                               width: "50px"},
+/* 19 */     {field: "calc_illness_without"     , name: "Больничные без подтв.",                             width: "50px"},
+/* 20 */     {field: "calc_worked_ill"          , name: "Работа на больничном в этом месяце",                width: "50px"},
+
+
+                    // Группа Расчетные показатели по отработанным дням
+
+/* 20 */     {field: "calc_worked_plan"         , name: "Отработано (план)",                                 width: "50px"},
+/* 21 */     {field: "calc_worked_fact"         , name: "Отработано (факт)",                                 width: "50px"}
+
             ]]
         }
     ];
@@ -109,8 +132,10 @@
                 0, managerMapJson, dojo.byId("monthReportTable_divisionId"), dojo.byId("monthReportTable_managerId"));
     }
 
-    function setCalcMonthColumnVisibility(visible){
-        for (var i = 16; i <= 30; i++){
+
+    // Функция для назначения видимости/невидимости определённых колонок
+    function setColumnVisibility(visible, startIndex, endIndex){
+        for (var i = startIndex; i <= endIndex; i++){
             monthReportTable.layout.setColumnVisibility(/* int */ i - 1, /* bool */ visible);
         }
     }
@@ -186,9 +211,6 @@
         var item = monthReportTable.getItem(rowIndex);
         if (item.ts_worked[0] && item.ts_worked[0] != "null"){ // проверка, что поле, от которого зависит значение - содержит реальное значение, а не по умолчанию
             monthReportTable.store.setValue(item, "ts_all_paid", (parseFloat(item.ts_worked) + parseFloat(item.ts_vacation)).toPrecision(3));
-        }
-        if(item.ts_over_val_fin_comp[0] && item.ts_over_val_fin_comp[0] != "null"){ // проверка, что поле, от которого зависит значение - содержит реальное значение, а не по умолчанию
-            monthReportTable.store.setValue(item, "ts_over_not_done", (parseFloat(item.ts_all_over_accounted) - parseFloat(item.ts_over_done) - parseFloat(item.ts_over_val_fin_comp)).toPrecision(3));
         }
     }
 
