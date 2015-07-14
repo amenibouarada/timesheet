@@ -80,6 +80,9 @@ public class OvertimeDAO {
         if (project != null) {
             queryString += " AND project = :project";
             projectSet = true;
+           // Если выбрана непроектная занятость
+        } else {
+            queryString += " AND project is null";
         }
         Query query = entityManager.createQuery(queryString).setParameter("employee", employee).setParameter("year", year).setParameter("month", month);
         if (projectSet) {query.setParameter("project", project);}
