@@ -160,6 +160,7 @@
                     mutualWorkTable.store.save();
                     //делаем кнопку "Сохранить" активной
                     monthReport_saveButtonChangeState(true);
+                    stopProcessing();
                 }
         );
     }
@@ -201,6 +202,7 @@
                                 mutualWorkTable.store.save();
                             });
                         }
+                        stopProcessing();
                     }
             );
     }

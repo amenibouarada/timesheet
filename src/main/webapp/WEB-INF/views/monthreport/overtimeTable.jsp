@@ -118,6 +118,7 @@
                     overtimeTable.store.save();
                     //делаем кнопку "Сохранить" активной
                     monthReport_saveButtonChangeState(true);
+                    stopProcessing();
                 }
         );
     }
@@ -158,6 +159,7 @@
                                 overtimeTable.store.save();
                             });
                         }
+                        stopProcessing();
                     }
             );
     }
