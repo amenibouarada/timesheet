@@ -154,13 +154,7 @@
                 "json",
                 "Во время запроса данных для таблицы 'Взаимная занятость' произошла ошибка. Пожалуйста, свяжитесть с администраторами системы.",
                 function (data) {
-                    dojo.forEach(data, function (data) {
-                        mutualWorkTable.store.newItem(data);
-                    });
-                    mutualWorkTable.store.save();
-                    //делаем кнопку "Сохранить" активной
-                    monthReport_saveButtonChangeState(true);
-                    stopProcessing();
+                    fillStore(mutualWorkTable, data);
                 }
         );
     }
@@ -288,6 +282,7 @@
                 project_name:    project,
                 work_days: 0.0,
                 overtimes:   0.0,
+                // TODO: Перенести значение коэффициента в константы
                 coefficient:    1.15,
                 work_days_calculated: 0.0,
                 overtimes_calculated: 0.0,

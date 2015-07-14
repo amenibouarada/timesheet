@@ -97,6 +97,7 @@ public class MutualWorkDAO {
         if (project != null) {
             queryString += " AND project = :project";
             projectSet = true;
+          // Если выбрана непроектная занятость
         } else {
             queryString += " AND project is null";
         }

@@ -109,16 +109,9 @@
                 },
                 "json",
                 "Во время запроса данных для таблицы 'Переработки' произошла ошибка. Пожалуйста, свяжитесть с администраторами системы.",
+
                 function (data) {
-                    dojo.forEach(data, function(overtime){
-                        // уникальный идентификатор, для добавления новых строк
-                        overtime.identifier = overtime.employee_id + "_" + overtime.project_id;
-                    });
-                    overtimeTable_addRows(data);
-                    overtimeTable.store.save();
-                    //делаем кнопку "Сохранить" активной
-                    monthReport_saveButtonChangeState(true);
-                    stopProcessing();
+                    fillStore(overtimeTable, data);
                 }
         );
     }

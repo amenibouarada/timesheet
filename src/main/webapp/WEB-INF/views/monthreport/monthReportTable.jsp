@@ -56,13 +56,13 @@
     var gridlayout = [
         {
             cells: [[
-/* 0  */                {field: "employee", name: "Сотрудник", width: "150px"}
+/* 0  */                {field: "employee", name: "Сотрудник", width: "120px"}
             ]], noscroll: true
         },
         {
             cells: [[
 
-/* 1  */     {field: "division"                 , name: "Подразделение",                                     width: "180px"},
+/* 1  */     {field: "division"                 , name: "Подразделение",                                     width: "162px"},
 /* 2  */     {field: "region"                   , name: "Регион",                                            width: "100px"},
 
                     // Группа "Управленческий табель"
@@ -158,13 +158,7 @@
                 "json",
                 "Во время запроса данных для табеля произошла ошибка. Пожалуйста, свяжитесть с администраторами системы.",
                 function (data) {
-                    for (var i = 0; i < data.length; i++) {
-                        monthReportTable.store.newItem(data[i]);
-                    }
-                    monthReportTable.store.save();
-                    //делаем кнопку "Сохранить" активной
-                    monthReport_saveButtonChangeState(true);
-                    stopProcessing();
+                    fillStore(monthReportTable, data);
                 }
         );
     }

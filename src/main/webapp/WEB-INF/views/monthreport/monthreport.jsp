@@ -113,6 +113,17 @@
             });
         }
 
+        // Заполняет таблицы во время ajax-запроса
+        function fillStore(currentTable, data) {
+            dojo.forEach(data, function (data) {
+                currentTable.store.newItem(data);
+            });
+            currentTable.store.save();
+            //делаем кнопку "Сохранить" активной
+            monthReport_saveButtonChangeState(true);
+            stopProcessing();
+        }
+
         // раскраска ячеек и проверка на существующее значение заполненности таблицы реальными данными, а не автовычисленными
         // и добавляю подсказку
         function monthReport_colorCell(value, rowIndex, cell) {
@@ -120,7 +131,7 @@
             var calculatedValue = this.grid.store.getValue(item, cell.field + "_calculated", null);
             var dispValue = "";
             if (value && value != "null" || value == "0"){
-                cell.customStyles.push('color:blue');
+                cell.customStyles.push('color:green');
                 dispValue = value != null ? value : '';
             }else{
                 cell.customStyles.push('color:red');
