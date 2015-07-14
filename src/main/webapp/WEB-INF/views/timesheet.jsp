@@ -109,7 +109,7 @@
         </button>
         <button id="confirmDateChangeWithSave" style="margin-top: 10px; margin-left: 10px; width: 120px;"
                 onclick="confirmCalDateChangeWithSave()">
-            Сохранить
+            Перенести
         </button>
         <button id="cancelDateChange" style="margin-top: 10px; margin-left: 10px; width: 120px;"
                 onclick="cancelCalDateChange()">

@@ -232,29 +232,19 @@ public class EmployeeService extends EmployeeJSONBuilder {
      */
     @Transactional
     public StringBuffer setEmployees(List<Employee> employees) {
-        // Если город не найден - "Другой район"
-        Region defaultCity = regionDAO.find(1);
         StringBuffer trace = new StringBuffer();
-
         for (Employee emp : employees) {
-            if (emp.getRegion() == null) {
-                emp.setRegion(defaultCity);
-            }
             try {
-                Employee result = employeeDAO.findByObjectSid(emp.getObjectSid());
-                if ( result != null  && !result.isNotToSync() && result.getEndDate() == null) {
+                if (emp.isNotToSync()){
+                    trace.append(String.format(
+                            "\nUser: %s %s marked not_to_sync. (Need update)\n%s\n\n",
+                            emp.getEmail(), emp.getName(), emp.toString()));
+
+                } else {
                     trace.append(String.format(
                             "%s user: %s %s\n", emp.getId() != null ? "Updated" : "Added", emp.getEmail(), emp.getName()
                     ));
                     save(emp);
-                } else if (result == null || result.isNotToSync()) {
-                    trace.append(String.format(
-                            "\nUser: %s %s marked not_to_sync.(Need update)\n%s\n\n",
-                            emp.getEmail(), emp.getName(), emp.toString()));
-                } else if (result.getEndDate() != null) {
-                    trace.append(String.format(
-                            "\nUser: %s %s is dismiss \n%s\n\n",
-                            emp.getEmail(), emp.getName(), emp.toString()));
                 }
             } catch (Exception e) {
                 trace.append("exception: " + e);

@@ -77,9 +77,7 @@
     var projectListWithOwnerDivision = ${projectListWithOwnerDivision};
 
     function mutualWorkTable_addNewEmployees(){
-        var divisionOwnerId = dojo.byId("mutualWorkTable_divisionOwnerId").value;
-        var divisionEmployeeId = dojo.byId("mutualWorkTable_divisionEmployeeId").value;
-        monthReport_employeeDialogShow(divisionOwnerId, divisionEmployeeId);
+        monthReport_employeeDialogShow(mutualWorkTable_divisionOwnerId.value, mutualWorkTable_divisionEmployeeId.value);
         addEmployeesForm_returnEmployees = mutualWorkTable_returnEmployees;
     }
 
