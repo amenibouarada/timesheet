@@ -97,6 +97,8 @@ public class MutualWorkDAO {
         if (project != null) {
             queryString += " AND project = :project";
             projectSet = true;
+        } else {
+            queryString += " AND project is null";
         }
         Query query = entityManager.createQuery(queryString).setParameter("employee", employee).setParameter("year", year).setParameter("month", month);
         if (projectSet) {query.setParameter("project", project);}
