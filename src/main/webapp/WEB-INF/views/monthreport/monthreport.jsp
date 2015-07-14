@@ -283,15 +283,15 @@
             changeButtonListeners(); // выполним, чтобы загрузить слушателей для первой вкладки
         });
 
+        var divFromCookie = getCookieValue('aplanaDivision');
+        divFromCookie = divFromCookie ? divFromCookie : 0;
+
         //Инициализация таблицы "Табель"
         function monthReport_initMonthReportTable() {
-            // Поскольку вкладка "Табель" загружается первой и по умолчанию, то выполняем инициирующие операции для этой вкладки
             monthReportTable_createStore();
             if (dojo.byId("monthReportTable_divisionId")){
                 monthReportTable_updateManagers();
-                var div = getCookieValue('aplanaDivision');
-                div = div ? div : 0;
-                monthReportTable_divisionId.value = div;
+                monthReportTable_divisionId.value = divFromCookie;
             }
             monthReport_cellsValidator(monthReportTable);
             createTooltips(monthReportTable_tooltips, monthReportTable);
@@ -301,10 +301,8 @@
         function monthReport_initOvertimeTable() {
             overtimeTable_createStore();
             if (dojo.byId("overtimeTable_divisionOwnerId")){
-                var div = getCookieValue('aplanaDivision');
-                div = div ? div : 0;
-                dojo.byId("overtimeTable_divisionOwnerId").value = div;
-                dojo.byId("overtimeTable_divisionEmployeeId").value = div;
+                dojo.byId("overtimeTable_divisionOwnerId").value = divFromCookie;
+                dojo.byId("overtimeTable_divisionEmployeeId").value = divFromCookie;
                 overtimeTable_divisionChanged();
             }
             monthReport_cellsValidator(overtimeTable, "comment");
@@ -315,13 +313,9 @@
         function monthReport_initMutualWorkTable() {
             mutualWorkTable_createStore();
             mutualWorkTable_divisionChanged();
-
-            var div = getCookieValue('aplanaDivision');
-            div = div ? div : 0;
-            dojo.byId("mutualWorkTable_divisionOwnerId").value = div;
-            dojo.byId("mutualWorkTable_divisionEmployeeId").value = div;
+            dojo.byId("mutualWorkTable_divisionOwnerId").value = divFromCookie;
+            dojo.byId("mutualWorkTable_divisionEmployeeId").value = divFromCookie;
             fillProjectListByDivision(dojo.byId("mutualWorkTable_divisionOwnerId").value, dojo.byId("mutualWorkTable_projectId"), null);
-
             monthReport_cellsValidator(mutualWorkTable, "comment");
             createTooltips(mutualWorkTable_tooltips, mutualWorkTable);
         }
