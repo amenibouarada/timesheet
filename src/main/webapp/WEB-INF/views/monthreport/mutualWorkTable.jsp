@@ -288,7 +288,7 @@
                 project_name:    project,
                 work_days: 0.0,
                 overtimes:   0.0,
-                coefficient:    0.0,
+                coefficient:    1.15,
                 work_days_calculated: 0.0,
                 overtimes_calculated: 0.0,
                 comment:    ""
