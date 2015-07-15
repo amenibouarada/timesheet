@@ -64,7 +64,7 @@ public class OvertimeService {
         List<Map<String, Object>> overtimes = mapper.readValue(jsonData, mapCollectionType);
         List<Integer> idsToDelete = new ArrayList<Integer>();
         for (Map<String, Object> overtimeMap : overtimes){
-            Integer id = (Integer)overtimeMap.get("id");
+            Integer id = (Integer)overtimeMap.get("overtime_id");
             if (id != null){
                 idsToDelete.add(id);
             }

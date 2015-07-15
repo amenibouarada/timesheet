@@ -54,7 +54,7 @@ public class MutualWorkService {
         List<Map<String, Object>> mutualWorks = mapper.readValue(jsonData, mapCollectionType);
         List<Integer> idsToDelete = new ArrayList<Integer>();
         for (Map<String, Object> mutualWorkMap : mutualWorks){
-            Integer id = (Integer)mutualWorkMap.get("id");
+            Integer id = (Integer)mutualWorkMap.get("mutual_work_id");
             if (id != null){
                 idsToDelete.add(id);
             }
