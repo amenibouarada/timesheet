@@ -159,7 +159,6 @@
                 "Во время запроса данных для табеля произошла ошибка. Пожалуйста, свяжитесть с администраторами системы.",
                 function (data) {
                     fillStore(monthReportTable, data);
-                    monthReport_updateStatus();
                 }
         );
     }
@@ -184,6 +183,7 @@
                 );
             }
         });
+        monthReport_updateStatus();
     }
 
     var monthReportTable_cellChanged = function(rowIndex){

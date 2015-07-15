@@ -92,6 +92,7 @@
                 content:    content,
                 preventCache: false,
                 load: function (response, ioargs) {
+                    stopProcessing();
                     if (responseType == "text"){
                         alert(response);
                         handler();
@@ -121,6 +122,7 @@
             currentTable.store.save();
             //делаем кнопку "Сохранить" активной
             monthReport_saveButtonChangeState(true);
+            monthReport_updateStatus();
             stopProcessing();
         }
 
@@ -406,7 +408,6 @@
                         </sec:authorize>
 
                         monthReport_colorizeMonthOption();
-                        stopProcessing();
                     }
             )
         }

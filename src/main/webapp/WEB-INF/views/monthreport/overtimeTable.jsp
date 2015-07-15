@@ -139,7 +139,6 @@
 
                 function (data) {
                     fillStore(overtimeTable, data);
-                    monthReport_updateStatus();
                 }
         );
     }
@@ -180,7 +179,6 @@
                                 overtimeTable.store.save();
                             });
                         }
-                        stopProcessing();
                     }
             );
     }
