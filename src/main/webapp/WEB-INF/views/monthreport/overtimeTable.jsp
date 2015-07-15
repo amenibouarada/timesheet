@@ -42,11 +42,38 @@
             <th field="region_name"                  width="100px"                                                       >Регион</th>
             <th field="project_name"                 width="100px"                                                       >Проект/Пресейл</th>
             <th field="project_type_name"            width="100px"                                                       >Тип</th>
-            <th field="overtime"                     width="50px"   editable="true" formatter= "monthReport_colorCell"   >Переработки, отработанные дни</th>
-            <th field="premium"                      width="50px"   editable="true" formatter= "monthReport_colorCell"   >Переработки, дополнительные дни</th>
+            <th field="overtime"
+                width="50px"
+                <sec:authorize access="hasAnyRole('ROLE_ADMIN', 'ROLE_MONTH_REPORT_MANAGER')">
+                    editable="true"
+                </sec:authorize>
+                formatter= "monthReport_colorCell">
+                Переработки, отработанные дни
+            </th>
+            <th field="premium"
+                width="50px"
+                <sec:authorize access="hasAnyRole('ROLE_ADMIN', 'ROLE_MONTH_REPORT_MANAGER')">
+                    editable="true"
+                </sec:authorize>
+                formatter= "monthReport_colorCell">
+                Переработки, дополнительные дни
+            </th>
             <th field="total_accounted_overtime"     width="50px"                                                        >Всего переработок</th>
-            <th field="fin_compensated_overtime"     width="50px"   editable="true" formatter= "monthReport_colorCell"   >Из них финансово компенсируемые</th>
-            <th field="comment"                      width="100px"  editable="true"                                      >Комментарий</th>
+            <th field="fin_compensated_overtime"
+                width="50px"
+                <sec:authorize access="hasAnyRole('ROLE_ADMIN', 'ROLE_MONTH_REPORT_MANAGER')">
+                    editable="true"
+                </sec:authorize>
+                formatter= "monthReport_colorCell">
+                Из них финансово компенсируемые
+            </th>
+            <th field="comment"
+                width="100px"
+                <sec:authorize access="hasAnyRole('ROLE_ADMIN', 'ROLE_MONTH_REPORT_MANAGER')">
+                    editable="true"
+                </sec:authorize>>
+                Комментарий
+            </th>
         </tr>
     </thead>
 </table>
@@ -112,6 +139,7 @@
 
                 function (data) {
                     fillStore(overtimeTable, data);
+                    monthReport_updateStatus();
                 }
         );
     }

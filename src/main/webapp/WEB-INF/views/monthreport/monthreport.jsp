@@ -179,7 +179,6 @@
                         });
                     }
             );
-            stopProcessing();
         }
 
         <sec:authorize access="hasAnyRole('ROLE_ADMIN', 'ROLE_MONTH_REPORT_MANAGER')">
@@ -305,6 +304,13 @@
                 monthReportTable_updateManagers();
                 monthReportTable_divisionId.value = divFromCookie;
             }
+            <sec:authorize access="hasAnyRole('ROLE_ADMIN', 'ROLE_MONTH_REPORT_MANAGER')">
+            monthReportTable.layout.cells[3].editable = true;
+            monthReportTable.layout.cells[5].editable = true;
+            monthReportTable.layout.cells[9].editable = true;
+            monthReportTable.layout.cells[12].editable = true;
+            monthReportTable.layout.cells[13].editable = true;
+            </sec:authorize>
             monthReport_cellsValidator(monthReportTable);
             createTooltips(monthReportTable_tooltips, monthReportTable);
         }
@@ -391,11 +397,16 @@
                                 saveButton.style.visibility = "visible";
                             }
                         }
+                        <sec:authorize access="hasAnyRole('ROLE_ADMIN', 'ROLE_MONTH_REPORT_MANAGER')">
                         monthReportTable.layout.cells[3].editable = editable;
                         monthReportTable.layout.cells[5].editable = editable;
-                        monthReportTable.layout.cells[7].editable = editable;
+                        monthReportTable.layout.cells[9].editable = editable;
+                        monthReportTable.layout.cells[12].editable = editable;
+                        monthReportTable.layout.cells[13].editable = editable;
+                        </sec:authorize>
 
                         monthReport_colorizeMonthOption();
+                        stopProcessing();
                     }
             )
         }
@@ -461,7 +472,7 @@
             <span class="label">Год:</span>
         </td>
         <td>
-            <select data-dojo-id="monthreport_year" id="monthreport_year" onchange="monthReport_updateStatus();">
+            <select data-dojo-id="monthreport_year" id="monthreport_year">
                 <option value="2015" label="2015">2015</option>
                 <option value="2016" label="2016">2016</option>
             </select>
@@ -472,7 +483,7 @@
         </td>
         <td>
             <%--// ToDo сделать отдельный файл для формирования выпадашки с месяцами--%>
-            <select data-dojo-id="monthreport_month" id="monthreport_month" onchange="monthReport_updateStatus();">
+            <select data-dojo-id="monthreport_month" id="monthreport_month">
                 <option id="monthreport_month_option_1"  value="1"  title="Январь">Январь</option>
                 <option id="monthreport_month_option_2"  value="2"  title="Февраль">Февраль</option>
                 <option id="monthreport_month_option_3"  value="3"  title="Март">Март</option>

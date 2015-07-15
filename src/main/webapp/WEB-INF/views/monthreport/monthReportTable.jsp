@@ -67,20 +67,20 @@
 
                     // Группа "Управленческий табель"
 
-/* 3  */     {field: "ts_worked"                , name: "Отработано",                                        width: "50px", editable: true, formatter: monthReport_colorCell},
+/* 3  */     {field: "ts_worked"                , name: "Отработано",                                        width: "50px", formatter: monthReport_colorCell},
 /* 4  */     {field: "overtimes_paid_current"   , name: "Оплач. переработки этого месяца",                   width: "50px"},
-/* 5  */     {field: "overtimes_paid_previous"  , name: "Оплач. переработки пред.периодов",                  width: "50px", editable: true},
+/* 5  */     {field: "overtimes_paid_previous"  , name: "Оплач. переработки пред.периодов",                  width: "50px"},
 /* 6  */     {field: "calc_vacation_with"       , name: "Отпуск с сохранением фактический",                  width: "50px"},
 /* 7  */     {field: "calc_vacation_without"    , name: "Отпуск без сохранения",                             width: "50px"},
 /* 8  */     {field: "calc_vacation_hol_paid"   , name: "Переработки, отгуленные в этом месяце",             width: "50px"},
-/* 9  */     {field: "ts_illness"               , name: "Больничные дни за этот месяц",                      width: "50px", editable: true, formatter: monthReport_colorCell},
+/* 9  */     {field: "ts_illness"               , name: "Больничные дни за этот месяц",                      width: "50px", formatter: monthReport_colorCell},
 /* 10 */     {field: "ts_all_paid"              , name: "Всего оплачено рабочих дней",                       width: "50px"},
 /* 11 */     {field: "ts_all_over_accounted"    , name: "Всего оплачено переработок",                        width: "50px"},
 
                     // Группа "Отпуска и отгулы"
 
-/* 12 */     {field: "ts_vacation_avail"        , name: "Доступный на конец месяца отпуск",                  width: "50px", editable: true},
-/* 13 */     {field: "ts_over_remain"           , name: "Доступные на конец месяца для отгула переработки",  width: "50px", editable: true, formatter: monthReport_colorCell},
+/* 12 */     {field: "ts_vacation_avail"        , name: "Доступный на конец месяца отпуск",                  width: "50px"},
+/* 13 */     {field: "ts_over_remain"           , name: "Доступные на конец месяца для отгула переработки",  width: "50px", formatter: monthReport_colorCell},
 /* 14 */     {field: "calc_worked_vac"          , name: "Работа в отпуске/отгуле в этом месяце",             width: "50px"},
 /* 15 */     {field: "ts_vacation"              , name: "Отпуск, начисленный в этом месяце",                 width: "50px"},
 /* 16 */     {field: "overtimes_acc_current"    , name: "Перер, начисленные в отгул в этом месяце",          width: "50px"},
@@ -159,6 +159,7 @@
                 "Во время запроса данных для табеля произошла ошибка. Пожалуйста, свяжитесть с администраторами системы.",
                 function (data) {
                     fillStore(monthReportTable, data);
+                    monthReport_updateStatus();
                 }
         );
     }
