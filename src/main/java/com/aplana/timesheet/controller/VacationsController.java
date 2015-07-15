@@ -95,6 +95,8 @@ public class VacationsController extends AbstractControllerForEmployee {
 
         vacationsFormValidator.validate(vacationsForm, result);
         if (result != null && result.hasErrors()){
+            modelAndView.addObject("vacationListByRegionJSON", "[]");
+            modelAndView.addObject("holidayList", "[]");
             return modelAndView;
         }
 
