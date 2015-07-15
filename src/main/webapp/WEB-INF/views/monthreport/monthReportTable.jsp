@@ -180,7 +180,6 @@
                         "Во время сохранения табеля произошла ошибка. Пожалуйста, свяжитесть с администраторами системы.",
                         function () {
                             monthReportTable_reloadTable();
-                            monthReport_updateStatus();
                         }
                 );
             }
