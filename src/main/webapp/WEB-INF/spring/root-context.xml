@@ -24,8 +24,9 @@
     <import resource="app/springldap.xml"/>
 
     <!-- Реализация авторизации в системе -->
-    <!--<import resource="app/authentication_OpenLDAP.xml"/>     -->
-    <import resource="app/authentication_ActiveDirectory.xml"/>
+    <!-- Реализация авторизации в системе -->
+    <import resource="app/authentication_OpenLDAP.xml"/>
+    <!--<import resource="app/authentication_ActiveDirectory.xml"/>-->
 
     <!-- Application Message Bundle -->
     <beans:bean id="messageSource"
