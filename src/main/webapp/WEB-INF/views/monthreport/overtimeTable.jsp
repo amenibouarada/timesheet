@@ -112,7 +112,8 @@
 
                 function (data) {
                     fillStore(overtimeTable, data);
-                }
+                },
+                true
         );
     }
 
@@ -152,7 +153,8 @@
                                 overtimeTable.store.save();
                             });
                         }
-                    }
+                    },
+                    true
             );
     }
 
@@ -174,7 +176,8 @@
                         "Во время сохранения таблицы 'Переработки' произошла ошибка. Пожалуйста, свяжитесть с администраторами системы.",
                         function () {
                             overtimeTable_reloadTable();
-                        }
+                        },
+                        true
                 );
             }
         });

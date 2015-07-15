@@ -34,6 +34,9 @@
             notCreated: {id: <%=NOT_CREATED.getId()%>,  name: '<%=NOT_CREATED.getName()%>'}
         };
 
+        var monthReportTable_editableColumns = [3, 5, 9, 12, 13];
+        var overtimeTable_editableColumns = [5, 6, 8, 9];
+
         function monthreport_getStatusById(/* int */ id){
             if (statusList.open.id == id){ return statusList.open; }
             if (statusList.closed.id == id){ return statusList.closed; }
@@ -83,9 +86,12 @@
          * @param content - параметры запроса
          * @param errorMessage - сообщение, которое отобразится пользователю при ошибке
          * @param handler - обработчик полученного сообщения
+         * @param doProcessing - признак того, использовать ли "крутилку"
         */
-        function makeAjaxRequest(url, content, responseType, errorMessage, handler){
-            processing();
+        function makeAjaxRequest(url, content, responseType, errorMessage, handler, doProcessing){
+            if (doProcessing == true) {
+                processing();
+            }
             dojo.xhrPost({
                 url:        url,
                 handleAs:   "text",
@@ -103,10 +109,14 @@
                             alert(response);
                         }
                     }
-                    stopProcessing();
+                    if (doProcessing == true) {
+                        stopProcessing();
+                    }
                 },
                 error: function() {
-                    stopProcessing();
+                    if (doProcessing == true) {
+                        stopProcessing();
+                    }
                     alert(errorMessage);
                 }
             });
@@ -120,7 +130,6 @@
             currentTable.store.save();
             //делаем кнопку "Сохранить" активной
             monthReport_saveButtonChangeState(true);
-            monthReport_updateStatus();
             stopProcessing();
         }
 
@@ -177,7 +186,8 @@
                                     break;
                             }
                         });
-                    }
+                    },
+                    false
             );
         }
 
@@ -304,8 +314,7 @@
                 monthReportTable_updateManagers();
                 monthReportTable_divisionId.value = divFromCookie;
             }
-            var editableColumns = [3, 5, 9, 12, 13];
-            monthReport_setEditable(monthReportTable, editableColumns, true);
+            monthReport_setEditable(monthReportTable, monthReportTable_editableColumns, true);
             monthReport_cellsValidator(monthReportTable);
             createTooltips(monthReportTable_tooltips, monthReportTable);
         }
@@ -318,8 +327,7 @@
                 dojo.byId("overtimeTable_divisionEmployeeId").value = divFromCookie;
                 overtimeTable_divisionChanged();
             }
-            var editableColumns = [5, 6, 8, 9];
-            monthReport_setEditable(overtimeTable, editableColumns, true);
+            monthReport_setEditable(overtimeTable, overtimeTable_editableColumns, true);
             monthReport_cellsValidator(overtimeTable, "comment");
             createTooltips(overtimeTable_tooltips, overtimeTable);
         }
@@ -359,7 +367,7 @@
         function monthReport_setEditable(currentTable, columns, editable) {
             <sec:authorize access="hasAnyRole('ROLE_ADMIN', 'ROLE_MONTH_REPORT_MANAGER')">
             for (var i = 0; i < columns.length; i++) {
-                col = columns[i];
+                var col = columns[i];
                 if (currentTable.layout.cells[col]) {
                     currentTable.layout.cells[col].editable = editable;
                 }
@@ -405,10 +413,10 @@
                                 saveButton.style.visibility = "visible";
                             }
                         }
-                        var editableColumns = [3, 5, 9, 12, 13];
-                        monthReport_setEditable(monthReportTable, editableColumns, editable);
+                        monthReport_setEditable(monthReportTable, monthReportTable_editableColumns, editable);
                         monthReport_colorizeMonthOption();
-                    }
+                    },
+                    false
             )
         }
 
@@ -451,7 +459,8 @@
                     "Не удалось изменить статус табеля",
                     function (){
                         monthReport_updateStatus();
-                    }
+                    },
+                    true
             );
         }
         function monthReport_close(){
@@ -473,7 +482,7 @@
             <span class="label">Год:</span>
         </td>
         <td>
-            <select data-dojo-id="monthreport_year" id="monthreport_year">
+            <select data-dojo-id="monthreport_year" id="monthreport_year" onchange="monthReport_updateStatus();">
                 <option value="2015" label="2015">2015</option>
                 <option value="2016" label="2016">2016</option>
             </select>
@@ -484,7 +493,7 @@
         </td>
         <td>
             <%--// ToDo сделать отдельный файл для формирования выпадашки с месяцами--%>
-            <select data-dojo-id="monthreport_month" id="monthreport_month">
+            <select data-dojo-id="monthreport_month" id="monthreport_month" onchange="monthReport_updateStatus();">
                 <option id="monthreport_month_option_1"  value="1"  title="Январь">Январь</option>
                 <option id="monthreport_month_option_2"  value="2"  title="Февраль">Февраль</option>
                 <option id="monthreport_month_option_3"  value="3"  title="Март">Март</option>
