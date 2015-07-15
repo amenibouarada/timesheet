@@ -208,15 +208,16 @@ function refreshEmployeeSelect(employeeList) {
 
     if (employeeList.length > 0) {
         var employeeArray = getEmployeeListByManagerAndRegions(employeeList, managerId, regions);
-        var emptyObj = {
-            id: 0,
-            value: ""
-        };
-        employeeArray.push(emptyObj);
 
         employeeArray.sort(function (a, b) {
             return (a.value < b.value) ? -1 : 1;
         });
+
+        var emptyObj = {
+            id: -1,
+            value: "Все сотрудники"
+        };
+        employeeArray.unshift(emptyObj);
 
         var employeeDataStore = new dojo.data.ObjectStore({
             objectStore: new dojo.store.Memory({
