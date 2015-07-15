@@ -179,6 +179,7 @@
                         });
                     }
             );
+            stopProcessing();
         }
 
         <sec:authorize access="hasAnyRole('ROLE_ADMIN', 'ROLE_MONTH_REPORT_MANAGER')">
