@@ -92,13 +92,10 @@
                 content:    content,
                 preventCache: false,
                 load: function (response, ioargs) {
-                    stopProcessing();
                     if (responseType == "text"){
                         alert(response);
                         handler();
-                        return
-                    }
-                    if (responseType == "json"){
+                    }else if (responseType == "json"){
                         try{
                             handler(dojo.fromJson(response));
                         }catch(exc){
@@ -106,6 +103,7 @@
                             alert(response);
                         }
                     }
+                    stopProcessing();
                 },
                 error: function() {
                     stopProcessing();
