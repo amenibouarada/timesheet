@@ -322,6 +322,7 @@
 
         //Инициализация таблицы "Взаиммная занятость"
         function monthReport_initMutualWorkTable() {
+            <sec:authorize access="hasAnyRole('ROLE_ADMIN', 'ROLE_MONTH_REPORT_MANAGER')">
             mutualWorkTable_createStore();
             mutualWorkTable_divisionChanged();
             dojo.byId("mutualWorkTable_divisionOwnerId").value = divFromCookie;
@@ -329,6 +330,7 @@
             fillProjectListByDivision(dojo.byId("mutualWorkTable_divisionOwnerId").value, dojo.byId("mutualWorkTable_projectId"), null);
             monthReport_cellsValidator(mutualWorkTable, "comment");
             createTooltips(mutualWorkTable_tooltips, mutualWorkTable);
+            </sec:authorize>
         }
 
         //Функция для валидации введённых пользователем значений
