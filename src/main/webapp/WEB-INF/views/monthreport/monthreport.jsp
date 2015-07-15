@@ -306,13 +306,8 @@
                 monthReportTable_updateManagers();
                 monthReportTable_divisionId.value = divFromCookie;
             }
-            <sec:authorize access="hasAnyRole('ROLE_ADMIN', 'ROLE_MONTH_REPORT_MANAGER')">
-            monthReportTable.layout.cells[3].editable = true;
-            monthReportTable.layout.cells[5].editable = true;
-            monthReportTable.layout.cells[9].editable = true;
-            monthReportTable.layout.cells[12].editable = true;
-            monthReportTable.layout.cells[13].editable = true;
-            </sec:authorize>
+            var editableColumns = [3, 5, 9, 12, 13];
+            monthReport_setEditable(monthReportTable, editableColumns, true);
             monthReport_cellsValidator(monthReportTable);
             createTooltips(monthReportTable_tooltips, monthReportTable);
         }
@@ -325,6 +320,8 @@
                 dojo.byId("overtimeTable_divisionEmployeeId").value = divFromCookie;
                 overtimeTable_divisionChanged();
             }
+            var editableColumns = [5, 6, 8, 9];
+            monthReport_setEditable(overtimeTable, editableColumns, true);
             monthReport_cellsValidator(overtimeTable, "comment");
             createTooltips(overtimeTable_tooltips, overtimeTable);
         }
@@ -359,6 +356,17 @@
                     }
                 }else if (inValue == "null") {currentTable.store.setValue(currentTable.getItem(inRowIndex), fieldName, "");}
             }
+        }
+
+        function monthReport_setEditable(currentTable, columns, editable) {
+            <sec:authorize access="hasAnyRole('ROLE_ADMIN', 'ROLE_MONTH_REPORT_MANAGER')">
+            for (var i = 0; i < columns.length; i++) {
+                col = columns[i];
+                if (currentTable.layout.cells[col]) {
+                    currentTable.layout.cells[col].editable = editable;
+                }
+            }
+            </sec:authorize>
         }
 
         function monthReport_updateStatus(){
@@ -399,14 +407,8 @@
                                 saveButton.style.visibility = "visible";
                             }
                         }
-                        <sec:authorize access="hasAnyRole('ROLE_ADMIN', 'ROLE_MONTH_REPORT_MANAGER')">
-                        monthReportTable.layout.cells[3].editable = editable;
-                        monthReportTable.layout.cells[5].editable = editable;
-                        monthReportTable.layout.cells[9].editable = editable;
-                        monthReportTable.layout.cells[12].editable = editable;
-                        monthReportTable.layout.cells[13].editable = editable;
-                        </sec:authorize>
-
+                        var editableColumns = [3, 5, 9, 12, 13];
+                        monthReport_setEditable(monthReportTable, editableColumns, editable);
                         monthReport_colorizeMonthOption();
                     }
             )
