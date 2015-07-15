@@ -89,6 +89,7 @@
          * @param doProcessing - признак того, использовать ли "крутилку"
         */
         function makeAjaxRequest(url, content, responseType, errorMessage, handler, doProcessing){
+            doProcessing = doProcessing || true; // значение по умолчанию
             if (doProcessing == true) {
                 processing();
             }
