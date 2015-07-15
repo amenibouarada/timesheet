@@ -153,7 +153,6 @@
                 "Во время запроса данных для таблицы 'Взаимная занятость' произошла ошибка. Пожалуйста, свяжитесть с администраторами системы.",
                 function (data) {
                     fillStore(mutualWorkTable, data);
-                    monthReport_updateStatus();
                 }
         );
     }
@@ -195,7 +194,6 @@
                                 mutualWorkTable.store.save();
                             });
                         }
-                        stopProcessing();
                     }
             );
     }

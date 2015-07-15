@@ -36,45 +36,18 @@
 <table data-dojo-id="overtimeTable" data-dojo-type="dojox.grid.DataGrid"
        onApplyEdit="overtimeTable_cellChanged" height="500px" sortInfo="1">
     <thead>
-        <tr>
-            <th field="employee_name"                width="150px"                                                       >Сотрудник</th>
-            <th field="division_employee_name"       width="150px"                                                       >Подразделение</th>
-            <th field="region_name"                  width="100px"                                                       >Регион</th>
-            <th field="project_name"                 width="100px"                                                       >Проект/Пресейл</th>
-            <th field="project_type_name"            width="100px"                                                       >Тип</th>
-            <th field="overtime"
-                width="50px"
-                <sec:authorize access="hasAnyRole('ROLE_ADMIN', 'ROLE_MONTH_REPORT_MANAGER')">
-                    editable="true"
-                </sec:authorize>
-                formatter= "monthReport_colorCell">
-                Переработки, отработанные дни
-            </th>
-            <th field="premium"
-                width="50px"
-                <sec:authorize access="hasAnyRole('ROLE_ADMIN', 'ROLE_MONTH_REPORT_MANAGER')">
-                    editable="true"
-                </sec:authorize>
-                formatter= "monthReport_colorCell">
-                Переработки, дополнительные дни
-            </th>
-            <th field="total_accounted_overtime"     width="50px"                                                        >Всего переработок</th>
-            <th field="fin_compensated_overtime"
-                width="50px"
-                <sec:authorize access="hasAnyRole('ROLE_ADMIN', 'ROLE_MONTH_REPORT_MANAGER')">
-                    editable="true"
-                </sec:authorize>
-                formatter= "monthReport_colorCell">
-                Из них финансово компенсируемые
-            </th>
-            <th field="comment"
-                width="100px"
-                <sec:authorize access="hasAnyRole('ROLE_ADMIN', 'ROLE_MONTH_REPORT_MANAGER')">
-                    editable="true"
-                </sec:authorize>>
-                Комментарий
-            </th>
-        </tr>
+    <tr>
+        <th field="employee_name"                width="150px"                                      >Сотрудник</th>
+        <th field="division_employee_name"       width="150px"                                      >Подразделение</th>
+        <th field="region_name"                  width="100px"                                      >Регион</th>
+        <th field="project_name"                 width="100px"                                      >Проект/Пресейл</th>
+        <th field="project_type_name"            width="100px"                                      >Тип</th>
+        <th field="overtime"                     width="50px"   formatter= "monthReport_colorCell"  >Переработки, отработанные дни</th>
+        <th field="premium"                      width="50px"   formatter= "monthReport_colorCell"  >Переработки, дополнительные дни</th>
+        <th field="total_accounted_overtime"     width="50px"                                       >Всего переработок</th>
+        <th field="fin_compensated_overtime"     width="50px"   formatter= "monthReport_colorCell"  >Из них финансово компенсируемые</th>
+        <th field="comment"                      width="100px"                                      >Комментарий</th>
+    </tr>
     </thead>
 </table>
 
@@ -139,7 +112,6 @@
 
                 function (data) {
                     fillStore(overtimeTable, data);
-                    monthReport_updateStatus();
                 }
         );
     }
@@ -180,7 +152,6 @@
                                 overtimeTable.store.save();
                             });
                         }
-                        stopProcessing();
                     }
             );
     }
