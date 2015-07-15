@@ -138,7 +138,6 @@ com.aplana.timesheet.controller.AbstractControllerForEmployee.fillMavForAddEmplo
     };
 
     dojo.addOnLoad(function () {
-        addEmployeesForm_updateLists();
         var ownerDiv = getCookieValue('aplanaDivision');
         ownerDiv = ownerDiv == undefined ? 0 : ownerDiv;
         dojo.byId("addEmployeesForm_divisionOwnerId").value = ownerDiv;

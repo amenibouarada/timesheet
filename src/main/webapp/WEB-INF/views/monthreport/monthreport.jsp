@@ -89,7 +89,7 @@
          * @param doProcessing - признак того, использовать ли "крутилку"
         */
         function makeAjaxRequest(url, content, responseType, errorMessage, handler, doProcessing){
-            doProcessing = doProcessing || true; // значение по умолчанию
+            doProcessing = doProcessing != null ? doProcessing : true; // значение по умолчанию
             if (doProcessing == true) {
                 processing();
             }
@@ -326,7 +326,7 @@
             if (dojo.byId("overtimeTable_divisionOwnerId")){
                 dojo.byId("overtimeTable_divisionOwnerId").value = divFromCookie;
                 dojo.byId("overtimeTable_divisionEmployeeId").value = divFromCookie;
-                overtimeTable_divisionChanged();
+                monthReport_addEmployeesButtonsVisibleChange(overtimeTable_divisionOwnerId, overtimeTable_divisionEmployeeId, overtimeTable_addEmployeesButton);
             }
             monthReport_setEditable(overtimeTable, overtimeTable_editableColumns, true);
             monthReport_cellsValidator(overtimeTable, "comment");
@@ -433,6 +433,15 @@
                 if (requiredState == false) {
                     saveButton.disabled = true;
                 }
+            }
+        }
+
+        function monthReport_addEmployeesButtonsVisibleChange(divisionOwnerId, divisionEmployeeId, button) {
+            if (divisionOwnerId.value == ALL_VALUE ||
+                    divisionEmployeeId.value == ALL_VALUE) {
+                button.disabled = true;
+            } else {
+                button.disabled = false;
             }
         }
 

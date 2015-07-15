@@ -118,12 +118,7 @@
         //дизактивируем кнопку "Сохранить"
         monthReport_saveButtonChangeState(false);
         // меняем видимость кнопки "Добавить сотрудников"
-        if (mutualWorkTable_divisionOwnerId.value == ALL_VALUE ||
-                mutualWorkTable_divisionEmployeeId.value == ALL_VALUE) {
-            mutualWorkTable_addEmployeesButton.disabled = true;
-        } else {
-            mutualWorkTable_addEmployeesButton.disabled = false;
-        }
+        monthReport_addEmployeesButtonsVisibleChange(mutualWorkTable_divisionOwnerId, mutualWorkTable_divisionEmployeeId, mutualWorkTable_addEmployeesButton);
         if (mutualWorkTable.store.isDirty()) {
 
             if (!confirm("В таблице были изменения. Вы уверены, что хотите обновить данные не записав текущие?")) {

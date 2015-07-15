@@ -67,13 +67,7 @@
         // обновляем таблицу
         overtimeTable_reloadTable();
         // меняем видимость кнопки "Добавить сотрудников"
-        if( overtimeTable_divisionOwnerId.value == ALL_VALUE ||
-            overtimeTable_divisionEmployeeId.value == ALL_VALUE)
-        {
-            overtimeTable_addEmployeesButton.disabled = true;
-        }else{
-            overtimeTable_addEmployeesButton.disabled = false;
-        }
+        monthReport_addEmployeesButtonsVisibleChange(overtimeTable_divisionOwnerId, overtimeTable_divisionEmployeeId, overtimeTable_addEmployeesButton);
     }
 
     function overtimeTable_createStore(){
