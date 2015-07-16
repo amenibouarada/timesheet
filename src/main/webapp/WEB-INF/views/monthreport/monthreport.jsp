@@ -34,8 +34,10 @@
             notCreated: {id: <%=NOT_CREATED.getId()%>,  name: '<%=NOT_CREATED.getName()%>'}
         };
 
+        // Номера редактируемых полей в таблицах
         var monthReportTable_editableColumns = [3, 5, 9, 12, 13];
         var overtimeTable_editableColumns = [5, 6, 8, 9];
+        var mutualWorkTable_editableColumns = [6, 7, 8, 12];
 
         function monthreport_getStatusById(/* int */ id){
             if (statusList.open.id == id){ return statusList.open; }
@@ -415,6 +417,8 @@
                             }
                         }
                         monthReport_setEditable(monthReportTable, monthReportTable_editableColumns, editable);
+                        monthReport_setEditable(overtimeTable, overtimeTable_editableColumns, editable);
+                        monthReport_setEditable(mutualWorkTable, mutualWorkTable_editableColumns, editable);
                         monthReport_colorizeMonthOption();
                     },
                     false
