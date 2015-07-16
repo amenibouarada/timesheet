@@ -418,7 +418,9 @@
                         }
                         monthReport_setEditable(monthReportTable, monthReportTable_editableColumns, editable);
                         monthReport_setEditable(overtimeTable, overtimeTable_editableColumns, editable);
+                        <sec:authorize access="hasAnyRole('ROLE_ADMIN', 'ROLE_MONTH_REPORT_MANAGER')">
                         monthReport_setEditable(mutualWorkTable, mutualWorkTable_editableColumns, editable);
+                        </sec:authorize>
                         monthReport_colorizeMonthOption();
                     },
                     false
