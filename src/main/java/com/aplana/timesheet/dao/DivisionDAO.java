@@ -58,7 +58,8 @@ public class DivisionDAO {
 	 * @return объект типа Division или null, если подразделение не найдено.
 	 */
 	public Division find(String title) {
-		Query query = entityManager.createQuery(
+        System.err.println(title);
+        Query query = entityManager.createQuery(
                 "from Division as d where d.active=:active and lower(d.ldapName)=:title"
         ).setParameter( "active", true ).setParameter( "title", title.toLowerCase() );
 

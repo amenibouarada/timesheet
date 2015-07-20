@@ -446,7 +446,7 @@ public class TimeSheetDAO {
                 "      where c.caldate between i.begin_date and i.end_date and i.employee_id = e.id\n" +
                 "  )\n" +
                 "group by e.id having count(1) > :threshold\n" +
-                "order by count(1) desc, e.id"
+                "order by count(1) desc, e.name asc"
         )
                 .setParameter("division", division.getId())
                 .setParameter("startDate", startDate)

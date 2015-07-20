@@ -47,6 +47,16 @@
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 
+   <!-- Prevent session URL -->
+    <filter>
+        <filter-name>PreventUrlSessionFilter</filter-name>
+        <filter-class>com.aplana.timesheet.util.filters.PreventUrlSessionFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>PreventUrlSessionFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
     <filter>
         <filter-name>AutentificationFilter</filter-name>
         <filter-class>com.aplana.timesheet.system.security.AutentificationFilter</filter-class>
