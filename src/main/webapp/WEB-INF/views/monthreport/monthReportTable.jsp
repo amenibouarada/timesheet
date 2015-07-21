@@ -50,57 +50,91 @@
 
 <script type="text/javascript">
 
-    // TODO: Реализовать группировку колонок заголовка в соответствии с обозначенными ниже группами.
-    // TODO: Сделать возможность включения групп колонок : по умолчанию включена группа Управленческий табель, все друугие выключены
+    var modelFieldsForSave = [
 
-    var gridlayout = [
+    ];
+
+    var monthReportTable_views = [
         {
-            cells: [[
-/* 0  */                {field: "employee", name: "Сотрудник", width: "120px"}
-            ]], noscroll: true
+            noscroll: true,
+            expand: false,
+            cells:  [
+     /* 0  */        {field: "employee"                 , name: "Сотрудник",                                         width: "120px", headerStyles: "font: bold 8pt/6pt sans-serif; height: 148px;"},
+     /* 1  */        {field: "division"                 , name: "Подразделение",                                     width: "162px", headerStyles: "font: bold 8pt/6pt sans-serif; height: 148px;"},
+     /* 2  */        {field: "region"                   , name: "Регион",                                            width: "100px", headerStyles: "font: bold 8pt/6pt sans-serif; height: 148px;"}
+            ]
         },
         {
-            cells: [[
+            noscroll: true,
+            expand: false,
+            cells:  [
+            // Группа "Управленческий табель"
 
-/* 1  */     {field: "division"                 , name: "Подразделение",                                     width: "162px"},
-/* 2  */     {field: "region"                   , name: "Регион",                                            width: "100px"},
+     /* 3  */        {field: "ts_worked"                , name: "Отработано",                                        width: "50px", formatter: monthReport_colorCell},
+     /* 4  */        {field: "overtimes_paid_current"   , name: "Оплач. переработки этого месяца",                   width: "50px"},
+     /* 5  */        {field: "overtimes_paid_previous"  , name: "Оплач. переработки пред.периодов",                  width: "50px"},
+     /* 6  */        {field: "calc_vacation_with"       , name: "Отпуск с сохранением фактический",                  width: "50px"},
+     /* 7  */        {field: "calc_vacation_without"    , name: "Отпуск без сохранения",                             width: "50px"},
+     /* 8  */        {field: "calc_vacation_hol_paid"   , name: "Переработки, отгуленные в этом месяце",             width: "50px"},
+     /* 9  */        {field: "ts_illness"               , name: "Больничные дни за этот месяц",                      width: "50px", formatter: monthReport_colorCell},
+     /* 10 */        {field: "ts_all_paid"              , name: "Всего оплачено рабочих дней",                       width: "50px"},
+     /* 11 */        {field: "ts_all_over_accounted"    , name: "Всего оплачено переработок",                        width: "50px"},
 
-                    // Группа "Управленческий табель"
+            // Группа "Отпуска и отгулы"
 
-/* 3  */     {field: "ts_worked"                , name: "Отработано",                                        width: "50px", formatter: monthReport_colorCell},
-/* 4  */     {field: "overtimes_paid_current"   , name: "Оплач. переработки этого месяца",                   width: "50px"},
-/* 5  */     {field: "overtimes_paid_previous"  , name: "Оплач. переработки пред.периодов",                  width: "50px"},
-/* 6  */     {field: "calc_vacation_with"       , name: "Отпуск с сохранением фактический",                  width: "50px"},
-/* 7  */     {field: "calc_vacation_without"    , name: "Отпуск без сохранения",                             width: "50px"},
-/* 8  */     {field: "calc_vacation_hol_paid"   , name: "Переработки, отгуленные в этом месяце",             width: "50px"},
-/* 9  */     {field: "ts_illness"               , name: "Больничные дни за этот месяц",                      width: "50px", formatter: monthReport_colorCell},
-/* 10 */     {field: "ts_all_paid"              , name: "Всего оплачено рабочих дней",                       width: "50px"},
-/* 11 */     {field: "ts_all_over_accounted"    , name: "Всего оплачено переработок",                        width: "50px"},
+     /* 12 */        {field: "ts_vacation_avail"        , name: "Доступный на конец месяца отпуск",                  width: "50px"},
+     /* 13 */        {field: "ts_over_remain"           , name: "Доступные на конец месяца для отгула переработки",  width: "50px", formatter: monthReport_colorCell},
+     /* 14 */        {field: "calc_worked_vac"          , name: "Работа в отпуске/отгуле в этом месяце",             width: "50px"},
+     /* 15 */        {field: "ts_vacation"              , name: "Отпуск, начисленный в этом месяце",                 width: "50px"},
+     /* 16 */        {field: "overtimes_acc_current"    , name: "Перер, начисленные в отгул в этом месяце",          width: "50px"},
 
-                    // Группа "Отпуска и отгулы"
+            // Группа "Больничные"
 
-/* 12 */     {field: "ts_vacation_avail"        , name: "Доступный на конец месяца отпуск",                  width: "50px"},
-/* 13 */     {field: "ts_over_remain"           , name: "Доступные на конец месяца для отгула переработки",  width: "50px", formatter: monthReport_colorCell},
-/* 14 */     {field: "calc_worked_vac"          , name: "Работа в отпуске/отгуле в этом месяце",             width: "50px"},
-/* 15 */     {field: "ts_vacation"              , name: "Отпуск, начисленный в этом месяце",                 width: "50px"},
-/* 16 */     {field: "overtimes_acc_current"    , name: "Перер, начисленные в отгул в этом месяце",          width: "50px"},
-
-                    // Группа "Больничные"
-
-/* 17 */     {field: "calc_illness"             , name: "Больничные итого",                                  width: "50px"},
-/* 18 */     {field: "calc_illness_with"        , name: "Больничные с подтв.",                               width: "50px"},
-/* 19 */     {field: "calc_illness_without"     , name: "Больничные без подтв.",                             width: "50px"},
-/* 20 */     {field: "calc_worked_ill"          , name: "Работа на больничном в этом месяце",                width: "50px"},
+     /* 17 */        {field: "calc_illness"             , name: "Больничные итого",                                  width: "50px"},
+     /* 18 */        {field: "calc_illness_with"        , name: "Больничные с подтв.",                               width: "50px"},
+     /* 19 */        {field: "calc_illness_without"     , name: "Больничные без подтв.",                             width: "50px"},
+     /* 20 */        {field: "calc_worked_ill"          , name: "Работа на больничном в этом месяце",                width: "50px"},
 
 
-                    // Группа Расчетные показатели по отработанным дням
+            // Группа "Расчетные показатели по отработанным дням"
 
-/* 20 */     {field: "calc_worked_plan"         , name: "Отработано (план)",                                 width: "50px"},
-/* 21 */     {field: "calc_worked_fact"         , name: "Отработано (факт)",                                 width: "50px"}
-
-            ]]
+     /* 20 */        {field: "calc_worked_plan"         , name: "Отработано (план)",                                 width: "52px"},
+     /* 21 */        {field: "calc_worked_fact"         , name: "Отработано (факт)",                                 width: "52px"}
+             ],
+             groups: [
+                     {
+                        name: "Управленческий табель",
+                        colSpan: 9,
+                        expand: true,
+                        headerStyles: "font: bold 8pt/6pt sans-serif; line-height:50px;"
+                     },
+                     {
+                        name: "Отпуска и отгулы",
+                        colSpan: 5,
+                        expand: true,
+                        headerStyles: "font: bold 8pt/6pt sans-serif; line-height:50px;"
+                     },
+                     {
+                        name: "Больничные",
+                        colSpan: 4,
+                        expand: true,
+                        headerStyles: "font: bold 8pt/6pt sans-serif; line-height:50px;"
+                     },
+                     {
+                        name: "Расч. показатели по отраб. дням",
+                        colSpan: 2,
+                        expand: true,
+                        headerStyles: "font: bold 8pt/10pt sans-serif;"
+                     }
+                  ]
+        },
+        {
+            noscroll: false,
+            expand: false
         }
     ];
+
+    var gridlayout = createLayout(monthReportTable_views);
 
     function monthReportTable_createStore(){
         var data = {

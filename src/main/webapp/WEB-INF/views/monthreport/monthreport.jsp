@@ -19,6 +19,7 @@
     </style>
 
     <script type="text/javascript" src="<%= request.getContextPath()%>/resources/js/monthreport.js"></script>
+    <script src="<%= getResRealPath("/resources/js/DataGrid.ext.js", application) %>" type="text/javascript"></script>
 
     <script type="text/javascript">
         dojo.require("dojo.parser");
@@ -35,7 +36,7 @@
         };
 
         // Номера редактируемых полей в таблицах
-        var monthReportTable_editableColumns = [3, 5, 9, 12, 13];
+        var monthReportTable_editableColumns = [7, 9, 13, 16, 17];
         var overtimeTable_editableColumns = [5, 6, 8, 9];
         var mutualWorkTable_editableColumns = [6, 7, 8, 12];
 
@@ -50,7 +51,7 @@
         var managerMapJson = ${managerList};
 
         //Массив всплывающих подсказок для таблицы "Табель"
-        var monthReportTable_tooltips = ["Сотрудник", "Подразделение", "Регион", "Отработано", "Оплаченные переработки этого месяца",
+        var monthReportTable_tooltips = ["Сотрудник", "Подразделение", "Регион", "", "", "", "", "Отработано", "Оплаченные переработки этого месяца",
             "Переработки, не отгуленные за прошедшие периоды на начало месяца", "Отпуск с сохранением фактический",
             "Отпуск без сохранения фактический", "Переработки, отгуленные в этом месяце", "Количество рабочих дней болезни за месяц",
             "Всего оплаченных рабочих дней", "Всего оплаченных переработок", "Накопленный отпуск на конец месяца за вычетом отпуска за свой счет, отгуленного в этом месяце ",
@@ -149,14 +150,16 @@
                 cell.customStyles.push('color:red');
                 dispValue = calculatedValue != null ? calculatedValue : '';
             }
-            return "<span title='Значение по умолчанию: " + calculatedValue + "'>" + dispValue + "</span>"
+            return cell.name == "<div>&nbsp;</div>" ? "" : "<span title='Значение по умолчанию: " + calculatedValue + "'>" + dispValue + "</span>";
         }
 
         // Создаёт всплывающие подсказки для заголовков таблиц
         function createTooltips(tooltips, grid) {
             var showTooltip = function (e) {
                 var msg = tooltips[e.cell.index];
-                dijit.showTooltip(msg, e.cellNode);
+                if (msg) {
+                    dijit.showTooltip(msg, e.cellNode);
+                }
             };
             var hideTooltip = function (e) {
                 dijit.hideTooltip(e.cellNode);
