@@ -158,7 +158,7 @@
         }
     }
 
-    function monthReportTable_reloadTable(){
+    function monthReportTable_reloadTable(month){
         //дизактивируем кнопку "Сохранить"
         monthReport_saveButtonChangeState(false);
         if (monthReportTable.store && monthReportTable.store.isDirty()){
@@ -168,7 +168,7 @@
         }
 
         var year = dojo.byId("monthreport_year").value;
-        var month = dojo.byId("monthreport_month").value;
+        var month = month ? month : dojo.byId("monthreport_month").value;
         var divisionId  = dojo.byId("monthReportTable_divisionId") ?
                 monthReportTable_divisionId.value : 0;
         var managerId   = dojo.byId("monthReportTable_managerId") ?
@@ -214,12 +214,12 @@
                         "Во время сохранения табеля произошла ошибка. Пожалуйста, свяжитесть с администраторами системы.",
                         function () {
                             monthReportTable_reloadTable();
+                            monthReport_updateStatus();
                         },
                         false
                 );
             }
         });
-        monthReport_updateStatus();
     }
 
     var monthReportTable_cellChanged = function(rowIndex){

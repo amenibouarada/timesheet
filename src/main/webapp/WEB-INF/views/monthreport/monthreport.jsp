@@ -168,33 +168,81 @@
             dojo.connect(grid, "onHeaderCellMouseOut", hideTooltip);
         }
 
-        function monthReport_colorizeMonthOption(){
+        // Функция для окраски месяцев в зависимости от статуса, а также установки доступности/недоступности
+        // опций для выбора в зависимости от статуса предыдущего месяца.
+        // start - признак того, что таблица загружается впервые.
+        function monthReport_colorizeMonthsOption(start){
             makeAjaxRequest(
                     "<%= request.getContextPath()%>/monthreport/getMonthReportStatusesForYear",
                     { year: monthreport_year.value },
                     "json",
                     "При запросе статусов табелей за год произошла ошибка",
                     function (response) {
+                        if (start) {
+                            setDefaultMonth(response);
+                        }
                         // сперва очистим, потом расскрасим
                         for (var i = 1; i <= 12; i++){
                             dojo.byId("monthreport_month_option_" + i).style.backgroundColor = "white";
                         }
-                        response.forEach(function(item){
-                            var month = item[0];
-                            var status = item[1];
-                            var option = dojo.byId("monthreport_month_option_" + month);
-                            switch (status){
-                                case statusList.closed.id:
-                                    option.style.backgroundColor = "green";
-                                    break;
-                                case statusList.open.id:
-                                    option.style.backgroundColor = "red";
-                                    break;
-                            }
-                        });
+                        if (response == '') {
+                            var nextMonth = 2;
+                            var nextYear = dojo.byId("monthreport_year").selectedIndex + 1;
+                            var lastYear = dojo.byId("monthreport_year").length - 1;
+                            monthReport_monthsYearsDisable(nextMonth, nextYear, lastYear);
+                        } else {
+                            response.forEach(function (item) {
+                                var month = item[0];
+                                var nextMonth = month < 12 ? month + 1 : 1;
+                                var status = item[1];
+                                var closeDate = item[2];
+                                var option = dojo.byId("monthreport_month_option_" + month);
+                                var nextYear = dojo.byId("monthreport_year").selectedIndex + 1;
+                                var lastYear = dojo.byId("monthreport_year").length - 1;
+                                switch (status) {
+                                    case statusList.closed.id:
+                                        option.style.backgroundColor = "green";
+                                        dojo.byId("monthreport_month_option_" + nextMonth).disabled = false;
+                                        if (nextMonth == 1) {
+                                            dojo.byId("monthreport_year_option_" + nextYear).disabled = false;
+                                        }
+                                        monthReport_monthsYearsDisable(nextMonth + 1, nextYear, lastYear);
+                                        break;
+                                    case statusList.open.id:
+                                        option.style.backgroundColor = "red";
+                                        if (closeDate == '') {
+                                            monthReport_monthsYearsDisable(nextMonth, nextYear, lastYear);
+                                        } else {
+                                            dojo.byId("monthreport_month_option_" + nextMonth).disabled = false;
+                                        }
+                                        break;
+                                }
+                            });
+                        }
                     },
                     false
             );
+        }
+
+        function monthReport_monthsYearsDisable(nextMonth, nextYear, lastYear) {
+            for (var i = nextMonth ; i <= 12; i++) {
+                dojo.byId("monthreport_month_option_" + i).disabled = true;
+            }
+            for (var i = nextYear; i <= lastYear; i++ ) {
+                dojo.byId("monthreport_year_option_" + i).disabled = true;
+            }
+        }
+
+        function setDefaultMonth(response) {
+            var maxMonth = 0;
+            dojo.forEach(response, function (data) {
+                if (data[0] > maxMonth && data[1] == statusList.closed.id) {
+                    maxMonth = data[0];
+                }
+            });
+            dojo.byId("monthreport_month").value = maxMonth + 1;
+            monthReportTable_reloadTable(maxMonth + 1)
+            monthReport_updateStatus(maxMonth + 1);
         }
 
         <sec:authorize access="hasAnyRole('ROLE_ADMIN', 'ROLE_MONTH_REPORT_MANAGER')">
@@ -241,12 +289,9 @@
             monthReport_initOvertimeTable();
             monthReport_initMutualWorkTable();
 
-            // установим год/месяц по умолчанию
+            // установим год по умолчанию
             var currentDate = new Date();
             dojo.byId("monthreport_year").value = currentDate.getFullYear();
-            dojo.byId("monthreport_month").value = currentDate.getMonth();
-            monthReport_updateStatus();
-            monthReport_colorizeMonthOption();
 
             // функция для переназначения обработчиков нажатия кнопок
             // и отображения актуальных данных
@@ -254,7 +299,6 @@
                 dojo.forEach(eventConnections, dojo.disconnect);
                 eventConnections = [];
                 if (dijit.byId('tabContainer').selectedChildWidget.id == "monthReportTable_tab") {
-                    monthReportTable_reloadTable();
                     eventConnections.push(dojo.connect(monthreport_year, "onchange", function () {
                         monthReportTable_reloadTable()
                     }));
@@ -308,6 +352,7 @@
             // назначим слушителей переключения табов
             tabContainer.watch("selectedChildWidget", changeButtonListeners);
             changeButtonListeners(); // выполним, чтобы загрузить слушателей для первой вкладки
+            monthReport_colorizeMonthOption(true);
         });
 
         var divFromCookie = getCookieValue('aplanaDivision');
@@ -381,10 +426,10 @@
             </sec:authorize>
         }
 
-        function monthReport_updateStatus(){
+        function monthReport_updateStatus(month){
             makeAjaxRequest(
                     "<%= request.getContextPath()%>/monthreport/getStatus",
-                    {year: monthreport_year.value, month: monthreport_month.value},
+                    {year: monthreport_year.value, month: month ? month : monthreport_month.value},
                     "json",
                     "Не удалось получить статус",
                     function (status) {
@@ -518,8 +563,8 @@
         </td>
         <td>
             <select data-dojo-id="monthreport_year" id="monthreport_year" onchange="monthReport_updateStatus();">
-                <option value="2015" label="2015">2015</option>
-                <option value="2016" label="2016">2016</option>
+                <option id="monthreport_year_option_0" value="2015" label="2015">2015</option>
+                <option id="monthreport_year_option_1" value="2016" label="2016">2016</option>
             </select>
         </td>
 
