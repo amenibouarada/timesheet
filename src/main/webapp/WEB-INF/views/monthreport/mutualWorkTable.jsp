@@ -87,7 +87,7 @@
         // что запись была добавлена вручную, то детальный отчет создать невозможно, поэтому делаем фон "лупы" непрозрачным, убираем кликабельность.
         // подробнее - APLANATS-1935
        if (mutualWorkTable.getItem(rowIndex).mutual_work_id[0] == null) {
-           return "<a href='#' onclick='getReport3(" + rowIndex + ")'><img src='/resources/img/view.png' width='25' height='25'/></a>";
+           return "<a href='#' onclick='getReport3(" + rowIndex + ")'><img src='/resources/img/view.png' width='20' height='20'/></a>";
        } else {
            cell.customStyles.push('opacity: 0.2;');
            return "<img src='/resources/img/view.png' width='25' height='25'/>";

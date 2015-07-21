@@ -41,7 +41,7 @@
         <th field="employee_name"                width="150px"                                      >Сотрудник</th>
         <th field="division_employee_name"       width="150px"                                      >Подразделение</th>
         <th field="region_name"                  width="100px"                                      >Регион</th>
-        <th field="project_name"                 width="100px"                                      >Проект/Пресейл</th>
+        <th field="project_name"                 width="155px"                                      >Проект/Пресейл</th>
         <th field="project_type_name"            width="100px"                                      >Тип</th>
         <th field="overtime"                     width="50px"   formatter= "monthReport_colorCell"  >Переработки, отработанные дни</th>
         <th field="premium"                      width="50px"   formatter= "monthReport_colorCell"  >Переработки, дополнительные дни</th>
