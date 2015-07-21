@@ -360,6 +360,9 @@
 
         //Инициализация таблицы "Табель"
         function monthReport_initMonthReportTable() {
+            switchColDisplay(document.getElementById("hide_button_ts_vacation_avail"), "ts_vacation_avail", true, true);
+            switchColDisplay(document.getElementById("hide_button_calc_illness"), "calc_illness", true, true);
+            switchColDisplay(document.getElementById("hide_button_calc_worked_plan"), "calc_worked_plan", true, true);
             monthReportTable_createStore();
             if (dojo.byId("monthReportTable_divisionId")){
                 monthReportTable_updateManagers();
