@@ -49,7 +49,8 @@
 
 <button data-dojo-id="mutualWorkTable_addEmployeesButton" id="mutualWorkTable_addEmployeesButton"
         onclick="mutualWorkTable_addNewEmployees()">Добавить сотрудников</button>
-<button onclick="mutualWorkTable_deleteRows()">Удалить выделенные строки</button>
+<button data-dojo-id="mutualWorkTable_deleteRowsButton" id="mutualWorkTable_deleteRowsButton"
+        onclick="mutualWorkTable_deleteRows()">Удалить выделенные строки</button>
 
 <table data-dojo-id="mutualWorkTable" data-dojo-type="dojox.grid.DataGrid" height="500px">
     <thead>

@@ -30,7 +30,8 @@
 
 <button data-dojo-id="overtimeTable_addEmployeesButton" id="overtimeTable_addEmployeesButton"
         onclick="overtimeTable_addNewEmployees()">Добавить сотрудников</button>
-<button onclick="overtimeTable_deleteRows()">Удалить выделенные строки</button>
+<button data-dojo-id="overtimeTable_deleteRowsButton" id="overtimeTable_deleteRowsButton"
+        onclick="overtimeTable_deleteRows()">Удалить выделенные строки</button>
 </sec:authorize>
 
 <table data-dojo-id="overtimeTable" data-dojo-type="dojox.grid.DataGrid"

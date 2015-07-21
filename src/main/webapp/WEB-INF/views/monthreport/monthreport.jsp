@@ -402,6 +402,7 @@
                                 saveButton.style.visibility = "hidden";
                             }
                             editable = false;
+                            monthReport_changeButtonsState(true);
                         }else if(status == statusList.notCreated.id){
                             if (closeButton){ // кнопка может быть не видна для некоторых ролей
                                 closeButton.style.visibility = "hidden";
@@ -418,6 +419,7 @@
                             if (saveButton) {
                                 saveButton.style.visibility = "visible";
                             }
+                            monthReport_changeButtonsState(false);
                         }
                         monthReport_setEditable(monthReportTable, monthReportTable_editableColumns, editable);
                         monthReport_setEditable(overtimeTable, overtimeTable_editableColumns, editable);
@@ -442,6 +444,20 @@
                 if (requiredState == false) {
                     saveButton.disabled = true;
                 }
+            }
+        }
+
+        //Функция для изменения состояния кнопок добавления и удаления строк. Необходима для отключения возможностей редактирования
+        // в случае закрытия табеля.
+        // Параметр disabled - требуемое состояние кнопки (true - сделать неактивной, false - сделать активной)
+        function monthReport_changeButtonsState(disabled) {
+            if (dojo.byId("overtimeTable_addEmployeesButton") && dojo.byId("overtimeTable_deleteRowsButton")) {
+                dojo.byId("overtimeTable_addEmployeesButton").disabled = disabled;
+                dojo.byId("overtimeTable_deleteRowsButton").disabled = disabled;
+            }
+            if (dojo.byId("mutualWorkTable_addEmployeesButton") && dojo.byId("mutualWorkTable_deleteRowsButton")) {
+                dojo.byId("mutualWorkTable_addEmployeesButton").disabled = disabled;
+                dojo.byId("mutualWorkTable_deleteRowsButton").disabled = disabled;
             }
         }
 
