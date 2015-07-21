@@ -70,7 +70,7 @@
             cells:  [
             // Группа "Управленческий табель"
 
-     /* 3  */        {field: "ts_worked"                , name: "Отработано",                                        width: "50px", formatter: monthReport_colorCell},
+     /* 3  */        {field: "ts_worked"                , name: "Отработано",                                        width: "50px", formatter: monthReport_colorCell, headerStyles: "height: 84px;"},
      /* 4  */        {field: "overtimes_paid_current"   , name: "Оплач. переработки этого месяца",                   width: "50px"},
      /* 5  */        {field: "overtimes_paid_previous"  , name: "Оплач. переработки пред.периодов",                  width: "50px"},
      /* 6  */        {field: "calc_vacation_with"       , name: "Отпуск с сохранением фактический",                  width: "50px"},
