@@ -57,7 +57,7 @@
     var monthReportTable_views = [
         {
             noscroll: true,
-            expand: false,
+            expand: true,
             cells:  [
      /* 0  */        {field: "employee"                 , name: "Сотрудник",                                         width: "120px", headerStyles: "font: bold 8pt/6pt sans-serif; height: 148px;"},
      /* 1  */        {field: "division"                 , name: "Подразделение",                                     width: "162px", headerStyles: "font: bold 8pt/6pt sans-serif; height: 148px;"},
@@ -65,8 +65,8 @@
             ]
         },
         {
-            noscroll: true,
-            expand: false,
+            noscroll: false,
+            expand: true,
             cells:  [
             // Группа "Управленческий табель"
 
@@ -106,19 +106,19 @@
                         name: "Управленческий табель",
                         colSpan: 9,
                         expand: true,
-                        headerStyles: "font: bold 8pt/6pt sans-serif; line-height:50px;"
+                        headerStyles: "font: bold 8pt/6pt sans-serif; line-height:50px; padding-right: 15px; padding-left: 15px;"
                      },
                      {
                         name: "Отпуска и отгулы",
                         colSpan: 5,
                         expand: true,
-                        headerStyles: "font: bold 8pt/6pt sans-serif; line-height:50px;"
+                        headerStyles: "font: bold 8pt/6pt sans-serif; line-height:50px; padding-right: 9px; padding-left: 9px;"
                      },
                      {
                         name: "Больничные",
                         colSpan: 4,
                         expand: true,
-                        headerStyles: "font: bold 8pt/6pt sans-serif; line-height:50px;"
+                        headerStyles: "font: bold 8pt/6pt sans-serif; line-height:50px; padding-right: 6px; padding-left: 6px;"
                      },
                      {
                         name: "Расч. показатели по отраб. дням",
@@ -127,10 +127,6 @@
                         headerStyles: "font: bold 8pt/10pt sans-serif;"
                      }
                   ]
-        },
-        {
-            noscroll: false,
-            expand: false
         }
     ];
 
@@ -143,6 +139,9 @@
         };
         var store = new dojo.data.ItemFileWriteStore({data: data});
         monthReportTable.setStore(store);
+        for (var i = 0; i <= 26; i++) {
+            monthReportTable.layout.cells[i].noresize = "true";
+        }
     }
 
     function monthReportTable_updateManagers(){
