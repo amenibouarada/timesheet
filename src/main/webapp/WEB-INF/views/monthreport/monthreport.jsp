@@ -150,6 +150,8 @@
                 cell.customStyles.push('color:red');
                 dispValue = calculatedValue != null ? calculatedValue : '';
             }
+            // Если cell.name == "<div>&nbsp;</div>" - это показатель того, что колонка свёрнута. Чтобы в этом случае не отображались символы,
+            // возвращаем пустое значение.
             return cell.name == "<div>&nbsp;</div>" ? "" : "<span title='Значение по умолчанию: " + calculatedValue + "'>" + dispValue + "</span>";
         }
 

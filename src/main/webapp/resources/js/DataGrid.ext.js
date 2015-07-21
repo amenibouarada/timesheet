@@ -120,6 +120,8 @@ function createLayout(/* Array */ headerViews) {
                 headerStyles:  (!cell.headerStyles ? "" : cell.headerStyles) + "width: " + cell.width,
                 cellStyles: cellStyles,
                 hasBeenChanged: {},
+                // Если у ячейки присутствует пользовательский formatter, то используем его,
+                // иначе используем стандартный formatter, предусмотренный данной функцией
                 formatter: cell.formatter !=null ? cell.formatter : function(text, rowIndex, cell) {
                     var div = document.createElement("div");
 
