@@ -171,7 +171,7 @@
         // Функция для окраски месяцев в зависимости от статуса, а также установки доступности/недоступности
         // опций для выбора в зависимости от статуса предыдущего месяца.
         // start - признак того, что таблица загружается впервые.
-        function monthReport_colorizeMonthsOption(start){
+        function monthReport_colorizeMonthOption(start){
             makeAjaxRequest(
                     "<%= request.getContextPath()%>/monthreport/getMonthReportStatusesForYear",
                     { year: monthreport_year.value },
