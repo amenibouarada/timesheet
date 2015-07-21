@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import java.util.Date;
 import java.util.List;
 
 @Repository
@@ -158,6 +159,7 @@ public class MonthReportDAO {
     public boolean setMonthReportStatus(Integer year, Integer month, Integer status) {
         MonthReport monthReport = findMonthReportYearMonth(year, month);
         monthReport.setStatus(status);
+        monthReport.setClose_date(new Date());
         entityManager.merge(monthReport);
         entityManager.flush();
         logger.debug("Updated status monthReport object id = {}", monthReport.getId());
@@ -166,7 +168,7 @@ public class MonthReportDAO {
 
     public List<Object> getMonthReportStatusesForYear(Integer year) {
         Query query = entityManager.
-                createQuery("SELECT month, status FROM MonthReport WHERE year = :year ORDER BY year")
+                createQuery("SELECT month, status, close_date FROM MonthReport WHERE year = :year ORDER BY year")
                 .setParameter("year", year);
         logger.debug("getMonthReportStatusesForYear List<Object> result size = {}", query.getResultList().size());
         return query.getResultList();

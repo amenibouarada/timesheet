@@ -5,6 +5,7 @@ import com.aplana.timesheet.enums.MonthReportStatusEnum;
 import org.hibernate.annotations.ForeignKey;
 
 import javax.persistence.*;
+import java.util.Date;
 
 @Entity
 @Table(name = "month_report")
@@ -25,20 +26,19 @@ public class MonthReport {
     @Column(name = "status")
     private Integer status;
 
+    @Column(name = "open_date")
+    private Date open_date;
+
+    @Column(name = "close_date")
+    private Date close_date;
+
     public MonthReport() { }
 
     public MonthReport(Integer year, Integer month) {
         this.year = year;
         this.month = month;
         this.setStatus(MonthReportStatusEnum.OPEN.getId());
-    }
-
-    public Integer getStatus() {
-        return status;
-    }
-
-    public void setStatus(Integer status) {
-        this.status = status;
+        this.setOpen_date(new Date());
     }
 
     public Integer getId() {
@@ -63,5 +63,29 @@ public class MonthReport {
 
     public void setMonth(Integer month) {
         this.month = month;
+    }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
+
+    public Date getOpen_date() {
+        return open_date;
+    }
+
+    public void setOpen_date(Date open_date) {
+        this.open_date = open_date;
+    }
+
+    public Date getClose_date() {
+        return close_date;
+    }
+
+    public void setClose_date(Date close_date) {
+        this.close_date = close_date;
     }
 }
