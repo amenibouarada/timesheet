@@ -39,6 +39,8 @@
         var monthReportTable_editableColumns = [7, 9, 13, 16, 17];
         var overtimeTable_editableColumns = [5, 6, 8, 9];
         var mutualWorkTable_editableColumns = [6, 7, 8, 12];
+        var monthReportTable_groupsAreHidden = [false, true, true, true];
+        var monthReportTable_hideGroups = [7, 16, 21, 25];
 
         function monthreport_getStatusById(/* int */ id){
             if (statusList.open.id == id){ return statusList.open; }
@@ -212,10 +214,10 @@
                                         break;
                                     case statusList.open.id:
                                         option.style.backgroundColor = "red";
-                                        if (closeDate == '') {
-                                            monthReport_monthsYearsDisable(nextMonth, nextYear, lastYear);
-                                        } else {
+                                        if (closeDate) {
                                             dojo.byId("monthreport_month_option_" + nextMonth).disabled = false;
+                                        } else {
+                                            monthReport_monthsYearsDisable(nextMonth, nextYear, lastYear);
                                         }
                                         break;
                                 }
@@ -362,9 +364,7 @@
 
         //Инициализация таблицы "Табель"
         function monthReport_initMonthReportTable() {
-            switchColDisplay(document.getElementById("hide_button_ts_vacation_avail"), "ts_vacation_avail", true, true);
-            switchColDisplay(document.getElementById("hide_button_calc_illness"), "calc_illness", true, true);
-            switchColDisplay(document.getElementById("hide_button_calc_worked_plan"), "calc_worked_plan", true, true);
+            //monthReport_setGroupsState(monthReportTable_groupsAreHidden);
             monthReportTable_createStore();
             if (dojo.byId("monthReportTable_divisionId")){
                 monthReportTable_updateManagers();
@@ -400,6 +400,19 @@
             createTooltips(mutualWorkTable_tooltips, mutualWorkTable);
             </sec:authorize>
         }
+
+        function monthReport_setGroupsState(state) {
+            var group;
+            var groupState;
+            for (var i = 0; i < monthReportTable_hideGroups.length; i++){
+                group = monthReportTable_hideGroups[i];
+                groupState = getCookieValue("datagrid_hide_" + monthReportTable.layout.cells[group].field) ? getCookieValue("datagrid_hide_" + monthReportTable.layout.cells[group].field) : state[i];
+                if (groupState == "true") {
+                    switchColDisplay(document.getElementById("hide_button_" + monthReportTable.layout.cells[group].field), monthReportTable.layout.cells[group].field, groupState, true);
+                }
+            }
+        }
+
 
         //Функция для валидации введённых пользователем значений
         function monthReport_cellsValidator(currentTable, allowStringField) {
