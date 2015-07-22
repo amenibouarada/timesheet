@@ -397,10 +397,14 @@
         function monthReport_setGroupsState(state) {
             var group;
             var groupState;
-            for (var i = 0; i < monthReportTable_hideGroups.length; i++){
+            for (var i = 0; i < monthReportTable_hideGroups.length; i++) {
                 group = monthReportTable_hideGroups[i];
                 groupState = getCookieValue("datagrid_hide_" + monthReportTable.layout.cells[group].field) ? getCookieValue("datagrid_hide_" + monthReportTable.layout.cells[group].field) : state[i];
-                if (groupState == "true") {
+                if (getCookieValue("datagrid_hide_" + monthReportTable.layout.cells[group].field)) {
+                    if (groupState == "true") {
+                        switchColDisplay(document.getElementById("hide_button_" + monthReportTable.layout.cells[group].field), monthReportTable.layout.cells[group].field, groupState, true);
+                    }
+                } else {
                     switchColDisplay(document.getElementById("hide_button_" + monthReportTable.layout.cells[group].field), monthReportTable.layout.cells[group].field, groupState, true);
                 }
             }
