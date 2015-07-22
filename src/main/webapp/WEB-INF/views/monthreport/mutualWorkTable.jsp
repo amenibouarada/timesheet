@@ -196,7 +196,7 @@
             );
     }
 
-    function mutualWorkTable_save() {
+    function mutualWorkTable_save(isCloseOperation) {
         mutualWorkTable.store.fetch({
             query: {}, queryOptions: {deep: true},
             onComplete: function (items) {
@@ -209,7 +209,8 @@
                             year: dojo.byId("monthreport_year").value,
                             month: dojo.byId("monthreport_month").value,
                             divisionOwner: divisionOwner,
-                            jsonData: "[" + jsonData + "]"
+                            jsonData: "[" + jsonData + "]",
+                            isCloseOperation: isCloseOperation ? true : false
                         },
                         "text",
                         "Во время сохранения таблицы 'Взаимная занятость' произошла ошибка. Пожалуйста, свяжитесть с администраторами системы.",
