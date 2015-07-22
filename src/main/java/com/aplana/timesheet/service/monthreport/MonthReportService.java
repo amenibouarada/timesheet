@@ -145,4 +145,9 @@ public class MonthReportService {
         List<Object> result = monthReportDAO.getMonthReportStatusesForYear(year);
         return new ObjectMapper().writeValueAsString(result);
     }
+
+    public String getLastEnableYearAndMonth() throws IOException {
+        List<Object> result = monthReportDAO.getLastEnableYearAndMonth();
+        return new ObjectMapper().writeValueAsString(result);
+    }
 }

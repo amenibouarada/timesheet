@@ -1,9 +1,7 @@
 package com.aplana.timesheet.controller;
 
-import com.aplana.timesheet.enums.MonthReportStatusEnum;
 import com.aplana.timesheet.exception.JReportBuildError;
 import com.aplana.timesheet.form.AddEmployeeForm;
-import com.aplana.timesheet.form.MonthReportForm;
 import com.aplana.timesheet.service.monthreport.MonthReportExcelService;
 import com.aplana.timesheet.service.monthreport.MonthReportService;
 import com.aplana.timesheet.service.monthreport.MutualWorkService;
@@ -44,8 +42,13 @@ public class MonthReportController extends AbstractControllerForEmployee {
         final ModelAndView modelAndView = new ModelAndView("monthreport/monthreport");
 
         fillMavForAddEmployeesForm(modelAndView);
-        modelAndView.addObject(MonthReportForm.FORM, new MonthReportForm());
         modelAndView.addObject(AddEmployeeForm.ADD_FORM, new AddEmployeeForm());
+        try {
+            modelAndView.addObject("lastEnableYearAndMonth", monthReportService.getLastEnableYearAndMonth());
+        } catch (Exception exc) {
+            modelAndView.addObject("lastEnableYearAndMonth", "null, null");
+            logger.error("Во время получения максимальных доступных года и месяца произошла ошибка: ", exc);
+        }
 
         return modelAndView;
     }

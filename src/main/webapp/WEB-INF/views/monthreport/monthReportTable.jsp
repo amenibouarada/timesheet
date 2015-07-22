@@ -157,7 +157,7 @@
         }
     }
 
-    function monthReportTable_reloadTable(month){
+    function monthReportTable_reloadTable(){
         monthReport_setGroupsState(monthReportTable_groupsAreHidden);
         //дизактивируем кнопку "Сохранить"
         monthReport_saveButtonChangeState(false);
@@ -168,7 +168,7 @@
         }
 
         var year = dojo.byId("monthreport_year").value;
-        var month = month ? month : dojo.byId("monthreport_month").value;
+        var month = dojo.byId("monthreport_month").value;
         var divisionId  = dojo.byId("monthReportTable_divisionId") ?
                 monthReportTable_divisionId.value : 0;
         var managerId   = dojo.byId("monthReportTable_managerId") ?

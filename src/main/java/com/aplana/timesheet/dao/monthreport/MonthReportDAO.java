@@ -5,6 +5,7 @@ import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.dao.entity.monthreport.MonthReport;
 import com.aplana.timesheet.dao.entity.monthreport.MonthReportData;
 import com.aplana.timesheet.dao.entity.monthreport.MonthReportDetail;
+import com.aplana.timesheet.enums.MonthReportStatusEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -171,6 +172,12 @@ public class MonthReportDAO {
                 createQuery("SELECT month, status, close_date FROM MonthReport WHERE year = :year ORDER BY year")
                 .setParameter("year", year);
         logger.debug("getMonthReportStatusesForYear List<Object> result size = {}", query.getResultList().size());
+        return query.getResultList();
+    }
+
+    public List<Object> getLastEnableYearAndMonth() {
+        Query query = entityManager.createQuery("SELECT MAX(year), MAX(month) FROM MonthReport WHERE status = " + MonthReportStatusEnum.CLOSED.getId());
+        logger.debug("getLastEnableYearAndMonth List<Object> result size = {}", query.getResultList().size());
         return query.getResultList();
     }
 }

@@ -172,19 +172,22 @@
             dojo.connect(grid, "onHeaderCellMouseOut", hideTooltip);
         }
 
-        // Функция для окраски месяцев в зависимости от статуса, а также установки доступности/недоступности
-        // опций для выбора в зависимости от статуса предыдущего месяца.
-        // start - признак того, что таблица загружается впервые.
-        function monthReport_colorizeMonthOption(start){
+        /**
+         * Раскрашивает месяцы в выпадашке в зависимости от статуса, делает месяцы и годы доступными/недоступными
+         * Краткое описание алгоритма:
+         * Получает статусы всех табелей. Если нет ни одного созданного табеля, то делает доступным для просмотра январь текущего года,
+         * все остальные месяцы и годы делает недоступными. Если есть созданные табели, то проходит все эти табели по циклу. Если табель открыт,
+         * то делает все табели за все следующие месяцы недоступными для просмотра. Если попадается закрытый табель, то делаем следующий месяц
+         * доступным для просмотра. Если это закрытый табель за декабрь (следующий месяц - январь), то делаем доступным для просмотра следующий год
+         * и январь следующего года.
+         */
+        function monthReport_colorizeMonthOption(){
             makeAjaxRequest(
                     "<%= request.getContextPath()%>/monthreport/getMonthReportStatusesForYear",
                     { year: monthreport_year.value },
                     "json",
                     "При запросе статусов табелей за год произошла ошибка",
                     function (response) {
-                        if (start) {
-                            setDefaultMonth(response);
-                        }
                         // сперва очистим, потом расскрасим
                         for (var i = 1; i <= 12; i++){
                             dojo.byId("monthreport_month_option_" + i).style.backgroundColor = "white";
@@ -192,7 +195,7 @@
                         if (response == '') {
                             var nextMonth = 2;
                             var nextYear = dojo.byId("monthreport_year").selectedIndex + 1;
-                            var lastYear = dojo.byId("monthreport_year").length - 1;
+                            var lastYear = dojo.byId("monthreport_year").length;
                             monthReport_monthsYearsDisable(nextMonth, nextYear, lastYear);
                         } else {
                             response.forEach(function (item) {
@@ -202,7 +205,7 @@
                                 var closeDate = item[2];
                                 var option = dojo.byId("monthreport_month_option_" + month);
                                 var nextYear = dojo.byId("monthreport_year").selectedIndex + 1;
-                                var lastYear = dojo.byId("monthreport_year").length - 1;
+                                var lastYear = dojo.byId("monthreport_year").length;
                                 switch (status) {
                                     case statusList.closed.id:
                                         option.style.backgroundColor = "green";
@@ -235,18 +238,6 @@
             for (var i = nextYear; i <= lastYear; i++ ) {
                 dojo.byId("monthreport_year_option_" + i).disabled = true;
             }
-        }
-
-        function setDefaultMonth(response) {
-            var maxMonth = 0;
-            dojo.forEach(response, function (data) {
-                if (data[0] > maxMonth && data[1] == statusList.closed.id) {
-                    maxMonth = data[0];
-                }
-            });
-            dojo.byId("monthreport_month").value = maxMonth + 1;
-            monthReportTable_reloadTable(maxMonth + 1)
-            monthReport_updateStatus(maxMonth + 1);
         }
 
         <sec:authorize access="hasAnyRole('ROLE_ADMIN', 'ROLE_MONTH_REPORT_MANAGER')">
@@ -288,14 +279,15 @@
         var eventConnections = [];
 
         dojo.addOnLoad(function () {
+            // установим год и месяц по умолчанию
+            var currentDate = new Date();
+            dojo.byId("monthreport_year").value = ${lastEnableYearAndMonth}[0][0] ?  ${lastEnableYearAndMonth}[0][0] : currentDate.getFullYear();
+            dojo.byId("monthreport_month").value = ${lastEnableYearAndMonth}[0][0] ?  ${lastEnableYearAndMonth}[0][1] + 1 : 1;
+
             //Инициализируем вложенные таблицы
             monthReport_initMonthReportTable();
             monthReport_initOvertimeTable();
             monthReport_initMutualWorkTable();
-
-            // установим год по умолчанию
-            var currentDate = new Date();
-            dojo.byId("monthreport_year").value = currentDate.getFullYear();
 
             // функция для переназначения обработчиков нажатия кнопок
             // и отображения актуальных данных
@@ -303,6 +295,7 @@
                 dojo.forEach(eventConnections, dojo.disconnect);
                 eventConnections = [];
                 if (dijit.byId('tabContainer').selectedChildWidget.id == "monthReportTable_tab") {
+                    monthReportTable_reloadTable()
                     eventConnections.push(dojo.connect(monthreport_year, "onchange", function () {
                         monthReportTable_reloadTable()
                     }));
@@ -356,7 +349,7 @@
             // назначим слушителей переключения табов
             tabContainer.watch("selectedChildWidget", changeButtonListeners);
             changeButtonListeners(); // выполним, чтобы загрузить слушателей для первой вкладки
-            monthReport_colorizeMonthOption(true);
+            monthReport_colorizeMonthOption();
         });
 
         var divFromCookie = getCookieValue('aplanaDivision');
@@ -364,7 +357,7 @@
 
         //Инициализация таблицы "Табель"
         function monthReport_initMonthReportTable() {
-            //monthReport_setGroupsState(monthReportTable_groupsAreHidden);
+            monthReport_updateStatus();
             monthReportTable_createStore();
             if (dojo.byId("monthReportTable_divisionId")){
                 monthReportTable_updateManagers();
@@ -444,10 +437,10 @@
             </sec:authorize>
         }
 
-        function monthReport_updateStatus(month){
+        function monthReport_updateStatus(){
             makeAjaxRequest(
                     "<%= request.getContextPath()%>/monthreport/getStatus",
-                    {year: monthreport_year.value, month: month ? month : monthreport_month.value},
+                    {year: monthreport_year.value, month: monthreport_month.value},
                     "json",
                     "Не удалось получить статус",
                     function (status) {
@@ -581,8 +574,8 @@
         </td>
         <td>
             <select data-dojo-id="monthreport_year" id="monthreport_year" onchange="monthReport_updateStatus();">
-                <option id="monthreport_year_option_0" value="2015" label="2015">2015</option>
-                <option id="monthreport_year_option_1" value="2016" label="2016">2016</option>
+                <option id="monthreport_year_option_1" value="2015" label="2015">2015</option>
+                <option id="monthreport_year_option_2" value="2016" label="2016">2016</option>
             </select>
         </td>
 
