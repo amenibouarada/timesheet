@@ -106,21 +106,33 @@ public class MutualWorkService {
         return mapper.writeValueAsString(mutualWorkList);
     }
 
-    public boolean saveMutualWorkTable(int year, int month, int divisionOwner, String jsonData) throws IOException {
+    public boolean saveMutualWorkTable(int year, int month, int divisionOwner, String jsonData, boolean isCloseOperation) throws IOException {
         logger.debug("Старт сохранения таблицы 'Взаимная занятость'");
         ObjectMapper mapper = new ObjectMapper();
         CollectionType mapCollectionType = mapper.getTypeFactory().constructCollectionType(List.class, Map.class);
 
         List<Map<String, Object>> mutualWorks = mapper.readValue(jsonData, mapCollectionType);
+        Object work_days;
+        Object overtimes;
+        Object coefficient;
 
         for (Map<String, Object> mutualWorkMap : mutualWorks) {
             Project project = projectDAO.find((Integer) mutualWorkMap.get("project_id"));
             Employee employee = employeeDAO.find((Integer)mutualWorkMap.get("employee_id"));
             MutualWork mutualWork = mutualWorkDAO.findOrCreateMutualWork(employee, project, year, month, divisionOwner);
+            if (isCloseOperation) {
+                work_days = mutualWorkMap.get("work_days") != null ? mutualWorkMap.get("work_days") : mutualWorkMap.get("work_days_calculated");
+                overtimes = mutualWorkMap.get("overtimes") != null ? mutualWorkMap.get("overtimes") : mutualWorkMap.get("overtimes_calculated");
+                coefficient = mutualWorkMap.get("coefficient") != null ? mutualWorkMap.get("coefficient") : mutualWorkMap.get("coefficient_calculated");
+            } else {
+                work_days = mutualWorkMap.get("work_days");
+                overtimes = mutualWorkMap.get("overtimes");
+                coefficient = mutualWorkMap.get("coefficient");
+            }
 
-            mutualWork.setWork_days(     NumberUtils.getDoubleValue(mutualWorkMap.get("work_days")));
-            mutualWork.setOvertimes(NumberUtils.getDoubleValue(mutualWorkMap.get("overtimes")));
-            mutualWork.setCoefficient(NumberUtils.getDoubleValue(mutualWorkMap.get("coefficient")));
+            mutualWork.setWork_days(NumberUtils.getDoubleValue(work_days));
+            mutualWork.setOvertimes(NumberUtils.getDoubleValue(overtimes));
+            mutualWork.setCoefficient(NumberUtils.getDoubleValue(coefficient));
             mutualWork.setComment((String) mutualWorkMap.get("comment"));
             logger.debug("Сохранение записи в таблицу mutual_work: " + mutualWork.toString());
             mutualWorkDAO.save(mutualWork);

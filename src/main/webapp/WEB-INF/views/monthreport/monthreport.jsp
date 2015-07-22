@@ -104,7 +104,7 @@
                 content:    content,
                 preventCache: false,
                 load: function (response, ioargs) {
-                    if (responseType == "text"){
+                    if (responseType == "text" && response != ''){
                         alert(response);
                         handler();
                     }else if (responseType == "json"){
@@ -560,6 +560,7 @@
         }
         function monthReport_close(){
             monthReport_changeStatus("<%= request.getContextPath()%>/monthreport/closeMonthReport");
+            monthReportTable_save(true);
         }
         function monthReport_open(){
             monthReport_changeStatus("<%= request.getContextPath()%>/monthreport/openMonthReport");

@@ -153,7 +153,7 @@
             );
     }
 
-    function overtimeTable_save(){
+    function overtimeTable_save(isCloseOperation){
         overtimeTable.store.fetch({query: {}, queryOptions: {deep: true},
             onComplete: function (items) {
                 overtimeTable.store.save();
@@ -165,7 +165,8 @@
                             year: dojo.byId("monthreport_year").value,
                             month: dojo.byId("monthreport_month").value,
                             divisionOwner : divisionOwner,
-                            jsonData: "[" + jsonData + "]"
+                            jsonData: "[" + jsonData + "]",
+                            isCloseOperation: isCloseOperation ? true : false
                         },
                         "text",
                         "Во время сохранения таблицы 'Переработки' произошла ошибка. Пожалуйста, свяжитесть с администраторами системы.",

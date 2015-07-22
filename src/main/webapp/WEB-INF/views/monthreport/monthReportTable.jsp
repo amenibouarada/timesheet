@@ -198,7 +198,7 @@
         );
     }
 
-    function monthReportTable_save(){
+    function monthReportTable_save(isCloseOperation){
         monthReportTable.store.fetch({query: {}, queryOptions: {deep: true},
             onComplete: function (items) {
                 monthReportTable.store.save();
@@ -208,7 +208,8 @@
                         {
                             year: dojo.byId("monthreport_year").value,
                             month: dojo.byId("monthreport_month").value,
-                            jsonData: "[" + jsonData + "]"
+                            jsonData: "[" + jsonData + "]",
+                            isCloseOperation: isCloseOperation ? true : false
                         },
                         "text",
                         "Во время сохранения табеля произошла ошибка. Пожалуйста, свяжитесть с администраторами системы.",

@@ -36,22 +36,31 @@ public class OvertimeService {
 
     private static final Logger logger = LoggerFactory.getLogger(OvertimeService.class);
 
-    public boolean saveOvertimeTable(int year, int month, int divisionOwner, String jsonData) throws IOException {
+    public boolean saveOvertimeTable(int year, int month, int divisionOwner, String jsonData, boolean isCloseOperation) throws IOException {
         logger.debug("Старт сохранения таблицы 'Переработки'");
         ObjectMapper mapper = new ObjectMapper();
         CollectionType mapCollectionType = mapper.getTypeFactory().constructCollectionType(List.class, Map.class);
 
         List<Map<String, Object>> overtimes = mapper.readValue(jsonData, mapCollectionType);
+        Object overtime_alias;
+        Object fin_compensated_overtime;
 
         for (Map<String, Object> overtimeMap : overtimes){
             Project project = projectDAO.find((Integer) overtimeMap.get("project_id"));
             Employee employee = employeeDAO.find((Integer)overtimeMap.get("employee_id"));
             Overtime overtime = overtimeDAO.findOrCreateOvertime(employee, project, year, month, divisionOwner);
-
-            overtime.setOvertime(NumberUtils.getDoubleValue(overtimeMap.get("overtime")));
+            if (isCloseOperation) {
+                overtime_alias = overtimeMap.get("overtime") != null ? overtimeMap.get("overtime") : overtimeMap.get("overtime_calculated");
+                fin_compensated_overtime = overtimeMap.get("fin_compensated_overtime") != null ? overtimeMap.get("fin_compensated_overtime") :
+                        overtimeMap.get("fin_compensated_overtime_calculated");
+            } else {
+                overtime_alias = overtimeMap.get("overtime");
+                fin_compensated_overtime = overtimeMap.get("fin_compensated_overtime");
+            }
+            overtime.setOvertime(NumberUtils.getDoubleValue(overtime_alias));
             overtime.setPremium(NumberUtils.getDoubleValue(overtimeMap.get("premium")));
-            overtime.setFin_compensated_overtime(NumberUtils.getDoubleValue(overtimeMap.get("fin_compensated_overtime")));
-            overtime.setComment((String)overtimeMap.get("comment"));
+            overtime.setFin_compensated_overtime(NumberUtils.getDoubleValue(fin_compensated_overtime));
+            overtime.setComment((String) overtimeMap.get("comment"));
             logger.debug("Сохранение записи в таблицу overtime: " + overtime.toString());
             overtimeDAO.save(overtime);
         }
