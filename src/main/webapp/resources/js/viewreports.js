@@ -293,16 +293,6 @@ function setAllCheckBoxChecked() {
     }
 }
 
-function openVacation(date, emplId, divId) {
-    var vacationForm = dojo.byId("vacationsForm");
-    vacationForm.action = getContextPath()+"/vacations";
-
-    dojo.byId("calFromDate").value = date;
-    dojo.byId("calToDate").value = date;
-    dojo.query("#vacationsForm > #employeeId")[0].value = emplId;
-    dojo.query("#vacationsForm > #divisionId")[0].value = divId;
-    vacationForm.submit();
-}
 
 function sendDeleteTimeSheetApproval(reportId) {
     dojo.byId("link").value = document.URL;

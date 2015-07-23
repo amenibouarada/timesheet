@@ -237,8 +237,7 @@
             <c:if test="${report.illnessDay}">Болезнь</c:if>
             <c:if test="${report.vacationDay}">
                 Отпуск
-                <a href="#" onclick="openVacation('<fmt:formatDate value="${report.calDate}"
-                                                                   pattern="yyyy-MM-dd"/>', ${report.emp.id},  ${report.emp.division.id});">(Подробнее)</a>
+                <a id="openVacationLink" href="/open_vacation/<fmt:formatDate value="${report.calDate}" pattern="yyyy-MM-dd"/>/${employeeId}">(Подробнее)</a>
             </c:if>
             <c:if test="${report.businessTripDay}">Командировка</c:if>
         </td>
@@ -297,21 +296,6 @@
     </c:if>
     </thead>
 </table>
-
-<form:form method="post" commandName="vacationsForm" name="vacationsForm">
-    <form:hidden path="year"/>
-    <form:hidden path="vacationId"/>
-    <form:hidden path="vacationType"/>
-    <form:hidden path="managerId"/>
-    <form:hidden path="regions"/>
-    <form:hidden path="approvalId"/>
-    <form:hidden path="projectId"/>
-    <form:hidden path="viewMode"/>
-    <form:hidden path="calFromDate"/>
-    <form:hidden path="calToDate"/>
-    <form:hidden path="employeeId"/>
-    <form:hidden path="divisionId"/>
-</form:form>
 
 
 <form:form method="post" commandName="deleteReportsForm" name="deleteReportsForm">

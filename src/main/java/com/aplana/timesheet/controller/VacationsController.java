@@ -68,12 +68,29 @@ public class VacationsController extends AbstractControllerForEmployee {
         vacationsForm.setEmployeeId(employee.getId());
         vacationsForm.setCalToDate(DateTimeUtil.currentYearLastDay());
         vacationsForm.setCalFromDate(DateTimeUtil.currentMonthFirstDay());
-        vacationsForm.setVacationType(0);
+        vacationsForm.setVacationType(VacationsForm.ALL_VALUE);
         vacationsForm.setRegions(new ArrayList<Integer>());
         vacationsForm.getRegions().add(VacationsForm.ALL_VALUE);
         vacationsForm.setViewMode(VIEW_TABLE);
         return showVacations(vacationsForm, null);
     }
+
+    @RequestMapping(value = "/open_vacation/{calDate}/{employeeID}", method = RequestMethod.GET)
+    public ModelAndView openVacation(@ModelAttribute(VACATION_FORM) VacationsForm vacationsForm,
+                                     @PathVariable String calDate, @PathVariable Integer employeeID)
+    {
+        Employee employee = employeeService.find(employeeID);
+        vacationsForm.setDivisionId(employee.getDivision().getId());
+        vacationsForm.setEmployeeId(employee.getId());
+        vacationsForm.setCalToDate(calDate);
+        vacationsForm.setCalFromDate(calDate);
+        vacationsForm.setVacationType(VacationsForm.ALL_VALUE);
+        vacationsForm.setRegions(new ArrayList<Integer>());
+        vacationsForm.getRegions().add(VacationsForm.ALL_VALUE);
+        vacationsForm.setViewMode(VIEW_TABLE);
+        return showVacations(vacationsForm, null);
+    }
+
 
     @RequestMapping(value = "/vacations", method = RequestMethod.POST)
     public ModelAndView showVacations(
