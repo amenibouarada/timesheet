@@ -6,6 +6,7 @@ import com.aplana.timesheet.service.monthreport.MonthReportExcelService;
 import com.aplana.timesheet.service.monthreport.MonthReportService;
 import com.aplana.timesheet.service.monthreport.MutualWorkService;
 import com.aplana.timesheet.service.monthreport.OvertimeService;
+import com.aplana.timesheet.util.DateTimeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +47,8 @@ public class MonthReportController extends AbstractControllerForEmployee {
         try {
             modelAndView.addObject("lastEnableYearAndMonth", monthReportService.getLastEnableYearAndMonth());
         } catch (Exception exc) {
-            modelAndView.addObject("lastEnableYearAndMonth", "null, null");
+            // Если ошибка, то устанавливаем текущий год и первый месяц
+            modelAndView.addObject("lastEnableYearAndMonth", DateTimeUtil.getCurrentYear().toString() + ", 1");
             logger.error("Во время получения максимальных доступных года и месяца произошла ошибка: ", exc);
         }
 

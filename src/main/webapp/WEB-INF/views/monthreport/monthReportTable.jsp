@@ -192,7 +192,7 @@
                 "Во время запроса данных для табеля произошла ошибка. Пожалуйста, свяжитесть с администраторами системы.",
                 function (data) {
                     fillStore(monthReportTable, data);
-                    monthReport_setGroupsState(monthReportTable_groupsAreHidden);
+                    monthReport_setGroupsState();
                 },
                 true
         );
@@ -221,6 +221,25 @@
                 );
             }
         });
+    }
+
+    function monthReport_setGroupsState() {
+        // номера групп, состояние которых надо установить
+        var groups = [7, 16, 21, 25];
+        // требуемое состояние групп по умолчанию. false - не скрыто, true -  скрыто
+        var groupState = [false, true, true, true];
+        var group;
+        var cookie;
+        for (var i = 0; i < groups.length; i++) {
+            group = groups[i];
+            cookie = "datagrid_hide_" + monthReportTable.layout.cells[group].field;
+            if (!getCookieValue(cookie)) {
+                setCookie("datagrid_hide_" + monthReportTable.layout.cells[group].field, state[i])
+            }
+            if (getCookieValue(cookie) == "true") {
+                switchColDisplay(document.getElementById("hide_button_" + monthReportTable.layout.cells[group].field), monthReportTable.layout.cells[group].field, getCookieValue(cookie), true);
+            }
+        }
     }
 
     var monthReportTable_cellChanged = function(rowIndex){

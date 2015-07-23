@@ -39,8 +39,6 @@
         var monthReportTable_editableColumns = [7, 9, 13, 16, 17];
         var overtimeTable_editableColumns = [5, 6, 8, 9];
         var mutualWorkTable_editableColumns = [6, 7, 8, 12];
-        var monthReportTable_groupsAreHidden = [false, true, true, true];
-        var monthReportTable_hideGroups = [7, 16, 21, 25];
 
         function monthreport_getStatusById(/* int */ id){
             if (statusList.open.id == id){ return statusList.open; }
@@ -281,8 +279,8 @@
         dojo.addOnLoad(function () {
             // установим год и месяц по умолчанию
             var currentDate = new Date();
-            dojo.byId("monthreport_year").value = ${lastEnableYearAndMonth}[0][0] ?  ${lastEnableYearAndMonth}[0][0] : currentDate.getFullYear();
-            dojo.byId("monthreport_month").value = ${lastEnableYearAndMonth}[0][0] ?  ${lastEnableYearAndMonth}[0][1] + 1 : 1;
+            dojo.byId("monthreport_year").value = ${lastEnableYearAndMonth}[0][0];
+            dojo.byId("monthreport_month").value = ${lastEnableYearAndMonth}[0][1] + 1;
 
             //Инициализируем вложенные таблицы
             monthReport_initMonthReportTable();
@@ -314,14 +312,14 @@
                 if (dijit.byId('tabContainer').selectedChildWidget.id == "overtimeTable_tab") {
                     overtimeTable_reloadTable();
                     eventConnections.push(dojo.connect(monthreport_year, "onchange", function () {
-                        overtimeTable_reloadTable()
+                        overtimeTable_reloadTable();
                     }));
                     eventConnections.push(dojo.connect(monthreport_month, "onchange", function () {
-                        overtimeTable_reloadTable()
+                        overtimeTable_reloadTable();
                     }));
                     <sec:authorize access="hasAnyRole('ROLE_ADMIN', 'ROLE_MONTH_REPORT_MANAGER')">
                     eventConnections.push(dojo.connect(monthReport_saveButton, "onclick", function () {
-                        overtimeTable_save()
+                        overtimeTable_save();
                     }));
                     eventConnections.push(dojo.connect(monthReport_exportButton, "onclick", function () {
                         makeReport(2)
@@ -332,13 +330,13 @@
                 if (dijit.byId('tabContainer').selectedChildWidget.id == "mutualWorkTable_tab") {
                     mutualWorkTable_reloadTable();
                     eventConnections.push(dojo.connect(monthreport_year, "onchange", function () {
-                        mutualWorkTable_reloadTable()
+                        mutualWorkTable_reloadTable();
                     }));
                     eventConnections.push(dojo.connect(monthreport_month, "onchange", function () {
-                        mutualWorkTable_reloadTable()
+                        mutualWorkTable_reloadTable();
                     }));
                     eventConnections.push(dojo.connect(monthReport_saveButton, "onclick", function () {
-                        mutualWorkTable_save()
+                        mutualWorkTable_save();
                     }));
                     eventConnections.push(dojo.connect(monthReport_exportButton, "onclick", function () {
                         makeReport(3)
@@ -396,23 +394,6 @@
             createTooltips(mutualWorkTable_tooltips, mutualWorkTable);
             </sec:authorize>
         }
-
-        function monthReport_setGroupsState(state) {
-            var group;
-            var groupState;
-            var stateFromCookie;
-            for (var i = 0; i < monthReportTable_hideGroups.length; i++) {
-                group = monthReportTable_hideGroups[i];
-                if (!getCookieValue("datagrid_hide_" + monthReportTable.layout.cells[group].field)) {
-                    setCookie("datagrid_hide_" + monthReportTable.layout.cells[group].field, state[i])
-                }
-                stateFromCookie = getCookieValue("datagrid_hide_" + monthReportTable.layout.cells[group].field);
-                if (stateFromCookie == "true") {
-                    switchColDisplay(document.getElementById("hide_button_" + monthReportTable.layout.cells[group].field), monthReportTable.layout.cells[group].field, stateFromCookie, true);
-                }
-            }
-        }
-
 
         //Функция для валидации введённых пользователем значений
         function monthReport_cellsValidator(currentTable, allowStringField) {
