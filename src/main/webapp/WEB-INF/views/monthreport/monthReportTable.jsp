@@ -158,7 +158,6 @@
     }
 
     function monthReportTable_reloadTable(){
-        monthReport_setGroupsState(monthReportTable_groupsAreHidden);
         //дизактивируем кнопку "Сохранить"
         monthReport_saveButtonChangeState(false);
         if (monthReportTable.store && monthReportTable.store.isDirty()){
@@ -193,6 +192,7 @@
                 "Во время запроса данных для табеля произошла ошибка. Пожалуйста, свяжитесть с администраторами системы.",
                 function (data) {
                     fillStore(monthReportTable, data);
+                    monthReport_setGroupsState(monthReportTable_groupsAreHidden);
                 },
                 true
         );

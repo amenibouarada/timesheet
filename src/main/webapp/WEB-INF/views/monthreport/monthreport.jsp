@@ -372,6 +372,7 @@
         function monthReport_initOvertimeTable() {
             overtimeTable_createStore();
             overtimeTable_reloadTable();
+            processing();
             if (dojo.byId("overtimeTable_divisionOwnerId")){
                 dojo.byId("overtimeTable_divisionOwnerId").value = divFromCookie;
                 dojo.byId("overtimeTable_divisionEmployeeId").value = divFromCookie;
@@ -399,15 +400,15 @@
         function monthReport_setGroupsState(state) {
             var group;
             var groupState;
+            var stateFromCookie;
             for (var i = 0; i < monthReportTable_hideGroups.length; i++) {
                 group = monthReportTable_hideGroups[i];
-                groupState = getCookieValue("datagrid_hide_" + monthReportTable.layout.cells[group].field) ? getCookieValue("datagrid_hide_" + monthReportTable.layout.cells[group].field) : state[i];
-                if (getCookieValue("datagrid_hide_" + monthReportTable.layout.cells[group].field)) {
-                    if (groupState == "true") {
-                        switchColDisplay(document.getElementById("hide_button_" + monthReportTable.layout.cells[group].field), monthReportTable.layout.cells[group].field, groupState, true);
-                    }
-                } else {
-                    switchColDisplay(document.getElementById("hide_button_" + monthReportTable.layout.cells[group].field), monthReportTable.layout.cells[group].field, groupState, true);
+                if (!getCookieValue("datagrid_hide_" + monthReportTable.layout.cells[group].field)) {
+                    setCookie("datagrid_hide_" + monthReportTable.layout.cells[group].field, state[i])
+                }
+                stateFromCookie = getCookieValue("datagrid_hide_" + monthReportTable.layout.cells[group].field);
+                if (stateFromCookie == "true") {
+                    switchColDisplay(document.getElementById("hide_button_" + monthReportTable.layout.cells[group].field), monthReportTable.layout.cells[group].field, stateFromCookie, true);
                 }
             }
         }
