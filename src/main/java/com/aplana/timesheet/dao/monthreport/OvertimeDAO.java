@@ -59,8 +59,9 @@ public class OvertimeDAO {
                 entityManager.createQuery(queryString).setParameter("year", year).setParameter("month", month);
         if (ownerDivSet) { query.setParameter("divisionOwner", divisionOwner); }
         if (employeeDivSet) { query.setParameter("divisionEmployee", divisionEmployee); }
-        logger.debug("getOvertimes List<Overtime> result size = {}", query.getResultList().size());
-        return query.getResultList();
+        List<OvertimeData> result = query.getResultList();
+        logger.debug("getOvertimes List<Overtime> result size = {}", result.size());
+        return result;
     }
 
     public List<OvertimeData> getSingleOvertime(Employee currentUser, int year, int month) {
@@ -69,8 +70,9 @@ public class OvertimeDAO {
                 .setParameter("year", year)
                 .setParameter("month", month)
                 .setParameter("employee_id", currentUser.getId());
-        logger.debug("getSingleOvertime List<Overtime> result size = {}", query.getResultList().size());
-        return query.getResultList();
+        List<OvertimeData> result = query.getResultList();
+        logger.debug("getSingleOvertime List<Overtime> result size = {}", result.size());
+        return result;
     }
 
     @Transactional

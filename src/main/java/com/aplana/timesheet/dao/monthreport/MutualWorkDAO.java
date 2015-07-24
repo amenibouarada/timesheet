@@ -86,8 +86,9 @@ public class MutualWorkDAO {
         if (regionSet) {
             query.setParameter("regions", regions);
         }
-        logger.debug("getMutualWorkData List<MutualWorkData> result size = {}", query.getResultList().size());
-        return query.getResultList();
+        List<MutualWorkData> result = query.getResultList();
+        logger.debug("getMutualWorkData List<MutualWorkData> result size = {}", result.size());
+        return result;
     }
 
     @Transactional

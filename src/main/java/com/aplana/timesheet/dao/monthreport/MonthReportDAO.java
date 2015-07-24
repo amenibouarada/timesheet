@@ -102,11 +102,11 @@ public class MonthReportDAO {
                 .setParameter("month", month);
         List result = query.getResultList();
         if (result.size() == 0){
-            logger.debug("findMonthReportYearMonth List<MonthReport> result size = {}", query.getResultList().size());
+            logger.debug("findMonthReportYearMonth List<MonthReport> result size = {}", result.size());
             logger.info("findMonthReportYearMonth returned null");
             return null;
         }else{
-            logger.debug("findMonthReportYearMonth List<MonthReport> result size = {}", query.getResultList().size());
+            logger.debug("findMonthReportYearMonth List<MonthReport> result size = {}", result.size());
             return (MonthReport)result.get(0);
         }
     }
@@ -136,11 +136,11 @@ public class MonthReportDAO {
         if (result.size() == 0){ // создадим новый
             MonthReportDetail newMonthReportDetail = new MonthReportDetail(monthReport, employee);
             entityManager.persist(newMonthReportDetail);
-            logger.debug("findOrCreateMonthReportDetail List<MonthReportDetail> result size = {}", query.getResultList().size());
+            logger.debug("findOrCreateMonthReportDetail List<MonthReportDetail> result size = {}", result.size());
             logger.info("findOrCreateMonthReportDetail created newMonthReportDetail");
             return newMonthReportDetail;
         }else{
-            logger.debug("findOrCreateMonthReportDetail List<MonthReportDetail> result size = {}", query.getResultList().size());
+            logger.debug("findOrCreateMonthReportDetail List<MonthReportDetail> result size = {}", result.size());
             return (MonthReportDetail)result.get(0);
         }
     }
@@ -172,14 +172,16 @@ public class MonthReportDAO {
         Query query = entityManager.
                 createQuery("SELECT month, status, close_date FROM MonthReport WHERE year = :year ORDER BY year")
                 .setParameter("year", year);
-        logger.debug("getMonthReportStatusesForYear List<Object> result size = {}", query.getResultList().size());
-        return query.getResultList();
+        List<Object> result = query.getResultList();
+        logger.debug("getMonthReportStatusesForYear List<Object> result size = {}", result.size());
+        return result;
     }
 
     public List<Object> getLastEnableYearAndMonth() {
         Query query = entityManager.createQuery("SELECT MAX(year), MAX(month) FROM MonthReport WHERE status = " + MonthReportStatusEnum.CLOSED.getId());
-        logger.debug("getLastEnableYearAndMonth List<Object> result size = {}", query.getResultList().size());
-        return query.getResultList();
+        List<Object> result = query.getResultList();
+        logger.debug("getLastEnableYearAndMonth List<Object> result size = {}", result.size());
+        return result;
     }
 
     public List<MonthReportDetail> getMonthReportDataForCloseOperation(int year, int month) {
