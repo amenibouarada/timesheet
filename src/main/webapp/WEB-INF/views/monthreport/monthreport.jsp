@@ -541,9 +541,6 @@
         }
         function monthReport_close(){
             monthReport_changeStatus("<%= request.getContextPath()%>/monthreport/closeMonthReport");
-            monthReportTable_save(true);
-            overtimeTable_save(true);
-            mutualWorkTable_save(true);
         }
         function monthReport_open(){
             monthReport_changeStatus("<%= request.getContextPath()%>/monthreport/openMonthReport");
