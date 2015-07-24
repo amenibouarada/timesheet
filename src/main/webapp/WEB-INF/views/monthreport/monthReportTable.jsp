@@ -217,7 +217,7 @@
                             monthReportTable_reloadTable();
                             monthReport_updateStatus();
                         },
-                        false
+                        true
                 );
             }
         });
@@ -240,6 +240,7 @@
                 switchColDisplay(document.getElementById("hide_button_" + monthReportTable.layout.cells[group].field), monthReportTable.layout.cells[group].field, getCookieValue(cookie), true);
             }
         }
+        monthReport_updateStatus();
     }
 
     var monthReportTable_cellChanged = function(rowIndex){
