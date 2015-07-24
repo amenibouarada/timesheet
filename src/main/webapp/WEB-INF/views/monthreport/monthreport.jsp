@@ -293,12 +293,12 @@
                 dojo.forEach(eventConnections, dojo.disconnect);
                 eventConnections = [];
                 if (dijit.byId('tabContainer').selectedChildWidget.id == "monthReportTable_tab") {
-                    monthReportTable_reloadTable()
+                    monthReportTable_reloadTable();
                     eventConnections.push(dojo.connect(monthreport_year, "onchange", function () {
-                        monthReportTable_reloadTable()
+                        monthReportTable_reloadTable();
                     }));
                     eventConnections.push(dojo.connect(monthreport_month, "onchange", function () {
-                        monthReportTable_reloadTable()
+                        monthReportTable_reloadTable();
                     }));
                     <sec:authorize access="hasAnyRole('ROLE_ADMIN', 'ROLE_MONTH_REPORT_MANAGER')">
                     eventConnections.push(dojo.connect(monthReport_saveButton, "onclick", function () {
@@ -339,7 +339,7 @@
                         mutualWorkTable_save();
                     }));
                     eventConnections.push(dojo.connect(monthReport_exportButton, "onclick", function () {
-                        makeReport(3)
+                        makeReport(3);
                     }));
                 }
                 </sec:authorize>
