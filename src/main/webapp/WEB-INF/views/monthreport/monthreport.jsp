@@ -283,8 +283,8 @@
         dojo.addOnLoad(function () {
             // установим год и месяц по умолчанию
             var currentDate = new Date();
-            dojo.byId("monthreport_year").value = ${lastEnableYearAndMonth}[0][0] || currentDate.getFullYear();
-            dojo.byId("monthreport_month").value = ${lastEnableYearAndMonth}[0][1] + 1 || 3;
+            dojo.byId("monthreport_year").value = ${lastEnableYearAndMonth}[0][0] ? ${lastEnableYearAndMonth}[0][0] : currentDate.getFullYear();
+            dojo.byId("monthreport_month").value = ${lastEnableYearAndMonth}[0][1] ? ${lastEnableYearAndMonth}[0][1] + 1 : 3;
 
             //Инициализируем вложенные таблицы
             monthReport_initMonthReportTable();
