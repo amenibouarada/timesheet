@@ -90,8 +90,9 @@ public class MonthReportDAO {
         if (managerSet) { query.setParameter("manager", manager);   }
         if (regionSet)  { query.setParameter("regions", regions);   }
         if (rolesSet)   { query.setParameter("roles", roles);       }
-        logger.debug("getMonthReportData List<MonthReportData> result size = {}", query.getResultList().size());
-        return query.getResultList();
+        List<MonthReportData>  result =   query.getResultList();
+        logger.debug("getMonthReportData List<MonthReportData> result size = {}", result.size());
+        return result;
     }
 
     private MonthReport findMonthReportYearMonth(Integer year, Integer month){
