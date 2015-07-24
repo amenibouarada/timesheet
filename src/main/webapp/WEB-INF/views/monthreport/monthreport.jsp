@@ -284,7 +284,7 @@
             // установим год и месяц по умолчанию
             var currentDate = new Date();
             dojo.byId("monthreport_year").value = ${lastEnableYearAndMonth}[0][0] || currentDate.getFullYear();
-            dojo.byId("monthreport_month").value = ${lastEnableYearAndMonth}[0][1] + 3 || 3;
+            dojo.byId("monthreport_month").value = ${lastEnableYearAndMonth}[0][1] + 1 || 3;
 
             //Инициализируем вложенные таблицы
             monthReport_initMonthReportTable();
@@ -365,6 +365,8 @@
                 monthReportTable_updateManagers();
                 monthReportTable_divisionId.value = divFromCookie;
             }
+            dojo.byId(monthReportTable_regionListId).value = 0;
+            dojo.byId(monthReportTable_projectRoleListId).value = 0;
             monthReport_setEditable(monthReportTable, monthReportTable_editableColumns, true);
             monthReport_cellsValidator(monthReportTable);
             createTooltips(monthReportTable_tooltips, monthReportTable);
@@ -390,6 +392,7 @@
             mutualWorkTable_divisionChanged();
             dojo.byId("mutualWorkTable_divisionOwnerId").value = divFromCookie;
             dojo.byId("mutualWorkTable_divisionEmployeeId").value = divFromCookie;
+            dojo.byId(mutualWorkTable_regionListId).value = 0;
             fillProjectListByDivision(dojo.byId("mutualWorkTable_divisionOwnerId").value, dojo.byId("mutualWorkTable_projectId"), null);
             monthReport_cellsValidator(mutualWorkTable, "comment");
             createTooltips(mutualWorkTable_tooltips, mutualWorkTable);
