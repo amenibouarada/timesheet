@@ -186,6 +186,10 @@
                     "json",
                     "При запросе статусов табелей за год произошла ошибка",
                     function (response) {
+                        // Временно, до лучших времён задизаблил январь и февраль. До той поры, пока
+                        // не появится постоянное решение по этому поводу
+                        dojo.byId("monthreport_month_option_1").disabled = true;
+                        dojo.byId("monthreport_month_option_2").disabled = true;
                         // сперва очистим, потом расскрасим
                         for (var i = 1; i <= 12; i++){
                             dojo.byId("monthreport_month_option_" + i).style.backgroundColor = "white";
@@ -280,7 +284,7 @@
             // установим год и месяц по умолчанию
             var currentDate = new Date();
             dojo.byId("monthreport_year").value = ${lastEnableYearAndMonth}[0][0] || currentDate.getFullYear();
-            dojo.byId("monthreport_month").value = ${lastEnableYearAndMonth}[0][1] + 1 || 1;
+            dojo.byId("monthreport_month").value = ${lastEnableYearAndMonth}[0][1] + 3 || 3;
 
             //Инициализируем вложенные таблицы
             monthReport_initMonthReportTable();

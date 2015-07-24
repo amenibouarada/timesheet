@@ -48,7 +48,7 @@ public class MonthReportController extends AbstractControllerForEmployee {
             modelAndView.addObject("lastEnableYearAndMonth", monthReportService.getLastEnableYearAndMonth());
         } catch (Exception exc) {
             // Если ошибка, то устанавливаем текущий год и первый месяц
-            modelAndView.addObject("lastEnableYearAndMonth", DateTimeUtil.getCurrentYear().toString() + ", 1");
+            modelAndView.addObject("lastEnableYearAndMonth", DateTimeUtil.getCurrentYear().toString() + ", 3");
             logger.error("Во время получения максимальных доступных года и месяца произошла ошибка: ", exc);
         }
 
