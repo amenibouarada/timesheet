@@ -279,8 +279,8 @@
         dojo.addOnLoad(function () {
             // установим год и месяц по умолчанию
             var currentDate = new Date();
-            dojo.byId("monthreport_year").value = ${lastEnableYearAndMonth}[0][0];
-            dojo.byId("monthreport_month").value = ${lastEnableYearAndMonth}[0][1] + 1;
+            dojo.byId("monthreport_year").value = ${lastEnableYearAndMonth}[0][0] || currentDate.getFullYear();
+            dojo.byId("monthreport_month").value = ${lastEnableYearAndMonth}[0][1] + 1 || 1;
 
             //Инициализируем вложенные таблицы
             monthReport_initMonthReportTable();
