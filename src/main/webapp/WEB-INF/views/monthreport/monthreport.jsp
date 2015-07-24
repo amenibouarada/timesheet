@@ -369,8 +369,6 @@
         //Инициализация таблицы "Переработки"
         function monthReport_initOvertimeTable() {
             overtimeTable_createStore();
-            overtimeTable_reloadTable();
-            processing();
             if (dojo.byId("overtimeTable_divisionOwnerId")){
                 dojo.byId("overtimeTable_divisionOwnerId").value = divFromCookie;
                 dojo.byId("overtimeTable_divisionEmployeeId").value = divFromCookie;
@@ -385,7 +383,6 @@
         function monthReport_initMutualWorkTable() {
             <sec:authorize access="hasAnyRole('ROLE_ADMIN', 'ROLE_MONTH_REPORT_MANAGER')">
             mutualWorkTable_createStore();
-            mutualWorkTable_reloadTable();
             mutualWorkTable_divisionChanged();
             dojo.byId("mutualWorkTable_divisionOwnerId").value = divFromCookie;
             dojo.byId("mutualWorkTable_divisionEmployeeId").value = divFromCookie;

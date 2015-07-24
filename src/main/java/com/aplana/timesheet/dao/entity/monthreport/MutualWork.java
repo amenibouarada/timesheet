@@ -47,6 +47,16 @@ public class MutualWork {
     @Column(name = "division_owner_id")
     private Integer division_owner_id;
 
+    public MutualWork() {}
+
+    public MutualWork(Employee employee, Project project, Double work_days, Double overtimes, Double coefficient) {
+        this.employee = employee;
+        this.project = project;
+        this.work_days = work_days;
+        this.overtimes = overtimes;
+        this.coefficient = coefficient;
+    }
+
     public Integer getId() {
         return id;
     }

@@ -103,4 +103,15 @@ public class OvertimeDAO {
             return (Overtime) result.get(0);
         }
     }
+
+    public List<Overtime> getOvertimesForCloseOperation(int year, int month) {
+        Query query = entityManager.createQuery("SELECT NEW Overtime(em AS employee, p AS project, " +
+                                                "COALESCE(otd.overtime, otd.overtime_calculated) AS overtime, " +
+                                                "COALESCE(otd.fin_compensated_overtime, otd.fin_compensated_overtime_calculated) AS fin_compensated_overtime) " +
+                                                "FROM OvertimeData otd, Employee em, Project p " +
+                                                "WHERE otd.year = :year AND otd.month = :month AND em.id = otd.employee_id AND p.id = otd.project_id")
+                .setParameter("year", year)
+                .setParameter("month", month);
+        return query.getResultList();
+    }
 }

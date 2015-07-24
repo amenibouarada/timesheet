@@ -86,24 +86,18 @@ public class MonthReportController extends AbstractControllerForEmployee {
     public String saveMonthReport(
             @RequestParam("year") Integer year,
             @RequestParam("month") Integer month,
-            @RequestParam("jsonData") String jsonData,
-            @RequestParam("isCloseOperation") boolean isCloseOperation
+            @RequestParam("jsonData") String jsonData
     ) {
         try {
             if ( ! employeeService.isEmployeeHasPermissionsToMonthReportManage(getCurrentUser())){
                 return NO_PERMISSION_MESSAGE;
             }
-            monthReportService.saveMonthReportTable(year, month, jsonData, isCloseOperation);
+            monthReportService.saveMonthReportTable(year, month, jsonData);
         }catch (Exception exc){
             return handleCommonException("сохранения табеля", exc);
         }
-        if (!isCloseOperation) {
-            return SAVE_SUCCESS_MESSAGE;
-        } else {
-            return null;
-        }
+        return SAVE_SUCCESS_MESSAGE;
     }
-
 
     /**************************/
     /*   Блок "Переработки"   */
@@ -114,22 +108,17 @@ public class MonthReportController extends AbstractControllerForEmployee {
             @RequestParam("year") Integer year,
             @RequestParam("month") Integer month,
             @RequestParam("divisionOwner") Integer divisionOwner,
-            @RequestParam("jsonData") String jsonData,
-            @RequestParam("isCloseOperation") boolean isCloseOperation
+            @RequestParam("jsonData") String jsonData
     ){
         try{
             if ( ! employeeService.isEmployeeHasPermissionsToMonthReportManage(getCurrentUser())){
                 return NO_PERMISSION_MESSAGE;
             }
-            overtimeService.saveOvertimeTable(year, month, divisionOwner, jsonData, isCloseOperation);
+            overtimeService.saveOvertimeTable(year, month, divisionOwner, jsonData);
         }catch (Exception exc){
             return handleCommonException("сохранения таблицы переработок", exc);
         }
-        if (!isCloseOperation) {
-            return SAVE_SUCCESS_MESSAGE;
-        } else {
-            return null;
-        }
+        return SAVE_SUCCESS_MESSAGE;
     }
 
     @RequestMapping(value = "/deleteOvertimes", produces = "text/plain;charset=UTF-8")
@@ -194,22 +183,17 @@ public class MonthReportController extends AbstractControllerForEmployee {
             @RequestParam("year") Integer year,
             @RequestParam("month") Integer month,
             @RequestParam("divisionOwner") Integer divisionOwner,
-            @RequestParam("jsonData") String jsonData,
-            @RequestParam("isCloseOperation") boolean isCloseOperation
+            @RequestParam("jsonData") String jsonData
     ){
         try{
             if ( ! employeeService.isEmployeeHasPermissionsToMonthReportManage(getCurrentUser())){
                 return NO_PERMISSION_MESSAGE;
             }
-            mutualWorkService.saveMutualWorkTable(year, month, divisionOwner, jsonData, isCloseOperation);
+            mutualWorkService.saveMutualWorkTable(year, month, divisionOwner, jsonData);
         }catch (Exception exc){
             return handleCommonException("сохранения данных таблицы 'Взаимная занятость'", exc);
         }
-        if (!isCloseOperation) {
-            return SAVE_SUCCESS_MESSAGE;
-        } else {
-            return null;
-        }
+        return SAVE_SUCCESS_MESSAGE;
     }
 
     @RequestMapping(value = "/deleteMutualWorks", produces = "text/plain;charset=UTF-8")

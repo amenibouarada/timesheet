@@ -2,10 +2,11 @@ package com.aplana.timesheet.service.monthreport;
 
 import com.aplana.timesheet.dao.EmployeeDAO;
 import com.aplana.timesheet.dao.entity.Employee;
-import com.aplana.timesheet.dao.entity.monthreport.MonthReport;
-import com.aplana.timesheet.dao.entity.monthreport.MonthReportData;
-import com.aplana.timesheet.dao.entity.monthreport.MonthReportDetail;
+import com.aplana.timesheet.dao.entity.Project;
+import com.aplana.timesheet.dao.entity.monthreport.*;
 import com.aplana.timesheet.dao.monthreport.MonthReportDAO;
+import com.aplana.timesheet.dao.monthreport.MutualWorkDAO;
+import com.aplana.timesheet.dao.monthreport.OvertimeDAO;
 import com.aplana.timesheet.enums.MonthReportStatusEnum;
 import com.aplana.timesheet.service.EmployeeService;
 import com.aplana.timesheet.util.NumberUtils;
@@ -18,11 +19,7 @@ import org.springframework.stereotype.Service;
 import com.aplana.timesheet.util.StringUtil;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class MonthReportService {
@@ -31,6 +28,10 @@ public class MonthReportService {
 
     @Autowired
     private MonthReportDAO monthReportDAO;
+    @Autowired
+    private OvertimeDAO overtimeDAO;
+    @Autowired
+    private MutualWorkDAO mutualWorkDAO;
     @Autowired
     private EmployeeDAO employeeDAO;
     @Autowired
@@ -100,15 +101,12 @@ public class MonthReportService {
         return mapper.writeValueAsString(monthReportDataList);
     }
 
-    public boolean saveMonthReportTable(int year, int month, String jsonData, boolean isCloseOperation) throws IOException {
+    public boolean saveMonthReportTable(int year, int month, String jsonData) throws IOException {
         logger.debug("Старт сохранения таблицы 'Табель'");
         ObjectMapper mapper = new ObjectMapper();
         CollectionType mapCollectionType = mapper.getTypeFactory().constructCollectionType(List.class, Map.class);
 
         List<Map<String, Object>> monthReportData = mapper.readValue(jsonData, mapCollectionType);
-        Object ts_worked;
-        Object ts_illness;
-        Object ts_over_remain;
 
         for (Map<String, Object> monthReportMap : monthReportData){
             MonthReport monthReport = monthReportDAO.findOrCreateMonthReport(year, month);
@@ -117,20 +115,12 @@ public class MonthReportService {
             MonthReportDetail monthReportDetail = monthReportDAO.findOrCreateMonthReportDetail(monthReport, employee);
             monthReportDetail.setMonthReport(monthReport);
             monthReportDetail.setEmployee(employee);
-            if (isCloseOperation) {
-                ts_worked = monthReportMap.get("ts_worked") != null ? monthReportMap.get("ts_worked") : monthReportMap.get("ts_worked_calculated");
-                ts_illness = monthReportMap.get("ts_illness") != null ? monthReportMap.get("ts_illness") : monthReportMap.get("ts_illness_calculated");
-                ts_over_remain = monthReportMap.get("ts_over_remain") != null ? monthReportMap.get("ts_over_remain") : monthReportMap.get("ts_over_remain_calculated");
-            } else {
-                ts_worked = monthReportMap.get("ts_worked");
-                ts_illness = monthReportMap.get("ts_illness");
-                ts_over_remain = monthReportMap.get("ts_over_remain");
-            }
-            monthReportDetail.setTsWorked(NumberUtils.getDoubleValue(ts_worked));
+            monthReportDetail.setTsWorked(NumberUtils.getDoubleValue(monthReportMap.get("ts_worked")));
             monthReportDetail.setOvertimesPaidPrevious(NumberUtils.getDoubleValue(monthReportMap.get("overtimes_paid_previous")));
-            monthReportDetail.setTsIllness(NumberUtils.getDoubleValue(ts_illness));
+            monthReportDetail.setTsIllness(NumberUtils.getDoubleValue(monthReportMap.get("ts_illness")));
             monthReportDetail.setTsVacationAvail(NumberUtils.getDoubleValue(monthReportMap.get("ts_vacation_avail")));
-            monthReportDetail.setTsOverRemain(NumberUtils.getDoubleValue(ts_over_remain));
+            monthReportDetail.setTsOverRemain(NumberUtils.getDoubleValue(monthReportMap.get("ts_over_remain")));
+
             logger.debug("Сохранение записи в таблицу month_report_detail: " + monthReportDetail.toString());
             monthReportDAO.save(monthReportDetail);
         }
@@ -144,7 +134,43 @@ public class MonthReportService {
         return status == null ? MonthReportStatusEnum.NOT_CREATED : MonthReportStatusEnum.getById(status);
     }
 
-    public boolean closeMonthReport(Integer year, Integer month) {
+    public boolean closeMonthReport(Integer year, Integer month) throws IOException {
+        List<MonthReportDetail> monthReportDetails = monthReportDAO.getMonthReportDataForCloseOperation(year, month);
+        MonthReport monthReport = monthReportDAO.findOrCreateMonthReport(year, month);
+        for (MonthReportDetail detail : monthReportDetails){
+            Employee employee = detail.getEmployee();
+            MonthReportDetail monthReportDetail = monthReportDAO.findOrCreateMonthReportDetail(monthReport, employee);
+
+            monthReportDetail.setMonthReport(monthReport);
+            monthReportDetail.setEmployee(employee);
+            monthReportDetail.setTsWorked(detail.getTsWorked());
+            monthReportDetail.setOvertimesPaidPrevious(detail.getOvertimesPaidPrevious());
+            monthReportDetail.setTsIllness(detail.getTsIllness());
+            monthReportDetail.setTsVacationAvail(detail.getTsVacationAvail());
+            monthReportDetail.setTsOverRemain(detail.getTsOverRemain());
+            monthReportDAO.save(monthReportDetail);
+        }
+        List<Overtime> overtimes = overtimeDAO.getOvertimesForCloseOperation(year, month);
+        for (Overtime overtime : overtimes){
+            Employee employee = overtime.getEmployee();
+            Project project = overtime.getProject();
+            Overtime finalOvertime = overtimeDAO.findOrCreateOvertime(employee, project, year, month, null);
+
+            finalOvertime.setOvertime(overtime.getOvertime());
+            finalOvertime.setFin_compensated_overtime(overtime.getFin_compensated_overtime());
+            overtimeDAO.save(finalOvertime);
+        }
+        List<MutualWork> mutualWorks = mutualWorkDAO.getMutualWorksForCloseOperation(year, month);
+        for (MutualWork mutualWork : mutualWorks){
+            Employee employee = mutualWork.getEmployee();
+            Project project = mutualWork.getProject();
+            MutualWork finalMutualWork = mutualWorkDAO.findOrCreateMutualWork(employee, project, year, month, null);
+
+            finalMutualWork.setWork_days(mutualWork.getWork_days());
+            finalMutualWork.setOvertimes(mutualWork.getOvertimes());
+            finalMutualWork.setCoefficient(mutualWork.getCoefficient());
+            mutualWorkDAO.save(finalMutualWork);
+        }
         return monthReportDAO.setMonthReportStatus(year, month, MonthReportStatusEnum.CLOSED.getId());
     }
 

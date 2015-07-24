@@ -121,4 +121,16 @@ public class MutualWorkDAO {
         }
     }
 
+    public List<MutualWork> getMutualWorksForCloseOperation(int year, int month) {
+        Query query = entityManager.createQuery("SELECT NEW MutualWork(em AS employee, p AS project, " +
+                                                "COALESCE(mwd.work_days, mwd.work_days_calculated) AS work_days, " +
+                                                "COALESCE(mwd.overtimes, mwd.overtimes_calculated) AS overtimes, " +
+                                                "COALESCE(mwd.coefficient, mwd.coefficient_calculated) AS coefficient) " +
+                                                "FROM MutualWorkData mwd, Employee em, Project p " +
+                                                "WHERE mwd.year = :year AND mwd.month = :month AND em.id = mwd.employee_id AND p.id = mwd.project_id")
+                .setParameter("year", year)
+                .setParameter("month", month);
+        return query.getResultList();
+    }
+
 }

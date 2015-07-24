@@ -46,6 +46,18 @@ public class MonthReportDetail {
         this.employee = employee;
     }
 
+    public MonthReportDetail(MonthReport monthReport, Employee employee, Double tsWorked, Double overtimesPaidPrevious,
+                             Double tsIllness, Double tsVacationAvail, Double tsOverRemain)
+    {
+        this.monthReport = monthReport;
+        this.employee = employee;
+        this.tsWorked = tsWorked;
+        this.overtimesPaidPrevious = overtimesPaidPrevious;
+        this.tsIllness = tsIllness;
+        this.tsVacationAvail = tsVacationAvail;
+        this.tsOverRemain = tsOverRemain;
+    }
+
     public Integer getId() {
         return id;
     }

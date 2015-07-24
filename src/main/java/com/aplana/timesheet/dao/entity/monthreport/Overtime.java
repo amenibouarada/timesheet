@@ -47,6 +47,15 @@ public class Overtime {
     @Column(name = "division_owner_id")
     private Integer division_owner_id;
 
+    public Overtime() {}
+
+    public Overtime(Employee employee, Project project, Double overtime, Double fin_compensated_overtime) {
+        this.employee = employee;
+        this.project = project;
+        this.overtime = overtime;
+        this.fin_compensated_overtime = fin_compensated_overtime;
+    }
+
     public Integer getId() {
         return id;
     }

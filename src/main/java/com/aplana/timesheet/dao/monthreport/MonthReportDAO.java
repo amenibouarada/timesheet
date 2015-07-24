@@ -180,4 +180,18 @@ public class MonthReportDAO {
         logger.debug("getLastEnableYearAndMonth List<Object> result size = {}", query.getResultList().size());
         return query.getResultList();
     }
+
+    public List<MonthReportDetail> getMonthReportDataForCloseOperation(int year, int month) {
+        Query query = entityManager.createQuery("SELECT NEW MonthReportDetail(mrd.monthReport AS monthReport, mrd.employee AS employee, " +
+                                                "COALESCE(mr.ts_worked, mr.ts_worked_calculated) AS tsWorked,  " +
+                                                 "mr.overtimes_paid_previous AS overtimesPaidPrevious,  " +
+                                                "COALESCE(mr.ts_illness, mr.ts_illness_calculated) AS tsIllness, " +
+                                                 "mr.ts_vacation_avail AS tsVacationAvail, " +
+                                                "COALESCE(mr.ts_over_remain, mr.ts_over_remain_calculated) AS tsOverRemain) " +
+                                                "FROM MonthReportData mr, MonthReportDetail mrd " +
+                                                "WHERE mr.year = :year AND mr.month = :month AND mrd.employee.id = mr.employeeId")
+                .setParameter("year", year)
+                .setParameter("month", month);
+        return query.getResultList();
+    }
 }
