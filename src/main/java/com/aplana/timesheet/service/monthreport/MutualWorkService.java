@@ -115,7 +115,8 @@ public class MutualWorkService {
         for (Map<String, Object> mutualWorkMap : mutualWorks) {
             Project project = projectDAO.find((Integer) mutualWorkMap.get("project_id"));
             Employee employee = employeeDAO.find((Integer)mutualWorkMap.get("employee_id"));
-            MutualWork mutualWork = mutualWorkDAO.findOrCreateMutualWork(employee, project, year, month, divisionOwner);
+            Integer divisionOwnerId = divisionOwner != 0 ? divisionOwner : (Integer) mutualWorkMap.get("division_owner_id");
+            MutualWork mutualWork = mutualWorkDAO.findOrCreateMutualWork(employee, project, year, month, divisionOwnerId);
 
             mutualWork.setWork_days(NumberUtils.getDoubleValue(mutualWorkMap.get("work_days")));
             mutualWork.setOvertimes(NumberUtils.getDoubleValue(mutualWorkMap.get("overtimes")));
