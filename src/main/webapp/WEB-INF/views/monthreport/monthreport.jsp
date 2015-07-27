@@ -365,8 +365,10 @@
                 monthReportTable_updateManagers();
                 monthReportTable_divisionId.value = divFromCookie;
             }
+            <sec:authorize access="hasAnyRole('ROLE_ADMIN', 'ROLE_MONTH_REPORT_MANAGER')">
             dojo.byId(monthReportTable_regionListId).value = 0;
             dojo.byId(monthReportTable_projectRoleListId).value = 0;
+            </sec:authorize>
             monthReport_setEditable(monthReportTable, monthReportTable_editableColumns, true);
             monthReport_cellsValidator(monthReportTable);
             createTooltips(monthReportTable_tooltips, monthReportTable);
