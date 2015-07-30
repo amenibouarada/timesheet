@@ -4,7 +4,6 @@ import argo.jdom.JsonArrayNodeBuilder;
 import argo.jdom.JsonObjectNodeBuilder;
 import com.aplana.timesheet.dao.AvailableActivityCategoryDAO;
 import com.aplana.timesheet.dao.EmployeeDAO;
-import com.aplana.timesheet.dao.HolidayDAO;
 import com.aplana.timesheet.dao.TimeSheetDAO;
 import com.aplana.timesheet.dao.entity.*;
 import com.aplana.timesheet.dao.entity.Calendar;
@@ -12,7 +11,6 @@ import com.aplana.timesheet.enums.*;
 import com.aplana.timesheet.form.TimeSheetForm;
 import com.aplana.timesheet.form.TimeSheetTableRowForm;
 import com.aplana.timesheet.form.entity.DayTimeSheet;
-import com.aplana.timesheet.service.helper.EmployeeHelper;
 import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.system.security.SecurityService;
 import com.aplana.timesheet.util.DateTimeUtil;
@@ -151,15 +149,17 @@ public class TimeSheetService {
             TimeSheetDetail timeSheetDetail = new TimeSheetDetail();
             timeSheetDetail.setDuration((double) 0);
             timeSheetDetail.setTimeSheet(timeSheet);
-            String comment;
-            if (businessTripService.isBusinessTripDay(timeSheet.getEmployee(), timeSheet.getCalDate().getCalDate())) {
-                OvertimeCausesEnum overtimeCause =
-                        EnumsUtils.getEnumById(tsForm.getOvertimeCause(), OvertimeCausesEnum.class);
-                comment = overtimeCause.getName() + ":" + tsForm.getOvertimeCauseComment();
-            } else {
-                UndertimeCausesEnum undertimeCause =
-                        EnumsUtils.getEnumById(tsForm.getOvertimeCause(), UndertimeCausesEnum.class);
-                comment = undertimeCause.getName() + ":" + tsForm.getOvertimeCauseComment();
+            String comment = "";
+            if (TypesOfTimeSheetEnum.DRAFT != type){ // если это не черновик, то проверим причину отсутствия строк отчета
+                if (businessTripService.isBusinessTripDay(timeSheet.getEmployee(), timeSheet.getCalDate().getCalDate())) {
+                    OvertimeCausesEnum overtimeCause =
+                            EnumsUtils.getEnumById(tsForm.getOvertimeCause(), OvertimeCausesEnum.class);
+                    comment = overtimeCause.getName() + ":" + tsForm.getOvertimeCauseComment();
+                } else {
+                    UndertimeCausesEnum undertimeCause =
+                            EnumsUtils.getEnumById(tsForm.getOvertimeCause(), UndertimeCausesEnum.class);
+                    comment = undertimeCause.getName() + ":" + tsForm.getOvertimeCauseComment();
+                }
             }
             timeSheetDetail.setDescription(comment);
             timeSheetDetails.add(timeSheetDetail);
@@ -376,7 +376,7 @@ public class TimeSheetService {
                 for (TimeSheetDetail timeSheetDetail : timeSheetDetailSet) {
                     detailsBuilder.withElement(
                             anObjectBuilder().
-                                    withField("row", JsonUtil.aStringBuilder(i++)).
+                                    withField("row", JsonUtil.aStringBuilderNumber(i++)).
                                     withField("activity_type_id", aStringBuilder(timeSheetDetail.getActType() != null ? timeSheetDetail.getActType().getId().toString() : "0")).
                                     withField("workplace_id", aStringBuilder(timeSheetDetail.getWorkplace() != null ? timeSheetDetail.getWorkplace().getId().toString() : "0")).
                                     withField("project_id", aStringBuilder(timeSheetDetail.getProject() != null ? timeSheetDetail.getProject().getId().toString() : "0")).
@@ -551,14 +551,14 @@ public class TimeSheetService {
             for (int i = 0; i < tablePart.size(); i++) {
                 builder.withElement(
                         anObjectBuilder().
-                                withField(ROW, JsonUtil.aStringBuilder(i)).
-                                withField(ACT_CAT, JsonUtil.aStringBuilder(tablePart.get(i).getActivityCategoryId()))
+                                withField(ROW, JsonUtil.aStringBuilderNumber(i)).
+                                withField(ACT_CAT, JsonUtil.aStringBuilderNumber(tablePart.get(i).getActivityCategoryId()))
                 );
             }
         } else {
             builder.withElement(
                     anObjectBuilder().
-                            withField(ROW, JsonUtil.aStringBuilder(0)).
+                            withField(ROW, JsonUtil.aStringBuilderNumber(0)).
                             withField(ACT_CAT, aStringBuilder(StringUtils.EMPTY))
             );
         }
@@ -573,14 +573,14 @@ public class TimeSheetService {
             for (int i = 0; i < tablePart.size(); i++) {
                 builder.withElement(
                         anObjectBuilder().
-                                withField(ROW, JsonUtil.aStringBuilder(i)).
-                                withField(WORKPLACE, JsonUtil.aStringBuilder(tablePart.get(i).getWorkplaceId()))
+                                withField(ROW, JsonUtil.aStringBuilderNumber(i)).
+                                withField(WORKPLACE, JsonUtil.aStringBuilderNumber(tablePart.get(i).getWorkplaceId()))
                 );
             }
         } else {
             builder.withElement(
                     anObjectBuilder().
-                            withField(ROW, JsonUtil.aStringBuilder(0)).
+                            withField(ROW, JsonUtil.aStringBuilderNumber(0)).
                             withField(WORKPLACE, aStringBuilder(StringUtils.EMPTY))
             );
         }
@@ -597,7 +597,7 @@ public class TimeSheetService {
                 if (tablePart.get(i).getProjectTaskId() != null) {
                     builder.withElement(
                             anObjectBuilder().
-                                    withField(ROW, JsonUtil.aStringBuilder(i)).
+                                    withField(ROW, JsonUtil.aStringBuilderNumber(i)).
                                     withField(TASK, aStringBuilder(tablePart.get(i).getProjectTaskId().toString()))
                     );
                 }
@@ -605,7 +605,7 @@ public class TimeSheetService {
         } else {
             builder.withElement(
                     anObjectBuilder().
-                            withField(ROW, JsonUtil.aStringBuilder(0)).
+                            withField(ROW, JsonUtil.aStringBuilderNumber(0)).
                             withField(TASK, aStringBuilder(StringUtils.EMPTY))
             );
         }
@@ -622,15 +622,15 @@ public class TimeSheetService {
                 if (tablePart.get(i).getProjectTaskId() != null) {
                     builder.withElement(
                             anObjectBuilder().
-                                    withField(ROW, JsonUtil.aStringBuilder(i)).
-                                    withField(ROLE, JsonUtil.aStringBuilder(tablePart.get(i).getProjectRoleId()))
+                                    withField(ROW, JsonUtil.aStringBuilderNumber(i)).
+                                    withField(ROLE, JsonUtil.aStringBuilderNumber(tablePart.get(i).getProjectRoleId()))
                     );
                 }
             }
         } else {
             builder.withElement(
                     anObjectBuilder().
-                            withField(ROW, JsonUtil.aStringBuilder(0)).
+                            withField(ROW, JsonUtil.aStringBuilderNumber(0)).
                             withField(ROLE, aStringBuilder(StringUtils.EMPTY))
             );
         }
@@ -646,14 +646,14 @@ public class TimeSheetService {
             for (int i = 0; i < tablePart.size(); i++) {
                 builder.withElement(
                         anObjectBuilder().
-                                withField(ROW, JsonUtil.aStringBuilder(i)).
-                                withField(PROJECT, JsonUtil.aStringBuilder(tablePart.get(i).getProjectId()))
+                                withField(ROW, JsonUtil.aStringBuilderNumber(i)).
+                                withField(PROJECT, JsonUtil.aStringBuilderNumber(tablePart.get(i).getProjectId()))
                 );
             }
         } else {
             builder.withElement(
                     anObjectBuilder().
-                            withField(ROW, JsonUtil.aStringBuilder(0)).
+                            withField(ROW, JsonUtil.aStringBuilderNumber(0)).
                             withField(PROJECT, aStringBuilder(StringUtils.EMPTY))
             );
         }
@@ -807,7 +807,7 @@ public class TimeSheetService {
             for (TimeSheetDetail timeSheetDetail : timeSheet.getTimeSheetDetails())
                 builder.withElement(
                         anObjectBuilder().
-                                withField("row", JsonUtil.aStringBuilder(i++)).
+                                withField("row", JsonUtil.aStringBuilderNumber(i++)).
                                 withField("activity_type_id", aStringBuilder(timeSheetDetail.getActType() != null ? timeSheetDetail.getActType().getId().toString() : "0")).
                                 withField("workplace_id", aStringBuilder(timeSheetDetail.getWorkplace() != null ? timeSheetDetail.getWorkplace().getId().toString() : "0")).
                                 withField("project_id", aStringBuilder(timeSheetDetail.getProject() != null ? timeSheetDetail.getProject().getId().toString() : "0")).

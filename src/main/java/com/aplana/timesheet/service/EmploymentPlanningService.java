@@ -30,24 +30,18 @@ public class EmploymentPlanningService {
 
     @Autowired
     private CalendarService calendarService;
-
     @Autowired
     private SecurityService securityService;
-
     @Autowired
     private DivisionService divisionService;
-
-    @Autowired
-    private ManagerService managerService;
-
     @Autowired
     private ProjectRoleService projectRoleService;
-
     @Autowired
     private RegionService regionService;
-
     @Autowired
     private ProjectService projectService;
+    @Autowired
+    private EmployeeService employeeService;
 
     private List<Calendar> getYearList() {
         return DateTimeUtil.getYearsList(calendarService);
@@ -67,11 +61,13 @@ public class EmploymentPlanningService {
         modelAndView.addObject("yearList", yearList);
         modelAndView.addObject("monthList", calendarService.getMonthList(2013));
         modelAndView.addObject("projectList", getProjects(currentUser.getDivision().getId(), date));
-        modelAndView.addObject("divisionList", divisionService.getDivisions());
-        modelAndView.addObject("managerList", managerService.getManagerList());
-        modelAndView.addObject("projectRoleList", projectRoleService.getProjectRoles());
-        modelAndView.addObject("regionList", regionService.getRegions());
-        modelAndView.addObject("all", ALL);
+        modelAndView.addObject("divisionList", divisionService.getDivisions());   // ToDo заполнение этих полей вынести в
+        modelAndView.addObject("managerList", employeeService.getManagerListJson());   // ToDo
+        modelAndView.addObject("projectRoleList", projectRoleService.getProjectRoles());// ToDo отдельный сервис
+        modelAndView.addObject("regionList", regionService.getRegions());                 //   ToDo и отнаследоваться
+        modelAndView.addObject("all", ALL);    // ToDo
+        // Todo com.aplana.timesheet.controller.AbstractControllerForEmployee.fillMavForAddEmployeesForm
+
 
         AddEmployeeForm addEmployeeForm = new AddEmployeeForm();
         addEmployeeForm.setDivisionId(1);
@@ -119,44 +115,19 @@ public class EmploymentPlanningService {
         form.setSelectDivisionId(currentUser.getDivision().getId());
     }
 
-    /**
-     * Получает JSON для грида занятости сотрудников на проекте
-     * @param planList
-     * @return
-     */
-    public String getProjectPlanAsJSON(List<EmployeePercentPlan> planList){
+    public String getEmployeesPlanAsJSON(Map<Employee, List<ProjectPercentPlan>> employeePlanList){
         JsonArrayNodeBuilder builder = anArrayBuilder();
-        Map<Integer, JsonObjectNodeBuilder> jsonMap = new LinkedHashMap<Integer, JsonObjectNodeBuilder>();
 
-        for(EmployeePercentPlan result : planList){
-            Integer employee_id = result.getEmployeeId();
-            String  employee_name = result.getEmployeeName();
-            Integer year = result.getYear();
-            Integer month = result.getMonth();
-            Double  value = result.getPercent();
-
-            JsonObjectNodeBuilder objectNodeBuilder = jsonMap.get(employee_id);
-
-            if (objectNodeBuilder != null){
-                objectNodeBuilder.withField(year+"_"+month, aNumberBuilder(value.toString()));
-            } else {
-                objectNodeBuilder = anObjectBuilder();
-                objectNodeBuilder.
-                        withField("employee_id", aNumberBuilder(employee_id.toString())).
-                        withField("employee_name", aStringBuilder(employee_name)).
-                        withField(year+"_"+month, aNumberBuilder(value.toString()));
-                jsonMap.put(employee_id, objectNodeBuilder);
-            }
-        }
-
-        for(Map.Entry<Integer, JsonObjectNodeBuilder> entry : jsonMap.entrySet()){
-            builder.withElement(entry.getValue());
+        for (Employee employee : employeePlanList.keySet()){
+            JsonObjectNodeBuilder employeePlanNodeBuilder = employeeService.getEmployeeAsJSONBulder(employee, false);
+            employeePlanNodeBuilder.withField("planList", getEmployeePlanAsJSON(employeePlanList.get(employee)));
+            builder.withElement(employeePlanNodeBuilder);
         }
 
         return JsonUtil.format(builder.build());
     }
 
-    public String getEmployeePlanAsJSON(List<ProjectPercentPlan> planList){
+    public JsonArrayNodeBuilder getEmployeePlanAsJSON(List<ProjectPercentPlan> planList){
         JsonArrayNodeBuilder builder = anArrayBuilder();
         Map<Integer, JsonObjectNodeBuilder> jsonMap = new LinkedHashMap<Integer, JsonObjectNodeBuilder>();
 
@@ -197,43 +168,7 @@ public class EmploymentPlanningService {
             builder.withElement(entry.getValue());
         }
 
-        return JsonUtil.format(builder.build());
+        return builder;
     }
 
-
-    /**
-     * Возвращает список сотрудников как json {id, name}
-     * @param employeeList
-     * @return
-     */
-    public String getEmployeeListAsJson(List<Employee> employeeList){
-        JsonArrayNodeBuilder builder = anArrayBuilder();
-
-        for(Employee employee : employeeList){
-            JsonObjectNodeBuilder objectNodeBuilder = anObjectBuilder();
-            objectNodeBuilder.withField("employee_id", aNumberBuilder(employee.getId().toString()));
-            objectNodeBuilder.withField("employee_name", aStringBuilder(employee.getName()));
-            builder.withElement(objectNodeBuilder);
-        }
-
-        return JsonUtil.format(builder.build());
-    }
-
-    /**
-     * Возвращает список проектов как json {id, name}
-     * @param projectList
-     * @return
-     */
-    public String getProjectListAsJson(List<Project> projectList){
-        JsonArrayNodeBuilder builder = anArrayBuilder();
-
-        for(Project project : projectList){
-            JsonObjectNodeBuilder objectNodeBuilder = anObjectBuilder();
-            objectNodeBuilder.withField("project_id", aNumberBuilder(project.getId().toString()));
-            objectNodeBuilder.withField("project_name", aStringBuilder(project.getName()));
-            builder.withElement(objectNodeBuilder);
-        }
-
-        return JsonUtil.format(builder.build());
-    }
 }

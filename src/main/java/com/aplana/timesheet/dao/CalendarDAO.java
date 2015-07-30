@@ -286,16 +286,17 @@ public class CalendarDAO {
         return result;
     }
 
-    public int getCountWorkDayPriorDate(Region region, Integer year, Integer month, @NotNull Date toDate) {
+    public int getCountWorkDayPriorDate(Region region, Integer year, Integer month, Date startDate, @NotNull Date toDate) {
         final Query query = entityManager.createQuery(
                 "select count(c) - count(h)" +
                         " from Calendar c" +
                         " left outer join c.holidays h with (h.region.id is null or h.region.id = :regionId)" +
                         " where YEAR(c.calDate) = :year and MONTH(c.calDate) = :month" +
-                        " and c.calDate <= :toDate")
+                        " and c.calDate >= :startDate and c.calDate <= :toDate")
                 .setParameter("regionId", region.getId())
                 .setParameter("year", year)
                 .setParameter("month", month)
+                .setParameter("startDate", startDate)
                 .setParameter("toDate", toDate);
 
         return ((Long) query.getSingleResult()).intValue();

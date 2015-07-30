@@ -4,6 +4,7 @@ import argo.jdom.JsonArrayNodeBuilder;
 import argo.jdom.JsonNodeBuilder;
 import argo.jdom.JsonNodeBuilders;
 import argo.jdom.JsonObjectNodeBuilder;
+import com.aplana.timesheet.service.json.EmployeeJSONBuilder;
 import com.aplana.timesheet.system.constants.TimeSheetConstants;
 import com.aplana.timesheet.dao.EmployeeDAO;
 import com.aplana.timesheet.dao.RegionDAO;
@@ -14,6 +15,7 @@ import com.aplana.timesheet.util.JsonUtil;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.time.DateUtils;
 import org.apache.velocity.app.VelocityEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,16 +26,34 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Nullable;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import java.sql.Timestamp;
 import java.util.*;
+import java.util.Calendar;
 
 import static argo.jdom.JsonNodeBuilders.*;
 import static argo.jdom.JsonNodeFactories.string;
 import static com.aplana.timesheet.system.constants.RoleConstants.ROLE_ADMIN;
+import static com.aplana.timesheet.util.DateTimeUtil.MAX_DATE;
+import static com.aplana.timesheet.util.DateTimeUtil.dateToString;
 
 @Service
-public class EmployeeService {
+public class EmployeeService extends EmployeeJSONBuilder {
 
     private static final Logger logger = LoggerFactory.getLogger(EmployeeService.class);
+
+    public static final String ID                   = "id";
+    public static final String MANAGER_ID           = "managerId";
+    public static final String VALUE                = "value";
+    public static final String DIV_ID               = "divId";
+    public static final String REG_ID               = "regId";
+    public static final String MAN_ID               = "manId";
+    public static final String JOB_ID               = "jobId";
+    public static final String DIVISION_EMPLOYEES   = "divEmps";
+    public static final String DATE_BY_DEFAULT      = "dateByDefault";
+    public static final String FIRST_WORK_DATE      = "firstWorkDate";
+    public static final String LAST_WORK_DATE       = "lastWorkDate";
+    public static final String DATE_FORMAT          = "dd.MM.yyyy";
+    public static final String ACTIVE_FLAG          = "active";
 
     @Autowired
     public VelocityEngine velocityEngine;
@@ -49,8 +69,6 @@ public class EmployeeService {
     private ProjectService projectService;
     @Autowired
     RegionDAO regionDAO;
-    @Autowired
-    private EmployeeDAO emloyeeDAO;
     @Autowired
     private VacationService vacationService;
 
@@ -121,6 +139,10 @@ public class EmployeeService {
             result = employeeDAO.getEmployees(division);
         }
         return result;
+    }
+
+    public String getAllEmployeesJSON() {
+        return getEmployeeListAsJson(employeeDAO.getAllEmployees(), false);
     }
 
     /**
@@ -210,29 +232,19 @@ public class EmployeeService {
      */
     @Transactional
     public StringBuffer setEmployees(List<Employee> employees) {
-        // Если город не найден - "Другой район"
-        Region defaultCity = regionDAO.find(1);
         StringBuffer trace = new StringBuffer();
-
         for (Employee emp : employees) {
-            if (emp.getRegion() == null) {
-                emp.setRegion(defaultCity);
-            }
             try {
-                Employee result = employeeDAO.findByObjectSid(emp.getObjectSid());
-                if ( result != null  && !result.isNotToSync() && result.getEndDate() == null) {
+                if (emp.isNotToSync()){
+                    trace.append(String.format(
+                            "\nUser: %s %s marked not_to_sync. (Need update)\n%s\n\n",
+                            emp.getEmail(), emp.getName(), emp.toString()));
+
+                } else {
                     trace.append(String.format(
                             "%s user: %s %s\n", emp.getId() != null ? "Updated" : "Added", emp.getEmail(), emp.getName()
                     ));
                     save(emp);
-                } else if (result == null || result.isNotToSync()) {
-                    trace.append(String.format(
-                            "\nUser: %s %s marked not_to_sync.(Need update)\n%s\n\n",
-                            emp.getEmail(), emp.getName(), emp.toString()));
-                } else if (result.getEndDate() != null) {
-                    trace.append(String.format(
-                            "\nUser: %s %s is dismiss \n%s\n\n",
-                            emp.getEmail(), emp.getName(), emp.toString()));
                 }
             } catch (Exception e) {
                 trace.append("exception: " + e);
@@ -266,6 +278,15 @@ public class EmployeeService {
         return employeeDAO.getWorkDaysOnIllnessWorked(employee, beginDate, endDate);
     }
 
+    public boolean isEmployeeHasPermissionsToCloseOpenMonthReport(Employee employee){
+        return isEmployeeHasPermissions(employee, PermissionsEnum.MONTH_REPORT_PERMISSION);
+    }
+
+    public boolean isEmployeeHasPermissionsToMonthReportManage(Employee employee){
+        return isEmployeeHasPermissions(employee, PermissionsEnum.ADMIN_PERMISSION) ||
+                isEmployeeHasPermissions(employee, PermissionsEnum.MONTH_REPORT_PERMISSION);
+    }
+
     public boolean isEmployeeAdmin(Integer employeeId) {
         return isEmployeeHasPermissions(employeeId, PermissionsEnum.ADMIN_PERMISSION);
     }
@@ -273,6 +294,10 @@ public class EmployeeService {
     public boolean isEmployeeHasPermissions(Integer employeeId, final PermissionsEnum permissions) {
         final Employee employee = find(employeeId);
 
+        return isEmployeeHasPermissions(employee, permissions);
+    }
+
+    public boolean isEmployeeHasPermissions(Employee employee, final PermissionsEnum permissions) {
         return Iterables.any(employee.getPermissions(), new Predicate<Permission>() {
             @Override
             public boolean apply(@Nullable Permission permission) {
@@ -281,32 +306,36 @@ public class EmployeeService {
         });
     }
 
-    public List<Employee> getDivisionEmployees(Integer divisionId, Date date, List<Integer> regionIds, List<Integer> projectRoleIds) {
-        return employeeDAO.getDivisionEmployees(divisionId, date, regionIds, projectRoleIds);
-    }
-
-    // ToDo нельзя ли эту логику перенести в запрос?
     public List<Employee> getDivisionEmployeesByManager(Integer divisionId, Date date, List<Integer> regionIds, List<Integer> projectRoleIds, Integer managerId) {
-        List<Employee> divisionEmployeesByManager = employeeDAO.getDivisionEmployeesByManager(divisionId, date, regionIds, projectRoleIds, managerId);
-        List<Employee> divisionEmployeesTemp = new ArrayList<Employee>();
-        for (Employee employee : divisionEmployeesByManager) {
-            List<Employee> employeesByManager = getDivisionEmployeesByManager(divisionId, date, regionIds, projectRoleIds, employee.getId());
-            for (Employee employeeTemp : employeesByManager) {
-                if (!(divisionEmployeesTemp.contains(employeeTemp)) && !(divisionEmployeesByManager.contains(employeeTemp))) {
-                    divisionEmployeesTemp.add(employeeTemp);
-                }
-            }
-        }
-        divisionEmployeesByManager.addAll(divisionEmployeesTemp);
+        List<Employee> employees =
+                getSubManagersEmployee(divisionId, date, regionIds, projectRoleIds, managerId);
 
-        Collections.sort(divisionEmployeesByManager, new Comparator<Employee>() {
+        Collections.sort(employees, new Comparator<Employee>() {
             @Override
             public int compare(Employee o1, Employee o2) {
                 return o1.getName().compareTo(o2.getName());
             }
         });
-        return divisionEmployeesByManager;
+
+        return employees;
     }
+
+    // возвращает список сотрудников по переданным параметром,
+    // а также рекурсивно всех подчиненных у найденных сотрудников
+    public List<Employee> getSubManagersEmployee(
+            Integer divisionId, Date date, List<Integer> regionIds, List<Integer> projectRoleIds, Integer managerId){
+
+        Set<Employee> employeesByManager = new HashSet<Employee>(employeeDAO.getDivisionEmployeesByManager(divisionId, date, regionIds, projectRoleIds, managerId));
+        Set<Employee> employeesBySubManagers = new HashSet<Employee>();
+        for (Employee employee : employeesByManager) {
+            if (!(employeesBySubManagers.contains(employee))) {
+                employeesBySubManagers.add(employee);
+                employeesBySubManagers.addAll(getSubManagersEmployee(divisionId, date, regionIds, projectRoleIds, employee.getId()));
+            }
+        }
+        employeesByManager.addAll(employeesBySubManagers);
+        return new ArrayList<Employee>(employeesByManager);
+    };
 
     public List<Employee> getEmployees() {
         return employeeDAO.getEmployees();
@@ -314,20 +343,6 @@ public class EmployeeService {
 
     public List<Employee> getAllEmployees() {
         return employeeDAO.getAllEmployees();
-    }
-
-    public String getAllEmployeesJSON() {
-        final JsonArrayNodeBuilder builder = anArrayBuilder();
-
-        for (Employee employee : employeeDAO.getAllEmployees()) {
-            builder.withElement(
-                    anObjectBuilder()
-                            .withField("id", aStringBuilder(employee.getId().toString()))
-                            .withField("name", aStringBuilder(employee.getName()))
-            );
-        }
-
-        return JsonUtil.format(builder);
     }
 
     public Employee getEmployeeFromBusinessTrip(Integer reportId) {
@@ -367,13 +382,13 @@ public class EmployeeService {
         for (Employee manager : employeeDAO.getMainProjectManagers()) {
             allDivisionsBuilder.withElement(
                     anObjectBuilder()
-                            .withField("managerId", aStringBuilder(manager.getId().toString()))
+                            .withField(MANAGER_ID, aStringBuilder(manager.getId().toString()))
                             .withField("name", aStringBuilder(manager.getName()))
             );
         }
         builder.withElement(
                 anObjectBuilder()
-                        .withField("divisionId", aStringBuilder("-1"))
+                        .withField(DIVISION_ID, aStringBuilder("-1"))
                         .withField("managers", allDivisionsBuilder)
         );
 
@@ -382,13 +397,13 @@ public class EmployeeService {
         for (Employee manager : employeeDAO.getMainProjectManagers(null)) {
             nullDivisionBuilder.withElement(
                     anObjectBuilder()
-                            .withField("managerId", aStringBuilder(manager.getId().toString()))
+                            .withField(MANAGER_ID, aStringBuilder(manager.getId().toString()))
                             .withField("name", aStringBuilder(manager.getName()))
             );
         }
         builder.withElement(
                 anObjectBuilder()
-                        .withField("divisionId", aStringBuilder("0"))
+                        .withField(DIVISION_ID, aStringBuilder("0"))
                         .withField("managers", nullDivisionBuilder)
         );
 
@@ -398,25 +413,18 @@ public class EmployeeService {
             for (Employee manager : employeeDAO.getMainProjectManagers(division)) {
                 divisionBuilder.withElement(
                         anObjectBuilder()
-                                .withField("managerId", aStringBuilder(manager.getId().toString()))
+                                .withField(MANAGER_ID, aStringBuilder(manager.getId().toString()))
                                 .withField("name", aStringBuilder(manager.getName()))
                 );
             }
             builder.withElement(
                     anObjectBuilder()
-                            .withField("divisionId", aStringBuilder(division.getId().toString()))
+                            .withField(DIVISION_ID, aStringBuilder(division.getId().toString()))
                             .withField("managers", divisionBuilder)
             );
         }
 
         return JsonUtil.format(builder);
-    }
-
-    private String getEmployeeNameByActiveStatus(Employee employee) {
-        if (employee.isActive()) {
-            return employee.getName();
-        }
-        return employee.getName() + " (уволен)";
     }
 
     private JsonNodeBuilder getEmployeesBuilder(List<Employee> employees) {
@@ -444,7 +452,7 @@ public class EmployeeService {
         // Заполнение списка сотрудников для варианта "Все подразделения"
         builder.withElement(
                 anObjectBuilder()
-                        .withField("divisionId", aStringBuilder("-1"))
+                        .withField(DIVISION_ID, aStringBuilder("-1"))
                         .withField("employees", getEmployeesBuilder(employeeDAO.getAllEmployees()))
         );
 
@@ -455,7 +463,7 @@ public class EmployeeService {
         for (Division division : divisionsEmployees.keySet()) {
             builder.withElement(
                     anObjectBuilder()
-                            .withField("divisionId", aStringBuilder(division.getId().toString()))
+                            .withField(DIVISION_ID, aStringBuilder(division.getId().toString()))
                             .withField("active", aStringBuilder(String.valueOf(division.isActive())))
                             .withField("employees", getEmployeesBuilder(divisionsEmployees.get(division)))
             );
@@ -471,6 +479,10 @@ public class EmployeeService {
         return employeeDAO.getProjectManagersSameRole(project, employee);
     }
 
+    /* ToDo нельзя ли объединить метод getJuniorProjectManagersAndProjects для vacation и illness
+    * скорее всего, когда проект перейдет на Java 8 можно будет это реализовать, когда можно будет
+    * передавать функции в качестве аргументов.
+    */
     /**
      * получаем список младших (тимлиды, ведущие аналитики) руководителей проектов, на которых сотрудник планирует свою занятость в даты болезни.
      */
@@ -543,13 +555,13 @@ public class EmployeeService {
             final JsonArrayNodeBuilder regionBuilder = anArrayBuilder();
             for (Integer region : employeeDAO.getRegionsWhereManager(manager.getId())) {
                 regionBuilder.withElement(
-                        anObjectBuilder().withField("id", aStringBuilder(region.toString())));
+                        anObjectBuilder().withField(ID, aStringBuilder(region.toString())));                // ToDo заменить на regionId
             }
             builder.withElement(
                     anObjectBuilder().
-                            withField("id", JsonUtil.aStringBuilder(manager.getId())).
+                            withField(ID, JsonUtil.aStringBuilderNumber(manager.getId())).                        // ToDo заменить на managerId
                             withField("name", aStringBuilder(manager.getName())).
-                            withField("division", aStringBuilder(manager.getDivision().getId().toString())).
+                            withField("division", aStringBuilder(manager.getDivision().getId().toString())).  // ToDo заменить на divisionId
                             withField("regionWhereMan", regionBuilder)
             );
         }
@@ -590,22 +602,9 @@ public class EmployeeService {
         return employeeDAO.getEmployeeByRegionAndManagerRecursiveAndDivision(regions, divisionId, manager);
     }
 
-    /**
-     * Возвращает список сотрудников по центру, руководителю, списку должностей и списку регионов
-     *
-     * @param division        - идентификатора центра
-     * @param manager         - идентификатора руководителя
-     * @param projectRoleList - список идентификаторов должностей
-     * @param regionList      - список идентификаторов регионов
-     * @return
-     */
-    public List<Employee> getEmployeeByDivisionManagerRoleRegion(Integer division, Integer manager, List<Integer> projectRoleList, List<Integer> regionList) {
-        return employeeDAO.getEmployeeByDivisionManagerRoleRegion(division, manager, projectRoleList, regionList);
-    }
-
     public String checkDayIsVacation(Integer employeeId, String reportDate) {
         Date date = DateTimeUtil.parseStringToDateForDB(reportDate);
-        Employee user = emloyeeDAO.find(employeeId);
+        Employee user = employeeDAO.find(employeeId);
         Boolean isVacationDay = vacationService.isDayVacationWithoutPlanned(user, date);
         final JsonArrayNodeBuilder builder = anArrayBuilder();
         JsonObjectNodeBuilder objectNodeBuilder = anObjectBuilder().
@@ -622,7 +621,7 @@ public class EmployeeService {
      */
     public Boolean checkNotStartWorkByDate(Integer employeeId, String reportDate) {
         Date date = DateTimeUtil.parseStringToDateForDB(reportDate);
-        Employee employee = emloyeeDAO.find(employeeId);
+        Employee employee = employeeDAO.find(employeeId);
         if (employee.getStartDate().after(date)) {
             return true;
         }
@@ -653,4 +652,160 @@ public class EmployeeService {
 
         return null;
     }
+
+    @Transactional(readOnly = true)
+    public String getEmployeeListWithLastWorkdayForDivisionJson(Integer divisionId, Boolean filterFired, Boolean addDetails) {
+        Division division = divisionService.find(divisionId);
+        final List<Employee> employees = getEmployees(division, filterFired);
+        Map<Integer, Date> lastWorkdays = new HashMap<Integer, Date>();
+        if (addDetails) {
+            lastWorkdays = timeSheetService.getLastWorkdayWithoutTimesheetMap(division);
+        }
+
+        final JsonArrayNodeBuilder employeesBuilder = anArrayBuilder();
+
+        if (employees.isEmpty()) {
+            employeesBuilder.withElement(
+                    anObjectBuilder().
+                            withField(ID, JsonUtil.aStringBuilderNumber(0)).
+                            withField(VALUE, JsonNodeBuilders.aStringBuilder(StringUtils.EMPTY))
+            );
+        } else {
+            for (Employee employee : employees) {
+                JsonObjectNodeBuilder objectNodeBuilder = getEmployeeDetailsJsonObjectNode(addDetails, lastWorkdays, employee);
+                employeesBuilder.withElement(objectNodeBuilder);
+            }
+        }
+
+
+        return JsonUtil.format(employeesBuilder.build());
+    }
+
+    private JsonObjectNodeBuilder getEmployeeDetailsJsonObjectNode(Boolean addDetails, Map<Integer, Date> lastWorkdays, Employee employee) {
+        JsonObjectNodeBuilder objectNodeBuilder = anObjectBuilder().
+                withField(ID, JsonUtil.aStringBuilderNumber(employee.getId())).
+                withField(VALUE, JsonNodeBuilders.aStringBuilder(getValue(employee))).
+                //добавил два поля из за того что на форме "командировки/болезни" все заточено под другую структуру данных
+                        withField(MAN_ID, JsonUtil.aStringBuilderNumber(employee.getManager() == null ? null : employee.getManager().getId())).
+                withField(REG_ID, JsonUtil.aStringBuilderNumber(employee.getRegion().getId()));
+        if (addDetails) {
+
+            Date defaultDate = lastWorkdays.get(employee.getId());
+            if (defaultDate == null)
+                defaultDate = employee.getStartDate();
+
+            Date curDate = new Date();
+            if (defaultDate.after(curDate)) {
+                defaultDate = curDate;
+            }
+
+            if ((employee.getEndDate() != null && defaultDate.after(employee.getEndDate()))) {
+                defaultDate = employee.getEndDate();
+            }
+
+            objectNodeBuilder.withField(JOB_ID, JsonUtil.aStringBuilderNumber(employee.getJob().getId())).
+                    withField(DATE_BY_DEFAULT, JsonNodeBuilders.aStringBuilder(
+                            dateToString(defaultDate, DATE_FORMAT))).
+                    withField(FIRST_WORK_DATE, JsonNodeBuilders.aStringBuilder(
+                            dateToString(employee.getStartDate(), DATE_FORMAT))).
+                    withField(LAST_WORK_DATE, JsonNodeBuilders.aStringBuilder(
+                            employee.getEndDate() != null ? dateToString(employee.getEndDate(), DATE_FORMAT) : ""
+                    )).withField("birthday",
+                    JsonNodeBuilders.aStringBuilder(DateTimeUtil.getDayMonthFromDate(employee.getBirthday())));
+        }
+        return objectNodeBuilder;
+    }
+
+    @Transactional(readOnly = true)
+    public String getEmployeeListWithDivisionAndManagerAndRegionJson(List<Division> divisions, Boolean filterFired) {
+        final JsonArrayNodeBuilder builder = anArrayBuilder();
+
+        for (Division division : divisions) {
+            final List<Employee> employees = getEmployees(division, filterFired);
+            final JsonObjectNodeBuilder nodeBuilder = anObjectBuilder();
+            final JsonArrayNodeBuilder employeesBuilder = anArrayBuilder();
+
+            nodeBuilder.withField(DIV_ID, JsonUtil.aStringBuilderNumber(division.getId()));
+
+            if (employees.isEmpty()) {
+                employeesBuilder.withElement(
+                        anObjectBuilder().
+                                withField(ID, JsonUtil.aStringBuilderNumber(0)).
+                                withField(VALUE, JsonNodeBuilders.aStringBuilder(StringUtils.EMPTY))
+                );
+            } else {
+                for (Employee employee : employees) {
+                    JsonObjectNodeBuilder objectNodeBuilder = anObjectBuilder().
+                            withField(ID, JsonUtil.aStringBuilderNumber(employee.getId())).
+                            withField(VALUE, JsonNodeBuilders.aStringBuilder(getValue(employee))).
+                            withField(MAN_ID, JsonUtil.aStringBuilderNumber(employee.getManager() == null ? null : employee.getManager().getId())).
+                            withField(REG_ID, JsonUtil.aStringBuilderNumber(employee.getRegion().getId())).
+                            withField(ACTIVE_FLAG, JsonUtil.aStringBuilderBoolean(isEmployeeActive(employee)));
+                    employeesBuilder.withElement(objectNodeBuilder);
+                }
+            }
+            builder.withElement(nodeBuilder.withField(DIVISION_EMPLOYEES, employeesBuilder));
+        }
+        return JsonUtil.format(builder.build());
+    }
+
+    public Boolean isEmployeeActive(Employee employee) {
+        if (employee != null) {
+            Date beginDate = employee.getStartDate();
+            Date curDate = new Date();
+            /* определим дату окончания работы
+            *  если её нет то считаем бесконечно большой
+            *  если есть то добавим день чтоб учесть последий рабочий день */
+            Date endDate = (employee.getEndDate() != null) ?
+                    DateUtils.addDays(employee.getEndDate(), 1) :
+                    DateTimeUtil.parseStringToDateForDB(MAX_DATE);
+            if (curDate.after(beginDate) && curDate.before(endDate)) {
+                return Boolean.TRUE;
+            }
+        }
+        return Boolean.FALSE;
+    }
+
+    // преобразует список сотрудников в JSON
+    public String makeEmployeeListInJSON(List<Employee> employees) {
+        final JsonArrayNodeBuilder builder = anArrayBuilder();
+
+        for (Employee employee : employees) {
+            JsonObjectNodeBuilder objectNodeBuilder = anObjectBuilder().
+                    withField(ID, JsonUtil.aStringBuilderNumber(employee.getId())).
+                    withField(VALUE, JsonNodeBuilders.aStringBuilder(getValue(employee)));
+            builder.withElement(objectNodeBuilder);
+        }
+        return JsonUtil.format(builder.build());
+    }
+
+    @Transactional(readOnly = true)
+    public String getManagerListJsonNew() {
+        final JsonArrayNodeBuilder builder = anArrayBuilder();
+        List<Employee> managerList = getManagerListForAllEmployee();
+        for (Employee e : managerList) {
+            JsonObjectNodeBuilder nodeBuilder = anObjectBuilder();
+            nodeBuilder.withField(ID, JsonUtil.aStringBuilderNumber(e.getId()));
+            nodeBuilder.withField(VALUE, JsonNodeBuilders.aStringBuilder(e.getName()));
+            nodeBuilder.withField(DIV_ID, JsonUtil.aStringBuilderNumber(e.getDivision().getId()));
+            builder.withElement(nodeBuilder);
+        }
+        return JsonUtil.format(builder.build());
+    }
+
+
+    private String getValue(Employee employee) {
+        final StringBuilder sb = new StringBuilder(employee.getName());
+        Timestamp endDate = employee.getEndDate();
+
+        if (null != endDate) {
+            if (DateUtils.truncatedCompareTo(endDate, new Date(), Calendar.DAY_OF_MONTH) < 0) {
+                sb.append(" (уволен: ").append(dateToString(employee.getEndDate(), DATE_FORMAT)).append(")");
+            }
+        }
+
+        return sb.toString();
+    }
+
+
 }

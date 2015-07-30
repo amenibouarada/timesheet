@@ -1,11 +1,13 @@
 package com.aplana.timesheet.service.MailSenders;
 
+import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.system.constants.PadegConstants;
 import com.aplana.timesheet.dao.entity.Illness;
 import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.EmployeeService;
 import com.aplana.timesheet.service.ProjectService;
 import com.aplana.timesheet.service.SendMailService;
+import com.aplana.timesheet.system.security.entity.TimeSheetUser;
 import com.aplana.timesheet.util.DateTimeUtil;
 import org.apache.commons.lang.StringUtils;
 import padeg.lib.Padeg;
@@ -22,6 +24,8 @@ public class IllnessDeleteSender extends AbstractIllnessSender {
         return String.format(" Оповещения об удалении больничного (%s)", this.getClass().getSimpleName());
     }
 
+    final Employee curUser = sendMailService.getSecurityPrincipal().getEmployee();
+
     @Override
     protected String getSubject(Illness illness) {
         return propertyProvider.getIllnessMailMarker() +
@@ -35,7 +39,7 @@ public class IllnessDeleteSender extends AbstractIllnessSender {
         String beginDateStr = DateTimeUtil.formatDateIntoViewFormat(illness.getBeginDate());
         String endDateStr = DateTimeUtil.formatDateIntoViewFormat(illness.getEndDate());
         String deletedDate = DateTimeUtil.formatDateIntoViewFormat(new Date());
-        String authorVacation = Padeg.getFIOPadegFS(illness.getAuthor().getName(), illness.getAuthor().getSex(), PadegConstants.Tvoritelnyy);
+        String authorVacation = Padeg.getFIOPadegFS(curUser.getName(), curUser.getSex(), PadegConstants.Tvoritelnyy);
         String commentStr = StringUtils.EMPTY;
         if (StringUtils.isNotBlank(illness.getComment())) {
             commentStr = String.format("Комментарий: %s. ", illness.getComment());

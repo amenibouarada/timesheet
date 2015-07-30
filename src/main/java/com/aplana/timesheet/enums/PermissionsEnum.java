@@ -12,7 +12,8 @@ public enum PermissionsEnum implements TSEnum {
     VIEW_ILLNESS_BUSINESS_TRIP(4, "Просмотр болезней и командировок всех сотрудников"),
     CHANGE_ILLNESS_BUSINESS_TRIP(5, "Изменение болезней и командировок всех сотрудников"),
     VIEW_PLANS(6, "Просмотр планов"),
-    EDIT_PLANS(7, "Изменение планов");
+    EDIT_PLANS(7, "Изменение планов"),
+    MONTH_REPORT_PERMISSION(8, "Открытие и закрытие табеля");
 
     private int id;
     private String name;

@@ -159,6 +159,19 @@ public class VacationDAO {
         entityManager.remove(vacation);
     }
 
+    /**
+     * Удаляет планируемые отпуска уволенного сотрудника
+     *
+     * @param employee
+     */
+    public void deleteFiredVacations(Employee employee) {
+        final Query query = entityManager.createQuery(
+                "delete from Vacation v " +
+                        "where v.employee.id = " + employee.getId() +
+                        "and v.type = " + VacationTypesEnum.PLANNED.getId());
+        query.executeUpdate();
+    }
+
     public Long getIntersectVacationsCount(Integer employeeId, Date fromDate, Date toDate, DictionaryItem typeVacation) {
         final Query query = entityManager.createQuery(
                 "select count(*) as c " +
@@ -204,7 +217,7 @@ public class VacationDAO {
         return true;
     }
 
-    public Boolean isDayVacationWithoutPlanned(Employee employee, Date date) {
+    public Vacation getVacationWithoutPlanned(Employee employee, Date date) {
         Query query = entityManager.createQuery(
                 "SELECT i FROM Vacation AS i " +
                         "WHERE i.employee = :employee " +
@@ -216,17 +229,15 @@ public class VacationDAO {
                 setParameter("statusId", APPROVED.getId()).
                 setParameter("typePlanned", VacationTypesEnum.PLANNED.getId());
         if (query.getResultList().isEmpty()) {
-            return false;
+            return null;
         }
-        return true;
+        return (Vacation)query.getSingleResult();
     }
 
     public List<Integer> getAllNotApprovedVacationsIds() {
         return entityManager.createQuery("select v.id from Vacation as v where v.status.id in :notApprovedStatuses")
                 .setParameter("notApprovedStatuses", VacationStatusEnum.getNotApprovedStatuses()).getResultList();
     }
-
-
 
     // todo наhql
     public int getVacationsWorkdaysCount(Employee employee, Integer year, Integer month) {
@@ -251,24 +262,22 @@ public class VacationDAO {
     }
 
     /**
-     * Метод считает количество дней утвержденных отпусков в месяце без учета планируемых
+     * Метод считает количество дней утвержденных отпусков указанных типов
+     * Если vacationTypes не указан (null), то учитывает только отпуска:
+     * - "Отпуск с сохранением содержания"
+     * - "Отпуск без сохранения содержания"
+     * - "Отпуск по уходу за ребенком"
+     *
      * @param employee
      * @param year
      * @param month
-     * @param status - статус отпуска, захардкожено "Утвержден"
-     * @param typeVacation - тип отпуска
-     * @param withoutPlannedAndNextWork - не учитывать "Планируемые отпуска"
+     * @param vacationTypes - типы отпусков, которые необходимо учитывать
+     * @param toCurrentDate - параметр, указывающий, считать все дни отпуска за текущий месяц или только до текущей даты
      * @return
      */
-    public int getVacationsWorkdaysCount(Employee employee, Integer year, Integer month, VacationStatusEnum status,
-                                         VacationTypesEnum typeVacation, Boolean withoutPlannedAndNextWork) {
-        /*
-            Здравствуй, мой юный друг! Я понимаю, в каком ты пребываешь состоянии от ниже написанных строчек кода, но,
-            пожалуйста, если ты знаешь, как сделать рабочий вариант на HQL - сделай это за меня.
-
-            P.S.: проблема в том, что вариант на HQL ВСЕГДА возвращает 0.
-        */
-
+    public int getApprovedVacationsWorkdaysCount(Employee employee, Integer year, Integer month,
+                                         List<VacationTypesEnum> vacationTypes, boolean toCurrentDate) {
+        Date curDate = new Date();
         String textQuery = "select" +
                 "        (count(c) - count(h)) as days" +
                 "    from" +
@@ -278,14 +287,10 @@ public class VacationDAO {
                 "    where" +
                 "        v.employee_id = :employee_id" +
                 "        and v.status_id = :status_id" +
-                "        and {ts '%1$s'} between date_trunc('month', v.begin_Date) and date_trunc('month', v.end_Date)";
-
-        if (typeVacation != null) {
-            textQuery += "and v.type_id = :type_id";
-        }
-
-        if (typeVacation == null && withoutPlannedAndNextWork) {
-            textQuery += "and v.type_id in :types_id";
+                "        and {ts '%1$s'} between date_trunc('month', v.begin_Date) and date_trunc('month', v.end_Date)" +
+                "        and v.type_id in :types_id";
+        if (toCurrentDate) {
+            textQuery += " and v.begin_date <= :cur_date and c.caldate <= :cur_date";
         }
 
         final Query query = entityManager.createNativeQuery(
@@ -293,20 +298,21 @@ public class VacationDAO {
                         textQuery,
                         String.format("%d-%d-1", year, month)
                 )
-        ).setParameter("employee_id", employee.getId()).setParameter("status_id", status.getId()).
-                setParameter("region", employee.getRegion().getId());
-
-        if (typeVacation != null) {
-            query.setParameter("type_id", typeVacation.getId());
+        ).setParameter("employee_id", employee.getId())
+                .setParameter("status_id", VacationStatusEnum.APPROVED.getId())
+                .setParameter("region", employee.getRegion().getId());
+        if (toCurrentDate) {
+            query.setParameter("cur_date", curDate);
         }
 
-        if (typeVacation == null && withoutPlannedAndNextWork) {
-            List<DictionaryItem> typesVac = dictionaryItemService.getItemsByDictionaryId(DictionaryEnum.VACATION_TYPE.getId());
-
-            typesVac.remove(dictionaryItemService.find(VacationTypesEnum.PLANNED.getId()));
-
-            query.setParameter("types_id", typesVac) ;
+        // если не указано, то исключаем из общего списка те отпуска, которые не должны учитываться
+        if (vacationTypes == null) {
+            query.setParameter("types_id",
+                    dictionaryItemService.getDictItemsIdByEnumElements(VacationTypesEnum.getConsiderVacationTypes()));
+        }else{
+            query.setParameter("types_id", vacationTypes);
         }
+
         return ((Number) query.getSingleResult()).intValue();
     }
 
@@ -358,10 +364,10 @@ public class VacationDAO {
     public List<Vacation> getPlannedVacationsByBeginAndEndDates(Employee employee, Date beginDate, Date endDate) {
         Query query =
                 entityManager.createQuery("select v from Vacation v where v.type.id=:type and v.beginDate = :beginDate and v.endDate=:endDate and v.employee = :employee").
-                setParameter("type", VacationTypesEnum.PLANNED.getId())
-                .setParameter("beginDate", beginDate)
-                .setParameter("employee", employee)
-                .setParameter("endDate", endDate);
+                        setParameter("type", VacationTypesEnum.PLANNED.getId())
+                        .setParameter("beginDate", beginDate)
+                        .setParameter("employee", employee)
+                        .setParameter("endDate", endDate);
 
         return query.getResultList();
     }

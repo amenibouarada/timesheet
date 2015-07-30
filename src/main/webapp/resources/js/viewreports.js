@@ -63,7 +63,7 @@ function updateEmployeeSelect() {
     var divisionId =  widgets.division.value;
 
     dojo.xhrGet({
-        url: getContextPath() + "/employee/employeeListWithLastWorkday/" + divisionId + "/true/true",
+        url: getContextPath() + "/employee/employeeListWithLastWorkday/" + divisionId + "/false/true",
         handleAs: "json",
         timeout: 10000,
         sync: true,

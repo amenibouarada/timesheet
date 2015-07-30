@@ -10,7 +10,6 @@ import com.aplana.timesheet.exception.controller.BusinessTripsAndIllnessAddExcep
 import com.aplana.timesheet.form.BusinessTripsAndIllnessAddForm;
 import com.aplana.timesheet.form.validator.BusinessTripsAndIllnessAddFormValidator;
 import com.aplana.timesheet.service.*;
-import com.aplana.timesheet.service.helper.EmployeeHelper;
 import com.aplana.timesheet.util.EnumsUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,9 +48,6 @@ public class BusinessTripsAndIllnessAddController extends AbstractController {
     ProjectService projectService;
     @Autowired
     BusinessTripsAndIllnessAddFormValidator businessTripsAndIllnessAddFormValidator;
-    @Autowired
-    EmployeeHelper employeeHelper;
-
 
     private static final Logger logger = LoggerFactory.getLogger(BusinessTripsAndIllnessController.class);
 
@@ -180,7 +176,7 @@ public class BusinessTripsAndIllnessAddController extends AbstractController {
     @ResponseBody
     public String getProjects() {
         List<Project> projects = projectService.getAllProjects();
-        return projectService.getProjectListAsJson(projects);
+        return projectService.getProjectListAsJsonOld(projects);
     }
 
     /**
@@ -263,7 +259,7 @@ public class BusinessTripsAndIllnessAddController extends AbstractController {
     private ModelAndView getModelAndViewCreation(Employee employee) {
         ModelAndView modelAndView = new ModelAndView("businesstripsandillnessadd");
         if (employee != null) modelAndView.addObject("employeeId", employee.getId());
-        modelAndView.addObject("employeeList", employeeHelper.makeEmployeeListInJSON(employeeService.getEmployees()));
+        modelAndView.addObject("employeeList", employeeService.makeEmployeeListInJSON(employeeService.getEmployees()));
         return modelAndView;
     }
 

@@ -111,7 +111,7 @@ public class DictionaryItemService {
         for (DictionaryItem item : items) {
             builder.withElement(
                     anObjectBuilder().
-                            withField("id", JsonUtil.aStringBuilder(item.getId())).
+                            withField("id", JsonUtil.aStringBuilderNumber(item.getId())).
                             withField("value", aStringBuilder(item.getValue()))
             );
         }
@@ -121,5 +121,25 @@ public class DictionaryItemService {
 
     public String getDictionaryItemsInJson(int dictId) {
         return getDictionaryItemsInJson(getItemsByDictionaryId(dictId));
+    }
+
+    public List<DictionaryItem> getDictionaryItemsByEnumElements(List<TSEnum> enumElements){
+        List<DictionaryItem> result = new ArrayList<DictionaryItem>(enumElements.size());
+        for ( TSEnum element : enumElements){
+            result.add(find(element.getId()));
+        }
+        return result;
+    }
+
+    public List<Integer> getDictItemsIdByEnumElements(List<TSEnum> enumElements){
+        return getDictionaryItemsIds(getDictionaryItemsByEnumElements(enumElements));
+    }
+
+    public List<Integer> getDictionaryItemsIds(List<DictionaryItem> dictionaryItemList){
+        List<Integer> result = new ArrayList<Integer>(dictionaryItemList.size());
+        for ( DictionaryItem element : dictionaryItemList){
+            result.add(element.getId());
+        }
+        return result;
     }
 }

@@ -49,6 +49,7 @@ public class ReportCheckService {
      * Метод формирования оповещений используемый в таймере
      */
     public void storeReportCheck() {
+        logger.info("Starts forming alerts of arrears: " + new Date());
 
         trace.setLength(0);
 
@@ -62,11 +63,13 @@ public class ReportCheckService {
             String lastCurrentMonthSunday = DateTimeUtil.lastSunday();
 
             String lastDay = DateTimeUtil.decreaseDay(currentDay);
+            logger.info("Alerts of arrears: storeReportCheck starting");
             storeReportCheck(firstPrevMonthDay, lastDay, lastCurrentMonthSunday.equals(currentDay));
         }
 
         trace.append("Finish send mails\n");
 
+        logger.info("Forming alerts of arrears finished: " + new Date());
     }
 
     /**

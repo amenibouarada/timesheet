@@ -5,6 +5,7 @@ import com.aplana.timesheet.dao.LdapDAO;
 import com.aplana.timesheet.dao.ProjectRolePermissionsDAO;
 import com.aplana.timesheet.dao.entity.*;
 import com.aplana.timesheet.dao.entity.ldap.EmployeeLdap;
+import com.aplana.timesheet.enums.RegionsEnum;
 import com.aplana.timesheet.util.DateTimeUtil;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -28,6 +29,9 @@ public class EmployeeLdapService extends AbstractServiceWithTransactionManagemen
 
     @Autowired
     private EmployeeService employeeService;
+
+    @Autowired
+    private VacationService vacationService;
 
     @Autowired
     private ProjectRoleService projectRoleService;
@@ -325,6 +329,8 @@ public class EmployeeLdapService extends AbstractServiceWithTransactionManagemen
                                 }
                             }
                         }
+                        //удаляем из базы планируемые отпуска уволенного сотрудника
+                        vacationService.deleteFiredVacations(empDb);
                     }
                 }
             }
@@ -620,27 +626,31 @@ public class EmployeeLdapService extends AbstractServiceWithTransactionManagemen
         List<Region> list = regionService.getRegions();
         boolean isSetRegion = false;
         if (employeeLdap.getCity() != null) {
-            loop:
             for (Region reg : list) {
+                if (reg.getId().equals(RegionsEnum.OTHERS.getId())){
+                    continue;
+                }
                 String[] regs = reg.getLdapCity().split(",");
                 for (String region : regs) {
                     if (employeeLdap.getCity().contains(region.trim())) {
                         employee.setRegion(regionService.findRegionByCity(region.trim()));
                         isSetRegion = true;
-                        continue loop;
                     }
                 }
             }
         }
-        if (!isSetRegion) errors.append("region not found, ");
+        if (!isSetRegion) {
+            errors.append("region not found, ");
+            employee.setRegion(regionService.find(RegionsEnum.OTHERS.getId()));
+        }
     }
 
     private void findAndFillJobField(EmployeeLdap employeeLdap, StringBuffer errors, Employee employee) {
-        ProjectRole job = projectRoleService.find(employeeLdap.getTitle());
-        if (job != null) {
-            employee.setJob(job);
-        } else {
-            employee.setJob(projectRoleService.getUndefinedRole());
+        try{
+            employee.setJob(projectRoleService.findJobForCreateEmployee(employeeLdap.getTitle()));
+        }catch(Exception exc){
+            errors.append("Role not found and didn't set fo employee " + employeeLdap.getEmail());
+            logger.error("Some exception happened while adding project role to employee" + employeeLdap.getEmail(), exc);
         }
     }
 

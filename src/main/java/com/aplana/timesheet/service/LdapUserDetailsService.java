@@ -78,6 +78,14 @@ public class LdapUserDetailsService implements UserDetailsContextMapper {
                     list.add(new SimpleGrantedAuthority(RoleConstants.VIEW_ILLNESS_BUSINESS_TRIP));
                     break;
                 }
+
+                case MONTH_REPORT_PERMISSION:{
+                    list.add(new SimpleGrantedAuthority(RoleConstants.ROLE_MONTH_REPORT_MANAGER));
+                    // медеджер по табелю также имеет права на просмотр формы "Формирование отчётов"
+                    list.add(new SimpleGrantedAuthority(RoleConstants.ROLE_MANAGER));
+                    break;
+                }
+
                 default:
                     logger.error("Unknown permission");
             }

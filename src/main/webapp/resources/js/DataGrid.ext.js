@@ -120,7 +120,9 @@ function createLayout(/* Array */ headerViews) {
                 headerStyles:  (!cell.headerStyles ? "" : cell.headerStyles) + "width: " + cell.width,
                 cellStyles: cellStyles,
                 hasBeenChanged: {},
-                formatter: function(text, rowIndex, cell) {
+                // Если у ячейки присутствует пользовательский formatter, то используем его,
+                // иначе используем стандартный formatter, предусмотренный данной функцией
+                formatter: cell.formatter !=null ? cell.formatter : function(text, rowIndex, cell) {
                     var div = document.createElement("div");
 
                     if (!this.editable) {
@@ -132,7 +134,9 @@ function createLayout(/* Array */ headerViews) {
                     var parentCol = this.parentCol;
 
                     if (!(parentCol && parentCol.isHidden)) {
-                        div.innerHTML = (text.length != 0) ? text : '-';
+                        if (text != null) {
+                            div.innerHTML = (text.length != 0) ? text : '-';
+                        }
 
                         if (parentCol && typeof parentCol.cellsFormatter == "function") {
                             div.innerHTML = parentCol.cellsFormatter(div.innerHTML);
@@ -220,10 +224,12 @@ function createLayout(/* Array */ headerViews) {
 }
 
 function hideCol(button, colField) {
+    tooltip.hide();
     switchColDisplay(button, colField, true, true);
 }
 
 function showCol(button, colField) {
+    tooltip.hide();
     switchColDisplay(button, colField, false, true);
 }
 

@@ -1,6 +1,8 @@
 package com.aplana.timesheet.service;
 
 import argo.jdom.JsonArrayNodeBuilder;
+import argo.jdom.JsonField;
+import argo.jdom.JsonNode;
 import argo.jdom.JsonObjectNodeBuilder;
 import com.aplana.timesheet.dao.ProjectDAO;
 import com.aplana.timesheet.dao.entity.*;
@@ -17,6 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 
 import static argo.jdom.JsonNodeBuilders.*;
+import static argo.jdom.JsonNodeFactories.*;
+import static argo.jdom.JsonNodeFactories.array;
 
 @Service
 public class ProjectService {
@@ -24,6 +28,14 @@ public class ProjectService {
     private static final Logger logger = LoggerFactory.getLogger(ProjectService.class);
     private static final String ID = "id";
     private static final String VALUE = "value";
+
+    public static final String PROJECT_ID =             "project_id";
+    public static final String PROJECT_NAME =           "project_name";
+    public static final String PROJECT_ACTIVE =         "project_active";
+    public static final String PROJECT_STATE =          "project_state";
+    public static final String PROJECT_DIVISION =       "project_division";
+    public static final String PROJECT_TYPE =           "project_type";
+    public static final String PROJECT_FUNDING_TYPE =   "project_funding_type";
 
     @Autowired
 	private ProjectDAO projectDAO;
@@ -112,7 +124,7 @@ public class ProjectService {
             final JsonObjectNodeBuilder projectBuilder = getProjectBuilder(project);
             /* определим принадлежность проекта к центру */
             Integer division_id = (project.getDivision() != null) ? project.getDivision().getId() : 0;
-            projectBuilder.withField("ownerDivisionId", JsonUtil.aStringBuilder(division_id));
+            projectBuilder.withField("ownerDivisionId", JsonUtil.aStringBuilderNumber(division_id));
             builder.withElement(projectBuilder);
         }
 
@@ -126,7 +138,47 @@ public class ProjectService {
      * @return
      */
     public String getProjectListJson(List<Division> divisions) {
-        return getProjectListJson(divisions, null);
+        return getProjectListByDivisionsJson(divisions, null);
+    }
+
+    /**
+     * Возвращает список проектов
+     * @param projects  - список проектов
+     *                  если null - то все проекты
+     * @param fields    - какие поля включить в JSON-объект, поля использовать как константы, из начала класса
+     *                  если null - тогда все поля заполняются.
+     *                  NOTE! Возможно в будущем понадобятся новые поля, но пока это
+     *                  {PROJECT_ID, PROJECT_NAME, PROJECT_DIVISION, PROJECT_TYPE, PROJECT_FUNDING_TYPE}
+     *                  При необходимости можно расширить
+     * @return
+     */
+    public String getProjectListAsJson(List<Project> projects, String[] fields) {
+        final List<JsonNode> nodes = new ArrayList<JsonNode>();
+
+        if (projects == null){
+            projects = getAllProjects();
+        }
+
+        if (fields == null){
+            fields = new String[]{PROJECT_ID, PROJECT_NAME, PROJECT_DIVISION, PROJECT_TYPE, PROJECT_FUNDING_TYPE};
+        }
+
+        for (Project project : projects) {
+            List<JsonField> jsonFields = new ArrayList<JsonField>();
+
+            for (String field : fields){
+                // ToDo change to switch when migrate java 1.7+
+                if (field == PROJECT_ID)            { jsonFields.add(field(PROJECT_ID, number(project.getId()))); }
+                if (field == PROJECT_NAME)          { jsonFields.add(field(PROJECT_NAME, string(project.getName()))); }
+                if (field == PROJECT_DIVISION)      { jsonFields.add(field(PROJECT_DIVISION, number( project.getDivision() != null ? project.getDivision().getId() : -1 ))); }
+                if (field == PROJECT_TYPE)          { jsonFields.add(field(PROJECT_TYPE, number( project.getState().getId()))); }
+                if (field == PROJECT_FUNDING_TYPE)  { jsonFields.add(field(PROJECT_FUNDING_TYPE, number(project.getFundingType() != null ? project.getFundingType().getId() : -1))); }
+            }
+
+            nodes.add(object(jsonFields));
+        }
+
+        return JsonUtil.format(array(nodes));
     }
 
     /**
@@ -136,7 +188,7 @@ public class ProjectService {
      * @param active true - активны, false - неактивные, null - без разницы
      * @return
      */
-    public String getProjectListJson(List<Division> divisions, Boolean active) {
+    public String getProjectListByDivisionsJson(List<Division> divisions, Boolean active) {
         final JsonArrayNodeBuilder builder = anArrayBuilder();
 
         for (Division division : divisions) {
@@ -146,7 +198,7 @@ public class ProjectService {
             if (projects.isEmpty()) {
                 projectsBuilder.withElement(
                         anObjectBuilder().
-                                withField(ID, JsonUtil.aStringBuilder(0)).
+                                withField(ID, JsonUtil.aStringBuilderNumber(0)).
                                 withField(VALUE, aStringBuilder(StringUtils.EMPTY))
                 );
             } else {
@@ -161,7 +213,7 @@ public class ProjectService {
 
             builder.withElement(
                     anObjectBuilder().
-                            withField("divId", JsonUtil.aStringBuilder(division.getId())).
+                            withField("divId", JsonUtil.aStringBuilderNumber(division.getId())).
                             withField("divProjs", projectsBuilder)
             );
         }
@@ -169,22 +221,26 @@ public class ProjectService {
         return JsonUtil.format(builder);
     }
 
+    // TODO заменить на getProjectListAsJson
     /**
      * Возвращает JSON полного списка проектов
      *
      * @return
      */
-    public String getProjectListJson() {
-        return getProjectListAsJson(getAllProjects());
+    @Deprecated
+    public String getProjectListJsonOld() {
+        return getProjectListAsJsonOld(getAllProjects());
     }
 
-    public String getProjectListAsJson(List<Project> projects) {
+    // TODO заменить на getProjectListAsJson
+    @Deprecated
+    public String getProjectListAsJsonOld(List<Project> projects) {
         final JsonArrayNodeBuilder builder = anArrayBuilder();
 
         if (projects.isEmpty()) {
             builder.withElement(
                     anObjectBuilder().
-                            withField(ID, JsonUtil.aStringBuilder(0)).
+                            withField(ID, JsonUtil.aStringBuilderNumber(0)).
                             withField(VALUE, aStringBuilder(StringUtils.EMPTY))
             );
         } else {
@@ -200,10 +256,10 @@ public class ProjectService {
 
     private JsonObjectNodeBuilder getProjectBuilder(Project project) {
         return anObjectBuilder().
-                withField(ID, JsonUtil.aStringBuilder(project.getId())).
+                withField(ID, JsonUtil.aStringBuilderNumber(project.getId())).
                 withField(VALUE, aStringBuilder(project.getName())).
-                withField("state", JsonUtil.aStringBuilder(project.getState().getId())).
-                withField("active", JsonUtil.aStringBuilder(Boolean.valueOf(project.isActive())));
+                withField("state", JsonUtil.aStringBuilderNumber(project.getState().getId())).
+                withField("active", JsonUtil.aStringBuilderBoolean(Boolean.valueOf(project.isActive())));
     }
 
     public List<Project> getEmployeeProjectPlanByDates(Employee employee, HashMap<Integer, Set<Integer>> dates) {
@@ -212,13 +268,6 @@ public class ProjectService {
 
     public List<Project> getEmployeeProjectsFromTimeSheetByDates(Date beginDate, Date endDate, Employee employee) {
         return projectDAO.getEmployeeProjectsFromTimeSheetByDates(beginDate, endDate, employee);
-    }
-
-    /**
-     * получаем список проектов, менеджерам которых разосланы письма с просьбой согласовать данный отпуск
-     */
-    public List<Project> getProjectsAssignedToVacation(Vacation vacation) {
-        return projectDAO.getProjectsAssignedToVacation(vacation);
     }
 
     public List<Project> getProjectsByStatesForDateAndDivisionId(List<Integer> projectStates, Date date,

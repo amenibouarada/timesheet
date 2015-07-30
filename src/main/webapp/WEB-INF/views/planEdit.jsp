@@ -5,6 +5,7 @@
 <%@ page import="static com.aplana.timesheet.controller.PlanEditController.*" %>
 <%@ page import="static com.aplana.timesheet.form.PlanEditForm.*" %>
 <%@ page import="static com.aplana.timesheet.service.PlanEditService.*" %>
+<%@ page import="static com.aplana.timesheet.service.ProjectService.*" %>
 <%@ page import="static com.aplana.timesheet.util.ResourceUtils.getResRealPath" %>
 <%@ page import="com.aplana.timesheet.enums.ProjectFundingTypeEnum" %>
 <%@ page import="com.aplana.timesheet.enums.TypesOfActivityEnum" %>
@@ -95,6 +96,9 @@
     var selectedRowIndex = '${selectionRowIndex}';
     var scrollX = '${scrollX}';
     var scrollY = '${scrollY}';
+
+    var PROJECT_ID = "<%= PROJECT_ID %>";
+    var PROJECT_NAME = "<%= PROJECT_NAME %>";
 
     dojo.addOnLoad(function () {
 
@@ -527,7 +531,7 @@
     <form:errors path="*" cssClass="errors_box" delimiter="<br/><br/>"/>
     <form:hidden path="<%= JSON_DATA %>"/>
 
-    <table>
+    <table style="border:none">
         <tr>
             <td class="topAlignTD">
                 <div class="blockYearMonth">

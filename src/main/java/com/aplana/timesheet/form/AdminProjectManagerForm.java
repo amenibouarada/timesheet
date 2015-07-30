@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author dsysterov
  * @version 1.0
  */
+// ToDo зачем нужен этот класс, если есть класс ProjectManager
 public class AdminProjectManagerForm {
     private Integer id;
     private Integer employee;

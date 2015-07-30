@@ -1,5 +1,6 @@
 package com.aplana.timesheet.dao;
 
+import com.aplana.timesheet.dao.entity.Division;
 import com.aplana.timesheet.dao.entity.ldap.EmployeeLdap;
 import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.google.common.collect.Iterables;
@@ -10,9 +11,7 @@ import org.springframework.ldap.NameNotFoundException;
 import org.springframework.ldap.core.AttributesMapper;
 import org.springframework.ldap.core.DistinguishedName;
 import org.springframework.ldap.core.LdapTemplate;
-import org.springframework.ldap.filter.AndFilter;
-import org.springframework.ldap.filter.EqualsFilter;
-import org.springframework.ldap.filter.LikeFilter;
+import org.springframework.ldap.filter.*;
 import org.springframework.ldap.support.LdapUtils;
 
 import javax.naming.NamingEnumeration;
@@ -27,9 +26,13 @@ import java.util.Map;
 
 public class LdapDAO {
 	private static final Logger logger = LoggerFactory.getLogger(LdapDAO.class);
+    private static final String ANY_BUT_NOT_EMPTY = "*";
 
     @Autowired
     private TSPropertyProvider propertyProvider;
+
+    @Autowired
+    private DivisionDAO divisionDAO;
 
 	private LdapTemplate ldapTemplate;
 
@@ -125,14 +128,15 @@ public class LdapDAO {
                 .and(new EqualsFilter(propertyProvider.getLdapFieldForDivision(), department))
                 .and(new EqualsFilter(
                         propertyProvider.getLdapFieldForObjectClass(),
-                        propertyProvider.getLdapObjectClassEmployee()));
+                        propertyProvider.getLdapObjectClassEmployee()))
+                .and(new LikeFilter(propertyProvider.getLdapFieldForEmail(), ANY_BUT_NOT_EMPTY));
         logger.debug("LDAP Query {}", andFilter.encode());
         // для OpenLDAP используется вместо whenCreated поле createTimestamp, которое является скрытым
         // чтобы его получить мы запрашиваем это поле и все остальные ("*")
         // когда данные будут запрашиваться для AD, то будет запрашиваться whenCreated, которое и так там видно
         // и будет получено и по "*", но это проблем не создаст и для AD тоже всё будет корректно
 		List<EmployeeLdap> employees = ldapTemplate.search("", andFilter.encode(), SearchControls.SUBTREE_SCOPE,
-                new String[]{ propertyProvider.getLdapFieldForWhenCreated(), "*" }, new EmployeeAttributeMapper());
+                new String[]{ propertyProvider.getLdapFieldForWhenCreated(), ANY_BUT_NOT_EMPTY }, new EmployeeAttributeMapper());
 		logger.debug("LDAP Query finished. Employees size is {}", employees.size());
 		if(!employees.isEmpty())
             logger.debug("Employee {} City is {}", employees.get(0).getDisplayName(), employees.get(0).getCity());
@@ -142,15 +146,21 @@ public class LdapDAO {
 	@SuppressWarnings("unchecked")
 	public List<EmployeeLdap> getDisabledEmployees() {
 		logger.info("Getting Disabled Employees from LDAP.");
-		DistinguishedName dn = new DistinguishedName();
-	    dn.add("ou", propertyProvider.getLdapOuDisabledEmployee());
-
         AndFilter andFilter = new AndFilter()
                 .and(new EqualsFilter(
                         propertyProvider.getLdapFieldForObjectClass(),
-                        propertyProvider.getLdapObjectClassDisabledEmployee()));
+                        propertyProvider.getLdapObjectClassDisabledEmployee()))
+                .and(new NotFilter(
+                        new LikeFilter(propertyProvider.getLdapFieldForEmail(), ANY_BUT_NOT_EMPTY)
+                ));
+        OrFilter orFilter = new OrFilter();
+        List<Division> divisions = divisionDAO.getDivisionsToSyncEmployee();
+        for (Division division : divisions){
+            orFilter.or(new EqualsFilter(propertyProvider.getLdapFieldForDivision(), division.getLdapName()));
+        }
+        andFilter.and(orFilter);
 		logger.debug("LDAP Query {}", andFilter.encode());
-        List search = ldapTemplate.search(dn, andFilter.encode(), new EmployeeAttributeMapper());
+        List search = ldapTemplate.search(DistinguishedName.EMPTY_PATH, andFilter.encode(), new EmployeeAttributeMapper());
         logger.debug("LDAP Query finished. result.size = {}", search.size());
         return search;
 	}

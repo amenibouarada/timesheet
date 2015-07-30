@@ -12,7 +12,6 @@ import com.aplana.timesheet.form.validator.CreateVacationFormValidator;
 import com.aplana.timesheet.service.*;
 import com.aplana.timesheet.system.security.SecurityService;
 import com.aplana.timesheet.util.DateTimeUtil;
-import com.aplana.timesheet.service.helper.EmployeeHelper;
 import org.apache.commons.lang.BooleanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,8 +53,6 @@ public class CreateVacationController {
     private VacationService vacationService;
     @Autowired
     private DivisionService divisionService;
-    @Autowired
-    protected EmployeeHelper employeeHelper;
     @Autowired
     protected SendMailService sendMailService;
     @Autowired
@@ -125,6 +122,11 @@ public class CreateVacationController {
         return vacationService.checkVacationCountDaysJSON(beginDate, endDate, employeeId, vacationTypeId);
     }
 
+    private boolean isMotherhoodVacation(CreateVacationForm createVacationForm){
+        return (createVacationForm.getVacationType().equals(VacationTypesEnum.CHILDBEARING.getId())) ||
+               (createVacationForm.getVacationType().equals(VacationTypesEnum.CHILDCARE.getId()));
+    }
+
     @RequestMapping(value = "/validateAndCreateVacation/{employeeId}/{approved}", method = RequestMethod.POST)
     public ModelAndView validateAndCreateVacation(
             @PathVariable("employeeId") Integer employeeId,
@@ -135,7 +137,8 @@ public class CreateVacationController {
         final Employee employee = employeeService.find(employeeId);
         final Employee curEmployee = securityService.getSecurityPrincipal().getEmployee();
         final boolean isApprovedVacation =
-                (employeeService.isEmployeeAdmin(curEmployee.getId()) && BooleanUtils.toBoolean(approved));
+                employeeService.isEmployeeAdmin(curEmployee.getId()) &&
+                (BooleanUtils.toBoolean(approved) || isMotherhoodVacation(createVacationForm));
 
         createVacationFormValidator.validate(createVacationForm, bindingResult, isApprovedVacation);
 

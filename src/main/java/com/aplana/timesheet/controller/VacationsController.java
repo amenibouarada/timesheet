@@ -4,7 +4,6 @@ import argo.jdom.JsonNodeBuilders;
 import com.aplana.timesheet.dao.entity.*;
 import com.aplana.timesheet.enums.DictionaryEnum;
 import com.aplana.timesheet.enums.VacationStatusEnum;
-import com.aplana.timesheet.exception.service.DeleteVacationException;
 import com.aplana.timesheet.form.VacationsForm;
 import com.aplana.timesheet.form.validator.VacationsFormValidator;
 import com.aplana.timesheet.service.*;
@@ -113,6 +112,8 @@ public class VacationsController extends AbstractControllerForEmployee {
 
         vacationsFormValidator.validate(vacationsForm, result);
         if (result != null && result.hasErrors()){
+            modelAndView.addObject("vacationListByRegionJSON", "[]");
+            modelAndView.addObject("holidayList", "[]");
             return modelAndView;
         }
 
@@ -236,7 +237,7 @@ public class VacationsController extends AbstractControllerForEmployee {
                 DateTimeUtil.parseStringToDateForDB(vacationsForm.getCalToDate()),
                 true
         );
-        return employeeHelper.makeEmployeeListInJSON(employeeList);
+        return employeeService.makeEmployeeListInJSON(employeeList);
     }
 
     /**

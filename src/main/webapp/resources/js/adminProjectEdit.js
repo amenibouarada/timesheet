@@ -27,7 +27,8 @@ dojo.require("dojo.store.Memory");
 
 var employeesDataStore = new dojo.data.ObjectStore({
     objectStore: new dojo.store.Memory({
-        data: employeesListJSON
+        data: employeesListJSON,
+        idProperty: EMPLOYEE_ID
     })
 });
 
@@ -275,7 +276,7 @@ function createManager() {
         id: managerIdText,
         name: managerNameText,
         store: employeesDataStore,
-        searchAttr: 'name',
+        searchAttr: EMPLOYEE_NAME,
         queryExpr: "*\${0}*",
         ignoreCase: true,
         autoComplete: false,
@@ -315,27 +316,6 @@ function createManager() {
     }
     roleCell.appendChild(roleSelect);
 
-    /*------------------------*/
-    /*   Чекбокс "Главный"    */
-    /*------------------------*/
-
-    var masterCell = newManager.insertCell(3);
-    var masterInput = dojo.doc.createElement("input");
-    dojo.attr(masterInput, {
-        id: "projectManagers" + newManagerIndex + ".master1",
-        name: "projectManagers[" + newManagerIndex + "].master",
-        type: "checkbox"
-    });
-    masterCell.appendChild(masterInput);
-
-    var _masterInput = dojo.doc.createElement("input");
-    dojo.attr(_masterInput, {
-        name: "_projectManagers[" + newManagerIndex + "].master",
-        type: "hidden",
-        value: "on"
-    });
-    masterCell.appendChild(_masterInput);
-
     /*----------------------------------*/
     /*   Чекбокс "Признак активности"   */
     /*----------------------------------*/
@@ -356,6 +336,27 @@ function createManager() {
         value: "on"
     });
     activeCell.appendChild(_activeInput);
+
+    /*------------------------*/
+    /*   Чекбокс "Главный"    */
+    /*------------------------*/
+
+    var masterCell = newManager.insertCell(3);
+    var masterInput = dojo.doc.createElement("input");
+    dojo.attr(masterInput, {
+        id: "projectManagers" + newManagerIndex + ".master1",
+        name: "projectManagers[" + newManagerIndex + "].master",
+        type: "checkbox"
+    });
+    masterCell.appendChild(masterInput);
+
+    var _masterInput = dojo.doc.createElement("input");
+    dojo.attr(_masterInput, {
+        name: "_projectManagers[" + newManagerIndex + "].master",
+        type: "hidden",
+        value: "on"
+    });
+    masterCell.appendChild(_masterInput);
 }
 
 function createBillable() {
@@ -416,7 +417,7 @@ function createBillable() {
         id: idBillbleName,
         name: nameBillableName,
         store: employeesDataStore,
-        searchAttr: 'name',
+        searchAttr: EMPLOYEE_NAME,
         queryExpr: "*\${0}*",
         ignoreCase: true,
         autoComplete: false,
@@ -645,7 +646,7 @@ function createFilteringSelect(row, idValue, fieldNames, rowName) {
         id: idElement,
         name: nameElement,
         store: employeesDataStore,
-        searchAttr: 'name',
+        searchAttr: EMPLOYEE_NAME,
         queryExpr: "*\${0}*",
         ignoreCase: true,
         autoComplete: false,

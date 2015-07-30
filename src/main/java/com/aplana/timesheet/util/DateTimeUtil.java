@@ -273,6 +273,7 @@ public class DateTimeUtil {
         return calendar.getTime();
     }
 
+    // TODO: Попробовать объединить нижеследующие 3 метода в один.
     /**
      * Возвращает конец текущего месяца
      *
@@ -292,6 +293,20 @@ public class DateTimeUtil {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(targetDate);
         calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
+        return calendar.getTime();
+    }
+
+    /**
+     * Возвращает последний день месяца по году и месяцу
+     *
+     * @param month
+     * @param year
+     * @return last day of month in MM/dd/YYYY format
+     */
+    public static Date getLastDayOfAnyMonth(int year, int month) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(year, month - 1, 1);
+        calendar.set(Calendar.DATE, calendar.getActualMaximum(Calendar.DATE));
         return calendar.getTime();
     }
 
@@ -330,6 +345,26 @@ public class DateTimeUtil {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
         return calendar.get(Calendar.YEAR);
+    }
+
+    /**
+     * Возвращает текущий год
+     *
+     * @return
+     */
+    public static Integer getCurrentYear() {
+        Calendar calendar = Calendar.getInstance();
+        return calendar.get(Calendar.YEAR);
+    }
+
+    /**
+     * Возвращает текущий месяц
+     *
+     * @return
+     */
+    public static Integer getCurrentMonth() {
+        Calendar calendar = Calendar.getInstance();
+        return calendar.get(Calendar.MONTH);
     }
 
     /**
@@ -492,8 +527,22 @@ public class DateTimeUtil {
         return (int) ((endDate.getTime() - beginDate.getTime()) / (24 * 3600 * 1000) + 1);
     }
 
+    public static int getDiffInMonths(Date beginDate, Date endDate){
+        Calendar startCalendar = Calendar.getInstance();
+        startCalendar.setTime(beginDate);
+        Calendar endCalendar = Calendar.getInstance();
+        endCalendar.setTime(endDate);
+        int diffYear = endCalendar.get(Calendar.YEAR) - startCalendar.get(Calendar.YEAR);
+        int diffMonth = diffYear * 12 + endCalendar.get(Calendar.MONTH) - startCalendar.get(Calendar.MONTH);
+        return diffMonth;
+    }
+
     private static String[] months = new String[] {"января", "февраля", "марта", "апреля", "мая", "июня", "июля",
             "августа", "сентября", "октября", "ноября", "декабря"};
+
+    //Возвращает название месяца по его номеру в именительном падеже (для формирования отчётов)
+    public static String[] monthsNominative = new String[] {"январь", "февраль", "март", "апрель", "май", "июнь", "июль",
+            "август", "сентябрь", "октябрь", "ноябрь", "декабрь"};
 
     /**
      * Возвращает дату в виде дня и месяца (пример: 1 октября)

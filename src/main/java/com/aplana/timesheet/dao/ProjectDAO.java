@@ -201,17 +201,6 @@ public class ProjectDAO {
         return query.getResultList();
     }
 
-    /**
-     * получаем список проектов пользователя, руководители которых должны подтвердить заявление на отпуск
-     */
-    public List<Project> getProjectsAssignedToVacation(Vacation vacation) {
-        Query query = entityManager.createQuery("select distinct var.project from VacationApprovalResult as var " +
-                "where var.vacationApproval.vacation = :vacation")
-                .setParameter("vacation", vacation);
-
-        return query.getResultList();
-    }
-
     public List<Project> getProjectsByStatesForDateAndDivisionId(List<Integer> projectStates, Date date,
                                                                  Integer divisionId) {
         final Calendar calendar = Calendar.getInstance();

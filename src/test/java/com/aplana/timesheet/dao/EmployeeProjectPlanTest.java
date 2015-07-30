@@ -45,11 +45,6 @@ public class EmployeeProjectPlanTest extends AbstractTest{
     }
 
     @Test
-    public void getProjectPlan(){
-        employeeProjectPlanDAO.getProjectPlan(employmentPlanningForm);
-    }
-
-    @Test
     public void updateEmployeeProjectPlan(){
         employeeProjectPlanDAO.updateEmployeeProjectPlan(employeeId, employmentPlanningForm, value);
     }

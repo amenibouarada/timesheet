@@ -13,7 +13,6 @@ dojo.ready(function () {
     dojo.connect(dojo.byId("divisionId"), "onchange", dojo.byId("divisionId"), updateEmployeeSelect);
     dojo.connect(dojo.byId("divisionId"), "onchange", dojo.byId("divisionId"), updateExitToWorkAndCountVacationDay);
     dojo.connect(dojo.byId("vacationType"), "onchange", dojo.byId("vacationType"), updateExitToWorkAndCountVacationDay);
-    dojo.connect(dojo.byId("vacationType"), "onchange", dojo.byId("vacationType"), updateSubmitButton);
     dojo.connect(dojo.byId("vacationType"), "onchange", dojo.byId("vacationType"), updateCountVacationDaysForPeriod);
     dojo.on(dijit.byId("calFromDate"), "change", updateExitToWorkAndCountVacationDay);
     dojo.on(dijit.byId("calFromDate"), "change", updateCountVacationDaysForPeriod);
@@ -38,7 +37,7 @@ dojo.declare("Calendar", com.aplana.dijit.ext.Calendar, {
                 return 'classDateVioletBack';
                 break;
             case "0":   //день без отпуска
-                if (date <= getFirstWorkDate()) {// день раньше начала работы
+                if (date <= getFirstWorkDate(dijit.byId("employeeIdSelect").item)) {// день раньше начала работы
                     return '';
                 } else {
                     return 'classDateGreen';
@@ -64,9 +63,9 @@ dojo.declare("DateTextBox", com.aplana.dijit.ext.DateTextBox, {
             return true;
         } else {
             if (hasRoleAdmin) {
-                return (date <= new Date());
-            } else {
                 return false;
+            } else {
+                return (date <= new Date());
             }
         }
     }
@@ -84,11 +83,6 @@ require(["dijit/Tooltip", "dojo/domReady!"], function (Tooltip) {
             "<table>"
     });
 });
-
-// переопределение метода из timesheet.js, не удалять
-function getEmployeeData() {
-    return dijit.byId("employeeIdSelect").item;
-}
 
 function getEmployeeId() {
     return dojo.byId("employeeId").value;
@@ -166,11 +160,16 @@ function validate() {
 }
 
 function checkVacation() {
+    // ToDo реализовать позднее, когда появится необходимость
+    return true;
+
+
+
     var vacationType = dojo.byId("types").value;
     var errorField = dojo.byId("errorField");
     if (vacationType != EnumConstants.VacationTypesEnum.WITH_PAY && vacationType != EnumConstants.VacationTypesEnum.PLANNED) {
         errorField.innerHTML = "";
-        return;
+        return true;
     }
 
     var result = true;
@@ -214,6 +213,9 @@ function checkVacation() {
 }
 
 function updateCountVacationDaysForPeriod() {
+    // ToDo реализовать позднее, когда появится необходимость
+    return true;
+
     var countDaysElement = dojo.byId("countDays");
     var fromDate = dojo.byId("calFromDate").value;
     var vacationType = dojo.byId("types").value;
@@ -308,15 +310,6 @@ function cancel() {
 function openCreateVacationRules() {
 
     window.open(rulesUrl);
-}
-
-function updateSubmitButton() {
-    if (dojo.byId('types').value == childBearId || dojo.byId('types').value == childCareId) {
-        dojo.byId('createVacationId').setAttribute("onclick", "javascript: createVacation(true)");
-    } else {
-        dojo.byId('createVacationId').setAttribute("onclick", "javascript: createVacation(false)");
-    }
-
 }
 
 function updateEmployeeSelect() {

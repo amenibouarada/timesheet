@@ -5,6 +5,7 @@
 <%@ page import="com.aplana.timesheet.dao.entity.Employee" %>
 <%@ page import="com.aplana.timesheet.dao.entity.Vacation" %>
 <%@ page import="com.aplana.timesheet.enums.VacationStatusEnum" %>
+<%@ page import="static com.aplana.timesheet.enums.VacationTypesEnum.*" %>
 <%@ page import="com.aplana.timesheet.service.VacationService" %>
 <%@ page import="com.aplana.timesheet.util.DateTimeUtil" %>
 
@@ -304,6 +305,8 @@
                                          onclick="deleteVacation(this.parentElement, ${vacation.id});"/>
                                 </div>
                             </sec:authorize>
+                            <c:set var="isVacationPlanned"
+                                   value="<%= vacation.getType().getId().equals(PLANNED.getId()) %>"/>
                             <c:set var="isVacationNotApproved"
                                    value="<%= vacationService.isVacationNotApproved(vacation)%>"/>
                             <c:set var="vacationApprovePermission"
@@ -311,7 +314,8 @@
 
                             <c:set var="beginDate" value="<%= DateTimeUtil.getOnlyDate(vacation.getBeginDate()) %>" />
                             <c:set var="endDate" value="<%= DateTimeUtil.getOnlyDate(vacation.getEndDate()) %>" />
-                            <c:if test="${isVacationNotApproved }">
+                            <%-- не согласован и не планируемый, т.к. планируемые не надо согласовывать --%>
+                            <c:if test="${isVacationNotApproved && !isVacationPlanned}">
                                 <sec:authorize access="hasRole('ROLE_ADMIN') or ${vacationApprovePermission}">
                                     <div class="delete-button">
                                         <img src="<c:url value="/resources/img/ok.png"/>" title="Утвердить"

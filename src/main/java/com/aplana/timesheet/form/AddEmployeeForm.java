@@ -8,7 +8,14 @@ import java.util.List;
  * @see <a href="http://conf.aplana.com/pages/viewpage.action?pageId=10487278">Аналитика</a>
  * creation date: 18.10.13
  */
+// ToDo сделать общую форму
 public class AddEmployeeForm {
+    private Integer year;
+    private Integer month;
+    private String monthTxt;
+    private Integer divisionOwnerId;
+    private Integer projectTypeId;
+    private Integer projectId;
     private Integer divisionId;
     private Integer managerId;
     private List<Integer> projectRoleListId;
@@ -49,5 +56,53 @@ public class AddEmployeeForm {
 
     public void setRegionListId(List<Integer> regionListId) {
         this.regionListId = regionListId;
+    }
+
+    public Integer getDivisionOwnerId() {
+        return divisionOwnerId;
+    }
+
+    public void setDivisionOwnerId(Integer divisionOwnerId) {
+        this.divisionOwnerId = divisionOwnerId;
+    }
+
+    public Integer getProjectTypeId() {
+        return projectTypeId;
+    }
+
+    public void setProjectTypeId(Integer projectTypeId) {
+        this.projectTypeId = projectTypeId;
+    }
+
+    public Integer getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(Integer projectId) {
+        this.projectId = projectId;
+    }
+
+    public Integer getYear() {
+        return year;
+    }
+
+    public void setYear(Integer year) {
+        this.year = year;
+    }
+
+    public Integer getMonth() {
+        return month;
+    }
+
+    public void setMonth(Integer month) {
+        this.month = month;
+    }
+
+    public String getMonthTxt() {
+        return monthTxt;
+    }
+
+    public void setMonthTxt(String monthTxt) {
+        this.monthTxt = monthTxt;
     }
 }

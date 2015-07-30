@@ -6,7 +6,6 @@ import argo.jdom.JsonNode;
 import argo.jdom.JsonRootNode;
 import argo.saj.InvalidSyntaxException;
 import com.aplana.timesheet.dao.entity.Employee;
-import com.aplana.timesheet.dao.entity.EmployeePercentPlan;
 import com.aplana.timesheet.dao.entity.Project;
 import com.aplana.timesheet.dao.entity.ProjectPercentPlan;
 import com.aplana.timesheet.form.AddEmployeeForm;
@@ -14,6 +13,7 @@ import com.aplana.timesheet.form.EmploymentPlanningForm;
 import com.aplana.timesheet.service.EmployeeProjectPlanService;
 import com.aplana.timesheet.service.EmployeeService;
 import com.aplana.timesheet.service.EmploymentPlanningService;
+import com.aplana.timesheet.service.ProjectService;
 import com.aplana.timesheet.util.DateTimeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,9 +24,12 @@ import org.springframework.web.servlet.ModelAndView;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+
+import static com.aplana.timesheet.service.ProjectService.*;
 
 @Controller
-public class EmploymentPlanningController{
+public class EmploymentPlanningController {
     private static final Logger logger = LoggerFactory.getLogger(EmploymentPlanningController.class);
 
     @Autowired
@@ -37,6 +40,9 @@ public class EmploymentPlanningController{
 
     @Autowired
     private EmployeeService employeeService;
+
+    @Autowired
+    private ProjectService projectService;
 
     /* страница по умолчанию */
     @RequestMapping("/employmentPlanning")
@@ -60,35 +66,22 @@ public class EmploymentPlanningController{
         return modelAndView;
     }
 
-    /* Возвращает JSON для грида занятости сотрудников на проекте */
-    @RequestMapping(value="/employmentPlanning/getProjectPlanAsJSON", produces = "text/plain;charset=UTF-8")
+    /* Возвращает JSON список планов сотрудников, которые участвуют на выбранном проекте в указанные временные рамки */
+    @RequestMapping(value="/employmentPlanning/getEmployeesPlanAsJSON", produces = "text/plain;charset=UTF-8")
     @ResponseBody
     public String showProjectPlan(@ModelAttribute(EmploymentPlanningForm.FORM) EmploymentPlanningForm form) {
-        List<EmployeePercentPlan> projectPlanList = employeeProjectPlanService.getProjectPlan(form);
+        List<Employee> employees = employeeProjectPlanService.getEmployeesWhoWillWorkOnProject(
+                form.getProjectId(),
+                form.getMonthBeg(), form.getYearBeg(),
+                form.getMonthEnd(), form.getYearEnd()
+        );
 
-        return employmentPlanningService.getProjectPlanAsJSON(projectPlanList);
-    }
+        Map<Employee, List<ProjectPercentPlan>> planList =
+                employeeProjectPlanService.getEmployeesPlan(
+                        employees, form.getYearBeg(), form.getMonthBeg(), form.getYearEnd(), form.getMonthEnd()
+                );
 
-    /* Возвращает JSON для грида занятости сотрудника на проектах*/
-    @RequestMapping(value="/employmentPlanning/getEmployeePlanAsJSON", produces = "text/plain;charset=UTF-8")
-    @ResponseBody
-    public String showEmployeePlan(
-            @ModelAttribute(EmploymentPlanningForm.FORM) EmploymentPlanningForm form,
-            @RequestParam("employeeId") Integer employeeId
-    ) {
-        List<ProjectPercentPlan> planList = employeeProjectPlanService.getEmployeePlan(employeeId, form.getYearBeg(), form.getMonthBeg(), form.getYearEnd(), form.getMonthEnd());
-
-        return employmentPlanningService.getEmployeePlanAsJSON(planList);
-    }
-
-
-    /* Возвращает JSON для форме выбора сотрудников */
-    @RequestMapping(value="/employmentPlanning/getAddEmployeeListAsJSON", produces = "text/plain;charset=UTF-8")
-    @ResponseBody
-    public String showAddEmployeeList(@ModelAttribute(AddEmployeeForm.ADD_FORM) AddEmployeeForm form) {
-        List<Employee> employeeList = employeeService.getEmployeeByDivisionManagerRoleRegion(form.getDivisionId(), form.getManagerId(), form.getProjectRoleListId(), form.getRegionListId());
-
-        return employmentPlanningService.getEmployeeListAsJson(employeeList);
+        return employmentPlanningService.getEmployeesPlanAsJSON(planList);
     }
 
     /* Возвращает JSON для форме выбора сотрудников */
@@ -101,7 +94,7 @@ public class EmploymentPlanningController{
         Date date = DateTimeUtil.createDate(yearBegin, monthBegin);
         List<Project> projectList = employmentPlanningService.getProjects(Integer.parseInt(divisionId), date);
 
-        return employmentPlanningService.getProjectListAsJson(projectList);
+        return projectService.getProjectListAsJson(projectList, new String[]{PROJECT_ID, PROJECT_NAME});
     }
 
     /* Сохраняем данные план по сотрудникам по проекту*/
@@ -138,7 +131,7 @@ public class EmploymentPlanningController{
     @RequestMapping(value="/employmentPlanning/setProjectDataAsJSON", produces = "text/plain;charset=UTF-8")
     @ResponseBody
     public String saveProjectData(@RequestParam("employeeId") Integer employeeId,
-                                   @RequestParam("jsonData") String jsonData) throws InvalidSyntaxException {
+                                  @RequestParam("jsonData") String jsonData) throws InvalidSyntaxException {
         employeeProjectPlanService.saveProjectData(jsonData, employeeId);
         return "+OK";
     }

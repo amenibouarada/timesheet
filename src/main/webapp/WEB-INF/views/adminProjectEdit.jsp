@@ -7,6 +7,8 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 
+<%@ page import="static com.aplana.timesheet.service.EmployeeService.*" %>
+
 <html>
 <head>
     <title><fmt:message key="adminprojects.${pageFunction}"/></title>
@@ -16,6 +18,9 @@
         var employeesListJSON = ${employeesListJSON};
         var projectRoleTypesJSON = ${projectRoleTypesJSON};
         var managerId = "${managerId}";
+
+        var EMPLOYEE_ID   = '<%= EMPLOYEE_ID %>';
+        var EMPLOYEE_NAME = '<%= EMPLOYEE_NAME %>';
     </script>
     <script type="text/javascript" src="<%= request.getContextPath()%>/resources/js/adminProjectEdit.js"></script>
 </head>
@@ -151,7 +156,7 @@
     <td colspan="4">
         <table class="details_table" id="projectTasks">
             <tr>
-                <sec:authorize access="hasRole('ROLE_PLAN_EDIT')">
+                <sec:authorize access="hasRole('ROLE_ADMIN')">
                     <th width="32">
                         <img class="iconbutton" title="Создать"
                              src="<c:url value="/resources/img/add.gif"/>"
@@ -165,13 +170,7 @@
             </tr>
             <c:forEach items="${projectform.projectTasks}" varStatus="row">
                 <tr id="projectTask_${row.index}" class="task_row">
-                    <sec:authorize access="hasRole('ROLE_PLAN_EDIT')">
-                        <td>
-                            <img class="iconbutton hidden_button" title="Удалить" id="taskDeleteButton_${row.index}"
-                                 src="<c:url value="/resources/img/delete.png"/>"
-                                 onclick="deleteTask(${row.index});"/>
-                        </td>
-                    </sec:authorize>
+                    <td></td>
                     <td class="multiline">
                         <form:hidden path="projectTasks[${row.index}].id"/>
                         <form:hidden path="projectTasks[${row.index}].toDelete"/>
@@ -200,7 +199,7 @@
     <td colspan="4">
         <table class="details_table" id="projectManagers">
             <tr>
-                <sec:authorize access="hasRole('ROLE_PLAN_EDIT')">
+                <sec:authorize access="hasRole('ROLE_ADMIN')">
                     <th width="32">
                         <img class="iconbutton" title="Создать"
                              src="<c:url value="/resources/img/add.gif"/>"
@@ -214,13 +213,7 @@
             </tr>
             <c:forEach items="${projectform.projectManagers}" varStatus="row" var="projectManager">
                 <tr id="projectManager_${row.index}" class="manager_row">
-                    <sec:authorize access="hasRole('ROLE_PLAN_EDIT')">
-                        <td>
-                            <img class="iconbutton hidden_button" title="Удалить" id="managerDeleteButton_${row.index}"
-                                 src="<c:url value="/resources/img/delete.png"/>"
-                                 onclick="deleteManager(${row.index});"/>
-                        </td>
-                    </sec:authorize>
+                    <td></td>
                     <td>
                         <form:hidden path="projectManagers[${row.index}].id"/>
                         <form:hidden path="projectManagers[${row.index}].toDelete"/>
@@ -254,7 +247,7 @@
     <td colspan="4">
         <table class="details_table" id="projectBillables">
             <tr>
-                <sec:authorize access="hasRole('ROLE_PLAN_EDIT')">
+                <sec:authorize access="hasRole('ROLE_ADMIN')">
                     <th width="32">
                         <img class="iconbutton" title="Создать"
                              src="<c:url value="/resources/img/add.gif"/>"
@@ -269,7 +262,7 @@
             </tr>
             <c:forEach items="${projectform.projectBillables}" varStatus="row" var="projectBillable">
                 <tr id="projectBillable_${row.index}" class="billable_row">
-                    <sec:authorize access="hasRole('ROLE_PLAN_EDIT')">
+                    <sec:authorize access="hasRole('ROLE_ADMIN')">
                         <td>
                             <img class="iconbutton" title="Удалить" id="billableDeleteButton_${row.index}"
                                  src="<c:url value="/resources/img/delete.png"/>"

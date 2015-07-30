@@ -1,6 +1,7 @@
 package com.aplana.timesheet.dao;
 
 import com.aplana.timesheet.enums.*;
+import com.aplana.timesheet.exception.JReportBuildError;
 import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.reports.*;
 import com.aplana.timesheet.util.DateTimeUtil;
@@ -21,7 +22,6 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
-import java.text.ParseException;
 import java.util.*;
 
 import static com.aplana.timesheet.enums.TypesOfActivityEnum.getProjectPresaleNonProjectActivityId;
@@ -29,18 +29,16 @@ import static com.aplana.timesheet.enums.VacationStatusEnum.APPROVED;
 import static com.aplana.timesheet.enums.IllnessTypesEnum.ILLNESS;
 
 @Repository
-public class JasperReportDAO {
+public class JasperReportDAO extends AbstractReportDAO {
 
     public static final String HOURS_WITH_PERCENTS = ", ч. (%)";
     private DecimalFormat doubleFormat = new DecimalFormat("#.##");
-
-    private static Map<Class, String[]> fieldsMap = new HashMap<Class, String[]>( 6 );
 
     static {
         //может быть это вынести в сам класс Reports? kss - нет, это мапинг полей datasource для отчета, его логично делать там же, где формируются данные.
         fieldsMap.put( Report01.class, new String[] { "id", "name", "caldate", "projnames", "overtime", "duration",
                 "holiday", "region", "projdetail", "durationdetail", "region_name", "project_role", "vacation", "illness",
-                "billable", "overtime_cause", "comment", "compensation", "vacation_type" } );
+                "billable", "overtime_cause", "comment", "compensation", "vacation_type", "day_type" } );
         fieldsMap.put( Report02.class, new String[] { "name", "empldivision", "project",
                 "taskname", "duration", "day_type", "region", "region_name", "project_role", "project_state", "billable", "vacation_type" } );
         fieldsMap.put( Report03.class, new String[] { "name", "empldivision", "project", "taskname",
@@ -71,23 +69,26 @@ public class JasperReportDAO {
 
     private static final String WITHOUT_CLAUSE  = "";
 
-    @PersistenceContext
-    private EntityManager entityManager;
+    /** Коды дней используемые в отчетах
+     Пример использования в отчетах:
+     $F{day_type} == 1  ? "Общий выходной" :
+     $F{day_type} == 11 ? "Региональный выходной" :
+     $F{day_type} == 2  ? $F{vacation_type} :
+     $F{day_type} == 3  ? "Болезнь" :
+     "<НЕ ОПРЕДЕЛЕНО>"]
+    */
+    private static final Integer UNDEFINED_DAY              = 0; // неопределенный день или рабочий день
+    private static final Integer HOLIDAY_DAY                = 1;
+    private static final Integer REGION_HOLIDAY_DAY         = 11;
+    private static final Integer VACATION_DAY               = 2;
+    private static final Integer ILLNESS_DAY                = 3; // болезнь, для 3 отчета - неподтвержденная болезнь
+    private static final Integer ILLNESS_DAY_WITH_REASON    = 4; // только для 3 отчета - подтвержденная болезнь
+    private static final Integer TRIP_DAY                   = 5;
+
     @Autowired
     private TSPropertyProvider propertyProvider;
 
-
-    public HibernateQueryResultDataSource getReportData(BaseReport report) {
-        List resultList     = getResultList     ( report );
-
-        if (resultList != null && !resultList.isEmpty()) {
-            return new HibernateQueryResultDataSource(resultList, fieldsMap.get( report.getClass() ) );
-        } else {
-            return null;
-        }
-    }
-
-    private List getResultList( BaseReport baseReport ) {
+    public List getResultList(TSJasperReport baseReport ) throws JReportBuildError {
         //TODO выпилить это, заменить на иерархию классов
         if ( baseReport instanceof Report01 ) {
             Report01 report = ( Report01 ) baseReport;
@@ -227,17 +228,21 @@ public class JasperReportDAO {
                         "        compensation.value AS col_17, " +
                         "        vacation_type.value AS col_18, " +
                         "        CASE" +
-                        "           WHEN (holidays.id is not null) " +
-                        "               THEN 1 " +
+                        "           WHEN (holidays.id is not null) THEN " +
+                        "               CASE " +
+                        "                   WHEN (holidays.region is not null)" +
+                        "                       THEN " + REGION_HOLIDAY_DAY +
+                        "                   ELSE " + HOLIDAY_DAY +
+                        "               END " +
                         "           ELSE " +
                         "               CASE " +
                         "                   WHEN (vacations.id is not null) " +
-                        "                       THEN 2 " +
+                        "                       THEN " + VACATION_DAY +
                         "                   ELSE " +
                         "                       CASE " +
                         "                           WHEN (illnesses.id is not null) " +
-                        "                               THEN 3 " +
-                        "                           ELSE 0" +
+                        "                               THEN " + ILLNESS_DAY +
+                        "                           ELSE " + UNDEFINED_DAY +
                         "                       END" +
                         "               END" +
                         "        END AS day_type " +
@@ -341,17 +346,21 @@ public class JasperReportDAO {
                                 "project_task.name as col_3, " +
                                 "sum(timesheet_details.duration) as col_4, " +
                                 "CASE" +
-                                "   WHEN (holidays.id is not null) " +
-                                "       THEN 1 " +
+                                "   WHEN (holidays.id is not null) THEN " +
+                                "       CASE " +
+                                "           WHEN (holidays.region is not null)" +
+                                "               THEN " + REGION_HOLIDAY_DAY +
+                                "           ELSE " + HOLIDAY_DAY +
+                                "       END " +
                                 "   ELSE " +
                                 "       CASE " +
                                 "           WHEN (vacations.id is not null) " +
-                                "               THEN 2 " +
+                                "               THEN " + VACATION_DAY +
                                 "           ELSE " +
                                 "               CASE " +
                                 "                   WHEN (illnesses.id is not null) " +
-                                "                       THEN 3 " +
-                                "                   ELSE 0 " +
+                                "                       THEN " + ILLNESS_DAY +
+                                "                   ELSE " + UNDEFINED_DAY +
                                 "               END " +
                                 "       END " +
                                 "END as day_type, " +
@@ -487,26 +496,29 @@ public class JasperReportDAO {
                     "calendar.caldate as col_4, " +
                     "sum(timesheet_details.duration) as col_5, " +
                     "CASE" +
-                    "   WHEN (holidays.id is not null) " +
-                    "       THEN 1 " +
+                    "   WHEN (holidays.id is not null) THEN" +
+                    "       CASE " +
+                    "           WHEN (holidays.region is not null)" +
+                    "               THEN " + REGION_HOLIDAY_DAY +
+                    "           ELSE " + HOLIDAY_DAY +
+                    "       END " +
                     "   ELSE " +
                     "       CASE " +
                     "           WHEN (vacations.id is not null) " +
-                    "               THEN 2 " +
+                    "               THEN " + VACATION_DAY +
                     "           ELSE " +
                     "               CASE " +
-                    "                   WHEN (trip.id is not null) " +
-                    "                       THEN 5 " +
-                    "                   ELSE " +
+                    "                   WHEN (illnesses.id is not null) THEN " +
                     "                       CASE " +
-                    "                           WHEN (illnesses.id is not null) " +
-                    "                               THEN  " +
-                    "                                   CASE " +
-                    "                                       WHEN (illnesses.reason_id=:reasonable_illness) " +
-                    "                                           THEN 3 " +
-                    "                                   ELSE 4 " +
-                    "                                   END " +
-                    "                           ELSE 0 " +
+                    "                           WHEN (illnesses.reason_id = :reasonable_illness) " +
+                    "                               THEN " + ILLNESS_DAY_WITH_REASON +
+                    "                           ELSE " + ILLNESS_DAY +
+                    "                       END " +
+                    "                   ELSE " +
+                    "                       CASE" +
+                    "                           WHEN (trip.id is not null) " +
+                    "                               THEN " + TRIP_DAY +
+                    "                           ELSE " + UNDEFINED_DAY +
                     "                       END " +
                     "               END " +
                     "       END " +
@@ -727,9 +739,13 @@ public class JasperReportDAO {
                         "workplace.value as col_11," +
                         "project_role.name as col_12," +
                         "CASE" +
-                        "   WHEN (holidays.id is not null) " +
-                        "       THEN 1 " +
-                        "   ELSE 0 " +
+                        "   WHEN (holidays.id is not null) THEN " +
+                        "       CASE " +
+                        "           WHEN (holidays.region is not null)" +
+                        "               THEN " + REGION_HOLIDAY_DAY +
+                        "           ELSE " + HOLIDAY_DAY +
+                        "       END " +
+                        "   ELSE " + UNDEFINED_DAY +
                         "END as col_13, " +
                         "CASE " +
                         "    WHEN (epbillable.billable is not null) THEN epbillable.billable " +

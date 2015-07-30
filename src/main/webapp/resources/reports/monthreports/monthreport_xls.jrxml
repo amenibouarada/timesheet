@@ -1,0 +1,623 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Табель сотрудников" pageWidth="1930" pageHeight="1000" orientation="Landscape" columnWidth="1890" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="6ae905b3-cfb1-47a7-bda5-eeede374788b">
+	<property name="net.sf.jasperreports.print.keep.full.text" value="true"/>
+	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.x" value="1625"/>
+	<property name="ireport.y" value="0"/>
+	<import value="com.aplana.timesheet.util.DateTimeUtil"/>
+	<style name="Normal" isDefault="true" fontSize="8" pdfEncoding="Cp1251"/>
+	<style name="Title" style="Normal" fontName="Arial" fontSize="26"/>
+	<style name="SubTitle" style="Normal" forecolor="#666666"/>
+	<style name="SubTitle 2" style="Normal" forecolor="#666666"/>
+	<style name="Group Header 1" style="Normal" forecolor="#666666"/>
+	<style name="Group Header 2" style="Normal" forecolor="#666666" isBold="true"/>
+	<style name="Group Header 3" style="Normal" forecolor="#000000" isBold="true"/>
+	<style name="Column header" style="Normal" forecolor="#666666" isBold="true"/>
+	<style name="Detail" style="Normal" backcolor="#FF0000"/>
+	<parameter name="reportParams" class="com.aplana.timesheet.reports.monthreports.MonthXLSReport"/>
+	<field name="employee_name" class="java.lang.String"/>
+	<field name="division_name" class="java.lang.String"/>
+	<field name="region_name" class="java.lang.String"/>
+	<field name="ts_worked" class="java.math.BigDecimal"/>
+	<field name="overtimes_paid_current" class="java.math.BigDecimal"/>
+	<field name="overtimes_paid_previous" class="java.math.BigDecimal"/>
+	<field name="calc_vacation_with" class="java.math.BigInteger"/>
+	<field name="calc_vacation_without" class="java.math.BigInteger"/>
+	<field name="calc_vacation_hol_paid" class="java.math.BigInteger"/>
+	<field name="ts_illness" class="java.math.BigInteger"/>
+	<field name="ts_all_paid" class="java.math.BigDecimal"/>
+	<field name="ts_all_over_accounted" class="java.math.BigDecimal"/>
+	<field name="ts_vacation_avail" class="java.math.BigDecimal"/>
+	<field name="ts_over_remain" class="java.lang.Integer"/>
+	<field name="calc_worked_vac" class="java.math.BigDecimal"/>
+	<field name="ts_vacation" class="java.math.BigInteger"/>
+	<field name="overtimes_acc_current" class="java.math.BigDecimal"/>
+	<field name="calc_illness" class="java.math.BigDecimal"/>
+	<field name="calc_illness_with" class="java.math.BigDecimal"/>
+	<field name="calc_worked_ill" class="java.math.BigDecimal"/>
+	<field name="calc_illness_without" class="java.math.BigDecimal"/>
+	<field name="calc_worked_plan" class="java.math.BigDecimal"/>
+	<field name="calc_worked_fact" class="java.math.BigDecimal"/>
+	<title>
+		<band height="90" splitType="Stretch">
+			<staticText>
+				<reportElement style="Title" x="0" y="0" width="1890" height="53" uuid="e176eae3-8e13-4c8b-900a-0ea89219d71c"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Табель сотрудников]]></text>
+			</staticText>
+			<textField>
+				<reportElement style="SubTitle" x="522" y="53" width="832" height="37" forecolor="#3333FF" uuid="c9acbc77-0e13-4480-a47e-099ff66e5f53"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["за " + DateTimeUtil.monthsNominative[$P{reportParams}.getMonth()-1] + " " + Integer.toString($P{reportParams}.getYear()) + " года"]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="59" splitType="Stretch">
+			<staticText>
+				<reportElement style="Column header" x="142" y="0" width="143" height="59" forecolor="#000000" uuid="e5b65ba5-f077-43f9-94c3-0783569fcd1e"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[Подразделение]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="Column header" x="285" y="0" width="165" height="59" forecolor="#000000" uuid="40124c18-d007-470b-befd-f869c224b5b7"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[Регион]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="Column header" x="0" y="0" width="142" height="59" forecolor="#000000" uuid="666f9751-4e11-4d41-8559-2cdb8683501f"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[Сотрудник]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="Column header" x="450" y="0" width="648" height="23" forecolor="#000000" uuid="9029612b-8c41-4a78-b22f-cafee6c9e61f"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[Управленческий табель]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="Column header" x="450" y="23" width="72" height="36" forecolor="#000000" uuid="e5620d71-4f5d-42bc-8ebd-d1e70705f12b"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[Отработано]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="Column header" x="522" y="23" width="72" height="36" forecolor="#000000" uuid="0be0046a-5992-42b6-8bf0-32c9d8f6c4db"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[Оплач. переработки этого месяца ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="Column header" x="594" y="23" width="72" height="36" forecolor="#000000" uuid="e7b95152-3740-497f-8ca7-7fb4ae48041e"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[Оплач. переработки пред.периодов]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="Column header" x="666" y="23" width="72" height="36" forecolor="#000000" uuid="817c5a1b-732b-4b6a-aa4a-f9461e67eec5"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[Отпуск с сохранением фактический]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="Column header" x="738" y="23" width="72" height="36" forecolor="#000000" uuid="082a72df-4400-49c4-9fc6-98ddcb0cec2a"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[Отпуск без сохранения]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="Column header" x="810" y="23" width="72" height="36" forecolor="#000000" uuid="0af136c4-6689-4ad8-9cae-b0a100dda908"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[Переработки, отгуленные в этом месяце]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="Column header" x="882" y="23" width="72" height="36" forecolor="#000000" uuid="af83432b-8f09-4351-be7c-4e7eedfe1bf6"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[Больничные дни за этот месяц]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="Column header" x="1026" y="23" width="72" height="36" forecolor="#000000" uuid="d68eb0f9-f11b-4521-ab29-cd066e519369"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[Всего оплачено переработок]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="Column header" x="1098" y="23" width="72" height="36" forecolor="#000000" uuid="bcdb377c-e02c-40ba-acd1-3dc5a64437c2"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[Доступный на конец месяца отпуск]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="Column header" x="1170" y="23" width="72" height="36" forecolor="#000000" uuid="f55074b2-8869-4fb1-beae-6af3bb6e3689"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[Доступные на конец месяца для отгула переработки]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="Column header" x="1242" y="23" width="72" height="36" forecolor="#000000" uuid="6e1a72c4-b443-459c-b059-86ec26b54e96"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[Работа в отпуске/отгуле в этом месяце]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="Column header" x="1314" y="23" width="72" height="36" forecolor="#000000" uuid="59a1d002-5423-4e0a-af40-1cb2fdcdcab1"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[Отпуск, начисленный в этом месяце]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="Column header" x="1386" y="23" width="72" height="36" forecolor="#000000" uuid="2f37e40c-3390-4249-aa08-63a70aa4e6e8"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[Перер., начисленные в отгул в этом месяце]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="Column header" x="1458" y="23" width="72" height="36" forecolor="#000000" uuid="54ca5977-afce-482d-87d3-06d2fa427105"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[Больничные итого]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="Column header" x="1530" y="23" width="72" height="36" forecolor="#000000" uuid="bc172110-d8b5-4bfb-9e5a-bc20e6368b88"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[Больничные с подтв.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="Column header" x="1098" y="0" width="360" height="23" forecolor="#000000" uuid="9b290fc6-afed-4176-a0e0-c5d1d01111d3"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[Отпуска и отгулы]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="Column header" x="1746" y="23" width="72" height="36" forecolor="#000000" uuid="734ad327-d351-4a81-ab03-01c9e063d4d1"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[Отработано (план)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="Column header" x="1818" y="23" width="72" height="36" forecolor="#000000" uuid="967b100e-a2b8-42ca-b305-a50bd29130e0"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[Отработано (факт)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="Column header" x="954" y="23" width="72" height="36" forecolor="#000000" uuid="f914ca85-254e-4b02-9806-bf3048628c3f"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[Всего оплачено рабочих дней]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="Column header" x="1602" y="23" width="72" height="36" forecolor="#000000" uuid="60b6e28e-352e-479a-8101-517017037361"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[Больничные без подтв.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="Column header" x="1458" y="0" width="288" height="23" forecolor="#000000" uuid="26c28a53-b4b7-44f9-b056-e8519c3ed22e"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[Больничные]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="Column header" x="1674" y="23" width="72" height="36" forecolor="#000000" uuid="5df15efc-7b12-4ee1-9069-0a45b32a2d33"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[Работа на больничном в этом месяце]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="Column header" x="1746" y="0" width="144" height="23" forecolor="#000000" uuid="101eeef8-453f-4849-8062-ef0bf20a7709"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[Расчетные показатели по отработанным дням]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="15">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="0" y="0" width="142" height="15" uuid="0c3357c3-a5a2-469d-ad05-4bd12bd8903a"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{employee_name}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="142" y="0" width="143" height="15" uuid="44f5ca84-3f41-4797-8480-70376103b7f1"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{division_name}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="285" y="0" width="165" height="15" uuid="ad26f0a9-1486-4f70-ba37-7f54938832c2"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{region_name}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="450" y="0" width="72" height="15" uuid="c12b2177-bf92-4b8e-bb6c-918740a3f794"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{ts_worked}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="522" y="0" width="72" height="15" uuid="2821c1e7-cf15-47ce-b023-0e85f3907471"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{overtimes_paid_current}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="594" y="0" width="72" height="15" uuid="d632933b-e22a-46ff-8f85-d82c8a21885b"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{overtimes_paid_previous}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="666" y="0" width="72" height="15" uuid="9e35365c-8199-482d-ab0e-f9690e14b9eb"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{calc_vacation_with}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="738" y="0" width="72" height="15" uuid="9c768da3-fff9-4040-ba68-76f76354baa4"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{calc_vacation_without}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="810" y="0" width="72" height="15" uuid="b3f51302-bd6b-4c6d-a117-7e8980228e80"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{calc_vacation_hol_paid}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="882" y="0" width="72" height="15" uuid="dd489917-477f-4d69-b154-77b7197c4c98"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{ts_illness}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="1026" y="0" width="72" height="15" uuid="96e96d5b-a5be-4e35-86ca-56f3fb492822"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{ts_all_over_accounted}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="1098" y="0" width="72" height="15" uuid="76963281-0f62-4174-9ed0-d342bf5425a3"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{ts_vacation_avail}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="1170" y="0" width="72" height="15" uuid="f5e6b567-0cb0-4632-9e7b-6d69985df946"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{ts_over_remain}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="1242" y="0" width="72" height="15" uuid="43ef1036-2988-474d-aec0-a510fe3324a9"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{calc_worked_vac}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="1314" y="0" width="72" height="15" uuid="2d1bcdcf-0d1a-4c58-a8f2-e48cea9c14de"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{ts_vacation}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="1386" y="0" width="72" height="15" uuid="310d3b44-b37b-4408-90ef-ddead9199726"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{overtimes_acc_current}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="1458" y="0" width="72" height="15" uuid="9f379941-aa9d-42f4-90ec-224fc364c7a1"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{calc_illness}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="1530" y="0" width="72" height="15" uuid="78430aba-ddef-4d5c-8f47-439a5e37ceac"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{calc_illness_with}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="1602" y="0" width="72" height="15" uuid="b71caf26-a4a2-4755-86f4-8f3c428710b9"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{calc_illness_without}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="1746" y="0" width="72" height="15" uuid="36db2d5f-d6af-446b-902c-234c51eafccb"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{calc_worked_plan}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="1818" y="0" width="72" height="15" uuid="762d024f-3285-4124-8a9f-37516f988d0f"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{calc_worked_fact}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="954" y="0" width="72" height="15" uuid="428c5510-b1fa-4130-8464-f6b064a2ce15"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{ts_all_paid}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="Normal" positionType="Float" stretchType="RelativeToTallestObject" x="1674" y="0" width="72" height="15" uuid="8f0664b0-661e-4e06-b0ff-1df1149ade81"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{calc_worked_ill}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
+</jasperReport>

@@ -20,7 +20,6 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.apache.commons.lang.time.DateUtils;
-import org.joda.time.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -183,8 +182,17 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
         return JsonUtil.format(builder);
     }
 
-    public int getVacationsWorkdaysCount(Employee employee, Integer year, Integer month, VacationStatusEnum status) {
-        return vacationDAO.getVacationsWorkdaysCount(employee, year, month, VacationStatusEnum.APPROVED, null, true);
+    /**
+     * Удаляет планируемые отпуска уволенного сотрудника
+     *
+     * @param employee
+     */
+    public void deleteFiredVacations(Employee employee) {
+        vacationDAO.deleteFiredVacations(employee);
+    }
+
+    public int getApprovedVacationsWorkdaysCount(Employee employee, Integer year, Integer month, boolean toCurrentDate) {
+        return vacationDAO.getApprovedVacationsWorkdaysCount(employee, year, month, null, toCurrentDate);
     }
 
     public Double getVacationsWorkdaysCount(Employee employee, Integer year, Integer month) {
@@ -415,7 +423,22 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
 
     @Transactional
     public Boolean isDayVacationWithoutPlanned(Employee employee, Date date) {
-        return vacationDAO.isDayVacationWithoutPlanned(employee, date);
+        return vacationDAO.getVacationWithoutPlanned(employee, date) != null ? true : false;
+    }
+
+    public Vacation getVacationWithoutPlanned(Employee employee, Date date){
+        return vacationDAO.getVacationWithoutPlanned(employee, date);
+    }
+
+    /**
+     * Определяет является ли отпуск учитываемым в трудозатратах
+     * @param vacation
+     * @return
+     */
+    public Boolean isConsiderVacation(Vacation vacation){
+        if (vacation == null) {return false;}
+        return VacationTypesEnum.getConsiderVacationTypes().contains(
+                VacationTypesEnum.getById(vacation.getType().getId()));
     }
 
     /* функция возвращает можно ли удалить планируемый отпуск в таблице заявлений на отпуск */
@@ -780,14 +803,14 @@ public class VacationService extends AbstractServiceWithTransactionManagement {
             calendar.set(Calendar.YEAR, year);
             calendar.set(Calendar.DAY_OF_MONTH, calendarAct.get(Calendar.DAY_OF_MONTH));
 
-            DateTime start = new DateTime(vacationDays.getActualizationDate());
-            DateTime end = new DateTime(calendar.getTime());
+            Date start = vacationDays.getActualizationDate();
+            Date end = calendar.getTime();
 
-            if (start.isAfter(end)) {
+            if (start.after(end)) {
                 return 0;
             }
 
-            int months = Months.monthsBetween(start, end).get(DurationFieldType.months());
+            int months = DateTimeUtil.getDiffInMonths(start, end);
             int vacDays = (int) (++months * VACATION_KOEF);
             vacDays += vacationDays.getCountDays();
             Integer vacationsCountByPeriod;

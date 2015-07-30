@@ -22,8 +22,10 @@ public class VacationDays {
     @JoinColumn(name = "employee_id", unique = true, nullable = true)
     private Employee employee;
 
+    @Column(name = "actualization_date")
     private Date actualizationDate;
 
+    @Column(name = "count_days")
     private Integer countDays;
 
     public Integer getId() {

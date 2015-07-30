@@ -65,13 +65,13 @@ public class JsonUtil {
         return Double.valueOf(jsonNode.getNode(field).getText().replace(',', '.'));
     }
 
-    public static JsonNodeBuilder aStringBuilder(Number n) {
+    public static JsonNodeBuilder aStringBuilderNumber(Number n) {
         return argo.jdom.JsonNodeBuilders.aStringBuilder(
                 n != null ? n.toString() : "0"
         );
     }
 
-    public static JsonNodeBuilder aStringBuilder(Boolean b) {
+    public static JsonNodeBuilder aStringBuilderBoolean(Boolean b) {
         return argo.jdom.JsonNodeBuilders.aStringBuilder(
                 b != null ? b.toString() : ""
         );

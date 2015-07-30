@@ -33,7 +33,14 @@ public class DivisionDAO {
         return query.getResultList();
     }
 
-	@SuppressWarnings("unchecked")
+    @SuppressWarnings("unchecked")
+    public List<Division> getDivisionsToSyncEmployee() {
+        Query query = entityManager.createQuery(
+                "from Division where sync_employee = true "); //and d.active=true");
+        return query.getResultList();
+    }
+
+    @SuppressWarnings("unchecked")
 	public List<Division> getAllDivisions() {
         return  entityManager.createQuery(
                 "from Division as d order by d.name asc"

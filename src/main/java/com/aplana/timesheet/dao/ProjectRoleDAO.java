@@ -80,28 +80,4 @@ public class ProjectRoleDAO {
             return null;
         }
     }
-
-    public ProjectRole findByName(String s) {
-        Query query = entityManager.createQuery(
-                "FROM ProjectRole AS pr WHERE pr.active=:active AND pr.name like :name"
-        ).setParameter("active", true).setParameter("name", "%" + s + "%");
-
-        return (ProjectRole) query.getSingleResult();
-    }
-
-    public ProjectRole findByCode(String s) {
-        Query query = entityManager.createQuery(
-                "FROM ProjectRole AS pr WHERE pr.active=:active AND pr.code=:code"
-        ).setParameter("active", true).setParameter("code", s);
-
-        return (ProjectRole) query.getResultList().get(0);
-    }
-
-    public ProjectRole getSysRole(Integer roleId) {
-        Query query = entityManager.createQuery(
-                "FROM ProjectRole AS pr WHERE pr.id=:id"
-        ).setParameter("id", roleId);
-
-        return (ProjectRole) query.getResultList().get(0);
-    }
 }

@@ -49,6 +49,8 @@
 
             <li><a href="<c:url value='/activeProjects'/>"><fmt:message key="menu.activeProjects"/></a></li>
 
+            <li><a href="<c:url value='/monthreport'/>"><fmt:message key="menu.monthreport"/></a></li>
+
             <li><a href="<c:url value='/birthdays'/>"><fmt:message key="menu.birthdays"/></a></li>
 
             <sec:authorize access="hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')">

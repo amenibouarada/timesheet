@@ -37,6 +37,7 @@
 	<field name="comment" class="java.lang.String"/>
 	<field name="compensation" class="java.lang.String"/>
 	<field name="vacation_type" class="java.lang.String"/>
+	<field name="day_type" class="java.lang.Integer"/>
 	<variable name="holVacIllDay" class="java.lang.Boolean" resetType="Group" resetGroup="GroupByOvertime" calculation="Variance">
 		<variableExpression><![CDATA[$F{holiday} != null || $F{vacation} != null || $F{illness} != null]]></variableExpression>
 		<initialValueExpression><![CDATA[$F{holiday} != null || $F{vacation} != null || $F{illness} != null]]></initialValueExpression>
@@ -244,10 +245,11 @@
 				<textElement>
 					<paragraph lineSpacing="Double" lineSpacingSize="1.0"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{holiday} != null && $F{region} == null ? "Общий выходной" :
-                                               $F{holiday} != null && $F{region} != null ? "Региональный выходной" :
-                                               $F{vacation} != null ? $F{vacation_type} :
-                                               $F{illness} != null  ? "Болезнь" : "<НЕ ОПРЕДЕЛЕНО>"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{day_type} == 1  ? "Общий выходной" :
+				                              $F{day_type} == 11 ? "Региональный выходной" :
+                                              $F{day_type} == 2  ? $F{vacation_type} :
+                                              $F{day_type} == 3  ? "Болезнь" :
+                                              "<НЕ ОПРЕДЕЛЕНО>"]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement uuid="848e238c-5f38-4736-a728-07c0d8b97a4e" style="Detail" stretchType="RelativeToTallestObject" x="646" y="0" width="90" height="15"/>

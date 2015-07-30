@@ -1,5 +1,4 @@
 <%@ page import="com.aplana.timesheet.system.properties.TSPropertyProvider" %>
-<%@ page import="com.aplana.timesheet.enums.VacationTypesEnum" %>
 <%@page contentType="text/html" pageEncoding="UTF-8" %>
 
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
@@ -23,8 +22,6 @@
         var typeVacPlanned = "${typeVacationPlanned}";
         var typeWithRequiredCommentJsp = +"${typeWithRequiredComment}";
         var loadImg = "<img src=\"<c:url value="/resources/img/loading_small.gif"/>\"/>";
-        var childBearId = "<%= VacationTypesEnum.CHILDBEARING.getId() %>";
-        var childCareId = "<%= VacationTypesEnum.CHILDCARE.getId() %>";
         var rulesUrl = "<%=rules%>";
 
         <sec:authorize access="not hasRole('ROLE_ADMIN')">

@@ -10,7 +10,7 @@ function recalcColumns(myStoreObject, inRowIndex) {
     var sumComercial = 0;
 
     dojo.forEach(projectList, function (project) {
-        var projectPlan = myStoreObject.items[inRowIndex][project.id + _PLAN][0] * 1;
+        var projectPlan = myStoreObject.items[inRowIndex][project[PROJECT_ID] + _PLAN][0] * 1;
 
         if (project.project_type == PRESALE){
             sumPresaleCenter += projectPlan;
@@ -71,16 +71,8 @@ function recalcColumns(myStoreObject, inRowIndex) {
     myStoreObject.items[inRowIndex][SUMMARY + _PLAN][0] = Math.round(monthPlan * percent_of_charge / 100) + "/" + monthPlan;
 }
 
-function getCookieValue(CookieName) {
-    var razrez = document.cookie.split(CookieName + '=');
-    if (razrez.length > 1) { // Значит, куки с этим именем существует
-        var hvost = razrez[1],
-            tzpt = hvost.indexOf(';'),
-            EndOfValue = (tzpt > -1) ? tzpt : hvost.length;
-        return unescape(hvost.substring(0, EndOfValue));
-    }
-}
 
+// ToDo перенести в общие методы
 function updateManagerList(id) {
     if (id == null) {
         id = dojo.byId(DIVISION_ID).value;

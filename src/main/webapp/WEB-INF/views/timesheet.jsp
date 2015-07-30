@@ -47,7 +47,14 @@
             initTimeSheetForm();
         });
     </script>
-    <script type="text/javascript" src="<%= request.getContextPath()%>/resources/js/timesheet.js"></script>
+    <%-- TODO Возможно стоит при сборке складывать в один файл и тогда браузер будет только 1 запрос делать, а не 6 --%>
+    <script type="text/javascript" src="<%= request.getContextPath()%>/resources/js/timesheet/timesheet.js"></script>
+    <script type="text/javascript" src="<%= request.getContextPath()%>/resources/js/timesheet/draft.js"></script>
+    <script type="text/javascript" src="<%= request.getContextPath()%>/resources/js/timesheet/jira.js"></script>
+    <script type="text/javascript" src="<%= request.getContextPath()%>/resources/js/timesheet/submit.js"></script>
+    <script type="text/javascript" src="<%= request.getContextPath()%>/resources/js/timesheet/table.js"></script>
+    <script type="text/javascript" src="<%= request.getContextPath()%>/resources/js/timesheet/widgetChanging.js"></script>
+
     <link rel="stylesheet" type="text/css" href="<%= request.getContextPath()%>/resources/css/timesheetForm.css">
 </head>
 <body>
@@ -68,9 +75,12 @@
         <div style="margin-top: 10px;"><span>Комментарий</span></div>
         <div data-dojo-type="dijit.form.ValidationTextBox"
              data-dojo-prop="missingMessage:'Комментарий для причины 'Другое' является обязательным!'"
+             maxLength="256"
              wrap="soft" id="overtimeCauseComment" rows="10" style="width: 99%;margin-top: 3px;"
-             placeHolder="Напишите причину, если нет подходящей в списке"
-             tooltip="комментарий">${timeSheetForm.overtimeCauseComment}</div>
+             placeHolder="Напишите причину, если нет подходящей в списке (макс. 256 символов)"
+             tooltip="комментарий">
+                ${timeSheetForm.overtimeCauseComment}
+        </div>
         <div id="typeOfCompensationContainer" style="margin-top: 10px;">
             <div style="margin-bottom: 3px;">Тип компенсации</div>
             <select data-dojo-type="dijit.form.Select" style="width: 99%;" id="typeOfCompensation"
@@ -89,12 +99,17 @@
 </div>
 
 <div id="dialogChangeDate" data-dojo-type="dijit.Dialog" title="" style="display: none;">
-    <div data-dojo-type="dijit.layout.ContentPane" style="width: 270px; height: 65px;">
-        В отчете имеются несохраненные изменения.<br/>
-        Продолжить без сохранения?<br/>
-        <button id="confirmDateChange" style="margin-top: 10px; margin-left: 10px; width: 120px;"
-                onclick="confirmCalDateChange()">
+    <div data-dojo-type="dijit.layout.ContentPane" style="width: 400px; height: 75px;">
+        Дата изменилась. Выберите одно из действий:<br/>
+        <b>Продолжить</b> без переноса введенных данных на новую дату <br/>
+        <b>Перенести</b> введенные данные на новую дату<br/>
+        <button id="confirmDateChangeWithReload" style="margin-top: 10px; margin-left: 10px; width: 120px;"
+                onclick="confirmCalDateChangeWithReload()">
             Продолжить
+        </button>
+        <button id="confirmDateChangeWithSave" style="margin-top: 10px; margin-left: 10px; width: 120px;"
+                onclick="confirmCalDateChangeWithSave()">
+            Перенести
         </button>
         <button id="cancelDateChange" style="margin-top: 10px; margin-left: 10px; width: 120px;"
                 onclick="cancelCalDateChange()">

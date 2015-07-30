@@ -10,10 +10,7 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by abayanov
@@ -180,6 +177,13 @@ public class AdminProjectEditService {
         form.setProjectTasks(projectTaskForms);
 
         List<ProjectManager> projectManagers = projectManagerService.findByProject(project);
+        // Отсортируем по ФИО
+        Collections.sort(projectManagers, new Comparator<ProjectManager>() {
+            @Override
+            public int compare(ProjectManager pm1, ProjectManager pm2) {
+                return pm1.getEmployee().getName().compareTo(pm2.getEmployee().getName());
+            }
+        });
         List<AdminProjectManagerForm> projectManagerForms = new ArrayList<AdminProjectManagerForm>();
         for (ProjectManager projectManager : projectManagers) {
             AdminProjectManagerForm manager = new AdminProjectManagerForm();

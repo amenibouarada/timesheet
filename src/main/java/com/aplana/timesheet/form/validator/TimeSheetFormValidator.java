@@ -76,7 +76,9 @@ public class TimeSheetFormValidator extends AbstractValidator {
         tsForm.setTimeSheetTablePart(tsTablePart);
         logger.info("##### ");
         int notNullRowNumber = 0;
-        if (tsTablePart != null && tsTablePart.size() != 0) {
+        if ((tsTablePart != null && tsTablePart.size() != 0) || // если табличная часть не пустая
+             !tsForm.getPlan().isEmpty())                       // или заполнены планы
+        {
             Integer selectedEmployeeId = tsForm.getEmployeeId();
             checkForEffectiveActTypes(tsTablePart, tsForm.getEmployeeId(), errors);
             validateSelectedDate(tsForm, selectedEmployeeId, errors);
@@ -150,6 +152,7 @@ public class TimeSheetFormValidator extends AbstractValidator {
                     valdateCategoryOfActivity(formRow, emplJob, notNullRowNumber, errors);
                     validateProjectTask(formRow, notNullRowNumber, errors);
                     validateDescription(formRow, emplJob, notNullRowNumber, errors);
+                    validateProblem(formRow);
 
                     notNullRowNumber++;
                 }
@@ -620,14 +623,24 @@ public class TimeSheetFormValidator extends AbstractValidator {
                 );
             }
             /* проверим коментарии к причине */
+            String overtimeCauseComment = tsForm.getOvertimeCauseComment();
             if (overtimeCause.getValue().equals("Другое")) {
-                String overtimeCauseComment = tsForm.getOvertimeCauseComment();
-                if (StringUtils.isBlank(overtimeCauseComment)
-                        || !overtimeCauseComment.matches(inStringMoreThanTwoWordsRegex)) {
+                if (StringUtils.isBlank(overtimeCauseComment)) {
+                    errors.rejectValue(
+                            "overtimeCauseComment",
+                            "error.tsform.overtimecause.wrongemptycomment",
+                            "Необходимо указать комментарий к недоработкам/переработкам/работам в выходной, если указана причина \"Другое\""
+                    );
+                }
+            }
+            // Если комментарий не пустой, то должны соблюдаться условия
+            if ( ! StringUtils.isBlank(overtimeCauseComment)){
+                if (!overtimeCauseComment.matches(inStringMoreThanTwoWordsRegex)
+                    || (overtimeCauseComment.length() > 256)) {
                     errors.rejectValue(
                             "overtimeCauseComment",
                             "error.tsform.overtimecause.wrongcommentformat",
-                            "Комментарий должен содержать не менее двух слов"
+                            "Комментарий к причинам недоработок/переработок/работы в выходной день должен быть не менее двух слов и не более 256 символов"
                     );
                 }
             }
@@ -655,5 +668,9 @@ public class TimeSheetFormValidator extends AbstractValidator {
                 }
             }
         }
+    }
+
+    private void validateProblem(TimeSheetTableRowForm rowForm){
+        rowForm.setProblem(rowForm.getProblem().trim());
     }
 }

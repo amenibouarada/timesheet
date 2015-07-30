@@ -21,7 +21,7 @@ public class BusinessTripsAndIllnessForm {
     private List<QuickReportTypesEnum> reportTypes = Arrays.asList(QuickReportTypesEnum.values());
     private Integer reportType = QuickReportTypesEnum.ILLNESS.getId();
     private List<Integer> regions;
-    private Integer manager;
+    private Integer managerId;
 
     public List<QuickReportTypesEnum> getReportTypes() {
         return reportTypes;
@@ -63,12 +63,12 @@ public class BusinessTripsAndIllnessForm {
         this.regions = regions;
     }
 
-    public Integer getManager() {
-        return manager;
+    public Integer getManagerId() {
+        return managerId;
     }
 
-    public void setManager(Integer manager) {
-        this.manager = manager;
+    public void setManagerId(Integer managerId) {
+        this.managerId = managerId;
     }
 
     public Date getDateFrom() {
