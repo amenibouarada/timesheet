@@ -34,6 +34,21 @@
         <skipTests>true</skipTests>
     </properties>
 
+    <repositories>
+        <repository>
+            <id>atlassian-public</id>
+            <url>https://m2proxy.atlassian.com/repository/public</url>
+            <snapshots>
+                <enabled>true</enabled>
+                <checksumPolicy>warn</checksumPolicy>
+            </snapshots>
+            <releases>
+                <enabled>true</enabled>
+                <checksumPolicy>warn</checksumPolicy>
+            </releases>
+        </repository>
+    </repositories>
+
     <build>
         <finalName>${project.artifactId}</finalName>
 
