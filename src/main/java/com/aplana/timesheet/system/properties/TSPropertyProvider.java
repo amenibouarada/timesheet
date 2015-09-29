@@ -72,6 +72,10 @@ public class TSPropertyProvider {
         return getProperties().getProperty("mail.transport.protocol");
     }
 
+    public String getMailProblemAndProposalsToAddress() {
+        return getProperties().getProperty("mail.ProblemsAndProposals.toaddress", "timesheet@aplana.com");
+    }
+
     public String getMailProblemsAndProposalsCoaddress(Integer feedbackType) {
         return feedbackType < 6 // 6 - magic number!
                 ? getProperties().getProperty("mail.ProblemsAndProposals.toaddress")

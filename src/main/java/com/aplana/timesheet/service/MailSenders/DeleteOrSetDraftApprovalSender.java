@@ -7,7 +7,7 @@ import com.aplana.timesheet.service.SendMailService;
 import com.aplana.timesheet.system.constants.PadegConstants;
 import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.util.DateTimeUtil;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import padeg.lib.Padeg;
 
 import javax.mail.Multipart;
@@ -55,7 +55,7 @@ public class DeleteOrSetDraftApprovalSender extends MailSender<TimeSheet> {
         String date = DateTimeUtil.formatDateIntoViewFormat(timeSheet.getCalDate().getCalDate());
         String fio = Padeg.getFIOPadegFS(employeeName, employee.getSex(), PadegConstants.Roditelnyy);
 
-        mail.setToEmails(Arrays.asList(propertyProvider.getMailAdminsAddress()));
+        mail.setToEmails(Arrays.asList(propertyProvider.getMailProblemAndProposalsToAddress()));
         mail.setCcEmails(Arrays.asList(employeeEmail));
 
         DeleteTimeSheetApproval deleteTimeSheetApproval = timeSheet.getDeleteTimeSheetApproval();
@@ -67,18 +67,31 @@ public class DeleteOrSetDraftApprovalSender extends MailSender<TimeSheet> {
 
         mail.setSubject(propertyProvider.getDeleteOrSetDraftApprovalMarker() + subject);
 
-        StringBuilder body = new StringBuilder(String.format("Необходимо выполнить %s отчета за %s сотрудника %s.",
-                deleteTimeSheetApproval.getReportSendApprovalType().getName(),
-                date,
-                fio));
-
         String comment = deleteTimeSheetApproval.getDeleteSendApprovalComment();
-        if (StringUtils.isNotBlank(comment)) {
-            body.append(String.format(" Комментарий: %s", comment));
-        }
-
-        mail.setPreconstructedMessageBody(body.toString());
+        mail.setPreconstructedMessageBody(getMessageBody(fio, employeeEmail, comment, employee.getDivision() == null ? null : employee.getDivision().getName()));
 
         return Arrays.asList(mail);
+    }
+
+    private String getMessageBody(String name, String email, String comment, String employeeDivision) {
+        final StringBuilder bodyTxt = new StringBuilder();
+
+        bodyTxt.append(String.format("Комментарий: %s", comment));
+
+        if (StringUtils.isNotBlank(name)) {
+            bodyTxt.append("\n\nПришло от: ").append(name);
+        }
+
+        if (StringUtils.isNotBlank(employeeDivision)) {
+            bodyTxt.append(" (").append(employeeDivision).append(")");
+        }
+
+        if (StringUtils.isNotBlank(email)) {
+            bodyTxt.append("\nС адреса: ").append(email);
+        }
+
+        bodyTxt.append("\nТип сообщения: ").append("Другое");
+
+        return bodyTxt.toString().replace("\n", "<br>");
     }
 }
