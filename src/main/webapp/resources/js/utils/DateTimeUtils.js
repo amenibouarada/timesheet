@@ -5,6 +5,7 @@ function dateDiffInDay(begin, end){
 // ковертирует дату в тип Date из строки (разделитель ".")
 function getDateByString(dateString){
     var date = new Date();
+    date.setHours(0, 0, 0, 0);
     if (dateString == null){ return date;}
     if (dateString instanceof Date){ return dateString; }
     if (dateString == ""){ return date;}
