@@ -6,7 +6,7 @@ function somethingChanged() {
         }
 }
 
-function onEmployeeChange(employeeObj) {
+function onEmployeeChange() {
     setDefaultEmployeeJob(-1);
     setDefaultDate();
 }

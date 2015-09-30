@@ -112,6 +112,18 @@ function initTimeSheetForm() {
     }
 
     updateJiraButtonVisibility();
+
+    // Обработка событий должна появляеться после того как страница будет загружена
+    // Во время первоначальной загрузки события будут появляться, но обрабатывать их не надо
+    setTimeout(function() {
+        dijit.byId("calDate").on('change', function() {
+            onCalDateChange(dijit.byId("calDate"));
+        });
+
+        dijit.byId("employeeIdSelect").on('change', function() {
+            onEmployeeChange();
+        });
+    }, 0);
 }
 
 // переопределение метода из timesheet.js, не удалять
@@ -184,10 +196,7 @@ function refreshEmployeeSelect(employeeList) {
                 tooltip.hide();
             },
             onChange: function () {
-                var value = this.item ? this.item.id : null;
-                dojo.byId('employeeId').value = value;
-                var obj = { value: value };
-                onEmployeeChange(obj);
+                dojo.byId('employeeId').value = this.item ? this.item.id : null;
             }
         }, "employeeIdSelect");
         employeeFlteringSelect.startup();

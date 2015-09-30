@@ -141,8 +141,7 @@
     <span class="label">за дату</span>
     <form:input path="calDate" id="calDate" class="date_picker" data-dojo-type="DateTextBox"
                 data-dojo-id="reportDate"
-                required="true" onMouseOver="tooltip.show(getTitle(this));" onMouseOut="tooltip.hide();"
-                onChange="onCalDateChange(this)"/>
+                required="true" onMouseOver="tooltip.show(getTitle(this));" onMouseOut="tooltip.hide();" />
     <span id="date_warning"></span>
 
 </div>
