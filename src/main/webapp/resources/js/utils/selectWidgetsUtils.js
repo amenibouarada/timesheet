@@ -57,6 +57,7 @@ function sortSelectOptions(select) {
  * @param projectState тип проекта (проект, пресейл ...)
  */
 function fillProjectList(rowIndex, projectState) {
+
     var projectSelect = dojo.byId("project_id_" + rowIndex);
     projectSelect.options.length = 0;
     var division = dojo.byId("divisionId").value;
@@ -78,14 +79,15 @@ function fillProjectList(rowIndex, projectState) {
             });
         });
 
+
         if (existsCookie('aplanaProject')) {
             projectSelect.value = getCookieValue('aplanaProject');
-            // ToDo нужен ли этот вызов?
-            projectChange(projectSelect);
         }
+        //Принудительно вызывает обработчик события изменения списков проектов/пресейлов
+        projectChange(projectSelect);
     } else {
-
     }
+
     sortSelectOptions(projectSelect);
 }
 
