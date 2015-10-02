@@ -61,6 +61,9 @@ function fillProjectList(rowIndex, projectState) {
     var projectSelect = dojo.byId("project_id_" + rowIndex);
     projectSelect.options.length = 0;
     var division = dojo.byId("divisionId").value;
+
+
+
     if (division != 0) {
 
         dojo.forEach(dojo.filter(projectList, function (projectsOfDiv) {
@@ -82,15 +85,7 @@ function fillProjectList(rowIndex, projectState) {
         sortSelectOptions(projectSelect);
 
         if (existsCookie('aplanaProject')) {
-            for(var i = 0,
-                    cookie = getCookieValue('aplanaProject'),
-                    length = projectSelect.options.length;
-                i < length; i++) {
-                if(cookie === projectSelect.options[0].value) {
-                    projectSelect.value = cookie;
-                    return;
-                }
-            }
+            checkAndSetCookie(projectSelect);
         }
 
         //Принудительно вызывает обработчик события изменения списков проектов/пресейлов
@@ -100,7 +95,18 @@ function fillProjectList(rowIndex, projectState) {
 
 
 }
-
+/**Проверяет cookie на валидность: содержит ли список такое значение**/
+function checkAndSetCookie(projectSelect) {
+    for (var i = 0,
+             cookie = getCookieValue('aplanaProject'),
+             length = projectSelect.options.length;
+         i < length; i++) {
+        if (cookie === projectSelect.options[i].value) {
+            projectSelect.value = cookie;
+            break;
+        }
+    }
+}
 /**
  * Заполняет список доступных проектов/пресейлов для "Взаимной занятости" и формирования отчётов
  * @param division подразделение, по которому определяется список проектов
