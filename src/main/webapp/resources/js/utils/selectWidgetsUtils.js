@@ -79,16 +79,26 @@ function fillProjectList(rowIndex, projectState) {
             });
         });
 
+        sortSelectOptions(projectSelect);
 
         if (existsCookie('aplanaProject')) {
-            projectSelect.value = getCookieValue('aplanaProject');
+            for(var i = 0,
+                    cookie = getCookieValue('aplanaProject'),
+                    length = projectSelect.options.length;
+                i < length; i++) {
+                if(cookie === projectSelect.options[0].value) {
+                    projectSelect.value = cookie;
+                    return;
+                }
+            }
         }
+
         //Принудительно вызывает обработчик события изменения списков проектов/пресейлов
         projectChange(projectSelect);
     } else {
     }
 
-    sortSelectOptions(projectSelect);
+
 }
 
 /**
