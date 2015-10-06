@@ -83,27 +83,25 @@ function fillProjectList(rowIndex, projectState) {
         });
 
         sortSelectOptions(projectSelect);
-
-        if (existsCookie('aplanaProject')) {
-            checkAndSetCookie(projectSelect);
-        }
+        checkAndSetCookie(projectSelect, 'aplanaProject');
 
         //Принудительно вызывает обработчик события изменения списков проектов/пресейлов
         projectChange(projectSelect);
     } else {
     }
-
-
 }
+
 /**Проверяет cookie на валидность: содержит ли список такое значение**/
-function checkAndSetCookie(projectSelect) {
-    for (var i = 0,
-             cookie = getCookieValue('aplanaProject'),
-             length = projectSelect.options.length;
-         i < length; i++) {
-        if (cookie === projectSelect.options[i].value) {
-            projectSelect.value = cookie;
-            break;
+function checkAndSetCookie(selector, cookieName) {
+    if (existsCookie('aplanaProject')) {
+        for (var i = 0,
+                 cookie = getCookieValue(cookieName),
+                 length = selector.options.length;
+             i < length; i++) {
+            if (cookie === selector.options[i].value) {
+                selector.value = cookie;
+                break;
+            }
         }
     }
 }
