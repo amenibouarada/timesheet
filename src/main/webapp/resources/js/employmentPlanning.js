@@ -391,6 +391,7 @@ function initProjectGrid() {
                 dojo.byId("spanEmployeeName").hidden = true;
                 dojo.byId("divEmployeeInfo").hidden = false;
 
+                showEmployeeGrid();
                 refreshEmployeeGrid(employeeId, gYearBegin, gMonthBegin, gYearEnd, gMonthEnd);
             }
         }
@@ -915,6 +916,21 @@ function removeRow(employeeId) {
         });
     }
     recalculateTotalRow();
+    hideEmployeeGrid();
+}
+
+/**
+ * Показать блок сотрудник-проекты
+ */
+function showEmployeeGrid() {
+    dojo.style("employeeGrid", "display", "block");
+}
+
+/**
+ * Скрыть блок сотрудник-проекты
+ */
+function hideEmployeeGrid() {
+    dojo.style("employeeGrid", "display", "none");
 }
 
 // Отмена изменения плана на гриде "проект-сотрудники"
