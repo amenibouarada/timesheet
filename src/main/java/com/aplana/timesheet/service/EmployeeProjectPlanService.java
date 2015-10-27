@@ -6,7 +6,10 @@ import argo.jdom.JsonNode;
 import argo.jdom.JsonRootNode;
 import argo.saj.InvalidSyntaxException;
 import com.aplana.timesheet.dao.EmployeeProjectPlanDAO;
-import com.aplana.timesheet.dao.entity.*;
+import com.aplana.timesheet.dao.entity.Employee;
+import com.aplana.timesheet.dao.entity.EmployeeProjectPlan;
+import com.aplana.timesheet.dao.entity.Project;
+import com.aplana.timesheet.dao.entity.ProjectPercentPlan;
 import com.aplana.timesheet.form.EmploymentPlanningForm;
 import com.aplana.timesheet.util.DateTimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,9 +57,15 @@ public class EmployeeProjectPlanService {
         employeeProjectPlanDAO.remove(employee, year, month);
     }
 
-    @Transactional
-    public void updateEmployeeProjectPlan(Integer employeeId, EmploymentPlanningForm employmentPlanningForm, Double plan){
-        employeeProjectPlanDAO.updateEmployeeProjectPlan(employeeId, employmentPlanningForm, plan);
+    public void updateEmployeeProjectPlan(Integer employeeId, EmploymentPlanningForm employmentPlanningForm,
+                                          double plannedWorkingPercent) {
+        Integer projectId = employmentPlanningForm.getProjectId();
+        Integer year = employmentPlanningForm.getYearBeg();
+        Integer month = employmentPlanningForm.getMonthBeg();
+
+        double workingHours = getEmployeeWorkingHours(employeeId, year, month, plannedWorkingPercent);
+
+        employeeProjectPlanDAO.updateEmployeeProjectPlan(projectId, employeeId, year, month, workingHours);
     }
 
     @Transactional
@@ -138,5 +147,20 @@ public class EmployeeProjectPlanService {
             }
         }
 
+    }
+
+    /**
+     * Рассчитать количество рабочих часов сотрудника за 1 месяц
+     *
+     * @param employeeId идентификатор сотрудника
+     * @param year       год
+     * @param month      меясц
+     * @param plan       план в процентах
+     * @return количество рабочих часов
+     */
+    private double getEmployeeWorkingHours(Integer employeeId, Integer year, Integer month, Double plan) {
+        Integer workDays = employeeProjectPlanDAO.getEmployeeWorkingDaysCount(year, month, employeeId);
+
+        return 8 * plan * workDays / 100;
     }
 }

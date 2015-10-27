@@ -3,16 +3,19 @@ package com.aplana.timesheet.dao;
 import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.dao.entity.EmployeeProjectPlan;
 import com.aplana.timesheet.dao.entity.Project;
-import com.aplana.timesheet.enums.*;
+import com.aplana.timesheet.enums.EmployeePlanType;
+import com.aplana.timesheet.enums.TypesOfTimeSheetEnum;
+import com.aplana.timesheet.enums.VacationStatusEnum;
+import com.aplana.timesheet.enums.VacationTypesEnum;
 import com.aplana.timesheet.form.EmploymentPlanningForm;
-import com.aplana.timesheet.util.DateTimeUtil;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
-import java.util.Date;
+import java.math.BigInteger;
 import java.util.List;
 
 /**
@@ -69,67 +72,37 @@ public class EmployeeProjectPlanDAO {
             entityManager.remove(employeeProjectPlan);
     }
 
-    // ToDo убрать логику из запросов, оставить только получение данных, всю логику в Java-код
     /**
      * Обновляет планы по проектам за период. Merge для одного сотрудника
-     * @param employeeId
-     * @param employmentPlanningForm
-     * @param plan
+     *
+     * @param projectId           идентификатор проекта
+     * @param employeeId          идентификатор сотрудника
+     * @param year                год
+     * @param month               месяц
+     * @param plannedWorkingHours количество запланированных рабочих часов
      */
-    public void updateEmployeeProjectPlan(Integer employeeId, EmploymentPlanningForm employmentPlanningForm, Double plan){
+    @Transactional
+    public void updateEmployeeProjectPlan(Integer projectId, Integer employeeId, Integer year, Integer month,
+                                          double plannedWorkingHours) {
 
-        Query query = entityManager.createNativeQuery(
-                "with workDay(year, month, cnt) as " +
-                "( " +
-                    "select " +
-                        "c.year, c.month, count(case when h.id is null then 1 end) val " +
-                    "from " +
-                        "region r " +
-                        "cross join calendar c " +
-                        "left join holiday h on (c.caldate = h.caldate and (r.id  = h.region or h.region is NULL)) " +
-                    "where " +
-                        "r.id in (select e.region from employee e where e.id = :employeeId) " +
-                        "and ( " +
-                        "   (c.year = :yearStart and c.year = :yearEnd   and c.month between :monthStart and :monthEnd) " +
-                        "or (c.year = :yearStart and c.year < :yearEnd   and c.month > :monthStart) " +
-                        "or (c.year = :yearEnd   and c.year > :yearStart and c.month < :monthEnd) " +
-                        "or (c.year > :yearStart and c.year < :yearEnd) " +
-                        ") " +
-                    "group by " +
-                        "r.id, c.month, c.year " +
-                "), " +
-                "upsert as " +
-                "( " +
-                    "update " +
-                        "employee_project_plan epp " +
-                    "set " +
-                        "value = 8*:plan*wrk.cnt/100 " +
-                    "from " +
-                        "(select w.year, w.month, w.cnt from workDay w) wrk " +
-                    "where " +
-                        "epp.project_id = :projectId and epp.employee_id = :employeeId " +
-                        "and wrk.year = epp.year and wrk.month = epp.month " +
-                    "returning epp.year, epp.month " +
-                ") " +
-                "insert into employee_project_plan" +
-                    "(employee_id, project_id, month, year, value) " +
-                "select " +
-                    ":employeeId, :projectId, wrk.month, wrk.year, 8*:plan*wrk.cnt/100 " +
-                "from " +
-                    "workDay wrk " +
-                "where " +
-                    "(year, month) not in (select year, month from upsert)");
-
-        query.setParameter("projectId", employmentPlanningForm.getProjectId());
-        query.setParameter("monthStart", employmentPlanningForm.getMonthBeg());
-        query.setParameter("yearStart", employmentPlanningForm.getYearBeg());
-        query.setParameter("monthEnd", employmentPlanningForm.getMonthEnd());
-        query.setParameter("yearEnd", employmentPlanningForm.getYearEnd());
-
-        query.setParameter("employeeId", employeeId);
-        query.setParameter("plan", plan);
-
-        query.executeUpdate();
+        entityManager.createNativeQuery("WITH data AS (\n" +
+                "  VALUES (:projectId, :employeeId, :year, :month, :plannedWorkingHours)),\n" +
+                "    updated AS (\n" +
+                "    UPDATE employee_project_plan epp\n" +
+                "    SET value = data.column5 FROM data\n" +
+                "    WHERE epp.project_id = data.column1 AND epp.employee_id = data.column2\n" +
+                "          AND epp.year = data.column3 AND epp.month = data.column4\n" +
+                "    RETURNING epp.project_id, epp.employee_id, epp.year, epp.month )\n" +
+                "INSERT INTO employee_project_plan (project_id, employee_id, year, month, value)\n" +
+                "  SELECT column1, column2, column3, column4, column5\n" +
+                "  FROM data d\n" +
+                "  WHERE (column1, column2, column3, column4) NOT IN (\n" +
+                "    SELECT project_id, employee_id, year, month FROM updated)\n")
+                .setParameter("projectId", projectId)
+                .setParameter("employeeId", employeeId)
+                .setParameter("year", year)
+                .setParameter("month", month)
+                .setParameter("plannedWorkingHours", plannedWorkingHours).executeUpdate();
     }
 
     // ToDo убрать логику из запросов, оставить только получение данных, всю логику в Java-код
@@ -467,5 +440,26 @@ public class EmployeeProjectPlanDAO {
                 setParameter("beginYear", beginYear);
 
         return query.getResultList();
+    }
+
+    /**
+     * Получить количество рабочих дней сотрудника в месяце
+     *
+     * @param year       год
+     * @param month      месяц
+     * @param employeeId идентификатор сотрудника
+     * @return количество рабочих дней в месяце
+     */
+    public Integer getEmployeeWorkingDaysCount(Integer year, Integer month, Integer employeeId) {
+        Query query = entityManager.createNativeQuery("SELECT count(CASE WHEN h.id IS NULL THEN 1 END) val\n" +
+                "FROM region r CROSS JOIN calendar c\n" +
+                "  LEFT JOIN holiday h ON (c.caldate = h.caldate AND (r.id = h.region OR h.region IS NULL))\n" +
+                "WHERE r.id IN (SELECT e.region FROM employee e WHERE e.id = :employeeId) AND (\n" +
+                "        c.year = :year AND c.month = :month)")
+                .setParameter("employeeId", employeeId)
+                .setParameter("year", year)
+                .setParameter("month", month);
+
+        return ((BigInteger) query.getSingleResult()).intValue();
     }
 }

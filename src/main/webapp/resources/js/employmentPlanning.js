@@ -485,7 +485,7 @@ function createLayoutEmployee(isFact, employeeId, yearStart, monthStart, yearEnd
     var grid = dijit.byId("employeeGrid");
     var cnt = monthCount(yearStart, monthStart, yearEnd, monthEnd);
 
-    var divEmployee = '<div style="text-align: left; font-size: 9px">Загрузка сотрудника: ' + gEmployeeName + '</div>';
+    var divEmployee = '<div id="employeeLoadCaption" style="text-align: left; font-size: 9px">Загрузка сотрудника: ' + gEmployeeName + '</div>';
     var divProject = '<div style="text-align: center; float: both;">Проект</div>';
 
     var leftView = {
@@ -509,7 +509,7 @@ function createLayoutEmployee(isFact, employeeId, yearStart, monthStart, yearEnd
                                     '" onclick="cancelEmployeeChange(' + projectId + ');"/><img align="right" width="15px" src = "' +
                                     okImg +
                                     '" onclick="saveEmployeePlan(' +
-                                    employeeId +
+                                    gEmployeeId +
                                     ',' +
                                     projectId +
                                     ');"/>'
@@ -781,7 +781,7 @@ function initEmployeeGrid(employeeId, yearStart, monthStart, yearEnd, monthEnd) 
     });
     grid.placeAt("employeeGridDiv");
     grid.startup();
-};
+}
 
 // Динамически перестраивает грид "сотрудник-проекты"
 function refreshEmployeeGrid(employeeId, yearStart, monthStart, yearEnd, monthEnd) {
@@ -811,6 +811,7 @@ function refreshEmployeeGrid(employeeId, yearStart, monthStart, yearEnd, monthEn
     var projectId = dojo.byId("projectId").value;
     grid.store.fetch({query: {project_id: projectId}, onComplete: actionSelection, queryOptions: {deep: true}});
     grid.render();
+    dojo.byId("employeeLoadCaption").innerHTML = 'Загрузка сотрудника: ' + gEmployeeName;
 }
 
 // ToDo использовать метод из addEmployees.jsp (когда будет реализация общей формы)
@@ -894,9 +895,11 @@ function addRow() {
             employee_name: row.text,
             isChanged: 1,
             isNew: 1,
-            plan: "0"
+            plan: 0
         };
         grid.store.newItem(myNewItem);
+        // При добавлении нового сотрудника, необходимо создать для него store
+        employeesPlansStore[employeeId] = createStoreEmployee([], gYearBegin, gMonthBegin, gYearEnd, gMonthEnd);
     });
     employeeDialog.hide();
     clearDialogSelection();
@@ -986,6 +989,7 @@ function saveEmployeePlan(employeeId, projectId) {
     function actionAfterSaveEmployee(result) {
         cancelChange(Number(gEmployeeId));
         recalculateTotalRow();
+        dojo.style(dojo.byId("errorBox"), 'display', 'none');
     }
 
     function saveProjectData(items) {
