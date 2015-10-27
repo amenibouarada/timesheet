@@ -35,8 +35,9 @@ dojo.addOnLoad(function () {
     initEmployeeGrid(0, gYearBegin, gMonthBegin, gYearEnd, gMonthEnd);
     // обновим руководителей на форме добавления сотрудников
     updateManagerListByDivision();
-    // и сразу же обновим список сотрудников
-    updateAdditionEmployeeList();
+    dijit.byId("employeeDialog").onShow = function() {
+        updateAdditionEmployeeList();
+    };
 });
 
 function updateGrids(){

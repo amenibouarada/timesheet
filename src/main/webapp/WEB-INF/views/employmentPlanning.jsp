@@ -128,7 +128,7 @@
 </div>
 
 <%--ToDo брать этот кусок из общих jsp--%>
-<div data-dojo-type="dijit/Dialog" data-dojo-id="employeeDialog" title="Добавить сотрудника">
+<div data-dojo-type="dijit/Dialog" data-dojo-id="employeeDialog" title="Добавить сотрудника" id="employeeDialog" style="display: none">
 
     <form:form commandName="<%= ADD_FORM %>">
         <table class="dijitDialogPaneContentArea no_border employmentPlanningTable">
