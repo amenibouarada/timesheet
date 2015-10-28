@@ -6,13 +6,11 @@ import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.enums.BusinessTripTypesEnum;
 import com.aplana.timesheet.exception.controller.BusinessTripsAndIllnessAddException;
 import com.aplana.timesheet.form.BusinessTripsAndIllnessAddForm;
-import com.aplana.timesheet.system.security.SecurityService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.servlet.ModelAndView;
 
 import java.util.Date;
 import java.util.List;
@@ -43,7 +41,6 @@ public class BusinessTripService {
         return businessTripDAO.getEmployeeBusinessTrips(employee);
     }
 
-    @Transactional
     public void setBusinessTrip(BusinessTrip businessTrip) {
         businessTripDAO.setBusinessTrip(businessTrip);
     }

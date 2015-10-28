@@ -3,6 +3,7 @@ package com.aplana.timesheet.dao;
 import com.aplana.timesheet.dao.entity.BusinessTrip;
 import com.aplana.timesheet.dao.entity.Employee;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -27,6 +28,7 @@ public class BusinessTripDAO {
         return (List<BusinessTrip>) query.getResultList();
     }
 
+    @Transactional
     public void setBusinessTrip(BusinessTrip businessTrip){
         entityManager.merge(businessTrip);
         entityManager.flush();
