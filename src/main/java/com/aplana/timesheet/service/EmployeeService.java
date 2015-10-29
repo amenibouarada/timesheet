@@ -793,6 +793,17 @@ public class EmployeeService extends EmployeeJSONBuilder {
         return JsonUtil.format(builder.build());
     }
 
+    /**
+     * Получить идентификатор проектной роли сотрудника
+     *
+     * @param projectId  идентификатор проекта
+     * @param employeeId идентификатор сотрудника
+     * @return
+     */
+    public Integer getEmployeeProjectRoleId(Integer projectId, Integer employeeId) {
+        return employeeDAO.getEmployeeProjectRoleId(projectId, employeeId);
+    }
+
 
     private String getValue(Employee employee) {
         final StringBuilder sb = new StringBuilder(employee.getName());

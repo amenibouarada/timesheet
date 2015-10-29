@@ -30,25 +30,35 @@ public class ManagerRoleNameService {
     @Autowired
     private ProjectService projectService;
 
-    /** Получить проектную роль согласующего*/
-    public String getManagerRoleName(VacationApproval vacationApproval){
-        if (isLineManager(vacationApproval.getVacation().getEmployee(), vacationApproval.getManager())){
+    @Autowired
+    private EmployeeService employeeService;
+
+    /**
+     * Получить проектную роль согласующего
+     */
+    public String getManagerRoleName(VacationApproval vacationApproval) {
+        Employee manager = vacationApproval.getManager();
+        Employee employee = vacationApproval.getVacation().getEmployee();
+        if (isLineManager(employee, manager)) {
             return LINE_MANAGER;
         }
         List<Project> projectList = projectService.getProjectsForVacation(vacationApproval.getVacation());
-        for (Project project : projectList){
-            if (project.getManager().getId().equals(vacationApproval.getManager().getId())){
-                return String.format(PROJECT_LEADER, project.getName());
+        for (Project project : projectList) {
+            Integer managerProjectRoleId = employeeService.getEmployeeProjectRoleId(project.getId(), manager.getId());
+            if (managerProjectRoleId != null) {
+                ProjectRolesEnum projectRolesEnum = ProjectRolesEnum.getById(managerProjectRoleId);
+
+                switch (projectRolesEnum) {
+                    case HEAD:
+                        return String.format(PROJECT_LEADER, project.getName());
+                    case DEVELOPER:
+                        return String.format(TEAM_LEADER, project.getName());
+                    case ANALYST:
+                        return String.format(SENIOR_ANALYST, project.getName());
+                    default:
+                        logger.error(String.format("Не удалось определить проектную роль согласующего \"%s\"", manager.getName()));
+                }
             }
-        }
-        if (projectList != null && !projectList.isEmpty()) {
-            Project project = projectList.get(0);
-            if (vacationApproval.getManager().getJob().getId().equals(ProjectRolesEnum.ANALYST.getId())){
-                return String.format(SENIOR_ANALYST, project.getName());
-            }
-            return String.format(TEAM_LEADER, project.getName());
-        }else{
-            logger.error(String.format("Не удалось определить проектную роль согласующего \"%s\"",vacationApproval.getManager().getName()));
         }
         return "";
     }

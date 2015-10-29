@@ -680,4 +680,25 @@ public class EmployeeDAO {
 
         return query.getResultList().size() == 1 ? (Employee) query.getResultList().get(0) : null;
     }
+
+    /**
+     * Получить идентификатор проектной роли сотрудника
+     *
+     * @param projectId  идентификатор проекта
+     * @param employeeId идентификатор сотрудника
+     * @return
+     */
+    public Integer getEmployeeProjectRoleId(Integer projectId, Integer employeeId) {
+        Query query = entityManager.createNativeQuery("SELECT project_role\n" +
+                "FROM project_managers\n" +
+                "WHERE project = :projectId AND employee = :employeeId")
+                .setParameter("projectId", projectId)
+                .setParameter("employeeId", employeeId);
+
+        try {
+            return (Integer) query.getSingleResult();
+        } catch (NoResultException e) {
+            return null;
+        }
+    }
 }

@@ -290,14 +290,17 @@ public class ProjectService {
      */
     public List<Project> getProjectsForVacation (Vacation vacation) {
         /* список проектов на период отпуска */
-        List<Project> employeeProjects = getEmployeeProjectPlanByDates(vacation.getBeginDate(), vacation.getEndDate(), vacation.getEmployee());
+        List<Project> projectPlanByDates = getEmployeeProjectPlanByDates(vacation.getBeginDate(), vacation.getEndDate(), vacation.getEmployee());
         /* список проектов в который учавствовал работник за последние Х дней*/
         Integer beforeVacationDays = propertyProvider.getBeforeVacationDays();
         Date periodBeginDate = DateUtils.addDays(vacation.getCreationDate(), 0 - beforeVacationDays);
-        /* складываем оба списка */
-        employeeProjects.addAll(getEmployeeProjectsFromTimeSheetByDates(periodBeginDate, vacation.getCreationDate(), vacation.getEmployee()));
+        List<Project> projectsFromTimeSheetByDates = getEmployeeProjectsFromTimeSheetByDates(periodBeginDate, vacation.getCreationDate(), vacation.getEmployee());
+        /* складываем оба списка, исключая дубли */
+        Set<Project> projects = new HashSet<Project>();
+        projects.addAll(projectPlanByDates);
+        projects.addAll(projectsFromTimeSheetByDates);
 
-        return employeeProjects;
+        return new ArrayList<Project>(projects);
     }
 
     /**
