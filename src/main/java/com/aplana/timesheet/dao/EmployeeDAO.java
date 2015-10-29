@@ -682,23 +682,19 @@ public class EmployeeDAO {
     }
 
     /**
-     * Получить идентификатор проектной роли сотрудника
+     * Получить идентификаторы проектных ролей сотрудника
      *
      * @param projectId  идентификатор проекта
      * @param employeeId идентификатор сотрудника
-     * @return
+     * @return список идентификаторов проектных ролей
      */
-    public Integer getEmployeeProjectRoleId(Integer projectId, Integer employeeId) {
+    public List<Integer> getEmployeeProjectRoleIds(Integer projectId, Integer employeeId) {
         Query query = entityManager.createNativeQuery("SELECT project_role\n" +
                 "FROM project_managers\n" +
                 "WHERE project = :projectId AND employee = :employeeId")
                 .setParameter("projectId", projectId)
                 .setParameter("employeeId", employeeId);
 
-        try {
-            return (Integer) query.getSingleResult();
-        } catch (NoResultException e) {
-            return null;
-        }
+        return query.getResultList();
     }
 }

@@ -4,12 +4,19 @@ import com.aplana.timesheet.dao.entity.Employee;
 import com.aplana.timesheet.dao.entity.Project;
 import com.aplana.timesheet.dao.entity.VacationApproval;
 import com.aplana.timesheet.enums.ProjectRolesEnum;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import static com.aplana.timesheet.enums.ProjectRolesEnum.*;
 
 /**
  * Сервис, который возвращает название роли руководителя для конкретного сотрудника
@@ -42,25 +49,58 @@ public class ManagerRoleNameService {
         if (isLineManager(employee, manager)) {
             return LINE_MANAGER;
         }
-        List<Project> projectList = projectService.getProjectsForVacation(vacationApproval.getVacation());
-        for (Project project : projectList) {
-            Integer managerProjectRoleId = employeeService.getEmployeeProjectRoleId(project.getId(), manager.getId());
-            if (managerProjectRoleId != null) {
-                ProjectRolesEnum projectRolesEnum = ProjectRolesEnum.getById(managerProjectRoleId);
+        List<Project> projects = projectService.getProjectsForVacation(vacationApproval.getVacation());
+        Map<ProjectRolesEnum, List<String>> projectRoles = new HashMap<ProjectRolesEnum, List<String>>();
 
-                switch (projectRolesEnum) {
-                    case HEAD:
-                        return String.format(PROJECT_LEADER, project.getName());
-                    case DEVELOPER:
-                        return String.format(TEAM_LEADER, project.getName());
-                    case ANALYST:
-                        return String.format(SENIOR_ANALYST, project.getName());
-                    default:
-                        logger.error(String.format("Не удалось определить проектную роль согласующего \"%s\"", manager.getName()));
+        // Группируем названия проектов по ролям согласующего
+        for (Project project : projects) {
+            List<Integer> managerProjectRoleId = employeeService.getEmployeeProjectRoleIds(project.getId(), manager.getId());
+            for (Integer roleId : managerProjectRoleId) {
+                if (roleId != null) {
+                    ProjectRolesEnum projectRolesEnum = ProjectRolesEnum.getById(roleId);
+
+                    switch (projectRolesEnum) {
+                        case HEAD:
+                            addProjectName(projectRoles, HEAD, project.getName());
+                            break;
+                        case DEVELOPER:
+                            addProjectName(projectRoles, DEVELOPER, project.getName());
+                            break;
+                        case ANALYST:
+                            addProjectName(projectRoles, ANALYST, project.getName());
+                            break;
+                        default:
+                            logger.error(String.format("Не удалось определить проектную роль согласующего \"%s\"", manager.getName()));
+                    }
                 }
             }
         }
-        return "";
+
+        StringBuilder stringBuilder = new StringBuilder();
+        for (Map.Entry<ProjectRolesEnum, List<String>> entry : projectRoles.entrySet()) {
+            if (stringBuilder.length() != 0) {
+                stringBuilder.append("</br>");
+            }
+            switch (entry.getKey()) {
+                case HEAD:
+                    stringBuilder.append(String.format(PROJECT_LEADER, StringUtils.join(entry.getValue(), ",</br>")));
+                    break;
+                case DEVELOPER:
+                    stringBuilder.append(String.format(TEAM_LEADER, StringUtils.join(entry.getValue(), ",</br>")));
+                    break;
+                case ANALYST:
+                    stringBuilder.append(String.format(SENIOR_ANALYST, StringUtils.join(entry.getValue(), ",</br>")));
+                    break;
+            }
+        }
+
+        return stringBuilder.toString();
+    }
+
+    private void addProjectName(Map<ProjectRolesEnum, List<String>> projectRoles, ProjectRolesEnum role, String projectName) {
+        List<String> headProjectNames = !CollectionUtils.isEmpty(projectRoles.get(role)) ? projectRoles.get(role) : new ArrayList<String>();
+        headProjectNames.add(projectName);
+        projectRoles.put(role, headProjectNames);
     }
 
     /** Проверка на линейного руководителя*/

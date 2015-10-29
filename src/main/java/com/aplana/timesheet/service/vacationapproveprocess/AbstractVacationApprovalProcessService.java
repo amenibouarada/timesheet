@@ -4,10 +4,9 @@ import com.aplana.timesheet.dao.entity.*;
 import com.aplana.timesheet.enums.VacationStatusEnum;
 import com.aplana.timesheet.exception.service.CalendarServiceException;
 import com.aplana.timesheet.exception.service.VacationApprovalServiceException;
-import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.service.*;
+import com.aplana.timesheet.system.properties.TSPropertyProvider;
 import com.aplana.timesheet.util.DateTimeUtil;
-import com.google.common.collect.Lists;
 import org.apache.commons.lang.BooleanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -385,14 +384,21 @@ public abstract class AbstractVacationApprovalProcessService extends AbstractSer
     private Map<String, VacationApproval> prepareProjectManagersVacationApprovals(Map<String, VacationApproval> approvals, List<Project> projects, Vacation vacation) {
         Date requestDate = new Date();
 
+        Set<Employee> projectManagers = new HashSet<Employee>();
+
         for (Project project : projects) {
             Employee projectManager = project.getManager();
             Division projectDivision = project.getDivision();
             Employee vacationEmployee = vacation.getEmployee();
 
+            // Исключаем дубли согласующих, если они пересекаются в разных проектах
             if (vacationEmployee.getDivision().equals(projectDivision)) {
-                tryAddNewManagerToApprovalResults(vacation, requestDate, approvals, projectManager);
+                projectManagers.add(projectManager);
             }
+        }
+
+        for (Employee projectManager : projectManagers) {
+            tryAddNewManagerToApprovalResults(vacation, requestDate, approvals, projectManager);
         }
 
         return approvals;

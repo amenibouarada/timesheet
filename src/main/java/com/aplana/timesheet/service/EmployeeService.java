@@ -794,14 +794,14 @@ public class EmployeeService extends EmployeeJSONBuilder {
     }
 
     /**
-     * Получить идентификатор проектной роли сотрудника
+     * Получить идентификаторы проектных ролей сотрудника
      *
      * @param projectId  идентификатор проекта
      * @param employeeId идентификатор сотрудника
-     * @return
+     * @return список идентификаторов проектных ролей
      */
-    public Integer getEmployeeProjectRoleId(Integer projectId, Integer employeeId) {
-        return employeeDAO.getEmployeeProjectRoleId(projectId, employeeId);
+    public List<Integer> getEmployeeProjectRoleIds(Integer projectId, Integer employeeId) {
+        return employeeDAO.getEmployeeProjectRoleIds(projectId, employeeId);
     }
 
 
