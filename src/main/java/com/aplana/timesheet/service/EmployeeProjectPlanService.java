@@ -12,6 +12,7 @@ import com.aplana.timesheet.dao.entity.Project;
 import com.aplana.timesheet.dao.entity.ProjectPercentPlan;
 import com.aplana.timesheet.form.EmploymentPlanningForm;
 import com.aplana.timesheet.util.DateTimeUtil;
+import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,12 +61,26 @@ public class EmployeeProjectPlanService {
     public void updateEmployeeProjectPlan(Integer employeeId, EmploymentPlanningForm employmentPlanningForm,
                                           double plannedWorkingPercent) {
         Integer projectId = employmentPlanningForm.getProjectId();
-        Integer year = employmentPlanningForm.getYearBeg();
-        Integer month = employmentPlanningForm.getMonthBeg();
+        Integer yearBeg = employmentPlanningForm.getYearBeg();
+        Integer monthBeg = employmentPlanningForm.getMonthBeg();
 
-        double workingHours = getEmployeeWorkingHours(employeeId, year, month, plannedWorkingPercent);
+        Integer yearEnd = employmentPlanningForm.getYearEnd();
+        Integer monthEnd = employmentPlanningForm.getMonthEnd();
 
-        employeeProjectPlanDAO.updateEmployeeProjectPlan(projectId, employeeId, year, month, workingHours);
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(yearBeg, monthBeg - 1, 1);
+        LocalDate startDate = new LocalDate(calendar.getTimeInMillis());
+
+        calendar.set(yearEnd, monthEnd - 1, 2);
+        LocalDate endDate = new LocalDate(calendar.getTimeInMillis());
+
+        for (LocalDate date = startDate; date.isBefore(endDate); date = date.plusMonths(1)) {
+            int year = date.getYear();
+            int month = date.getMonthOfYear();
+            double workingHours = getEmployeeWorkingHours(employeeId, year, month, plannedWorkingPercent);
+
+            employeeProjectPlanDAO.updateEmployeeProjectPlan(projectId, employeeId, year, month, workingHours);
+        }
     }
 
     @Transactional

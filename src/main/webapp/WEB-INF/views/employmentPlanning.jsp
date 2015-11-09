@@ -106,7 +106,7 @@
         <tr>
             <td>
                 <input style="width:150px;margin-left: 23px;" type="button" value="Сохранить"
-                       onclick="saveProjectPlan();" hidden/>
+                       onclick="saveProjectPlan();"/>
             </td>
         </tr>
     </table>
