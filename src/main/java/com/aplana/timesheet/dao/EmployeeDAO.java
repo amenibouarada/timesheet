@@ -463,11 +463,12 @@ public class EmployeeDAO {
      */
     public List<Employee> getProjectManagersThatDoesntApproveVacation(Project project, Vacation vacation) {
         Query query = entityManager.createQuery("select pm.employee from ProjectManager as pm " +
-                "where pm.project = :project and pm.active=:active and " +
+                "where pm.project = :project and pm.active=:active and pm.master = :master and " +
                 "pm.projectRole.id = :roleId and pm.employee not in " +
                 "(select va.manager from VacationApproval as va where va.vacation = :vacation and va.result is not null)")
                 .setParameter("project", project)
                 .setParameter("active", true)
+                .setParameter("master", true)
                 .setParameter("roleId", vacation.getEmployee().getJob().getId())
                 .setParameter("vacation", vacation);
 
@@ -691,9 +692,11 @@ public class EmployeeDAO {
     public List<Integer> getEmployeeProjectRoleIds(Integer projectId, Integer employeeId) {
         Query query = entityManager.createNativeQuery("SELECT project_role\n" +
                 "FROM project_managers\n" +
-                "WHERE project = :projectId AND employee = :employeeId")
+                "WHERE project = :projectId AND employee = :employeeId AND master = :master AND active = :active")
                 .setParameter("projectId", projectId)
-                .setParameter("employeeId", employeeId);
+                .setParameter("employeeId", employeeId)
+                .setParameter("master", true)
+                .setParameter("active", true);
 
         return query.getResultList();
     }
