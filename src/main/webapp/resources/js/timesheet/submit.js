@@ -21,8 +21,7 @@ function submitform(sendType) {
                         if (projectComponent[0].value != 0)
                             diffProjects = true;
                     }
-                    else
-                        projectId = projectComponent[0].value;
+                    projectId = projectComponent[0].value;
                 }
 
             workPlaceComponent = dojo.query("#workplace_id_" + i)
@@ -39,10 +38,7 @@ function submitform(sendType) {
         setCookie('aplanaDivision', division.value, TimeAfter(7, 0, 0));
         setCookie('aplanaEmployee', employee.value, TimeAfter(7, 0, 0));
         setCookie('aplanaRowsCount', rowsCount, TimeAfter(7, 0, 0));
-        if (diffProjects)
-            deleteCookie("aplanaProject");
-        else
-            setCookie('aplanaProject', projectId, TimeAfter(7, 0, 0));
+        setCookie('aplanaProject', projectId, TimeAfter(7, 0, 0));
         if (diffWorkPlaces)
             deleteCookie("aplanaWorkPlace");
         else
