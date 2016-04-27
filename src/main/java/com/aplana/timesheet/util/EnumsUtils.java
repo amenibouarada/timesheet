@@ -1,6 +1,7 @@
 package com.aplana.timesheet.util;
 
 import com.aplana.timesheet.dao.entity.DictionaryItem;
+import com.aplana.timesheet.enums.RegionsEnum;
 import com.aplana.timesheet.enums.TSEnum;
 
 import java.util.NoSuchElementException;
@@ -30,6 +31,9 @@ public class EnumsUtils {
             if (enumValue.getId() == id) {
                 return enumValue;
             }
+        }
+        if (aClass == RegionsEnum.class) {
+            return (T)RegionsEnum.OTHERS;
         }
         return null;
     }
